@@ -67,6 +67,8 @@ function renderTable(tbl) {
   return wrap;
 }
 
+let figNum = 0;
+
 function renderEntry(e, idx) {
   const card = el("section", "entry");
   card.id = e.id;
@@ -91,8 +93,9 @@ function renderEntry(e, idx) {
       img.src = f.src;
       img.loading = "lazy";
       img.alt = t(f.caption);
+      figNum++;
       const cap = el("figcaption", null,
-        `<span class="fignum">${t(UI.figurePrefix)} ${idx + 1}.${i + 1}</span>${t(f.caption)}`);
+        `<span class="fignum">${t(UI.figurePrefix)} ${figNum}</span>${t(f.caption)}`);
       fig.appendChild(img);
       fig.appendChild(cap);
       figs.appendChild(fig);
@@ -105,6 +108,7 @@ function renderEntry(e, idx) {
 function renderDiary() {
   const d = $("#diary");
   d.innerHTML = "";
+  figNum = 0;
   ENTRIES.forEach((e, i) => d.appendChild(renderEntry(e, i)));
 }
 
