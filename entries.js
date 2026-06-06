@@ -741,6 +741,83 @@ const ENTRIES = [
         caption: { ru: "Честная карта всех путей: стену ломает медиаторный цикл (бром→этан); один шаг до этилена пока заблокирован; азот-медиатор (NH₂) — свежий лид.",
                    en: "The honest map of every path: the wall is broken by a mediated cycle (bromine→ethane); one-step ethylene is still blocked; the nitrogen mediator (NH₂) is the fresh lead." } }
     ]
+  },
+
+  /* ---------------------------------------------------------------- */
+  {
+    id: "nfamily",
+    date: "2026-06-06",
+    stage: { ru: "Этап 11", en: "Stage 11" },
+    title: { ru: "Лид под давлением: у азота есть компромисс",
+             en: "The lead under pressure: nitrogen has a trade-off" },
+    simple: {
+      ru: `<p>Стресс-тест азотного лида. Вопрос: «азот щадит этилен» — это общее свойство или
+           случайность именно NH₂? Проверили электрон-богатый (NMe₂) и электрон-бедный (NF₂)
+           азотные радикалы.</p>
+           <p><strong>Хорошая новость:</strong> щадение этилена ОБОБЩАЕТСЯ — и NH₂, и NMe₂ берегут
+           двойную связь. Это реальное свойство азота → дизайн-правило.</p>
+           <p><strong>Засада — компромисс:</strong> делаешь азот «мягче» (богаче электронами, NMe₂)
+           → ещё лучше щадит этилен, но становится <em>слишком слабым, чтобы оторвать водород у
+           метана</em> (не активирует). Делаешь «жёстче» (беднее, NF₂) → вообще метан не берёт.
+           <strong>NH₂ — единственная «сладкая точка»</strong>: ровно настолько реактивен, чтобы
+           взять метан и при этом пощадить этилен — и даже он на грани (медленно).</p>
+           <p>Честно: лид настоящий, но живёт в <strong>узком окне</strong>, и лучший кандидат
+           кинетически слабоват. Следующее: откуда брать NH₂ и можно ли его вернуть в цикл
+           (жизнеспособность), и проверка барьеров на уровне переходных состояний.</p>`,
+      en: `<p>Stress-testing the nitrogen lead. Question: is "nitrogen spares ethylene" a general
+           property, or special to NH₂? We tested an electron-rich (NMe₂) and an electron-poor (NF₂)
+           nitrogen radical.</p>
+           <p><strong>Good news:</strong> the π-sparing GENERALIZES — both NH₂ and NMe₂ spare the
+           double bond. It's a real nitrogen property → a design rule.</p>
+           <p><strong>The catch — a trade-off:</strong> make the nitrogen "softer" (electron-rich,
+           NMe₂) → it spares ethylene even more, but becomes <em>too weak to take methane's
+           hydrogen</em> (no activation). Make it "harder" (electron-poor, NF₂) → it can't activate
+           methane at all. <strong>NH₂ is the only "sweet spot"</strong>: just reactive enough to grab
+           methane while sparing ethylene — and even it is borderline (slow).</p>
+           <p>Honest: the lead is real but lives in a <strong>narrow window</strong>, and the best
+           candidate is kinetically weak. Next: where NH₂ comes from and whether it can be recycled
+           (viability), plus a transition-state-level barrier check.</p>`
+    },
+    tech: {
+      ru: `<p>Активация / ddH_π (def2-SVP, опт. минимумы): <strong>NH₂</strong> (−0.8, +1.4 щадит),
+           <strong>NMe₂</strong> (+12.3, +2.2 щадит), <strong>NF₂</strong> (+67.3, −67.8 — но это
+           доминируется провальной активацией, не «поеданием» этилена; π-add у NF₂ сам по себе ~0).</p>
+           <p><strong>Тренд:</strong> π-щадение общее для амино-радикалов; активация и π-реактивность
+           обе растут с H-сродством азотного радикала → <strong>антикорреляция «активация ↔ щадение»</strong>.
+           Богатый электронами N (NMe₂) — слабый отрыватель H (плохая активация) но отлично щадит;
+           бедный (NF₂) — N–H связь в продукте слаба → активация невозможна. NH₂ — единственное
+           пересечение «активирует И щадит», и то у самой границы (−0.8 → кинетически медленно).</p>
+           <p><strong>Оговорки:</strong> прокси по энергиям реакций (без явного TS — барьеры могут
+           сдвинуть окно); нужна термодинамика источника/рецикла NH₂ (N–H BDE в NH₃ ~107 ккал/моль —
+           источник дорог) и TS-уровень. Лид реален как направление, но с жёсткими ограничениями.</p>`,
+      en: `<p>Activation / ddH_π (def2-SVP, optimized minima): <strong>NH₂</strong> (−0.8, +1.4 spares),
+           <strong>NMe₂</strong> (+12.3, +2.2 spares), <strong>NF₂</strong> (+67.3, −67.8 — but this is
+           dominated by the failed activation, not by "eating" ethylene; NF₂'s π-add alone is ~0).</p>
+           <p><strong>Trend:</strong> π-sparing is general for amine radicals; activation and
+           π-reactivity both scale with the N-radical's H-affinity → an <strong>activation↔sparing
+           anticorrelation</strong>. An electron-rich N (NMe₂) is a weak H-abstractor (poor activation)
+           but spares well; an electron-poor N (NF₂) has a weak product N–H → activation impossible. NH₂
+           is the only intersection of "activates AND spares", and it's at the very edge (−0.8 →
+           kinetically slow).</p>
+           <p><strong>Caveats:</strong> reaction-energy proxy (no explicit TS — barriers could shift the
+           window); needs the thermodynamics of an NH₂ source/recycle (the N–H BDE in NH₃ ~107 kcal/mol
+           — an expensive source) and a TS-level check. The lead is real as a direction, but tightly
+           constrained.</p>`
+    },
+    table: {
+      title: { ru: "N-семейство: активация vs щадение (ккал/моль)", en: "N-family: activation vs sparing (kcal/mol)" },
+      head: { ru: ["N-радикал", "активация CH₄", "ddH_π (щадит?)", "итог"], en: ["N-radical", "CH₄ activation", "ddH_π (spares?)", "verdict"] },
+      rows: [
+        ["★ NH₂", "−0.8", "+1.4 ✓", "сладкая точка (на грани) / sweet spot (borderline)"],
+        ["NMe₂ (e-rich)", "+12.3", "+2.2 ✓", "щадит, но не активирует / spares, no activation"],
+        ["NF₂ (e-poor)", "+67.3", "n/a", "не активирует метан / can't activate methane"]
+      ]
+    },
+    figures: [
+      { src: "assets/nfamily_tradeoff.png",
+        caption: { ru: "Компромисс азота: все амино-радикалы щадят этилен, но активация падает при настройке на щадение. Только NH₂ попадает в окно «активирует И щадит».",
+                   en: "Nitrogen's trade-off: all amine radicals spare ethylene, but activation collapses as you tune for sparing. Only NH₂ lands in the 'activates AND spares' window." } }
+    ]
   }
 ];
 
