@@ -331,6 +331,101 @@ const ENTRIES = [
         caption: { ru: "Самокоррекция: STO-3G дал заманчивый +6.3, но дальний контроль на def2-SVP даёт ещё больше (+12.9) — значит это артефакт добавленных атомов, а не конфайнмент.",
                    en: "Self-correction: STO-3G gave a tempting +6.3, but at def2-SVP the far control gives even more (+12.9) — so it is an additive artefact, not confinement." } }
     ]
+  },
+
+  /* ---------------------------------------------------------------- */
+  {
+    id: "routes",
+    date: "2026-06-06",
+    stage: { ru: "Этап 6", en: "Stage 6" },
+    title: { ru: "Третий путь: перебор маршрутов — где революционная магистраль?",
+             en: "The third path: screening routes — where is the revolutionary trunk?" },
+    simple: {
+      ru: `<p>Вместо того чтобы чинить кислородный (O₂) катализатор, мы зашли с совсем другой
+           стороны: <strong>перебрали много маршрутов</strong> «метан → этилен» с разными
+           «заменителями кислорода» и при разных температурах — хлор, бром, сера, CO₂, вообще без
+           окислителя. Зачем? Стена O₂ в том, что кислород <em>сжигает</em> готовый продукт в CO₂.
+           А если взять «мягкого» партнёра, который не сжигает?</p>
+           <p><strong>Результат:</strong> с <strong>хлором/бромом</strong> метан соединяется почти
+           полностью <em>уже при 400 °C</em>, и продукт НЕ горит (нет CO₂) — потому что реакция идёт
+           через устойчивый промежуток (CH₃Cl), который сшивают отдельно. <strong>Сера</strong>
+           (мягкий окислитель) тоже обходит «горение». А обычный O₂ даёт «100% конверсии» только на
+           бумаге — на деле горит в CO₂ и упирается в свои ~28%.</p>
+           <p><strong>Магистраль:</strong> революция не в «лучшем O₂-катализаторе», а в <strong>смене
+           химии на медиатор, который не жжёт продукт</strong> (галогенный цикл / серный мягкий путь).
+           Подвох честно: хлор/серу надо <em>возвращать в цикл</em>, и хлор склонен «пережёвывать»
+           свой продукт (бром чище). Но стены COx здесь <strong>механически нет</strong> — это и есть
+           неординарный путь.</p>`,
+      en: `<p>Instead of fixing the oxygen (O₂) catalyst, we came at it from a completely different
+           angle: <strong>screened many routes</strong> for methane → ethylene with different "oxygen
+           substitutes" and temperatures — chlorine, bromine, sulfur, CO₂, no oxidant at all. Why? The
+           O₂ wall is that oxygen <em>burns</em> the finished product to CO₂. What if we use a "soft"
+           partner that doesn't burn it?</p>
+           <p><strong>Result:</strong> with <strong>chlorine/bromine</strong> methane couples almost
+           completely <em>already at 400 °C</em>, and the product is NOT burned (no CO₂) — because it
+           goes through a stable intermediate (CH₃Cl) that is coupled separately. <strong>Sulfur</strong>
+           (a soft oxidant) also escapes the "burning". Plain O₂ shows "100% conversion" only on paper —
+           in reality it burns to CO₂ and hits its ~28%.</p>
+           <p><strong>The trunk:</strong> the revolution is not a "better O₂ catalyst" but
+           <strong>switching the chemistry to a mediator that doesn't burn the product</strong>
+           (a halogen loop / soft sulfur route). The honest catch: chlorine/sulfur must be
+           <em>recycled</em>, and chlorine tends to over-react with its own product (bromine is
+           cleaner). But the COx wall is <strong>mechanically absent</strong> here — that's the
+           non-ordinary path.</p>`
+    },
+    tech: {
+      ru: `<p><strong>Термодинамическая карта</strong> (NIST ΔHf/S°, равновесный экстент) по 12
+           маршрутам × T (400–1400 °C, 1 бар): трунк = <em>мягкие/медиаторные</em> окислители.
+           Cl₂/Br₂ → C₂H₆: <strong>~100% / 93% уже при 400 °C, без COx</strong>; S₂ → C₂H₄ ~61% при
+           высокой T, без COx; неокислительный/MDA — равновесно-ограничены (~51–61% при 1400 °C); O₂
+           термодинамически ~100%, но <strong>COx-стена</strong> режет выход до ~28% (конверсия не
+           лимит — лимит селективность).</p>
+           <p><strong>Квантовая проверка (газофазный HAT, UKS/PBE0):</strong> дескриптор
+           ΔΔG‡ = барьер(X•+C₂H₆) − барьер(X•+CH₄) для X = OH/Cl/Br/SH — <strong>у ВСЕХ &lt; 0</strong>
+           (ни один радикал-абстрактор не инвертирует селективность). Это Эванс–Поляни: разница BDE
+           C–H субстратов не зависит от абстрактора. <strong>Вывод: преимущество трунка —
+           механистическое</strong> (устойчивый CH₃X развязывает активацию и переокисление; мягкая
+           термодинамика серы), а не «магический катализатор». Переокисление продукта: Cl хуже Br
+           (бромный путь чище). <em>(def2-SVP подтверждение знаков считается на AWS.)</em></p>
+           <p><strong>Честные оговорки:</strong> термодинамика = <em>способность</em>, не выход
+           (кинетика/коксование/разделение решают остальное); абсолюты жёсткого скана грубые (знаки
+           надёжны). Узкое место смещается к <em>петле медиатора</em> (рецикл Cl/HX, управление H₂S)
+           и селективности сшивки CH₃X → C₂ — это следующий настоящий AWS-расчёт.</p>`,
+      en: `<p><strong>Thermodynamic map</strong> (NIST ΔHf/S°, equilibrium extent) over 12 routes × T
+           (400–1400 °C, 1 bar): the trunk is <em>soft/mediated</em> oxidants. Cl₂/Br₂ → C₂H₆:
+           <strong>~100% / 93% already at 400 °C, no COx</strong>; S₂ → C₂H₄ ~61% at high T, no COx;
+           non-oxidative/MDA are equilibrium-limited (~51–61% at 1400 °C); O₂ is thermodynamically
+           ~100% but the <strong>COx wall</strong> caps yield at ~28% (conversion isn't the limit —
+           selectivity is).</p>
+           <p><strong>Quantum check (gas-phase HAT, UKS/PBE0):</strong> the descriptor
+           ΔΔG‡ = barrier(X•+C₂H₆) − barrier(X•+CH₄) for X = OH/Cl/Br/SH is <strong>&lt; 0 for ALL</strong>
+           (no radical abstractor inverts selectivity). That's Evans–Polanyi: the substrate C–H BDE
+           difference is abstractor-independent. <strong>So the trunk's advantage is MECHANISTIC</strong>
+           (a stable CH₃X decouples activation from over-functionalization; soft sulfur thermodynamics),
+           not a "magic catalyst". Product over-functionalization: Cl worse than Br (the bromine route is
+           cleaner). <em>(def2-SVP sign-confirmation running on AWS.)</em></p>
+           <p><strong>Honest caveats:</strong> thermodynamics = <em>capability</em>, not yield
+           (kinetics/coking/separation decide the rest); rigid-scan absolutes are crude (signs are
+           robust). The bottleneck shifts to the <em>mediator loop</em> (Cl/HX recycle, H₂S management)
+           and CH₃X → C₂ coupling selectivity — the next real AWS calculation.</p>`
+    },
+    table: {
+      title: { ru: "Карта маршрутов: макс. равновесная конверсия CH₄ и класс стены",
+               en: "Route map: max equilibrium CH₄ conversion and wall class" },
+      head: { ru: ["маршрут", "макс. конв.", "класс"], en: ["route", "max conv.", "wall class"] },
+      rows: [
+        ["★ Cl₂ → C₂H₆ (галоген/halogen)", "~100% @ 400 °C", "no-COx (мех./mech.)"],
+        ["★ Br₂ → C₂H₆ (галоген/halogen)", "~93% @ 400 °C", "no-COx (чище/cleaner)"],
+        ["★ S₂ → C₂H₄ (сера/sulfur)", "~61% @ 1400 °C", "no-COx (мягкий/soft)"],
+        ["O₂ → C₂ (OCM)", "~100% термо / thermo", "COx wall → ~28% выход/yield"],
+        ["non-ox / MDA", "~51–61% @ 1400 °C", "equilibrium-limited"]
+      ]
+    },
+    figures: [
+      { src: "assets/route_landscape.png",
+        caption: { ru: "Ландшафт маршрутов: зелёные (сера/галоген) обходят COx-стену и термодинамически образуют магистраль; галоген доминирует уже при низкой T.",
+                   en: "Route landscape: green (sulfur/halogen) escape the COx wall and form the thermodynamic trunk; halogen dominates already at low T." } }
+    ]
   }
 ];
 
