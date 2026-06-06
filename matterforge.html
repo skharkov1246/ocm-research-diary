@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MatterForge — журнал прогресса</title>
+  <meta name="description" content="MatterForge — пять направлений квантовой разработки катализаторов. Единый источник контента, честные оценки потенциала." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="matterforge.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⬢</text></svg>" />
+</head>
+<body data-lang="ru" data-level="simple">
+
+  <header class="site-header">
+    <div class="wrap">
+      <div class="brand">
+        <span class="brand-mark">⬢</span>
+        <div>
+          <h1>MatterForge</h1>
+          <p id="mf-subtitle" class="subtitle"></p>
+        </div>
+      </div>
+      <a class="toggle mf-back" href="index.html">← дневник OCM</a>
+    </div>
+  </header>
+
+  <!-- Standalone preview of the MatterForge tabs. Shares the diary's
+       matterforge.js / matterforge.css; with no diary sections present the
+       renderer shows just the tabs (first one active). The integrated
+       version lives in index.html as tab 1..N of the OCM diary. -->
+  <main class="wrap">
+    <nav class="mf-tabs" id="mf-tabs" role="tablist" aria-label="MatterForge sections"></nav>
+    <div id="mf-view"></div>
+    <p id="mf-purpose" class="muted"></p>
+  </main>
+
+  <script src="matterforge.js"></script>
+</body>
+</html>
