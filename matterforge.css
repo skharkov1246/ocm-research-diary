@@ -1,0 +1,199 @@
+/* ============================================================================
+   MatterForge journal — tab view. Builds on style.css design tokens.
+   Per-tab accent is injected as --tab (e.g. #4fd1c5 for H₂); everything
+   accent-coloured reads from var(--tab) so each tab themes itself.
+   ============================================================================ */
+
+.mf-main { padding-top: 8px; padding-bottom: 48px; }
+
+/* The diary sections use class-level `display:flex` (.diary/.toc), which beats the
+   UA `[hidden]{display:none}` rule — so toggling .hidden alone won't hide them.
+   Force it for exactly the sections the tab layer shows/hides. */
+.hero[hidden], #toc[hidden], #diary[hidden], #glossary[hidden], #mf-view[hidden] { display: none !important; }
+
+/* back-link in the header reuses the .toggle pill look */
+.mf-back { text-decoration: none; display: inline-flex; align-items: center; }
+
+/* ---------- tab bar ---------- */
+.mf-tabs {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  padding: 18px 0 22px; border-bottom: 1px solid var(--line);
+}
+.mf-tab {
+  --tab: var(--accent);
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--line); background: var(--card);
+  color: var(--ink-soft); padding: 8px 14px; font-size: 13.5px; font-weight: 600;
+  border-radius: 999px; cursor: pointer; transition: all .15s ease;
+  font-family: var(--font); line-height: 1.2;
+}
+.mf-tab:hover { border-color: var(--tab); color: var(--ink); }
+.mf-tab .mf-tab-dot {
+  width: 9px; height: 9px; border-radius: 50%; background: var(--tab);
+  box-shadow: 0 0 8px var(--tab); flex: none;
+}
+.mf-tab.active {
+  background: var(--tab); color: #06121a; border-color: transparent;
+  box-shadow: 0 3px 16px color-mix(in srgb, var(--tab) 45%, transparent);
+}
+.mf-tab.active .mf-tab-dot { background: #06121a; box-shadow: none; }
+
+/* ---------- panel ---------- */
+.mf-panel { padding-top: 26px; }
+
+/* 1. header — title + subtitle + accent bar */
+.mf-accent-bar {
+  height: 4px; width: 66px; border-radius: 999px; background: var(--tab);
+  box-shadow: 0 0 18px var(--tab); margin-bottom: 16px;
+}
+.mf-title-h { font-size: 28px; line-height: 1.2; margin: 0 0 6px; letter-spacing: .2px; }
+.mf-sub { font-size: 15.5px; color: var(--ink-soft); margin: 0 0 16px; max-width: 60ch; }
+
+/* 2. narrative_role badge */
+.mf-badge {
+  display: block; font-size: 13.5px; color: var(--ink); line-height: 1.5;
+  background: var(--bg-soft); border: 1px solid var(--line);
+  border-left: 3px solid var(--tab); border-radius: 0 10px 10px 0;
+  padding: 11px 16px; margin: 0 0 26px;
+}
+.mf-badge-label {
+  display: inline-block; font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .9px; color: var(--tab); margin-right: 8px; vertical-align: 1px;
+}
+
+/* 3 + 4. the two reasoning blocks */
+.mf-twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 8px; }
+.mf-block {
+  background: linear-gradient(180deg, var(--card), var(--bg-soft));
+  border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 18px 20px; box-shadow: 0 8px 24px rgba(0,0,0,.18);
+}
+.mf-block-q { border-top: 3px solid var(--tab); }
+.mf-block-c { border-top: 3px solid var(--warn); }
+.mf-block-title { font-weight: 700; font-size: 14.5px; margin-bottom: 9px; }
+.mf-block-q .mf-block-title { color: var(--tab); }
+.mf-block-c .mf-block-title { color: var(--warn); }
+.mf-block-body { margin: 0; font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
+
+/* sections (roadmap, economics) */
+.mf-section { margin-top: 30px; }
+.mf-h3 {
+  font-size: 12px; text-transform: uppercase; letter-spacing: .9px;
+  color: var(--muted); margin: 0 0 14px; font-weight: 700;
+}
+
+/* 5 + 6. figures (full width, stacked — detailed scientific plots) */
+.mf-figs { display: grid; gap: 18px; margin-top: 26px; }
+.mf-figure {
+  background: #0c1322; border: 1px solid var(--line);
+  border-radius: var(--radius); overflow: hidden;
+}
+.mf-figure img { width: 100%; display: block; background: #fff; }
+.mf-figure figcaption {
+  font-size: 12.5px; color: var(--ink-soft); padding: 10px 16px;
+  border-top: 1px solid var(--line);
+}
+.mf-figure figcaption::before {
+  content: "▦"; color: var(--tab); font-weight: 700; margin-right: 8px;
+}
+.mf-fig-placeholder {
+  aspect-ratio: 16 / 7; display: flex; flex-direction: column; gap: 6px;
+  align-items: center; justify-content: center; color: var(--muted);
+  background:
+    repeating-linear-gradient(45deg, #0c1322, #0c1322 12px, #0e1626 12px, #0e1626 24px);
+}
+.mf-fig-placeholder span { font-size: 13.5px; font-weight: 600; color: var(--ink-soft); }
+.mf-fig-placeholder small { font-family: var(--mono); font-size: 11px; }
+
+/* 7. horizontal roadmap */
+.mf-roadmap { display: flex; gap: 10px; }
+.mf-stage {
+  flex: 1 1 0; min-width: 0;
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+  padding: 13px 13px 14px; display: flex; flex-direction: column;
+}
+.mf-stage.current {
+  border-color: var(--tab); background: linear-gradient(180deg, var(--bg-soft), var(--card));
+  box-shadow: 0 0 0 1px var(--tab), 0 10px 26px rgba(0,0,0,.32);
+}
+.mf-stage-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
+.mf-stage-num {
+  width: 22px; height: 22px; border-radius: 50%; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; font-family: var(--mono);
+  background: #0c1322; border: 1px solid var(--line); color: var(--ink-soft);
+}
+.mf-stage.current .mf-stage-num { background: var(--tab); color: #06121a; border-color: transparent; }
+.mf-stage.done .mf-stage-num { color: var(--good); border-color: color-mix(in srgb, var(--good) 50%, var(--line)); }
+.mf-stage-now {
+  font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .7px;
+  color: #06121a; background: var(--tab); padding: 2px 7px; border-radius: 999px;
+}
+.mf-stage-name { font-size: 12.5px; font-weight: 600; color: var(--ink); line-height: 1.35; min-height: 3.2em; }
+.mf-stage-bar { height: 6px; background: #0c1322; border-radius: 999px; overflow: hidden; margin-top: 11px; }
+.mf-stage-fill { height: 100%; background: var(--tab); border-radius: 999px; transition: width .5s ease; }
+.mf-stage.done .mf-stage-fill { background: var(--good); }
+.mf-stage-pct { font-size: 12px; font-family: var(--mono); color: var(--ink-soft); margin-top: 7px; }
+.mf-stage.current .mf-stage-pct { color: var(--tab); font-weight: 700; }
+
+/* 8. economics cards */
+.mf-econ { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.mf-card {
+  background: linear-gradient(180deg, var(--card), var(--bg-soft));
+  border: 1px solid var(--line); border-radius: 12px; padding: 16px 17px;
+  display: flex; flex-direction: column;
+}
+.mf-card-label { font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); font-weight: 700; }
+.mf-card-value { font-size: 23px; font-weight: 800; color: var(--ink); margin-top: 7px; line-height: 1.18; }
+.mf-card-value.is-text { font-size: 15px; font-weight: 700; line-height: 1.4; }
+.mf-card-unit { font-size: 14px; font-weight: 600; color: var(--muted); }
+.mf-card-sub { font-size: 12px; color: var(--muted); margin-top: auto; padding-top: 8px; }
+.mf-meter { height: 7px; background: #0c1322; border-radius: 999px; overflow: hidden; margin-top: 11px; }
+.mf-meter-fill { height: 100%; background: linear-gradient(90deg, var(--tab), var(--accent-2)); border-radius: 999px; }
+.mf-chip {
+  display: inline-block; background: var(--bg-soft); border: 1px solid var(--line);
+  color: var(--ink-soft); border-radius: 999px; padding: 4px 11px;
+  margin: 4px 5px 0 0; font-size: 12.5px; font-weight: 600;
+}
+
+/* 9. honesty disclaimer */
+.mf-disclaimer {
+  margin: 32px 0 0; font-size: 12px; color: var(--muted); line-height: 1.55;
+  border-left: 3px solid var(--line); background: var(--bg-soft);
+  padding: 11px 15px; border-radius: 0 8px 8px 0;
+}
+.mf-disclaimer strong { color: var(--ink-soft); }
+
+/* honest economics caveat — prominent warning block, never hidden */
+.mf-caveat {
+  margin-top: 16px;
+  border: 1px solid var(--tab, var(--warn));
+  border-left: 5px solid var(--tab, var(--warn));
+  background: color-mix(in srgb, var(--tab, var(--warn)) 12%, transparent);
+  border-radius: 10px; padding: 13px 16px;
+}
+.mf-caveat-label {
+  font-weight: 800; letter-spacing: .2px; margin-bottom: 5px;
+  color: var(--tab, var(--warn));
+}
+.mf-caveat-body { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink); }
+
+.mf-error {
+  margin-top: 26px; padding: 18px 20px; border-radius: var(--radius);
+  border: 1px solid var(--warn); background: var(--bg-soft); color: var(--ink-soft);
+  font-size: 14px; line-height: 1.6;
+}
+.mf-error small { color: var(--muted); font-family: var(--mono); }
+
+/* ---------- responsive: mobile = single column ---------- */
+@media (max-width: 760px) {
+  .mf-twocol { grid-template-columns: 1fr; }
+  .mf-econ { grid-template-columns: 1fr; }
+  .mf-roadmap { flex-direction: column; }
+  .mf-stage-name { min-height: 0; }
+  .mf-title-h { font-size: 23px; }
+  .mf-sub { font-size: 14.5px; }
+}
+@media (min-width: 761px) and (max-width: 980px) {
+  .mf-econ { grid-template-columns: repeat(2, 1fr); }
+}

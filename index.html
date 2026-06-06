@@ -7,6 +7,7 @@
   <meta name="description" content="An honest, bilingual (RU/EN) diary of quantum-chemistry experiments on turning methane into ethylene in one step." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="matterforge.css" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚛️</text></svg>" />
 </head>
 <body data-lang="ru" data-level="simple">
@@ -37,6 +38,12 @@
   </header>
 
   <main class="wrap">
+
+    <!-- MatterForge tabs: tab 0 = OCM diary (below), tabs 1..N from
+         assets/matterforge/matterforge_tabs_content.json. Filled by matterforge.js. -->
+    <nav class="mf-tabs" id="mf-tabs" role="tablist" aria-label="MatterForge sections"></nav>
+    <div id="mf-view" hidden></div>
+
     <section class="hero">
       <p id="hero-text" class="hero-text"></p>
       <p id="honesty-note" class="honesty-note"></p>
@@ -62,5 +69,6 @@
 
   <script src="entries.js"></script>
   <script src="app.js"></script>
+  <script src="matterforge.js"></script>
 </body>
 </html>
