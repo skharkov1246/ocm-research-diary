@@ -511,6 +511,85 @@ const ENTRIES = [
         caption: { ru: "ΔG регенерации медиатора vs T: бром (оранж.) под горку везде → цикл замыкается; хлор (синий) выше ~600°C застревает; сера (Клаус) тривиально замыкается.",
                    en: "ΔG of mediator recycle vs T: bromine (orange) downhill everywhere → cycle closes; chlorine (blue) stalls above ~600 °C; sulfur (Claus) closes trivially." } }
     ]
+  },
+
+  /* ---------------------------------------------------------------- */
+  {
+    id: "ethylene",
+    date: "2026-06-06",
+    stage: { ru: "Этап 8", en: "Stage 8" },
+    title: { ru: "Этилен — слабое звено: медиаторы едят двойную связь",
+             en: "Ethylene is the weak link: mediators eat the double bond" },
+    simple: {
+      ru: `<p>Нашли, <strong>почему «один шаг до этилена» так труден.</strong> Слабое место
+           этилена — не его C–H связи (они как раз <em>прочные</em>), а его <strong>двойная
+           связь</strong>. И хлор/бром/сера радостно <em>атакуют именно её</em> (присоединяются),
+           разрушая этилен.</p>
+           <p>Отсюда честный вывод про бром: он чисто делает <strong>ЭТАН</strong> (у этана нет
+           двойной связи → он в безопасности; цикл замыкается, COx-стены нет). Но как только
+           появляется <strong>этилен — бром его съедает.</strong> Значит, бромная магистраль =
+           метан→этан (отлично, обходит стену), а этилен требует <strong>отдельной
+           бром-свободной стадии</strong> (дегидрирования этана).</p>
+           <p><strong>«Один шаг до этилена» блокируется дважды:</strong> в O₂-путях — сгоранием в
+           CO₂; в медиаторных — присоединением к двойной связи. <em>Просвет:</em> кислородный
+           радикал (OH) двойную связь НЕ предпочитает (+1.7, «щадит») — значит, может существовать
+           особый медиатор, который активирует метан, но щадит этилен. Это следующая охота.</p>`,
+      en: `<p>We found <strong>why "one step to ethylene" is so hard.</strong> Ethylene's weak spot
+           is not its C–H bonds (those are actually <em>strong</em>) but its <strong>double
+           bond</strong>. And chlorine/bromine/sulfur happily <em>attack exactly that</em> (add to
+           it), destroying the ethylene.</p>
+           <p>Honest consequence for bromine: it cleanly makes <strong>ETHANE</strong> (ethane has no
+           double bond → it's safe; the cycle closes, no COx wall). But the moment <strong>ethylene
+           appears, bromine eats it.</strong> So the bromine trunk = methane→ethane (great, escapes
+           the wall), while ethylene needs a <strong>separate bromine-free step</strong> (dehydrogenation
+           of ethane).</p>
+           <p><strong>"One step to ethylene" is blocked twice:</strong> in O₂ routes by burning to CO₂;
+           in mediated routes by addition to the double bond. <em>A hopeful sign:</em> the oxygen
+           radical (OH) does NOT prefer the double bond (+1.7, "spares" it) — so a special mediator
+           that activates methane yet spares ethylene might exist. That's the next hunt.</p>`
+    },
+    tech: {
+      ru: `<p>Энергии реакций (def2-SVP, оптимизированные минимумы; Эванс–Поляни: ниже ΔH →
+           ниже барьер → быстрее). Дескриптор = ΔΔH относительно активации метана.</p>
+           <p><strong>Винильный HAT</strong> X•+C₂H₄→XH+C₂H₃•: ΔΔH = <strong>+8.7 для ВСЕХ</strong>
+           (X сокращается → это просто разница BDE винил-vs-метил C–H; винильная C–H прочнее → НЕ
+           тот канал). <strong>π-присоединение</strong> X•+C₂H₄→X-CH₂CH₂•: ΔΔH = OH <strong>+1.7
+           (щадит)</strong>, Cl <strong>−31.3</strong>, Br <strong>−19.5</strong>, SH <strong>−19.6
+           (разрушают)</strong>.</p>
+           <p><strong>Следствие:</strong> медиаторная сшивка даёт насыщенный продукт (этан) чисто,
+           но ненасыщенную цель (этилен) Cl/Br/S съедают π-присоединением → метан→этилен в один шаг
+           медиатором заблокирован. Архитектура: бром→этан (цикл, Этап 7) + отдельное бром-свободное
+           дегидрирование→этилен. O/OH π-связь щадит, но у O₂-пути своя COx-стена. <em>Оговорка:</em>
+           прокси по энергиям реакций (без явного TS); знаки надёжны.</p>`,
+      en: `<p>Reaction energies (def2-SVP, optimized minima; Evans–Polanyi: lower ΔH → lower barrier
+           → faster). Descriptor = ΔΔH relative to methane activation.</p>
+           <p><strong>Vinylic HAT</strong> X•+C₂H₄→XH+C₂H₃•: ΔΔH = <strong>+8.7 for ALL</strong> (X
+           cancels → just the vinyl-vs-methyl C–H BDE gap; vinylic C–H is stronger → NOT the channel).
+           <strong>π-addition</strong> X•+C₂H₄→X-CH₂CH₂•: ΔΔH = OH <strong>+1.7 (spares)</strong>,
+           Cl <strong>−31.3</strong>, Br <strong>−19.5</strong>, SH <strong>−19.6 (destroy)</strong>.</p>
+           <p><strong>Implication:</strong> mediated coupling gives the saturated product (ethane)
+           cleanly, but the unsaturated target (ethylene) is eaten by Cl/Br/S via π-addition → one-step
+           methane→ethylene by a mediator is blocked. Architecture: bromine→ethane (cycle, Stage 7) +
+           a separate bromine-free dehydrogenation→ethylene. O/OH spares the π-bond, but the O₂ route
+           has its own COx wall. <em>Caveat:</em> reaction-energy proxy (no explicit TS); signs robust.</p>`
+    },
+    table: {
+      title: { ru: "Как медиатор атакует этилен (ΔΔH vs активации метана, ккал/моль)",
+               en: "How the mediator attacks ethylene (ΔΔH vs methane activation, kcal/mol)" },
+      head: { ru: ["медиатор", "π-присоед. к C=C", "винильный HAT", "этилен"],
+              en: ["mediator", "π-add to C=C", "vinylic HAT", "ethylene"] },
+      rows: [
+        ["OH• (кислород/oxygen)", "+1.7", "+8.7", "ЩАДИТ / SPARED"],
+        ["Cl•", "−31.3", "+8.7", "РАЗРУШЕН / DESTROYED"],
+        ["Br•", "−19.5", "+8.7", "РАЗРУШЕН / DESTROYED"],
+        ["SH• (сера/sulfur)", "−19.6", "+8.7", "РАЗРУШЕН / DESTROYED"]
+      ]
+    },
+    figures: [
+      { src: "assets/ethylene_channel.png",
+        caption: { ru: "π-присоединение (красное) разрушает этилен у Cl/Br/S; винильный HAT (синее, +9) — не тот канал; OH этилен щадит.",
+                   en: "π-addition (red) destroys ethylene for Cl/Br/S; vinylic HAT (blue, +9) is the wrong channel; OH spares ethylene." } }
+    ]
   }
 ];
 
