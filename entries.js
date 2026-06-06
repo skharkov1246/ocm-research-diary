@@ -590,6 +590,157 @@ const ENTRIES = [
         caption: { ru: "π-присоединение (красное) разрушает этилен у Cl/Br/S; винильный HAT (синее, +9) — не тот канал; OH этилен щадит.",
                    en: "π-addition (red) destroys ethylene for Cl/Br/S; vinylic HAT (blue, +9) is the wrong channel; OH spares ethylene." } }
     ]
+  },
+
+  /* ---------------------------------------------------------------- */
+  {
+    id: "hunt",
+    date: "2026-06-06",
+    stage: { ru: "Этап 9", en: "Stage 9" },
+    title: { ru: "Охота на медиатор: кто активирует метан, но щадит этилен?",
+             en: "The mediator hunt: who activates methane yet spares ethylene?" },
+    simple: {
+      ru: `<p>Святой Грааль одного шага: радикал-«партнёр», который <em>отнимает водород у метана</em>
+           (чтобы запустить сочетание), но <strong>НЕ трогает двойную связь этилена</strong> (чтобы не
+           разрушить продукт). Прогнали кислородные/азотные/фторные радикалы.</p>
+           <p>Галогены, сера, фтор — все <strong>едят</strong> двойную связь. Но <strong>N/O-радикалы
+           (NH₂, OH, CF₃) её ЩАДЯТ!</strong> Звезда — <strong>NH₂</strong> (азотный радикал): активирует
+           метан <em>и</em> щадит этилен, и (в отличие от кислорода) у него нет пути «сгорания в CO₂».</p>
+           <p>→ <strong>Азот-медиаторный путь — свежая вычисляемая гипотеза для одного шага.</strong>
+           Честные оговорки: NH₂ активирует метан лишь слабо (медленно); азот-радикальные медиаторы и их
+           рецикл — экзотика, неизучено; кислород (OH) щадит π-связь, но жжёт продукт <em>другими</em>
+           путями (та самая COx-стена). Это <strong>лид, а не решение</strong> — новое направление,
+           которое движок нащупал сам.</p>`,
+      en: `<p>The holy grail of the one-step route: a "partner" radical that <em>takes a hydrogen from
+           methane</em> (to start coupling) but <strong>does NOT touch ethylene's double bond</strong>
+           (so it won't destroy the product). We screened oxygen/nitrogen/fluorine radicals.</p>
+           <p>Halogens, sulfur, fluorine all <strong>eat</strong> the double bond. But <strong>N/O
+           radicals (NH₂, OH, CF₃) SPARE it!</strong> The standout is <strong>NH₂</strong> (a nitrogen
+           radical): it activates methane <em>and</em> spares ethylene, and (unlike oxygen) has no
+           "burn-to-CO₂" path.</p>
+           <p>→ <strong>A nitrogen-mediated route is a fresh, computable hypothesis for the one-step
+           goal.</strong> Honest caveats: NH₂ activates methane only weakly (slow); nitrogen-radical
+           mediators and their recycle are exotic/unexplored; oxygen (OH) spares the π-bond but burns the
+           product by <em>other</em> paths (the COx wall). This is a <strong>lead, not a solution</strong>
+           — a new direction the engine surfaced on its own.</p>`
+    },
+    tech: {
+      ru: `<p>Энергии реакций (def2-SVP, опт. минимумы). Зона-энэйблер (активация &lt;~3 И ddH_π&gt;0):
+           <strong>OH</strong> (−8.4, +1.7), <strong>NH₂</strong> (−0.8, +1.4), <strong>CF₃</strong>
+           (+2.1, +2.6). Едят этилен (ddH_π&lt;0): Cl (−31.3), Br (−19.5), SH (−19.6), F (−1.3), OOH (−0.2).
+           CH₃O — на грани (0.0).</p>
+           <p><strong>Лид — NH₂:</strong> единственный с благоприятной активацией метана, щадящий π-связь,
+           и БЕЗ кислорода → нет COx-пути глубокого окисления. OH тоже щадит π, но O жжёт C₂ другими путями
+           (COx-стена — не ловится одним π-дескриптором). CF₃ щадит, но активация вверх (медленно). F
+           слишком агрессивен.</p>
+           <p><strong>Гипотеза (свежая, вычисляемая):</strong> азот-центрированная радикальная медиация
+           для метан→этилен в один шаг. Нужно проверить TS-уровнем (явные барьеры), продумать источник/
+           рецикл NH₂-медиатора, и убедиться в отсутствии N-специфичного переокисления. <em>Оговорка:</em>
+           прокси по энергиям реакций; знаки/тренды надёжны, абсолюты — нет.</p>`,
+      en: `<p>Reaction energies (def2-SVP, optimized minima). Enabler zone (activation &lt;~3 AND ddH_π&gt;0):
+           <strong>OH</strong> (−8.4, +1.7), <strong>NH₂</strong> (−0.8, +1.4), <strong>CF₃</strong>
+           (+2.1, +2.6). Eat ethylene (ddH_π&lt;0): Cl (−31.3), Br (−19.5), SH (−19.6), F (−1.3), OOH (−0.2).
+           CH₃O is borderline (0.0).</p>
+           <p><strong>The lead — NH₂:</strong> the only one with favourable methane activation that spares
+           the π-bond AND has no oxygen → no COx deep-oxidation path. OH also spares π, but O burns C₂ by
+           other paths (the COx wall — not captured by a single π descriptor). CF₃ spares but activation is
+           uphill (slow). F is too aggressive.</p>
+           <p><strong>Hypothesis (fresh, computable):</strong> nitrogen-centred radical mediation for
+           methane→ethylene in one step. Needs TS-level verification (explicit barriers), a source/recycle
+           for the NH₂ mediator, and a check for N-specific over-oxidation. <em>Caveat:</em> reaction-energy
+           proxy; signs/trends robust, absolutes not.</p>`
+    },
+    table: {
+      title: { ru: "Карта медиаторов (ккал/моль)", en: "Mediator map (kcal/mol)" },
+      head: { ru: ["медиатор", "активация CH₄", "щадит этилен (ddH_π)", "зона"],
+              en: ["mediator", "CH₄ activation", "spares ethylene (ddH_π)", "zone"] },
+      rows: [
+        ["★ NH₂• (азот/nitrogen)", "−0.8", "+1.4", "ЭНЭЙБЛЕР / ENABLER (no COx)"],
+        ["OH• (кислород/oxygen)", "−8.4", "+1.7", "щадит π, но COx-стена / spares π but COx wall"],
+        ["CF₃•", "+2.1", "+2.6", "щадит, активация вверх / spares, slow"],
+        ["Cl / Br / SH", "плохо/poor", "−20…−31", "ЕДЯТ / EAT C=C"],
+        ["F•", "−21.3", "−1.3", "агрессивен, ест / aggressive, eats"]
+      ]
+    },
+    figures: [
+      { src: "assets/mediator_map.png",
+        caption: { ru: "Карта медиаторов: верх-лево = активирует CH₄ + щадит C₂H₄ (зона одного шага). NH₂/OH/CF₃ щадят, галогены/S/F едят. NH₂ — настоящий лид (без COx).",
+                   en: "Mediator map: upper-left = activates CH₄ + spares C₂H₄ (one-step zone). NH₂/OH/CF₃ spare, halogens/S/F eat. NH₂ is the genuine lead (no COx)." } }
+    ]
+  },
+
+  /* ---------------------------------------------------------------- */
+  {
+    id: "verdict",
+    date: "2026-06-06",
+    stage: { ru: "Этап 10", en: "Stage 10" },
+    title: { ru: "Честный вердикт: карта всех путей и где магистраль",
+             en: "The honest verdict: the map of every path, and where the trunk is" },
+    simple: {
+      ru: `<p>Весь путь на одной картинке. Мечта была: метан → этилен в ОДИН шаг при 70%. Честный итог:</p>
+           <ul>
+             <li><strong>O₂-OCM (28% стена), электроника, сито, конфайнмент — стену НЕ ломают</strong>
+                 (артефакты мы ловили контролями).</li>
+             <li><strong>Революционный выход из C₂-стены — медиаторный цикл:</strong> бром соединяет метан
+                 в <em>этан</em>, обходит «сгорание» и сам регенерируется (магистраль).</li>
+             <li><strong>Но один шаг именно до ЭТИЛЕНА всё ещё заблокирован</strong> (O₂ — сгорание;
+                 медиаторы — атака двойной связи). Этилен = бром→этан + отдельное дегидрирование (два шага).</li>
+             <li><strong>Свежий лид для одного шага:</strong> азот-медиатор (NH₂-тип), который щадит двойную
+                 связь — новое, вычисляемое, но непроверенное направление.</li>
+           </ul>
+           <p><strong>Итог честно:</strong> вычисляемая революционная магистраль <em>есть</em> (бром→этан,
+           обходит 40-летнюю стену); «один шаг до этилена при 70%» остаётся фронтиром — но теперь с
+           конкретным новым направлением (азот-медиаторы), которое стоит копать.</p>`,
+      en: `<p>The whole journey in one picture. The dream was methane → ethylene in ONE step at 70%. The
+           honest verdict:</p>
+           <ul>
+             <li><strong>O₂-OCM (28% wall), electronics, sieving, confinement — do NOT break the wall</strong>
+                 (we caught the artefacts with controls).</li>
+             <li><strong>The revolutionary escape from the C₂ wall is a mediated cycle:</strong> bromine
+                 couples methane to <em>ethane</em>, routes around the burning wall, and self-regenerates
+                 (the trunk).</li>
+             <li><strong>But one step to ETHYLENE specifically is still blocked</strong> (O₂ — burning;
+                 mediators — double-bond attack). Ethylene = bromine→ethane + a separate dehydrogenation
+                 (two steps).</li>
+             <li><strong>A fresh lead for the one-step goal:</strong> a nitrogen mediator (NH₂-type) that
+                 spares the double bond — a new, computable, but unproven direction.</li>
+           </ul>
+           <p><strong>Honest bottom line:</strong> a computable revolutionary trunk <em>exists</em>
+           (bromine→ethane, escapes the 40-year wall); "one step to ethylene at 70%" remains the frontier —
+           but now with a concrete new direction (nitrogen mediators) worth chasing.</p>`
+    },
+    tech: {
+      ru: `<p>Сводка по всем путям (лучший честно-достижимый выход за проход / стена, что его держит):
+           электроника ~29% (BEP-стена); сито ~28% (CH₄≈C₂H₄ по размеру); конфайнмент — артефакт (не
+           подтверждён контролем на def2-SVP); неокислительный ~50% (равновесие); сера ~55%
+           (сшивка-равновесие); <strong>бром-медиатор → этан: цикл замыкается (Дикон −74), COx-стены нет
+           (магистраль)</strong>; тот же путь → этилен — блок π-присоединением; <strong>NH₂-медиатор —
+           лид для одного шага</strong> (щадит π, без COx; не доказан).</p>
+           <p>Все числа — из реальных расчётов в репозитории (термодинамика NIST + газофазная квант-химия
+           CASCI/UKS), с гейтами честности и контролями (дальний воротник, парность, сходимость; артефакты
+           помечены/отброшены). Квантового превосходства не заявляется. Запуски на AWS, суммарно ~$3.</p>
+           <p><strong>Следующий настоящий расчёт:</strong> TS-уровень для NH₂-медиации (явные барьеры
+           активации/π-щадения) + источник и рецикл азот-медиатора + проверка N-переокисления; параллельно
+           — кинетика сшивки vs ре-бромирования для бром→этан (концентрационная селективность).</p>`,
+      en: `<p>Summary across all paths (best honestly-achievable single-pass yield / the wall that stops
+           it): electronics ~29% (BEP wall); sieving ~28% (CH₄≈C₂H₄ in size); confinement — artefact (not
+           confirmed by the def2-SVP control); non-oxidative ~50% (equilibrium); sulfur ~55%
+           (coupling-equilibrium); <strong>bromine mediator → ethane: cycle closes (Deacon −74), no COx wall
+           (the trunk)</strong>; the same route → ethylene is blocked by π-addition; <strong>NH₂ mediator —
+           the lead for the one-step goal</strong> (spares π, no COx; unproven).</p>
+           <p>Every number comes from a real computation in the repo (NIST thermodynamics + gas-phase
+           quantum chemistry CASCI/UKS), with honesty gates and controls (far-collar, parity, convergence;
+           artefacts flagged/discarded). No quantum advantage is claimed. Runs on AWS, ~$3 total.</p>
+           <p><strong>The next real calculation:</strong> TS-level study of NH₂ mediation (explicit
+           activation / π-sparing barriers) + a source and recycle for the nitrogen mediator + a check for
+           N-over-oxidation; in parallel, the kinetics of coupling vs re-bromination for bromine→ethane
+           (concentration-driven selectivity).</p>`
+    },
+    figures: [
+      { src: "assets/synthesis_map.png",
+        caption: { ru: "Честная карта всех путей: стену ломает медиаторный цикл (бром→этан); один шаг до этилена пока заблокирован; азот-медиатор (NH₂) — свежий лид.",
+                   en: "The honest map of every path: the wall is broken by a mediated cycle (bromine→ethane); one-step ethylene is still blocked; the nitrogen mediator (NH₂) is the fresh lead." } }
+    ]
   }
 ];
 
