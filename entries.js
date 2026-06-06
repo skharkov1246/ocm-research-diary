@@ -818,6 +818,82 @@ const ENTRIES = [
         caption: { ru: "Компромисс азота: все амино-радикалы щадят этилен, но активация падает при настройке на щадение. Только NH₂ попадает в окно «активирует И щадит».",
                    en: "Nitrogen's trade-off: all amine radicals spare ethylene, but activation collapses as you tune for sparing. Only NH₂ lands in the 'activates AND spares' window." } }
     ]
+  },
+
+  /* ---------------------------------------------------------------- */
+  {
+    id: "viability",
+    date: "2026-06-06",
+    stage: { ru: "Этап 12", en: "Stage 12" },
+    title: { ru: "Можно ли вернуть азот в цикл? Нет — лид не замыкается",
+             en: "Can nitrogen be recycled? No — the lead doesn't close" },
+    simple: {
+      ru: `<p>Финальная проверка азотного лида. Как брому нужен шаг Дикона, чтобы вернуть Br₂,
+           так медиатор NH₂ должен регенерироваться из NH₃ — иначе ты его просто расходуешь.
+           Посчитали:</p>
+           <ul>
+             <li>вернуть NH₂ из NH₃ — <strong>сильно «в гору»</strong> (+59 гомолизом, +64 даже с
+                 кислородом): связь N–H слишком прочная;</li>
+             <li>единственный выгодный путь (через OH-радикал, −8) <strong>требует кислорода</strong>
+                 — а тот возвращает «сгорание» (COx-проблему).</li>
+           </ul>
+           <p><strong>Итог:</strong> азотный лид <em>щадит</em> этилен (здорово), но <strong>не
+           замыкается в цикл</strong> — NH₂ нельзя дёшево регенерировать без кислорода. В отличие
+           от брома, чей цикл <em>замыкается</em> (Дикон −18). Честное закрытие: самый красивый
+           лид на «один шаг», доведённый до проверки жизнеспособности, не выживает.</p>
+           <p>Так что бром→этан остаётся единственной <em>жизнеспособной</em> магистралью; «один
+           шаг до этилена 70%» честно остаётся непокорённым по всем просчитанным путям. Это и есть
+           полная, честная карта — с одной реальной дверью (бром→этан) и ясно очерченными стенами.</p>`,
+      en: `<p>The final test of the nitrogen lead. Just as bromine needs its Deacon step to
+           regenerate Br₂, the NH₂ mediator must be regenerated from NH₃ — else you just consume it.
+           Computed:</p>
+           <ul>
+             <li>regenerating NH₂ from NH₃ is strongly <strong>uphill</strong> (+59 by homolysis,
+                 +64 even with oxygen): the N–H bond is too strong;</li>
+             <li>the only favourable route (via an OH radical, −8) <strong>needs oxygen</strong> —
+                 which brings back the "burning" (COx) problem.</li>
+           </ul>
+           <p><strong>Verdict:</strong> the nitrogen lead <em>spares</em> ethylene (great) but
+           <strong>doesn't close into a cycle</strong> — NH₂ can't be cheaply regenerated without
+           oxygen. Unlike bromine, whose cycle <em>closes</em> (Deacon −18). An honest closure: the
+           most beautiful one-step lead, taken all the way to a viability check, does not survive.</p>
+           <p>So bromine→ethane remains the one <em>viable</em> trunk; "one step to ethylene at 70%"
+           honestly stays unbeaten across every path computed. That is the complete, honest map — one
+           real door (bromine→ethane) and clearly-drawn walls.</p>`
+    },
+    tech: {
+      ru: `<p>Энергии регенерации NH₂ (def2-SVP/PBE0, ΔE): NH₃→NH₂•+½H₂ <strong>+59.5</strong>;
+           2NH₃+½O₂→2NH₂•+H₂O <strong>+64.4</strong>; NH₃+OH•→NH₂•+H₂O <strong>−7.6</strong>.
+           Прочная N–H связь (BDE ~107 ккал/моль) делает регенерацию эндотермичной; O₂-ассист не
+           спасает; только OH-ассист выгоден, но возвращает O-радикальную химию (COx). Сравнение:
+           бромный Дикон (Этап 7) замыкается (ΔG −74 кДж/моль ≈ −18 ккал/моль).</p>
+           <p><strong>Вывод:</strong> N-медиатор = щадит π-связь, но не рециклируется → не
+           жизнеспособный цикл. Полная карта: единственная замыкающаяся медиаторная магистраль —
+           бром→этан; один шаг до этилена заблокирован везде (O₂ — сгорание; Cl/Br/S — π-присоединение;
+           N — не рециклируется). <em>Оговорка:</em> термодинамика; не оценены неравновесные источники
+           N-радикалов (плазма/фото) — спекулятивный обход, не считался.</p>`,
+      en: `<p>NH₂ regeneration energies (def2-SVP/PBE0, ΔE): NH₃→NH₂•+½H₂ <strong>+59.5</strong>;
+           2NH₃+½O₂→2NH₂•+H₂O <strong>+64.4</strong>; NH₃+OH•→NH₂•+H₂O <strong>−7.6</strong>. The
+           strong N–H bond (BDE ~107 kcal/mol) makes regeneration endothermic; O₂-assist doesn't
+           rescue it; only OH-assist is favourable but reintroduces O-radical chemistry (COx).
+           Contrast: the bromine Deacon step (Stage 7) closes (ΔG −74 kJ/mol ≈ −18 kcal/mol).</p>
+           <p><strong>Conclusion:</strong> the N-mediator spares the π-bond but doesn't recycle → not a
+           viable cycle. The full map: the only self-closing mediated trunk is bromine→ethane; one-step
+           ethylene is blocked everywhere (O₂ — burning; Cl/Br/S — π-addition; N — no recycle).
+           <em>Caveat:</em> thermodynamics; non-equilibrium N-radical sources (plasma/photo) not
+           assessed — a speculative bypass, not computed.</p>`
+    },
+    table: {
+      title: { ru: "Регенерация NH₂-медиатора (ΔE, ккал/моль)", en: "NH₂-mediator regeneration (ΔE, kcal/mol)" },
+      head: { ru: ["путь регенерации", "ΔE", "вердикт"], en: ["regeneration route", "ΔE", "verdict"] },
+      rows: [
+        ["NH₃ → NH₂• + ½H₂", "+59.5", "в гору — не идёт / uphill — fails"],
+        ["2NH₃ + ½O₂ → 2NH₂• + H₂O", "+64.4", "в гору даже с O₂ / fails even with O₂"],
+        ["NH₃ + OH• → NH₂• + H₂O", "−7.6", "ок, но нужен O→COx / ok, but needs O→COx"],
+        ["(сравн.) Br Дикон / Br Deacon", "≈ −18", "ЗАМЫКАЕТСЯ / CLOSES ✅"]
+      ]
+    },
+    figures: []
   }
 ];
 
