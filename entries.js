@@ -426,6 +426,91 @@ const ENTRIES = [
         caption: { ru: "Ландшафт маршрутов: зелёные (сера/галоген) обходят COx-стену и термодинамически образуют магистраль; галоген доминирует уже при низкой T.",
                    en: "Route landscape: green (sulfur/halogen) escape the COx wall and form the thermodynamic trunk; halogen dominates already at low T." } }
     ]
+  },
+
+  /* ---------------------------------------------------------------- */
+  {
+    id: "cycles",
+    date: "2026-06-06",
+    stage: { ru: "Этап 7", en: "Stage 7" },
+    title: { ru: "Замыкается ли цикл? Бром выходит вперёд",
+             en: "Does the cycle close? Bromine pulls ahead" },
+    simple: {
+      ru: `<p>Чтобы медиаторный путь был <strong>настоящим процессом</strong>, медиатор
+           (хлор/бром/серу) нужно <em>возвращать в цикл</em> — иначе ты его просто расходуешь.
+           Проверили термодинамику полного цикла:</p>
+           <ul>
+             <li><strong>Хлор:</strong> сшивка метана отличная, но вернуть Cl₂ (реакция Дикона)
+                 выше ~600 °C <em>застревает</em> — это известная беда хлора.</li>
+             <li><strong>Бром:</strong> <em>оба</em> шага идут «под горку» — <strong>цикл
+                 замыкается сам.</strong></li>
+             <li><strong>Сера:</strong> регенерация тривиальна, но сама сшивка слабая (равновесие).</li>
+           </ul>
+           <p>Итог: самая чистая самозамыкающаяся магистраль — <strong>БРОМ</strong>. Он соединяет
+           метан, не жжёт продукт (нет CO₂), сам себя регенерирует, а суммарная реакция —
+           <em>такая же, как у O₂-OCM, но БЕЗ стены COx</em>. Плюс бром меньше «пережёвывает» свой
+           продукт, чем хлор (Этап 6). Значит, <strong>бром-медиаторное окислительное сочетание —
+           расчётная магистраль</strong>.</p>`,
+      en: `<p>For a mediated route to be a <strong>real process</strong>, the mediator
+           (chlorine/bromine/sulfur) must be <em>recycled</em> — otherwise you just consume it. We
+           checked the full-cycle thermodynamics:</p>
+           <ul>
+             <li><strong>Chlorine:</strong> methane coupling is excellent, but regenerating Cl₂ (the
+                 Deacon step) <em>stalls</em> above ~600 °C — the well-known chlorine problem.</li>
+             <li><strong>Bromine:</strong> <em>both</em> steps run downhill — <strong>the cycle
+                 closes by itself.</strong></li>
+             <li><strong>Sulfur:</strong> regeneration is trivial, but the coupling itself is weak
+                 (equilibrium-limited).</li>
+           </ul>
+           <p>Bottom line: the cleanest self-closing trunk is <strong>BROMINE</strong>. It couples
+           methane, doesn't burn the product (no CO₂), regenerates itself, and the net reaction is
+           <em>the same as O₂-OCM but WITHOUT the COx wall</em>. Bromine also over-reacts with its
+           own product less than chlorine (Stage 6). So <strong>bromine-mediated oxidative coupling is
+           the computable trunk</strong>.</p>`
+    },
+    tech: {
+      ru: `<p>ΔG(T) шагов цикла (NIST термохимия, конст. ΔH/ΔS), при 700 °C:</p>
+           <p><strong>Cl:</strong> сшивка 2CH₄+Cl₂→C₂H₆+2HCl ΔG=−127; Дикон 2HCl+½O₂→Cl₂+H₂O
+           ΔG=+5.6 (пересекает 0 около 600 °C → <em>бутылочное горло</em>). <strong>Br:</strong>
+           сшивка −47; Дикон 2HBr+½O₂→Br₂+H₂O ΔG=−74 → <strong>цикл замыкается</strong>.
+           <strong>S:</strong> сшивка +2.5 (равновесие); Клаус 2H₂S+O₂→S₂+2H₂O ΔG=−303 → замыкается,
+           но лимитирует сшивка. Суммарно для всех: <code>2CH₄+½O₂→C₂H₆+H₂O</code> (или →C₂H₄+H₂O для
+           S) — <strong>та же net-реакция, что у OCM, но переокисление обходится медиатором</strong>.</p>
+           <p><strong>Победитель — бром:</strong> единственный, у кого ОБА шага термодинамически
+           благоприятны (цикл self-regenerating) И минимальное переокисление продукта (Этап 6:
+           Br −30 vs Cl −34). Это согласуется с реальными бром-медиаторными процессами конверсии
+           метана.</p>
+           <p><strong>Честные оговорки:</strong> только термодинамика (конст. ΔH/ΔS); реальную
+           селективность и скорость решают кинетика сшивки CH₃•/CH₃Br → C₂ против ре-бромирования
+           (концентрационно-зависимо), обращение с HBr/H₂S и коррозия. Это уже инженерия процесса.</p>`,
+      en: `<p>ΔG(T) of cycle steps (NIST thermochem, constant ΔH/ΔS), at 700 °C:</p>
+           <p><strong>Cl:</strong> coupling 2CH₄+Cl₂→C₂H₆+2HCl ΔG=−127; Deacon 2HCl+½O₂→Cl₂+H₂O
+           ΔG=+5.6 (crosses 0 near 600 °C → <em>bottleneck</em>). <strong>Br:</strong> coupling −47;
+           Deacon 2HBr+½O₂→Br₂+H₂O ΔG=−74 → <strong>cycle closes</strong>. <strong>S:</strong>
+           coupling +2.5 (equilibrium); Claus 2H₂S+O₂→S₂+2H₂O ΔG=−303 → closes, but coupling is the
+           limit. Net for all: <code>2CH₄+½O₂→C₂H₆+H₂O</code> (or →C₂H₄+H₂O for S) — <strong>the same
+           net reaction as OCM, but over-oxidation is bypassed by the mediator</strong>.</p>
+           <p><strong>Winner — bromine:</strong> the only one where BOTH steps are thermodynamically
+           favourable (self-regenerating cycle) AND product over-functionalization is lowest (Stage 6:
+           Br −30 vs Cl −34). This matches real bromine-mediated methane-conversion routes.</p>
+           <p><strong>Honest caveats:</strong> thermodynamics only (constant ΔH/ΔS); real selectivity
+           and rate are set by the kinetics of CH₃•/CH₃Br → C₂ coupling vs re-bromination
+           (concentration-dependent), HBr/H₂S handling, and corrosion. That's process engineering.</p>`
+    },
+    table: {
+      title: { ru: "Термодинамика цикла (ΔG, кДж/моль, 700 °C)", en: "Cycle thermodynamics (ΔG, kJ/mol, 700 °C)" },
+      head: { ru: ["цикл", "сшивка", "регенерация", "вердикт"], en: ["cycle", "coupling", "recycle", "verdict"] },
+      rows: [
+        ["★ Br (бром/bromine)", "−47", "−74 (Deacon)", "ЦИКЛ ЗАМЫКАЕТСЯ / CLOSES ✅"],
+        ["Cl (хлор/chlorine)", "−127", "+5.6 (Deacon)", "регенерация-горло / recycle bottleneck"],
+        ["S (сера/sulfur)", "+2.5", "−303 (Claus)", "сшивка-горло / coupling-limited"]
+      ]
+    },
+    figures: [
+      { src: "assets/cycle_recycle.png",
+        caption: { ru: "ΔG регенерации медиатора vs T: бром (оранж.) под горку везде → цикл замыкается; хлор (синий) выше ~600°C застревает; сера (Клаус) тривиально замыкается.",
+                   en: "ΔG of mediator recycle vs T: bromine (orange) downhill everywhere → cycle closes; chlorine (blue) stalls above ~600 °C; sulfur (Claus) closes trivially." } }
+    ]
   }
 ];
 
