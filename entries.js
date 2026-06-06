@@ -243,6 +243,94 @@ const ENTRIES = [
            <p>Adding a stage = append one object to <code>ENTRIES</code>, drop figures in <code>assets/</code>, then <code>git push</code> — Pages rebuilds itself. The diary grows with the research.</p>`
     },
     figures: []
+  },
+
+  /* ---------------------------------------------------------------- */
+  {
+    id: "confined",
+    date: "2026-06-06",
+    stage: { ru: "Этап 5", en: "Stage 5" },
+    title: { ru: "Конфайнмент на AWS: красивый сигнал, который не выжил",
+             en: "Confinement on AWS: a beautiful signal that didn't survive" },
+    simple: {
+      ru: `<p>Была красивая гипотеза: посадить активный кислород на дно крошечной «пещерки» из
+           атомов (поры) и так зажать молекулы, чтобы селективность перевернулась — то, чего не
+           смогли ни электроника, ни сито по размеру. Дешёвый расчёт радостно сказал: <strong>ДА,
+           +6.3</strong> — выше порога 70%! 🎉</p>
+           <p>Но прежде чем поверить, мы сделали <strong>контроль</strong>: отодвинули стенки
+           «пещерки» далеко. Логика простая — если эффект от <em>зажатия</em>, то с далёкими
+           стенками он должен исчезнуть. И на нормальной математике (на облачном компьютере AWS)
+           контроль <strong>провалился</strong>: с далёкими стенками эффект стал ещё
+           <strong>больше</strong>. Значит, дело не в зажатии — просто «добавили атомы → число
+           поменялось». Ложная тревога.</p>
+           <p><strong>Прорыва нет.</strong> Но главное — мы <strong>поймали обманку до того, как в
+           неё поверили</strong>. Вот так и работает честная наука: красивый результат сначала
+           пытаются убить контролем, и настоящим считается только выживший. Карта потолка
+           (Этапы 1–3) остаётся в силе: 70% за один шаг пока не берёт ни один проверенный
+           механизм. (Весь расчёт — на AWS, ~$2, инстанс выключен.)</p>`,
+      en: `<p>A pretty hypothesis: put the reactive oxygen at the bottom of a tiny atomic "cave"
+           (a pore) and squeeze the molecules so selectivity flips — something neither electronics
+           nor size-sieving could do. The cheap calculation happily said: <strong>YES, +6.3</strong>
+           — above the 70% threshold! 🎉</p>
+           <p>But before believing it, we ran a <strong>control</strong>: move the cave walls far
+           away. Simple logic — if the effect is from <em>squeezing</em>, far walls should kill it.
+           And with proper math (on an AWS cloud computer) the control <strong>failed</strong>: with
+           the walls far away the effect got even <strong>bigger</strong>. So it wasn't squeezing —
+           just "add atoms → the number changes." A false alarm.</p>
+           <p><strong>No breakthrough.</strong> But the point is we <strong>caught the fake-out
+           before believing it</strong>. That's how honest science works: you first try to kill a
+           pretty result with a control, and only the survivor counts as real. The ceiling map
+           (Stages 1–3) stands: 70% in one step is still beaten by no tested mechanism. (All compute
+           on AWS, ~$2, instance shut down.)</p>`
+    },
+    tech: {
+      ru: `<p><strong>Канал и движок:</strong> считали на ВАЛИДИРОВАННОМ канале (этан-HAT,
+           воспроизводит −1.09) валидированным движком ROHF + frontier-CAS CASCI (жёсткий скан).
+           Конфайнмент — <em>связанная</em> MgO-полость (Mg²⁺/O²⁻ на позициях решётки, целыми
+           нейтральными блоками → закрытая оболочка), без плавающего He, который ломал прошлый заход.</p>
+           <p><strong>Контроль:</strong> те же атомы воротника, отодвинутые в 2× (присутствуют, но не
+           зажимают). Если эффект — конфайнмент, дальний воротник НЕ должен воспроизводить сдвиг.</p>
+           <p><strong>STO-3G:</strong> bare −1.09 → ближний +6.34, дальний −2.08 (контроль ✅ —
+           выглядело реально). <strong>def2-SVP (AWS):</strong> bare −0.01, ближний +8.70 (у CH₄
+           барьер схлопнулся в 0.00 — патология), дальний <strong>+12.91 &gt; ближнего</strong> →
+           <strong>контроль ❌</strong>: сдвиг — аддитивный артефакт добавленных атомов, не зажатие.</p>
+           <p><strong>Доп. флаг:</strong> голый дескриптор просел −1.09 (STO-3G) → −0.01 (def2-SVP) —
+           авто-выбор активного пространства не устойчив по базису. Скрипт сам пометил «NOT TRUSTED».</p>
+           <p><strong>Что нужно для настоящего теста:</strong> фиксированное/валидированное активное
+           пространство (AVAS), периодическая/embedding-модель реальной поры, и правильный канал для
+           этилена (π-окисление, не HAT). Это отдельный большой расчёт.</p>`,
+      en: `<p><strong>Channel & engine:</strong> computed on the VALIDATED channel (ethane HAT,
+           reproduces −1.09) with the validated ROHF + frontier-CAS CASCI rigid-scan engine.
+           Confinement = a <em>bonded</em> MgO cavity (Mg²⁺/O²⁻ at lattice positions, whole neutral
+           units → closed shell), no floating He (which broke the previous attempt).</p>
+           <p><strong>Control:</strong> the same collar atoms moved 2× out (present but not confining).
+           If the effect is confinement, the far collar must NOT reproduce the shift.</p>
+           <p><strong>STO-3G:</strong> bare −1.09 → near +6.34, far −2.08 (control ✅ — looked real).
+           <strong>def2-SVP (AWS):</strong> bare −0.01, near +8.70 (CH₄ barrier collapsed to 0.00 —
+           pathological), far <strong>+12.91 &gt; near</strong> → <strong>control ❌</strong>: the
+           shift is an additive artefact of adding atoms, not squeezing.</p>
+           <p><strong>Extra flag:</strong> the bare descriptor drifted −1.09 (STO-3G) → −0.01
+           (def2-SVP) — the auto active-space selection is not basis-robust. The script itself
+           flagged "NOT TRUSTED".</p>
+           <p><strong>What a real test needs:</strong> a fixed/validated active space (AVAS), a
+           periodic/embedded model of an actual pore, and the right channel for ethylene
+           (π-oxidation, not HAT). That is a separate, larger calculation.</p>`
+    },
+    table: {
+      title: { ru: "Дескриптор ΔΔG‡ по базису и контролю (ккал/моль)",
+               en: "Descriptor ΔΔG‡ across basis & control (kcal/mol)" },
+      head: { ru: ["", "голый сайт", "ближний воротник", "дальний контроль"],
+              en: ["", "bare site", "near collar", "far control"] },
+      rows: [
+        ["STO-3G", "−1.09", "+6.34", "−2.08  ✅ control ok"],
+        ["def2-SVP", "−0.01", "+8.70", "+12.91  ❌ control fails"]
+      ]
+    },
+    figures: [
+      { src: "assets/cavity_selfcorrection.png",
+        caption: { ru: "Самокоррекция: STO-3G дал заманчивый +6.3, но дальний контроль на def2-SVP даёт ещё больше (+12.9) — значит это артефакт добавленных атомов, а не конфайнмент.",
+                   en: "Self-correction: STO-3G gave a tempting +6.3, but at def2-SVP the far control gives even more (+12.9) — so it is an additive artefact, not confinement." } }
+    ]
   }
 ];
 
