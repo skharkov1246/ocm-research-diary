@@ -14,7 +14,6 @@ const UI = {
   glossaryTitle: { ru: "Словарь терминов", en: "Glossary" },
   tocTitle: { ru: "Дневник", en: "Diary" },
   figurePrefix: { ru: "Рис.", en: "Fig." },
-  economicsLabel: { ru: "Честный контекст — экономика", en: "Honest context — economics" },
   honesty: {
     ru: "Принцип проекта: каждое число — из реального расчёта. Что нельзя проверить — помечаем явно. Ничего не приукрашиваем; неудачи и артефакты показываем.",
     en: "Project rule: every number comes from a real computation. What can't be validated is labelled. Nothing is smoothed; failures and artefacts are shown."
@@ -895,99 +894,6 @@ const ENTRIES = [
       ]
     },
     figures: []
-  },
-
-  /* ---------------------------------------------------------------- */
-  {
-    id: "polyolefins",
-    date: "2026-06-06",
-    stage: { ru: "Рынок", en: "Market" },
-    accent: "#b794f4",
-    title: { ru: "Катализаторы полимеризации PE/PP: где на самом деле деньги",
-             en: "PE/PP polymerization catalysts: where the money actually is" },
-    simple: {
-      ru: `<p>Вся история выше — про то, как получить мономеры (этилен, пропилен). А <strong>выручка</strong>
-           живёт на следующем шаге: из мономеров на катализаторе «сшивают» <strong>полиэтилен (PE)</strong> и
-           <strong>полипропилен (PP)</strong> — основу почти всего пластика в мире.</p>
-           <p>Это <strong>самый крупный рынок во всей цепочке</strong>: совокупный TAM ≈ <strong>$380 млрд</strong>.
-           Покупатели катализаторов и технологий — мировые производители полиолефинов:
-           <em>Borouge</em>, <em>SABIC</em>, <em>Нижнекамскнефтехим (НКНХ)</em>.</p>
-           <p>Сердце процесса — <strong>активный центр</strong>: атом <strong>Ti</strong> (катализатор Циглера–Натты)
-           или <strong>Zr</strong> (металлоцен). Он присоединяет мономер за мономером и выстраивает длинную цепь —
-           так рождается пластик с нужными свойствами.</p>
-           <p>Но есть честная оговорка про деньги — она ниже, и мы её не прячем.</p>`,
-      en: `<p>Everything above is about <em>making</em> the monomers (ethylene, propylene). The <strong>revenue</strong>
-           lives one step later: a catalyst stitches those monomers into <strong>polyethylene (PE)</strong> and
-           <strong>polypropylene (PP)</strong> — the base of almost all the world's plastic.</p>
-           <p>This is the <strong>largest market in the whole chain</strong>: a combined TAM of ≈ <strong>$380 B</strong>.
-           The buyers of catalysts and technology are the global polyolefin producers:
-           <em>Borouge</em>, <em>SABIC</em>, <em>Nizhnekamskneftekhim (NKNH)</em>.</p>
-           <p>The heart of the process is the <strong>active centre</strong>: a <strong>Ti</strong> atom (Ziegler–Natta)
-           or a <strong>Zr</strong> atom (metallocene). It adds monomer after monomer to build a long chain —
-           that is how plastic with the right properties is born.</p>
-           <p>There is an honest caveat about the money — it's right below, and we don't hide it.</p>`
-    },
-    tech: {
-      ru: `<p><strong>Координационная полимеризация:</strong> внедрение мономера в связь M–C по механизму
-           Косси–Арлмана. <em>Ti</em>-системы (TiCl₄/MgCl₂, Циглер–Натта) — рабочая лошадка для HDPE и
-           изотактического PP; одноцентровые <em>Zr</em>-металлоцены (Cp₂ZrCl₂, CGC) дают узкое ММР и точное
-           встраивание сомономера (mLLDPE, эластомеры); пост-металлоцены — фронтир.</p>
-           <p><strong>Два дескриптора активного центра = два рычага стоимости:</strong> (1) электронная плотность
-           и стерика у металла → активность и молекулярная масса (<em>выход</em>); (2) лигандное окружение →
-           стереоселективность и встраивание сомономера (<em>свойства марки</em>). Это та же логика дескриптора
-           ΔΔG‡, что мы строили для OCM (Этап 9), но приложенная к центру полимеризации.</p>
-           <p><strong>Честная привязка к проекту:</strong> наши квантово-химические расчёты пока про апстрим
-           (метан→этилен), а не про полимеризацию. Этот раздел — коммерческий пункт назначения и естественное
-           направление, куда расширять дескрипторный подход. Цифры рынка — отраслевые оценки; карта катализаторов
-           (Рис. ниже) — <em>качественная</em>, не посчитана здесь, и помечена как схема.</p>`,
-      en: `<p><strong>Coordination polymerization:</strong> monomer insertion into the M–C bond via the
-           Cossee–Arlman mechanism. <em>Ti</em> systems (TiCl₄/MgCl₂, Ziegler–Natta) are the workhorse for HDPE
-           and isotactic PP; single-site <em>Zr</em> metallocenes (Cp₂ZrCl₂, CGC) give narrow MWD and precise
-           comonomer incorporation (mLLDPE, elastomers); post-metallocenes are the frontier.</p>
-           <p><strong>Two active-centre descriptors = two value levers:</strong> (1) electron density and sterics at
-           the metal → activity and molecular weight (<em>yield</em>); (2) the ligand environment → stereoselectivity
-           and comonomer incorporation (<em>grade properties</em>). It is the same ΔΔG‡ descriptor logic we built for
-           OCM (Stage 9), applied to the polymerization centre.</p>
-           <p><strong>Honest project scope:</strong> our quantum-chemistry computations so far are upstream
-           (methane→ethylene), not polymerization. This section is the commercial destination and the natural place
-           to extend the descriptor approach. Market figures are industry estimates; the catalyst map (figure below)
-           is <em>qualitative</em>, not computed here, and is labelled as a schematic.</p>`
-    },
-    economics: {
-      caveat: {
-        ru: `Доля катализатора в себестоимости полиолефина — <strong>около 4%</strong>. Поэтому коммерческий
-             рычаг — <strong>не цена катализатора</strong>, а <strong>свойства полимера и выход/производительность</strong>,
-             которые он задаёт. В себестоимости доминирует <strong>сырьё (феедсток)</strong> — мономер/нафта/этан.
-             Лучший катализатор окупается премиальными марками и более высокой производительностью, а не собственной
-             дешевизной. Продавать «дешёвый катализатор» — значит целиться не в тот рычаг.`,
-        en: `The catalyst is <strong>about 4% of polyolefin production cost</strong>. So the commercial lever is
-             <strong>not the catalyst's price</strong> but the <strong>polymer properties and yield/productivity</strong>
-             it unlocks. <strong>Feedstock dominates</strong> the cost — monomer/naphtha/ethane. A better catalyst pays
-             off through premium grades and higher throughput, not by being cheap itself. Selling "a cheaper catalyst"
-             aims at the wrong lever.`
-      }
-    },
-    table: {
-      title: { ru: "Полиолефины: где деньги (рыночный контекст)",
-               en: "Polyolefins: where the money is (market context)" },
-      head: { ru: ["параметр", "PE / PP"], en: ["aspect", "PE / PP"] },
-      rows: [
-        ["Продукт / Product", "PE + PP — основа ~всего пластика / the base of ~all plastics"],
-        ["TAM (оценка отрасли) / TAM (industry est.)", "≈ $380 млрд / ≈ $380 B"],
-        ["Заказчики / Customers", "Borouge · SABIC · НКНХ / Borouge · SABIC · Nizhnekamskneftekhim"],
-        ["Активный центр / Active centre", "Ti (Циглер–Натта) · Zr (металлоцен) / Ti (Ziegler–Natta) · Zr (metallocene)"],
-        ["Доля катализатора / Catalyst share", "≈ 4% — рычаг НЕ цена / ≈ 4% — the lever is NOT its price"],
-        ["Рычаг стоимости / Value lever", "свойства + выход / properties + yield"]
-      ]
-    },
-    figures: [
-      { src: "assets/04_polyolefins_molecules.png",
-        caption: { ru: "Мономеры + активный центр Ti/Zr.",
-                   en: "Monomers + the Ti/Zr active centre." } },
-      { src: "assets/04_polyolefins_descriptor.png",
-        caption: { ru: "Дескрипторная карта катализаторов: два рычага стоимости (свойства × выход). Качественная схема, не посчитана здесь.",
-                   en: "Catalyst descriptor map: the two value levers (properties × yield). A qualitative schematic, not computed here." } }
-    ]
   }
 ];
 
@@ -1015,14 +921,5 @@ const GLOSSARY = [
            en: "Variational Quantum Eigensolver — a route to quantum computers for spaces beyond classical reach." } },
   { term: { ru: "Конфайнмент / молекулярное сито", en: "Confinement / molecular sieving" },
     def: { ru: "Идея отделять молекулы по размеру/форме порами. Для метана и этилена по размеру не работает — они почти одинаковы.",
-           en: "Separating molecules by size/shape using pores. For methane vs. ethylene it fails by size — they're almost identical." } },
-  { term: { ru: "Полиолефины (PE/PP)", en: "Polyolefins (PE/PP)" },
-    def: { ru: "Полиэтилен и полипропилен — основа почти всего пластика; крупнейший рынок в цепочке метан→этилен→пластик.",
-           en: "Polyethylene and polypropylene — the base of almost all plastics; the largest market in the methane→ethylene→plastic chain." } },
-  { term: { ru: "Координационная полимеризация (Косси–Арлман)", en: "Coordination polymerization (Cossee–Arlman)" },
-    def: { ru: "Рост цепи внедрением мономера в связь металл–углерод на активном центре Ti/Zr (Циглер–Натта, металлоцены).",
-           en: "Chain growth by inserting monomer into a metal–carbon bond at a Ti/Zr active centre (Ziegler–Natta, metallocenes)." } },
-  { term: { ru: "Сырьё (феедсток)", en: "Feedstock" },
-    def: { ru: "Исходный мономер/нафта/этан. Доминирует в себестоимости полиолефинов; катализатор — лишь ~4%.",
-           en: "The input monomer/naphtha/ethane. It dominates polyolefin cost; the catalyst is only ~4%." } }
+           en: "Separating molecules by size/shape using pores. For methane vs. ethylene it fails by size — they're almost identical." } }
 ];

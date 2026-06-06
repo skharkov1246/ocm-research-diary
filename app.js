@@ -73,13 +73,6 @@ function renderEntry(e, idx) {
   const card = el("section", "entry");
   card.id = e.id;
 
-  // Optional per-entry accent: recolour everything that reads var(--accent*) inside this card.
-  if (e.accent) {
-    card.classList.add("accented");
-    card.style.setProperty("--accent", e.accent);
-    card.style.setProperty("--accent-2", e.accent);
-  }
-
   const meta = el("div", "entry-meta");
   meta.appendChild(el("span", "stage-tag", t(e.stage)));
   meta.appendChild(el("span", "entry-date", e.date));
@@ -89,14 +82,6 @@ function renderEntry(e, idx) {
 
   const body = el("div", "entry-body", e[state.level][state.lang]);
   card.appendChild(body);
-
-  // Optional honest economics caveat — shown, never hidden.
-  if (e.economics && e.economics.caveat) {
-    const ec = el("div", "economics-caveat");
-    ec.innerHTML =
-      `<span class="ec-label">${t(UI.economicsLabel)}</span>` + t(e.economics.caveat);
-    card.appendChild(ec);
-  }
 
   if (e.table) card.appendChild(renderTable(e.table));
 
