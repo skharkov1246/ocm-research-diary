@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FeMoco Lab — N₂ → NH₃ activation research diary</title>
+  <meta name="description" content="An honest, bilingual (RU/EN) diary of quantum-chemistry experiments on activating the nitrogen triple bond N≡N toward ammonia — the road to a FeMoco-scale quantum calculation." />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧬</text></svg>" />
+  <!-- Self-contained FeMoco diary: reuses style.css + app.js unchanged, with its own
+       data (femoco_entries.js defines SITE/UI/ENTRIES/GLOSSARY). It does NOT load
+       entries.js or matterforge.js, so it never collides with the OCM diary page.
+       To weave this in as a tab on index.html later, point the mf-tabs bar at this page. -->
+</head>
+<body data-lang="ru" data-level="simple">
+
+  <header class="site-header">
+    <div class="wrap">
+      <div class="brand">
+        <span class="brand-mark">🧬</span>
+        <div>
+          <h1 id="site-title">FeMoco Lab</h1>
+          <p id="site-subtitle" class="subtitle"></p>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="toggle-group" id="lang-group" role="group" aria-label="Language">
+          <span class="toggle-label" id="lang-label"></span>
+          <button class="toggle" data-set="lang" data-value="ru">RU</button>
+          <button class="toggle" data-set="lang" data-value="en">EN</button>
+        </div>
+        <div class="toggle-group" id="level-group" role="group" aria-label="Level">
+          <span class="toggle-label" id="level-label"></span>
+          <button class="toggle" data-set="level" data-value="simple" id="lvl-simple"></button>
+          <button class="toggle" data-set="level" data-value="tech" id="lvl-tech"></button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <p id="hero-text" class="hero-text"></p>
+      <p id="honesty-note" class="honesty-note"></p>
+    </section>
+
+    <nav class="toc" id="toc" aria-label="Diary contents"></nav>
+
+    <section id="diary" class="diary"></section>
+
+    <section class="glossary" id="glossary">
+      <h2 id="glossary-title"></h2>
+      <dl id="glossary-list"></dl>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p id="footer-honesty"></p>
+      <p class="muted">Built with PennyLane · PySCF · CASCI/VQE — and an unbreakable rule about honesty.
+         <a id="repo-link" href="#" target="_blank" rel="noopener">source ↗</a></p>
+    </div>
+  </footer>
+
+  <script src="femoco_entries.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
