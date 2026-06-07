@@ -21,9 +21,9 @@ const UI = {
 };
 
 const SITE = {
-  title:    { ru: "OCM-лаборатория", en: "OCM Lab" },
-  subtitle: { ru: "Метан → этилен: открытый дневник квантово-химических экспериментов",
-              en: "Methane → ethylene: an open diary of quantum-chemistry experiments" },
+  title:    { ru: "MatterForge diary", en: "MatterForge diary" },
+  subtitle: { ru: "Квантовая разработка катализаторов — открытый честный дневник",
+              en: "Quantum catalyst design — an open, honest diary" },
   hero: {
     simple: {
       ru: "Мы учим компьютер считать поведение электронов, чтобы понять, можно ли превратить природный газ (метан) сразу в этилен — вещество, из которого делают почти весь пластик. В один шаг это не получается уже 40 лет. Здесь я после каждого этапа честно записываю, что мы посчитали и что узнали.",

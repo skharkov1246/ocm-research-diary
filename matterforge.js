@@ -66,8 +66,9 @@
     if (!TABS.length) return;
 
     const fromHash = location.hash.replace(/^#/, "");
+    const hasOcm = TABS.some((t) => t.id === "ocm");
     active = TABS.some((t) => t.id === fromHash) ? fromHash
-           : HAS_DIARY ? DIARY_ID : TABS[0].id;
+           : (HAS_DIARY && hasOcm) ? "ocm" : TABS[0].id;
 
     // optional header/footer hooks on a standalone page
     const sub = $("#mf-subtitle"); if (sub) sub.textContent = DATA._meta?.project || "";
@@ -91,14 +92,13 @@
   function renderTabs() {
     const nav = $("#mf-tabs");
     nav.innerHTML = "";
-    if (HAS_DIARY) nav.appendChild(tabButton(DIARY_ID, "var(--accent)", "📔 Дневник OCM"));
     TABS.forEach((t) => nav.appendChild(tabButton(t.id, t.color, t.title)));
   }
 
   function selectTab(id) {
     if (active === id) return;
     active = id;
-    history.replaceState(null, "", id === DIARY_ID ? location.pathname + location.search : "#" + id);
+    history.replaceState(null, "", "#" + id);
     renderTabs();
     applyView();
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -106,13 +106,9 @@
 
   function applyView() {
     const view = $("#mf-view");
-    const showDiary = HAS_DIARY && active === DIARY_ID;
+    // OCM research diary is embedded INSIDE the "ocm" tab — shown below its summary panel.
+    const showDiary = HAS_DIARY && active === "ocm";
     if (HAS_DIARY) diarySections().forEach((s) => { s.hidden = !showDiary; });
-    if (showDiary) {
-      view.hidden = true;
-      view.innerHTML = "";
-      return;
-    }
     view.hidden = false;
     renderPanel(view, TABS.find((t) => t.id === active));
   }
@@ -276,7 +272,7 @@
 
   window.addEventListener("hashchange", () => {
     const id = location.hash.replace(/^#/, "");
-    const next = TABS.some((t) => t.id === id) ? id : (HAS_DIARY ? DIARY_ID : active);
+    const next = TABS.some((t) => t.id === id) ? id : active;
     if (next !== active) { active = next; renderTabs(); applyView(); }
   });
 
