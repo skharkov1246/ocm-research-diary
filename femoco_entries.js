@@ -432,6 +432,64 @@ const ENTRIES = [
         caption: { ru: "Спиновые состояния атома Fe по четырём методам (отн. квинтета): ROHF врёт качественно, DFT расходится, минимальный CASSCF занижает. Реальный расчёт (def2-SVP).",
                    en: "Fe-atom spin states by four methods (vs quintet): ROHF qualitatively wrong, DFT scatters, minimal CASSCF underestimates. Real computation (def2-SVP)." } }
     ]
+  },
+
+  /* ---------------------------------------------------------------- */
+  {
+    id: "fe-n2",
+    date: "2026-06",
+    stage: { ru: "Этап 9", en: "Stage 9" },
+    title: { ru: "N₂ на железе: первая модель самого катализа (и честный сюрприз)",
+             en: "N₂ on iron: the first model of catalysis itself (and an honest surprise)" },
+    simple: {
+      ru: `<p>После калибровки на голом атоме Fe (Этап 8) сажаем N₂ на железо — первая модель самого́ катализа. Оптимизировали геометрию и получили честный, поучительный результат: <strong>одинокий атом железа — плохой активатор</strong>.</p>
+           <ul>
+             <li>В <strong>триплете</strong> Fe всё же слабо цепляет N₂ (Fe–N 1.85 Å) и чуть растягивает тройную связь (<strong>+0.028 Å</strong> — намёк на активацию), но комплекс на <strong>+15.4 ккал/моль ВЫШЕ</strong> разделённых Fe + N₂ — то есть сам собой не связывается.</li>
+             <li>В <strong>квинтете</strong> (естественное состояние свободных Fe + N₂) атом и молекула просто расходятся.</li>
+           </ul>
+           <p>Вывод: одного железа мало — ровно поэтому природа упаковывает его в серно-углеродную клетку с несколькими металлами (FeMoco). Ещё деталь: триплет и квинтет почти вырождены (в пределах ~0.1 эВ), и методы спорят, кто ниже — тонкая спиновая физика, как раз для квантовых методов.</p>
+           <p>«Катализаторное» активное пространство тут (d-орбитали железа + орбитали азота) — <strong>CAS(16,12) = 24 кубита</strong>, вдвое больше, чем для чистого N₂. Это следующая цель VQE на AWS.</p>`,
+      en: `<p>After calibrating on the bare Fe atom (Stage 8), we put N₂ on iron — the first model of catalysis itself. We optimized the geometry and got an honest, instructive result: <strong>a lone iron atom is a poor activator</strong>.</p>
+           <ul>
+             <li>In the <strong>triplet</strong> Fe does weakly grab N₂ (Fe–N 1.85 Å) and slightly stretches the triple bond (<strong>+0.028 Å</strong> — a hint of activation), but the complex is <strong>+15.4 kcal/mol ABOVE</strong> separated Fe + N₂ — i.e. it does not bind spontaneously.</li>
+             <li>In the <strong>quintet</strong> (the natural state of free Fe + N₂) the atom and molecule simply drift apart.</li>
+           </ul>
+           <p>Conclusion: one iron is not enough — exactly why nature wraps it in a sulfur–carbon cage with several metals (FeMoco). Also: triplet and quintet are nearly degenerate (within ~0.1 eV), and methods disagree on which wins — delicate spin physics, the kind quantum methods are built for.</p>
+           <p>The "catalyst" active space here (iron d-orbitals + nitrogen orbitals) is <strong>CAS(16,12) = 24 qubits</strong>, double the N₂-only size. That is the next VQE target on AWS.</p>`
+    },
+    tech: {
+      ru: `<p>B3LYP/def2-SVP оптимизация геометрии; ROHF→CASSCF; активные пространства через AVAS. Все числа посчитаны.</p>
+           <ul>
+             <li><strong>Связывание/активация:</strong> триплетный минимум d(Fe–N)=1.847, d(N–N)=1.129 Å (+0.028 vs свободная 1.100). E_связ = <strong>+15.4 ккал/моль</strong> относительно Fe(⁵D)+N₂ (эндотермично → метастабильно). Квинтет оптимизируется к d(Fe–N)=5.47 Å (диссоциация). Bare Fe–N₂ в основном состоянии не связан; лёгкая активация — лишь в метастабильном триплете.</li>
+             <li><strong>Вертикальная спиновая щель</strong> (квинтет−триплет) при геометрии связанного комплекса: PBE <strong>−0.05</strong>, B3LYP <strong>−0.03</strong>, CASSCF(6e,5o) <strong>−0.13</strong> эВ → почти вырождение, расхождение DFT vs мультиреференс ~0.1 эВ. (У полноразмерных FeMoco-кластеров ошибки DFT по спину доходят до ~1 эВ — это о большом кофакторе, не об этой мини-модели.)</li>
+             <li><strong>Активное пространство для VQE:</strong> AVAS(Fe 3d + N₂ 2p) = CAS(16e,12o) → <strong>24 кубита</strong> (против 12 у чистого N₂). CASSCF сошёлся для триплета (E=−1371.036 Ha); квинтет на 24 кубитах сходится трудно — само по себе признак сложности. Это 24-кубитное пространство — следующая цель VQE на AWS.</li>
+           </ul>
+           <p>Это намеренно простейшая «Fe-модель»; урок (нужны лиганды/многоядерность) ведёт к следующему этапу — [2Fe–2S] кластеру. Кубитный гамильтониан будет сверен с CASCI перед VQE (как на Этапах 1/4).</p>`,
+      en: `<p>B3LYP/def2-SVP geometry optimization; ROHF→CASSCF; active spaces via AVAS. All numbers computed.</p>
+           <ul>
+             <li><strong>Binding/activation:</strong> triplet minimum d(Fe–N)=1.847, d(N–N)=1.129 Å (+0.028 vs free 1.100). E_bind = <strong>+15.4 kcal/mol</strong> relative to Fe(⁵D)+N₂ (endothermic → metastable). Quintet optimizes to d(Fe–N)=5.47 Å (dissociation). Bare Fe–N₂ is unbound in the ground state; slight activation only in the metastable triplet.</li>
+             <li><strong>Vertical spin gap</strong> (quintet−triplet) at the bound geometry: PBE <strong>−0.05</strong>, B3LYP <strong>−0.03</strong>, CASSCF(6e,5o) <strong>−0.13</strong> eV → near-degeneracy, DFT-vs-multireference spread ~0.1 eV. (Full-size FeMoco clusters show DFT spin errors up to ~1 eV — about the large cofactor, not this mini-model.)</li>
+             <li><strong>Active space for VQE:</strong> AVAS(Fe 3d + N₂ 2p) = CAS(16e,12o) → <strong>24 qubits</strong> (vs 12 for N₂ alone). CASSCF converged for the triplet (E=−1371.036 Ha); the quintet is hard to converge at 24 qubits — itself a sign of the difficulty. This 24-qubit space is the next VQE target on AWS.</li>
+           </ul>
+           <p>A deliberately minimal "Fe model"; the lesson (need ligands/multinuclearity) leads to the next stage — a [2Fe–2S] cluster. The qubit Hamiltonian will be cross-checked vs CASCI before VQE (as in Stages 1/4).</p>`
+    },
+    table: {
+      title: { ru: "Fe–N₂: геометрия, связывание, спиновая щель — реальный расчёт (def2-SVP)",
+               en: "Fe–N₂: geometry, binding, spin gap — real computation (def2-SVP)" },
+      head: { ru: ["Величина", "Значение (посчитано)"], en: ["Quantity", "Value (computed)"] },
+      rows: [
+        ["Триплет: Fe–N / N–N", "1.85 / 1.129 Å  (N≡N удлинена +0.028 Å)"],
+        ["Связывание vs Fe(⁵D)+N₂", "+15.4 ккал/моль (метастабильно, не связан)"],
+        ["Квинтет", "диссоциирует (Fe–N → 5.47 Å)"],
+        ["Вертик. щель квинтет−триплет", "PBE −0.05 · B3LYP −0.03 · CASSCF −0.13 эВ"],
+        ["Активное пространство (цель VQE)", "Fe 3d + N₂ 2p = CAS(16,12) → 24 кубита"]
+      ]
+    },
+    figures: [
+      { src: "assets/femoco/fe_n2_summary.png",
+        caption: { ru: "N₂ на одиночном Fe: метастабильная активация в триплете (+0.028 Å, но +15.4 ккал/моль над фрагментами), квинтет диссоциирует; вертикальная спиновая щель DFT vs CASSCF. Реальный расчёт def2-SVP.",
+                   en: "N₂ on a single Fe: metastable triplet activation (+0.028 Å, but +15.4 kcal/mol above fragments), quintet dissociates; vertical spin gap DFT vs CASSCF. Real def2-SVP computation." } }
+    ]
   }
 ];
 
