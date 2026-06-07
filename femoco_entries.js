@@ -70,9 +70,46 @@ const ENTRIES = [
 
   /* ---------------------------------------------------------------- */
   {
-    id: "n2-bench",
+    id: "engine",
     date: "2026-06",
     stage: { ru: "Этап 1", en: "Stage 1" },
+    title: { ru: "Движок честности: кубитный гамильтониан = CASCI до 9-го знака",
+             en: "An honesty engine: the qubit Hamiltonian = CASCI to 9 digits" },
+    simple: {
+      ru: `<p>Любой вывод дневника стоит ровно столько, сколько стоит наш «калькулятор». Поэтому первым делом мы доказываем, что он <strong>не врёт</strong>.</p>
+           <p>Мы превращаем химию в форму, понятную квантовому компьютеру (так называемый «кубитный гамильтониан»), а затем сравниваем его точное решение с эталонным классическим ответом (CASCI) на системах, которые ещё решаются точно: H₂, LiH и активное пространство N₂.</p>
+           <p><strong>Совпадение — до девятого знака</strong> (расхождение ~5×10⁻⁹ ккал/моль — это в миллиард раз точнее «химической точности» в 1 ккал/моль). Этот тест мы прогоняем <em>перед каждым</em> квантовым расчётом, так что ошибка в переводе химии в кубиты не проскочит незаметно.</p>`,
+      en: `<p>Every conclusion in this diary is worth exactly as much as our "calculator". So the first thing we do is prove it <strong>doesn't lie</strong>.</p>
+           <p>We turn the chemistry into a form a quantum computer understands (a "qubit Hamiltonian") and then compare its exact solution to the reference classical answer (CASCI) on systems still solvable exactly: H₂, LiH, and the N₂ active space.</p>
+           <p><strong>They agree to the ninth digit</strong> (discrepancy ~5×10⁻⁹ kcal/mol — a billion times tighter than the 1 kcal/mol "chemical accuracy"). This test runs <em>before every</em> quantum calculation, so an error translating chemistry into qubits can't slip through unnoticed.</p>`
+    },
+    tech: {
+      ru: `<p>Рецепт «интегралы активного пространства → кубитный гамильтониан» (хемист-ERI → OpenFermion, отображение Jordan–Wigner) валидируется напрямую: точная диагонализация JW-гамильтониана при фиксированном числе частиц должна воспроизводить PySCF CASCI на тех же орбиталях.</p>
+           <p>Результат (реальный прогон): H₂ — <strong>8×10⁻¹³</strong>, LiH — машинный ноль, N₂ CAS(6e,6o)/cc-pVDZ — <strong>5.4×10⁻⁹</strong> ккал/моль. Худшее расхождение <strong>≈5×10⁻⁹ ккал/моль</strong> — на ~9 порядков ниже химической точности.</p>
+           <p>Этот кросс-чек (<code>build_system(..., crosscheck=True)</code>) — обязательный гейт перед VQE: молчаливая ошибка соглашения/маппинга не пройдёт (assert &lt;10⁻³ ккал/моль). Это тот же движок, что валидирован в OCM-проекте на H₂/LiH до ~10⁻¹² Ha.</p>`,
+      en: `<p>The recipe "active-space integrals → qubit Hamiltonian" (chemist-ERI → OpenFermion, Jordan–Wigner mapping) is validated directly: exact diagonalization of the JW Hamiltonian at fixed particle number must reproduce PySCF CASCI on the same orbitals.</p>
+           <p>Result (real run): H₂ — <strong>8×10⁻¹³</strong>, LiH — machine zero, N₂ CAS(6e,6o)/cc-pVDZ — <strong>5.4×10⁻⁹</strong> kcal/mol. Worst disagreement <strong>≈5×10⁻⁹ kcal/mol</strong> — ~9 orders of magnitude below chemical accuracy.</p>
+           <p>This cross-check (<code>build_system(..., crosscheck=True)</code>) is a mandatory gate before VQE: a silent convention/mapping error can't pass (assert &lt;10⁻³ kcal/mol). It is the same engine validated in the OCM project on H₂/LiH to ~10⁻¹² Ha.</p>`
+    },
+    table: {
+      title: { ru: "Сверка кубитного гамильтониана с CASCI (реальный прогон)",
+               en: "Qubit-Hamiltonian vs CASCI cross-check (real run)" },
+      head: { ru: ["Система", "Активное пр-во", "Кубиты", "|Δ| vs CASCI, ккал/моль"],
+              en: ["System", "Active space", "Qubits", "|Δ| vs CASCI, kcal/mol"] },
+      rows: [
+        ["H₂", "CAS(2e,2o)", "4", "8.4 × 10⁻¹³"],
+        ["LiH", "CAS(2e,3o)", "6", "&lt; 10⁻¹² (машинный ноль)"],
+        ["N₂", "CAS(6e,6o)", "12", "5.4 × 10⁻⁹"]
+      ]
+    },
+    figures: []
+  },
+
+  /* ---------------------------------------------------------------- */
+  {
+    id: "n2-bench",
+    date: "2026-06",
+    stage: { ru: "Этап 2", en: "Stage 2" },
     title: { ru: "Честный калькулятор: разрыв N≡N и срыв классики-одиночки",
              en: "An honest calculator: breaking N≡N and the single-reference collapse" },
     simple: {
@@ -118,9 +155,58 @@ const ENTRIES = [
 
   /* ---------------------------------------------------------------- */
   {
+    id: "mr",
+    date: "2026-06",
+    stage: { ru: "Этап 3", en: "Stage 3" },
+    title: { ru: "Сколько здесь мультиреференсности? Измеряем напрямую",
+             en: "How multireference is it? Measuring it directly" },
+    simple: {
+      ru: `<p>«Классике-одиночке нельзя верить» — звучит как мнение. Сделаем из этого <strong>число</strong>.</p>
+           <p>В простой молекуле орбитали либо заполнены (2 электрона), либо пусты (0). Когда связь N≡N рвётся, они становятся «полупустыми» (≈1) — и значит, никакая одна «картинка» молекулу не описывает. Мы считаем индикатор <strong>N_u</strong> — число эффективно неспаренных электронов (0 = идеальная одна картинка).</p>
+           <p><strong>Результат (реальный CASSCF):</strong> у равновесия N_u = <strong>0.53</strong> (почти одна картинка — поэтому CCSD(T) там и работает). При растяжении N_u растёт до <strong>5.47</strong> — то есть почти все 6 связывающих электронов «расцепляются» (три связи разорваны). Вот <em>измеренная</em> причина, почему классика-одиночка врёт — и почему FeMoco, где железо-серные центры живут в таком режиме <em>постоянно</em>, так сложен.</p>`,
+      en: `<p>"You can't trust single-reference classical methods" sounds like an opinion. Let's turn it into a <strong>number</strong>.</p>
+           <p>In a simple molecule orbitals are either full (2 electrons) or empty (0). When N≡N breaks they become "half-full" (≈1) — meaning no single "picture" describes the molecule. We compute an indicator <strong>N_u</strong> — the number of effectively unpaired electrons (0 = a perfect single picture).</p>
+           <p><strong>Result (real CASSCF):</strong> at equilibrium N_u = <strong>0.53</strong> (nearly one picture — which is why CCSD(T) works there). On stretching, N_u rises to <strong>5.47</strong> — almost all 6 bonding electrons "uncouple" (three bonds broken). This is the <em>measured</em> reason single-reference fails — and why FeMoco, whose iron–sulfur centres live in this regime <em>permanently</em>, is so hard.</p>`
+    },
+    tech: {
+      ru: `<p>Прямая мера статической корреляции — натуральные орбитальные заселённости (NOON) активного пространства из 1-РДМ CASSCF(6,6)/cc-pVDZ, и индикатор Хэда-Гордона N<sub>u</sub> = Σᵢ nᵢ(2−nᵢ).</p>
+           <ul>
+             <li><strong>R = 1.10 Å:</strong> NOON ≈ {1.98, 1.94, 1.94, 0.06, 0.06, 0.02}, N<sub>u</sub> = <strong>0.53</strong> — почти замкнутая оболочка; динамическая корреляция доминирует, CCSD(T) надёжен.</li>
+             <li><strong>R = 1.60 Å:</strong> {1.91, 1.73, 1.73, 0.27, 0.27, 0.09}, N<sub>u</sub> = <strong>2.24</strong> — заселённости поплыли.</li>
+             <li><strong>R = 2.20 Å:</strong> {1.46, 1.16, 1.16, 0.84, 0.84, 0.54}, N<sub>u</sub> = <strong>5.47</strong> ≈ 6 неспаренных = три разорванные пары σ+2π. Истинно многоконфигурационный режим.</li>
+           </ul>
+           <p>Рост N<sub>u</sub> 0.53 → 5.47 количественно объясняет срыв RHF/CCSD(T) (Этап 2). Центры Fe-S в FeMoco сидят в высоком-N<sub>u</sub> режиме постоянно — отсюда ошибки спиновых зазоров DFT до ~1 эВ и потребность в большом активном пространстве (→ VQE). Это и мотивирует масштаб CAS(54,54).</p>`,
+      en: `<p>The direct measure of static correlation — natural-orbital occupation numbers (NOON) of the active space from the CASSCF(6,6)/cc-pVDZ 1-RDM, and the Head-Gordon indicator N<sub>u</sub> = Σᵢ nᵢ(2−nᵢ).</p>
+           <ul>
+             <li><strong>R = 1.10 Å:</strong> NOON ≈ {1.98, 1.94, 1.94, 0.06, 0.06, 0.02}, N<sub>u</sub> = <strong>0.53</strong> — nearly closed-shell; dynamic correlation dominates, CCSD(T) reliable.</li>
+             <li><strong>R = 1.60 Å:</strong> {1.91, 1.73, 1.73, 0.27, 0.27, 0.09}, N<sub>u</sub> = <strong>2.24</strong> — occupations spreading.</li>
+             <li><strong>R = 2.20 Å:</strong> {1.46, 1.16, 1.16, 0.84, 0.84, 0.54}, N<sub>u</sub> = <strong>5.47</strong> ≈ 6 unpaired = three broken pairs (σ+2π). Genuinely multiconfigurational.</li>
+           </ul>
+           <p>The growth N<sub>u</sub> 0.53 → 5.47 quantitatively explains the RHF/CCSD(T) collapse (Stage 2). FeMoco's Fe-S centres sit in the high-N<sub>u</sub> regime permanently — hence DFT spin-gap errors up to ~1 eV and the need for a large active space (→ VQE). This is what motivates the CAS(54,54) scale.</p>`
+    },
+    table: {
+      title: { ru: "Натуральные заселённости активного пространства N₂ — CASSCF(6,6)/cc-pVDZ",
+               en: "N₂ active-space natural occupations — CASSCF(6,6)/cc-pVDZ" },
+      head: { ru: ["R (Å)", "Заселённости 6 орбиталей", "N_u (неспаренные e⁻)"],
+              en: ["R (Å)", "Occupations of 6 orbitals", "N_u (unpaired e⁻)"] },
+      rows: [
+        ["1.10", "1.98 · 1.94 · 1.94 · 0.06 · 0.06 · 0.02", "0.53"],
+        ["1.60", "1.91 · 1.73 · 1.73 · 0.27 · 0.27 · 0.09", "2.24"],
+        ["2.20", "1.46 · 1.16 · 1.16 · 0.84 · 0.84 · 0.54", "5.47"]
+      ]
+    },
+    figures: [
+      { src: "assets/femoco/n2_noon.png",
+        caption: { ru: "Натуральные заселённости CAS(6,6): от {2,2,2,0,0,0} (одна картинка) у равновесия к {1,1,…} при разрыве N≡N. N_u 0.53→5.47. Реальный CASSCF.",
+                   en: "CAS(6,6) natural occupations: from {2,2,2,0,0,0} (one picture) at equilibrium to {1,1,…} as N≡N breaks. N_u 0.53→5.47. Real CASSCF." } }
+    ]
+  },
+
+  /* ---------------------------------------------------------------- */
+  {
     id: "scaling",
     date: "2026-06",
-    stage: { ru: "Этап 2", en: "Stage 2" },
+    stage: { ru: "Этап 4", en: "Stage 4" },
     title: { ru: "Масштаб задачи и где стена: путь к CAS(54,54)",
              en: "Problem size and where the wall is: the road to CAS(54,54)" },
     simple: {
