@@ -245,6 +245,21 @@
     const figs = el("div", "mf-figs");
     figs.appendChild(figure(t.molecules_png, "molecules", t.id));
     figs.appendChild(figure(t.descriptor_png, "descriptor", t.id));
+    // optional 3rd figure by convention: NN_<name>_quantum_path.png — appended only
+    // if the file actually loads (most tabs have none; it self-removes on 404).
+    const qpFile = t.molecules_png && t.molecules_png.replace(/_molecules\.png$/i, "_quantum_path.png");
+    if (qpFile && qpFile !== t.molecules_png) {
+      const qf = el("figure", "mf-figure");
+      const qi = el("img");
+      qi.src = IMG_DIR + qpFile;
+      qi.loading = "lazy";
+      qi.alt = "Путь к квантовому преимуществу";
+      qi.addEventListener("error", () => qf.remove());
+      qf.appendChild(qi);
+      qf.appendChild(el("figcaption", null,
+        "Путь к квантовому преимуществу: предел DFT+U и рост активного пространства (иллюстративно)"));
+      figs.appendChild(qf);
+    }
     view.appendChild(figs);
 
     // 7. roadmap
