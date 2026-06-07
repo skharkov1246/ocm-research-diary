@@ -204,9 +204,55 @@ const ENTRIES = [
 
   /* ---------------------------------------------------------------- */
   {
-    id: "scaling",
+    id: "vqe-conv",
     date: "2026-06",
     stage: { ru: "Этап 4", en: "Stage 4" },
+    title: { ru: "VQE в деле: сходимость к точному ответу",
+             en: "VQE at work: convergence to the exact answer" },
+    simple: {
+      ru: `<p>Мы утверждали, что квантовый алгоритм (VQE) воспроизводит точный ответ. Вот как это выглядит «в динамике».</p>
+           <p>ADAPT-VQE собирает свою квантовую схему <em>оператор за оператором</em>, и мы следим, как энергия падает от стартовой ошибки ~40 ккал/моль (уровень простейшего приближения) вниз к <strong>химической точности (~1 ккал/моль)</strong> на равновесной N₂.</p>
+           <p>Маленькое пространство (CAS(4,4), 8 кубитов) доходит за <strong>19 шагов / 16 с</strong>; большее (CAS(6,6), 12 кубитов) — за <strong>52 шага / 7 мин</strong>. Тот же результат, но заметно дороже. Это и есть квантовый метод, работающий на настоящей молекуле (пока на симуляторе) — и наглядный намёк, <em>почему</em> дорога к FeMoco требует и больше кубитов, и лучшего железа.</p>`,
+      en: `<p>We claimed the quantum algorithm (VQE) reproduces the exact answer. Here is what that looks like "in motion".</p>
+           <p>ADAPT-VQE builds its quantum circuit <em>operator by operator</em>, and we watch the energy fall from a starting error of ~40 kcal/mol (the simplest-approximation level) down to <strong>chemical accuracy (~1 kcal/mol)</strong> at the N₂ equilibrium.</p>
+           <p>The small space (CAS(4,4), 8 qubits) gets there in <strong>19 steps / 16 s</strong>; the larger one (CAS(6,6), 12 qubits) in <strong>52 steps / 7 min</strong>. Same destination, markedly more expensive. This is the quantum method working on a real molecule (on a simulator for now) — and a vivid hint of <em>why</em> the road to FeMoco needs both more qubits and better hardware.</p>`
+    },
+    tech: {
+      ru: `<p>ADAPT-VQE (пул синглетов+дублетов возбуждений), бэкенд lightning.qubit, cc-pVDZ, N₂ при R=1.10 Å. Перед запуском кубитный гамильтониан сверен с CASCI (&lt;10⁻³ ккал/моль).</p>
+           <ul>
+             <li><strong>CAS(4e,4o) / 8 кубитов:</strong> ошибка vs CASCI 40.3 → <strong>1.07</strong> ккал/моль, 19 операторов, 16 с (сошёлся по градиенту).</li>
+             <li><strong>CAS(6e,6o) / 12 кубитов:</strong> 42.7 → <strong>1.21</strong> ккал/моль, 52 оператора, 416 с (сошёлся).</li>
+           </ul>
+           <p>Оба выходят на уровень химической точности; остаточные ~1 ккал/моль — это предел пула S+D (не полный FCI), и у равновесия он мал (согласуется с низким N_u, Этап 3 — при растяжении было бы хуже). Рост 8→12 кубитов: ×2.7 операторов и ×26 по времени стены — это предвестие масштабирования (Этап 5) и причина, по которой полный FeMoco требует отказоустойчивого железа, а не симулятора.</p>`,
+      en: `<p>ADAPT-VQE (singles+doubles excitation pool), lightning.qubit backend, cc-pVDZ, N₂ at R=1.10 Å. The qubit Hamiltonian is cross-checked vs CASCI (&lt;10⁻³ kcal/mol) before each run.</p>
+           <ul>
+             <li><strong>CAS(4e,4o) / 8 qubits:</strong> error vs CASCI 40.3 → <strong>1.07</strong> kcal/mol, 19 operators, 16 s (gradient-converged).</li>
+             <li><strong>CAS(6e,6o) / 12 qubits:</strong> 42.7 → <strong>1.21</strong> kcal/mol, 52 operators, 416 s (converged).</li>
+           </ul>
+           <p>Both reach the chemical-accuracy ballpark; the residual ~1 kcal/mol is the S+D pool limit (not full FCI), and at equilibrium it is small (consistent with low N_u, Stage 3 — stretching would be worse). The 8→12 qubit growth: ×2.7 operators and ×26 wall-time — a foretaste of the scaling (Stage 5) and why the full FeMoco needs fault-tolerant hardware, not a simulator.</p>`
+    },
+    table: {
+      title: { ru: "Сходимость ADAPT-VQE на N₂ (R=1.10 Å, cc-pVDZ) — реальный прогон",
+               en: "ADAPT-VQE convergence on N₂ (R=1.10 Å, cc-pVDZ) — real run" },
+      head: { ru: ["Активное пр-во", "Кубиты", "Операторов", "Время", "Итог vs CASCI"],
+              en: ["Active space", "Qubits", "Operators", "Wall time", "Final vs CASCI"] },
+      rows: [
+        ["CAS(4e,4o)", "8", "19", "16 с", "1.07 ккал/моль"],
+        ["CAS(6e,6o)", "12", "52", "416 с", "1.21 ккал/моль"]
+      ]
+    },
+    figures: [
+      { src: "assets/femoco/n2_vqe_convergence.png",
+        caption: { ru: "ADAPT-VQE сходится к точному CASCI на N₂: от ~40 ккал/моль к ~1 ккал/моль. Большое пространство дороже. Реальный прогон (lightning.qubit).",
+                   en: "ADAPT-VQE converging to exact CASCI on N₂: from ~40 to ~1 kcal/mol. The larger space costs more. Real run (lightning.qubit)." } }
+    ]
+  },
+
+  /* ---------------------------------------------------------------- */
+  {
+    id: "scaling",
+    date: "2026-06",
+    stage: { ru: "Этап 5", en: "Stage 5" },
     title: { ru: "Масштаб задачи и где стена: путь к CAS(54,54)",
              en: "Problem size and where the wall is: the road to CAS(54,54)" },
     simple: {
@@ -244,6 +290,88 @@ const ENTRIES = [
         caption: { ru: "Реальные измерения: размер точной задачи и стоимость растут с активным пространством; FeMoco CAS(54,54) ≈10³⁰ детерминантов (108 кубитов) — за стеной классики. НЕ заявление о квантовом превосходстве.",
                    en: "Real measurements: exact-problem size and cost grow with the active space; FeMoco CAS(54,54) ≈10³⁰ determinants (108 qubits) — beyond the classical wall. NOT a quantum-advantage claim." } }
     ]
+  },
+
+  /* ---------------------------------------------------------------- */
+  {
+    id: "thermo",
+    date: "2026-06",
+    stage: { ru: "Этап 6", en: "Stage 6" },
+    title: { ru: "Что классика берёт легко: термодинамика N₂ + 3H₂ → 2NH₃",
+             en: "What classical methods nail: the thermodynamics of N₂ + 3H₂ → 2NH₃" },
+    simple: {
+      ru: `<p>Важный честный контрапункт ко всему дневнику. Сама реакция «азот + водород → аммиак» классике <strong>вполне по силам</strong>.</p>
+           <p>Мы посчитали её энергию обычным золотым стандартом (CCSD(T)): ответ устойчив и улучшается с качеством базиса. Почему здесь легко, а разрыв N≡N (Этап 2) был тяжёл? Потому что <em>исходники и продукты</em> (N₂, H₂, NH₃) — спокойные, замкнутооболочечные молекулы у равновесия: их описывает одна «картинка» (малый N_u). Тяжёл — <em>путь между ними</em>: каталитические интермедиаты на железе, где связи наполовину разорваны.</p>
+           <p><strong>Вывод:</strong> классика отлично берёт «пункт назначения». Квантово-трудна не термодинамика, а <strong>механизм катализа</strong> — именно туда и смотрим мы (и природа через FeMoco).</p>`,
+      en: `<p>An important, honest counterpoint to the whole diary. The overall reaction "nitrogen + hydrogen → ammonia" is <strong>well within classical reach</strong>.</p>
+           <p>We computed its energy with the usual gold standard (CCSD(T)): the answer is stable and improves with basis quality. Why is this easy when breaking N≡N (Stage 2) was hard? Because the <em>reactants and products</em> (N₂, H₂, NH₃) are calm, closed-shell molecules at equilibrium — one "picture" describes them (small N_u). What is hard is the <em>road between them</em>: the catalytic intermediates on iron where bonds are half-broken.</p>
+           <p><strong>Takeaway:</strong> classical methods nail the "destination". The quantum-hard part is not the thermodynamics but the <strong>catalytic mechanism</strong> — exactly where we (and nature, via FeMoco) look.</p>`
+    },
+    tech: {
+      ru: `<p>CCSD(T) одноточечно на фиксированных экспериментальных геометриях (H₂ 0.7414 Å; N₂ 1.0977 Å; NH₃ r=1.012 Å, ∠HNH=106.7°). Электронная энергия реакции ΔE = 2E(NH₃) − E(N₂) − 3E(H₂):</p>
+           <ul>
+             <li><strong>cc-pVTZ:</strong> RHF −33.5; MP2 −36.9; CCSD −39.5; <strong>CCSD(T) −37.4</strong> ккал/моль.</li>
+             <li><strong>cc-pVDZ:</strong> CCSD(T) −24.7 ккал/моль — заметно недосходится по базису (~13 ккал/моль неполнота); честная иллюстрация важности базиса.</li>
+           </ul>
+           <p>Иерархия RHF→MP2→CCSD→CCSD(T) ведёт себя нормально (без расходимостей) — значит, равновесные молекулы однодетерминантны (согласуется с N_u=0.53 для N₂, Этап 3). Наша ΔE — <em>бесколебательная электронная</em> энергия; экспериментальная ΔH°₂₉₈ = −21.9 ккал/моль включает ZPE+тепловые, поэтому электронная величина закономерно отрицательнее на ≈ΔZPE (у NH₃ велика энергия нулевых колебаний N–H). Это не ошибка метода. <strong>Мораль:</strong> для термодинамики достаточно классического CC; мультиреференсная трудность (и аргумент за квант) живёт в переходных состояниях катализа, а не в стабильных конечных точках.</p>`,
+      en: `<p>CCSD(T) single points at fixed experimental geometries (H₂ 0.7414 Å; N₂ 1.0977 Å; NH₃ r=1.012 Å, ∠HNH=106.7°). Electronic reaction energy ΔE = 2E(NH₃) − E(N₂) − 3E(H₂):</p>
+           <ul>
+             <li><strong>cc-pVTZ:</strong> RHF −33.5; MP2 −36.9; CCSD −39.5; <strong>CCSD(T) −37.4</strong> kcal/mol.</li>
+             <li><strong>cc-pVDZ:</strong> CCSD(T) −24.7 kcal/mol — markedly basis-underconverged (~13 kcal/mol incompleteness); an honest illustration of basis sensitivity.</li>
+           </ul>
+           <p>The RHF→MP2→CCSD→CCSD(T) hierarchy behaves normally (no divergence) — i.e. the equilibrium species are single-reference (consistent with N_u=0.53 for N₂, Stage 3). Our ΔE is the <em>vibrationless electronic</em> energy; the experimental ΔH°₂₉₈ = −21.9 kcal/mol includes ZPE+thermal, so the electronic value is correctly more negative by ≈ΔZPE (NH₃ has large N–H zero-point energy). This is not a method error. <strong>Moral:</strong> classical CC suffices for the thermodynamics; the multireference difficulty (the case for quantum) lives in the catalytic transition states, not the stable end-points.</p>`
+    },
+    table: {
+      title: { ru: "Энергия реакции N₂+3H₂→2NH₃ (ккал/моль) — реальный CCSD(T) и др.",
+               en: "Reaction energy N₂+3H₂→2NH₃ (kcal/mol) — real CCSD(T) and others" },
+      head: { ru: ["Базис", "RHF", "MP2", "CCSD", "CCSD(T)"],
+              en: ["Basis", "RHF", "MP2", "CCSD", "CCSD(T)"] },
+      rows: [
+        ["cc-pVDZ", "−32.0", "−24.6", "−27.4", "−24.7"],
+        ["cc-pVTZ", "−33.5", "−36.9", "−39.5", "−37.4"]
+      ]
+    },
+    figures: [
+      { src: "assets/femoco/nh3_thermo.png",
+        caption: { ru: "Электронная ΔE реакции синтеза аммиака (CCSD(T) и др., cc-pVDZ/TZ). Классика берёт термодинамику; ΔE отрицательнее экспериментальной ΔH₂₉₈ на ≈ZPE. Реальный расчёт.",
+                   en: "Electronic ΔE of ammonia synthesis (CCSD(T) etc., cc-pVDZ/TZ). Classical methods handle the thermodynamics; ΔE is more negative than experimental ΔH₂₉₈ by ≈ZPE. Real computation." } }
+    ]
+  },
+
+  /* ---------------------------------------------------------------- */
+  {
+    id: "plan",
+    date: "2026-06",
+    stage: { ru: "Этап 7", en: "Stage 7" },
+    title: { ru: "Куда дальше: к железо-серному кластеру (план)",
+             en: "Where next: toward the iron–sulfur cluster (a plan)" },
+    simple: {
+      ru: `<p>До сих пор мы работали с самой молекулой N₂ — чтобы отладить инструменты и показать, <em>почему</em> тройная связь трудна. Следующий честный шаг к FeMoco — посадить N₂ на <strong>железо</strong>.</p>
+           <p>Вся сложность FeMoco — от его железных центров: открытые оболочки, множество близких по энергии спиновых состояний. Поэтому мы построим небольшую <em>считаемую</em> модель с железом, которая связывает N₂, и прогоним тот же конвейер (классический эталон + VQE на симуляторе), используя AWS для тяжёлых частей.</p>
+           <p>Полный FeMoco (10³⁰ — классически невозможно) мы изображать не будем. Идём к нему честно, по одной посильной модели за раз, и записываем, что работает, а что нет.</p>`,
+      en: `<p>So far we worked with the N₂ molecule itself — to debug the tools and show <em>why</em> the triple bond is hard. The next honest step toward FeMoco is to put N₂ on <strong>iron</strong>.</p>
+           <p>All of FeMoco's difficulty comes from its iron centres: open shells, many near-degenerate spin states. So we will build a small, <em>computable</em> iron model that binds N₂ and run the same pipeline (classical reference + VQE on a simulator), using AWS for the heavy parts.</p>
+           <p>We will not pretend to do the full FeMoco (10³⁰ — classically impossible). We climb toward it honestly, one tractable model at a time, logging what works and what doesn't.</p>`
+    },
+    tech: {
+      ru: `<p><strong>План следующего этапа</strong> (это план, не результаты — числа заполнит реальный прогон):</p>
+           <ul>
+             <li><strong>Модель:</strong> открытооболочечный Fe–N₂ фрагмент (моноядерный Fe-центр или малый [2Fe–2S] кластер) — ROHF/CASSCF-эталон, активное пространство охватывает Fe 3d + π/π* азота, ориентир CAS(10–16) → 20–32 кубита.</li>
+             <li><strong>Дескриптор:</strong> энергия связывания N₂ и барьер первого гидрирования; порядок спиновых состояний (там DFT ошибается до ~1 эВ — наш реальный edge).</li>
+             <li><strong>Железо:</strong> AWS lightning.qubit (где важны RAM/ядра). Ограничения честно: квота ~16 vCPU (один c7i.4xlarge зараз); statevector-VQE реалистичен до ~24–28 кубитов, дальше — приближения (фрагментация/embedding).</li>
+             <li><strong>Контракт прежний:</strong> кубитный гамильтониан сверяется с CASCI; всё схематичное помечается; неудачи показываем.</li>
+           </ul>
+           <p>Это переводит дневник от «почему трудно» (N₂) к «как мы реально считаем катализатор» (Fe). Следующая запись будет с реальными числами модели.</p>`,
+      en: `<p><strong>Next-stage plan</strong> (a plan, not results — numbers will be filled by a real run):</p>
+           <ul>
+             <li><strong>Model:</strong> an open-shell Fe–N₂ fragment (a mononuclear Fe centre or a small [2Fe–2S] cluster) — ROHF/CASSCF reference, active space spanning Fe 3d + N₂ π/π*, target CAS(10–16) → 20–32 qubits.</li>
+             <li><strong>Descriptor:</strong> N₂ binding energy and first-hydrogenation barrier; spin-state ordering (where DFT errs by up to ~1 eV — our real edge).</li>
+             <li><strong>Hardware:</strong> AWS lightning.qubit (where RAM/cores matter). Constraints stated honestly: ~16 vCPU quota (one c7i.4xlarge at a time); statevector VQE realistic to ~24–28 qubits, beyond which approximations (fragmentation/embedding) are needed.</li>
+             <li><strong>Same contract:</strong> the qubit Hamiltonian is checked against CASCI; anything schematic is labelled; failures are shown.</li>
+           </ul>
+           <p>This moves the diary from "why it's hard" (N₂) to "how we actually compute the catalyst" (Fe). The next entry will carry real model numbers.</p>`
+    },
+    figures: []
   }
 ];
 
