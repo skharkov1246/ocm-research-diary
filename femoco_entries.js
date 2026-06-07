@@ -372,6 +372,66 @@ const ENTRIES = [
            <p>This moves the diary from "why it's hard" (N₂) to "how we actually compute the catalyst" (Fe). The next entry will carry real model numbers.</p>`
     },
     figures: []
+  },
+
+  /* ---------------------------------------------------------------- */
+  {
+    id: "fe-spin",
+    date: "2026-06",
+    stage: { ru: "Этап 8", en: "Stage 8" },
+    title: { ru: "Железо вблизи: даже один атом Fe уже труден",
+             en: "Iron up close: even a single Fe atom is already hard" },
+    simple: {
+      ru: `<p>Начинаем железную часть с самого простого случая — <strong>одного атома железа</strong> — чтобы откалибровать методы перед кластером. Уже здесь начинается то, из-за чего FeMoco — фронтир.</p>
+           <p>Мы посчитали энергетическую щель между основным состоянием железа (квинтет ⁵D — это эксперимент, NIST) и другими спиновыми состояниями, четырьмя способами:</p>
+           <ul>
+             <li><strong>ROHF</strong> (одна картинка): <em>качественно врёт</em> — кладёт септет даже ниже основного состояния (переоценивает высокий спин), а триплет завышает на ~5.7 эВ.</li>
+             <li><strong>DFT</strong> (PBE и B3LYP): разумно, но два функционала <em>расходятся</em> (1.18 против 1.36 эВ) — и какой прав, из самого DFT не понять.</li>
+             <li><strong>Минимальный CASSCF</strong>: 0.39 эВ — но <em>занижает</em>, потому что маленькое активное пространство недоучитывает корреляцию.</li>
+           </ul>
+           <p>Ни один дешёвый метод не надёжен даже на <em>одном</em> атоме. В FeMoco таких атомов <strong>семь</strong>, и они магнитно связаны. Вот почему это передний край.</p>`,
+      en: `<p>We begin the iron part with the simplest case — a <strong>single iron atom</strong> — to calibrate methods before the cluster. Even here, what makes FeMoco a frontier begins.</p>
+           <p>We computed the energy gap between iron's ground state (quintet ⁵D — experimental, NIST) and other spin states, four ways:</p>
+           <ul>
+             <li><strong>ROHF</strong> (one picture): <em>qualitatively wrong</em> — it puts the septet even below the ground state (over-favours high spin), and overshoots the triplet by ~5.7 eV.</li>
+             <li><strong>DFT</strong> (PBE and B3LYP): reasonable, but the two functionals <em>disagree</em> (1.18 vs 1.36 eV) — and DFT alone can't tell you which is right.</li>
+             <li><strong>Minimal CASSCF</strong>: 0.39 eV — but it <em>underestimates</em>, because a small active space misses correlation.</li>
+           </ul>
+           <p>No cheap method is reliable on even <em>one</em> atom. FeMoco has <strong>seven</strong>, magnetically coupled. That is why it is the frontier.</p>`
+    },
+    tech: {
+      ru: `<p>Атом Fe, def2-SVP. Щель триплет − квинтет (³F − ⁵D), реальный расчёт:</p>
+           <ul>
+             <li><strong>ROHF: +5.73 эВ</strong>, и септет лежит на 0.18 эВ <em>ниже</em> квинтета — одно-детерминантный метод качественно неверно упорядочивает спины (завышает высокоспиновые).</li>
+             <li><strong>CASSCF(8e,6o): +0.39 эВ</strong> — минимальное активное пространство (3d+4s) без динамической корреляции занижает; надёжная щель требует большего CAS + CASPT2/NEVPT2.</li>
+             <li><strong>UKS-PBE +1.18, UKS-B3LYP +1.36 эВ</strong> — функционалы расходятся; «правильного» ответа из DFT не извлечь.</li>
+           </ul>
+           <p><strong>Честно о подводном камне:</strong> наш первый, наивный CASSCF (AVAS отдельно на каждое спиновое состояние) дал <em>нефизичный</em> результат — триплет на 2.78 эВ ниже квинтета — потому что AVAS выбирал <em>разные</em> активные пространства для разных состояний. Починили принудительным единым CAS(8e,6o) + спин-проекцией (fix_spin). Сам факт, что корректную мультиреференсную постановку для железа легко испортить, — часть ответа на вопрос, почему FeMoco так тяжёл. Разброс в несколько эВ на одном атоме, помноженный на 7 обменно-связанных Fe, — суть задачи; отсюда и потребность в большом активном пространстве (→ VQE).</p>`,
+      en: `<p>Fe atom, def2-SVP. Triplet − quintet gap (³F − ⁵D), real computation:</p>
+           <ul>
+             <li><strong>ROHF: +5.73 eV</strong>, and the septet lies 0.18 eV <em>below</em> the quintet — the single-determinant method qualitatively mis-orders the spins (over-stabilizes high spin).</li>
+             <li><strong>CASSCF(8e,6o): +0.39 eV</strong> — the minimal active space (3d+4s) without dynamic correlation underestimates; a reliable gap needs a larger CAS + CASPT2/NEVPT2.</li>
+             <li><strong>UKS-PBE +1.18, UKS-B3LYP +1.36 eV</strong> — the functionals disagree; DFT alone can't yield the "right" answer.</li>
+           </ul>
+           <p><strong>An honest pitfall:</strong> our first, naive CASSCF (AVAS run separately per spin state) gave an <em>unphysical</em> result — the triplet 2.78 eV below the quintet — because AVAS selected <em>different</em> active spaces for different states. Fixed by forcing a single consistent CAS(8e,6o) + spin projection (fix_spin). That a correct multireference setup for iron is easy to get wrong is itself part of why FeMoco is so hard. A multi-eV scatter on one atom, multiplied over 7 exchange-coupled Fe, is the heart of the problem — hence the need for a large active space (→ VQE).</p>`
+    },
+    table: {
+      title: { ru: "Спиновая щель атома Fe (триплет − квинтет), эВ — реальный расчёт (def2-SVP)",
+               en: "Fe-atom spin gap (triplet − quintet), eV — real computation (def2-SVP)" },
+      head: { ru: ["Метод", "³F − ⁵D (эВ)", "Комментарий"],
+              en: ["Method", "³F − ⁵D (eV)", "Comment"] },
+      rows: [
+        ["ROHF", "+5.73", "качественно неверно (септет ниже ⁵D)"],
+        ["CASSCF(8,6)", "+0.39", "занижает (мало корреляции)"],
+        ["DFT PBE", "+1.18", "функционал-зависимо"],
+        ["DFT B3LYP", "+1.36", "функционал-зависимо"]
+      ]
+    },
+    figures: [
+      { src: "assets/femoco/fe_spin.png",
+        caption: { ru: "Спиновые состояния атома Fe по четырём методам (отн. квинтета): ROHF врёт качественно, DFT расходится, минимальный CASSCF занижает. Реальный расчёт (def2-SVP).",
+                   en: "Fe-atom spin states by four methods (vs quintet): ROHF qualitatively wrong, DFT scatters, minimal CASSCF underestimates. Real computation (def2-SVP)." } }
+    ]
   }
 ];
 
