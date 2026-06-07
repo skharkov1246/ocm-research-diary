@@ -259,6 +259,45 @@
               : `<span class="mf-status-upd">журнал пуст</span>`);
     return s;
   }
+  /* one operations entry — expandable (long) or a flat row (short). Interactive. */
+  function opItem(u) {
+    const full = u.title || "";
+    const long = full.length > 96;
+    const lead = long ? full.slice(0, 92).trim() + "…" : full;
+    const headHtml = `<span class="mf-op-date">${u.date}</span>` +
+      (u.tag ? `<span class="mf-op-tag">${u.tag}</span>` : "") +
+      `<span class="mf-op-lead">${lead}</span>`;
+    if (!long) {
+      const row = el("div", "mf-op mf-op-flat", headHtml);
+      if (u.tag) row.dataset.stage = u.tag;
+      return row;
+    }
+    const d = el("details", "mf-op");
+    if (u.tag) d.dataset.stage = u.tag;
+    d.appendChild(el("summary", "mf-op-head", headHtml));
+    d.appendChild(el("div", "mf-op-body", full));
+    return d;
+  }
+  /* stage filter chips for the full log */
+  function filterChips(view, ups) {
+    const stages = [...new Set(ups.map((u) => u.tag).filter(Boolean))];
+    if (stages.length < 2) return null;
+    const bar = el("div", "mf-filter");
+    const mk = (label, val) => {
+      const b = el("button", "mf-chip-btn" + (val === null ? " active" : ""), label);
+      b.type = "button";
+      b.addEventListener("click", () => {
+        bar.querySelectorAll(".mf-chip-btn").forEach((x) => x.classList.toggle("active", x === b));
+        view.querySelectorAll(".mf-feed-full .mf-op").forEach((op) => {
+          op.style.display = (val === null || op.dataset.stage === val) ? "" : "none";
+        });
+      });
+      return b;
+    };
+    bar.appendChild(mk("Все", null));
+    stages.forEach((s) => bar.appendChild(mk(s, s)));
+    return bar;
+  }
   function feedSection(t) {
     const ups = updatesFor(t);
     const sec = el("div", "mf-section");
@@ -272,13 +311,7 @@
     sec.appendChild(head);
     if (ups.length) {
       const list = el("div", "mf-feed");
-      ups.slice(0, 4).forEach((u) => {
-        const it = el("div", "mf-feed-item");
-        it.innerHTML = `<span class="mf-feed-date">${u.date}</span>` +
-          (u.tag ? `<span class="mf-feed-tag">${u.tag}</span>` : "") +
-          `<span class="mf-feed-title">${u.title}</span>`;
-        list.appendChild(it);
-      });
+      ups.slice(0, 4).forEach((u) => list.appendChild(opItem(u)));
       sec.appendChild(list);
     } else {
       sec.appendChild(el("p", "mf-empty", "Записи операций появятся здесь по мере работы — открой «Дневник операций»."));
@@ -390,14 +423,11 @@
       view.appendChild(head);
       const ups = updatesFor(t);
       if (ups.length) {
+        const chips = filterChips(view, ups);
+        if (chips) view.appendChild(chips);
+        view.appendChild(el("p", "mf-op-count", "Операций в журнале: " + ups.length + " · нажми запись, чтобы развернуть"));
         const list = el("div", "mf-feed mf-feed-full");
-        ups.forEach((u) => {
-          const it = el("div", "mf-feed-item");
-          it.innerHTML = `<span class="mf-feed-date">${u.date}</span>` +
-            (u.tag ? `<span class="mf-feed-tag">${u.tag}</span>` : "") +
-            `<span class="mf-feed-title">${u.title}</span>`;
-          list.appendChild(it);
-        });
+        ups.forEach((u) => list.appendChild(opItem(u)));
         view.appendChild(list);
       } else {
         view.appendChild(el("p", "mf-empty",

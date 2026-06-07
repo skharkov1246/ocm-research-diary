@@ -19,7 +19,7 @@
       "economics": {"tam_2035_busd": 120, "saving_busd_year": "10–20", "quantum_potential": 10, "catalyst_cost_share_pct": 30},
       "timeline": "2029–2032 (кластерные модели активных центров)",
       "first_clients": ["ADNOC", "Masdar", "электролизёрные OEM"],
-      "stage_progress": [1.0, 0.55, 0.3, 0.1, 0.0],
+      "stage_progress": [1.0, 0.65, 0.5, 0.1, 0.0],
       "molecules_png": "01_H2_electrocatalysis_molecules.png",
       "descriptor_png": "01_H2_electrocatalysis_descriptor.png",
       "updates": [
@@ -88,7 +88,7 @@
       "economics": {"tam_2035_busd": 380, "saving_busd_year": "5–15", "quantum_potential": 8, "catalyst_cost_share_pct": 4, "caveat": "Доля катализатора в себестоимости мала (~4%); экономический рычаг — не цена катализатора, а свойства полимера и выход. Феедсток (этилен) доминирует в costs."},
       "timeline": "2030–2034",
       "first_clients": ["Borouge", "SABIC", "НКНХ"],
-      "stage_progress": [1.0, 0.45, 0.2, 0.05, 0.0],
+      "stage_progress": [1.0, 0.5, 0.4, 0.05, 0.0],
       "molecules_png": "04_polyolefins_molecules.png",
       "descriptor_png": "04_polyolefins_descriptor.png",
       "updates": [
