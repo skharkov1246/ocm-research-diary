@@ -490,6 +490,53 @@ const ENTRIES = [
         caption: { ru: "N₂ на одиночном Fe: метастабильная активация в триплете (+0.028 Å, но +15.4 ккал/моль над фрагментами), квинтет диссоциирует; вертикальная спиновая щель DFT vs CASSCF. Реальный расчёт def2-SVP.",
                    en: "N₂ on a single Fe: metastable triplet activation (+0.028 Å, but +15.4 kcal/mol above fragments), quintet dissociates; vertical spin gap DFT vs CASSCF. Real def2-SVP computation." } }
     ]
+  },
+
+  /* ---------------------------------------------------------------- */
+  {
+    id: "vqe-24q",
+    date: "2026-06",
+    stage: { ru: "Этап 10", en: "Stage 10" },
+    title: { ru: "24-кубитный VQE катализатора: реальный масштаб и стена симулятора",
+             en: "24-qubit catalyst VQE: the real scale and the simulator wall" },
+    simple: {
+      ru: `<p>Берём каталитическое активное пространство Fe–N₂ (24 кубита, Этап 9) в сторону VQE — и впервые упираемся в масштаб «настоящего» катализатора.</p>
+           <p>Честные цифры этой задачи: квантовое состояние — это <strong>16.7 миллиона</strong> амплитуд (против 4096 у чистого N₂), точная задача — <strong>174 240</strong> конфигураций, а «ящик инструментов» VQE (операторы возбуждения) содержит <strong>1424</strong> штуки, и каждый шаг оптимизации перебирает их все. На одном классическом симуляторе это минуты-часы на шаг.</p>
+           <p>Наш метод работает — проверен на 12 кубитах (ошибка HF 42.7 → <strong>1.4 ккал/моль</strong>). Но на 24 кубитах <em>сама симуляция</em> становится узким местом — это ровно та «стена», которую призвано перешагнуть настоящее квантовое железо. Сам спуск VQE гоняем на AWS; прямо сейчас общая облачная квота занята соседними каталитическими проектами, поэтому он в очереди.</p>`,
+      en: `<p>We take the Fe–N₂ catalyst active space (24 qubits, Stage 9) toward VQE — and for the first time hit the scale of a "real" catalyst.</p>
+           <p>The honest numbers: the quantum state has <strong>16.7 million</strong> amplitudes (vs 4096 for bare N₂), the exact problem has <strong>174,240</strong> configurations, and the VQE "toolbox" of excitation operators holds <strong>1,424</strong>, every optimization step trying all of them. On one classical simulator that is minutes-to-hours per step.</p>
+           <p>Our method works — validated at 12 qubits (HF error 42.7 → <strong>1.4 kcal/mol</strong>). But at 24 qubits <em>the simulation itself</em> becomes the bottleneck — exactly the "wall" real quantum hardware is meant to cross. The VQE descent runs on AWS; right now the shared cloud quota is taken by sibling catalyst projects, so it is queued.</p>`
+    },
+    tech: {
+      ru: `<p>Активное пространство Fe 3d + N₂ 2p из Этапа 9 = <strong>CAS(16e,12o) → 24 кубита</strong> (спин-орбитали). Эталон — CASSCF(16,12) = −1371.036 Ha (триплет).</p>
+           <ul>
+             <li><strong>Размер:</strong> 174 240 детерминантов; вектор состояния 2²⁴ = 16 777 216 амплитуд (~256 МБ комплексных). Разреженная матрица гамильтониана на 24 кубитах в память не влезает — поэтому VQE считаем <em>без</em> неё, напрямую через adjoint по паули-гамильтониану на lightning.qubit.</li>
+             <li><strong>Пул ADAPT:</strong> 64 синглета + 1360 даблетов = <strong>1424</strong> оператора; один проход градиентов по пулу на 24 кубитах — минуты-часы.</li>
+             <li><strong>Метод валидирован</strong> (тот же не-разреженный путь, N₂ CAS(6,6)/12 кубитов): HF 42.7 → 1.4 ккал/моль за 30 операторов на lightning.qubit. Кубитный гамильтониан сверяется с CASCI (Этапы 1/4).</li>
+           </ul>
+           <p><strong>Статус честно:</strong> спуск VQE на 24 кубитах поставлен на AWS (c7i/r7i, lightning.qubit, авто-терминирование). Сейчас общая квота 16 vCPU полностью занята соседними агентами (полиолефины + H₂/NiO-VQE), поэтому запуск в очереди — обновлю запись числами спуска, как только освободится квота. Сам факт, что 24-кубитный VQE упирается в классический симулятор (1424-операторный пул × 16.7M-амплитудное состояние), — это и есть аргумент за переход к отказоустойчивому QPU; полный FeMoco (108 кубитов, Этап 5) — далеко за этой стеной.</p>`,
+      en: `<p>The Fe 3d + N₂ 2p active space from Stage 9 = <strong>CAS(16e,12o) → 24 qubits</strong> (spin-orbitals). Reference: CASSCF(16,12) = −1371.036 Ha (triplet).</p>
+           <ul>
+             <li><strong>Size:</strong> 174,240 determinants; state vector 2²⁴ = 16,777,216 amplitudes (~256 MB complex). The Hamiltonian sparse matrix does not fit in memory at 24 qubits — so we run VQE <em>without</em> it, directly via adjoint on the Pauli Hamiltonian on lightning.qubit.</li>
+             <li><strong>ADAPT pool:</strong> 64 singles + 1360 doubles = <strong>1,424</strong> operators; one gradient sweep over the pool at 24 qubits takes minutes-to-hours.</li>
+             <li><strong>Method validated</strong> (same non-sparse path, N₂ CAS(6,6)/12 qubits): HF 42.7 → 1.4 kcal/mol in 30 operators on lightning.qubit. The qubit Hamiltonian is cross-checked vs CASCI (Stages 1/4).</li>
+           </ul>
+           <p><strong>Status, honestly:</strong> the 24-qubit VQE descent is queued on AWS (c7i/r7i, lightning.qubit, auto-terminate). The shared 16-vCPU quota is currently fully used by sibling agents (polyolefins + H₂/NiO-VQE), so the launch is queued — I will update this entry with descent numbers once quota frees. That a 24-qubit VQE already strains a classical simulator (1,424-operator pool × 16.7M-amplitude state) is itself the argument for fault-tolerant QPUs; the full FeMoco (108 qubits, Stage 5) is far beyond this wall.</p>`
+    },
+    table: {
+      title: { ru: "24-кубитная задача Fe–N₂: ресурсный профиль (реальные числа)",
+               en: "24-qubit Fe–N₂ problem: resource profile (real numbers)" },
+      head: { ru: ["Величина", "Значение"], en: ["Quantity", "Value"] },
+      rows: [
+        ["Кубиты (CAS(16,12))", "24"],
+        ["Детерминантов (точная задача)", "174 240"],
+        ["Амплитуд вектора состояния (2²⁴)", "16 777 216  (~256 МБ)"],
+        ["Пул операторов ADAPT", "64 сингла + 1360 даблов = 1424"],
+        ["Эталон CASSCF(16,12)", "−1371.036 Ha"],
+        ["Метод проверен на N₂ (12 кубитов)", "HF 42.7 → 1.4 ккал/моль"]
+      ]
+    },
+    figures: []
   }
 ];
 
