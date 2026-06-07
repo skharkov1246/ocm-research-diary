@@ -5,10 +5,10 @@
    tabs share one schema, so one generic renderer fills the whole bar. Nothing on
    screen is invented; every value is read from the JSON.
 
-   Context-adaptive:
-     • standalone journal page (no diary)  → just the tabs, first one (H₂) active.
-     • mounted inside the OCM diary index   → adds a "Дневник" tab (tab 0) and
-       hides .hero/#toc/#diary/#glossary while a MatterForge tab is shown.
+   Structure:
+     • tab 0 = "Обзор" dashboard (project overview + per-direction stage progress) — the landing.
+     • tabs 1..N = the catalyst projects; each project keeps its own diary INSIDE its tab.
+       The OCM research diary (.hero/#toc/#diary/#glossary) is embedded in the "ocm" tab.
 
    Wrapped in an IIFE so its helpers ($/el/…) never collide with app.js, which
    declares its own globals of the same name in the shared classic-script scope.
@@ -22,6 +22,7 @@
   const CONTENT_URL = "assets/matterforge/matterforge_tabs_content.json";
   const IMG_DIR = "assets/matterforge/";
   const DIARY_ID = "__diary__";
+  const DASH = "__dashboard__"; // landing view: whole-project overview + progress
 
   /* figure captions are author-supplied (not in the JSON); generic default with
      a per-tab override for the H₂ OER ladder requested in the spec. */
@@ -66,9 +67,7 @@
     if (!TABS.length) return;
 
     const fromHash = location.hash.replace(/^#/, "");
-    const hasOcm = TABS.some((t) => t.id === "ocm");
-    active = TABS.some((t) => t.id === fromHash) ? fromHash
-           : (HAS_DIARY && hasOcm) ? "ocm" : TABS[0].id;
+    active = TABS.some((t) => t.id === fromHash) ? fromHash : DASH; // landing = dashboard
 
     // optional header/footer hooks on a standalone page
     const sub = $("#mf-subtitle"); if (sub) sub.textContent = DATA._meta?.project || "";
@@ -92,13 +91,14 @@
   function renderTabs() {
     const nav = $("#mf-tabs");
     nav.innerHTML = "";
+    nav.appendChild(tabButton(DASH, "var(--accent)", "📊 Обзор"));
     TABS.forEach((t) => nav.appendChild(tabButton(t.id, t.color, t.title)));
   }
 
   function selectTab(id) {
     if (active === id) return;
     active = id;
-    history.replaceState(null, "", "#" + id);
+    history.replaceState(null, "", id === DASH ? location.pathname + location.search : "#" + id);
     renderTabs();
     applyView();
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -106,11 +106,12 @@
 
   function applyView() {
     const view = $("#mf-view");
-    // OCM research diary is embedded INSIDE the "ocm" tab — shown below its summary panel.
+    // Dashboard is the landing; each project's diary lives inside its tab (OCM = .hero/#toc/#diary/#glossary).
     const showDiary = HAS_DIARY && active === "ocm";
     if (HAS_DIARY) diarySections().forEach((s) => { s.hidden = !showDiary; });
     view.hidden = false;
-    renderPanel(view, TABS.find((t) => t.id === active));
+    if (active === DASH) renderDashboard(view);
+    else renderPanel(view, TABS.find((t) => t.id === active));
   }
 
   /* current stage = first one not yet complete (else the last). */
@@ -215,6 +216,55 @@
     return wrap;
   }
 
+  function renderDashboard(view) {
+    const meta = DATA._meta || {};
+    const stages = meta.stage_model || [];
+    view.className = "mf-panel mf-dash";
+    view.style.removeProperty("--tab");
+    const totalTam = TABS.reduce((s, t) => s + (Number(t.economics && t.economics.tam_2035_busd) || 0), 0);
+
+    const head = el("div", "mf-head");
+    head.appendChild(el("h2", "mf-title-h", "Обзор проекта"));
+    head.appendChild(el("p", "mf-sub",
+      "Пять направлений квантовой разработки катализаторов и наш прогресс по этапам — от литературы до пилота с партнёром. Открой направление, чтобы увидеть детали и его дневник."));
+
+    const agg = el("div", "mf-dash-agg");
+    agg.innerHTML =
+      `<div class="mf-agg-item"><span class="mf-agg-n">${TABS.length}</span><span class="mf-agg-l">направления</span></div>` +
+      `<div class="mf-agg-item"><span class="mf-agg-n">$${totalTam} млрд</span><span class="mf-agg-l">суммарный TAM 2035</span></div>` +
+      `<div class="mf-agg-item"><span class="mf-agg-n">${stages.length}</span><span class="mf-agg-l">этапов до пилота</span></div>`;
+
+    const grid = el("div", "mf-dash-grid");
+    TABS.forEach((t) => {
+      const prog = t.stage_progress || [];
+      const cur = currentStageIndex(prog.length ? prog : [0]);
+      const c = el("button", "mf-dash-card");
+      c.type = "button";
+      c.style.setProperty("--tab", t.color);
+      c.addEventListener("click", () => selectTab(t.id));
+      const strip = prog.map((p, i) => {
+        const cls = p >= 1 ? "done" : i === cur ? "cur" : "";
+        return `<span class="mf-dash-seg ${cls}"><span style="width:${Math.round((p || 0) * 100)}%"></span></span>`;
+      }).join("");
+      const e = t.economics || {};
+      c.innerHTML =
+        `<div class="mf-dash-top"><span class="mf-dash-dot"></span><span class="mf-dash-name">${t.title}</span>` +
+        (t.composite != null ? `<span class="mf-dash-score">${t.composite}</span>` : "") + `</div>` +
+        `<div class="mf-dash-substage">Сейчас: <b>${stages[cur] || "—"}</b></div>` +
+        `<div class="mf-dash-strip">${strip}</div>` +
+        `<div class="mf-dash-meta"><span>TAM $${e.tam_2035_busd ?? "—"} млрд</span>` +
+        `<span>квант ${e.quantum_potential ?? "—"}/10</span><span>${t.timeline || ""}</span></div>`;
+      grid.appendChild(c);
+    });
+
+    view.innerHTML = "";
+    view.appendChild(head);
+    view.appendChild(agg);
+    view.appendChild(grid);
+    if (meta.honesty_note)
+      view.appendChild(el("p", "mf-disclaimer", `<strong>Честно:</strong> ${meta.honesty_note}`));
+  }
+
   function renderPanel(view, t) {
     const meta = DATA._meta || {};
     view.className = "mf-panel";
@@ -272,7 +322,7 @@
 
   window.addEventListener("hashchange", () => {
     const id = location.hash.replace(/^#/, "");
-    const next = TABS.some((t) => t.id === id) ? id : active;
+    const next = TABS.some((t) => t.id === id) ? id : DASH;
     if (next !== active) { active = next; renderTabs(); applyView(); }
   });
 

@@ -197,3 +197,32 @@
 @media (min-width: 761px) and (max-width: 980px) {
   .mf-econ { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ---------- dashboard (landing / project overview) ---------- */
+.mf-dash .mf-head { border-left: 0; padding-left: 0; }
+.mf-dash-agg { display: flex; gap: 26px; flex-wrap: wrap; margin: 2px 0 22px; }
+.mf-agg-item { display: flex; flex-direction: column; gap: 2px; }
+.mf-agg-n { font-size: 21px; font-weight: 800; color: var(--ink); line-height: 1.1; }
+.mf-agg-l { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
+
+.mf-dash-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.mf-dash-card {
+  --tab: var(--accent); text-align: left; cursor: pointer; font-family: var(--font);
+  background: linear-gradient(180deg, var(--card), var(--bg-soft));
+  border: 1px solid var(--line); border-top: 3px solid var(--tab);
+  border-radius: var(--radius); padding: 15px 18px 16px;
+  display: flex; flex-direction: column; gap: 9px; transition: all .15s ease;
+}
+.mf-dash-card:hover { border-color: var(--tab); box-shadow: 0 10px 28px rgba(0,0,0,.3); transform: translateY(-2px); }
+.mf-dash-top { display: flex; align-items: center; gap: 9px; }
+.mf-dash-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--tab); box-shadow: 0 0 8px var(--tab); flex: none; }
+.mf-dash-name { font-size: 14.5px; font-weight: 700; color: var(--ink); flex: 1; line-height: 1.25; }
+.mf-dash-score { font-size: 12px; font-weight: 800; color: var(--tab); border: 1px solid var(--tab); border-radius: 999px; padding: 2px 9px; flex: none; }
+.mf-dash-substage { font-size: 12.5px; color: var(--ink-soft); }
+.mf-dash-substage b { color: var(--ink); }
+.mf-dash-strip { display: flex; gap: 4px; margin-top: 1px; }
+.mf-dash-seg { flex: 1; height: 6px; background: #0c1322; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.mf-dash-seg > span { display: block; height: 100%; background: var(--tab); border-radius: 999px; }
+.mf-dash-seg.done > span { width: 100% !important; }
+.mf-dash-meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+@media (max-width: 640px) { .mf-dash-grid { grid-template-columns: 1fr; } }
