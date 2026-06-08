@@ -934,6 +934,37 @@ const ENTRIES = [
         caption: { ru: "Где заканчивается классическая точная диагонализация и реально нужен квантовый компьютер: точный комбинаторный рост числа детерминантов с размером активного пространства; честный порог ≈ 40 кубитов. Минимальная модель сегодня классически тривиальна — это НЕ заявление о квантовом превосходстве.",
                    en: "Where classical exact diagonalization ends and a quantum computer is genuinely needed: the exact combinatorial growth of the determinant space with active-space size; honest threshold ≈ 40 qubits. The minimal model is classically trivial today — NOT a quantum-advantage claim." } }
     ]
+  },
+
+  /* ---------------------------------------------------------------- */
+  {
+    id: "frontier-aws",
+    date: "2026-06-08",
+    accent: "#f6ad55",
+    stage: { ru: "Этап 14", en: "Stage 14" },
+    title: { ru: "Количественный error-bar: фронтир уехал на AWS",
+             en: "The quantitative error-bar: the frontier moved to AWS" },
+    simple: {
+      ru: `<p>В прошлой записи мы обещали посчитать точную величину «квантовой поправки» к селективности — и честно сказали, что для этого нужны две вещи: <strong>правильное переходное состояние</strong> (а не грубая прикидка) и <strong>динамическая корреляция</strong> (метод NEVPT2 поверх многоконфигурационного). Мы взялись за обе.</p>
+           <p><strong>Что получилось:</strong> мы научились строить <em>настоящее</em> переходное состояние отрыва водорода — закрепляя H сразу между углеродом и кислородом, чтобы он переходил на кислород, а не просто «отрывался». Раньше грубые модели давали то перелёт за равновесие, то вообще не тот путь — теперь профиль реакции честный (подъём к барьеру и спад к продукту). И NEVPT2 у нас работает.</p>
+           <p><strong>Где упёрлись локально (показываем, не прячем):</strong> на ноутбуке более точный многоконфигурационный расчёт <em>не сходится</em> на этом «капризном» марганцевом центре, а упрощённый даёт нефизичный результат. Это не лечится «подождать подольше» — нужна бóльшая, аккуратно подобранная модель электронов, а это уже тяжёлый счёт.</p>
+           <p><strong>Решение:</strong> мы вынесли этот тяжёлый расчёт в облако <strong>AWS</strong> (как наш «аммиачный» воркер для FeMoco) — отдельная машина считает сейчас бóльшую сбалансированную модель и сама выключится (защита от лишних трат). Точное число придёт оттуда — и я честно впишу его сюда, каким бы оно ни вышло.</p>`,
+      en: `<p>In the last entry we promised to compute the exact size of the selectivity "quantum correction" — and honestly said it needs two things: a <strong>proper transition state</strong> (not a crude proxy) and <strong>dynamic correlation</strong> (NEVPT2 on top of a multiconfigurational reference). We took on both.</p>
+           <p><strong>What worked:</strong> we learned to build a <em>real</em> hydrogen-abstraction transition state — by pinning the H between carbon and oxygen so it transfers to oxygen rather than just "falling off". Earlier crude models gave either an overshoot or the wrong pathway entirely — now the reaction profile is honest (a rise to the barrier and a fall to the product). And our NEVPT2 works.</p>
+           <p><strong>Where we hit a wall locally (shown, not hidden):</strong> on a laptop the more accurate multiconfigurational calculation <em>does not converge</em> on this "temperamental" manganese centre, and a simplified one gives an unphysical result. This is not fixed by "waiting longer" — it needs a larger, carefully chosen electron model, which is heavy compute.</p>
+           <p><strong>The fix:</strong> we moved this heavy calculation to the <strong>AWS</strong> cloud (as our "ammonia" worker does for FeMoco) — a separate machine is computing the larger, balanced model now and will shut itself down (cost safety). The exact number comes from there — and I will honestly write it here, whatever it turns out to be.</p>`
+    },
+    tech: {
+      ru: `<p>Цель — количественный <code>ΔΔE‡ = барьер(C₂H₆) − барьер(CH₄)</code> на DFT и на коррелированном методе, и сдвиг (NEVPT2 − DFT) с проверкой по «карте потолка» (нужен +4 для 70%).</p>
+           <p><strong>Геометрия (сделано):</strong> жёсткий скан и скан только по r(C–H) давали артефакты (перелёт за равновесие O–H; гомолиз C–H вместо HAT). <strong>Двухкоординатное закрепление r(C–H)+r(O–H)</strong> с релаксацией каркаса даёт настоящий HAT-профиль (подъём-к-TS-затем-спад). DFT-барьер CH₄ ≈ <strong>49 ккал/моль</strong> (минимальная модель, ранний TS).</p>
+           <p><strong>Энергия (упор локально):</strong> CASSCF на Mn-секстете <em>не сходится</em>; малое фронтирное CAS несбалансировано — NEVPT2//CASCI систематически <em>поднимает</em> барьер (CH₄: DFT 49 → CASCI 53 → NEVPT2 69), что для HAT физически подозрительно (корреляция должна опускать TS). AVAS ловит мультиреференсность, но «прыгает» размером между геометриями. Вывод: нужно <strong>курированное активное пространство</strong> (Mn 3d + O 2p + σ(C–H)/σ(O–H)) + робастный CASSCF (старт с CASCI-натурбит, level-shift) — это тяжёлый счёт.</p>
+           <p><strong>Фронтир на AWS (запущено):</strong> EC2 r7i.2xlarge (память под NEVPT2), bootstrap pyscf/geometric, dead-man switch (авто-терминирование), как в FeMoco-пайплайне. Считается курированный CASSCF+NEVPT2 на реальном Mn=O HAT-TS для CH₄ и C₂H₆. Число — из облака; впишу честно при сборе (--collect), включая «не сошлось», если так выйдет. Это и есть стадия «квантовая поправка» в работе.</p>`,
+      en: `<p>Goal: the quantitative <code>ΔΔE‡ = barrier(C₂H₆) − barrier(CH₄)</code> on DFT and on a correlated method, and the shift (NEVPT2 − DFT) checked against the "ceiling map" (+4 needed for 70%).</p>
+           <p><strong>Geometry (done):</strong> a rigid scan and an r(C–H)-only scan gave artefacts (overshoot past the O–H equilibrium; C–H homolysis instead of HAT). A <strong>2-coordinate constraint on r(C–H)+r(O–H)</strong> with framework relaxation yields a real HAT profile (rise-to-TS-then-fall). DFT CH₄ barrier ≈ <strong>49 kcal/mol</strong> (minimal model, early TS).</p>
+           <p><strong>Energy (the local wall):</strong> CASSCF does not converge on the Mn sextet; a small frontier CAS is imbalanced — NEVPT2//CASCI systematically <em>raises</em> the barrier (CH₄: DFT 49 → CASCI 53 → NEVPT2 69), physically suspect for HAT (correlation should lower the TS). AVAS captures the multireference character but its size jumps between geometries. Conclusion: we need a <strong>curated active space</strong> (Mn 3d + O 2p + the σ(C–H)/σ(O–H) system) + a robust CASSCF (CASCI-natural-orbital start, level shift) — heavy compute.</p>
+           <p><strong>Frontier on AWS (launched):</strong> EC2 r7i.2xlarge (memory for NEVPT2), pyscf/geometric bootstrap, dead-man switch (auto-terminate), as in the FeMoco pipeline. It is computing the curated CASSCF+NEVPT2 on the real Mn=O HAT-TS for CH₄ and C₂H₆. The number comes from the cloud; I will record it honestly on --collect, including "did not converge" if that happens. This is the "quantum correction" stage, in progress.</p>`
+    },
+    figures: []
   }
 ];
 

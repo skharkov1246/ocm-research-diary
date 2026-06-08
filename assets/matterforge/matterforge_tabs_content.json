@@ -47,7 +47,7 @@
       "economics": {"tam_2035_busd": 200, "saving_busd_year": "контекстная (этилен $200B+ рынок)", "quantum_potential": 8, "catalyst_cost_share_pct": null, "caveat": "OCM не конкурентен против парового крекинга при текущих ценах сырья; это R&D/диффер-нарратив, не near-term выручка. Порог пересмотра: однопроходный выход C2 ≥35% при селективности ≥85%."},
       "timeline": "2029–2032+ (честно: ранняя стадия, физический потолок выхода ~28%)",
       "first_clients": ["ADNOC (метан в избытке, этан в дефиците)", "SIBUR"],
-      "stage_progress": [1.0, 0.5, 0.55, 0.25, 0.0],
+      "stage_progress": [1.0, 0.5, 0.55, 0.35, 0.0],
       "molecules_png": "02_OCM_molecules.png",
       "descriptor_png": "02_OCM_descriptor.png"
     },
@@ -131,6 +131,7 @@
     },
     {
       "id": "co2-to-fuels",
+      "group": "testing",
       "rank": 6,
       "composite": null,
       "title": "CO₂ → C2+ топливо и химия",
@@ -149,6 +150,7 @@
     },
     {
       "id": "h2o2-direct",
+      "group": "testing",
       "rank": 7,
       "composite": null,
       "title": "Прямой синтез H₂O₂",
@@ -167,6 +169,7 @@
     },
     {
       "id": "cc-activation-recycling",
+      "group": "testing",
       "rank": 8,
       "composite": null,
       "title": "C–C-активация: рециклинг полиолефинов",
@@ -185,6 +188,7 @@
     },
     {
       "id": "oer-scaling",
+      "group": "testing",
       "rank": 9,
       "composite": null,
       "title": "OER: слом scaling-связи",
@@ -203,6 +207,7 @@
     },
     {
       "id": "ch4-to-methanol",
+      "group": "testing",
       "rank": 10,
       "composite": null,
       "title": "CH₄ → метанол",
