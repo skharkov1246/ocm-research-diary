@@ -236,6 +236,15 @@
 /* tab bar: home / "back to overview" control (not a content tab) */
 .mf-tab-home { font-weight: 700; }
 .mf-tab-home.active { background: var(--accent); color: #06121a; border-color: transparent; }
+/* testing group — early-screening tabs, visually set apart from production */
+.mf-tab-testing { font-weight: 700; border-style: dashed; }
+.mf-tab-testing.active { background: #1a2336; border-color: var(--muted); color: var(--ink); }
+.mf-tab-count { display: inline-block; min-width: 16px; padding: 0 5px; margin-left: 4px; border-radius: 999px; background: #2a3650; color: var(--ink-soft); font-size: 11px; font-weight: 700; }
+.mf-testing-promo { display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 18px; padding: 14px 18px; background: #141c2e; border: 1px dashed var(--line); border-radius: var(--radius); cursor: pointer; text-align: left; transition: border-color .15s ease, background .15s ease; }
+.mf-testing-promo:hover { border-color: var(--accent); background: #18223a; }
+.mf-testing-promo-l { font-weight: 800; color: var(--ink); white-space: nowrap; }
+.mf-testing-promo-r { color: var(--muted); font-size: 13px; }
+.mf-testing .mf-dash-card { border-style: dashed; }
 
 /* project sub-nav: Дашборд | Дневник операций */
 .mf-subnav { display: flex; gap: 4px; margin: 2px 0 20px; border-bottom: 1px solid var(--line); }

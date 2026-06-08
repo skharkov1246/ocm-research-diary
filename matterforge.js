@@ -24,6 +24,7 @@
   const IMG_DIR = "assets/matterforge/";
   const HOME = "__home__";
   const PROVEN = "proven";   // Track-B validation-benchmark tab ("Обкатанные технологии")
+  const TESTING = "__testing__";
 
   /* author-supplied figure captions (not in the JSON) */
   const CAPTIONS = {
@@ -69,7 +70,7 @@
     return items.filter((x) => x.date && x.title).sort((a, b) => (parseDate(b.date) - parseDate(a.date)));
   }
 
-  let DATA = null, TABS = [], HAS_DIARY = false;
+  let DATA = null, TABS = [], PROD = [], TEST = [], HAS_DIARY = false;
   let active = HOME;   // HOME | projectId
   let sub = "dash";    // "dash" | "log"
 
@@ -88,6 +89,8 @@
     }
     TABS = [...(DATA.tabs || [])].sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99));
     if (!TABS.length) return;
+    PROD = TABS.filter((t) => (t.group || "production") !== "testing");
+    TEST = TABS.filter((t) => (t.group || "production") === "testing");
 
     routeFromHash();
 
@@ -109,16 +112,19 @@
   function routeFromHash() {
     const [id, s] = location.hash.replace(/^#/, "").split("/");
     if (id === PROVEN && DATA && DATA.validated_track) { active = PROVEN; sub = "dash"; }
+    else if (id === "testing") { active = TESTING; sub = "dash"; }
     else if (TABS.some((t) => t.id === id)) { active = id; sub = s === "log" ? "log" : "dash"; }
     else { active = HOME; sub = "dash"; }
   }
   function syncHash() {
     const target = active === HOME ? location.pathname + location.search
+      : active === TESTING ? "#testing"
       : "#" + active + (sub === "log" ? "/log" : "");
     history.replaceState(null, "", target);
   }
 
   function goHome() { active = HOME; sub = "dash"; renderTabs(); applyView(); syncHash(); window.scrollTo({ top: 0 }); }
+  function goTesting() { active = TESTING; sub = "dash"; renderTabs(); applyView(); syncHash(); window.scrollTo({ top: 0, behavior: "smooth" }); }
   function selectProject(id) { active = id; sub = "dash"; renderTabs(); applyView(); syncHash(); window.scrollTo({ top: 0, behavior: "smooth" }); }
   function selectSub(s) { if (sub === s) return; sub = s; applyView(); syncHash(); window.scrollTo({ top: 0, behavior: "smooth" }); }
 
@@ -137,7 +143,16 @@
     const home = el("button", "mf-tab mf-tab-home" + (active === HOME ? " active" : ""), "← Обзор");
     home.type = "button"; home.addEventListener("click", goHome);
     nav.appendChild(home);
-    TABS.forEach((t) => nav.appendChild(tabButton(t.id, t.color, t.title)));
+    PROD.forEach((t) => nav.appendChild(tabButton(t.id, t.color, t.title)));
+    if (TEST.length) {
+      const onTest = active === TESTING || TEST.some((t) => t.id === active);
+      const tb = el("button", "mf-tab mf-tab-testing" + (onTest ? " active" : ""),
+        `🧪 К тестированию <span class="mf-tab-count">${TEST.length}</span>`);
+      tb.type = "button";
+      tb.setAttribute("title", "Ранний скрининг — гипотезы «просчёт от обратного»");
+      tb.addEventListener("click", goTesting);
+      nav.appendChild(tb);
+    }
     if (DATA && DATA.validated_track) {
       const vt = DATA.validated_track;
       nav.appendChild(tabButton(PROVEN, vt.color || "#48bb78", tt(vt.title)));
@@ -151,6 +166,7 @@
     view.hidden = false;
     if (active === HOME) renderHome(view);
     else if (active === PROVEN) renderValidated(view);
+    else if (active === TESTING) renderTesting(view);
     else renderProject(view, TABS.find((t) => t.id === active));
   }
 
@@ -327,49 +343,61 @@
   }
 
   /* ---------- HOME: whole-project overview ---------- */
+  function homeCard(t) {
+    const meta = DATA._meta || {};
+    const prog = t.stage_progress || [];
+    const cur = currentStageIndex(prog.length ? prog : [0]);
+    const ups = updatesFor(t);
+    const c = el("button", "mf-dash-card"); c.type = "button"; c.style.setProperty("--tab", t.color);
+    c.addEventListener("click", () => selectProject(t.id));
+    const strip = prog.map((p, i) => {
+      const cls = p >= 1 ? "done" : i === cur ? "cur" : "";
+      return `<span class="mf-dash-seg ${cls}"><span style="width:${Math.round((p || 0) * 100)}%"></span></span>`;
+    }).join("");
+    const e = t.economics || {};
+    c.innerHTML =
+      `<div class="mf-dash-top"><span class="mf-dash-dot"></span><span class="mf-dash-name">${t.title}</span>` +
+      (t.composite != null ? `<span class="mf-dash-score">${t.composite}</span>` : "") + `</div>` +
+      `<div class="mf-dash-substage">Сейчас: <b>${(meta.stage_model || [])[cur] || "—"}</b></div>` +
+      `<div class="mf-dash-strip">${strip}</div>` +
+      `<div class="mf-dash-foot"><span class="mf-dash-upd ${ups[0] ? "live" : ""}">${ups[0] ? "● обновлено " + relTime(ups[0].date) : "журнал пуст"}</span>` +
+      `<span class="mf-dash-tam">TAM $${e.tam_2035_busd ?? "—"} млрд</span></div>`;
+    return c;
+  }
   function renderHome(view) {
     const meta = DATA._meta || {};
     const stages = meta.stage_model || [];
     view.className = "mf-panel mf-dash";
     view.style.removeProperty("--tab");
     view.innerHTML = "";
-    const totalTam = TABS.reduce((s, t) => s + (Number(t.economics && t.economics.tam_2035_busd) || 0), 0);
+    const totalTam = PROD.reduce((s, t) => s + (Number(t.economics && t.economics.tam_2035_busd) || 0), 0);
 
     const head = el("div", "mf-head");
     head.appendChild(el("h2", "mf-title-h", "Обзор проекта"));
     head.appendChild(el("p", "mf-sub",
-      "Пять направлений квантовой разработки катализаторов и наш прогресс по этапам — от литературы до пилота с партнёром. Открой направление, чтобы увидеть его дашборд и дневник операций."));
+      "Пять основных направлений квантовой разработки катализаторов и наш прогресс по этапам — от литературы до пилота с партнёром. Открой направление, чтобы увидеть его дашборд и дневник операций."));
     view.appendChild(head);
 
     const agg = el("div", "mf-dash-agg");
     agg.innerHTML =
-      `<div class="mf-agg-item"><span class="mf-agg-n">${TABS.length}</span><span class="mf-agg-l">направления</span></div>` +
+      `<div class="mf-agg-item"><span class="mf-agg-n">${PROD.length}</span><span class="mf-agg-l">основных направления</span></div>` +
       `<div class="mf-agg-item"><span class="mf-agg-n">$${totalTam} млрд</span><span class="mf-agg-l">суммарный TAM 2035</span></div>` +
       `<div class="mf-agg-item"><span class="mf-agg-n">${stages.length}</span><span class="mf-agg-l">этапов до пилота</span></div>`;
     view.appendChild(agg);
 
     const grid = el("div", "mf-dash-grid");
-    TABS.forEach((t) => {
-      const prog = t.stage_progress || [];
-      const cur = currentStageIndex(prog.length ? prog : [0]);
-      const ups = updatesFor(t);
-      const c = el("button", "mf-dash-card"); c.type = "button"; c.style.setProperty("--tab", t.color);
-      c.addEventListener("click", () => selectProject(t.id));
-      const strip = prog.map((p, i) => {
-        const cls = p >= 1 ? "done" : i === cur ? "cur" : "";
-        return `<span class="mf-dash-seg ${cls}"><span style="width:${Math.round((p || 0) * 100)}%"></span></span>`;
-      }).join("");
-      const e = t.economics || {};
-      c.innerHTML =
-        `<div class="mf-dash-top"><span class="mf-dash-dot"></span><span class="mf-dash-name">${t.title}</span>` +
-        (t.composite != null ? `<span class="mf-dash-score">${t.composite}</span>` : "") + `</div>` +
-        `<div class="mf-dash-substage">Сейчас: <b>${(meta.stage_model || [])[cur] || "—"}</b></div>` +
-        `<div class="mf-dash-strip">${strip}</div>` +
-        `<div class="mf-dash-foot"><span class="mf-dash-upd ${ups[0] ? "live" : ""}">${ups[0] ? "● обновлено " + relTime(ups[0].date) : "журнал пуст"}</span>` +
-        `<span class="mf-dash-tam">TAM $${e.tam_2035_busd ?? "—"} млрд</span></div>`;
-      grid.appendChild(c);
-    });
+    PROD.forEach((t) => grid.appendChild(homeCard(t)));
     view.appendChild(grid);
+
+    if (TEST.length) {
+      const promo = el("button", "mf-testing-promo");
+      promo.type = "button";
+      promo.innerHTML =
+        `<span class="mf-testing-promo-l">🧪 К тестированию</span>` +
+        `<span class="mf-testing-promo-r">${TEST.length} гипотез раннего скрининга («просчёт от обратного») →</span>`;
+      promo.addEventListener("click", goTesting);
+      view.appendChild(promo);
+    }
     if (DATA.validated_track) {
       const vt = DATA.validated_track;
       const cta = el("div", "mf-proven-cta");
@@ -381,6 +409,22 @@
       cta.appendChild(go);
       view.appendChild(cta);
     }
+    if (meta.honesty_note) view.appendChild(el("p", "mf-disclaimer", `<strong>Честно:</strong> ${meta.honesty_note}`));
+  }
+  /* ---------- TESTING: early-screening group (inverse-design hypotheses) ---------- */
+  function renderTesting(view) {
+    const meta = DATA._meta || {};
+    view.className = "mf-panel mf-dash mf-testing";
+    view.style.removeProperty("--tab");
+    view.innerHTML = "";
+    const head = el("div", "mf-head");
+    head.appendChild(el("h2", "mf-title-h", "🧪 К тестированию"));
+    head.appendChild(el("p", "mf-sub",
+      "Ранний скрининг — направления «просчёт от обратного». Это рабочие гипотезы: рамка и дескриптор заданы, но расчётов ещё нет (готовность ~3%, журналы пусты). Держим их отдельно от основных направлений, пока не подтвердим квантовый edge расчётом. Открой направление — увидишь его дашборд и наряд для воркера."));
+    view.appendChild(head);
+    const grid = el("div", "mf-dash-grid");
+    TEST.forEach((t) => grid.appendChild(homeCard(t)));
+    view.appendChild(grid);
     if (meta.honesty_note) view.appendChild(el("p", "mf-disclaimer", `<strong>Честно:</strong> ${meta.honesty_note}`));
   }
 
