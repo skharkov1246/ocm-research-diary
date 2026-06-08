@@ -23,6 +23,7 @@
   const CONTENT_URL = "assets/matterforge/matterforge_tabs_content.json";
   const IMG_DIR = "assets/matterforge/";
   const HOME = "__home__";
+  const PROVEN = "proven";   // Track-B validation-benchmark tab ("Обкатанные технологии")
 
   /* author-supplied figure captions (not in the JSON) */
   const CAPTIONS = {
@@ -107,7 +108,8 @@
 
   function routeFromHash() {
     const [id, s] = location.hash.replace(/^#/, "").split("/");
-    if (TABS.some((t) => t.id === id)) { active = id; sub = s === "log" ? "log" : "dash"; }
+    if (id === PROVEN && DATA && DATA.validated_track) { active = PROVEN; sub = "dash"; }
+    else if (TABS.some((t) => t.id === id)) { active = id; sub = s === "log" ? "log" : "dash"; }
     else { active = HOME; sub = "dash"; }
   }
   function syncHash() {
@@ -136,6 +138,10 @@
     home.type = "button"; home.addEventListener("click", goHome);
     nav.appendChild(home);
     TABS.forEach((t) => nav.appendChild(tabButton(t.id, t.color, t.title)));
+    if (DATA && DATA.validated_track) {
+      const vt = DATA.validated_track;
+      nav.appendChild(tabButton(PROVEN, vt.color || "#48bb78", tt(vt.title)));
+    }
   }
 
   function applyView() {
@@ -144,6 +150,7 @@
     if (HAS_DIARY) diarySections().forEach((s) => { s.hidden = !showDiary; });
     view.hidden = false;
     if (active === HOME) renderHome(view);
+    else if (active === PROVEN) renderValidated(view);
     else renderProject(view, TABS.find((t) => t.id === active));
   }
 
@@ -363,6 +370,17 @@
       grid.appendChild(c);
     });
     view.appendChild(grid);
+    if (DATA.validated_track) {
+      const vt = DATA.validated_track;
+      const cta = el("div", "mf-proven-cta");
+      cta.style.setProperty("--tab", vt.color || "#48bb78");
+      cta.appendChild(el("div", "mf-proven-cta-tag", tt({ ru: "Дорожка B · валидация", en: "Track B · validation" })));
+      cta.appendChild(el("div", "mf-proven-cta-body", tt(vt.subtitle)));
+      const go = el("button", "mf-link", tt({ ru: "Открыть «Обкатанные технологии» →", en: "Open \"Proven systems\" →" }));
+      go.type = "button"; go.addEventListener("click", () => selectProject(PROVEN));
+      cta.appendChild(go);
+      view.appendChild(cta);
+    }
     if (meta.honesty_note) view.appendChild(el("p", "mf-disclaimer", `<strong>Честно:</strong> ${meta.honesty_note}`));
   }
 
@@ -433,6 +451,116 @@
         view.appendChild(el("p", "mf-empty",
           "Записей операций пока нет — они появятся здесь по мере работы над направлением. (Источник: поле updates[] этой вкладки в matterforge_tabs_content.json.)"));
       }
+    }
+  }
+
+  /* ---------- PROVEN: Track-B validation benchmark (bilingual) ---------- */
+  function langMini() {
+    const wrap = el("div", "mf-lang-mini");
+    ["ru", "en"].forEach((lg) => {
+      const btn = el("button", "mf-lang-b" + (lang() === lg ? " active" : ""), lg.toUpperCase());
+      btn.type = "button";
+      btn.addEventListener("click", () => {
+        document.body.dataset.lang = lg;
+        try { localStorage.setItem("ocm-lang", lg); } catch (e) {}
+        renderTabs(); applyView();
+      });
+      wrap.appendChild(btn);
+    });
+    return wrap;
+  }
+  function systemCard(s) {
+    const nm = typeof s.name === "string" ? s.name : tt(s.name);
+    const card = el("div", "mf-sys mf-sys-" + (s.status || "target"));
+    const head = el("div", "mf-sys-head");
+    head.appendChild(el("span", "mf-sys-name", nm));
+    head.appendChild(el("span", "mf-sys-badge mf-sys-badge-" + (s.status || "target"), tt(s.status_label)));
+    card.appendChild(head);
+    const grid = el("div", "mf-sys-grid");
+    const row = (k, v) => {
+      const r = el("div", "mf-sys-row");
+      r.appendChild(el("div", "mf-sys-k", k));
+      const vv = el("div", "mf-sys-v"); vv.innerHTML = v; r.appendChild(vv);
+      grid.appendChild(r);
+    };
+    row(tt({ ru: "Активный центр · реакция", en: "Active site · reaction" }), tt(s.site));
+    row(tt({ ru: "Известный ответ (эксп./лит.)", en: "Known answer (exp./lit.)" }), tt(s.known));
+    const dois = (s.dois || []).map((d) =>
+      `<a class="mf-doi" href="https://doi.org/${d}" target="_blank" rel="noopener">${d}</a>`).join(" · ");
+    row("DOI", dois || "—");
+    row("Active space", s.active_space || "—");
+    row(tt({ ru: "Кубиты (JW)", en: "Qubits (JW)" }), s.qubits || "—");
+    row(tt({ ru: "Где DFT врёт", en: "Where DFT fails" }), tt(s.why_dft));
+    row(tt({ ru: "Статус", en: "Status" }), tt(s.current));
+    card.appendChild(grid);
+    return card;
+  }
+  function renderValidated(view) {
+    const vt = DATA.validated_track || {};
+    view.className = "mf-panel mf-proven";
+    view.style.setProperty("--tab", vt.color || "#48bb78");
+    view.innerHTML = "";
+
+    const head = el("div", "mf-head");
+    head.appendChild(el("div", "mf-accent-bar"));
+    const titlerow = el("div", "mf-proven-titlerow");
+    titlerow.appendChild(el("h2", "mf-title-h", tt(vt.title)));
+    titlerow.appendChild(langMini());
+    head.appendChild(titlerow);
+    head.appendChild(el("p", "mf-sub", tt(vt.subtitle)));
+    head.appendChild(el("div", "mf-badge",
+      `<span class="mf-badge-label">${tt({ ru: "Нарративная роль", en: "Narrative role" })}</span>${tt(vt.role)}`));
+    view.appendChild(head);
+
+    const split = el("div", "mf-track-split");
+    (vt.tracks || []).forEach((tr) => {
+      const c = el("div", "mf-track-card mf-track-" + (tr.kind || "rd"));
+      c.appendChild(el("div", "mf-track-tag", tt(tr.tag)));
+      c.appendChild(el("p", "mf-track-body", tt(tr.body)));
+      split.appendChild(c);
+    });
+    view.appendChild(split);
+
+    const pipe = el("div", "mf-section");
+    pipe.appendChild(el("h3", "mf-h3", tt({ ru: "Единый движок — стадии", en: "Shared engine — stages" })));
+    const flow = el("div", "mf-pipeline");
+    (vt.stages || []).forEach((st, i) => {
+      const step = el("div", "mf-pipe-step" + (st.trackB ? " mf-pipe-b" : ""));
+      step.appendChild(el("span", "mf-pipe-n", String(i + 1)));
+      step.appendChild(el("span", "mf-pipe-t", tt(st)));
+      if (st.trackB) step.appendChild(el("span", "mf-pipe-tag", tt({ ru: "только B", en: "B only" })));
+      flow.appendChild(step);
+    });
+    pipe.appendChild(flow);
+    view.appendChild(pipe);
+
+    const b = vt.badge || {};
+    const bd = el("div", "mf-badge-def");
+    bd.appendChild(el("div", "mf-badge-def-chip", tt(b.label)));
+    bd.appendChild(el("p", "mf-badge-means", tt(b.means)));
+    const notList = (b.not && (b.not[lang()] || b.not.ru || b.not.en)) || [];
+    if (notList.length) {
+      const nw = el("div", "mf-badge-not");
+      nw.appendChild(el("div", "mf-badge-not-h", tt({ ru: "Плашка НЕ означает:", en: "The badge does NOT mean:" })));
+      const ul = el("ul", "mf-badge-list");
+      notList.forEach((x) => ul.appendChild(el("li", null, x)));
+      nw.appendChild(ul);
+      bd.appendChild(nw);
+    }
+    bd.appendChild(el("div", "mf-badge-status",
+      `<strong>${tt({ ru: "Статус сейчас", en: "Status now" })}:</strong> ${tt(b.status_now)}`));
+    view.appendChild(bd);
+
+    const sysSec = el("div", "mf-section");
+    sysSec.appendChild(el("h3", "mf-h3", tt({ ru: "Системы Дорожки B", en: "Track B systems" })));
+    (vt.systems || []).forEach((s) => sysSec.appendChild(systemCard(s)));
+    view.appendChild(sysSec);
+
+    if (vt.caveat) {
+      const cav = el("div", "mf-proven-caveat");
+      cav.appendChild(el("div", "mf-caveat-label", "⚠ " + tt({ ru: "Честно", en: "Honest" })));
+      cav.appendChild(el("p", "mf-caveat-body", tt(vt.caveat)));
+      view.appendChild(cav);
     }
   }
 

@@ -128,5 +128,82 @@
         { "date": "2026-06-08", "stage_label": "VQE PoC (симулятор)", "text": "VQE-PoC на симуляторе (переиспользую chem.py + vqe.py без изменений). Компактное фронтир-окно катодного центра [NiO₆] Ni³⁺ — CAS(7e,6o) = 12 кубитов (полное AVAS 23o→46 кубитов локально statevector не тянет → AWS). Кубитный гамильтониан Jordan–Wigner: 789 членов; lightning.qubit. UCCSD сходится до +0.67 ккал/моль к CASCI — в пределах химической точности на этом PoC-пространстве (104 параметра, 138 c); корреляционная энергия HF→CASCI ≈ 66 ккал/моль (огромная — согласуется с многодетерминантностью excess +1.74). ADAPT-VQE честно: «сошёлся» по градиенту (29 операторов), но застрял в локальном минимуме +15 ккал/моль над CASCI — та же поломка ADAPT в этой сборке PennyLane, что отметил воркер H₂; фундамент держу на UCCSD, ADAPT не прячу. Сверка маппинга: точное основное состояние кубитного H (N=7) на 2.68 ккал/моль НИЖЕ формального дублета → спиновое состояние Ni³⁺ само квантово-неоднозначно (как Fe в аммиаке), спектр физичен (не ошибка JW). Дальше — полный 46-кубитный CAS на AWS. Числа: cathode/stage2_vqe_results.json." }
       ]
     }
-  ]
+  ],
+  "validated_track": {
+    "id": "proven",
+    "color": "#48bb78",
+    "title": { "ru": "Обкатанные технологии", "en": "Proven systems" },
+    "subtitle": { "ru": "Дорожка B — валидационный бенчмарк: тот же вычислительный движок на системах с известным экспериментальным ответом.", "en": "Track B — validation benchmark: the same computational engine on systems with a known experimental answer." },
+    "role": { "ru": "Один движок — два класса систем. Не два метода, а один pipeline, прогнанный и на фронтире (Дорожка A), и на проверенных системах (Дорожка B).", "en": "One engine, two classes of system. Not two methods — one pipeline, run both on the frontier (Track A) and on proven systems (Track B)." },
+    "tracks": [
+      { "kind": "rd", "tag": { "ru": "Дорожка A · R&D", "en": "Track A · R&D" }, "body": { "ru": "Фронтир-кандидаты — 5 направлений в верхних вкладках. Квантовое преимущество, горизонт 2029–2032+. Готового ответа нет: это научный фронтир, и мы об этом честно пишем.", "en": "Frontier candidates — the 5 directions in the top tabs. Quantum advantage, horizon 2029–2032+. No ready answer: this is the scientific frontier, and we say so honestly." } },
+      { "kind": "val", "tag": { "ru": "Дорожка B · Валидация", "en": "Track B · Validation" }, "body": { "ru": "Проверенные системы с известным экспериментальным ответом, прогоняемые через ТОТ ЖЕ pipeline. Смысл: показать, что движок воспроизводит известное, прежде чем доверять ему на фронтире.", "en": "Proven systems with a known experimental answer, run through the SAME pipeline. The point: show the engine reproduces the known before trusting it on the frontier." } }
+    ],
+    "badge": {
+      "label": { "ru": "ПОДТВЕРЖДЕНО ВАЛИДАЦИЕЙ МЕТОДА", "en": "CONFIRMED BY METHOD VALIDATION" },
+      "means": { "ru": "Означает строго: расчётный контур MatterForge воспроизводит известные эксп./лит. данные (энергии, барьеры, спиновые состояния, тренды) в пределах заявленной точности. Логика: «известная рабочая система → наш метод совпал → методу доверяем».", "en": "Means strictly: the MatterForge pipeline reproduces known experimental/literature data (energies, barriers, spin states, trends) within the stated accuracy. Logic: \"known working system → our method matches → trust the method\"." },
+      "not": { "ru": ["НЕ «MatterForge изобрёл этот катализатор»", "НЕ присвоение чужих заводских/пилотных референций", "НЕ заявление о промышленном статусе как о заслуге MatterForge"], "en": ["NOT \"MatterForge invented this catalyst\"", "NOT appropriating anyone's plant/pilot references", "NOT claiming industrial status as a MatterForge achievement"] },
+      "status_now": { "ru": "Статус сейчас: для систем ниже засорсён известный ответ и оценено активное пространство; прогон pipeline в очереди. Зелёная плашка ставится строго ПОСЛЕ того, как наш CASCI/VQE совпал с эталоном — не раньше. Пока расчётов нет — все системы помечены как «цель валидации», а не «подтверждено».", "en": "Status now: for the systems below the known answer is sourced and the active space estimated; the pipeline run is queued. The green badge is awarded strictly AFTER our CASCI/VQE matches the reference — not before. Until calculations exist, every system is marked \"validation target\", not \"confirmed\"." }
+    },
+    "stages": [
+      { "ru": "Активный центр и постановка задачи", "en": "Active site & problem" },
+      { "ru": "Active space: CAS(n,m), кубиты (12–20)", "en": "Active space: CAS(n,m), qubits (12–20)" },
+      { "ru": "Маппинг JW/BK + анзац (ADAPT-VQE)", "en": "Mapping JW/BK + ansatz (ADAPT-VQE)" },
+      { "ru": "Классика: DFT-геометрии", "en": "Classical: DFT geometries" },
+      { "ru": "Квант: VQE/ADAPT-VQE (PennyLane)", "en": "Quantum: VQE/ADAPT-VQE (PennyLane)" },
+      { "ru": "Референс: CASCI", "en": "Reference: CASCI" },
+      { "trackB": true, "ru": "Сверка с экспериментом/лит. + DOI", "en": "Cross-check vs experiment/lit. + DOI" }
+    ],
+    "systems": [
+      {
+        "name": "Fe-zeolite α-O",
+        "status": "target",
+        "status_label": { "ru": "Промышленный · цель валидации", "en": "Industrial · validation target" },
+        "site": { "ru": "Высокоспиновый (S=2) Fe(IV)=O центр (α-O) в Fe-ZSM-5/FER, получаемый из α-Fe(II) активацией N₂O. Реакция: гидроксилирование CH₄→CH₃OH при комнатной T; родственный промышленный процесс — бензол→фенол (N₂O, «AlphOx», пилотировался).", "en": "High-spin (S=2) Fe(IV)=O site (α-O) in Fe-ZSM-5/FER, formed from α-Fe(II) by N₂O activation. Reaction: CH₄→CH₃OH hydroxylation at room T; the related industrial process is benzene→phenol (N₂O, \"AlphOx\", piloted)." },
+        "known": { "ru": "Экспериментально установленное основное спиновое состояние S=2 высокоспинового Fe(IV)=O (MCD/Mössbauer/NRVS) и его необычно активированная электронная структура. Мультиреференс (oxyl↔ferryl) — там, где функционалы DFT качественно расходятся по спиновому состоянию и барьеру.", "en": "Experimentally established S=2 high-spin Fe(IV)=O ground state (MCD/Mössbauer/NRVS) and its unusually activated electronic structure. Multireference (oxyl↔ferryl) — exactly where DFT functionals diverge qualitatively on spin state and barrier." },
+        "dois": ["10.1038/nature19059", "10.1073/pnas.1721717115", "10.1039/D5CS00496A"],
+        "active_space": "CAS(Fe 3d + O 2p) ≈ (8–12 e, 8–9 o)",
+        "qubits": "16–18",
+        "why_dft": { "ru": "Высокоспиновый Fe(IV)=O — открытая оболочка переходного металла с сильной статической корреляцией; одно-детерминантный DFT систематически ошибается в порядке спиновых состояний.", "en": "High-spin Fe(IV)=O is an open-shell transition-metal site with strong static correlation; single-determinant DFT systematically errs on spin-state ordering." },
+        "current": { "ru": "Известный ответ засорсён, оценены active space/кубиты. Прогон (DFT-геометрия → AVAS → CASCI → VQE → сверка спинового состояния) — в очереди.", "en": "Known answer sourced, active space/qubits estimated. Run (DFT geometry → AVAS → CASCI → VQE → spin-state cross-check) — queued." }
+      },
+      {
+        "name": "Cu-zeolite [Cu₂O]²⁺ / [Cu₃O₃]²⁺",
+        "status": "target",
+        "status_label": { "ru": "Промышленный (emerging) · цель валидации", "en": "Industrial (emerging) · validation target" },
+        "site": { "ru": "Cu(II)-оксо центры в цеолите: бент моно-µ-оксо [Cu₂O]²⁺ (Cu-ZSM-5) и трёхъядерный [Cu₃O₃]²⁺ (Cu-MOR). Реакция: низкотемпературное (stepwise) CH₄→CH₃OH.", "en": "Cu(II)-oxo sites in a zeolite: bent mono-µ-oxo [Cu₂O]²⁺ (Cu-ZSM-5) and trinuclear [Cu₃O₃]²⁺ (Cu-MOR). Reaction: low-temperature (stepwise) CH₄→CH₃OH." },
+        "known": { "ru": "Спектроскопически отнесённая активная структура: резонансная Raman-полоса 22 700 см⁻¹ (подтверждена ¹⁸O-сдвигом, исключает прочие Cu–O-частицы) → ядро [Cu₂O]²⁺; трёхъядерное [Cu₃O₃]²⁺ ядро в мордените.", "en": "Spectroscopically assigned active structure: resonance-Raman band at 22,700 cm⁻¹ (confirmed by ¹⁸O shift, excludes other Cu–O species) → [Cu₂O]²⁺ core; trinuclear [Cu₃O₃]²⁺ core in mordenite." },
+        "dois": ["10.1073/pnas.0910461106", "10.1038/ncomms8546"],
+        "active_space": "[Cu₂O]²⁺: Cu 3d×2 + O 2p = 13 o (полн.) / редуц. AVAS ~8–10 o",
+        "qubits": "26 (полн.) / 16–20 (редуц.); [Cu₃O₃]²⁺ ~48 → нужен sub-cluster",
+        "why_dft": { "ru": "Cu(II)-оксо со смешанной валентностью и радикально-анионным мостиковым кислородом — мультиреференс; описание частицы и барьера C–H за пределами надёжности одно-детерминантного DFT.", "en": "Mixed-valence Cu(II)-oxo with a radical-anionic bridging oxygen is multireference; describing the species and the C–H barrier is beyond single-determinant DFT reliability." },
+        "current": { "ru": "Эксп. отнесение засорсено; полный кластер выходит за коридор 12–20 кубитов → план: редуцированный AVAS/embedding (как для NiO-18q и FeMoco). Прогон в очереди.", "en": "Experimental assignment sourced; the full cluster exceeds the 12–20 qubit corridor → plan: reduced AVAS/embedding (as for NiO-18q and FeMoco). Run queued." }
+      },
+      {
+        "name": { "ru": "Спиновые состояния TM (метод-анкор)", "en": "TM spin-state energetics (method anchor)" },
+        "status": "anchor",
+        "status_label": { "ru": "Метод-анкор · не промышленная витрина", "en": "Method anchor · not an industrial showcase" },
+        "site": { "ru": "Каноничный случай, где DFT систематически врёт, а ответ известен количественно: спиновые зазоры октаэдрических Fe(II/III) комплексов и Fe/Mn/Co порфиринов. Это якорь корректности движка, а не промышленная система — помечаю честно.", "en": "The canonical case where DFT systematically errs while the answer is known quantitatively: spin gaps of octahedral Fe(II/III) complexes and Fe/Mn/Co porphyrins. This is an engine-correctness anchor, not an industrial system — labelled honestly." },
+        "known": { "ru": "Количественные эксп. данные: spin-crossover энтальпии и spin-forbidden переходы (ккал/моль), скорректированные на среду (Radoń: 4 октаэдрических Fe-комплекса; набор SSE17 — 17 комплексов). Бенчмарк Por21: на 250 методах DFT MUE >15 ккал/моль, хим. точность 1 ккал/моль недостижима; CASPT2/NEVPT2/CCSD(T) — референс.", "en": "Quantitative experimental data: spin-crossover enthalpies and spin-forbidden transitions (kcal/mol), corrected for environment (Radoń: 4 octahedral Fe complexes; SSE17 set — 17 complexes). Por21 benchmark: across 250 methods DFT MUE >15 kcal/mol, chemical accuracy of 1 kcal/mol unreachable; CASPT2/NEVPT2/CCSD(T) as reference." },
+        "dois": ["10.1039/c9cp00105k", "10.3390/molecules28083487"],
+        "active_space": "Fe 3d (+ double-shell 4d′): CAS(6e,5o) мин. → (10e,10–12o) для точности",
+        "qubits": "10 (мин., неточно) / 20–24 (точно)",
+        "why_dft": { "ru": "Прямая количественная демонстрация дифференциатора: одно-детерминантный DFT на спиновых состояниях TM ошибается на >15 ккал/моль — именно эту физику использует движок на Дорожке A.", "en": "A direct quantitative demonstration of the differentiator: single-determinant DFT on TM spin states errs by >15 kcal/mol — exactly the physics the engine relies on in Track A." },
+        "current": { "ru": "Роль — якорь корректности (как диатомный NiO-анкор у воркера H₂): воспроизвести эксп. спиновый зазор в пределах хим. точности. Прогон в очереди.", "en": "Role — a correctness anchor (like the diatomic-NiO anchor used by the H₂ worker): reproduce the experimental spin gap within chemical accuracy. Run queued." }
+      },
+      {
+        "name": "FeO⁺ (gas-phase paradigm)",
+        "status": "candidate",
+        "status_label": { "ru": "Кандидат · число не подтверждено первоисточником", "en": "Candidate · number not confirmed from a primary source" },
+        "site": { "ru": "Газофазная парадигма C–H активации: FeO⁺ + CH₄ → Fe⁺ + CH₃OH, классический пример two-state reactivity (пересечение спиновых поверхностей). Та же физика, что у Fe/Cu-цеолитов.", "en": "The gas-phase paradigm of C–H activation: FeO⁺ + CH₄ → Fe⁺ + CH₃OH, the classic two-state-reactivity case (spin-surface crossing). The same physics as the Fe/Cu zeolites." },
+        "known": { "ru": "Честная оговорка: эксп. энергию связи D₀(Fe⁺–O) НЕ удалось засорсить из первоисточника в этом окружении (поиск устойчиво путал с FeOH⁺ = 3.34–3.47 эВ — это другая частица). Расчётный барьер TS1 = 22.1 ккал/моль (Yoshizawa) — это расчёт, не эксперимент. Поэтому — КАНДИДАТ: число не ставлю, пока не подтверждён первоисточник.", "en": "Honest caveat: the experimental bond energy D₀(Fe⁺–O) could NOT be sourced from a primary reference in this environment (search consistently confused it with FeOH⁺ = 3.34–3.47 eV — a different species). The computed barrier TS1 = 22.1 kcal/mol (Yoshizawa) is a calculation, not experiment. Hence — CANDIDATE: no number until a primary source is confirmed." },
+        "dois": ["10.1021/ja971723u", "10.1021/ja0017965"],
+        "active_space": "CAS(Fe 3d + O 2p) ≈ 8–9 o",
+        "qubits": "16–18",
+        "why_dft": { "ru": "Two-state reactivity и спиновое пересечение — DFT чувствителен к спиновому состоянию; каноничный мультиреференс.", "en": "Two-state reactivity and a spin crossing — DFT is sensitive to spin state; a canonical multireference case." },
+        "current": { "ru": "Держу как кандидат-анкор; не в зелёной зоне, пока эксп. BDE не подтверждён первоисточником.", "en": "Kept as a candidate anchor; not in the green zone until the experimental BDE is confirmed from a primary source." }
+      }
+    ],
+    "caveat": { "ru": "Честно об инструментах и статусе: (1) расчётов Дорожки B пока нет — этот раздел документирует ЦЕЛИ валидации с засорсенным ответом, не результаты; (2) при сборе источников WebFetch в окружении был заблокирован (403), сверка шла по сводкам поиска + перекрёстно, поэтому где первоисточник на число не открыт — число не ставится (см. FeO⁺); (3) полные Cu-oxo кластеры выходят за коридор 12–20 кубитов → нужен редуцированный AVAS/embedding; (4) дифференциатор — строго сильно скоррелированные центры переходных металлов, где DFT систематически врёт, а НЕ «в N раз точнее DFT» и не общая квантовая химия.", "en": "Honest about tools and status: (1) no Track B calculations exist yet — this section documents validation TARGETS with a sourced answer, not results; (2) while sourcing, WebFetch was blocked in this environment (403), so checks went via search summaries + cross-referencing, and where a primary source for a number wasn't opened, the number is omitted (see FeO⁺); (3) full Cu-oxo clusters exceed the 12–20 qubit corridor → a reduced AVAS/embedding is needed; (4) the differentiator is strictly strongly-correlated transition-metal sites where DFT systematically errs — NOT \"N× more accurate than DFT\" and not general quantum chemistry." }
+  }
 }
