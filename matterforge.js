@@ -520,6 +520,7 @@
     head.appendChild(el("span", "mf-sys-name", nm));
     head.appendChild(el("span", "mf-sys-badge mf-sys-badge-" + (s.status || "target"), tt(s.status_label)));
     card.appendChild(head);
+    if (s.result) card.appendChild(el("div", "mf-sys-result", tt(s.result)));
     const grid = el("div", "mf-sys-grid");
     const row = (k, v) => {
       const r = el("div", "mf-sys-row");

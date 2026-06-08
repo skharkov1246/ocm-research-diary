@@ -358,6 +358,9 @@
 .mf-sys-badge-target    { color: var(--good); border: 1px solid var(--good); }
 .mf-sys-badge-anchor    { color: var(--accent-2); border: 1px solid var(--accent-2); }
 .mf-sys-badge-candidate { color: var(--warn); border: 1px solid var(--warn); }
+.mf-sys-validated { border-left: 4px solid var(--good); }
+.mf-sys-badge-validated { color: #06121a; background: var(--good); border: 1px solid var(--good); }
+.mf-sys-result { margin: 12px 18px 2px; padding: 12px 14px; border-radius: 10px; font-size: 13px; line-height: 1.6; color: var(--ink); background: color-mix(in srgb, var(--good) 13%, transparent); border: 1px solid color-mix(in srgb, var(--good) 45%, var(--line)); }
 .mf-sys-grid { display: grid; gap: 0; padding: 4px 0; }
 .mf-sys-row { display: grid; grid-template-columns: 200px 1fr; gap: 14px; padding: 9px 18px; }
 .mf-sys-row + .mf-sys-row { border-top: 1px solid color-mix(in srgb, var(--line) 60%, transparent); }
