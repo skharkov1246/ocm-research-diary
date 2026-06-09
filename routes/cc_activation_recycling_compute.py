@@ -117,12 +117,22 @@ def casci_noon(mf, ao_labels=('Rh 4d','C 2p'), ncas=9, nelecas=12, thr=0.02):
     return dict(e_cas=float(mc.e_tot), noon=[round(float(x),4) for x in occ],
                 n_u=round(unpaired(occ),4), ncas=ncas, nelecas=nelecas, mc=mc)
 
-def casscf_noon(mf, ao_labels=('Rh 4d','C 2p'), ncas=9, nelecas=12, thr=0.02, macro=40):
-    """AVAS -> orbital-optimized CASSCF NOON (reliable N_u; CASCI-on-AVAS under-counts here)."""
+def casscf_noon(mf, ao_labels=('Rh 4d','C 2p'), ncas=9, nelecas=12, thr=0.02, macro=200):
+    """AVAS -> orbital-optimized CASSCF NOON (reliable N_u; CASCI-on-AVAS under-counts here).
+    A CASCI natural-orbital start + tighter macro loop fixes the slow convergence caused by
+    the near-doubly-occupied (dead) AVAS orbitals (ill-conditioned orbital Hessian)."""
     _, _, orbs = avas.avas(mf, list(ao_labels), threshold=thr, canonicalize=True)
-    mc = mcscf.CASSCF(mf, ncas, nelecas)       # non-DF: proven to converge (~300 s) here
-    mc.max_cycle_macro = macro; mc.fix_spin_(ss=0)
-    mc.kernel(orbs)
+    # CASCI natural-orbital initial guess -> much better-conditioned CASSCF start
+    mci = mcscf.CASCI(mf, ncas, nelecas); mci.fix_spin_(ss=0); mci.kernel(orbs)
+    try:
+        mo_no = mci.cas_natorb()[0]
+    except Exception:
+        mo_no = orbs
+    mc = mcscf.CASSCF(mf, ncas, nelecas)
+    mc.max_cycle_macro = macro
+    mc.conv_tol = 1e-8; mc.conv_tol_grad = 5e-5
+    mc.fix_spin_(ss=0)
+    mc.kernel(mo_no)
     dm1 = mc.fcisolver.make_rdm1(mc.ci, ncas, nelecas)
     occ = np.sort(np.linalg.eigvalsh(dm1))[::-1]
     return dict(e_cas=float(mc.e_tot), noon=[round(float(x),4) for x in occ],
@@ -319,6 +329,44 @@ def run_thermo():
               f'({out[label]["sign"]})', flush=True)
     return out
 
+def run_quantum_correction():
+    """[F] Stage 4 'Квантовая поправка': the multireference (static-correlation) correction to
+    the C-C OA energetics. corr_static = E_CASCI - E_HF in the AVAS(12e,9o) space (CASCI is
+    EXACT-in-space -> no convergence issue, robust to geometry). The correction to the BARRIER
+    is the DIFFERENTIAL corr(TS) - corr(sigma): the error a single determinant (HF/DFT) makes in
+    the barrier. Small differential => static correlation cancels in the barrier => single-ref
+    DFT barrier is reliable. Also reports the now-converged CASSCF N_u (CASCI-natorb start)."""
+    print('=== [F] Stage-4 quantum (MR) correction: static-corr differential ===', flush=True)
+    geoms = [('sigma', 1.54, 2.45), ('OA-TS', 1.98, 2.16), ('product', 2.75, 2.05)]
+    rows = []
+    for tag, dCC, rhC in geoms:
+        mol = mol_of(build_metal(dCC, rhC), charge=1); mf = rhf(mol)
+        ci = casci_noon(mf)
+        try:
+            scf = casscf_noon(mf)
+        except Exception as e:
+            scf = dict(e_cas=None, n_u=None, converged=False, err=repr(e))
+        corr = (ci['e_cas'] - mf.e_tot) * H2KCAL
+        rows.append(dict(tag=tag, dCC=dCC, e_hf=float(mf.e_tot), e_casci=ci['e_cas'],
+                         e_casscf=scf.get('e_cas'), n_u_casci=ci['n_u'],
+                         n_u_casscf=scf.get('n_u'), casscf_conv=scf.get('converged'),
+                         corr_static_kcal=round(corr, 2)))
+        print(f'  [{tag:7s}] N_u(CASSCF)={scf.get("n_u")} conv={scf.get("converged")} '
+              f'corr_static(CASCI-HF)={corr:.2f} kcal/mol', flush=True)
+    by = {r['tag']: r for r in rows}
+    dcorr = by['OA-TS']['corr_static_kcal'] - by['sigma']['corr_static_kcal']
+    out = dict(rows=rows,
+               corr_sigma_kcal=by['sigma']['corr_static_kcal'],
+               corr_TS_kcal=by['OA-TS']['corr_static_kcal'],
+               corr_product_kcal=by['product']['corr_static_kcal'],
+               dcorr_barrier_kcal=round(dcorr, 2),
+               negligible=bool(abs(dcorr) < 3.0),
+               Nu_sigma_conv=by['sigma']['n_u_casscf'], Nu_TS_conv=by['OA-TS']['n_u_casscf'],
+               Nu_product_conv=by['product']['n_u_casscf'],
+               casscf_converged=all(r['casscf_conv'] for r in rows))
+    print('STAGE4:', json.dumps(out, ensure_ascii=False), flush=True)
+    return out
+
 # ----------------------------------------------------------------------------------
 if __name__ == '__main__':
     R = {'meta': dict(model='[Rh(PH3)2(CH3)2]+ <-> [Rh(PH3)2(C2H6)]+  (Rh d6<->d8)',
@@ -362,6 +410,8 @@ if __name__ == '__main__':
         R['thermo'] = run_thermo()
     if stage in ('all','D'):
         R['vqe_poc'] = run_vqe_poc()
+    if stage in ('all','F'):
+        R['quantum_correction'] = run_quantum_correction()
 
     # merge with any prior results (so staged runs accumulate)
     if os.path.exists(RESULTS):

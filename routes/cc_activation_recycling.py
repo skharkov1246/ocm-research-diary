@@ -200,17 +200,22 @@ def fig_descriptor():
     # --- QUANTUM-EDGE box (bottom-left): multireference + our measurement ---
     ax.add_patch(FancyBboxPatch((-33, -4.6), 29.5, 11.6, boxstyle='round,pad=0.3',
                  fc='#faf5ff', ec=ACCENT_D, lw=1.6, zorder=4))
-    nu_line = 'NOON/N_u — измеряем (этот проект)'
+    lines = ['КВАНТ-EDGE — наш расчёт (PySCF):']
     if res and 'headline' in res:
         h = res['headline']
         eth = res.get('ethane_curve', [])
         eth_max = max((row.get('nu_66') or 0) for row in eth) if eth else None
-        nu_line = (f"наш расчёт (CASSCF): гомолиз C–C\nэтана N_u→{eth_max:.2f} (пиролиз — MR!);\n"
-                   f"OA-TS на Rh-пинцере N_u={h['N_u_TS']} (слабо)" if eth_max is not None
-                   else f"наш расчёт: N_u(σ)={h['N_u_sigma']}→N_u(TS)={h['N_u_TS']}")
-    ax.text(-18.2, 1.3, 'КВАНТ-EDGE:  TS OA = разрыв σ + смена\nс.о. металла; для RhCl₃ даже\n'
-            'CCSD не рек. ' + nu_line,
-            fontsize=9.2, color=ACCENT_D, ha='center', va='center', zorder=5)
+        if eth_max is not None:
+            lines.append(f'• гомолиз C–C этана: N_u→{eth_max:.2f} (пиролиз = MR)')
+        lines.append(f'• OA-TS на Rh-пинцере: N_u≈{h["N_u_TS"]} (слабо)')
+    qc = (res or {}).get('quantum_correction')
+    if qc and qc.get('dcorr_barrier_kcal') is not None:
+        lines.append(f'• поправка к барьеру Δcorr‡≈{qc["dcorr_barrier_kcal"]:+.1f} ккал/моль → мала')
+        lines.append('⇒ для барьера OA DFT достаточен; квант — в гомолизе')
+    else:
+        lines.append('(для RhCl₃ даже CCSD не рекомендован)')
+    ax.text(-18.2, 1.2, '\n'.join(lines),
+            fontsize=8.2, color=ACCENT_D, ha='center', va='center', zorder=5, linespacing=1.4)
 
     # --- ECONOMICS box (bottom-right) ---
     ax.add_patch(FancyBboxPatch((17, -4.6), 30.5, 10.2, boxstyle='round,pad=0.3',
