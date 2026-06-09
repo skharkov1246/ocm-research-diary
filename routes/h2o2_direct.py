@@ -367,9 +367,65 @@ def multireference_probe():
 
 
 # --------------------------------------------------------------------------- #
+def vqe_poc():
+    """Stage 3 PoC: активный центр → кубиты (Jordan–Wigner) → VQE(UCCSD) на симуляторе,
+    сверка с CASCI вдоль координаты разрыва O–O (def. селективности). PennyLane 0.45."""
+    import warnings; warnings.filterwarnings("ignore")
+    import numpy as np
+    import pennylane as qml
+    from pyscf import gto, scf, mcscf
+    A2B = 1.8897259886; K = 627.5094740631
+    symbols = ["O", "O", "H", "H"]; AE, AO = 4, 4; BASIS = "6-31G"
+
+    def geom(Roo, roh=0.965, aooh=100.0, dih=113.7):
+        a, f = np.deg2rad(aooh), np.deg2rad(dih)
+        O1 = np.array([0, 0, 0.0]); O2 = np.array([0, 0, Roo])
+        H1 = O1 + roh * np.array([np.sin(a), 0, np.cos(a)])
+        H2 = O2 + roh * np.array([np.sin(np.pi - a) * np.cos(f),
+                                  np.sin(np.pi - a) * np.sin(f), np.cos(np.pi - a)])
+        return np.array([O1, O2, H1, H2])
+
+    print("== Stage 3 VQE-PoC: H2O2 O–O, CAS(4e,4o)=8 кубитов, JW→VQE(UCCSD) vs CASCI ==")
+    for Roo, tag in [(1.452, "равновесие (продукт)"), (1.90, "растянута"),
+                     (2.40, "к разрыву O-O (4e-)")]:
+        coords = geom(Roo) * A2B
+        mol = qml.qchem.Molecule(symbols, coords, charge=0, mult=1, basis_name=BASIS)
+        H, q = qml.qchem.molecular_hamiltonian(mol, method="pyscf",
+                                               active_electrons=AE, active_orbitals=AO)
+        E_exact = float(np.linalg.eigvalsh(qml.matrix(H, wire_order=range(q)))[0])
+        atoms = "; ".join(f"{s} {c[0]/A2B:.6f} {c[1]/A2B:.6f} {c[2]/A2B:.6f}"
+                          for s, c in zip(symbols, coords))
+        mf = scf.RHF(gto.M(atom=atoms, basis=BASIS, spin=0, verbose=0)); E_hf = mf.kernel()
+        E_cas = mcscf.CASCI(mf, AO, AE).kernel()[0]
+        hf = qml.qchem.hf_state(AE, q)
+        singles, doubles = qml.qchem.excitations(AE, q)
+        s_w, d_w = qml.qchem.excitations_to_wires(singles, doubles)
+        dev = qml.device("lightning.qubit", wires=q)
+
+        @qml.qnode(dev, diff_method="adjoint")
+        def cost(w):
+            qml.UCCSD(w, wires=range(q), s_wires=s_w, d_wires=d_w, init_state=hf)
+            return qml.expval(H)
+
+        w = qml.numpy.zeros(len(singles) + len(doubles), requires_grad=True)
+        opt = qml.AdamOptimizer(0.1); Ep = 1e9
+        for it in range(250):
+            w, E = opt.step_and_cost(cost, w)
+            if it > 25 and abs(E - Ep) < 1e-7:
+                break
+            Ep = E
+        E_vqe = float(cost(w))
+        print(f"  R(O-O)={Roo:.2f}Å [{tag}] {q}q: HF={E_hf:.5f} CASCI={E_cas:.5f} "
+              f"(стат.корр {(E_hf-E_cas)*K:.1f}) | gate|exact-CASCI|={abs(E_exact-E_cas)*K:.1e}"
+              f" | VQE-CASCI={(E_vqe-E_cas)*K:+.3f} ккал/моль")
+
+
 def main():
     if "--probe" in sys.argv:
         multireference_probe()
+        return
+    if "--vqe" in sys.argv:
+        vqe_poc()
         return
     os.makedirs(OUT, exist_ok=True)
     fig_molecules(os.path.join(OUT, "07_h2o2_direct_molecules.png"))
