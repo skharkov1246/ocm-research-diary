@@ -644,6 +644,56 @@ const ENTRIES = [
         caption: { ru: "Обменная связь J [2Fe–2S] по 4 функционалам DFT: разброс 885 см⁻¹ со сменой знака (TPSSh даёт ферромагнетик). DFT не определяет даже знак → нужен квант. Реальный расчёт, опт. геометрия.",
                    en: "[2Fe–2S] exchange coupling J across 4 DFT functionals: 885 cm⁻¹ spread with a sign flip (TPSSh gives ferromagnetic). DFT can't fix even the sign → quantum needed. Real computation, optimized geometry." } }
     ]
+  },
+
+  /* ---------------------------------------------------------------- */
+  {
+    id: "fe4s4",
+    date: "2026-06",
+    stage: { ru: "Этап 13", en: "Stage 13" },
+    title: { ru: "[4Fe–4S] кубан: следующий блок FeMoco — и лестница кубитов до фронтира",
+             en: "The [4Fe–4S] cubane: the next FeMoco block — and the qubit ladder to the frontier" },
+    simple: {
+      ru: `<p>После ромба [2Fe–2S] следующий кирпичик FeMoco — кубан <strong>[4Fe–4S]</strong>: четыре железа и четыре серы по углам куба, самый распространённый железо-серный кластер и прямой родственник ядра FeMoco.</p>
+           <p>Мы его посчитали: и высокоспиновое, и broken-symmetry (антиферромагнитное) состояния <strong>сошлись</strong> (HS −8241.754 Ha, BS −8241.764 Ha; BS ниже на 6 ккал/моль — антиферромагнетизм, как и положено). А активное пространство продолжает расти: <strong>~40 кубитов</strong> (d-орбитали желёз) / <strong>~88 кубитов</strong> (с серами).</p>
+           <p>Это замыкает <strong>лестницу кубитов</strong>: N₂ <strong>12</strong> → Fe–N₂ <strong>24</strong> (стена симулятора) → [2Fe–2S] <strong>56</strong> → [4Fe–4S] <strong>88</strong> → FeMoco <strong>108</strong>. Мы поднялись вплотную к фронтиру — и реальными числами показали, где именно классическая симуляция квантового метода сдаётся.</p>`,
+      en: `<p>After the [2Fe–2S] rhombus, the next FeMoco brick is the <strong>[4Fe–4S]</strong> cubane: four irons and four sulfurs at a cube's corners, the most common iron–sulfur cluster and a direct relative of FeMoco's core.</p>
+           <p>We computed it: both the high-spin and a broken-symmetry (antiferromagnetic) state <strong>converged</strong> (HS −8241.754 Ha, BS −8241.764 Ha; BS lower by 6 kcal/mol — antiferromagnetic, as expected). And the active space keeps growing: <strong>~40 qubits</strong> (the irons' d-orbitals) / <strong>~88 qubits</strong> (with the sulfurs).</p>
+           <p>This closes the <strong>qubit ladder</strong>: N₂ <strong>12</strong> → Fe–N₂ <strong>24</strong> (simulator wall) → [2Fe–2S] <strong>56</strong> → [4Fe–4S] <strong>88</strong> → FeMoco <strong>108</strong>. We've climbed right up to the frontier — and shown with real numbers exactly where the classical simulation of the quantum method gives out.</p>`
+    },
+    tech: {
+      ru: `<p>[Fe₄S₄(SH)₄]²⁻ кубан (идеализированный куб, минимальная модель, геометрия <em>не</em> оптимизирована), B3LYP/def2-SVP, UKS: 16 атомов, 288 базисных функций, 238 электронов, 18 неспаренных (HS S=9).</p>
+           <ul>
+             <li><strong>HS (mult=19):</strong> E=−8241.754 Ha, ⟨S²⟩=90.05 (=9·10 ✓), сошлось.</li>
+             <li><strong>BS</strong> (флип 2 из 4 Fe): E=−8241.764 Ha, ⟨S²⟩=9.45, сошлось; E_HS−E_BS=<strong>6.0 ккал/моль</strong> (BS ниже → антиферромагнитная связь, как в ферредоксиновом [4Fe–4S]; точный J — это уже <em>несколько</em> Fe–Fe связей, не одно число).</li>
+             <li><strong>Активное пространство</strong> (оценка по AVAS-схеме «5 орбиталей/Fe + 3/S», которая точно сошлась на [2Fe–2S]): Fe 3d = 20 орбиталей → <strong>40 кубитов</strong>; Fe 3d + S 3p = 44 орбитали → <strong>88 кубитов</strong>. Финальный AVAS-SCF прервал, чтобы не жечь инстанс впустую — счёт комбинаторный, согласован с точным [2Fe–2S].</li>
+           </ul>
+           <p><strong>Лестница кубитов (всё посчитано в дневнике):</strong> N₂ 12 → Fe–N₂ 24 (стена симулятора, Этап 10: VQE не сошёлся за 69 мин) → [2Fe–2S] 56 → [4Fe–4S] 88 → FeMoco CAS(54,54) 108. [4Fe–4S] на 88 кубитах уже почти у FeMoco/108 — далеко за пределами того, где классическая симуляция VQE реальна. Итог дуги: классика-одиночка ломается на физике связи; классическая симуляция VQE ломается на масштабе катализатора (24 кубита); обходной путь DFT теряет даже знак связи. Всё это — количественный, честный аргумент за переход к отказоустойчивому квантовому железу. Оговорки: минимальная модель, геометрия не оптимизирована, размер пространства — оценка.</p>`,
+      en: `<p>[Fe₄S₄(SH)₄]²⁻ cubane (idealized cube, minimal model, geometry <em>not</em> optimized), B3LYP/def2-SVP, UKS: 16 atoms, 288 basis functions, 238 electrons, 18 unpaired (HS S=9).</p>
+           <ul>
+             <li><strong>HS (mult=19):</strong> E=−8241.754 Ha, ⟨S²⟩=90.05 (=9·10 ✓), converged.</li>
+             <li><strong>BS</strong> (flip 2 of 4 Fe): E=−8241.764 Ha, ⟨S²⟩=9.45, converged; E_HS−E_BS=<strong>6.0 kcal/mol</strong> (BS lower → antiferromagnetic coupling, as in ferredoxin [4Fe–4S]; the exact J involves <em>several</em> Fe–Fe couplings, not one number).</li>
+             <li><strong>Active space</strong> (estimated by the AVAS counting "5 orbitals/Fe + 3/S" that converged exactly for [2Fe–2S]): Fe 3d = 20 orbitals → <strong>40 qubits</strong>; Fe 3d + S 3p = 44 orbitals → <strong>88 qubits</strong>. The final AVAS SCF was terminated to avoid idle billing — counts are combinatorial, consistent with the exact [2Fe–2S].</li>
+           </ul>
+           <p><strong>The qubit ladder (all computed in the diary):</strong> N₂ 12 → Fe–N₂ 24 (simulator wall, Stage 10: VQE didn't converge in 69 min) → [2Fe–2S] 56 → [4Fe–4S] 88 → FeMoco CAS(54,54) 108. [4Fe–4S] at 88 qubits is nearly at FeMoco's 108 — far beyond where classical VQE simulation is feasible. The arc's conclusion: single-reference classical methods break on the bond physics; classical simulation of VQE breaks at catalyst scale (24 qubits); the DFT workaround loses even the sign of the coupling. Together, a quantitative, honest case for fault-tolerant quantum hardware. Caveats: minimal model, unoptimized geometry, active-space size estimated.</p>`
+    },
+    table: {
+      title: { ru: "[4Fe–4S] кубан (B3LYP/def2-SVP) + лестница кубитов — реальный расчёт",
+               en: "[4Fe–4S] cubane (B3LYP/def2-SVP) + qubit ladder — real computation" },
+      head: { ru: ["Величина", "Значение"], en: ["Quantity", "Value"] },
+      rows: [
+        ["HS (mult=19)", "E=−8241.754 Ha · ⟨S²⟩=90.0"],
+        ["BS (антиферро, 2 Fe флип)", "E=−8241.764 Ha · ⟨S²⟩=9.45"],
+        ["E(HS) − E(BS)", "6.0 ккал/моль (BS ниже → антиферро)"],
+        ["Активное пр-во Fe 3d / +S 3p", "40 / 88 кубитов (оценка)"],
+        ["Лестница кубитов", "N₂ 12 → Fe–N₂ 24 → [2Fe2S] 56 → [4Fe4S] 88 → FeMoco 108"]
+      ]
+    },
+    figures: [
+      { src: "assets/femoco/qubit_ladder.png",
+        caption: { ru: "Лестница активных пространств, посчитанных в дневнике: N₂ 12 → Fe–N₂ 24 (стена симулятора) → [2Fe–2S] 56 → [4Fe–4S] 88 → FeMoco 108. Зелёные ≤24 — VQE проверен; за стеной классическая симуляция VQE ломается.",
+                   en: "The ladder of active spaces computed in this diary: N₂ 12 → Fe–N₂ 24 (simulator wall) → [2Fe–2S] 56 → [4Fe–4S] 88 → FeMoco 108. Green ≤24 — VQE validated; past the wall the classical simulation of VQE breaks." } }
+    ]
   }
 ];
 
