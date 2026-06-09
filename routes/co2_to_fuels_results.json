@@ -609,7 +609,14 @@
    "ts_nu_pi": 0.432,
    "barrier_pbe_eV": 1.326,
    "barrier_casci_eV": 1.828,
-   "quantum_corr_eV": 0.502
+   "quantum_corr_eV": 0.502,
+   "ts_sigma_nu": 0.1001,
+   "ts_sigma_strong": 0,
+   "reactant_sigma_nu": 0.1006,
+   "reactant_sigma_strong": 0,
+   "barrier_pbe_warm_eV": 1.326,
+   "casci_barrier_reliable": false,
+   "casci_note": "UNRELIABLE: per-geometry AVAS gave inconsistent active spaces (Cu2 12e↔14e, CuAl 11o↔10o) and the metal SCF has multiple solutions (cold restart differs ~10 eV from the relaxation branch) → barrier_casci/quantum_corr are artifacts, not physics. Needs CASSCF (fixed active space, orbital-optimized) on converged SCF = AWS."
   },
   "CuAl": {
    "profile": [
@@ -696,8 +703,58 @@
       -0.0,
       3.123
      ]
+    },
+    {
+     "d": 4.2,
+     "e_pbe": -2108.410033,
+     "free": [
+      1.816,
+      1.947,
+      -2.099,
+      -0.0,
+      2.979,
+      2.102,
+      -0.0,
+      3.121
+     ]
     }
-   ]
+   ],
+   "d_reactant": 3.0,
+   "d_ts": 2.2,
+   "barrier_exists": true,
+   "reactant_e_pbe": -2108.414023,
+   "reactant_e_casci": -2105.759456,
+   "reactant_nu_pi": 0.5342,
+   "ts_e_pbe": -2108.375328,
+   "ts_e_casci": -2105.637489,
+   "ts_nu_pi": 0.4781,
+   "barrier_pbe_eV": 1.053,
+   "barrier_casci_eV": 3.319,
+   "quantum_corr_eV": 2.266,
+   "ts_sigma_nu": 0.1089,
+   "ts_sigma_strong": 0,
+   "reactant_sigma_nu": 0.1721,
+   "reactant_sigma_strong": 0,
+   "barrier_pbe_warm_eV": 0.992,
+   "casci_barrier_reliable": false,
+   "casci_note": "UNRELIABLE: per-geometry AVAS gave inconsistent active spaces (Cu2 12e↔14e, CuAl 11o↔10o) and the metal SCF has multiple solutions (cold restart differs ~10 eV from the relaxation branch) → barrier_casci/quantum_corr are artifacts, not physics. Needs CASSCF (fixed active space, orbital-optimized) on converged SCF = AWS."
+  },
+  "_summary": {
+   "pbe_barrier_eV": {
+    "Cu2": 1.326,
+    "CuAl": 0.992
+   },
+   "pbe_barrier_order": [
+    "CuAl",
+    "Cu2"
+   ],
+   "casci_barrier": "UNRELIABLE at cluster CASCI//PBE level (active-space + SCF-solution inconsistency); apparent order-flip is an artifact, not reported as physics",
+   "ts_sigma_nu": {
+    "Cu2": 0.1001,
+    "CuAl": 0.1089
+   },
+   "ts_is_localized_diradical": false,
+   "note": "Relaxed PBE coupling barriers are real (frozen-metal cluster, def2-SVP, no constant-potential): CuAl<Cu2. σ-frontier of the forming C–C bond is NOT a localized diradical at the TS (unlike the literature surface 1.92/0.09 — model lacks potential/reduction). Trustworthy multireference barrier correction = CASSCF/AWS."
   }
  }
 }

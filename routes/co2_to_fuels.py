@@ -165,38 +165,42 @@ def fig_descriptor(res):
     fig.suptitle("Дескриптор сочленения C–C: расхождение CASCI − DFT(PBE)  —  и вопрос «от обратного»",
                  fontsize=16.5, fontweight="bold", color=INK, y=0.985)
 
-    # ── Панель A: реальный профиль CASCI vs PBE + фронтир-NOON ──────────
-    rows = (res or {}).get("occo_scan", {}).get("rows", [])
-    if rows:
-        R = np.array([r["R"] for r in rows])
-        ep = (np.array([r["e_pbe"] for r in rows]) - rows[-1]["e_pbe"]) * 27.2114
-        ec = (np.array([r["e_casci"] for r in rows]) - rows[-1]["e_casci"]) * 27.2114
-        axA.plot(R, ep, "--", color="#3182ce", lw=2.4, label="DFT (PBE)")
-        axA.plot(R, ec, "-", color=RED, lw=2.6, label="CASCI(12e,10o)")
-        axA.fill_between(R, ep, ec, color=RED, alpha=0.12)
-        axA.annotate("расхождение CASCI − DFT\n(расчёт, газофаза)",
-                     xy=(1.9, 4.5), xytext=(2.45, 6.4), fontsize=9.5, color=RED,
-                     ha="center", arrowprops=dict(arrowstyle="->", color=RED, lw=1.3))
+    # ── Панель A: РЕАЛЬНЫЕ релакс-барьеры PBE на металле (Cu₂ vs CuAl) ──
+    tb = (res or {}).get("ts_barrier", {})
+    site_sty = {"Cu2": (COPPER, "чистый Cu₂"), "CuAl": ("#3182ce", "сплав CuAl")}
+    for s, (col, lab) in site_sty.items():
+        if s not in tb or "profile" not in tb[s]:
+            continue
+        prof = sorted(tb[s]["profile"], key=lambda p: p["d"])
+        dd = np.array([p["d"] for p in prof])
+        ee = (np.array([p["e_pbe"] for p in prof]) - min(p["e_pbe"] for p in prof)) * 27.2114
+        axA.plot(dd, ee, "-o", color=col, lw=2.4, ms=5, label=lab)
+        dts = tb[s]["d_ts"]; i = int(np.argmin(np.abs(dd - dts)))
+        b = tb[s].get("barrier_pbe_warm_eV", tb[s].get("barrier_pbe_eV"))
+        axA.plot(dts, ee[i], "*", color=col, ms=17, zorder=6)
+        axA.annotate(f"ΔE‡={b:.2f} эВ", (dts, ee[i]), textcoords="offset points",
+                     xytext=(7, 5), fontsize=9.5, color=col, fontweight="bold")
     axA.set_xlabel("координата сочленения  C···C, Å", fontsize=11.5)
-    axA.set_ylabel("энергия (отн. разведённых *CO), эВ", fontsize=11.5)
-    axA.set_title("A · профиль на единой геометрии  (def2-SVP)", fontsize=12, color=INK)
-    axA.grid(alpha=0.25); axA.legend(loc="lower right", fontsize=10)
+    axA.set_ylabel("энергия PBE (отн. разведённых *CO), эВ", fontsize=11.5)
+    axA.set_title("A · релакс-барьер сочленения на металле  (PBE/def2-SVP)", fontsize=11.5, color=INK)
+    axA.grid(alpha=0.25); axA.legend(loc="upper right", fontsize=10)
     axA.invert_xaxis()
 
-    # honest box on panel A (top-left, empty region)
-    box = FancyBboxPatch((0.03, 0.60), 0.66, 0.34, transform=axA.transAxes,
+    # honest box on panel A (bottom, empty region)
+    box = FancyBboxPatch((0.03, 0.03), 0.94, 0.31, transform=axA.transAxes,
                          boxstyle="round,pad=0.02,rounding_size=0.02",
                          fc="#fffaf0", ec="#dd6b20", lw=1.4, zorder=5)
     axA.add_patch(box)
-    front = (res or {}).get("frontier", {})
-    nu_lo = front.get("n_u_min", 0.04); nu_hi = front.get("n_u_max", 0.12)
-    axA.text(0.05, 0.885,
-             "Честно: жёсткий газофазный скан =\nотталкивательная стена, не TS (артефакт).",
-             transform=axA.transAxes, fontsize=8.8, color="#dd6b20", fontweight="bold", zorder=6)
-    axA.text(0.05, 0.655,
-             f"Фронтир связи C–C почти closed-shell:\nn_u = {nu_lo:.2f}→{nu_hi:.2f}, strong=0. Нейтральная\n"
-             "газофаза НЕ даёт дирадикалоид → нужен металл.",
-             transform=axA.transAxes, fontsize=8.5, color=INK, zorder=6)
+    snu = tb.get("_summary", {}).get("ts_sigma_nu", {}) or {}
+    cu_nu = snu.get("Cu2") or 0.10; al_nu = snu.get("CuAl") or 0.11
+    axA.text(0.05, 0.275,
+             "Честно: барьеры PBE реальны (CuAl ниже Cu₂ — DFT-преимущество сплава).",
+             transform=axA.transAxes, fontsize=8.5, color="#dd6b20", fontweight="bold", zorder=6)
+    axA.text(0.05, 0.05,
+             f"σ-фронтир связи C–C в TS НЕ дирадикал (n_u≈{cu_nu:.2f}/{al_nu:.2f}, strong=0; вопреки лит. 1.92/0.09).\n"
+             "Мультиреференс-ПОПРАВКУ к барьеру на кластере (CASCI//PBE) надёжно не получить:\n"
+             "AVAS даёт разные актив. простр-ва (12e↔14e), у металла много SCF-решений → CASSCF/AWS.",
+             transform=axA.transAxes, fontsize=7.9, color=INK, zorder=6)
 
     # ── Панель B: Cu vs сплав CuAl — меняет ли квант порядок сайтов ──────
     axB.set_xlim(0, 10); axB.set_ylim(0, 10); axB.axis("off")
