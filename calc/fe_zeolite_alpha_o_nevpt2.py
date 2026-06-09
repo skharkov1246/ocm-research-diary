@@ -46,6 +46,17 @@ def constructed_cluster():
     ]
 
 
+def minimal_cluster():
+    """[Fe(O)(OH)2] — Fe=0, oxo=1. Smaller field, but relaxes reliably (the
+    extended aqua model does not converge berny gradients in this env)."""
+    return [
+        ["Fe", (0.000,  0.000,  0.000)],
+        ["O",  (0.000,  0.000,  1.620)],
+        ["O",  (1.820,  0.000, -0.430)], ["H", (2.470,  0.000, -1.090)],
+        ["O",  (-1.820, 0.000, -0.430)], ["H", (-2.470, 0.000, -1.090)],
+    ]
+
+
 def read_xyz(path):
     with open(path) as f:
         lines = f.read().splitlines()
@@ -115,10 +126,16 @@ def order(spins, key):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--xyz", default=None); ap.add_argument("--charge", type=int, default=0)
+    ap.add_argument("--minimal", action="store_true", help="use [Fe(O)(OH)2] (relaxes reliably)")
     args = ap.parse_args()
-    atoms = read_xyz(args.xyz) if args.xyz else constructed_cluster()
+    if args.xyz:
+        atoms, model = read_xyz(args.xyz), args.xyz
+    elif args.minimal:
+        atoms, model = minimal_cluster(), "constructed [Fe(O)(OH)2] minimal (relaxes; NOT a CIF CHA site)"
+    else:
+        atoms, model = constructed_cluster(), "constructed [Fe(O)(OH)2(OH2)2] (NOT a CIF CHA site)"
     out = {"meta": {"basis": BASIS, "ao_labels": AO_LABELS, "charge": args.charge,
-                    "model": args.xyz or "constructed [Fe(O)(OH)2(OH2)2] (NOT a CIF CHA site)",
+                    "model": model,
                     "known_answer": "alpha-O ground state = S=2 (Nature 2016)",
                     "honesty": "curated converged CASSCF + NEVPT2; VERTICAL gaps on a "
                                "CONSTRUCTED cluster; faithful absolutes need real CIF + adiabatic."},
@@ -140,9 +157,10 @@ def main():
         print("NEVPT2 :", json.dumps(out["verdict_nevpt2"], ensure_ascii=False))
     except Exception as e:
         out["error"] = f"{type(e).__name__}: {e}"; print("ERROR:", out["error"], file=sys.stderr)
-    with open("calc/fe_zeolite_alpha_o_nevpt2_results.json", "w") as f:
+    outfile = f"calc/fe_zeolite_alpha_o_nevpt2{'_minimal' if args.minimal else ''}_results.json"
+    with open(outfile, "w") as f:
         json.dump(out, f, indent=2)
-    print("wrote calc/fe_zeolite_alpha_o_nevpt2_results.json")
+    print("wrote", outfile)
 
 
 if __name__ == "__main__":
