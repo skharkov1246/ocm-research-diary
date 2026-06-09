@@ -21,9 +21,41 @@ import os, sys, json, time
 import numpy as np
 from scipy.optimize import minimize
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from co2_to_fuels_sites import METALS, _mol, _scf, casci_pi, HARTREE_EV, RESULTS
+from co2_to_fuels_sites import METALS, _mol, HARTREE_EV, RESULTS
+from pyscf import dft, mcscf
+from pyscf.scf import addons
+from pyscf.mcscf import avas
 
 DS = [1.8, 2.2, 2.6, 3.0, 3.4, 3.8, 4.2]   # driven C···C (x-separation), Å
+
+
+def _scf(mol, dm0=None):
+    """RI-PBE, Newton(SOSCF)-primary — robust+fast for the metal-adsorbate clusters
+    (≈40× faster than DIIS+level-shift on the hard CuAl geometries). Fermi-smearing
+    fallback breaks any residual oscillation, then re-tightens with Newton."""
+    mf = dft.RKS(mol).density_fit(); mf.xc = "pbe"; mf.verbose = 0; mf.conv_tol = 1e-8
+    mfn = mf.newton()
+    try:
+        mfn.kernel(dm0=dm0)
+    except TypeError:
+        mfn.kernel()
+    if not mfn.converged:
+        mf2 = dft.RKS(mol).density_fit(); mf2.xc = "pbe"; mf2.verbose = 0
+        mf2 = addons.smearing_(mf2, sigma=0.01, method="fermi")
+        mf2.max_cycle = 200; mf2.conv_tol = 1e-6; mf2.kernel(dm0=dm0)
+        mfn = mf2.newton(); mfn.kernel(mf2.make_rdm1())
+    return mfn
+
+
+def casci_pi(metal, ads):
+    """CASCI(π-manifold, 12e,10o via AVAS) + NOON n_u at a geometry (fast SCF)."""
+    mf = _scf(_mol(metal, ads))
+    no, ne, orbs = avas.avas(mf, ["C 2p", "O 2px", "O 2py"], threshold=0.4, verbose=0)
+    mc = mcscf.CASCI(mf, no, ne); mc.verbose = 0; mc.kernel(orbs)
+    dm = mc.fcisolver.make_rdm1(mc.ci, mc.ncas, mc.nelecas)
+    n = np.linalg.eigvalsh(dm)[::-1]
+    nu = float(np.sum(np.minimum(n, 2 - n)))
+    return float(mf.e_tot), float(mc.e_tot), round(nu, 4), (int(ne), int(no))
 
 
 def build_ads(d, free):
