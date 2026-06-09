@@ -1,0 +1,95 @@
+{
+  "meta": {
+    "basis": "def2-svp",
+    "ao_labels": [
+      "0 Fe 3d",
+      "1 O 2p"
+    ],
+    "charge": 0,
+    "model": "constructed [Fe(O)(OH)2(OH2)2] (NOT a CIF CHA site)",
+    "known_answer": "alpha-O ground state = S=2 (Nature 2016)",
+    "honesty": "curated converged CASSCF + NEVPT2; VERTICAL gaps on a CONSTRUCTED cluster; faithful absolutes need real CIF + adiabatic.",
+    "scf_conv": true
+  },
+  "spins": {
+    "quintet": {
+      "e_cas": -1639.658488843703,
+      "cas_conv": true,
+      "n_u": 5.12,
+      "excess": 1.12,
+      "noon": [
+        1.951,
+        1.946,
+        1.735,
+        1.051,
+        1.047,
+        1.0,
+        1.0,
+        0.269
+      ],
+      "e_nevpt2": -1640.85974676441,
+      "nevpt2_corr": -1.2012579207068985
+    },
+    "triplet": {
+      "e_cas": -1639.60960582347,
+      "cas_conv": true,
+      "n_u": 3.948,
+      "excess": 1.948,
+      "noon": [
+        1.972,
+        1.95,
+        1.819,
+        1.677,
+        1.043,
+        0.998,
+        0.343,
+        0.198
+      ],
+      "e_nevpt2": -1640.8074342721568,
+      "nevpt2_corr": -1.1978284486868886
+    },
+    "singlet": {
+      "e_cas": -1639.5816559985763,
+      "cas_conv": true,
+      "n_u": 1.638,
+      "excess": 1.638,
+      "noon": [
+        1.992,
+        1.982,
+        1.953,
+        1.866,
+        1.75,
+        0.286,
+        0.155,
+        0.016
+      ],
+      "e_nevpt2": -1640.7651102202483,
+      "nevpt2_corr": -1.1834542216721458
+    }
+  },
+  "active_space": {
+    "ncas": 8,
+    "nelec": 10,
+    "qubits_jw": 16
+  },
+  "verdict_casscf": {
+    "level": "e_cas",
+    "ground_state": "quintet",
+    "matches_known_S2": true,
+    "rel_kcal": {
+      "quintet": 0.0,
+      "triplet": 30.67,
+      "singlet": 48.21
+    }
+  },
+  "verdict_nevpt2": {
+    "level": "e_nevpt2",
+    "ground_state": "quintet",
+    "matches_known_S2": true,
+    "rel_kcal": {
+      "quintet": 0.0,
+      "triplet": 32.83,
+      "singlet": 59.39
+    }
+  }
+}
