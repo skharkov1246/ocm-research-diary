@@ -65,8 +65,8 @@ def relaxed_ref(atoms, charge):
     for backend in ("geometric_solver", "berny_solver"):
         try:
             opt = __import__(f"pyscf.geomopt.{backend}", fromlist=["optimize"]).optimize
-            mks = dft.ROKS(mol); mks.xc = "PBE0"; mks.level_shift = 0.2; mks.max_cycle = 300
-            mol = opt(mks, maxsteps=80)
+            mks = dft.UKS(mol); mks.xc = "PBE"; mks.conv_tol = 1e-7; mks.max_cycle = 400
+            mol = opt(mks, maxsteps=100, conv_params={"convergence_energy": 1e-5})
             print(f"[geom] relaxed (high-spin) with {backend}"); break
         except Exception as e:
             print(f"[warn] {backend} failed ({type(e).__name__}: {e})")
