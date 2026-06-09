@@ -1,0 +1,95 @@
+{
+  "meta": {
+    "basis": "def2-svp",
+    "ao_labels": [
+      "0 Fe 3d",
+      "1 O 2p"
+    ],
+    "charge": 0,
+    "model": "constructed [Fe(O)(OH)2(OH2)2] (NOT a CIF CHA site)",
+    "known_answer": "alpha-O ground state = S=2 (Nature 2016)",
+    "honesty": "curated converged CASSCF + NEVPT2; VERTICAL gaps on a CONSTRUCTED cluster; faithful absolutes need real CIF + adiabatic.",
+    "scf_conv": true
+  },
+  "spins": {
+    "quintet": {
+      "e_cas": -1639.6584888290126,
+      "cas_conv": true,
+      "n_u": 5.12,
+      "excess": 1.12,
+      "noon": [
+        1.951,
+        1.946,
+        1.735,
+        1.051,
+        1.047,
+        1.0,
+        1.0,
+        0.269
+      ],
+      "e_nevpt2": -1640.8597463557674,
+      "nevpt2_corr": -1.2012575267547967
+    },
+    "triplet": {
+      "e_cas": -1639.6112000958965,
+      "cas_conv": true,
+      "n_u": 4.004,
+      "excess": 2.004,
+      "noon": [
+        1.999,
+        1.988,
+        1.807,
+        1.607,
+        1.002,
+        1.0,
+        0.401,
+        0.197
+      ],
+      "e_nevpt2": -1640.8031699642033,
+      "nevpt2_corr": -1.1919698683069475
+    },
+    "singlet": {
+      "e_cas": -1639.5816559567195,
+      "cas_conv": true,
+      "n_u": 1.638,
+      "excess": 1.638,
+      "noon": [
+        1.992,
+        1.982,
+        1.953,
+        1.866,
+        1.75,
+        0.286,
+        0.155,
+        0.016
+      ],
+      "e_nevpt2": -1640.765110219945,
+      "nevpt2_corr": -1.1834542632254685
+    }
+  },
+  "active_space": {
+    "ncas": 8,
+    "nelec": 10,
+    "qubits_jw": 16
+  },
+  "verdict_casscf": {
+    "level": "e_cas",
+    "ground_state": "quintet",
+    "matches_known_S2": true,
+    "rel_kcal": {
+      "quintet": 0.0,
+      "triplet": 29.67,
+      "singlet": 48.21
+    }
+  },
+  "verdict_nevpt2": {
+    "level": "e_nevpt2",
+    "ground_state": "quintet",
+    "matches_known_S2": true,
+    "rel_kcal": {
+      "quintet": 0.0,
+      "triplet": 35.5,
+      "singlet": 59.39
+    }
+  }
+}
