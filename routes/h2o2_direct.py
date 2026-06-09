@@ -345,6 +345,26 @@ def multireference_probe():
               f"{'conv' if mc.converged else 'NOTconv'}  N_u={Nu(occ):.2f}  "
               f"NOON={np.round(occ,3)}")
 
+    print("== интермедиаты 2e--пути: супероксо O2^-• и гидропероксил HOO• (=*OOH) ==")
+    om = gto.M(atom="O 0 0 0; O 0 0 1.28", basis="def2-svp", spin=1, charge=-1,
+               symmetry=False, verbose=0)
+    mf = scf.ROHF(om); mf.kernel()
+    mc = mcscf.CASSCF(mf, 6, 9); mc.verbose = 0; mc.kernel()
+    occ = cas_noon(mc)
+    print(f"  супероксо O2^-• CAS(9e,6o) N_u={Nu(occ):.2f}  NOON={np.round(occ,3)}  "
+          f"(газофазный анион в def2-SVP без диффузных — для тренда)")
+
+    a = np.deg2rad(104.3); roh = 0.971; Roo = 1.331
+    O2 = np.array([0, 0, Roo])
+    H = O2 + roh * np.array([np.sin(np.pi - a), 0, np.cos(np.pi - a)])
+    hoo = f"O 0 0 0; O 0 0 {Roo}; H {H[0]:.4f} {H[1]:.4f} {H[2]:.4f}"
+    m = gto.M(atom=hoo, basis="def2-svp", spin=1, charge=0, symmetry=False, verbose=0)
+    mf = scf.ROHF(m); mf.kernel()
+    ncas, nelecas, mo = avas.avas(mf, ["O 2p"], canonicalize=True, verbose=0)
+    mc = mcscf.CASSCF(mf, ncas, nelecas); mc.verbose = 0; mc.kernel(mo)
+    occ = cas_noon(mc)
+    print(f"  HOO• (*OOH) CAS({nelecas}e,{ncas}o) N_u={Nu(occ):.2f}  NOON={np.round(occ,3)}")
+
 
 # --------------------------------------------------------------------------- #
 def main():
