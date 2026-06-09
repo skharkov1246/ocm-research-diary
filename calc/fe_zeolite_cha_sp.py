@@ -7,7 +7,7 @@ tractable. Geometry already xTB-relaxed -> no geom-opt here. Curated active spac
 This is the faithful test: real IZA CHA framework geometry, standard 2-Al 6-ring
 [FeO]2+ model. Honesty: cluster (not periodic), def2-SVP, 2-Al siting = para,
 xTB active-site geometry. Validates spin ORDERING on a real-framework geometry."""
-import json, sys, time
+import json, os, sys, time
 import numpy as np
 from pyscf import gto, scf, mcscf, mrpt
 from pyscf.mcscf import avas
@@ -33,7 +33,10 @@ def run():
     t = time.time()
     m = mol(4)
     out["meta"]["nbf"] = int(m.nao)
-    mf = scf.ROHF(m).density_fit(); mf.level_shift = 0.3; mf.max_cycle = 300
+    mf = scf.ROHF(m).density_fit(); mf.chkfile = "calc/cha_scf.chk"
+    if os.path.exists(mf.chkfile):
+        mf.init_guess = "chkfile"                    # reuse a prior SCF to skip the slow part
+    mf.level_shift = 0.3; mf.max_cycle = 300
     mf.kernel()
     if not mf.converged:
         mf = mf.newton(); mf.kernel()
@@ -51,10 +54,11 @@ def run():
         mc.max_cycle_macro = 200
         e = mc.kernel(mo)[0]
         d = {"e_cas": float(e), "cas_conv": bool(mc.converged)}
-        try:
-            d["e_nevpt2"] = float(e + mrpt.NEVPT(mc).kernel())
-        except Exception as ex:
-            d["nevpt2_err"] = f"{type(ex).__name__}: {str(ex)[:60]}"
+        if os.environ.get("CHA_NEVPT2") == "1":      # NEVPT2 is the AWS-scale part; off by default
+            try:
+                d["e_nevpt2"] = float(e + mrpt.NEVPT(mc).kernel())
+            except Exception as ex:
+                d["nevpt2_err"] = f"{type(ex).__name__}: {str(ex)[:60]}"
         out["spins"][name] = d
         print(f"  {name:8s} cas_conv={d['cas_conv']} E_cas={d['e_cas']:.4f} "
               f"E_nevpt2={d.get('e_nevpt2','-')} ({time.time()-t:.0f}s)")
