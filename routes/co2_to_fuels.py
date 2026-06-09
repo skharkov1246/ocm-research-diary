@@ -198,50 +198,56 @@ def fig_descriptor(res):
              "газофаза НЕ даёт дирадикалоид → нужен металл.",
              transform=axA.transAxes, fontsize=8.5, color=INK, zorder=6)
 
-    # ── Панель B: сито по сайтам + вопрос «от обратного» ────────────────
+    # ── Панель B: Cu vs сплав CuAl — меняет ли квант порядок сайтов ──────
     axB.set_xlim(0, 10); axB.set_ylim(0, 10); axB.axis("off")
-    axB.set_title("B · сито scaling-ломающих сайтов  (концепт + лит.)", fontsize=12, color=INK)
-
-    # literature anchor bars: PBE 0.48 vs CASPT2 1.43 eV (surface Cu(100))
-    axB.text(5.0, 9.2, "Литературный якорь · поверхность Cu(100):", ha="center",
-             fontsize=10.5, color=INK, fontweight="bold")
-    for x, h, c, lab in [(3.2, 0.48, "#3182ce", "PBE\n0.48 эВ"),
-                         (6.8, 1.43, RED, "CASPT2\n1.43 эВ")]:
-        axB.add_patch(plt.Rectangle((x - 0.6, 5.4), 1.2, h * 1.9, fc=c, ec=INK,
-                                    alpha=0.8, lw=1.2))
-        axB.text(x, 5.4 + h * 1.9 + 0.25, lab, ha="center", fontsize=9.5, color=c,
-                 fontweight="bold")
-    axB.annotate("", xy=(6.2, 5.4 + 1.43 * 1.9), xytext=(3.8, 5.4 + 0.48 * 1.9),
-                 arrowprops=dict(arrowstyle="->", color=RED, lw=1.6))
-    axB.text(5.0, 8.05, "Δ ≈ +0.95 эВ  (DFT занижает барьер)", ha="center",
-             fontsize=9.8, color=RED, style="italic")
-    axB.text(5.0, 4.85, "NOON(TS) ≈ 1.92 / 0.09 e — дирадикалоид  (лит. 2025)",
-             ha="center", fontsize=9.2, color=GREY)
-
-    # open inverse-design question box
-    q = FancyBboxPatch((0.4, 0.5), 9.2, 3.7, boxstyle="round,pad=0.10,rounding_size=0.12",
-                       fc="#f0fff4", ec=GREEN, lw=1.8)
-    axB.add_patch(q)
-    axB.text(5.0, 3.75, "ВОПРОС ОТ ОБРАТНОГО (открыт, AWS):", ha="center",
-             fontsize=10.5, color="#276749", fontweight="bold")
-    axB.text(5.0, 2.95,
-             "выживает ли DFT-преимущество scaling-ломающих сайтов\n"
-             "(CuAl / CuGa) под мультиреференс-поправкой ΔE‡(CASCI−DFT)?\n"
-             "Меняет ли квант ПОРЯДОК сайтов (ломает ли DFT-волкан)?",
-             ha="center", fontsize=9.2, color=INK)
-    ms = (res or {}).get("metal_site", {})
-    sep = ms.get("nu_pi_separated", 0.43); cpl = ms.get("nu_pi_coupled", 0.22)
-    axB.text(5.0, 1.62,
-             f"Реально (Cu₂+2*CO, PBE→CASCI): разведённые *CO мультиреференсны n_u(π)={sep:.2f};\n"
-             f"сочленение спаривает электроны → {cpl:.2f} (strong=0). Дирадикалоид — на СЕДЛЕ между ними:\n"
-             "нужен релакс-TS + потенциал + полное AVAS(Cu 3d)=CAS(36e,22o)=44 кубита (AWS).",
-             ha="center", fontsize=8.0, color="#276749", style="italic")
+    axB.set_title("B · Cu vs сплав CuAl: меняет ли квант порядок сайтов?",
+                  fontsize=12, color=INK)
+    sites = (res or {}).get("sites", {})
+    labels = {"Cu2": "чистый Cu₂", "CuAl": "сплав CuAl"}
+    colors = {"Cu2": COPPER, "CuAl": "#6b7cff"}
+    if all(k in sites for k in ("Cu2", "CuAl")):
+        dp = {t: sites[t]["dEcouple_pbe_eV"] for t in ("Cu2", "CuAl")}
+        dc = {t: sites[t]["dEcouple_casci_eV"] for t in ("Cu2", "CuAl")}
+        allv = list(dp.values()) + list(dc.values())
+        lo, hi = min(allv), max(allv); span = max(hi - lo, 0.4)
+        def Y(v): return 2.3 + 4.8 * (v - lo) / span
+        xL, xR = 3.2, 6.8
+        flipped = sites.get("_summary", {}).get("order_flipped", False)
+        verdict = ("КВАНТ МЕНЯЕТ порядок сайтов — DFT-волкан ломается"
+                   if flipped else "порядок сайтов сохраняется")
+        axB.text(5.0, 9.05, verdict, ha="center", fontsize=11,
+                 color=("#c53030" if flipped else "#276749"), fontweight="bold")
+        axB.text(xL, 7.9, "DFT (PBE)", ha="center", fontsize=10.5, color="#3182ce", fontweight="bold")
+        axB.text(xR, 7.9, "CASCI(12e,10o)", ha="center", fontsize=10.5, color=RED, fontweight="bold")
+        for t in ("Cu2", "CuAl"):
+            axB.plot([xL, xR], [Y(dp[t]), Y(dc[t])], "-o", color=colors[t], lw=2.6, ms=11, zorder=4)
+            axB.text(xL - 0.35, Y(dp[t]), f"{dp[t]:+.2f}", ha="right", va="center",
+                     fontsize=9, color=colors[t])
+            axB.text(xR + 0.35, Y(dc[t]), f"{labels[t]}  {dc[t]:+.2f} эВ", ha="left",
+                     va="center", fontsize=9.5, color=colors[t], fontweight="bold")
+        dcorr = {t: sites[t].get("quantum_corr_eV") for t in ("Cu2", "CuAl")}
+        axB.text(5.0, 1.55,
+                 f"мультиреференс-поправка ΔE_couple(CASCI−PBE):  Cu₂ {dcorr['Cu2']:+.2f} эВ,  "
+                 f"CuAl {dcorr['CuAl']:+.2f} эВ",
+                 ha="center", fontsize=9, color=INK)
+        axB.text(5.0, 0.95,
+                 "ось ↑ = ΔE_couple (E сочленённые − разведённые); ниже = легче сочленение.",
+                 ha="center", fontsize=8, color=GREY)
+    else:
+        axB.text(5.0, 5.0, "ВОПРОС ОТ ОБРАТНОГО (расчёт идёт):\n"
+                 "меняет ли ΔE‡(CASCI−DFT) порядок Cu vs CuAl?", ha="center",
+                 fontsize=10, color="#276749", fontweight="bold")
+    # compact literature anchor reference
+    axB.text(5.0, 3.7, "лит. якорь (поверхность Cu(100)): барьер PBE 0.48 vs CASPT2 1.43 эВ; "
+             "NOON(TS) 1.92/0.09 — дирадикалоид (2025)", ha="center", fontsize=8,
+             color=GREY, style="italic")
 
     # footer
     fig.text(0.012, 0.012,
-             "Кластер ≠ электрод (нет constant-potential) → это ДЕСКРИПТОР расхождения CASCI−DFT, "
-             "НЕ предсказание фарадеевской эффективности. Контроль метрики: O₂ excess +0.09, strong 2.",
-             fontsize=9, color=GREY, style="italic")
+             "Панель B: ΔE_couple — РЕАКЦИОННАЯ энергия сочленения (релакс-эндпоинты, замороженный "
+             "металл-кластер, def2-SVP), НЕ барьер ΔE‡ и НЕ фарадеевская эффективность (кластер ≠ "
+             "электрод). Седло + constant-potential — следующий прогон на AWS. Контроль метрики: O₂ excess +0.09.",
+             fontsize=8.3, color=GREY, style="italic")
     fig.text(0.988, 0.012, "схема · отчасти illustrative", ha="right", fontsize=10,
              color=GREY, style="italic")
     fig.tight_layout(rect=[0, 0.03, 1, 0.96])

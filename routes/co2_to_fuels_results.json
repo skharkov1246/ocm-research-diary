@@ -443,5 +443,26 @@
   "pbe_converged": true,
   "full_avas_cu3d": "CAS(36e,22o) = 44 qubits (Cu 3d + C 2p + O 2p) — VQE candidate / AWS",
   "finding": "metal-bound separated *CO IS multireference (n_u=0.43, pi); coupling pairs electrons and REDUCES it to 0.22; strong_frac=0 — no localized diradical at the endpoints. The literature diradicaloid is a saddle-point feature: needs relaxed TS + applied potential + full 44-qubit AVAS (AWS)."
+ },
+ "sites": {
+  "Cu2": {
+   "separated": {
+    "e_pbe": -3506.320701,
+    "e_casci": -3502.639363,
+    "nu_pi": 0.4128,
+    "cc_final": 3.762,
+    "cas": "(12e,10o)"
+   },
+   "coupled": {
+    "e_pbe": -3506.296348,
+    "e_casci": -3502.591109,
+    "nu_pi": 0.406,
+    "cc_final": 1.839,
+    "cas": "(16e,12o)"
+   },
+   "dEcouple_pbe_eV": 0.663,
+   "dEcouple_casci_eV": 1.313,
+   "quantum_corr_eV": 0.65
+  }
  }
 }
