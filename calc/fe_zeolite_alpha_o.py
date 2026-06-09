@@ -79,12 +79,17 @@ def scf_ref(atoms, charge, full):
     """Highest-spin reference (defines the active space). Optional DFT geom-opt."""
     mol = make_mol(atoms, charge, max(SPINS.values()))
     if full:
-        try:
-            from pyscf.geomopt.geometric_solver import optimize
-            mks = dft.ROKS(mol); mks.xc = "PBE0"; mks.level_shift = 0.2; mks.max_cycle = 300
-            mol = optimize(mks, maxsteps=80)
-        except Exception as e:
-            print(f"[warn] geom-opt skipped ({type(e).__name__}: {e}); using input geometry")
+        done = False
+        for backend in ("geometric_solver", "berny_solver"):
+            try:
+                opt = __import__(f"pyscf.geomopt.{backend}", fromlist=["optimize"]).optimize
+                mks = dft.ROKS(mol); mks.xc = "PBE0"; mks.level_shift = 0.2; mks.max_cycle = 300
+                mol = opt(mks, maxsteps=80)
+                print(f"[geom] relaxed (highest-spin) with {backend}"); done = True; break
+            except Exception as e:
+                print(f"[warn] {backend} failed ({type(e).__name__}: {e})")
+        if not done:
+            print("[warn] no optimizer available; using INPUT geometry (vertical gaps only)")
     mf = scf.ROHF(mol); mf.level_shift = 0.3; mf.max_cycle = 400
     mf.kernel()
     if not mf.converged:
