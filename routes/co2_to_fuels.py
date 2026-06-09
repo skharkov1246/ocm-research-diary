@@ -213,12 +213,25 @@ def fig_descriptor(res):
         def Y(v): return 2.3 + 4.8 * (v - lo) / span
         xL, xR = 3.2, 6.8
         flipped = sites.get("_summary", {}).get("order_flipped", False)
-        verdict = ("КВАНТ МЕНЯЕТ порядок сайтов — DFT-волкан ломается"
-                   if flipped else "порядок сайтов сохраняется")
-        axB.text(5.0, 9.05, verdict, ha="center", fontsize=11,
-                 color=("#c53030" if flipped else "#276749"), fontweight="bold")
-        axB.text(xL, 7.9, "DFT (PBE)", ha="center", fontsize=10.5, color="#3182ce", fontweight="bold")
-        axB.text(xR, 7.9, "CASCI(12e,10o)", ha="center", fontsize=10.5, color=RED, fontweight="bold")
+        sign_flip = [t for t in ("Cu2", "CuAl") if dp[t] < 0 <= dc[t]]
+        if flipped:
+            verdict, vc = "КВАНТ МЕНЯЕТ порядок сайтов — DFT-волкан ломается", "#c53030"
+        elif sign_flip:
+            verdict, vc = "порядок сохраняется, но поправка МЕНЯЕТ ЗНАК ΔE_couple", "#c53030"
+        else:
+            verdict, vc = "порядок сайтов сохраняется", "#276749"
+        axB.text(5.0, 9.25, verdict, ha="center", fontsize=10.5, color=vc, fontweight="bold")
+        if sign_flip:
+            t = sign_flip[0]
+            axB.text(5.0, 8.6, f"{labels[t]}: DFT — сочленение ВЫГОДНО ({dp[t]:+.2f}), "
+                     f"CASCI — НЕВЫГОДНО ({dc[t]:+.2f} эВ)", ha="center",
+                     fontsize=8.5, color=vc, style="italic")
+        axB.text(xL, 7.95, "DFT (PBE)", ha="center", fontsize=10.5, color="#3182ce", fontweight="bold")
+        axB.text(xR, 7.95, "CASCI(12e,10o)", ha="center", fontsize=10.5, color=RED, fontweight="bold")
+        y0 = Y(0.0)                                     # выгодно/невыгодно boundary
+        if 2.0 < y0 < 7.6:
+            axB.plot([xL - 0.8, xR + 0.8], [y0, y0], "--", color=GREY, lw=1.1, zorder=2)
+            axB.text(xL - 0.85, y0, "ΔE=0", ha="right", va="center", fontsize=7.5, color=GREY)
         for t in ("Cu2", "CuAl"):
             axB.plot([xL, xR], [Y(dp[t]), Y(dc[t])], "-o", color=colors[t], lw=2.6, ms=11, zorder=4)
             axB.text(xL - 0.35, Y(dp[t]), f"{dp[t]:+.2f}", ha="right", va="center",
@@ -226,21 +239,18 @@ def fig_descriptor(res):
             axB.text(xR + 0.35, Y(dc[t]), f"{labels[t]}  {dc[t]:+.2f} эВ", ha="left",
                      va="center", fontsize=9.5, color=colors[t], fontweight="bold")
         dcorr = {t: sites[t].get("quantum_corr_eV") for t in ("Cu2", "CuAl")}
-        axB.text(5.0, 1.55,
-                 f"мультиреференс-поправка ΔE_couple(CASCI−PBE):  Cu₂ {dcorr['Cu2']:+.2f} эВ,  "
-                 f"CuAl {dcorr['CuAl']:+.2f} эВ",
-                 ha="center", fontsize=9, color=INK)
-        axB.text(5.0, 0.95,
-                 "ось ↑ = ΔE_couple (E сочленённые − разведённые); ниже = легче сочленение.",
-                 ha="center", fontsize=8, color=GREY)
+        axB.text(5.0, 1.7,
+                 f"мультиреференс-поправка ΔE_couple(CASCI−PBE):  Cu₂ {dcorr['Cu2']:+.2f},  "
+                 f"CuAl {dcorr['CuAl']:+.2f} эВ  (крупная, неоднородная)",
+                 ha="center", fontsize=8.5, color=INK)
+        axB.text(5.0, 1.05, "ось ↑ = ΔE_couple (E сочленённые − разведённые), эВ; ниже = легче.",
+                 ha="center", fontsize=7.8, color=GREY)
+        axB.text(5.0, 0.45, "лит. (Cu(100)): барьер PBE 0.48 vs CASPT2 1.43 эВ; NOON(TS) 1.92/0.09",
+                 ha="center", fontsize=7.5, color=GREY, style="italic")
     else:
         axB.text(5.0, 5.0, "ВОПРОС ОТ ОБРАТНОГО (расчёт идёт):\n"
                  "меняет ли ΔE‡(CASCI−DFT) порядок Cu vs CuAl?", ha="center",
                  fontsize=10, color="#276749", fontweight="bold")
-    # compact literature anchor reference
-    axB.text(5.0, 3.7, "лит. якорь (поверхность Cu(100)): барьер PBE 0.48 vs CASPT2 1.43 эВ; "
-             "NOON(TS) 1.92/0.09 — дирадикалоид (2025)", ha="center", fontsize=8,
-             color=GREY, style="italic")
 
     # footer
     fig.text(0.012, 0.012,

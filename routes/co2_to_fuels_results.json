@@ -463,6 +463,37 @@
    "dEcouple_pbe_eV": 0.663,
    "dEcouple_casci_eV": 1.313,
    "quantum_corr_eV": 0.65
+  },
+  "CuAl": {
+   "separated": {
+    "e_pbe": -2108.474513,
+    "e_casci": -2105.820275,
+    "nu_pi": 0.4233,
+    "cc_final": 4.43,
+    "cas": "(14e,11o)"
+   },
+   "coupled": {
+    "e_pbe": -2108.486873,
+    "e_casci": -2105.802739,
+    "nu_pi": 0.3725,
+    "cc_final": 2.402,
+    "cas": "(16e,12o)"
+   },
+   "dEcouple_pbe_eV": -0.336,
+   "dEcouple_casci_eV": 0.477,
+   "quantum_corr_eV": 0.814
+  },
+  "_summary": {
+   "pbe_order": [
+    "CuAl",
+    "Cu2"
+   ],
+   "casci_order": [
+    "CuAl",
+    "Cu2"
+   ],
+   "order_flipped": false,
+   "note": "ΔE_couple = coupling REACTION energy at relaxed endpoints (frozen-metal cluster, def2-SVP, no constant-potential); NOT a barrier and NOT Faradaic efficiency. Barrier/TS = AWS."
   }
  }
 }
