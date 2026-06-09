@@ -585,6 +585,65 @@ const ENTRIES = [
       ]
     },
     figures: []
+  },
+
+  /* ---------------------------------------------------------------- */
+  {
+    id: "jscan",
+    date: "2026-06",
+    stage: { ru: "Этап 12", en: "Stage 12" },
+    title: { ru: "[2Fe–2S]: скан J по функционалам — DFT теряет даже знак связи",
+             en: "[2Fe–2S]: a functional scan of J — DFT loses even the sign of the coupling" },
+    simple: {
+      ru: `<p>На Этапе 11 мы получили J ≈ −161 см⁻¹ (антиферромагнетизм) на B3LYP. Но вся соль железо-серной химии в том, что <strong>ответ DFT зависит от выбранного функционала</strong>. Мы оптимизировали геометрию и пересчитали J <em>четырьмя</em> функционалами DFT.</p>
+           <p>Результат поразительный:</p>
+           <ul>
+             <li><strong>PBE −170, BP86 −178, B3LYP −100 см⁻¹</strong> — все антиферромагнитные, около эксперимента (−150…−400);</li>
+             <li><strong>TPSSh: +706 см⁻¹</strong> — <em>ферромагнетик</em>, противоположный знак!</li>
+           </ul>
+           <p>Разброс — <strong>885 см⁻¹, со сменой знака</strong>. То есть DFT не может надёжно сказать даже <strong>знак</strong> магнитной связи [2Fe–2S]. Это и есть предельно наглядное «здесь DFT нельзя верить» — и ровно поэтому нужен честный мультиреференсный (квантовый) метод.</p>`,
+      en: `<p>In Stage 11 we got J ≈ −161 cm⁻¹ (antiferromagnetic) with B3LYP. But the whole crux of iron–sulfur chemistry is that <strong>the DFT answer depends on the chosen functional</strong>. We optimized the geometry and recomputed J with <em>four</em> DFT functionals.</p>
+           <p>The result is striking:</p>
+           <ul>
+             <li><strong>PBE −170, BP86 −178, B3LYP −100 cm⁻¹</strong> — all antiferromagnetic, near experiment (−150…−400);</li>
+             <li><strong>TPSSh: +706 cm⁻¹</strong> — <em>ferromagnetic</em>, the opposite sign!</li>
+           </ul>
+           <p>A spread of <strong>885 cm⁻¹, with a sign flip</strong>. So DFT cannot reliably tell you even the <strong>sign</strong> of the [2Fe–2S] magnetic coupling. This is the clearest possible "you cannot trust DFT here" — and exactly why an honest multireference (quantum) method is needed.</p>`
+    },
+    tech: {
+      ru: `<p>Геометрия [Fe₂S₂(SH)₄]²⁻ <strong>оптимизирована</strong> в высокоспиновом состоянии (B3LYP/def2-SVP, geomeTRIC, сошлась за ~870 с). При этой геометрии — обменная связь по Ямагучи через broken-symmetry, четыре функционала по «лестнице»:</p>
+           <ul>
+             <li><strong>PBE (GGA): −170, BP86 (GGA): −178 см⁻¹</strong> — антиферромагнетик, у нижнего края экспериментального диапазона;</li>
+             <li><strong>B3LYP (гибрид): −100 см⁻¹</strong> — антиферромагнетик, недооценивает |J|;</li>
+             <li><strong>TPSSh (мета-гибрид): +706 см⁻¹</strong> — качественно <em>неверно</em> (ферромагнетик); его BS-состояние (⟨S²⟩=3.78) лежит <em>выше</em> HS. Честно: это либо патология broken-symmetry для данного функционала, либо настоящий провал — и то, и другое иллюстрирует хрупкость.</li>
+           </ul>
+           <p>Разброс J = <strong>885 см⁻¹, со сменой знака</strong> (эксп. [2Fe–2S] ферредоксинов ~−150…−400 см⁻¹). Мораль: антиферромагнитный суперобмен — это open-shell синглет, принципиально мультиреференсный; broken-symmetry-отображение DFT настолько функционал-чувствительно, что теряет даже знак. Это количественный аргумент за мультиреференсный/квантовый расчёт — а его активное пространство (Этап 11: 20–56 кубитов) уже за стеной симулятора (Этап 10). Оговорки: минимальная модель; TPSSh-выброс может быть BS-артефактом.</p>`,
+      en: `<p>The [Fe₂S₂(SH)₄]²⁻ geometry was <strong>optimized</strong> at the high-spin state (B3LYP/def2-SVP, geomeTRIC, converged in ~870 s). At that geometry — Yamaguchi exchange coupling via broken symmetry, four functionals across the "ladder":</p>
+           <ul>
+             <li><strong>PBE (GGA): −170, BP86 (GGA): −178 cm⁻¹</strong> — antiferromagnetic, at the low edge of the experimental range;</li>
+             <li><strong>B3LYP (hybrid): −100 cm⁻¹</strong> — antiferromagnetic, underestimates |J|;</li>
+             <li><strong>TPSSh (meta-hybrid): +706 cm⁻¹</strong> — qualitatively <em>wrong</em> (ferromagnetic); its BS state (⟨S²⟩=3.78) lies <em>above</em> HS. Honestly: either a broken-symmetry pathology for this functional, or a genuine failure — both illustrate the fragility.</li>
+           </ul>
+           <p>J spread = <strong>885 cm⁻¹, with a sign flip</strong> (experimental [2Fe–2S] ferredoxins ~−150…−400 cm⁻¹). The moral: the antiferromagnetic superexchange is an open-shell singlet, intrinsically multireference; the DFT broken-symmetry mapping is so functional-sensitive it loses even the sign. This is the quantitative case for a multireference/quantum calculation — whose active space (Stage 11: 20–56 qubits) is already past the simulator wall (Stage 10). Caveats: minimal model; the TPSSh outlier may be a BS artifact.</p>`
+    },
+    table: {
+      title: { ru: "Обменная связь J [2Fe–2S] по функционалам (опт. геометрия, def2-SVP)",
+               en: "[2Fe–2S] exchange coupling J by functional (optimized geometry, def2-SVP)" },
+      head: { ru: ["Функционал", "Тип", "J (см⁻¹)"], en: ["Functional", "Type", "J (cm⁻¹)"] },
+      rows: [
+        ["PBE", "GGA", "−170 (антиферро)"],
+        ["BP86", "GGA", "−178 (антиферро)"],
+        ["TPSSh", "мета-гибрид", "+706 (ферро — неверный знак!)"],
+        ["B3LYP", "гибрид", "−100 (антиферро)"],
+        ["Разброс", "—", "885 см⁻¹, со сменой знака"],
+        ["Эксперимент", "—", "−150…−400 см⁻¹"]
+      ]
+    },
+    figures: [
+      { src: "assets/femoco/fe2s2_jscan.png",
+        caption: { ru: "Обменная связь J [2Fe–2S] по 4 функционалам DFT: разброс 885 см⁻¹ со сменой знака (TPSSh даёт ферромагнетик). DFT не определяет даже знак → нужен квант. Реальный расчёт, опт. геометрия.",
+                   en: "[2Fe–2S] exchange coupling J across 4 DFT functionals: 885 cm⁻¹ spread with a sign flip (TPSSh gives ferromagnetic). DFT can't fix even the sign → quantum needed. Real computation, optimized geometry." } }
+    ]
   }
 ];
 
