@@ -1,0 +1,402 @@
+{
+  "meta": {
+    "basis": "def2-svp",
+    "ao_labels": [
+      "Fe 3d",
+      "O 2p"
+    ],
+    "scan_A": [
+      1.55,
+      1.62,
+      1.69,
+      1.76,
+      1.83
+    ],
+    "system": "[FeO]2+ bare ferryl core (Fe(IV)=O)",
+    "model_caveat": "BARE core, gas phase \u2014 NOT the framework-embedded zeolite \u03b1-O; \u03b1-O S=2 is enforced by the zeolite weak field (needs cluster model, AWS).",
+    "zeolite_known_answer": "\u03b1-O ground state = S=2 (high-spin Fe(IV)=O), Nature 2016"
+  },
+  "scan": [
+    {
+      "r": 1.55,
+      "scf_conv": true,
+      "ncas": 8,
+      "nelec": 10,
+      "qubits_jw": 16,
+      "quintet": {
+        "e_cas": -1336.1619060967005,
+        "cas_conv": true,
+        "na": 7,
+        "nb": 3,
+        "n_u": 5.328,
+        "excess": 1.328,
+        "noon": [
+          1.89,
+          1.89,
+          1.732,
+          1.105,
+          1.105,
+          1.002,
+          1.002,
+          0.272
+        ]
+      },
+      "triplet": {
+        "e_cas": -1336.1554616395047,
+        "cas_conv": true,
+        "na": 6,
+        "nb": 4,
+        "n_u": 4.282,
+        "excess": 2.282,
+        "noon": [
+          1.984,
+          1.927,
+          1.732,
+          1.649,
+          1.067,
+          1.001,
+          0.361,
+          0.278
+        ]
+      },
+      "singlet": {
+        "e_cas": -1336.116308162375,
+        "cas_conv": true,
+        "na": 5,
+        "nb": 5,
+        "n_u": 3.107,
+        "excess": 3.107,
+        "noon": [
+          1.942,
+          1.942,
+          1.814,
+          1.699,
+          1.699,
+          0.349,
+          0.348,
+          0.207
+        ]
+      }
+    },
+    {
+      "r": 1.62,
+      "scf_conv": true,
+      "ncas": 8,
+      "nelec": 10,
+      "qubits_jw": 16,
+      "quintet": {
+        "e_cas": -1336.1363435343417,
+        "cas_conv": true,
+        "na": 7,
+        "nb": 3,
+        "n_u": 5.836,
+        "excess": 1.836,
+        "noon": [
+          1.998,
+          1.998,
+          1.289,
+          1.056,
+          1.001,
+          1.001,
+          0.946,
+          0.713
+        ]
+      },
+      "triplet": {
+        "e_cas": -1336.1604881402081,
+        "cas_conv": true,
+        "na": 6,
+        "nb": 4,
+        "n_u": 5.169,
+        "excess": 3.169,
+        "noon": [
+          1.984,
+          1.954,
+          1.494,
+          1.494,
+          1.035,
+          0.999,
+          0.52,
+          0.519
+        ]
+      },
+      "singlet": {
+        "e_cas": -1336.1206443604358,
+        "cas_conv": true,
+        "na": 5,
+        "nb": 5,
+        "n_u": 3.704,
+        "excess": 3.704,
+        "noon": [
+          1.927,
+          1.927,
+          1.791,
+          1.614,
+          1.613,
+          0.446,
+          0.445,
+          0.237
+        ]
+      }
+    },
+    {
+      "r": 1.69,
+      "scf_conv": true,
+      "ncas": 8,
+      "nelec": 10,
+      "qubits_jw": 16,
+      "quintet": {
+        "e_cas": -1336.1656071322054,
+        "cas_conv": true,
+        "na": 7,
+        "nb": 3,
+        "n_u": 5.888,
+        "excess": 1.888,
+        "noon": [
+          1.998,
+          1.998,
+          1.173,
+          1.172,
+          1.001,
+          1.0,
+          0.829,
+          0.828
+        ]
+      },
+      "triplet": {
+        "e_cas": -1336.1800362549575,
+        "cas_conv": true,
+        "na": 6,
+        "nb": 4,
+        "n_u": 5.569,
+        "excess": 3.569,
+        "noon": [
+          1.998,
+          1.998,
+          1.332,
+          1.331,
+          1.001,
+          1.0,
+          0.67,
+          0.669
+        ]
+      },
+      "singlet": {
+        "e_cas": -1336.1229364494989,
+        "cas_conv": true,
+        "na": 5,
+        "nb": 5,
+        "n_u": 4.172,
+        "excess": 4.172,
+        "noon": [
+          1.923,
+          1.922,
+          1.78,
+          1.521,
+          1.519,
+          0.539,
+          0.537,
+          0.259
+        ]
+      }
+    },
+    {
+      "r": 1.76,
+      "scf_conv": true,
+      "ncas": 8,
+      "nelec": 10,
+      "qubits_jw": 16,
+      "quintet": {
+        "e_cas": -1336.1887202434812,
+        "cas_conv": true,
+        "na": 7,
+        "nb": 3,
+        "n_u": 5.938,
+        "excess": 1.938,
+        "noon": [
+          1.998,
+          1.998,
+          1.156,
+          1.103,
+          1.001,
+          1.001,
+          0.898,
+          0.845
+        ]
+      },
+      "triplet": {
+        "e_cas": -1336.1935092776394,
+        "cas_conv": true,
+        "na": 6,
+        "nb": 4,
+        "n_u": 5.697,
+        "excess": 3.697,
+        "noon": [
+          1.994,
+          1.984,
+          1.297,
+          1.297,
+          1.012,
+          1.0,
+          0.708,
+          0.708
+        ]
+      },
+      "singlet": {
+        "e_cas": -1336.124667685846,
+        "cas_conv": true,
+        "na": 5,
+        "nb": 5,
+        "n_u": 4.535,
+        "excess": 4.535,
+        "noon": [
+          1.923,
+          1.923,
+          1.794,
+          1.406,
+          1.405,
+          0.645,
+          0.644,
+          0.26
+        ]
+      }
+    },
+    {
+      "r": 1.83,
+      "scf_conv": true,
+      "ncas": 8,
+      "nelec": 10,
+      "qubits_jw": 16,
+      "quintet": {
+        "e_cas": -1336.2054467874425,
+        "cas_conv": true,
+        "na": 7,
+        "nb": 3,
+        "n_u": 5.96,
+        "excess": 1.96,
+        "noon": [
+          1.998,
+          1.998,
+          1.126,
+          1.092,
+          1.001,
+          1.001,
+          0.909,
+          0.876
+        ]
+      },
+      "triplet": {
+        "e_cas": -1336.2112472248823,
+        "cas_conv": true,
+        "na": 6,
+        "nb": 4,
+        "n_u": 5.825,
+        "excess": 3.825,
+        "noon": [
+          1.998,
+          1.998,
+          1.214,
+          1.214,
+          1.001,
+          1.0,
+          0.787,
+          0.787
+        ]
+      },
+      "singlet": {
+        "e_cas": -1336.1268268795216,
+        "cas_conv": true,
+        "na": 5,
+        "nb": 5,
+        "n_u": 4.983,
+        "excess": 4.983,
+        "noon": [
+          1.874,
+          1.874,
+          1.841,
+          1.254,
+          1.253,
+          0.841,
+          0.84,
+          0.223
+        ]
+      }
+    }
+  ],
+  "minima": {
+    "quintet": {
+      "r": 1.83,
+      "e_cas": -1336.2054467874425,
+      "cas_conv": true,
+      "na": 7,
+      "nb": 3,
+      "n_u": 5.96,
+      "excess": 1.96,
+      "noon": [
+        1.998,
+        1.998,
+        1.126,
+        1.092,
+        1.001,
+        1.001,
+        0.909,
+        0.876
+      ],
+      "ncas": 8,
+      "nelec": 10
+    },
+    "triplet": {
+      "r": 1.83,
+      "e_cas": -1336.2112472248823,
+      "cas_conv": true,
+      "na": 6,
+      "nb": 4,
+      "n_u": 5.825,
+      "excess": 3.825,
+      "noon": [
+        1.998,
+        1.998,
+        1.214,
+        1.214,
+        1.001,
+        1.0,
+        0.787,
+        0.787
+      ],
+      "ncas": 8,
+      "nelec": 10
+    },
+    "singlet": {
+      "r": 1.83,
+      "e_cas": -1336.1268268795216,
+      "cas_conv": true,
+      "na": 5,
+      "nb": 5,
+      "n_u": 4.983,
+      "excess": 4.983,
+      "noon": [
+        1.874,
+        1.874,
+        1.841,
+        1.254,
+        1.253,
+        0.841,
+        0.84,
+        0.223
+      ],
+      "ncas": 8,
+      "nelec": 10
+    }
+  },
+  "verdict": {
+    "ground_state_our_casscf": "triplet",
+    "zeolite_alpha_O_known": "S=2 (quintet)",
+    "bare_core_matches_S2": false,
+    "relative_kcal_above_ground": {
+      "triplet": 0.0,
+      "quintet": 3.64,
+      "singlet": 52.97
+    },
+    "note": "bare ferryl core != embedded \u03b1-O; this checks the engine on Fe(IV)=O, not the framework-enforced S=2."
+  }
+}
