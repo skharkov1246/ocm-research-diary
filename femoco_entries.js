@@ -746,6 +746,58 @@ const ENTRIES = [
         caption: { ru: "Цена «честного» Full CI для FeMoco: один вектор состояния = 6×10³¹ байт, в 600 млн раз больше всех цифровых данных мира. Память посчитана точно; отказоустойчивая оценка ~108 логических кубитов — по Reiher 2017 (цитата).",
                    en: "The price of an 'honest' Full CI for FeMoco: one state vector = 6×10³¹ bytes, 600 million times all the world's digital data. Memory computed exactly; the fault-tolerant estimate ~108 logical qubits is from Reiher 2017 (cited)." } }
     ]
+  },
+  {
+    id: "fe4s4-jscan",
+    date: "2026-06",
+    stage: { ru: "Этап 15", en: "Stage 15" },
+    title: { ru: "[4Fe–4S] с оптимизированной геометрией: B3LYP переворачивает знак магнитной связи",
+             en: "[4Fe–4S] with optimized geometry: B3LYP flips the sign of the magnetic coupling" },
+    simple: {
+      ru: `<p>На Этапе 12 мы увидели, как DFT для маленького ромба [2Fe–2S] не может договориться даже о знаке магнитной связи (один функционал из четырёх дал противоположный ответ). Возник честный вопрос: может, это артефакт крошечной модели или неоптимизированной геометрии? Проверяем на большом, FeMoco-релевантном кубане [4Fe–4S] — теперь с <strong>оптимизированной геометрией</strong>.</p>
+           <p>Оптимизировали геометрию кубана (B3LYP, 15 шагов) и посчитали энергетическую щель «высокий спин минус антиферромагнетик» четырьмя функционалами. PBE +6.0, BP86 +9.0, TPSSh +4.0 ккал/моль — все говорят «антиферромагнетик» (как и положено), но <strong>B3LYP даёт −6.1 — ферромагнетик, противоположный знак</strong>. Разброс — <strong>15.2 ккал/моль</strong>.</p>
+           <p>Значит, это не артефакт маленькой модели и не кривая геометрия: на большом кластере с честно оптимизированной геометрией DFT всё равно не определяет даже знак связи. И «выскочил» теперь другой функционал (на [2Fe–2S] это был TPSSh, тут — B3LYP) — то есть нельзя заранее выбрать «надёжный». Это прямой, измеренный аргумент: для магнитной структуры железо-серных кластеров нужен мультиреференсный (квантовый) метод.</p>`,
+      en: `<p>In Stage 12 we saw DFT fail to agree even on the sign of the magnetic coupling for the small [2Fe–2S] rhombus (one functional of four gave the opposite answer). A fair question: maybe that's an artifact of a tiny model or an unoptimized geometry? We test it on the large, FeMoco-relevant [4Fe–4S] cubane — now with an <strong>optimized geometry</strong>.</p>
+           <p>We optimized the cubane's geometry (B3LYP, 15 steps) and computed the high-spin-minus-antiferromagnet energy gap with four functionals. PBE +6.0, BP86 +9.0, TPSSh +4.0 kcal/mol all say "antiferromagnet" (as expected), but <strong>B3LYP gives −6.1 — a ferromagnet, the opposite sign</strong>. The spread is <strong>15.2 kcal/mol</strong>.</p>
+           <p>So it's not a small-model artifact and not a bad geometry: on the larger cluster with a properly optimized geometry, DFT still can't pin down even the sign of the coupling. And the outlier functional has changed (TPSSh for [2Fe–2S], B3LYP here) — so you can't pre-select a "trustworthy" one. This is a direct, measured argument: the magnetic structure of iron–sulfur clusters needs a multireference (quantum) method.</p>`
+    },
+    tech: {
+      ru: `<p>Пока локально считалась ресурс-оценка FeMoco (Этап 14), на AWS (r7i.8xlarge, 32 vCPU) добивался скан [4Fe–4S]. [Fe₄S₄(SH)₄]²⁻, def2-SVP, UKS; геометрия <strong>оптимизирована</strong> (B3LYP/HS, geomeTRIC, 15 шагов, E_HS=−8241.940 Ha в минимуме). При этой геометрии — HS (spin=18, ⟨S²⟩≈90.0) и broken-symmetry (флип 2 из 4 Fe, Ms=1, ⟨S²⟩≈8–9.5) для четырёх функционалов:</p>
+           <ul>
+             <li><strong>PBE:</strong> E_HS−E_BS = <strong>+6.02</strong> ккал/моль (BS ниже → антиферро)</li>
+             <li><strong>BP86:</strong> <strong>+9.03</strong> (антиферро)</li>
+             <li><strong>TPSSh:</strong> <strong>+4.05</strong> (антиферро)</li>
+             <li><strong>B3LYP:</strong> <strong>−6.13</strong> → HS ниже → <strong>ферромагнетик, смена знака</strong></li>
+             <li>Разброс щели = <strong>15.16 ккал/моль</strong>, со сменой знака.</li>
+           </ul>
+           <p>Это усиливает вывод Этапа 12 ([2Fe–2S]) сразу по трём осям: (1) больший, более FeMoco-релевантный кластер; (2) <em>оптимизированная</em> геометрия (значит, не геометрический артефакт); (3) «выскочивший» функционал другой (на [2Fe–2S] — TPSSh +706 см⁻¹, тут — B3LYP) → нет «универсально надёжного» функционала. Честные оговорки: у кубана несколько Fe–Fe связей, поэтому это <em>энергетическая щель HS−BS</em>, а не один параметр J; BS-состояние спин-контаминировано (⟨S²⟩≈8–9.5, как обычно у broken-symmetry); def2-SVP — скромный базис; повышенная доля точного обмена в B3LYP, как известно, систематически стабилизирует высокий спин — то есть направление выброса согласуется с теорией, но сам факт «функционалы накрывают диапазон от ферро до антиферро на 15 ккал/моль» — и есть проблема. Считалось на AWS; инстанс погашен вручную (SSH-канал оркестратора завис уже после завершения счёта — данные забрал прямым scp, инстанс терминировал, орфанов нет).</p>`,
+      en: `<p>While the FeMoco resource estimate ran locally (Stage 14), the [4Fe–4S] scan finished on AWS (r7i.8xlarge, 32 vCPU). [Fe₄S₄(SH)₄]²⁻, def2-SVP, UKS; geometry <strong>optimized</strong> (B3LYP/HS, geomeTRIC, 15 steps, E_HS=−8241.940 Ha at the minimum). At that geometry — HS (spin=18, ⟨S²⟩≈90.0) and broken-symmetry (flip 2 of 4 Fe, Ms=1, ⟨S²⟩≈8–9.5) for four functionals:</p>
+           <ul>
+             <li><strong>PBE:</strong> E_HS−E_BS = <strong>+6.02</strong> kcal/mol (BS lower → antiferro)</li>
+             <li><strong>BP86:</strong> <strong>+9.03</strong> (antiferro)</li>
+             <li><strong>TPSSh:</strong> <strong>+4.05</strong> (antiferro)</li>
+             <li><strong>B3LYP:</strong> <strong>−6.13</strong> → HS lower → <strong>ferromagnet, sign flip</strong></li>
+             <li>Gap spread = <strong>15.16 kcal/mol</strong>, with a sign change.</li>
+           </ul>
+           <p>This strengthens the Stage 12 ([2Fe–2S]) conclusion along three axes: (1) a larger, more FeMoco-relevant cluster; (2) an <em>optimized</em> geometry (so not a geometry artifact); (3) a different outlier functional (TPSSh +706 cm⁻¹ for [2Fe–2S], B3LYP here) → there is no "universally reliable" functional. Honest caveats: the cubane has several Fe–Fe couplings, so this is an <em>HS−BS energy gap</em>, not a single J; the BS state is spin-contaminated (⟨S²⟩≈8–9.5, as usual for broken symmetry); def2-SVP is a modest basis; B3LYP's larger exact-exchange fraction is known to systematically stabilize high spin — so the direction of the outlier is consistent with theory, but the fact that the functionals span ferro-to-antiferro across 15 kcal/mol is itself the problem. Computed on AWS; instance terminated manually (the orchestrator's SSH channel hung after the compute had finished — results pulled by a direct scp, instance terminated, no orphans).</p>`
+    },
+    table: {
+      title: { ru: "[4Fe–4S] (опт. геометрия): щель HS−BS по 4 функционалам — реальный расчёт",
+               en: "[4Fe–4S] (optimized geometry): HS−BS gap across 4 functionals — real computation" },
+      head: { ru: ["Функционал", "E(HS) − E(BS), ккал/моль"], en: ["Functional", "E(HS) − E(BS), kcal/mol"] },
+      rows: [
+        ["PBE", "+6.02 (AFM)"],
+        ["BP86", "+9.03 (AFM)"],
+        ["TPSSh", "+4.05 (AFM)"],
+        ["B3LYP", "−6.13 (FM — sign flip!)"],
+        ["Spread / разброс", "15.16 kcal/mol"]
+      ]
+    },
+    figures: [
+      { src: "assets/femoco/fe4s4_jscan.png",
+        caption: { ru: "Реальный расчёт (PySCF, def2-SVP, broken-symmetry, оптимизированная геометрия): щель HS−BS для [4Fe–4S] по 4 функционалам. Три дают антиферромагнетик (+), B3LYP — ферромагнетик (−): DFT не сходится даже в знаке, разброс 15.2 ккал/моль.",
+                   en: "Real computation (PySCF, def2-SVP, broken-symmetry, optimized geometry): the HS−BS gap for [4Fe–4S] across 4 functionals. Three give an antiferromagnet (+), B3LYP a ferromagnet (−): DFT disagrees even on the sign, spread 15.2 kcal/mol." } }
+    ]
   }
 ];
 
