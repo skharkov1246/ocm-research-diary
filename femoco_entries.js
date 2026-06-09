@@ -694,6 +694,58 @@ const ENTRIES = [
         caption: { ru: "Лестница активных пространств, посчитанных в дневнике: N₂ 12 → Fe–N₂ 24 (стена симулятора) → [2Fe–2S] 56 → [4Fe–4S] 88 → FeMoco 108. Зелёные ≤24 — VQE проверен; за стеной классическая симуляция VQE ломается.",
                    en: "The ladder of active spaces computed in this diary: N₂ 12 → Fe–N₂ 24 (simulator wall) → [2Fe–2S] 56 → [4Fe–4S] 88 → FeMoco 108. Green ≤24 — VQE validated; past the wall the classical simulation of VQE breaks." } }
     ]
+  },
+  {
+    id: "femoco-estimate",
+    date: "2026-06",
+    stage: { ru: "Этап 14", en: "Stage 14" },
+    title: { ru: "Полный FeMoco: почему классике это не по зубам — точная цена в детерминантах",
+             en: "The full FeMoco: why it is beyond classical reach — the exact price in determinants" },
+    simple: {
+      ru: `<p>Лестница довела нас до вершины — <strong>CAS(54,54)</strong> FeMoco, 108 кубитов. Теперь честный вопрос: почему нельзя просто взять очень большой суперкомпьютер и посчитать это «в лоб» (Full CI)? Мы посчитали цену.</p>
+           <p>Число базисных состояний (детерминантов) для 54 электронов на 54 орбиталях = C(54,27)² ≈ <strong>3.8×10³⁰</strong>. Чтобы хранить <em>один</em> вектор состояния, нужно ×16 байт = <strong>6×10³¹ байт</strong>. Это <strong>в 600 миллионов раз больше, чем все цифровые данные человечества</strong> (≈10²³ байт). Дело не в том, что «нужен кластер побольше» — столько памяти не существует и в принципе не появится.</p>
+           <p>А отказоустойчивому квантовому компьютеру для той же задачи нужно лишь <strong>≈108 логических кубитов</strong> (оценка Reiher et al., PNAS 2017). Вот ради этого зазора — 10³¹ байт против 108 кубитов — и нужен квантовый компьютер.</p>`,
+      en: `<p>The ladder brought us to the summit — FeMoco's <strong>CAS(54,54)</strong>, 108 qubits. Now the honest question: why can't we just take a very large supercomputer and do this head-on (Full CI)? We computed the price.</p>
+           <p>The number of basis states (determinants) for 54 electrons in 54 orbitals = C(54,27)² ≈ <strong>3.8×10³⁰</strong>. To store <em>one</em> state vector you need ×16 bytes = <strong>6×10³¹ bytes</strong>. That's <strong>600 million times all of humanity's digital data</strong> (≈10²³ bytes). Not "we need a bigger cluster" — that much memory does not exist and fundamentally never will.</p>
+           <p>Yet a fault-tolerant quantum computer needs only <strong>≈108 logical qubits</strong> for the same task (estimate from Reiher et al., PNAS 2017). That gap — 10³¹ bytes vs 108 qubits — is exactly why a quantum computer is needed.</p>`
+    },
+    tech: {
+      ru: `<p>FeMoco CAS(54e,54o) — активное пространство из Reiher et al., PNAS 114, 7555 (2017), «витрина фронтира» квантовой химии.</p>
+           <ul>
+             <li><strong>Логических кубитов:</strong> 2×54 = <strong>108</strong> (спин-орбитали, отображение Жордана–Вигнера).</li>
+             <li><strong>Детерминантов Full CI:</strong> C(54,27)² = <strong>3.79×10³⁰</strong> (точно посчитано здесь, math.comb).</li>
+             <li><strong>Память на один вектор состояния:</strong> ×16 байт (complex128) = <strong>6.06×10³¹ байт</strong> = <strong>6.1×10⁸×</strong> всех цифровых данных мира (~10²³ байт). Хранение FCI-вектора классически невозможно — это вопрос не ресурсов, а порядков величины.</li>
+             <li><strong>Членов в кубитном гамильтониане:</strong> ~O(N⁴) ≈ <strong>1.7×10⁷</strong> паулиевских слагаемых для N=108 (оценка по числу двухэлектронных интегралов).</li>
+             <li><strong>Отказоустойчивая оценка:</strong> ~108–111 логических кубитов; бюджет T-гейтов и время счёта — <em>по статье</em> Reiher 2017 (цитируем, не пересчитываем; их вывод — задача реальна на отказоустойчивом железе, но далеко за пределами «зашумлённых» NISQ-устройств).</li>
+           </ul>
+           <p>Что посчитано нами и что процитировано — разделено честно: <strong>комбинаторика и память — наш точный расчёт</strong>, <strong>T-гейты/время отказоустойчивого алгоритма — оценка Reiher 2017</strong>. Это замыкает аргумент всего дневника: Этапы 1–4 — одиночная классика ломается на физике связи; Этап 10 — классическая симуляция VQE упирается в стену на 24 кубитах; Этапы 12–13 — обходной путь broken-symmetry DFT теряет знак и величину магнитной связи; Этап 14 — а «честный» Full CI для FeMoco требует памяти в 10⁸ раз больше всех данных мира. Вывод один: для каталитического ядра нитрогеназы нужен отказоустойчивый квантовый компьютер.</p>`,
+      en: `<p>FeMoco CAS(54e,54o) — the active space from Reiher et al., PNAS 114, 7555 (2017), the "frontier showcase" of quantum chemistry.</p>
+           <ul>
+             <li><strong>Logical qubits:</strong> 2×54 = <strong>108</strong> (spin-orbitals, Jordan–Wigner mapping).</li>
+             <li><strong>Full-CI determinants:</strong> C(54,27)² = <strong>3.79×10³⁰</strong> (computed exactly here, math.comb).</li>
+             <li><strong>Memory for one state vector:</strong> ×16 bytes (complex128) = <strong>6.06×10³¹ bytes</strong> = <strong>6.1×10⁸×</strong> all the world's digital data (~10²³ bytes). Storing the FCI vector is classically impossible — not a matter of resources but of orders of magnitude.</li>
+             <li><strong>Qubit-Hamiltonian terms:</strong> ~O(N⁴) ≈ <strong>1.7×10⁷</strong> Pauli terms for N=108 (estimated from the number of two-electron integrals).</li>
+             <li><strong>Fault-tolerant estimate:</strong> ~108–111 logical qubits; the T-gate budget and runtime are <em>per</em> Reiher 2017 (cited, not recomputed; their conclusion — the task is feasible on fault-tolerant hardware, but far beyond "noisy" NISQ devices).</li>
+           </ul>
+           <p>What we computed vs what we cite is split honestly: <strong>the combinatorics and memory are our exact calculation</strong>, <strong>the T-gates/runtime of the fault-tolerant algorithm are Reiher 2017's estimate</strong>. This closes the whole diary's argument: Stages 1–4 — single-reference classical methods break on the bond physics; Stage 10 — the classical simulation of VQE hits a wall at 24 qubits; Stages 12–13 — the broken-symmetry DFT workaround loses the sign and magnitude of the magnetic coupling; Stage 14 — an "honest" Full CI for FeMoco needs 10⁸ times more memory than all the world's data. One conclusion: the catalytic core of nitrogenase needs a fault-tolerant quantum computer.</p>`
+    },
+    table: {
+      title: { ru: "Ресурс-оценка полного FeMoco CAS(54,54) — точная комбинаторика",
+               en: "Resource estimate of the full FeMoco CAS(54,54) — exact combinatorics" },
+      head: { ru: ["Величина", "Значение"], en: ["Quantity", "Value"] },
+      rows: [
+        ["Логических кубитов", "108 (= 2×54 спин-орбитали)"],
+        ["Детерминантов Full CI", "C(54,27)² = 3.79×10³⁰"],
+        ["Память на 1 вектор состояния", "6.06×10³¹ байт = 6.1×10⁸× всех данных мира"],
+        ["Членов гамильтониана (Паули)", "~1.7×10⁷ (O(N⁴))"],
+        ["Отказоустойчивая оценка", "≈108 лог. кубитов (Reiher 2017, цитата)"]
+      ]
+    },
+    figures: [
+      { src: "assets/femoco/femoco_estimate.png",
+        caption: { ru: "Цена «честного» Full CI для FeMoco: один вектор состояния = 6×10³¹ байт, в 600 млн раз больше всех цифровых данных мира. Память посчитана точно; отказоустойчивая оценка ~108 логических кубитов — по Reiher 2017 (цитата).",
+                   en: "The price of an 'honest' Full CI for FeMoco: one state vector = 6×10³¹ bytes, 600 million times all the world's digital data. Memory computed exactly; the fault-tolerant estimate ~108 logical qubits is from Reiher 2017 (cited)." } }
+    ]
   }
 ];
 
