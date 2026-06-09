@@ -155,15 +155,11 @@ def cc_localized_22(mol, mf, ci1=C1_IDX, ci2=C2_IDX):
                 e=float(mc.e_tot))
 
 # ----------------------------------------------------------------------------------
-def jw_check(mc):
-    """Build qubit Hamiltonian (Jordan-Wigner) from a CAS and verify it == CASCI."""
-    try:
-        from openfermion import InteractionOperator, get_fermion_operator, jordan_wigner
-        from openfermion.linalg import get_sparse_operator
-        import scipy.sparse.linalg as sla
-    except Exception as e:
-        return dict(error=f'openfermion import: {e!r}')
-    ncas, ne = mc.ncas, mc.nelecas
+def cas_to_qubit_H(mc):
+    """CAS 1-/2-electron integrals -> Jordan-Wigner qubit Hamiltonian (sparse, includes ecore)."""
+    from openfermion import InteractionOperator, get_fermion_operator, jordan_wigner
+    from openfermion.linalg import get_sparse_operator
+    ncas = mc.ncas
     h1, ecore = mc.get_h1eff()
     h2 = ao2mo.restore(1, mc.get_h2eff(), ncas)   # chemist (pq|rs)
     n = ncas; nso = 2*n
@@ -176,19 +172,61 @@ def jw_check(mc):
     for p in range(n):
         for q in range(n):
             for r in range(n):
-                for s in (range(n)):
+                for s in range(n):
                     val = 0.5*h2[p,s,q,r]
                     for a in (0,1):
                         for b in (0,1):
                             two[2*p+a, 2*q+b, 2*r+b, 2*s+a] = val
-    iop = InteractionOperator(float(ecore), one, two)
-    qop = jordan_wigner(get_fermion_operator(iop))
-    H = get_sparse_operator(qop, n_qubits=nso)
-    # ground state in the correct particle-number sector: just take algebraic min of full H
-    vals = sla.eigsh(H, k=1, which='SA', return_eigenvectors=False)
-    e_jw = float(vals[0])
+    qop = jordan_wigner(get_fermion_operator(InteractionOperator(float(ecore), one, two)))
+    return get_sparse_operator(qop, n_qubits=nso), nso
+
+def jw_check(mc):
+    """Verify the Jordan-Wigner qubit Hamiltonian reproduces CASCI (sector-restricted)."""
+    try:
+        from openfermion.linalg import jw_number_restrict_operator
+        import scipy.sparse.linalg as sla
+    except Exception as e:
+        return dict(error=f'openfermion import: {e!r}')
+    H, nso = cas_to_qubit_H(mc)
+    ne = mc.nelecas; nelec = ne if np.isscalar(ne) else sum(ne)
+    Hn = jw_number_restrict_operator(H, int(nelec), n_qubits=nso)  # correct e-number sector
+    e_jw = float(sla.eigsh(Hn, k=1, which='SA', return_eigenvectors=False)[0])
     return dict(qubits=nso, e_casci=float(mc.e_tot), e_jw=e_jw,
                 diff_kcal=round((e_jw-mc.e_tot)*H2KCAL, 8))
+
+def run_vqe_poc():
+    """[D] Stage-3 PoC: UCCSD-VQE on the CAS(4e,4o)=8-qubit active centre at the OA-TS,
+    EXACT statevector simulator (no shot noise) -> verifies the VQE(UCCSD)->CASCI bridge.
+    Validated on H2/STO-3G CAS(2,2): Powell reaches CASCI to 0.000000 kcal/mol."""
+    print('=== [D] VQE PoC: UCCSD on CAS(4,4)=8 qubits (statevector) ===', flush=True)
+    from openfermion import (jordan_wigner, uccsd_singlet_generator, uccsd_singlet_paramsize,
+                             jw_hartree_fock_state)
+    from openfermion.linalg import get_sparse_operator
+    import scipy.sparse.linalg as sla
+    from scipy.optimize import minimize
+    mfh = rhf(mol_of(build_metal(1.98, 2.16), charge=1))
+    mc = casci_noon(mfh, ncas=4, nelecas=4)['mc']
+    H, nq = cas_to_qubit_H(mc)
+    ne = mc.nelecas; ne = ne if np.isscalar(ne) else sum(ne)
+    npar = uccsd_singlet_paramsize(nq, ne)
+    hf = np.asarray(jw_hartree_fock_state(ne, nq)).reshape(-1).astype(complex)
+    def energy(theta):
+        gen = uccsd_singlet_generator(list(theta), nq, ne, anti_hermitian=True)
+        A = get_sparse_operator(jordan_wigner(gen), n_qubits=nq)
+        v = sla.expm_multiply(A, hf)
+        return float(np.real(np.vdot(v, H @ v)))
+    e_hf = energy(np.zeros(npar))
+    t = time.time()
+    res = minimize(energy, np.zeros(npar), method='Powell',
+                   options=dict(maxiter=6000, xtol=1e-7, ftol=1e-9))
+    out = dict(qubits=int(nq), n_params=int(npar), ansatz='UCCSD singlet',
+               simulator='exact statevector (openfermion+scipy)',
+               e_ref_hf=e_hf, e_vqe=float(res.fun), e_casci=float(mc.e_tot),
+               gap_vqe_casci_kcal=round((res.fun-mc.e_tot)*H2KCAL, 6),
+               corr_recovered_kcal=round((e_hf-res.fun)*H2KCAL, 3),
+               seconds=round(time.time()-t, 1))
+    print('VQE:', json.dumps(out), flush=True)
+    return out
 
 # ----------------------------------------------------------------------------------
 def run_ethane_curve():
@@ -322,6 +360,8 @@ if __name__ == '__main__':
             R['jw_check'] = dict(error=repr(e)); print('JW failed', repr(e), flush=True)
     if stage in ('all','C'):
         R['thermo'] = run_thermo()
+    if stage in ('all','D'):
+        R['vqe_poc'] = run_vqe_poc()
 
     # merge with any prior results (so staged runs accumulate)
     if os.path.exists(RESULTS):

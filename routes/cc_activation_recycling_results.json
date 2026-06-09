@@ -243,5 +243,17 @@
   "e_casci": -1818.9602718784854,
   "e_jw": -1818.9602718785068,
   "diff_kcal": -1e-08
+ },
+ "vqe_poc": {
+  "qubits": 8,
+  "n_params": 14,
+  "ansatz": "UCCSD singlet",
+  "simulator": "exact statevector (openfermion+scipy)",
+  "e_ref_hf": -1818.957346770254,
+  "e_vqe": -1818.9602712567764,
+  "e_casci": -1818.9602718785093,
+  "gap_vqe_casci_kcal": 0.00039,
+  "corr_recovered_kcal": 1.835,
+  "seconds": 136.4
  }
 }
