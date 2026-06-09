@@ -130,7 +130,7 @@ def casscf_noon(mf, ao_labels=('Rh 4d','C 2p'), ncas=9, nelecas=12, thr=0.02, ma
         mo_no = orbs
     mc = mcscf.CASSCF(mf, ncas, nelecas)
     mc.max_cycle_macro = macro
-    mc.conv_tol = 1e-8; mc.conv_tol_grad = 5e-5
+    mc.conv_tol = 1e-7; mc.conv_tol_grad = 1e-4   # standard "converged" criteria (faster)
     mc.fix_spin_(ss=0)
     mc.kernel(mo_no)
     dm1 = mc.fcisolver.make_rdm1(mc.ci, ncas, nelecas)
@@ -353,6 +353,13 @@ def run_quantum_correction():
                          corr_static_kcal=round(corr, 2)))
         print(f'  [{tag:7s}] N_u(CASSCF)={scf.get("n_u")} conv={scf.get("converged")} '
               f'corr_static(CASCI-HF)={corr:.2f} kcal/mol', flush=True)
+        # incremental save so a timeout cannot wipe completed points
+        try:
+            _R = json.load(open(RESULTS)) if os.path.exists(RESULTS) else {}
+            _R['quantum_correction_partial'] = rows
+            json.dump(_R, open(RESULTS, 'w'), ensure_ascii=False, indent=1, default=str)
+        except Exception:
+            pass
     by = {r['tag']: r for r in rows}
     dcorr = by['OA-TS']['corr_static_kcal'] - by['sigma']['corr_static_kcal']
     out = dict(rows=rows,
