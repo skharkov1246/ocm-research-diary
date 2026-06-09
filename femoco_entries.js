@@ -798,6 +798,58 @@ const ENTRIES = [
         caption: { ru: "Реальный расчёт (PySCF, def2-SVP, broken-symmetry, оптимизированная геометрия): щель HS−BS для [4Fe–4S] по 4 функционалам. Три дают антиферромагнетик (+), B3LYP — ферромагнетик (−): DFT не сходится даже в знаке, разброс 15.2 ккал/моль.",
                    en: "Real computation (PySCF, def2-SVP, broken-symmetry, optimized geometry): the HS−BS gap for [4Fe–4S] across 4 functionals. Three give an antiferromagnet (+), B3LYP a ferromagnet (−): DFT disagrees even on the sign, spread 15.2 kcal/mol." } }
     ]
+  },
+  {
+    id: "capstone",
+    date: "2026-06",
+    stage: { ru: "Этап 16 · сводка", en: "Stage 16 · synthesis" },
+    title: { ru: "Сводка дуги: почему для катализатора нитрогеназы нужен квантовый компьютер — четыре независимых доказательства",
+             en: "The arc in one place: why nitrogenase's catalyst needs a quantum computer — four independent proofs" },
+    simple: {
+      ru: `<p>За пятнадцать этапов этот дневник прошёл путь от молекулы N₂ до полного активного центра FeMoco — и на каждом шаге проверял <strong>расчётом, а не словами</strong> одно утверждение: классические методы не справляются с этой химией, и поэтому нужен квантовый компьютер. Соберём всё вместе.</p>
+           <p>Аргумент стоит на <strong>четырёх независимых ногах</strong> — каждая измерена реальным расчётом:</p>
+           <ol>
+             <li><strong>Одиночная классика ломается на физике связи.</strong> При разрыве N≡N однодетерминантные методы (RHF, и даже «золотой стандарт» CCSD(T)) срываются, а число эффективно-неспаренных электронов растёт с 0.5 до 5.5 — измеренная мультиреференсность (Этапы 1–4).</li>
+             <li><strong>Классическая симуляция квантового алгоритма упирается в стену.</strong> VQE точен на 12 кубитах (N₂, ~1 ккал/моль), но на 24 кубитах катализатора Fe–N₂ за 69 минут не закрыл ни одного шага — симулятор сдаётся ровно на масштабе катализатора (Этап 10).</li>
+             <li><strong>Обходной путь DFT теряет знак.</strong> Broken-symmetry DFT для магнитной связи железо-серных кластеров даёт разные ответы у разных функционалов — вплоть до смены знака (ферро/антиферро): и на [2Fe–2S], и на оптимизированном [4Fe–4S] (Этапы 12, 15).</li>
+             <li><strong>«Честный» точный расчёт невозможен в принципе.</strong> Полный FeMoco — 108 кубитов; один вектор состояния Full CI = 6×10³¹ байт, в 600 млн раз больше всех цифровых данных мира. А квантовому компьютеру нужно лишь ~108 логических кубитов (Этап 14).</li>
+           </ol>
+           <p>Вместе это не «квантовый компьютер был бы хорош», а <strong>измеренный, многосторонний аргумент</strong>, почему именно здесь он необходим. Следующий конкретный шаг уже идёт: превратить оценку активного пространства [4Fe–4S] в настоящий CASSCF и собрать кубитный гамильтониан, готовый для квантового железа (Этап 17).</p>`,
+      en: `<p>Across fifteen stages this diary travelled from the N₂ molecule to FeMoco's full active site — and at every step it tested, <strong>by computation rather than assertion</strong>, a single claim: classical methods cannot handle this chemistry, which is why a quantum computer is needed. Here it is in one place.</p>
+           <p>The argument stands on <strong>four independent legs</strong> — each one measured by a real calculation:</p>
+           <ol>
+             <li><strong>Single-reference classical methods break on the bond physics.</strong> As N≡N breaks, single-determinant methods (RHF, even the "gold standard" CCSD(T)) fall apart, and the effectively-unpaired electron count climbs from 0.5 to 5.5 — measured multireference character (Stages 1–4).</li>
+             <li><strong>The classical simulation of the quantum algorithm hits a wall.</strong> VQE is accurate at 12 qubits (N₂, ~1 kcal/mol), but at the 24 qubits of the Fe–N₂ catalyst it closed not one step in 69 minutes — the simulator gives out exactly at catalyst scale (Stage 10).</li>
+             <li><strong>The DFT workaround loses the sign.</strong> Broken-symmetry DFT for the magnetic coupling of iron–sulfur clusters gives different answers per functional — up to a sign flip (ferro/antiferro): on both [2Fe–2S] and the optimized [4Fe–4S] (Stages 12, 15).</li>
+             <li><strong>An "honest" exact calculation is fundamentally impossible.</strong> Full FeMoco is 108 qubits; one Full-CI state vector = 6×10³¹ bytes, 600 million times all the world's digital data. A quantum computer needs only ~108 logical qubits (Stage 14).</li>
+           </ol>
+           <p>Together this is not "a quantum computer would be nice" but a <strong>measured, many-sided argument</strong> for why it is necessary precisely here. The next concrete step is already running: turning the [4Fe–4S] active-space estimate into a real CASSCF and assembling the qubit Hamiltonian, ready for quantum hardware (Stage 17).</p>`
+    },
+    tech: {
+      ru: `<p>Каждое доказательство — реальный расчёт (PySCF / PennyLane, локально и на AWS EC2 с авто-терминированием), числа сведены в таблицу ниже. Принцип дневника соблюдён всюду: где модель минимальна, геометрия не оптимизирована или активное пространство оценено — это помечено; показаны и поправки по ходу (смена метрики мультиреференсности, OOM на 24q sparse, зависание SSH-канала).</p>
+           <p><strong>Лестница кубитов</strong>, всё посчитано: N₂ <strong>12</strong> → Fe–N₂ <strong>24</strong> (стена симулятора) → [2Fe–2S] <strong>56</strong> → [4Fe–4S] <strong>88</strong> → FeMoco CAS(54,54) <strong>108</strong>. Зелёная зона ≤24 кубитов — там VQE проверен против точного CASCI; за стеной классическая симуляция VQE ломается, и единственный честный путь к точному решению — отказоустойчивый квантовый компьютер.</p>
+           <p>Что это даёт практически: активные центры (N≡N-активация на FeMoco, перенос на промышленный Fe–Ru) — это сильно скоррелированная электронная структура переходных металлов, где ±0.2–0.3 эВ ошибки DFT обессмысливают скрининг. Квантовый расчёт активного пространства убирает именно эту неопределённость. Честный таймлайн остаётся прежним: упрощённые Fe–S кластеры 2028–2031, полный FeMoco 2032–2036 — это витрина фронтира (Reiher PNAS 2017), а не завтрашний продукт.</p>`,
+      en: `<p>Every proof is a real calculation (PySCF / PennyLane, locally and on AWS EC2 with auto-termination); the numbers are collected in the table below. The diary's principle held throughout: where the model is minimal, the geometry unoptimized, or the active space estimated — it is labelled; corrections are shown too (changing the multireference metric, the 24q sparse OOM, the hung SSH channel).</p>
+           <p><strong>The qubit ladder</strong>, all computed: N₂ <strong>12</strong> → Fe–N₂ <strong>24</strong> (simulator wall) → [2Fe–2S] <strong>56</strong> → [4Fe–4S] <strong>88</strong> → FeMoco CAS(54,54) <strong>108</strong>. The green zone ≤24 qubits is where VQE was validated against exact CASCI; past the wall the classical simulation of VQE breaks, and the only honest route to an exact solution is a fault-tolerant quantum computer.</p>
+           <p>What this buys in practice: active sites (N≡N activation on FeMoco, transferred to an industrial Fe–Ru catalyst) are strongly-correlated transition-metal electronic structure, where DFT's ±0.2–0.3 eV error makes screening meaningless. A quantum active-space calculation removes exactly that uncertainty. The honest timeline is unchanged: simplified Fe–S clusters 2028–2031, full FeMoco 2032–2036 — a frontier showcase (Reiher PNAS 2017), not a product for tomorrow.</p>`
+    },
+    table: {
+      title: { ru: "Дуга дневника: четыре доказательства, каждое — реальным числом",
+               en: "The diary's arc: four proofs, each by a real number" },
+      head: { ru: ["Доказательство", "Этапы", "Ключевое число"], en: ["Proof", "Stages", "Key number"] },
+      rows: [
+        ["Классика ломается на связи", "1–4", "N_u: 0.5 → 5.5 при разрыве N≡N (CCSD(T) срывается)"],
+        ["Симулятор VQE — стена", "10", "24 кубита: 0 операторов / 69 мин (12 кубитов: ~1 ккал/моль ✓)"],
+        ["DFT теряет знак связи", "12, 15", "[2Fe2S] J: −178…+706 см⁻¹; [4Fe4S]: 15 ккал/моль, смена знака"],
+        ["Точный Full CI невозможен", "14", "FeMoco: 6×10³¹ байт (6×10⁸× всех данных) vs 108 кубитов"],
+        ["Лестница кубитов", "1–13", "N₂ 12 → Fe–N₂ 24 → [2Fe2S] 56 → [4Fe4S] 88 → FeMoco 108"]
+      ]
+    },
+    figures: [
+      { src: "assets/femoco/qubit_ladder.png",
+        caption: { ru: "Капстон-визуал всей дуги: лестница активных пространств, посчитанных в дневнике. Зелёные ≤24 кубитов — VQE проверен против точного CASCI; за стеной классическая симуляция ломается. [4Fe–4S] (88) уже почти у FeMoco (108) — за пределами точной классики.",
+                   en: "The arc's capstone visual: the ladder of active spaces computed in this diary. Green ≤24 qubits — VQE validated against exact CASCI; past the wall the classical simulation breaks. [4Fe–4S] (88) is nearly at FeMoco (108) — beyond exact classical reach." } }
+    ]
   }
 ];
 
