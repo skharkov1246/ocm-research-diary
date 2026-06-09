@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "basis": "def2-svp",
+    "ao_labels": [
+      "Fe 3d",
+      "O 2p"
+    ],
+    "charge": 0,
+    "model": "idealized [Fe(O)(OH)2] (IDEALIZED stand-in, not crystallographic)",
+    "full_run": true,
+    "known_answer": "alpha-O ground state = S=2 (high-spin Fe(IV)=O), Nature 2016",
+    "honesty": "CASSCF (no dynamic correlation); validates spin-state ORDERING, not a quantitative gap; geometry idealized unless --xyz given.",
+    "scf_conv": true
+  },
+  "spins": {
+    "quintet": {
+      "e_cas": -1487.8384266254097,
+      "cas_conv": false,
+      "na": 13,
+      "nb": 9,
+      "n_u": 4.995,
+      "excess": 0.995,
+      "noon": [
+        1.999,
+        1.997,
+        1.997,
+        1.996,
+        1.996,
+        1.996,
+        1.951,
+        1.942,
+        1.793,
+        1.058,
+        1.05,
+        1.006,
+        1.005,
+        0.215
+      ]
+    },
+    "triplet": {
+      "e_cas": -1487.810354456329,
+      "cas_conv": false,
+      "na": 12,
+      "nb": 10,
+      "n_u": 3.547,
+      "excess": 1.547,
+      "noon": [
+        1.998,
+        1.997,
+        1.997,
+        1.996,
+        1.996,
+        1.995,
+        1.98,
+        1.957,
+        1.859,
+        1.777,
+        1.04,
+        1.004,
+        0.246,
+        0.159
+      ]
+    },
+    "singlet": {
+      "e_cas": -1487.7651664379075,
+      "cas_conv": false,
+      "na": 11,
+      "nb": 11,
+      "n_u": 2.043,
+      "excess": 2.043,
+      "noon": [
+        1.999,
+        1.999,
+        1.998,
+        1.998,
+        1.996,
+        1.996,
+        1.966,
+        1.951,
+        1.882,
+        1.832,
+        1.828,
+        0.212,
+        0.201,
+        0.143
+      ]
+    }
+  },
+  "active_space": {
+    "ncas": 14,
+    "nelec": 22,
+    "qubits_jw": 28
+  },
+  "verdict": {
+    "ground_state_our_casscf": "quintet",
+    "known_answer": "quintet (S=2)",
+    "matches_known_S2": true,
+    "rel_kcal_above_ground": {
+      "quintet": 0.0,
+      "triplet": 17.62,
+      "singlet": 45.97
+    }
+  },
+  "vqe_gate": {
+    "error": "ValueError: Open-shell systems are not supported for the requested backend. Use method = 'openfermion' or change the charge or spin multiplicity of the molecule."
+  }
+}

@@ -538,6 +538,53 @@ const ENTRIES = [
       ]
     },
     figures: []
+  },
+
+  /* ---------------------------------------------------------------- */
+  {
+    id: "fe2s2",
+    date: "2026-06",
+    stage: { ru: "Этап 11", en: "Stage 11" },
+    title: { ru: "[2Fe–2S] кластер: антиферромагнитное сердце железо-серной химии",
+             en: "The [2Fe–2S] cluster: the antiferromagnetic heart of iron–sulfur chemistry" },
+    simple: {
+      ru: `<p>FeMoco собран из железо-серных блоков. Самый простой — ромб <strong>[2Fe–2S]</strong> ферредоксинов. Его ключевая физика: два железа связывают свои спины <strong>антиферромагнитно</strong> через мостиковые серы — и это <em>принципиально</em> не описывается одной «картинкой» (мультиреференс в чистом виде).</p>
+           <p>Мы посчитали это честно (трюк broken-symmetry в DFT — он у нас <strong>сошёлся</strong>): антиферромагнитное состояние оказалось ниже ферромагнитного на <strong>11.7 ккал/моль</strong>, что даёт обменную связь <strong>J = −161 см⁻¹</strong> — ровно в экспериментальном диапазоне для таких кластеров. Это и есть та мультиреференсная физика, что делает FeMoco трудным.</p>
+           <p>А «квантово-готовое» активное пространство: только d-орбитали двух желёз — это <strong>20 кубитов</strong>; добавить серы — <strong>56 кубитов</strong>. Оба больше 24-кубитного Fe–N₂ (Этап 10), где симуляция уже сломалась. Значит, [2Fe–2S] — ещё дальше за стеной, а полный FeMoco (108 кубитов) — пункт назначения.</p>`,
+      en: `<p>FeMoco is built from iron–sulfur blocks. The simplest is the <strong>[2Fe–2S]</strong> rhombus of ferredoxins. Its defining physics: the two irons couple their spins <strong>antiferromagnetically</strong> through the bridging sulfurs — and this is <em>intrinsically</em> beyond a single "picture" (pure multireference).</p>
+           <p>We computed it honestly (the DFT broken-symmetry trick — which <strong>converged</strong> for us): the antiferromagnetic state is lower than the ferromagnetic one by <strong>11.7 kcal/mol</strong>, giving an exchange coupling <strong>J = −161 cm⁻¹</strong> — right in the experimental range for such clusters. This is the multireference physics that makes FeMoco hard.</p>
+           <p>And the "quantum-ready" active space: just the d-orbitals of the two irons is <strong>20 qubits</strong>; adding the sulfurs is <strong>56 qubits</strong>. Both exceed the 24-qubit Fe–N₂ (Stage 10) where the simulation already broke. So [2Fe–2S] is even further past the wall, and the full FeMoco (108 qubits) is the destination.</p>`
+    },
+    tech: {
+      ru: `<p>Минимальная модель [Fe₂S₂(SH)₄]²⁻ (2× Fe(III), геометрия hand-built, <em>не</em> оптимизирована — помечено), B3LYP/def2-SVP, UKS. Все числа посчитаны.</p>
+           <ul>
+             <li><strong>HS</strong> (ферромагнитное, mult=11, S=5): E=−4918.095 Ha, ⟨S²⟩=30.0 (= 5·6 ✓).</li>
+             <li><strong>BS</strong> (Ms=0, антиферромагнитное; затравка по Нудлмену — флип спина на втором Fe): E=−4918.113 Ha, ⟨S²⟩=<strong>4.66</strong> — настоящее нарушение симметрии (между HS 30 и синглетом 0), сошлось.</li>
+             <li><strong>Обменная связь</strong> (Ямагучи, H=−2J·S₁S₂): J = −(E_HS−E_BS)/(⟨S²⟩_HS−⟨S²⟩_BS) = <strong>−161 см⁻¹</strong> (антиферромагнетизм; E_HS−E_BS = 11.7 ккал/моль). В экспериментальном диапазоне [2Fe–2S] ферредоксинов (~−150…−400 см⁻¹).</li>
+           </ul>
+           <p>Основное состояние — open-shell синглет, принципиально многоконфигурационный; DFT добирается до него лишь приближением broken-symmetry, и J чувствителен к функционалу (известная трудность DFT для Fe–S — это и есть аргумент «зачем квант»). <strong>Активные пространства (AVAS):</strong> Fe 3d = 10 орбиталей → <strong>20 кубитов</strong>; Fe 3d + S 3p = 28 орбиталей → <strong>56 кубитов</strong>. Оба превышают 24-кубитный Fe–N₂ (Этап 10), где VQE-симуляция упёрлась в стену — значит честный квантовый расчёт [2Fe–2S] ещё дальше, а полный FeMoco (CAS(54,54)=108 кубитов, Этап 5) — конечная точка. Оговорки: минимальная модель, геометрия не оптимизирована, BS-DFT — приближение к истинному мультиреференсному состоянию; J иллюстративен.</p>`,
+      en: `<p>Minimal model [Fe₂S₂(SH)₄]²⁻ (2× Fe(III), hand-built geometry, <em>not</em> optimized — labelled), B3LYP/def2-SVP, UKS. All numbers computed.</p>
+           <ul>
+             <li><strong>HS</strong> (ferromagnetic, mult=11, S=5): E=−4918.095 Ha, ⟨S²⟩=30.0 (= 5·6 ✓).</li>
+             <li><strong>BS</strong> (Ms=0, antiferromagnetic; Noodleman fragment spin-flip seed): E=−4918.113 Ha, ⟨S²⟩=<strong>4.66</strong> — genuine symmetry breaking (between HS 30 and singlet 0), converged.</li>
+             <li><strong>Exchange coupling</strong> (Yamaguchi, H=−2J·S₁S₂): J = −(E_HS−E_BS)/(⟨S²⟩_HS−⟨S²⟩_BS) = <strong>−161 cm⁻¹</strong> (antiferromagnetic; E_HS−E_BS = 11.7 kcal/mol). Within the experimental [2Fe–2S] ferredoxin range (~−150…−400 cm⁻¹).</li>
+           </ul>
+           <p>The ground state is an open-shell singlet, intrinsically multiconfigurational; DFT reaches it only via the broken-symmetry approximation, and J is functional-sensitive (the known DFT difficulty for Fe–S — the very case for quantum). <strong>Active spaces (AVAS):</strong> Fe 3d = 10 orbitals → <strong>20 qubits</strong>; Fe 3d + S 3p = 28 orbitals → <strong>56 qubits</strong>. Both exceed the 24-qubit Fe–N₂ (Stage 10) where VQE simulation hit the wall — so an honest quantum treatment of [2Fe–2S] is further still, and the full FeMoco (CAS(54,54)=108 qubits, Stage 5) is the endpoint. Caveats: minimal model, unoptimized geometry, BS-DFT is an approximation to the true multireference state; J illustrative.</p>`
+    },
+    table: {
+      title: { ru: "[2Fe–2S] (B3LYP/def2-SVP, минимальная модель) — реальный расчёт",
+               en: "[2Fe–2S] (B3LYP/def2-SVP, minimal model) — real computation" },
+      head: { ru: ["Величина", "Значение"], en: ["Quantity", "Value"] },
+      rows: [
+        ["HS (ферромагнит, mult=11)", "E=−4918.095 Ha · ⟨S²⟩=30.0"],
+        ["BS (антиферромагнит, Ms=0)", "E=−4918.113 Ha · ⟨S²⟩=4.66"],
+        ["Обменная связь J (Ямагучи)", "−161 см⁻¹ — антиферромагнетизм"],
+        ["E(HS) − E(BS)", "11.7 ккал/моль"],
+        ["Активное пр-во Fe 3d", "10 орбиталей → 20 кубитов"],
+        ["Активное пр-во Fe 3d + S 3p", "28 орбиталей → 56 кубитов  (> 24q Fe–N₂)"]
+      ]
+    },
+    figures: []
   }
 ];
 

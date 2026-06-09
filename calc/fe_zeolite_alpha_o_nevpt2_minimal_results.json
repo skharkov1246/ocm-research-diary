@@ -1,0 +1,98 @@
+{
+  "meta": {
+    "basis": "def2-svp",
+    "ao_labels": [
+      "0 Fe 3d",
+      "1 O 2p"
+    ],
+    "charge": 0,
+    "model": "constructed [Fe(O)(OH)2] minimal (relaxes; NOT a CIF CHA site)",
+    "known_answer": "alpha-O ground state = S=2 (Nature 2016)",
+    "honesty": "curated converged CASSCF + NEVPT2; VERTICAL gaps on a CONSTRUCTED cluster; faithful absolutes need real CIF + adiabatic.",
+    "scf_conv": true
+  },
+  "spins": {
+    "quintet": {
+      "e_cas": -1487.8094591741997,
+      "cas_conv": true,
+      "n_u": 5.022,
+      "excess": 1.022,
+      "noon": [
+        1.997,
+        1.947,
+        1.938,
+        1.778,
+        1.06,
+        1.052,
+        1.002,
+        1.0,
+        0.227
+      ],
+      "e_nevpt2": -1488.6220532108796,
+      "nevpt2_corr": -0.8125940366799151
+    },
+    "triplet": {
+      "e_cas": -1487.7816679097325,
+      "cas_conv": true,
+      "n_u": 3.71,
+      "excess": 1.71,
+      "noon": [
+        1.998,
+        1.978,
+        1.954,
+        1.843,
+        1.724,
+        1.04,
+        0.999,
+        0.293,
+        0.17
+      ],
+      "e_nevpt2": -1488.5974686360905,
+      "nevpt2_corr": -0.8158007263579086
+    },
+    "singlet": {
+      "e_cas": -1487.7383928642935,
+      "cas_conv": true,
+      "n_u": 2.197,
+      "excess": 2.197,
+      "noon": [
+        1.998,
+        1.966,
+        1.95,
+        1.872,
+        1.811,
+        1.798,
+        0.233,
+        0.22,
+        0.152
+      ],
+      "e_nevpt2": -1488.5493819773048,
+      "nevpt2_corr": -0.8109891130114039
+    }
+  },
+  "active_space": {
+    "ncas": 9,
+    "nelec": 12,
+    "qubits_jw": 18
+  },
+  "verdict_casscf": {
+    "level": "e_cas",
+    "ground_state": "quintet",
+    "matches_known_S2": true,
+    "rel_kcal": {
+      "quintet": 0.0,
+      "triplet": 17.44,
+      "singlet": 44.59
+    }
+  },
+  "verdict_nevpt2": {
+    "level": "e_nevpt2",
+    "ground_state": "quintet",
+    "matches_known_S2": true,
+    "rel_kcal": {
+      "quintet": 0.0,
+      "triplet": 15.43,
+      "singlet": 45.6
+    }
+  }
+}
