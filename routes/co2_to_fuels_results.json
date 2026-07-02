@@ -756,5 +756,44 @@
    "ts_is_localized_diradical": false,
    "note": "Relaxed PBE coupling barriers are real (frozen-metal cluster, def2-SVP, no constant-potential): CuAl<Cu2. σ-frontier of the forming C–C bond is NOT a localized diradical at the TS (unlike the literature surface 1.92/0.09 — model lacks potential/reduction). Trustworthy multireference barrier correction = CASSCF/AWS."
   }
+ },
+ "casscf_barrier": {
+  "Cu2": {
+   "scf_branch_max_drift_mHa": 167.502,
+   "barrier_pbe_eV": 1.326,
+   "avas_dims_reactant": "(12e,10o)",
+   "reactant_e_casscf": -3502.808295,
+   "reactant_converged": true,
+   "reactant_noon": [
+    1.9913,
+    1.9909,
+    1.9497,
+    1.9496,
+    1.947,
+    1.9469,
+    0.0579,
+    0.0577,
+    0.0561,
+    0.053
+   ],
+   "reactant_nu": 0.4494,
+   "ts_e_casscf": -3502.747299,
+   "ts_converged": true,
+   "ts_noon": [
+    1.9911,
+    1.991,
+    1.9536,
+    1.949,
+    1.9468,
+    1.9446,
+    0.0587,
+    0.0579,
+    0.0556,
+    0.0517
+   ],
+   "ts_nu": 0.4477,
+   "barrier_casscf_eV": 1.66,
+   "quantum_corr_eV": 0.334
+  }
  }
 }
