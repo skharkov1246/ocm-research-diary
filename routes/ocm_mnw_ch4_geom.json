@@ -5,9 +5,9 @@
   {
    "rCH_pin": null,
    "rOH_pin": 2.2,
-   "e_h": -1266.0626570765833,
+   "e_h": -1266.0762284606035,
    "scf_converged": true,
-   "spin_square": 9.621,
+   "spin_square": 9.124,
    "wall_s": 232.7,
    "atoms": [
     [
@@ -66,7 +66,9 @@
       3.712174
      ]
     ]
-   ]
+   ],
+   "e_h_raw": -1266.0626570765833,
+   "polished": true
   },
   {
    "rCH_pin": 1.15,
