@@ -793,7 +793,28 @@
    ],
    "ts_nu": 0.4477,
    "barrier_casscf_eV": 1.66,
-   "quantum_corr_eV": 0.334
+   "quantum_corr_eV": 0.334,
+   "barrier_pbe_profile_eV": 1.326
+  },
+  "CuAl": {
+   "scf_branch_max_drift_mHa": 22.864,
+   "barrier_pbe_eV": 1.053,
+   "avas_dims_reactant": "(14e,11o)",
+   "reactant_e_casscf": -2105.878935,
+   "reactant_converged": false,
+   "reactant_noon": [
+    1.9942,
+    1.9813,
+    1.9579,
+    1.9528,
+    1.9465,
+    1.9394,
+    0.0647,
+    0.0629,
+    0.0536,
+    0.0467
+   ],
+   "reactant_nu": 0.4558
   }
  }
 }

@@ -36,8 +36,18 @@ from pyscf.mcscf import avas
 NCAS, NELECAS = 10, 12                      # фиксированное π-многообразие CAS(12e,10o)
 
 
+HERE = os.path.dirname(os.path.abspath(__file__))
+STATE_NPZ = os.path.join(HERE, "co2_to_fuels_casscf_state.npz")
+
+
 def _persist(res):
     json.dump(res, open(RESULTS, "w"), ensure_ascii=False, indent=1)
+
+
+def _save_npz(tag, **arrs):
+    data = dict(np.load(STATE_NPZ)) if os.path.exists(STATE_NPZ) else {}
+    data.update({f"{tag}_{k}": v for k, v in arrs.items()})
+    np.savez_compressed(STATE_NPZ, **data)
 
 
 def _noon(mc):
@@ -49,31 +59,40 @@ def _noon(mc):
 
 def chain_scf(tag, site):
     """Warm-chain SCF по релакс-профилю (d=1.8→4.2, как в оригинальном скане).
-    Возвращает {d: mf} для reactant/TS + макс. drift энергии от сохранённой ветки."""
+    Возвращает {d: mf} для reactant/TS + drift энергии от сохранённой ветки
+    НА КАЖДОЙ точке (подписанный, мГа; <0 = цепочка НИЖЕ сохранённой)."""
     metal = METALS[tag]
     want = {site["d_reactant"], site["d_ts"]}
-    keep, dm, drift = {}, None, 0.0
+    keep, dm, drift = {}, None, {}
     for p in sorted(site["profile"], key=lambda q: q["d"]):
         t0 = time.time()
         mf = _scf(_mol(metal, build_ads(p["d"], np.array(p["free"]))), dm)
         dm = mf.make_rdm1()
-        dr = abs(float(mf.e_tot) - p["e_pbe"]) * 1e3          # mHa
-        drift = max(drift, dr)
-        print(f"  chain d={p['d']:.2f}  E={mf.e_tot:.6f}  drift={dr:.3f} mHa  "
+        dr = (float(mf.e_tot) - p["e_pbe"]) * 1e3             # mHa, подписанный
+        drift[f"{p['d']:.1f}"] = round(dr, 3)
+        print(f"  chain d={p['d']:.2f}  E={mf.e_tot:.6f}  drift={dr:+.3f} mHa  "
               f"({time.time()-t0:.0f}s)", flush=True)
         if p["d"] in want:
             keep[p["d"]] = mf
-    return keep, round(drift, 3)
+    return keep, drift
 
 
-def casscf_fixed(mf, mo0, tag_label):
+def casscf_fixed(mf, mo0, tag_label, restarts=4):
+    """DF-CASSCF с фикс. CAS; при несходимости — рестарт ядра с последних
+    орбиталей (свежая AH-история), до `restarts` раз."""
     mc = mcscf.CASSCF(mf, NCAS, NELECAS).density_fit()
-    mc.verbose = 0; mc.conv_tol = 1e-7; mc.max_cycle_macro = 80
+    mc.verbose = 0; mc.conv_tol = 1e-7; mc.max_cycle_macro = 120
     t0 = time.time()
     mc.kernel(mo0)
+    tries = 1
+    while not mc.converged and tries < restarts:
+        tries += 1
+        print(f"  CASSCF {tag_label}: not converged, restart #{tries} "
+              f"from current orbitals", flush=True)
+        mc.kernel(mc.mo_coeff)
     noon, nu = _noon(mc)
     print(f"  CASSCF {tag_label}: E={mc.e_tot:.6f}  conv={mc.converged}  "
-          f"n_u={nu:.3f}  ({time.time()-t0:.0f}s)", flush=True)
+          f"n_u={nu:.3f}  ({tries} run(s), {time.time()-t0:.0f}s)", flush=True)
     return mc, noon, nu
 
 
@@ -91,12 +110,20 @@ def run_site(tag, res):
     print(f"\n--- CASSCF barrier, site {tag} ---", flush=True)
 
     mfs, drift = chain_scf(tag, site)
-    out["scf_branch_max_drift_mHa"] = drift
+    out["scf_branch_drift_mHa"] = drift
+    out["scf_branch_max_drift_mHa"] = max(abs(v) for v in drift.values())
     mf_r, mf_t = mfs[site["d_reactant"]], mfs[site["d_ts"]]
-    # PBE-барьер ТОЙ ЖЕ warm-ветки (у CuAl сохранённый barrier_pbe_eV смешивал
-    # холодный SCF: 1.053 vs warm 0.992) — поправка Δ_corr считается против него
+    # ДВА PBE-барьера честно: (а) ветка ЭТОЙ цепочки — та же, на которой стоит
+    # CASSCF (у CuAl совпала со старыми «холодными» эндпойнтами, 1.053);
+    # (б) релакс-профиль скана (вариационно ниже у CuAl: warm 0.992).
+    # Чувствительность CASSCF к выбору ветки меряет Check B (co2_to_fuels_nevpt2).
     out["barrier_pbe_eV"] = round(
         (float(mf_t.e_tot) - float(mf_r.e_tot)) * HARTREE_EV, 3)
+    prof_e = {p["d"]: p["e_pbe"] for p in site["profile"]}
+    out["barrier_pbe_profile_eV"] = round(
+        (prof_e[site["d_ts"]] - prof_e[site["d_reactant"]]) * HARTREE_EV, 3)
+    # персист dm/mo эндпойнтов — тёплый рестарт для NEVPT2/checks без полной цепочки
+    _save_npz(tag, reactant_dm=mf_r.make_rdm1(), ts_dm=mf_t.make_rdm1())
 
     # reactant: AVAS-guess (размер зафиксирован NCAS/NELECAS независимо от AVAS)
     orbs_r, avas_dims_r = avas_guess(mf_r)
@@ -105,6 +132,7 @@ def run_site(tag, res):
                reactant_e_casscf=round(float(mc_r.e_tot), 6),
                reactant_converged=bool(mc_r.converged),
                reactant_noon=noon_r, reactant_nu=nu_r)
+    _save_npz(tag, reactant_mo=mc_r.mo_coeff)
     _persist(res)
 
     # TS: начальные орбитали = ПРОЕКЦИЯ сошедшегося CASSCF реактанта (то же пространство)
@@ -114,6 +142,7 @@ def run_site(tag, res):
     out.update(ts_e_casscf=round(float(mc_t.e_tot), 6),
                ts_converged=bool(mc_t.converged),
                ts_noon=noon_t, ts_nu=nu_t)
+    _save_npz(tag, ts_mo=mc_t.mo_coeff)
 
     out["barrier_casscf_eV"] = round(
         (out["ts_e_casscf"] - out["reactant_e_casscf"]) * HARTREE_EV, 3)
