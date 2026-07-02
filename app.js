@@ -27,7 +27,8 @@ function renderHeader() {
   $("#lvl-simple").textContent = t(UI.simple);
   $("#lvl-tech").textContent = t(UI.tech);
 
-  $("#hero-text").innerHTML = SITE.hero[state.level][state.lang];
+  const hero = SITE.hero[state.level] || {};
+  $("#hero-text").innerHTML = hero[state.lang] || hero.ru || "";
   $("#honesty-note").textContent = t(UI.honesty);
   $("#footer-honesty").textContent = t(UI.honesty);
   $("#repo-link").href = REPO_URL;
