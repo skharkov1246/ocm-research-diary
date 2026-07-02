@@ -1,0 +1,308 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+calc/femoco_4fe4s_casscf.py — FeMoco diary, Stage 17.
+
+First MULTIREFERENCE (CASSCF) look at the [4Fe-4S] cubane, plus the Jordan-Wigner
+qubit Hamiltonian assembled and CASCI-verified — the concrete next step promised in
+the Stage-16 capstone ("turn the [4Fe-4S] active-space estimate into a real CASSCF and
+assemble the qubit Hamiltonian").
+
+WHY THIS STAGE (the link to Stage 15). Stage 15 showed broken-symmetry DFT cannot even
+fix the SIGN of the magnetic coupling in [4Fe-4S] (B3LYP flips ferro/antiferro; ~15
+kcal/mol spread across four functionals). The honest reason is that the ground state is
+genuinely multi-configurational — and a KS-DFT / broken-symmetry solution is a single
+Slater determinant, which cannot represent it. Here we MEASURE that multireference
+character directly (natural-orbital occupations, Head-Gordon n_u) with CASSCF, the
+method DFT is failing to stand in for.
+
+WHAT THE SCRIPT DOES.
+  1. Build a realistic [Fe4S4(SH)4]2- cubane (Fe-Fe 2.75, Fe-S core ~2.30, terminal
+     Fe-S(H) ~2.25 A, S-H 1.34 A), high-spin reference spin=18 (2 Fe3+ d5 + 2 Fe2+ d6
+     aligned) — the SAME composition as the Stage-15 BS-DFT run.
+  2. Converge the high-spin ROHF mean field (density fitting; DIIS then a Newton /
+     second-order restart if DIIS stalls — Fe-S clusters are hard SCF cases).
+  3. SIZE the full Fe-3d magnetic active space with AVAS, and Fe-3d + bridging-S-3p,
+     and report their qubit counts (2 x n_orb). These are the WALL: their exact CASCI
+     (>=1e10 determinants) is not run here — that untractability is the point.
+  4. Converge a TRACTABLE FRONTIER CASSCF (target CAS(8e,8o) = 16 qubits, the most
+     Fe-3d-like orbitals at the Fermi level), and measure its NOON / n_u multireference
+     character.
+  5. Assemble the Jordan-Wigner qubit Hamiltonian for that frontier space and verify
+     its lowest eigenvalue (in the correct electron-number sector) against CASCI to
+     < 1e-3 kcal/mol — the same engine-validation gate used on N2 / Fe-N2 earlier.
+     Self-test: H2/def2-SVP CAS(2e,2o) JW vs FCI to ~1e-9 Ha.
+
+HONEST SCOPE.
+  - Idealized-but-realistic cubane, not a CIF-derived protein site; def2-SVP (modest
+    basis); CASSCF only (no dynamic correlation) — we test the QUALITATIVE signal
+    (multireference character present) and the engine gate, not a quantitative gap.
+  - The full Fe-3d space is only SIZED, not diagonalized: that is the classical wall.
+    The converged CASSCF + JW check live in the tractable frontier window.
+  - Every number printed/saved is computed at run time. Nothing is invented. If the SCF
+    or CASSCF does not converge, that is recorded honestly in the results JSON.
+
+Run (heavy; intended for a compute box / AWS, see calc/aws_run.sh pattern):
+    python3 -u calc/femoco_4fe4s_casscf.py
+"""
+import os
+import json
+import time
+import numpy as np
+from pyscf import gto, scf, mcscf, ao2mo
+from pyscf.mcscf import avas
+import pennylane as qml
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+RESULTS = os.path.join(HERE, "femoco_4fe4s_casscf_results.json")
+XYZ_OUT = os.path.join(HERE, "femoco_4fe4s_cubane.xyz")
+KCAL = 627.50947406  # Ha -> kcal/mol
+
+BASIS = "def2-svp"
+CHARGE = -2
+SPIN = 18            # 2S = unpaired e in the high-spin reference (2 Fe3+ d5 + 2 Fe2+ d6)
+TARGET_NCAS = 8      # tractable frontier CAS size (16 qubits) for CASSCF + JW gate
+
+
+# --------------------------------------------------------------------------- geometry
+def build_cubane(d_FeFe=2.75, r_FeS_core=2.30, r_FeS_term=2.25, r_SH=1.34):
+    """Idealized [Fe4S4(SH)4]2- cubane: Fe4 tetrahedron, mu3-S capping each face,
+    a terminal SH on each Fe pointing outward. Returns a list of (element, xyz)."""
+    v = np.array([[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]], float)
+    Fe = v * (d_FeFe / np.linalg.norm(v[0] - v[1]))
+    cen = Fe.mean(0)
+    faces = [[1, 2, 3], [0, 2, 3], [0, 1, 3], [0, 1, 2]]
+    S_core = []
+    for f in faces:
+        fc = Fe[f].mean(0)
+        n = fc - cen
+        n /= np.linalg.norm(n)
+        # push S out along the face normal until mean Fe-S == r_FeS_core
+        best = None
+        for t in np.linspace(0.0, 1.8, 400):
+            p = fc + n * t
+            dmean = np.linalg.norm(Fe[f] - p, axis=1).mean()
+            if best is None or abs(dmean - r_FeS_core) < best[0]:
+                best = (abs(dmean - r_FeS_core), p)
+        S_core.append(best[1])
+    S_core = np.array(S_core)
+    S_term, H = [], []
+    for i in range(4):
+        d = Fe[i] - cen
+        d /= np.linalg.norm(d)
+        s = Fe[i] + d * r_FeS_term
+        S_term.append(s)
+        H.append(s + d * r_SH)
+    atoms = ([("Fe", p) for p in Fe]
+             + [("S", p) for p in S_core]        # bridging (core) sulfurs, indices 4-7
+             + [("S", p) for p in S_term]        # terminal thiolate sulfurs, 8-11
+             + [("H", p) for p in H])            # thiol H, 12-15
+    return atoms
+
+
+def write_xyz(atoms, path, comment):
+    with open(path, "w") as fh:
+        fh.write(f"{len(atoms)}\n{comment}\n")
+        for e, p in atoms:
+            fh.write(f"{e} {p[0]:.6f} {p[1]:.6f} {p[2]:.6f}\n")
+
+
+# --------------------------------------------------------------------------- mean field
+def converge_rohf(mol):
+    """High-spin ROHF with density fitting; DIIS then a second-order (Newton) restart
+    if DIIS has not converged. Returns the mf and its converged flag."""
+    mf = scf.ROHF(mol).density_fit()
+    mf.level_shift = 0.4
+    mf.max_cycle = 150
+    mf.conv_tol = 1e-7
+    mf.kernel()
+    if not mf.converged:
+        print("  DIIS not converged -> Newton (SOSCF) restart from current MOs")
+        mf = mf.newton()
+        mf.max_cycle = 80
+        mf.kernel(mf.mo_coeff, mf.mo_occ)
+    return mf
+
+
+# --------------------------------------------------------------------------- active spaces
+def avas_size(mf, labels, threshold):
+    """Return (ncas, nelec) of the AVAS active space for the given AO labels."""
+    ncas, nelec, _ = avas.avas(mf, labels, threshold=threshold, canonicalize=False, verbose=0)
+    return int(ncas), int(nelec)
+
+
+def frontier_avas(mf, target_ncas):
+    """Scan the AVAS threshold to obtain a frontier active space as close as possible
+    to target_ncas orbitals (the most reference-like frontier orbitals). Returns
+    (ncas, nelec, mo, threshold)."""
+    best = None
+    for thr in [0.95, 0.9, 0.85, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]:
+        try:
+            ncas, nelec, mo = avas.avas(mf, ["Fe 3d"], threshold=thr,
+                                        canonicalize=True, verbose=0)
+        except Exception:
+            continue
+        score = abs(int(ncas) - target_ncas)
+        if best is None or score < best[0] or (score == best[0] and int(ncas) >= target_ncas):
+            best = (score, int(ncas), int(nelec), mo, thr)
+        if int(ncas) == target_ncas:
+            break
+    if best is None:
+        raise RuntimeError("AVAS frontier selection failed for all thresholds")
+    _, ncas, nelec, mo, thr = best
+    return ncas, nelec, mo, thr
+
+
+# --------------------------------------------------------------------------- CAS -> qubits
+def cas_to_qubit_H(h1, eri, ecore, ncas):
+    """Active integrals (chemist (pq|rs)) -> fermion operator -> Jordan-Wigner.
+    Spin-orbital for spatial p, spin s in {0,1}: 2p+s. (Same routine validated in
+    routes/co2_to_fuels_vqe.py.)"""
+    op = ecore * qml.FermiWord({})
+    for p in range(ncas):
+        for q in range(ncas):
+            c = h1[p, q]
+            if abs(c) > 1e-12:
+                for s in (0, 1):
+                    op += c * (qml.FermiC(2 * p + s) * qml.FermiA(2 * q + s))
+    for p in range(ncas):
+        for q in range(ncas):
+            for r in range(ncas):
+                for s in range(ncas):
+                    c = eri[p, q, r, s]
+                    if abs(c) > 1e-12:
+                        for a in (0, 1):
+                            for b in (0, 1):
+                                op += 0.5 * c * (
+                                    qml.FermiC(2 * p + a) * qml.FermiC(2 * r + b)
+                                    * qml.FermiA(2 * s + b) * qml.FermiA(2 * q + a))
+    H = qml.jordan_wigner(op)
+    coeffs, ops = H.terms()
+    return qml.dot([float(np.real(c)) for c in coeffs], ops), len(coeffs)
+
+
+def ground_E_in_sector(H, nq, nelec):
+    """Lowest eigenvalue of the qubit H restricted to the fixed electron-number sector."""
+    Hm = np.real(qml.matrix(H, wire_order=range(nq)))
+    keep = [i for i in range(2 ** nq) if bin(i).count("1") == nelec]
+    sub = Hm[np.ix_(keep, keep)]
+    return float(np.linalg.eigvalsh(sub)[0])
+
+
+def integrals_from_mc(mc):
+    h1, ecore = mc.get_h1eff()
+    eri = ao2mo.restore(1, mc.get_h2eff(), mc.ncas)
+    return np.asarray(h1), np.asarray(eri), float(ecore)
+
+
+def self_test_h2():
+    mol = gto.M(atom="H 0 0 0; H 0 0 0.74", basis=BASIS, verbose=0)
+    mf = scf.RHF(mol)
+    mf.kernel()
+    mc = mcscf.CASCI(mf, 2, 2)
+    mc.verbose = 0
+    mc.kernel()
+    h1, eri, ec = integrals_from_mc(mc)
+    H, _ = cas_to_qubit_H(h1, eri, ec, mc.ncas)
+    eq = ground_E_in_sector(H, 2 * mc.ncas, sum(mc.nelecas))
+    err = abs(eq - mc.e_tot)
+    print(f"self-test H2 CAS(2,2): CASCI={mc.e_tot:.10f} JW={eq:.10f} d={err:.1e} Ha")
+    return err
+
+
+# --------------------------------------------------------------------------- main
+def main():
+    t_all = time.time()
+    res = {"meta": {"system": "[Fe4S4(SH)4]2- cubane", "basis": BASIS,
+                    "charge": CHARGE, "spin_2S": SPIN,
+                    "geometry": "idealized cubane (Fe-Fe 2.75, Fe-S core 2.30, "
+                                "term Fe-S 2.25, S-H 1.34 A)",
+                    "method": "HS ROHF/DF -> AVAS sizing + frontier CASSCF -> JW gate",
+                    "note": "CASSCF only, no dynamic correlation; full Fe-3d space is "
+                            "SIZED not diagonalized (the classical wall)."}}
+
+    err = self_test_h2()
+    res["self_test_h2_jw_vs_fci_Ha"] = float(f"{err:.2e}")
+    assert err < 1e-6, f"JW self-test failed: {err}"
+
+    atoms = build_cubane()
+    write_xyz(atoms, XYZ_OUT, "[Fe4S4(SH)4]2- idealized cubane (FeMoco diary Stage 17)")
+    mol = gto.M(atom=[(e, tuple(p)) for e, p in atoms], basis=BASIS,
+                charge=CHARGE, spin=SPIN, verbose=0)
+    res["meta"]["nao"] = int(mol.nao)
+    res["meta"]["nelec"] = list(map(int, mol.nelec))
+    print(f"cubane: nao={mol.nao} nelec={mol.nelec}")
+
+    t0 = time.time()
+    mf = converge_rohf(mol)
+    res["scf"] = {"e_hs_rohf": float(mf.e_tot), "converged": bool(mf.converged),
+                  "seconds": round(time.time() - t0, 1)}
+    print(f"HS ROHF: E={mf.e_tot:.5f} Ha conv={mf.converged} ({res['scf']['seconds']}s)")
+
+    # --- size the magnetic active spaces (the wall) ---
+    walls = {}
+    for tag, labels in [("Fe_3d", ["Fe 3d"]), ("Fe_3d__S_3p", ["Fe 3d", "S 3p"])]:
+        try:
+            nc, ne = avas_size(mf, labels, threshold=0.2)
+            walls[tag] = {"ncas": nc, "nelec": ne, "qubits_jw": 2 * nc}
+            print(f"wall {tag}: CAS({ne}e,{nc}o) = {2*nc} qubits")
+        except Exception as e:
+            walls[tag] = {"error": f"{type(e).__name__}: {e}"}
+    res["wall_active_spaces"] = walls
+
+    # --- tractable frontier CASSCF ---
+    frontier = {}
+    try:
+        ncas, nelec, mo, thr = frontier_avas(mf, TARGET_NCAS)
+        frontier.update(avas_threshold=thr, ncas=int(ncas), nelec=int(nelec),
+                        qubits_jw=2 * int(ncas))
+        print(f"frontier AVAS(Fe 3d, thr={thr}): CAS({nelec}e,{ncas}o) "
+              f"= {2*ncas} qubits")
+
+        na = (nelec + (nelec % 2)) // 2  # near-closed frontier split for the CAS ground
+        nb = nelec - na
+        t0 = time.time()
+        mc = mcscf.CASSCF(mf, ncas, nelec).density_fit()
+        mc.max_cycle_macro = 50
+        mc.verbose = 0
+        e_casscf = mc.kernel(mo)[0]
+        frontier["casscf_seconds"] = round(time.time() - t0, 1)
+        frontier["e_casscf"] = float(e_casscf)
+        frontier["casscf_converged"] = bool(mc.converged)
+
+        casdm1 = mc.fcisolver.make_rdm1(mc.ci, ncas, mc.nelecas)
+        occ = np.clip(np.linalg.eigvalsh(casdm1)[::-1], 0.0, 2.0)
+        n_u = float(np.sum(occ * (2.0 - occ)))
+        frontier["noon"] = [round(float(x), 3) for x in occ]
+        frontier["n_u"] = round(n_u, 3)
+        print(f"CASSCF: E={e_casscf:.6f} conv={mc.converged} "
+              f"n_u={n_u:.3f} ({frontier['casscf_seconds']}s)")
+
+        # --- JW gate: qubit H reproduces the exact CAS diagonalization ---
+        # reference = absolute-lowest CASCI state in the CASSCF-optimized orbitals
+        # (same electron-number sector as the JW ground search)
+        mc_ci = mcscf.CASCI(mf, ncas, nelec)
+        mc_ci.verbose = 0
+        mc_ci.mo_coeff = mc.mo_coeff
+        e_casci = mc_ci.kernel(mc.mo_coeff)[0]
+        h1, eri, ec = integrals_from_mc(mc_ci)
+        H, nterms = cas_to_qubit_H(h1, eri, ec, ncas)
+        eq = ground_E_in_sector(H, 2 * ncas, nelec)
+        d_jw = (eq - e_casci) * KCAL
+        frontier.update(jw_terms=int(nterms), e_casci=float(e_casci),
+                        e_jw=float(eq), jw_minus_casci_kcal=float(f"{d_jw:.2e}"))
+        print(f"JW gate: CASCI={e_casci:.8f} JW={eq:.8f} "
+              f"d={d_jw:.2e} kcal/mol ({nterms} terms)")
+    except Exception as e:
+        frontier["error"] = f"{type(e).__name__}: {e}"
+        print("frontier CASSCF/JW error:", frontier["error"])
+    res["frontier_casscf"] = frontier
+
+    res["meta"]["total_seconds"] = round(time.time() - t_all, 1)
+    with open(RESULTS, "w") as fh:
+        json.dump(res, fh, ensure_ascii=False, indent=1)
+    print(f"\nwrote {RESULTS}  (total {res['meta']['total_seconds']}s)")
+
+
+if __name__ == "__main__":
+    main()
