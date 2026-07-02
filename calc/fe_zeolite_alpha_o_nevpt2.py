@@ -70,10 +70,10 @@ def make_mol(atoms, charge, spin2):
                  basis=BASIS, verbose=0, max_memory=12000)
 
 
-def relaxed_ref(atoms, charge):
-    """High-spin reference; relax geometry once (berny/geometric)."""
+def relaxed_ref(atoms, charge, relax=True):
+    """High-spin reference; optionally relax geometry once (berny/geometric)."""
     mol = make_mol(atoms, charge, max(SPINS.values()))
-    for backend in ("geometric_solver", "berny_solver"):
+    for backend in (("geometric_solver", "berny_solver") if relax else ()):
         try:
             opt = __import__(f"pyscf.geomopt.{backend}", fromlist=["optimize"]).optimize
             mks = dft.UKS(mol); mks.xc = "PBE"; mks.conv_tol = 1e-7; mks.max_cycle = 400
@@ -127,6 +127,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--xyz", default=None); ap.add_argument("--charge", type=int, default=0)
     ap.add_argument("--minimal", action="store_true", help="use [Fe(O)(OH)2] (relaxes reliably)")
+    ap.add_argument("--norelax", action="store_true", help="skip geom-opt (geometry pre-relaxed, e.g. xTB)")
     args = ap.parse_args()
     if args.xyz:
         atoms, model = read_xyz(args.xyz), args.xyz
@@ -141,7 +142,7 @@ def main():
                                "CONSTRUCTED cluster; faithful absolutes need real CIF + adiabatic."},
            "spins": {}}
     try:
-        mf, mol = relaxed_ref(atoms, args.charge)
+        mf, mol = relaxed_ref(atoms, args.charge, relax=not args.norelax)
         out["meta"]["scf_conv"] = bool(mf.converged)
         ncas, nelec, mo = avas.avas(mf, AO_LABELS, canonicalize=False)
         ncas = int(ncas); nelec = int(nelec)
