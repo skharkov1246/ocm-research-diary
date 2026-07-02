@@ -167,6 +167,16 @@ def stage_geom(sub):
           f"(interior={out['ts_interior']})", flush=True)
 
 
+def analyze_scan(g):
+    """R = минимум профиля ДО максимума (истинный пре-комплекс: у CH₄ при
+    сближении с O есть яма ниже точки 0), TS = внутренний максимум после него."""
+    es = [p["e_h"] for p in g["points"]]
+    rel = [(e - es[0]) * HARTREE_KCAL for e in es]
+    imax = int(np.argmax(rel[1:]) + 1)
+    imin = int(np.argmin(rel[:imax]))
+    return rel, imin, imax, bool(0 < imax < len(rel) - 1)
+
+
 # ---------------------------------------------------------------- энергетика
 def rohf(mol):
     mf = scf.ROHF(mol)
@@ -231,10 +241,11 @@ def cas_nevpt2(atoms, tag):
 def stage_energy(sub):
     with open(os.path.join(DIR, f"ocm_mnw_{sub}_geom.json")) as f:
         g = json.load(f)
-    iR, iTS = 0, g["ts_index"]
+    rel, iR, iTS, interior = analyze_scan(g)
     out = {"substrate": sub, "cas": list(CAS_TARGET), "avas_labels": AVAS_LABELS,
-           "ts_index": iTS, "ts_interior": g["ts_interior"],
-           "dft_barrier_kcal": g["dft_barrier_kcal"]}
+           "r_index": iR, "ts_index": iTS, "ts_interior": interior,
+           "rel_kcal": [round(x, 2) for x in rel],
+           "dft_barrier_kcal": round(rel[iTS] - rel[iR], 2)}
     path = os.path.join(DIR, f"ocm_mnw_{sub}_energy.json")
     for name, idx in (("R", iR), ("TS", iTS)):
         atoms = [(s, tuple(c)) for s, c in g["points"][idx]["atoms"]]

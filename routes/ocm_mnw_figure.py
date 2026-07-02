@@ -22,21 +22,18 @@ NAME = {"ch4": "CH₄", "c2h6": "C₂H₆"}
 
 with open(os.path.join(DIR, "ocm_mnw_selectivity_results.json")) as f:
     R = json.load(f)
-scans = {}
-for s in ("ch4", "c2h6"):
-    with open(os.path.join(DIR, f"ocm_mnw_{s}_geom.json")) as f:
-        scans[s] = json.load(f)
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11.6, 5.4), width_ratios=[1.15, 1])
 fig.patch.set_facecolor("#fcfcfb")
 
-# --- панель 1: HAT-профили (относительно R-точки каждого субстрата)
+# --- панель 1: HAT-профили (rel к точке 0; R = минимум профиля, TS = максимум)
 for s in ("ch4", "c2h6"):
-    g = scans[s]
+    g = R["substrates"][s]
     xs = list(range(len(g["rel_kcal"])))
     ax1.plot(xs, g["rel_kcal"], "-o", color=C[s], lw=2, ms=6, label=NAME[s])
-    i = g["ts_index"]
-    ax1.annotate(f"TS {g['dft_barrier_kcal']:.1f}",
+    i, j = g["ts_index"], g["r_index"]
+    ax1.plot([j], [g["rel_kcal"][j]], "s", color=C[s], ms=9, mfc="none", mew=1.6)
+    ax1.annotate(f"TS  ΔE‡={g['dft_barrier_kcal']:.1f}",
                  (i, g["rel_kcal"][i]), textcoords="offset points",
                  xytext=(0, 9), ha="center", fontsize=10, fontweight="bold",
                  color=C[s])
