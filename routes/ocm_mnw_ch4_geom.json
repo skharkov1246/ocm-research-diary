@@ -481,9 +481,9 @@
   {
    "rCH_pin": 1.5,
    "rOH_pin": 1.02,
-   "e_h": -1266.040987392817,
+   "e_h": -1266.0692640103305,
    "scf_converged": true,
-   "spin_square": 9.459,
+   "spin_square": 9.565,
    "wall_s": 306.6,
    "atoms": [
     [
@@ -542,20 +542,23 @@
       3.241019
      ]
     ]
-   ]
+   ],
+   "e_h_raw": -1266.040987392817,
+   "polished": true
   }
  ],
  "rel_kcal": [
   0.0,
-  -6.33,
-  24.27,
-  -9.73,
-  -6.46,
-  -4.69,
-  -4.05,
-  13.6
+  2.19,
+  -6.13,
+  -1.22,
+  2.06,
+  3.83,
+  4.47,
+  4.37
  ],
- "ts_index": 2,
+ "ts_index": 6,
  "ts_interior": true,
- "dft_barrier_kcal": 24.27
+ "dft_barrier_kcal": 10.6,
+ "r_index": 2
 }
