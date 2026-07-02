@@ -35,7 +35,7 @@
     {
       "Sid": "Ec2DescribeRegionPinned",
       "Effect": "Allow",
-      "Action": ["ec2:DescribeInstances", "ec2:DescribeInstanceStatus"],
+      "Action": "ec2:DescribeInstances",
       "Resource": "*",
       "Condition": { "StringEquals": { "aws:RequestedRegion": "REGION" } }
     },
@@ -57,12 +57,6 @@
       "Action": "iam:PassRole",
       "Resource": "arn:aws:iam::ACCOUNT_ID:role/ROLE_NAME",
       "Condition": { "StringEquals": { "iam:PassedToService": "ec2.amazonaws.com" } }
-    },
-    {
-      "Sid": "S3CreateResultsBucket",
-      "Effect": "Allow",
-      "Action": "s3:CreateBucket",
-      "Resource": "arn:aws:s3:::BUCKET"
     },
     {
       "Sid": "S3ListResultsPrefix",
