@@ -55,18 +55,34 @@ def _mol_from_run(run, basis):
                  verbose=0, unit="Angstrom")
 
 
+def _save_json(path, obj):
+    tmp = path + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(obj, f, indent=1, ensure_ascii=False)
+    os.replace(tmp, path)
+
+
 def _rohf(mol):
+    """ROHF: Newton → level-shift DIIS → warm-start Newton. Незасошедшийся
+    SCF — ошибка (честно), а не тихий вход в AVAS/CASCI."""
     mf = scf.ROHF(mol); mf.verbose = 0; mf.conv_tol = 1e-8
     mfn = mf.newton()
     try:
         mfn.kernel()
     except Exception:
         mfn.converged = False
+    if getattr(mfn, "converged", False):
+        return mfn
+    mf2 = scf.ROHF(mol); mf2.verbose = 0
+    mf2.level_shift = 0.5; mf2.max_cycle = 400; mf2.conv_tol = 1e-7
+    mf2.kernel()
+    mfn = mf2.newton()
+    try:
+        mfn.kernel(mf2.make_rdm1())
+    except Exception:
+        mfn.converged = False
     if not getattr(mfn, "converged", False):
-        mf2 = scf.ROHF(mol); mf2.verbose = 0
-        mf2.level_shift = 0.5; mf2.max_cycle = 400; mf2.conv_tol = 1e-7
-        mf2.kernel()
-        mfn = mf2.newton(); mfn.kernel(mf2.make_rdm1())
+        raise RuntimeError("ROHF unconverged (Newton + level-shift + re-Newton)")
     return mfn
 
 
@@ -186,19 +202,37 @@ def main():
     with open(src) as f:
         data = json.load(f)
     ladder = data.get("ladder") or {}
+    # лестница обязана быть того же базиса (и гео-опт для моно) — иначе
+    # лимитирующая стадия могла прийти из другого расчёта
+    if ladder and ladder.get("basis") != args.basis:
+        print(f"[fatal] лестница в {src} посчитана в {ladder.get('basis')}, "
+              f"а запрошен {args.basis}"); return
+    if ladder and args.source == "mono" and not ladder.get("geom_opt", False):
+        print("[fatal] лестница в", src, "не гео-оптимизирована"); return
     step = args.step or ladder.get("limiting")
     if not step:
         print("[fatal] нет лестницы в", src); return
     rname, pname = STEP_SPECIES[step]
 
-    # лучшие раны частиц стадии + газовые контроли
+    # лучшие раны частиц стадии + газовые контроли (только успешные,
+    # только режим гео-опт — ':sp'-записи отсеиваются по ключу)
     best = {}
     for k, r in data["runs"].items():
-        if not k.startswith(args.basis) or "e_ha" not in r:
+        if not k.startswith(args.basis) or "e_ha" not in r or k.endswith(":sp"):
             continue
         sp = r.get("species") or k.split(":")[1]
-        if r.get("opt") not in (True, None) and "relax_ok" not in r:
-            continue
+        if args.source == "mono":
+            if sp in ("h2o", "h2"):
+                if r.get("opt") is not True:
+                    continue
+            elif r.get("opt") is not True:
+                continue
+        else:
+            if sp == "bare":
+                if not r.get("opt_ok"):
+                    continue
+            elif not r.get("relax_ok"):
+                continue
         if sp not in best or r["e_ha"] < best[sp]["e_ha"]:
             best[sp] = r
     if args.source == "di":
@@ -229,8 +263,7 @@ def main():
             out["species"][sp] = casci_probe(best[sp], args.basis)
         except Exception as exc:
             out["species"][sp] = {"error": f"{type(exc).__name__}: {exc}"}
-        with open(RESULTS, "w") as f:
-            json.dump(out, f, indent=1, ensure_ascii=False)
+        _save_json(RESULTS, out)
         r = out["species"][sp]
         if "e_static_ha" in r:
             print(f"       CAS{tuple(r['cas'])}={r['qubits']}q  "
@@ -249,8 +282,7 @@ def main():
             "ddE_static_kcal": round(dd * KCAL, 2),
             "note": "= E_static(prod) − E_static(react); диагностика того, "
                     "насколько многодетерминантность сдвигает лимитирующий шаг"}
-        with open(RESULTS, "w") as f:
-            json.dump(out, f, indent=1, ensure_ascii=False)
+        _save_json(RESULTS, out)
         print(json.dumps(out["step_correction"], indent=1, ensure_ascii=False))
 
     if os.environ.get("H2_VQE") == "1":
@@ -264,8 +296,7 @@ def main():
                 out["vqe"] = vqe_poc(best[target], args.basis, maxq)
             except Exception as exc:
                 out["vqe"] = {"error": f"{type(exc).__name__}: {exc}"}
-            with open(RESULTS, "w") as f:
-                json.dump(out, f, indent=1, ensure_ascii=False)
+            _save_json(RESULTS, out)
 
 
 if __name__ == "__main__":

@@ -90,7 +90,9 @@ def _mol(species, basis, spin, coords=None):
 
 
 def _scf(mol, dm0=None):
-    """UKS-PBE(DF), Newton первичен; fallback: level-shift DIIS → smearing → Newton."""
+    """UKS-PBE(DF), Newton первичен; fallback: level-shift DIIS →
+    smearing-DIIS → warm-start level-shift DIIS. Незаcошедшийся SCF —
+    ошибка (честно), а не тихо возвращённая энергия."""
     mf = dft.UKS(mol).density_fit(); mf.xc = "pbe"; mf.verbose = 0
     mf.conv_tol = 1e-8
     mfn = mf.newton()
@@ -98,54 +100,79 @@ def _scf(mol, dm0=None):
         mfn.kernel(dm0=dm0)
     except Exception:
         mfn.converged = False
-    if not getattr(mfn, "converged", False):
-        mf2 = dft.UKS(mol).density_fit(); mf2.xc = "pbe"; mf2.verbose = 0
-        mf2.level_shift = 0.4; mf2.max_cycle = 300; mf2.conv_tol = 1e-6
-        mf2 = addons.smearing_(mf2, sigma=0.01, method="fermi")
-        mf2.kernel(dm0=dm0)
-        mfn = mf2.newton(); mfn.kernel(mf2.make_rdm1())
-    return mfn
+    if getattr(mfn, "converged", False):
+        return mfn
+    mf2 = dft.UKS(mol).density_fit(); mf2.xc = "pbe"; mf2.verbose = 0
+    mf2.level_shift = 0.3; mf2.max_cycle = 400; mf2.conv_tol = 1e-8
+    mf2.kernel(dm0=dm0)
+    if mf2.converged:
+        return mf2
+    mfs = dft.UKS(mol).density_fit(); mfs.xc = "pbe"; mfs.verbose = 0
+    mfs = addons.smearing_(mfs, sigma=0.01, method="fermi")
+    mfs.max_cycle = 400; mfs.conv_tol = 1e-6
+    mfs.kernel(dm0=dm0)
+    mf3 = dft.UKS(mol).density_fit(); mf3.xc = "pbe"; mf3.verbose = 0
+    mf3.level_shift = 0.3; mf3.max_cycle = 400; mf3.conv_tol = 1e-8
+    mf3.kernel(dm0=mfs.make_rdm1())
+    if not mf3.converged:
+        raise RuntimeError("SCF unconverged after Newton/level-shift/smearing")
+    return mf3
 
 
-def optimize_species(species, spin, basis, do_opt=True, maxsteps=60):
-    """Оптимизация геометрии (pyberny) для (species, spin). Возвращает dict."""
+GMAX_TOL = 6e-4   # Ha/Bohr, чуть свободнее berny-дефолта (0.45e-3 max-компонента)
+
+
+def optimize_species(species, spin, basis, do_opt=True, maxsteps=60,
+                     restarts=2):
+    """Оптимизация геометрии (pyberny) для (species, spin). Сходимость
+    проверяется ПРЯМО — нормой градиента в финальной точке (berny умеет
+    молча выдохнуться по maxsteps); до `restarts` продолжений."""
     t0 = time.time()
     mol = _mol(species, basis, spin)
     mf = _scf(mol)
     e0 = float(mf.e_tot)
     coords = mol.atom_coords(unit="Angstrom").tolist()
-    converged_opt = None
-    if do_opt and mol.natm > 2:
-        from pyscf.geomopt.berny_solver import optimize as berny_opt
-        try:
-            mol_eq = berny_opt(mf, maxsteps=maxsteps, verbose=0)
-            mf = _scf(gto.M(atom=list(zip([mol.atom_symbol(i) for i in range(mol.natm)],
-                                          mol_eq.atom_coords(unit="Angstrom"))),
-                            basis=basis, charge=mol.charge, spin=spin,
-                            verbose=0, unit="Angstrom"))
-            coords = mol_eq.atom_coords(unit="Angstrom").tolist()
-            converged_opt = True
-        except Exception as exc:            # честно фиксируем неудачу оптимизации
-            converged_opt = f"FAILED: {type(exc).__name__}: {exc}"
-    elif do_opt and mol.natm == 2 and species == "h2":
-        # H₂: явный 1D-скан связи (berny не любит двухатомники)
-        best = (None, None)
-        for d in np.arange(0.62, 0.92, 0.02):
+    converged_opt, gmax = None, None
+    if do_opt and species == "h2":
+        # H₂: 1D-скан + тонкая доводка (berny не любит двухатомники)
+        def e_at(d):
             m = gto.M(atom=[("H", (0, 0, 0)), ("H", (float(d), 0, 0))],
                       basis=basis, spin=0, verbose=0, unit="Angstrom")
-            e = float(_scf(m).e_tot)
-            if best[0] is None or e < best[0]:
-                best = (e, float(d))
-        e0 = best[0]
-        coords = [[0, 0, 0], [best[1], 0, 0]]
-        converged_opt = True
-        return dict(species=species, spin=spin, e_ha=e0, opt=converged_opt,
-                    ss=0.0, coords=coords, seconds=round(time.time() - t0, 1))
+            return float(_scf(m).e_tot)
+        coarse = {round(float(d), 3): e_at(d) for d in np.arange(0.62, 0.92, 0.02)}
+        d0 = min(coarse, key=coarse.get)
+        fine = {round(float(d), 4): e_at(d)
+                for d in np.arange(d0 - 0.02, d0 + 0.021, 0.004)}
+        d1 = min(fine, key=fine.get)
+        return dict(species=species, spin=spin, e_ha=fine[d1], opt=True,
+                    ss=0.0, coords=[[0, 0, 0], [d1, 0, 0]], geom_opt=True,
+                    seconds=round(time.time() - t0, 1))
+    if do_opt:
+        from pyscf.geomopt.berny_solver import optimize as berny_opt
+        try:
+            cur_mf = mf
+            for attempt in range(restarts + 1):
+                mol_eq = berny_opt(cur_mf, maxsteps=maxsteps, verbose=0)
+                atoms = list(zip([mol.atom_symbol(i) for i in range(mol.natm)],
+                                 mol_eq.atom_coords(unit="Angstrom")))
+                cur_mf = _scf(gto.M(atom=atoms, basis=basis, charge=mol.charge,
+                                    spin=spin, verbose=0, unit="Angstrom"))
+                gmax = float(np.abs(cur_mf.nuc_grad_method().kernel()).max())
+                if gmax < GMAX_TOL:
+                    break
+            mf = cur_mf
+            coords = mol_eq.atom_coords(unit="Angstrom").tolist()
+            converged_opt = True if gmax < GMAX_TOL else \
+                f"UNCONVERGED gmax={gmax:.5f} after {restarts+1} berny runs"
+        except Exception as exc:            # честно фиксируем неудачу оптимизации
+            converged_opt = f"FAILED: {type(exc).__name__}: {exc}"
     e_final = float(mf.e_tot)
     ss = float(mf.spin_square()[0]) if spin >= 0 else 0.0
+    failed = isinstance(converged_opt, str) and converged_opt.startswith("FAILED")
     return dict(species=species, spin=spin,
-                e_ha=e_final if converged_opt in (True, None) else e0,
-                opt=converged_opt, ss=round(ss, 3), coords=coords,
+                e_ha=e0 if failed else e_final,   # UNCONVERGED: энергия финальной точки
+                opt=converged_opt, gmax=gmax, ss=round(ss, 3), coords=coords,
+                geom_opt=bool(do_opt),
                 seconds=round(time.time() - t0, 1))
 
 
@@ -200,7 +227,9 @@ def main():
     for sp in todo:
         for spin in SPECIES[sp]["spins"]:
             key = f"{basis}:{sp}:s{spin}" + ("" if do_opt else ":sp")
-            if key in data["runs"] and data["runs"][key].get("opt") in (True, None):
+            prev = data["runs"].get(key, {})
+            # резюм: пропускаем только УСПЕШНЫЕ записи (ошибки пересчитываем)
+            if "e_ha" in prev and prev.get("opt") in (True, None):
                 print(f"[skip] {key} (готово)"); continue
             print(f"[run ] {key} …", flush=True)
             try:
@@ -213,22 +242,27 @@ def main():
                   f"opt={res.get('opt')}  ⟨S²⟩={res.get('ss')}  "
                   f"{res.get('seconds', '?')}s", flush=True)
 
-    # лучшие (низшие) по спину — только успешные
+    # лучшие (низшие) по спину — только успешные И того же режима (opt vs :sp)
     best = {}
     for key, r in data["runs"].items():
-        b, sp = key.split(":")[0], key.split(":")[1]
-        if b != basis or "e_ha" not in r:
+        parts = key.split(":")
+        b, sp, is_sp = parts[0], parts[1], key.endswith(":sp")
+        if b != basis or "e_ha" not in r or is_sp == do_opt:
             continue
-        if do_opt and r.get("opt") not in (True, None):
+        if do_opt and r.get("opt") is not True:   # UNCONVERGED/FAILED/None — вон
             continue
         if sp not in best or r["e_ha"] < best[sp]["e_ha"]:
             best[sp] = r
     if all(k in best for k in ("bare", "oh", "o", "ooh", "h2o", "h2")):
         lad = ladder(best)
-        data["ladder"] = {"basis": basis, "geom_opt": do_opt, **lad,
-                          "best_spins": {k: best[k]["spin"] for k in best}}
+        entry = {"basis": basis, "geom_opt": do_opt, **lad,
+                 "best_spins": {k: best[k]["spin"] for k in best}}
+        # изоляция режимов: --fast НЕ трогает продакшен-слот "ladder"
+        data.setdefault("ladders", {})[f"{basis}" + ("" if do_opt else ":sp")] = entry
+        if do_opt:
+            data["ladder"] = entry
         save_results(data)
-        print(json.dumps(data["ladder"], indent=1, ensure_ascii=False))
+        print(json.dumps(entry, indent=1, ensure_ascii=False))
     else:
         print("[warn] лестница не собрана — не все частицы посчитаны:",
               sorted(set(SPECIES) - set(best)))

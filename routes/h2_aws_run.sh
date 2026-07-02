@@ -35,12 +35,29 @@ python3 -m pip install -q numpy scipy pyscf pyberny pennylane pennylane-lightnin
 
 run() { echo "[run] $*"; timeout "${TIMEOUT}" "$@" 2>&1 | tee -a routes/h2_aws.log; }
 
+persist() {
+  # результаты уезжают С инстанса ДО dead-man-терминации — иначе они гибнут
+  # вместе с ним. Git — первичный канал (ветка h2-aws-results), S3 — опция.
+  git add routes/h2_oer_*_results.json routes/h2_aws.log 2>/dev/null || true
+  git commit -m "results: h2 AWS run $(date -u +%Y%m%dT%H%M%SZ)" 2>/dev/null || true
+  git push origin "HEAD:refs/heads/h2-aws-results" 2>/dev/null \
+    || echo "[persist] git push failed — set a push-capable remote or S3_DEST"
+  [ -n "${S3_DEST:-}" ] && aws s3 cp --recursive --exclude '*' \
+    --include 'h2_oer_*_results.json' --include 'h2_aws.log' \
+    routes/ "${S3_DEST%/}/" || true
+}
+trap 'persist; terminate' EXIT
+
 # 1) mononuclear ladder (fills gas references too; resumes if JSON present)
 run python3 -u routes/h2_oer_ladder.py
+persist
 # 2) dinuclear NiOOH-edge ladder
 run python3 -u routes/h2_oer_dinuclear.py
-# 3) quantum probe + converged UCCSD-VQE on the limiting step (up to 20q here)
-H2_VQE=1 H2_VQE_MAXQ=20 run python3 -u routes/h2_oer_quantum.py --source di
+persist
+# 3) quantum probe: CASCI on dinuclear limiting step (26q+ space, no VQE there),
+#    then converged UCCSD-VQE PoC on the mono limiting step (16q fits statevector)
+run python3 -u routes/h2_oer_quantum.py --source di
+H2_VQE=1 H2_VQE_MAXQ=16 run python3 -u routes/h2_oer_quantum.py --source mono
 
-echo "[done] results: routes/h2_oer_*_results.json (grab them BEFORE termination)"
-# trap fires here -> instance self-terminates
+echo "[done] results persisted (branch h2-aws-results / S3_DEST)"
+# trap fires here -> persist + instance self-terminates

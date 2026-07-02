@@ -49,14 +49,43 @@ CORE = [
     ("O",  -2.65,  1.15, -0.35), ("H", -3.35,  1.05, -1.00),
     ("O",  -2.65, -1.15,  0.35), ("H", -3.35, -1.05,  1.00),
 ]
-# Апикальный сайт на Ni₁ (положительный x), старт над Ni вдоль +z:
-ADS = {
-    "oh":  [("O", 1.42, 0.10, 1.85), ("H", 2.05, 0.45, 2.50)],
-    "o":   [("O", 1.42, 0.05, 1.72)],
-    "ooh": [("O", 1.42, 0.10, 1.85), ("O", 2.30, 0.75, 2.55),
-            ("H", 2.00, 1.60, 2.80)],
+# Апикальный сайт на Ni₁: шаблонные смещения от Ni₁ в системе «апикаль = +z»;
+# при постановке на ОПТИМИЗИРОВАННОЕ ядро поворачиваются на реальную нормаль.
+ADS_OFFSETS = {
+    "oh":  [("O", 0.00, 0.10, 1.85), ("H", 0.63, 0.45, 2.50)],
+    "o":   [("O", 0.00, 0.05, 1.72)],
+    "ooh": [("O", 0.00, 0.10, 1.85), ("O", 0.88, 0.75, 2.55),
+            ("H", 0.58, 1.60, 2.80)],
 }
-SPINS = {"bare": (2, 0, 4), "oh": (1, 3), "o": (2, 0, 4), "ooh": (1, 3)}
+# высокоспиновые комбинации включены: моно-модель показала, что основное
+# состояние O* — высокий спин (2S=4), у димера потолок выше
+SPINS = {"bare": (2, 0, 4), "oh": (1, 3, 5), "o": (2, 0, 4, 6), "ooh": (1, 3, 5)}
+GMAX_ADS_TOL = 1.2e-3   # Ha/Å на DOF адсорбата (≈ berny max-компонента)
+
+
+def _core_hash(atoms):
+    import hashlib
+    s = json.dumps([[a[0]] + [round(float(x), 6) for x in a[1:]] for a in atoms])
+    return hashlib.sha1(s.encode()).hexdigest()[:12]
+
+
+def _place_ads(core_atoms, ads_name):
+    """Смещения шаблона повёрнуты так, чтобы +z лёг на апикальную нормаль Ni₁
+    (прочь от центроида O-соседей) — ядро могло сместиться/повернуться в opt."""
+    pos = np.array([a[1:] for a in core_atoms], float)
+    ni1 = pos[0]
+    oxy = [p for i, p in enumerate(pos)
+           if core_atoms[i][0] == "O" and np.linalg.norm(p - ni1) < 2.4]
+    n = ni1 - np.mean(oxy, axis=0)
+    n /= np.linalg.norm(n)
+    z = np.array([0.0, 0.0, 1.0])
+    v = np.cross(z, n); c = float(np.dot(z, n))
+    if np.linalg.norm(v) < 1e-8:
+        R = np.eye(3) if c > 0 else np.diag([1.0, -1.0, -1.0])
+    else:
+        vx = np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
+        R = np.eye(3) + vx + vx @ vx / (1 + c)
+    return [(s, *(ni1 + R @ np.array(off))) for s, *off in ADS_OFFSETS[ads_name]]
 
 
 def _mol(atoms, basis, spin):
@@ -64,24 +93,33 @@ def _mol(atoms, basis, spin):
                  basis=basis, charge=0, spin=spin, verbose=0, unit="Angstrom")
 
 
-def opt_core(basis, spin, maxsteps=80):
-    """Полная оптимизация голого димера."""
+def opt_core(basis, spin, maxsteps=80, restarts=2):
+    """Полная оптимизация голого димера; сходимость — прямой градиент-чек
+    с рестартами (berny умеет молча выдохнуться по maxsteps)."""
     from pyscf.geomopt.berny_solver import optimize as berny_opt
+    GMAX_TOL = 6e-4  # Ha/Bohr
     mf = _uks_scf(_mol(CORE, basis, spin))
-    mol_eq = berny_opt(mf, maxsteps=maxsteps, verbose=0)
-    atoms = [(mol_eq.atom_symbol(i), *mol_eq.atom_coords(unit="Angstrom")[i])
-             for i in range(mol_eq.natm)]
-    mf2 = _uks_scf(_mol(atoms, basis, spin))
-    return float(mf2.e_tot), atoms, float(mf2.spin_square()[0])
+    atoms, gmax = CORE, None
+    for attempt in range(restarts + 1):
+        mol_eq = berny_opt(mf, maxsteps=maxsteps, verbose=0)
+        atoms = [(mol_eq.atom_symbol(i), *mol_eq.atom_coords(unit="Angstrom")[i])
+                 for i in range(mol_eq.natm)]
+        mf = _uks_scf(_mol(atoms, basis, spin))
+        gmax = float(np.abs(mf.nuc_grad_method().kernel()).max())
+        if gmax < GMAX_TOL:
+            break
+    return (float(mf.e_tot), atoms, float(mf.spin_square()[0]),
+            gmax, gmax < GMAX_TOL)
 
 
 def relax_ads(core_atoms, ads_name, basis, spin, maxiter=40):
-    """Замороженное ядро; L-BFGS только по координатам адсорбата."""
+    """Замороженное ядро; L-BFGS только по координатам адсорбата.
+    Сходимость — по норме градиента в лучшей точке, не по флагу scipy."""
     nc = len(core_atoms)
-    ads0 = ADS[ads_name]
+    ads0 = _place_ads(core_atoms, ads_name)
     labels = [a[0] for a in ads0]
     x0 = np.array([a[1:] for a in ads0], float).ravel()
-    cache = {"dm": None, "best": (np.inf, x0.copy())}
+    cache = {"dm": None, "best": (np.inf, x0.copy(), np.inf)}
 
     def build(x):
         pos = x.reshape(-1, 3)
@@ -91,16 +129,16 @@ def relax_ads(core_atoms, ads_name, basis, spin, maxiter=40):
         mf = _uks_scf(_mol(build(x), basis, spin), dm0=cache["dm"])
         cache["dm"] = mf.make_rdm1()
         e = float(mf.e_tot)
-        if e < cache["best"][0]:
-            cache["best"] = (e, x.copy())
         # PySCF-градиент в Ha/Bohr → Ha/Å (координаты x в Å)
         gA = mf.nuc_grad_method().kernel()[nc:].ravel() / 0.52917721092
+        if e < cache["best"][0]:
+            cache["best"] = (e, x.copy(), float(np.abs(gA).max()))
         return e, gA
 
-    res = minimize(fun, x0, jac=True, method="L-BFGS-B",
-                   options=dict(maxiter=maxiter, ftol=1e-8, gtol=3e-4))
-    e_best, x_best = cache["best"]
-    return float(min(res.fun, e_best)), build(x_best), bool(res.success)
+    minimize(fun, x0, jac=True, method="L-BFGS-B",
+             options=dict(maxiter=maxiter, ftol=1e-9, gtol=3e-4))
+    e_best, x_best, gmax = cache["best"]
+    return float(e_best), build(x_best), float(gmax)
 
 
 def load():
@@ -130,17 +168,19 @@ def main():
                     "honest": "замороженное ядро под адсорбатом; ZPE-TS литературные; "
                               "нет растворителя/потенциала — скрин тренда моно→ди"}
 
-    # 1) голый димер: полный opt по спинам
+    # 1) голый димер: полный opt по спинам (ошибки пересчитываются при резюме)
     for spin in SPINS["bare"]:
         key = f"{basis}:bare:s{spin}"
-        if key in data["runs"] and "e_ha" in data["runs"][key]:
+        prev = data["runs"].get(key, {})
+        if "e_ha" in prev and prev.get("opt_ok"):
             print(f"[skip] {key}"); continue
         print(f"[core] {key} …", flush=True)
         t0 = time.time()
         try:
-            e, atoms, ss = opt_core(basis, spin)
+            e, atoms, ss, gmax, ok = opt_core(basis, spin)
             data["runs"][key] = dict(species="bare", spin=spin, e_ha=e,
                                      ss=round(ss, 3), atoms=atoms,
+                                     gmax=round(gmax, 6), opt_ok=ok,
                                      seconds=round(time.time() - t0, 1))
         except Exception as exc:
             data["runs"][key] = dict(species="bare", spin=spin,
@@ -149,36 +189,49 @@ def main():
         save(data)
         r = data["runs"][key]
         print(f"       E={r.get('e_ha', float('nan'))} ⟨S²⟩={r.get('ss')} "
-              f"{r['seconds']}s", flush=True)
+              f"gmax={r.get('gmax')} ok={r.get('opt_ok')} {r['seconds']}s",
+              flush=True)
 
     cores = {k: r for k, r in data["runs"].items()
-             if r.get("species") == "bare" and "e_ha" in r and k.startswith(basis)}
+             if r.get("species") == "bare" and "e_ha" in r
+             and r.get("opt_ok") and k.startswith(basis)}
     if not cores:
         print("[fatal] голый димер не сошёлся ни в одном спине"); return
     best_core = min(cores.values(), key=lambda r: r["e_ha"])
     core_atoms = [tuple(a) for a in best_core["atoms"]]
-    print(f"[core] лучший спин 2S={best_core['spin']}  E={best_core['e_ha']:.6f}")
+    chash = _core_hash(core_atoms)
+    data["core"] = {"spin": best_core["spin"], "e_ha": best_core["e_ha"],
+                    "hash": chash}
+    save(data)
+    print(f"[core] лучший спин 2S={best_core['spin']}  E={best_core['e_ha']:.6f}"
+          f"  hash={chash}")
 
-    # 2) адсорбаты на замороженном ядре
+    # 2) адсорбаты на замороженном ядре (записи пинованы хэшем ядра:
+    #    смена ядра инвалидирует старые записи — смешанная лестница невозможна)
     for ads_name in ("oh", "o", "ooh"):
         for spin in SPINS[ads_name]:
             key = f"{basis}:{ads_name}:s{spin}"
-            if key in data["runs"] and "e_ha" in data["runs"][key]:
+            prev = data["runs"].get(key, {})
+            if "e_ha" in prev and prev.get("core_hash") == chash:
                 print(f"[skip] {key}"); continue
             print(f"[ads ] {key} …", flush=True)
             t0 = time.time()
             try:
-                e, atoms, ok = relax_ads(core_atoms, ads_name, basis, spin)
+                e, atoms, gmax = relax_ads(core_atoms, ads_name, basis, spin)
                 data["runs"][key] = dict(species=ads_name, spin=spin, e_ha=e,
-                                         relax_ok=ok, atoms=atoms,
+                                         gmax_ads=round(gmax, 6),
+                                         relax_ok=gmax < GMAX_ADS_TOL,
+                                         core_hash=chash, atoms=atoms,
                                          seconds=round(time.time() - t0, 1))
             except Exception as exc:
                 data["runs"][key] = dict(species=ads_name, spin=spin,
                                          error=f"{type(exc).__name__}: {exc}",
+                                         core_hash=chash,
                                          seconds=round(time.time() - t0, 1))
             save(data)
             r = data["runs"][key]
-            print(f"       E={r.get('e_ha', float('nan'))} ok={r.get('relax_ok')} "
+            print(f"       E={r.get('e_ha', float('nan'))} "
+                  f"gmax={r.get('gmax_ads')} ok={r.get('relax_ok')} "
                   f"{r['seconds']}s", flush=True)
 
     # 3) лестница: газовые H₂O/H₂ берём из results мономерного скрипта
@@ -198,6 +251,11 @@ def main():
         if not k.startswith(basis) or "e_ha" not in r:
             continue
         sp = r["species"]
+        if sp == "bare":
+            if not r.get("opt_ok"):
+                continue
+        elif not (r.get("relax_ok") and r.get("core_hash") == chash):
+            continue                       # недорелаксированные/чужое ядро — вон
         if sp not in best or r["e_ha"] < best[sp]["e_ha"]:
             best[sp] = r
     need = {"bare", "oh", "o", "ooh"}
