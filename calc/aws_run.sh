@@ -38,5 +38,12 @@ python3 -m pip install -q numpy scipy pyscf
 echo "[run] CHA_NEVPT2=1 python3 calc/fe_zeolite_cha_sp.py  (timeout ${TIMEOUT}s, ${OMP_NUM_THREADS} threads)"
 CHA_NEVPT2=1 timeout "${TIMEOUT}" python3 -u calc/fe_zeolite_cha_sp.py 2>&1 | tee calc/fe_zeolite_cha.log
 echo "[done] results -> calc/fe_zeolite_cha_results.json"
-echo "[IMPORTANT] copy results off the box NOW, e.g.:  aws s3 cp calc/fe_zeolite_cha_results.json s3://YOUR_BUCKET/"
+if [ -n "${S3_OUT:-}" ]; then
+  echo "[upload] -> ${S3_OUT}"
+  aws s3 cp calc/fe_zeolite_cha_results.json "${S3_OUT%/}/fe_zeolite_cha_results.json" || echo "[warn] s3 upload failed"
+  aws s3 cp calc/fe_zeolite_cha.log        "${S3_OUT%/}/fe_zeolite_cha.log"        || true
+else
+  echo "[IMPORTANT] no S3_OUT set — copy results off NOW; the dead-man switch"
+  echo "            terminates this instance on exit. Re-run with: S3_OUT=s3://bucket/prefix ./calc/aws_run.sh"
+fi
 # trap fires here -> instance self-terminates
