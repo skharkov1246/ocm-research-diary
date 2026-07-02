@@ -23,6 +23,7 @@ routes/ocm_mnw_selectivity.py — Этап 15 OCM: закрыть двухсуб
 
 Запуск (стадии независимы, результаты инкрементально в JSON):
   python3 -u routes/ocm_mnw_selectivity.py geom   ch4|c2h6   # скан-профиль
+  python3 -u routes/ocm_mnw_selectivity.py polish ch4|c2h6   # цепочка warm-start+стабильность
   python3 -u routes/ocm_mnw_selectivity.py energy ch4|c2h6   # CASSCF+NEVPT2 в R и TS
   python3 -u routes/ocm_mnw_selectivity.py merge             # итоговый results-JSON
 """
@@ -167,6 +168,54 @@ def stage_geom(sub):
           f"(interior={out['ts_interior']})", flush=True)
 
 
+def uks_stable(mol, dm0=None, max_hops=3):
+    """UKS + внутренняя стабильность: если решение нестабильно — спуск на
+    низшее UKS-решение (лечит перескоки состояний вдоль скана)."""
+    mf = uks(mol, dm0=dm0)
+    for _ in range(max_hops):
+        mo_new = mf.stability()[0]
+        if mo_new is mf.mo_coeff or (
+                isinstance(mo_new, (tuple, list, np.ndarray))
+                and np.allclose(np.asarray(mo_new[0]), np.asarray(mf.mo_coeff[0]))):
+            break
+        dm = mf.make_rdm1(mo_new, mf.mo_occ)
+        mf = uks(mol, dm0=dm)
+    return mf
+
+
+def stage_polish(sub):
+    """Полировка профиля: по сохранённым геометриям — цепочка warm-start
+    (dm предыдущей точки) + стабильность UKS. Снимает перескоки состояний,
+    из-за которых профиль «зубчатый» (артефакт холодных SCF-стартов)."""
+    path = os.path.join(DIR, f"ocm_mnw_{sub}_geom.json")
+    with open(path) as f:
+        g = json.load(f)
+    dm = None
+    for i, p in enumerate(g["points"]):
+        mol = build_mol([(s, tuple(c)) for s, c in p["atoms"]])
+        t0 = time.time()
+        mf = uks_stable(mol, dm0=dm)
+        dm = mf.make_rdm1()
+        p["e_h_raw"] = p["e_h"]
+        p["e_h"] = float(mf.e_tot)
+        p["spin_square"] = round(float(mf.spin_square()[0]), 3)
+        p["scf_converged"] = bool(mf.converged)
+        p["polished"] = True
+        with open(path, "w") as f:
+            json.dump(g, f, indent=1)
+        print(f"[{sub}] polish {i}: raw {p['e_h_raw']:.6f} -> {p['e_h']:.6f} "
+              f"(d={(p['e_h']-p['e_h_raw'])*HARTREE_KCAL:+.2f} kcal) "
+              f"<S2>={p['spin_square']} ({time.time()-t0:.0f}s)", flush=True)
+    rel, imin, imax, interior = analyze_scan(g)
+    g["rel_kcal"] = [round(x, 2) for x in rel]
+    g["r_index"], g["ts_index"], g["ts_interior"] = imin, imax, interior
+    g["dft_barrier_kcal"] = round(rel[imax] - rel[imin], 2)
+    with open(path, "w") as f:
+        json.dump(g, f, indent=1)
+    print(f"[{sub}] polished profile: {g['rel_kcal']} "
+          f"R={imin} TS={imax} barrier={g['dft_barrier_kcal']} kcal/mol", flush=True)
+
+
 def analyze_scan(g):
     """R = минимум профиля ДО максимума (истинный пре-комплекс: у CH₄ при
     сближении с O есть яма ниже точки 0), TS = внутренний максимум после него."""
@@ -308,6 +357,8 @@ if __name__ == "__main__":
     stage = sys.argv[1]
     if stage == "geom":
         stage_geom(sys.argv[2])
+    elif stage == "polish":
+        stage_polish(sys.argv[2])
     elif stage == "energy":
         stage_energy(sys.argv[2])
     elif stage == "merge":
