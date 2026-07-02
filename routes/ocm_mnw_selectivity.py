@@ -206,6 +206,22 @@ def stage_polish(sub):
         print(f"[{sub}] polish {i}: raw {p['e_h_raw']:.6f} -> {p['e_h']:.6f} "
               f"(d={(p['e_h']-p['e_h_raw'])*HARTREE_KCAL:+.2f} kcal) "
               f"<S2>={p['spin_square']} ({time.time()-t0:.0f}s)", flush=True)
+    # обратный проход (против гистерезиса): цепочка dm с конца, берём нижнее
+    dm = None
+    for i in range(len(g["points"]) - 1, -1, -1):
+        p = g["points"][i]
+        mol = build_mol([(s, tuple(c)) for s, c in p["atoms"]])
+        t0 = time.time()
+        mf = uks_stable(mol, dm0=dm)
+        dm = mf.make_rdm1()
+        if float(mf.e_tot) < p["e_h"] - 1e-6:
+            p["e_h"] = float(mf.e_tot)
+            p["spin_square"] = round(float(mf.spin_square()[0]), 3)
+            p["scf_converged"] = bool(mf.converged)
+            print(f"[{sub}] polish-rev {i}: lower -> {p['e_h']:.6f} "
+                  f"<S2>={p['spin_square']} ({time.time()-t0:.0f}s)", flush=True)
+        with open(path, "w") as f:
+            json.dump(g, f, indent=1)
     rel, imin, imax, interior = analyze_scan(g)
     g["rel_kcal"] = [round(x, 2) for x in rel]
     g["r_index"], g["ts_index"], g["ts_interior"] = imin, imax, interior
