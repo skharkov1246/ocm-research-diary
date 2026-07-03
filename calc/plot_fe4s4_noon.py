@@ -64,11 +64,12 @@ def main():
              + ("" if conv else "   (CASSCF not fully converged)")
              + ("" if scf_ok else "   (SCF not fully converged)"))
     ax.set_title(title, fontsize=10.5)
-    ax.text(0.99, 0.02,
-            "occupations away from {0, 2} = static (multireference) correlation\n"
-            "— exactly what a single-determinant BS-DFT solution (Stage 15) cannot hold",
-            transform=ax.transAxes, ha="right", va="bottom", fontsize=7.5,
-            color="#444")
+    ax.text(0.975, 0.60,
+            "occupations away from {0, 2}\n= static (multireference) correlation —\n"
+            "exactly what a single-determinant\nBS-DFT solution (Stage 15) cannot hold",
+            transform=ax.transAxes, ha="right", va="center", fontsize=8,
+            color="#444",
+            bbox=dict(boxstyle="round,pad=0.4", fc="white", ec="#ddd", alpha=0.85))
 
     fig.tight_layout()
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
