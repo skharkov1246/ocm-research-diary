@@ -5,3 +5,4 @@ __pycache__/
 calc/cha_scf.chk
 .claude/
 *.chk.npz
+routes/*_scf_spin*.npz
