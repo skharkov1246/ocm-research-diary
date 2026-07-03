@@ -7,10 +7,10 @@
  },
  "species": {
   "o": {
-   "e_rohf": -1732.0792899695386,
-   "e_casci": -1732.10244638827,
+   "e_rohf": -1732.079289969532,
+   "e_casci": -1732.1024463882795,
    "casci_converged": true,
-   "e_static_ha": -0.02315641873133245,
+   "e_static_ha": -0.023156418747475982,
    "cas": [
     14,
     9
@@ -30,13 +30,13 @@
    "n_unpaired": 4.0,
    "n_unpaired_excess": -0.0,
    "spin": 4,
-   "seconds": 21.8
+   "seconds": 16.2
   },
   "ooh": {
-   "e_rohf": -1807.375998382037,
-   "e_casci": -1807.4632059282267,
+   "e_rohf": -1807.3759983820398,
+   "e_casci": -1807.4632059282314,
    "casci_converged": true,
-   "e_static_ha": -0.08720754618957471,
+   "e_static_ha": -0.08720754619162108,
    "cas": [
     21,
     13
@@ -60,11 +60,11 @@
    "n_unpaired": 1.355,
    "n_unpaired_excess": 0.355,
    "spin": 1,
-   "seconds": 21.7
+   "seconds": 15.2
   },
   "h2o": {
-   "e_rohf": -75.95939626800707,
-   "e_casci": -75.99957986070764,
+   "e_rohf": -75.959396268007,
+   "e_casci": -75.99957986070757,
    "casci_converged": true,
    "e_static_ha": -0.040183592700572035,
    "cas": [
@@ -102,7 +102,7 @@
    "n_unpaired": 0.055,
    "n_unpaired_excess": 0.055,
    "spin": 0,
-   "seconds": 0.0
+   "seconds": 0.1
   }
  },
  "step_correction": {
@@ -112,5 +112,8 @@
   "ddE_static_eV": -1.743,
   "ddE_static_kcal": -40.19,
   "note": "= E_static(prod) − E_static(react); диагностика того, насколько многодетерминантность сдвигает лимитирующий шаг"
+ },
+ "vqe": {
+  "error": "NameError: name 'hf_state' is not defined"
  }
 }

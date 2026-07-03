@@ -206,7 +206,7 @@ def vqe_poc(run, basis, maxq, iters=400):
     @qml.qnode(dev, diff_method="adjoint")
     def cost(w):
         qml.UCCSD(w, wires=range(nq), s_wires=s_w, d_wires=d_w,
-                  init_state=hf_state)
+                  init_state=init_state)
         return qml.expval(H)
 
     w = qml.numpy.zeros(len(singles) + len(doubles), requires_grad=True)
