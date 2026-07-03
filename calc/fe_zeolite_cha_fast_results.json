@@ -1,0 +1,30 @@
+{
+  "meta": {
+    "model": "REAL IZA-CHA 6-ring cluster (xTB-relaxed active site)",
+    "method": "ROKS-PBE orbitals + state-specific CASCI (FAST; no orbital opt / no NEVPT2)",
+    "basis": "def2-svp",
+    "active_space": "CAS(16e,11o)=22q",
+    "known_answer": "alpha-O ground state = S=2",
+    "honesty": "coarse (CASCI on DFT orbitals) \u2014 gives ORDERING, not a quantitative gap"
+  },
+  "spins": {
+    "quintet": {
+      "e_casci": -4330.369721014872
+    },
+    "triplet": {
+      "e_casci": -4330.364050217286
+    },
+    "singlet": {
+      "e_casci": -4330.273247833877
+    }
+  },
+  "verdict": {
+    "ground_state": "quintet",
+    "matches_known_S2": true,
+    "rel_kcal": {
+      "quintet": 0.0,
+      "triplet": 3.56,
+      "singlet": 60.54
+    }
+  }
+}

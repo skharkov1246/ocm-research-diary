@@ -3,7 +3,7 @@
 """
 routes/co2_to_fuels_nevpt2.py — устойчивость CASSCF-решения + динамическая корреляция.
 
-Надстройка над co2_to_fuels_casscf.py (тот даёт ΔE‡(CASSCF) с фикс. CAS(12e,10o)).
+Надстройка над co2_to_fuels_casscf_crossval.py (тот даёт ΔE‡(CASSCF) с фикс. CAS(12e,10o)).
 Три вопроса, каждый закрывает конкретную дыру в аргументации:
 
   A. TS CASSCF из НЕЗАВИСИМОГО AVAS-гесса (не из проекции реактанта): то же решение?
@@ -15,7 +15,7 @@ routes/co2_to_fuels_nevpt2.py — устойчивость CASSCF-решения
      ΔE‡(CASSCF+NEVPT2) — динамическая корреляция; сравнение с литературной
      CASPT2-щелью уровня-в-уровень честнее, чем голый CASSCF.
 
-Реализация: SCF-ветка воспроизводится тем же warm-chain (см. co2_to_fuels_casscf),
+Реализация: SCF-ветка воспроизводится тем же warm-chain (см. co2_to_fuels_casscf_crossval),
 CASSCF пересобирается и СВЕРЯЕТСЯ с сохранёнными энергиями casscf_barrier (это
 бесплатный тест воспроизводимости); NEVPT2 — через CASCI на сошедшихся CASSCF-
 орбиталях (точные интегралы; сами орбитали из DF-CASSCF — стандартная практика,
@@ -25,14 +25,14 @@ CASSCF пересобирается и СВЕРЯЕТСЯ с сохранённ�
 constant-potential); NEVPT2 state-specific на двух точках профиля, не пересканирован
 весь путь — барьер NEVPT2 наследует геометрии PBE-скана.
 
-Запуск (после co2_to_fuels_casscf.py): python3 -u routes/co2_to_fuels_nevpt2.py
+Запуск (после co2_to_fuels_casscf_crossval.py): python3 -u routes/co2_to_fuels_nevpt2.py
 """
 import os, sys, json, time
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from co2_to_fuels_sites import METALS, _mol, HARTREE_EV, RESULTS
 from co2_to_fuels_ts import build_ads, _scf
-from co2_to_fuels_casscf import (NCAS, NELECAS, chain_scf, casscf_fixed,
+from co2_to_fuels_casscf_crossval import (NCAS, NELECAS, chain_scf, casscf_fixed,
                                  avas_guess, _persist)
 from pyscf import mcscf, mrpt, dft
 from pyscf.scf import addons as scf_addons
