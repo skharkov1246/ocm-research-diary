@@ -1,0 +1,12 @@
+{
+  "_comment": "Policy attached to the EC2 INSTANCE ROLE (instance profile). The instance writes its results via this role — short-lived creds via IMDS, never on disk/env. Write-only to one prefix. Requires a plain SSE-S3 (AES256) bucket; if the bucket is SSE-KMS, add kms:GenerateDataKey + kms:Decrypt on the key.",
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "S3WriteResultsPrefixOnly",
+      "Effect": "Allow",
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::BUCKET/PREFIX/*"
+    }
+  ]
+}

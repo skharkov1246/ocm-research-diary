@@ -1,0 +1,136 @@
+{
+ "meta": {
+  "source": "mono",
+  "basis": "def2-svp",
+  "step": "dG3_O_to_OOH",
+  "honest": "CASCI-в-AVAS диагностика; поправка репортится отдельно от PBE-лестницы, не суммируется"
+ },
+ "species": {
+  "o": {
+   "e_rohf": -1732.0792899695407,
+   "e_casci": -1732.1024463882754,
+   "casci_converged": true,
+   "e_static_ha": -0.023156418734743056,
+   "cas": [
+    14,
+    9
+   ],
+   "qubits": 18,
+   "noon": [
+    1.998,
+    1.986,
+    1.975,
+    1.934,
+    1.925,
+    1.072,
+    1.069,
+    1.033,
+    1.008
+   ],
+   "n_unpaired": 4.0,
+   "n_unpaired_excess": -0.0,
+   "spin": 4,
+   "seconds": 16.6
+  },
+  "ooh": {
+   "e_rohf": -1807.3759983820366,
+   "e_casci": -1807.4632059282262,
+   "casci_converged": true,
+   "e_static_ha": -0.08720754618957471,
+   "cas": [
+    21,
+    13
+   ],
+   "qubits": 26,
+   "noon": [
+    2.0,
+    1.999,
+    1.998,
+    1.998,
+    1.997,
+    1.996,
+    1.995,
+    1.992,
+    1.95,
+    1.892,
+    1.006,
+    0.122,
+    0.055
+   ],
+   "n_unpaired": 1.355,
+   "n_unpaired_excess": 0.355,
+   "spin": 1,
+   "seconds": 15.0
+  },
+  "h2o": {
+   "e_rohf": -75.959396268007,
+   "e_casci": -75.99957986070754,
+   "casci_converged": true,
+   "e_static_ha": -0.04018359270054361,
+   "cas": [
+    8,
+    6
+   ],
+   "qubits": 12,
+   "noon": [
+    1.999,
+    1.999,
+    1.982,
+    1.975,
+    0.025,
+    0.02
+   ],
+   "n_unpaired": 0.09,
+   "n_unpaired_excess": 0.09,
+   "spin": 0,
+   "seconds": 0.1
+  },
+  "h2": {
+   "e_rohf": -1.1286235538547866,
+   "e_casci": -1.1461129803989185,
+   "casci_converged": true,
+   "e_static_ha": -0.01748942654413188,
+   "cas": [
+    2,
+    2
+   ],
+   "qubits": 4,
+   "noon": [
+    1.972,
+    0.028
+   ],
+   "n_unpaired": 0.055,
+   "n_unpaired_excess": 0.055,
+   "spin": 0,
+   "seconds": 0.0
+  }
+ },
+ "step_correction": {
+  "step": "dG3_O_to_OOH",
+  "reactant": "o",
+  "product": "ooh",
+  "ddE_static_eV": -1.743,
+  "ddE_static_kcal": -40.19,
+  "note": "= E_static(prod) − E_static(react); диагностика того, насколько многодетерминантность сдвигает лимитирующий шаг"
+ },
+ "vqe": {
+  "qubits": 18,
+  "cas": [
+   14,
+   9
+  ],
+  "terms": 9168,
+  "e_casci": -1732.1024463882652,
+  "e_exact_jw": null,
+  "gate_exact_vs_casci_kcal": null,
+  "e_vqe": -1732.102027365948,
+  "vqe_minus_casci_kcal": 0.26,
+  "iters": 68,
+  "energy_trace": [
+   -1732.07929,
+   -1732.100592,
+   -1732.101938
+  ],
+  "seconds": 2244.4
+ }
+}

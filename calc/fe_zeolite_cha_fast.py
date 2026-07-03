@@ -5,10 +5,12 @@ xTB-relaxed geometry from disk). Robust ROKS-PBE SCF (minutes, not the 1h ROHF)
 Coarser than CASSCF+NEVPT2 (no orbital opt / no dynamic correlation) but delivers
 the spin ORDERING on the real IZA-CHA relaxed geometry before the ephemeral
 container cycles. Atom order in xyz: 0=Fe, 1=oxo."""
-import json, time
+import json, sys, time
 import numpy as np
 from pyscf import gto, scf, mcscf, dft
 from pyscf.mcscf import avas
+
+BASIS = sys.argv[1] if len(sys.argv) > 1 else "def2-svp"
 
 
 def read_xyz(path):
@@ -21,8 +23,8 @@ def read_xyz(path):
 
 atoms = read_xyz("calc/alpha_o_cha_relaxed.xyz")
 mol = gto.M(atom=[[s, xyz] for s, xyz in atoms], charge=0, spin=4,
-            basis="def2-svp", verbose=0, max_memory=12000)
-print("n atoms:", len(atoms), "| n bf:", mol.nao, flush=True)
+            basis=BASIS, verbose=0, max_memory=12000)
+print("basis:", BASIS, "| n atoms:", len(atoms), "| n bf:", mol.nao, flush=True)
 
 mf = dft.ROKS(mol).density_fit(); mf.xc = "PBE"; mf.level_shift = 0.2
 mf.conv_tol = 1e-6; mf.max_cycle = 300
@@ -35,7 +37,7 @@ print("CAS(%de,%do) = %d qubits" % (nelec, ncas, 2 * ncas), flush=True)
 
 out = {"meta": {"model": "REAL IZA-CHA 6-ring cluster (xTB-relaxed active site)",
                 "method": "ROKS-PBE orbitals + state-specific CASCI (FAST; no orbital opt / no NEVPT2)",
-                "basis": "def2-svp", "active_space": f"CAS({nelec}e,{ncas}o)={2*ncas}q",
+                "basis": BASIS, "active_space": f"CAS({nelec}e,{ncas}o)={2*ncas}q",
                 "known_answer": "alpha-O ground state = S=2",
                 "honesty": "coarse (CASCI on DFT orbitals) — gives ORDERING, not a quantitative gap"},
        "spins": {}}

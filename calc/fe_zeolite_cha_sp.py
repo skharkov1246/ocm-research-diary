@@ -11,11 +11,23 @@ import json, os, sys, time
 import numpy as np
 from pyscf import gto, scf, mcscf, mrpt
 from pyscf.mcscf import avas
-from ase.io import read
 
 SPINS = {"quintet": 4, "triplet": 2, "singlet": 0}
-a = read("calc/alpha_o_cha_relaxed.xyz")
-SYM = a.get_chemical_symbols(); POS = a.get_positions()
+
+
+def _read_xyz(path):
+    """Plain xyz reader (extended-xyz tolerant) — no ase dependency on the AWS box."""
+    with open(path) as f:
+        lines = f.read().splitlines()
+    n = int(lines[0].split()[0])
+    sym, pos = [], []
+    for ln in lines[2:2 + n]:
+        p = ln.split()
+        sym.append(p[0]); pos.append((float(p[1]), float(p[2]), float(p[3])))
+    return sym, pos
+
+
+SYM, POS = _read_xyz("calc/alpha_o_cha_relaxed.xyz")
 
 
 def mol(spin2):
