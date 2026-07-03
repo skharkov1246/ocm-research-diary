@@ -101,18 +101,28 @@ def casci_probe(run, basis):
         labels += [f"{i} O 2p" for i in range(core_len, mol.natm)
                    if mol.atom_symbol(i) == "O"]
     else:
-        labels = ["O 2p"]  # газовые H₂O (контроль ≈0 статической корреляции)
+        # газовые контроли: связывающие+разрыхляющие, а не тривиально
+        # заполненное O-2p (в нём корреляция нулевая по построению)
+        labels = ["O 2p", "H 1s"]
     if mol.natm == 2 and set(mol.atom_symbol(i) for i in range(2)) == {"H"}:
         labels = ["H 1s"]
-    ncas, nelec, orbs = avas.avas(mf, labels, threshold=0.2, verbose=0)
+    # openshell_option=3: дефолт (2) на ROHF умеет терять SOMO-структуру —
+    # CASCI выходил ВЫШЕ ROHF на +41 ккал/моль (нарушение вариационности)
+    ncas, nelec, orbs = avas.avas(mf, labels, threshold=0.2,
+                                  openshell_option=3, verbose=0)
     mc = mcscf.CASCI(mf, ncas, nelec); mc.verbose = 0
+    mc.fcisolver.conv_tol = 1e-10
     mc.kernel(orbs)
+    if mc.e_tot - mf.e_tot > 1e-3 / 627.5:   # вариационный сторож
+        raise RuntimeError(f"CASCI above ROHF by {(mc.e_tot-mf.e_tot)*627.5:.2f} "
+                           "kcal/mol — active space is inconsistent")
     dm = mc.fcisolver.make_rdm1(mc.ci, mc.ncas, mc.nelecas)
     noon = np.sort(np.linalg.eigvalsh(dm))[::-1]
     spin = mol.spin
     n_u_formal = spin
     n_u = float(np.sum(np.minimum(noon, 2 - noon)))
     return dict(e_rohf=float(mf.e_tot), e_casci=float(mc.e_tot),
+                casci_converged=bool(mc.converged),
                 e_static_ha=float(mc.e_tot - mf.e_tot),
                 cas=[int(sum(nelec) if hasattr(nelec, "__len__") else nelec),
                      int(ncas)],
@@ -139,7 +149,8 @@ def vqe_poc(run, basis, maxq, iters=400):
     core_len = run.get("core_len", 5)
     labels = ["Ni 3d"] + [f"{i} O 2p" for i in range(core_len, mol.natm)
                           if mol.atom_symbol(i) == "O"]
-    ncas, nelec, orbs = avas.avas(mf, labels, threshold=0.2, verbose=0)
+    ncas, nelec, orbs = avas.avas(mf, labels, threshold=0.2,
+                                  openshell_option=3, verbose=0)
     nq = 2 * int(ncas)
     if nq > maxq:
         return {"skipped": f"{nq}q > H2_VQE_MAXQ={maxq}"}
