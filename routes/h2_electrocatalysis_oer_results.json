@@ -34,7 +34,7 @@
    "pyscf": "2.13.1",
    "geometric": "1.1.1"
   },
-  "updated": "2026-07-03T04:22:12Z"
+  "updated": "2026-07-03T04:58:02Z"
  },
  "states": {
   "H2O": {
@@ -289,50 +289,46 @@
      "multiplicity": 2,
      "spin_2S": 1,
      "charge": 0,
-     "relaxed": false,
+     "relaxed": true,
      "frozen_core_atoms": "xyz 1,2,4",
      "n_atoms": 8,
      "n_basis": 102,
      "init_scf_converged": false,
-     "opt_converged": false,
-     "opt_error": "RuntimeError: Nuclear gradients of <pyscf.scf.hf.DFUKS_Scanner object at 0x7f01cc73fdd0> not converged",
-     "warning": "geometry optimization failed; energy below is a single point at the INITIAL geometry",
-     "e_final_ha": -1809.9083256730169,
+     "opt_converged": true,
+     "e_final_ha": -1809.9651433616957,
      "scf_converged": true,
-     "used_soscf": true,
-     "s2": 1.2298,
+     "used_soscf": false,
+     "s2": 1.0367,
      "s2_ideal": 0.75,
-     "xyz_final": "Ni     0.000000     0.000000     0.000000\nO      1.850000     0.000000     0.000000\nH      2.400000     0.800000     0.000000\nO     -1.850000     0.000000     0.000000\nH     -2.400000    -0.800000     0.000000\nO      0.000000     0.000000     1.900000\nO      1.100000     0.000000     2.800000\nH      1.950000     0.250000     2.550000",
-     "wall_s": 948.3
+     "xyz_final": "Ni     0.000029    -0.000061     0.000023\nO      1.850024    -0.000039     0.000002\nH      2.396647     0.691910    -0.416812\nO     -1.850001    -0.000286     0.000009\nH     -2.165651    -0.706741     0.597328\nO      0.138429    -0.110087     1.815415\nO      1.332069    -0.115815     2.350485\nH      2.019265    -0.011983     1.034647",
+     "wall_s": 1245.5
     },
     "4": {
      "state": "OOH*",
      "multiplicity": 4,
      "spin_2S": 3,
      "charge": 0,
-     "relaxed": false,
+     "relaxed": true,
      "frozen_core_atoms": "xyz 1,2,4",
      "n_atoms": 8,
      "n_basis": 102,
      "init_scf_converged": true,
-     "opt_converged": false,
-     "opt_error": "RuntimeError: Nuclear gradients of <pyscf.scf.hf.DFUKS_Scanner object at 0x7f01c545c4d0> not converged",
-     "warning": "geometry optimization failed; energy below is a single point at the INITIAL geometry",
-     "e_final_ha": -1809.9133517954238,
+     "opt_converged": true,
+     "e_final_ha": -1809.9696070645364,
      "scf_converged": true,
-     "used_soscf": false,
-     "s2": 3.7566,
+     "used_soscf": true,
+     "s2": 3.7551,
      "s2_ideal": 3.75,
-     "xyz_final": "Ni     0.000000     0.000000     0.000000\nO      1.850000     0.000000     0.000000\nH      2.400000     0.800000     0.000000\nO     -1.850000     0.000000     0.000000\nH     -2.400000    -0.800000     0.000000\nO      0.000000     0.000000     1.900000\nO      1.100000     0.000000     2.800000\nH      1.950000     0.250000     2.550000",
-     "wall_s": 319.8
+     "xyz_final": "Ni    -0.000005    -0.000006     0.000008\nO      1.850021    -0.000041     0.000005\nH      2.475790     0.051921    -0.740905\nO     -1.849974     0.000023    -0.000005\nH     -2.164765    -0.095224     0.921774\nO      0.203672    -0.240153     1.919497\nO      1.474724    -0.311692     2.334789\nH      1.981942    -0.192902     1.380060",
+     "wall_s": 904.8
     }
    },
    "best": {
     "multiplicity": 4,
-    "e_final_ha": -1809.9133517954238,
-    "s2": 3.7566,
-    "relaxed": false,
-    "opt_converged": false
+    "e_final_ha": -1809.9696070645364,
+    "s2": 3.7551,
+    "relaxed": true,
+    "opt_converged": true
    }
   }
  },
@@ -343,20 +339,20 @@
    "T_K": 298.15
   },
   "formation_dE_eV": {
-   "OH*": 1.311,
-   "O*": 2.922,
-   "OOH*": 4.002
+   "OH*": 0.311,
+   "O*": 2.277,
+   "OOH*": 2.48
   },
   "formation_dG_eV": {
-   "OH*": 1.661,
-   "O*": 2.972,
-   "OOH*": 4.402
+   "OH*": 0.661,
+   "O*": 2.327,
+   "OOH*": 2.88
   },
   "steps_eV": {
-   "dG1": 1.661,
-   "dG2": 1.311,
-   "dG3": 1.43,
-   "dG4": 0.518
+   "dG1": 0.661,
+   "dG2": 1.666,
+   "dG3": 0.553,
+   "dG4": 2.04
   },
   "step_labels": [
    "* + H2O -> OH* + (H+ + e-)",
@@ -364,37 +360,37 @@
    "O* + H2O -> OOH* + (H+ + e-)",
    "OOH* -> * + O2 + (H+ + e-)"
   ],
-  "limiting_step": "* + H2O -> OH* + (H+ + e-)",
-  "eta_V": 0.431,
+  "limiting_step": "OOH* -> * + O2 + (H+ + e-)",
+  "eta_V": 0.81,
   "dG4_closure": "dG4 = 4.92 eV - (dG1+dG2+dG3); experimental water splitting dG, avoids direct triplet-O2 DFT",
   "best_states": {
    "*": {
     "multiplicity": 3,
-    "e_final_ha": -1659.2561207327815,
+    "e_final_ha": -1659.2564360401188,
     "s2": 2.0028,
-    "relaxed": false,
-    "opt_converged": false
+    "relaxed": true,
+    "opt_converged": true
    },
    "OH*": {
     "multiplicity": 2,
-    "e_final_ha": -1734.9002617112467,
-    "s2": 0.8784,
-    "relaxed": false,
-    "opt_converged": false
+    "e_final_ha": -1734.9373378058408,
+    "s2": 0.7776,
+    "relaxed": true,
+    "opt_converged": true
    },
    "O*": {
     "multiplicity": 3,
-    "e_final_ha": -1734.2607122424533,
-    "s2": 2.0135,
-    "relaxed": false,
-    "opt_converged": false
+    "e_final_ha": -1734.2847506373582,
+    "s2": 2.0055,
+    "relaxed": true,
+    "opt_converged": true
    },
    "OOH*": {
     "multiplicity": 4,
-    "e_final_ha": -1809.9133517954238,
-    "s2": 3.7566,
-    "relaxed": false,
-    "opt_converged": false
+    "e_final_ha": -1809.9696070645364,
+    "s2": 3.7551,
+    "relaxed": true,
+    "opt_converged": true
    },
    "H2O": {
     "multiplicity": 1,
@@ -411,11 +407,6 @@
     "opt_converged": true
    }
   },
-  "warnings": [
-   "state *: geometry NOT (fully) relaxed -- treat ladder as preliminary",
-   "state OH*: geometry NOT (fully) relaxed -- treat ladder as preliminary",
-   "state O*: geometry NOT (fully) relaxed -- treat ladder as preliminary",
-   "state OOH*: geometry NOT (fully) relaxed -- treat ladder as preliminary"
-  ]
+  "warnings": []
  }
 }
