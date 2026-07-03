@@ -122,9 +122,8 @@ def stage_spins():
     выбираем основное спиновое состояние ПЕРЕД пайплайном, не постулируем."""
     global SPIN
     atoms = start_atoms("ch4")
-    zmol = gto.M(atom=atoms, basis=BASIS, ecp=BASIS, charge=0, spin=0,
-                 verbose=0, max_memory=6000)
-    parity = zmol.nelectron % 2
+    # чётность электронов без пробной сборки (ECP-остов чётный, заряд 0)
+    parity = sum(gto.charge(a[0]) for a in atoms) % 2
     cands = [s for s in range(parity, 8, 2)][:4]   # 4 нижних мультиплетности
     out = {"model": MODEL, "candidates_2S": cands, "ladder": []}
     path = os.path.join(DIR, f"{PREF}_spins.json")
