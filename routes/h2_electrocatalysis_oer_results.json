@@ -34,7 +34,7 @@
    "pyscf": "2.13.1",
    "geometric": "1.1.1"
   },
-  "updated": "2026-07-03T01:57:25Z"
+  "updated": "2026-07-03T02:50:49Z"
  },
  "states": {
   "H2O": {
@@ -110,15 +110,15 @@
      "n_basis": 69,
      "init_scf_converged": false,
      "opt_converged": false,
-     "opt_error": "RuntimeError: Nuclear gradients of <pyscf.scf.hf.DFUKS_Scanner object at 0x7fbadf987510> not converged",
+     "opt_error": "RuntimeError: Nuclear gradients of <pyscf.scf.hf.DFUKS_Scanner object at 0x7f01cc691e10> not converged",
      "warning": "geometry optimization failed; energy below is a single point at the INITIAL geometry",
-     "e_final_ha": -1659.2561207342064,
+     "e_final_ha": -1659.2561207327815,
      "scf_converged": true,
      "used_soscf": true,
      "s2": 2.0028,
      "s2_ideal": 2.0,
      "xyz_final": "Ni     0.000000     0.000000     0.000000\nO      1.850000     0.000000     0.000000\nH      2.400000     0.800000     0.000000\nO     -1.850000     0.000000     0.000000\nH     -2.400000    -0.800000     0.000000",
-     "wall_s": 210.8
+     "wall_s": 176.5
     },
     "1": {
      "state": "*",
@@ -131,15 +131,15 @@
      "n_basis": 69,
      "init_scf_converged": false,
      "opt_converged": false,
-     "opt_error": "RuntimeError: Nuclear gradients of <pyscf.scf.hf.DFUKS_Scanner object at 0x7fbadf987510> not converged",
+     "opt_error": "RuntimeError: Nuclear gradients of <pyscf.scf.hf.DFUKS_Scanner object at 0x7f01cc6ae1d0> not converged",
      "warning": "geometry optimization failed; energy below is a single point at the INITIAL geometry",
-     "e_final_ha": -1659.244110340318,
+     "e_final_ha": -1659.2441103410702,
      "scf_converged": true,
      "used_soscf": true,
      "s2": 0.934,
      "s2_ideal": 0.0,
      "xyz_final": "Ni     0.000000     0.000000     0.000000\nO      1.850000     0.000000     0.000000\nH      2.400000     0.800000     0.000000\nO     -1.850000     0.000000     0.000000\nH     -2.400000    -0.800000     0.000000",
-     "wall_s": 170.6
+     "wall_s": 228.0
     },
     "5": {
      "state": "*",
@@ -152,20 +152,20 @@
      "n_basis": 69,
      "init_scf_converged": false,
      "opt_converged": false,
-     "opt_error": "RuntimeError: Nuclear gradients of <pyscf.scf.hf.DFUKS_Scanner object at 0x7fbadf4a6cd0> not converged",
+     "opt_error": "RuntimeError: Nuclear gradients of <pyscf.scf.hf.DFUKS_Scanner object at 0x7f01c54258d0> not converged",
      "warning": "geometry optimization failed; energy below is a single point at the INITIAL geometry",
-     "e_final_ha": -1659.09458773553,
+     "e_final_ha": -1659.0945877354363,
      "scf_converged": true,
      "used_soscf": true,
      "s2": 6.0023,
      "s2_ideal": 6.0,
      "xyz_final": "Ni     0.000000     0.000000     0.000000\nO      1.850000     0.000000     0.000000\nH      2.400000     0.800000     0.000000\nO     -1.850000     0.000000     0.000000\nH     -2.400000    -0.800000     0.000000",
-     "wall_s": 213.4
+     "wall_s": 181.7
     }
    },
    "best": {
     "multiplicity": 3,
-    "e_final_ha": -1659.2561207342064,
+    "e_final_ha": -1659.2561207327815,
     "s2": 2.0028,
     "relaxed": false,
     "opt_converged": false
@@ -184,15 +184,15 @@
      "n_basis": 88,
      "init_scf_converged": true,
      "opt_converged": false,
-     "opt_error": "RuntimeError: Nuclear gradients of <pyscf.scf.hf.DFUKS_Scanner object at 0x7fbadd8a9610> not converged",
+     "opt_error": "RuntimeError: Nuclear gradients of <pyscf.scf.hf.DFUKS_Scanner object at 0x7f01cc79a110> not converged",
      "warning": "geometry optimization failed; energy below is a single point at the INITIAL geometry",
-     "e_final_ha": -1734.9002617030344,
+     "e_final_ha": -1734.9002617112467,
      "scf_converged": true,
      "used_soscf": false,
-     "s2": 0.8785,
+     "s2": 0.8784,
      "s2_ideal": 0.75,
      "xyz_final": "Ni     0.000000     0.000000     0.000000\nO      1.850000     0.000000     0.000000\nH      2.400000     0.800000     0.000000\nO     -1.850000     0.000000     0.000000\nH     -2.400000    -0.800000     0.000000\nO      0.000000     0.000000     1.850000\nH      0.000000     0.800000     2.400000",
-     "wall_s": 202.0
+     "wall_s": 186.4
     },
     "4": {
      "state": "OH*",
@@ -205,21 +205,21 @@
      "n_basis": 88,
      "init_scf_converged": false,
      "opt_converged": false,
-     "opt_error": "RuntimeError: Nuclear gradients of <pyscf.scf.hf.DFUKS_Scanner object at 0x7fbadf4fd410> not converged",
+     "opt_error": "RuntimeError: Nuclear gradients of <pyscf.scf.hf.DFUKS_Scanner object at 0x7f01c54758d0> not converged",
      "warning": "geometry optimization failed; energy below is a single point at the INITIAL geometry",
-     "e_final_ha": -1734.8912467029154,
+     "e_final_ha": -1734.8912467029152,
      "scf_converged": true,
      "used_soscf": true,
      "s2": 3.7548,
      "s2_ideal": 3.75,
      "xyz_final": "Ni     0.000000     0.000000     0.000000\nO      1.850000     0.000000     0.000000\nH      2.400000     0.800000     0.000000\nO     -1.850000     0.000000     0.000000\nH     -2.400000    -0.800000     0.000000\nO      0.000000     0.000000     1.850000\nH      0.000000     0.800000     2.400000",
-     "wall_s": 242.1
+     "wall_s": 232.1
     }
    },
    "best": {
     "multiplicity": 2,
-    "e_final_ha": -1734.9002617030344,
-    "s2": 0.8785,
+    "e_final_ha": -1734.9002617112467,
+    "s2": 0.8784,
     "relaxed": false,
     "opt_converged": false
    }
@@ -237,15 +237,15 @@
      "n_basis": 83,
      "init_scf_converged": false,
      "opt_converged": false,
-     "opt_error": "RuntimeError: Nuclear gradients of <pyscf.scf.hf.DFUKS_Scanner object at 0x7fbadf4e8990> not converged",
+     "opt_error": "RuntimeError: Nuclear gradients of <pyscf.scf.hf.DFUKS_Scanner object at 0x7f01ce793c10> not converged",
      "warning": "geometry optimization failed; energy below is a single point at the INITIAL geometry",
-     "e_final_ha": -1734.2607122424915,
+     "e_final_ha": -1734.2607122424533,
      "scf_converged": true,
      "used_soscf": true,
      "s2": 2.0135,
      "s2_ideal": 2.0,
      "xyz_final": "Ni     0.000000     0.000000     0.000000\nO      1.850000     0.000000     0.000000\nH      2.400000     0.800000     0.000000\nO     -1.850000     0.000000     0.000000\nH     -2.400000    -0.800000     0.000000\nO      0.000000     0.000000     1.650000",
-     "wall_s": 577.4
+     "wall_s": 297.6
     },
     "1": {
      "state": "O*",
@@ -258,15 +258,15 @@
      "n_basis": 83,
      "init_scf_converged": true,
      "opt_converged": false,
-     "opt_error": "RuntimeError: Nuclear gradients of <pyscf.scf.hf.DFUKS_Scanner object at 0x7fbadf99be50> not converged",
+     "opt_error": "RuntimeError: Nuclear gradients of <pyscf.scf.hf.DFUKS_Scanner object at 0x7f01ce790250> not converged",
      "warning": "geometry optimization failed; energy below is a single point at the INITIAL geometry",
-     "e_final_ha": -1734.2511230836476,
+     "e_final_ha": -1734.2511230623927,
      "scf_converged": true,
-     "used_soscf": true,
+     "used_soscf": false,
      "s2": 1.0132,
      "s2_ideal": 0.0,
      "xyz_final": "Ni     0.000000     0.000000     0.000000\nO      1.850000     0.000000     0.000000\nH      2.400000     0.800000     0.000000\nO     -1.850000     0.000000     0.000000\nH     -2.400000    -0.800000     0.000000\nO      0.000000     0.000000     1.650000",
-     "wall_s": 227.9
+     "wall_s": 197.6
     },
     "5": {
      "state": "O*",
@@ -279,20 +279,20 @@
      "n_basis": 83,
      "init_scf_converged": false,
      "opt_converged": false,
-     "opt_error": "RuntimeError: Nuclear gradients of <pyscf.scf.hf.DFUKS_Scanner object at 0x7fbad878e710> not converged",
+     "opt_error": "RuntimeError: Nuclear gradients of <pyscf.scf.hf.DFUKS_Scanner object at 0x7f01ce7bd490> not converged",
      "warning": "geometry optimization failed; energy below is a single point at the INITIAL geometry",
-     "e_final_ha": -1734.2416436650888,
+     "e_final_ha": -1734.2416436651333,
      "scf_converged": true,
      "used_soscf": true,
      "s2": 6.0095,
      "s2_ideal": 6.0,
      "xyz_final": "Ni     0.000000     0.000000     0.000000\nO      1.850000     0.000000     0.000000\nH      2.400000     0.800000     0.000000\nO     -1.850000     0.000000     0.000000\nH     -2.400000    -0.800000     0.000000\nO      0.000000     0.000000     1.650000",
-     "wall_s": 596.7
+     "wall_s": 307.8
     }
    },
    "best": {
     "multiplicity": 3,
-    "e_final_ha": -1734.2607122424915,
+    "e_final_ha": -1734.2607122424533,
     "s2": 2.0135,
     "relaxed": false,
     "opt_converged": false
@@ -311,15 +311,15 @@
      "n_basis": 102,
      "init_scf_converged": false,
      "opt_converged": false,
-     "opt_error": "RuntimeError: Nuclear gradients of <pyscf.scf.hf.DFUKS_Scanner object at 0x7fbadd8a1a10> not converged",
+     "opt_error": "RuntimeError: Nuclear gradients of <pyscf.scf.hf.DFUKS_Scanner object at 0x7f01cc73fdd0> not converged",
      "warning": "geometry optimization failed; energy below is a single point at the INITIAL geometry",
-     "e_final_ha": -1809.9083256729223,
+     "e_final_ha": -1809.9083256730169,
      "scf_converged": true,
      "used_soscf": true,
-     "s2": 1.2299,
+     "s2": 1.2298,
      "s2_ideal": 0.75,
      "xyz_final": "Ni     0.000000     0.000000     0.000000\nO      1.850000     0.000000     0.000000\nH      2.400000     0.800000     0.000000\nO     -1.850000     0.000000     0.000000\nH     -2.400000    -0.800000     0.000000\nO      0.000000     0.000000     1.900000\nO      1.100000     0.000000     2.800000\nH      1.950000     0.250000     2.550000",
-     "wall_s": 882.4
+     "wall_s": 948.3
     },
     "4": {
      "state": "OOH*",
@@ -332,20 +332,20 @@
      "n_basis": 102,
      "init_scf_converged": true,
      "opt_converged": false,
-     "opt_error": "RuntimeError: Nuclear gradients of <pyscf.scf.hf.DFUKS_Scanner object at 0x7fbad872be50> not converged",
+     "opt_error": "RuntimeError: Nuclear gradients of <pyscf.scf.hf.DFUKS_Scanner object at 0x7f01c545c4d0> not converged",
      "warning": "geometry optimization failed; energy below is a single point at the INITIAL geometry",
-     "e_final_ha": -1809.9133518136914,
+     "e_final_ha": -1809.9133517954238,
      "scf_converged": true,
-     "used_soscf": true,
+     "used_soscf": false,
      "s2": 3.7566,
      "s2_ideal": 3.75,
      "xyz_final": "Ni     0.000000     0.000000     0.000000\nO      1.850000     0.000000     0.000000\nH      2.400000     0.800000     0.000000\nO     -1.850000     0.000000     0.000000\nH     -2.400000    -0.800000     0.000000\nO      0.000000     0.000000     1.900000\nO      1.100000     0.000000     2.800000\nH      1.950000     0.250000     2.550000",
-     "wall_s": 251.3
+     "wall_s": 319.8
     }
    },
    "best": {
     "multiplicity": 4,
-    "e_final_ha": -1809.9133518136914,
+    "e_final_ha": -1809.9133517954238,
     "s2": 3.7566,
     "relaxed": false,
     "opt_converged": false
@@ -386,28 +386,28 @@
   "best_states": {
    "*": {
     "multiplicity": 3,
-    "e_final_ha": -1659.2561207342064,
+    "e_final_ha": -1659.2561207327815,
     "s2": 2.0028,
     "relaxed": false,
     "opt_converged": false
    },
    "OH*": {
     "multiplicity": 2,
-    "e_final_ha": -1734.9002617030344,
-    "s2": 0.8785,
+    "e_final_ha": -1734.9002617112467,
+    "s2": 0.8784,
     "relaxed": false,
     "opt_converged": false
    },
    "O*": {
     "multiplicity": 3,
-    "e_final_ha": -1734.2607122424915,
+    "e_final_ha": -1734.2607122424533,
     "s2": 2.0135,
     "relaxed": false,
     "opt_converged": false
    },
    "OOH*": {
     "multiplicity": 4,
-    "e_final_ha": -1809.9133518136914,
+    "e_final_ha": -1809.9133517954238,
     "s2": 3.7566,
     "relaxed": false,
     "opt_converged": false
