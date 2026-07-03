@@ -429,12 +429,32 @@ def stage_merge():
            "substrates": {}}
     ok = True
     for sub in ("ch4", "c2h6"):
-        p = os.path.join(DIR, f"ocm_mnw_{sub}_energy.json")
-        if not os.path.exists(p):
+        ep = os.path.join(DIR, f"ocm_mnw_{sub}_energy.json")
+        pp = os.path.join(DIR, f"ocm_mnw_{sub}_profile.json")
+        gp = os.path.join(DIR, f"ocm_mnw_{sub}_geom.json")
+        if not (os.path.exists(pp) and os.path.exists(gp)):
             ok = False
             continue
-        with open(p) as f:
-            res["substrates"][sub] = json.load(f)
+        with open(pp) as f:
+            prof = json.load(f)
+        with open(gp) as f:
+            geom = json.load(f)
+        sd = {"dft_barrier_kcal": geom["dft_barrier_kcal"],
+              "dft_rel_kcal": geom["rel_kcal"],
+              "dft_r_index": geom["r_index"], "dft_ts_index": geom["ts_index"],
+              "dft_ts_interior": geom["ts_interior"]}
+        # коррелированные барьеры — из ПОЛНОГО профиля (свои R/TS на своей
+        # поверхности), а не из энергостадии с DFT-индексами
+        for lvl in ("casscf", "nevpt2"):
+            for k in ("barrier_kcal", "rel_kcal", "r_index", "ts_index",
+                      "ts_interior"):
+                sd[f"{lvl}_{k}"] = prof[f"{lvl}_{k}"]
+        sd["all_casscf_converged"] = prof["all_converged"]
+        sd["noon_ts"] = prof["points"][prof["nevpt2_ts_index"]]["noon"]
+        if os.path.exists(ep):
+            with open(ep) as f:
+                sd["energy_stage_dft_indices"] = json.load(f)
+        res["substrates"][sub] = sd
     if ok:
         res["ddE_kcal"] = {}
         for lvl in ("dft", "casscf", "nevpt2"):
@@ -443,10 +463,10 @@ def stage_merge():
         res["quantum_shift_kcal"] = round(
             res["ddE_kcal"]["nevpt2"] - res["ddE_kcal"]["dft"], 2)
         res["all_casscf_converged"] = all(
-            res["substrates"][s][pt]["casscf_converged"]
-            for s in ("ch4", "c2h6") for pt in ("R", "TS"))
+            res["substrates"][s]["all_casscf_converged"] for s in ("ch4", "c2h6"))
         res["all_ts_interior"] = all(
-            res["substrates"][s]["ts_interior"] for s in ("ch4", "c2h6"))
+            res["substrates"][s][f"{lvl}_ts_interior"]
+            for s in ("ch4", "c2h6") for lvl in ("dft", "nevpt2"))
     with open(os.path.join(DIR, "ocm_mnw_selectivity_results.json"), "w") as f:
         json.dump(res, f, indent=1)
     print(json.dumps({k: v for k, v in res.items() if k != "substrates"}, indent=1))
