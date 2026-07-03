@@ -162,26 +162,43 @@ def avas_size(mf, labels, threshold):
     return int(ncas), int(nelec)
 
 
-def frontier_avas(mf, target_ncas):
-    """Scan the AVAS threshold to obtain a frontier active space as close as possible
-    to target_ncas orbitals (the most reference-like frontier orbitals). Returns
-    (ncas, nelec, mo, threshold)."""
-    best = None
-    for thr in [0.95, 0.9, 0.85, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]:
-        try:
-            ncas, nelec, mo = avas.avas(mf, ["Fe 3d"], threshold=thr,
-                                        canonicalize=True, verbose=0)
-        except Exception:
-            continue
-        score = abs(int(ncas) - target_ncas)
-        if best is None or score < best[0] or (score == best[0] and int(ncas) >= target_ncas):
-            best = (score, int(ncas), int(nelec), mo, thr)
-        if int(ncas) == target_ncas:
-            break
-    if best is None:
-        raise RuntimeError("AVAS frontier selection failed for all thresholds")
-    _, ncas, nelec, mo, thr = best
-    return ncas, nelec, mo, thr
+def frontier_magnetic_cas(mf, ncas):
+    """Select a small frontier magnetic active space directly from the high-spin
+    reference. In HS [4Fe-4S]2- the 18 singly-occupied MOs ARE the Fe-3d magnetic
+    orbitals (2 Fe3+ d5 + 2 Fe2+ d6 aligned); we take the `ncas` of them closest to
+    the median SOMO energy — the central magnetic frontier. Each contributes one
+    electron, so the CAS is half-filled: nelec = ncas.
+
+    (AVAS-threshold cannot carve a *small* frontier here: every Fe-3d orbital projects
+    strongly onto the 'Fe 3d' reference, so AVAS always returns the full ~20 — which is
+    the 40-qubit wall, not a tractable window.)
+
+    Returns (active_idx, ncas, nelec, fe3d_frac) where fe3d_frac is the mean Fe-3d
+    Loewdin character of the chosen orbitals (a labelling honesty check)."""
+    occ = mf.mo_occ
+    somo = np.where(np.abs(occ - 1.0) < 0.5)[0]          # singly-occupied = magnetic
+    if len(somo) < ncas:
+        raise RuntimeError(f"only {len(somo)} SOMOs, need {ncas}")
+    e_somo = mf.mo_energy[somo]
+    med = np.median(e_somo)
+    chosen = somo[np.argsort(np.abs(e_somo - med))[:ncas]]
+    active = sorted(int(i) for i in chosen)
+    nelec = int(round(sum(mf.mo_occ[active])))           # = ncas (each SOMO has 1 e)
+
+    # Loewdin Fe-3d character of the chosen orbitals (honesty: are they really Fe-3d?)
+    fe3d = mf.mol.search_ao_label("Fe 3d")
+    s = mf.get_ovlp()
+    sqrtS = _sqrtm_sym(s)
+    C = mf.mo_coeff[:, active]
+    Cl = sqrtS @ C                                        # Loewdin-orthogonalized coeffs
+    pops = (Cl ** 2)
+    fe3d_frac = float(np.mean(pops[fe3d, :].sum(axis=0)))
+    return active, ncas, nelec, fe3d_frac
+
+
+def _sqrtm_sym(s):
+    w, v = np.linalg.eigh(s)
+    return (v * np.sqrt(np.clip(w, 0, None))) @ v.T
 
 
 # --------------------------------------------------------------------------- CAS -> qubits
@@ -294,21 +311,23 @@ def main():
         # --- tractable frontier CASSCF at the minimal-|Sz| split ---
         frontier = {"based_on_converged_scf": scf_ok}
         try:
-            ncas, nelec, mo, thr = frontier_avas(mf, TARGET_NCAS)
+            active, ncas, nelec, fe3d_frac = frontier_magnetic_cas(mf, TARGET_NCAS)
             # minimal-|Sz| split (Sz=0 for even N, 1/2 for odd): this sector provably
             # contains the global N-electron ground, so CASSCF/CASCI here target the
             # physically-relevant low-spin state AND match the JW N-sector search.
             na = (nelec + (nelec % 2)) // 2
             nb = nelec - na
-            frontier.update(avas_threshold=thr, ncas=int(ncas), nelec=int(nelec),
-                            nelecas=[int(na), int(nb)], qubits_jw=2 * int(ncas))
-            print(f"frontier AVAS(Fe 3d, thr={thr}): CAS({nelec}e,{ncas}o) "
-                  f"split ({na},{nb}) = {2*ncas} qubits")
+            frontier.update(ncas=int(ncas), nelec=int(nelec), nelecas=[int(na), int(nb)],
+                            qubits_jw=2 * int(ncas), active_mo_idx=active,
+                            frontier_fe3d_fraction=round(fe3d_frac, 3))
+            print(f"frontier magnetic CAS({nelec}e,{ncas}o) split ({na},{nb}) "
+                  f"= {2*ncas} qubits; Fe-3d character {fe3d_frac:.2f}")
 
             t0 = time.time()
             mc = mcscf.CASSCF(mf, ncas, (na, nb)).density_fit()
             mc.max_cycle_macro = 50
             mc.verbose = 0
+            mo = mc.sort_mo(active, base=0)          # place chosen SOMOs in the CAS
             e_casscf = mc.kernel(mo)[0]
             frontier["casscf_seconds"] = round(time.time() - t0, 1)
             frontier["e_casscf_df"] = float(e_casscf)
