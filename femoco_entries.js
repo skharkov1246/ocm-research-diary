@@ -851,6 +851,60 @@ const ENTRIES = [
         caption: { ru: "Капстон-визуал всей дуги: лестница активных пространств, посчитанных в дневнике. Зелёные ≤24 кубитов — VQE проверен против точного CASCI; за стеной классическая симуляция ломается. [4Fe–4S] (88) уже почти у FeMoco (108) — за пределами точной классики.",
                    en: "The arc's capstone visual: the ladder of active spaces computed in this diary. Green ≤24 qubits — VQE validated against exact CASCI; past the wall the classical simulation breaks. [4Fe–4S] (88) is nearly at FeMoco (108) — beyond exact classical reach." } }
     ]
+  },
+  {
+    id: "fe4s4-casscf",
+    date: "2026-07",
+    stage: { ru: "Этап 17", en: "Stage 17" },
+    title: { ru: "[4Fe–4S], первый мультиреференс: CASSCF измеряет то, что broken-symmetry DFT (Этап 15) держать не мог — и сборка кубитного гамильтониана",
+             en: "[4Fe–4S], the first multireference look: CASSCF measures what broken-symmetry DFT (Stage 15) couldn't hold — and the qubit Hamiltonian assembled" },
+    simple: {
+      ru: `<p>На Этапе 15 broken-symmetry DFT не смог назвать даже <em>знак</em> магнитной связи в [4Fe–4S]. Причина честно проверяется здесь: любое DFT/broken-symmetry решение — это <strong>один</strong> детерминант, а основное состояние этого кластера по-настоящему многоконфигурационно. Впервые смотрим на него мультиреференсным методом (CASSCF) — и заодно собираем то, ради чего всё затевается: кубитный гамильтониан.</p>
+           <p>Собрали реалистичный кубан [Fe₄S₄(SH)₄]²⁻ (та же система, что на Этапе 15), сошлись высокоспиновым ROHF (E=−8230.6 Ha) и на фронтире из шести центральных магнитных орбиталей железа посчитали CASSCF. Результат нагляден: заселённости натуральных орбиталей — <strong>2.00, 1.09, 1.00, 1.00, 0.91, 0.00</strong>, то есть <strong>четыре</strong> орбитали сидят у половинного заполнения. Индикатор «эффективно неспаренных» n_u = <strong>3.99</strong> (из максимума 6). Это и есть измеренная статическая корреляция — ровно то, что один детерминант держать не может.</p>
+           <p>И собрали кубитный гамильтониан этого пространства — <strong>12 кубитов, 1843 члена Паули</strong>: он воспроизводит точную диагонализацию (CASCI) до <strong>3×10⁻⁹ ккал/моль</strong>. Тот же контроль движка, что на N₂/Fe–N₂, теперь на реальном фрагменте FeMoco.</p>
+           <p>А вот и стена: полное магнитное пространство железа (Fe-3d) — <strong>40 кубитов</strong>, вместе с серой — <strong>88</strong> (тот самый кубит из капстоуна для [4Fe–4S]). Его точную диагонализацию мы <em>не</em> делаем: это классический предел, за которым нужен квант.</p>
+           <p>Честно: кубан идеализированный (не из белковой структуры), базис скромный (def2-SVP), CASSCF без динамической корреляции и не досошёлся до конца (упёрся в лимит макро-итераций за ~час). Но и сигнал мультиреференсности, и кубит-гейт от этого не зависят — гейт сверяет CASCI и кубитный гамильтониан в <em>одних</em> орбиталях.</p>`,
+      en: `<p>In Stage 15 broken-symmetry DFT couldn't name even the <em>sign</em> of the magnetic coupling in [4Fe–4S]. The reason is tested here: any DFT / broken-symmetry solution is <strong>one</strong> determinant, whereas this cluster's ground state is genuinely multi-configurational. We look at it with a multireference method (CASSCF) for the first time — and assemble the thing this is all for: the qubit Hamiltonian.</p>
+           <p>We built a realistic [Fe₄S₄(SH)₄]²⁻ cubane (the Stage-15 system), converged the high-spin ROHF (E=−8230.6 Ha), and ran CASSCF over a frontier of six central iron magnetic orbitals. The result is vivid: natural-orbital occupations of <strong>2.00, 1.09, 1.00, 1.00, 0.91, 0.00</strong> — <strong>four</strong> orbitals sit at near-half-filling. The effectively-unpaired index n_u = <strong>3.99</strong> (out of a maximum 6). That is the measured static correlation a single determinant cannot represent.</p>
+           <p>And we assembled the qubit Hamiltonian for that space — <strong>12 qubits, 1843 Pauli terms</strong>: it reproduces the exact diagonalization (CASCI) to <strong>3×10⁻⁹ kcal/mol</strong>. The same engine gate used on N₂ / Fe–N₂, now on a real FeMoco-relevant fragment.</p>
+           <p>Here is the wall: the full iron magnetic space (Fe-3d) is <strong>40 qubits</strong>; with sulfur, <strong>88</strong> (the very [4Fe–4S] number from the capstone). We do <em>not</em> diagonalize it — that is the classical limit past which a quantum computer is needed.</p>
+           <p>Honestly: the cubane is idealized (not from a protein structure), the basis is modest (def2-SVP), CASSCF has no dynamic correlation and did not fully converge (it hit the macro-iteration cap after ~an hour). But neither the multireference signal nor the qubit gate depends on that — the gate compares CASCI and the qubit Hamiltonian in the <em>same</em> orbitals.</p>`
+    },
+    tech: {
+      ru: `<p>[Fe₄S₄(SH)₄]²⁻, def2-SVP, заряд −2, HS-затравка spin=18 (2 Fe³⁺ d⁵ + 2 Fe²⁺ d⁶). nao=288, nelec (128,110). ROHF/DF: короткий DIIS → Newton/SOSCF, E_HS=−8230.607 Ha (сошёлся; MO закэшированы в chkfile — повторный старт 0.2 с вместо ~70 мин).</p>
+           <ul>
+             <li><strong>Стена (размер по AVAS, НЕ диагонализуется):</strong> Fe 3d → CAS(20e,20o)=<strong>40 кубитов</strong>; Fe 3d + 3p всех 8 S → CAS(68e,44o)=<strong>88 кубитов</strong>. Точный CASCI этих пространств (C(20,10)²≈3.4×10¹⁰ детерминантов и много больше для 88) не считаем — это документируемый предел.</li>
+             <li><strong>Фронтир:</strong> шесть центральных однократно-занятых MO высокоспиновой затравки — это магнитные Fe-3d орбитали (лёвдиновский Fe-3d-вес <strong>0.65</strong>; остальное — реальная ковалентность Fe–S). Половинно-заполненный CAS(6e,6o), сплит (3,3) минимального |Sz| (сектор, гарантированно содержащий основное состояние).</li>
+             <li><strong>Мультиреференс:</strong> NOON = [2.00, 1.09, 1.00, 1.00, 0.91, 0.00], n_u = Σnᵢ(2−nᵢ) = <strong>3.985</strong> — почти 4 эффективно-неспаренных электрона из 6.</li>
+             <li><strong>JW-гейт:</strong> кубитный гамильтониан (Jordan–Wigner, <strong>1843 члена Паули</strong>) в секторе N=6 → нижняя энергия −8230.31410400 Ha против CASCI −8230.31410400 Ha в тех же орбиталях и том же (3,3)-секторе → Δ = <strong>3.4×10⁻⁹ ккал/моль</strong>. Self-test H₂ CAS(2,2): JW=FCI до 9×10⁻¹⁶ Ha.</li>
+           </ul>
+           <p><strong>Оговорки (честно).</strong> (1) Кубан идеализированный, терминальный Fe–S–H линейный — не кристаллографический сайт. (2) def2-SVP, скромный базис. (3) CASSCF без динамической корреляции. (4) HS-детерминант (2S=18) — только затравка для отбора орбиталей AVAS, а не физическое (антиферромагнитно-связанное) основное состояние. (5) CASSCF не досошёлся (лимит 50 макро-итераций, ~61 мин): но JW-гейт сверяет CASCI и кубитный H в <em>одних</em> орбиталях, поэтому 10⁻⁹-совпадение и вывод «пространство собрано в кубиты» от этого не зависят, а n_u≈4 качественно робастен. (6) AVAS для открытой оболочки даёт приближённый счёт электронов активного пространства. Всё посчитано в этой сессии (PySCF/PennyLane); скрипт и results-JSON — в <code>calc/femoco_4fe4s_casscf.py</code>.</p>`,
+      en: `<p>[Fe₄S₄(SH)₄]²⁻, def2-SVP, charge −2, HS seed spin=18 (2 Fe³⁺ d⁵ + 2 Fe²⁺ d⁶). nao=288, nelec (128,110). ROHF/DF: short DIIS → Newton/SOSCF, E_HS=−8230.607 Ha (converged; MOs cached to a chkfile — a restart is 0.2 s instead of ~70 min).</p>
+           <ul>
+             <li><strong>Wall (AVAS-sized, NOT diagonalized):</strong> Fe 3d → CAS(20e,20o)=<strong>40 qubits</strong>; Fe 3d + 3p on all 8 S → CAS(68e,44o)=<strong>88 qubits</strong>. Exact CASCI of these (C(20,10)²≈3.4×10¹⁰ determinants, far more for 88) is not computed — the documented wall.</li>
+             <li><strong>Frontier:</strong> the six central singly-occupied MOs of the high-spin seed are the magnetic Fe-3d orbitals (Löwdin Fe-3d weight <strong>0.65</strong>; the rest is genuine Fe–S covalency). A half-filled CAS(6e,6o), minimal-|Sz| split (3,3) (the sector that provably contains the ground state).</li>
+             <li><strong>Multireference:</strong> NOON = [2.00, 1.09, 1.00, 1.00, 0.91, 0.00], n_u = Σnᵢ(2−nᵢ) = <strong>3.985</strong> — nearly 4 effectively-unpaired electrons of 6.</li>
+             <li><strong>JW gate:</strong> the qubit Hamiltonian (Jordan–Wigner, <strong>1843 Pauli terms</strong>) in the N=6 sector → lowest energy −8230.31410400 Ha vs CASCI −8230.31410400 Ha in the same orbitals and same (3,3) split → Δ = <strong>3.4×10⁻⁹ kcal/mol</strong>. Self-test H₂ CAS(2,2): JW=FCI to 9×10⁻¹⁶ Ha.</li>
+           </ul>
+           <p><strong>Honest caveats.</strong> (1) Idealized cubane, terminal Fe–S–H linear — not a crystallographic site. (2) def2-SVP, a modest basis. (3) CASSCF without dynamic correlation. (4) The HS determinant (2S=18) is only a seed for AVAS orbital selection, not the physical (antiferromagnetically-coupled) ground state. (5) CASSCF did not fully converge (50-macro-iteration cap, ~61 min): but the JW gate compares CASCI and the qubit H in the <em>same</em> orbitals, so the 10⁻⁹ agreement and the "space mapped to qubits" claim don't depend on it, and n_u≈4 is qualitatively robust. (6) AVAS on an open shell gives an approximate active-electron count. Everything computed this session (PySCF/PennyLane); script and results-JSON in <code>calc/femoco_4fe4s_casscf.py</code>.</p>`
+    },
+    table: {
+      title: { ru: "[4Fe–4S] Этап 17: первый CASSCF + кубитный гамильтониан — реальный расчёт",
+               en: "[4Fe–4S] Stage 17: first CASSCF + qubit Hamiltonian — real computation" },
+      head: { ru: ["Величина", "Значение"], en: ["Quantity", "Value"] },
+      rows: [
+        ["HS ROHF / def2-SVP", "E = −8230.607 Ha ✓ (converged)"],
+        ["Wall · Fe 3d", "CAS(20e,20o) = 40 qubits (not diagonalized)"],
+        ["Wall · Fe 3d + all 8 S 3p", "CAS(68e,44o) = 88 qubits"],
+        ["Frontier CASSCF", "CAS(6e,6o) = 12 qubits · n_u = 3.99 (NOON: 4×≈1)"],
+        ["JW Hamiltonian vs CASCI", "3.4×10⁻⁹ kcal/mol · 1843 Pauli terms"]
+      ]
+    },
+    figures: [
+      { src: "assets/femoco/fe4s4_casscf_noon.png",
+        caption: { ru: "Реальный расчёт (PySCF CASSCF, def2-SVP): заселённости натуральных орбиталей фронтира [4Fe–4S] CAS(6,6). Четыре орбитали у половинного заполнения (n_u=3.99 из 6) — измеренная мультиреференсность, которую одно-детерминантный BS-DFT (Этап 15) держать не может. CASSCF не досошёлся — помечено честно; вывод качественно робастен.",
+                   en: "Real computation (PySCF CASSCF, def2-SVP): frontier natural-orbital occupations of the [4Fe–4S] CAS(6,6). Four orbitals near half-filling (n_u=3.99 of 6) — the measured multireference character a single-determinant BS-DFT (Stage 15) cannot hold. CASSCF not fully converged — flagged honestly; the conclusion is qualitatively robust." } }
+    ]
   }
 ];
 
