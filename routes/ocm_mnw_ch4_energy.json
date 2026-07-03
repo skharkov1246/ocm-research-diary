@@ -1,0 +1,61 @@
+{
+ "substrate": "ch4",
+ "cas": [
+  9,
+  10
+ ],
+ "avas_labels": [
+  "Mn 3d",
+  "O 2p",
+  "2 H 1s"
+ ],
+ "r_index": 2,
+ "ts_index": 6,
+ "ts_interior": true,
+ "rel_kcal": [
+  0.0,
+  2.19,
+  -6.13,
+  -1.22,
+  2.06,
+  3.83,
+  4.47,
+  4.37
+ ],
+ "dft_barrier_kcal": 10.6,
+ "R": {
+  "tag": "ch4_R",
+  "avas_sel_weights": [
+   0.997,
+   0.992,
+   0.807,
+   0.219,
+   0.025
+  ],
+  "cas": [
+   9,
+   10
+  ],
+  "e_rohf_h": -1264.4438853958466,
+  "rohf_converged": true,
+  "e_casci_h": -1264.5221663412424,
+  "e_casscf_h": -1264.6204551123806,
+  "casscf_converged": true,
+  "e_nevpt2_h": -1265.1536008165465,
+  "nevpt2_corr_h": -0.5331457041658986,
+  "noon": [
+   1.962,
+   1.711,
+   1.018,
+   1.001,
+   1.0,
+   1.0,
+   1.0,
+   0.285,
+   0.019,
+   0.005
+  ],
+  "n_unpaired_beyond_spin": 0.617,
+  "wall_s": 29.4
+ }
+}
