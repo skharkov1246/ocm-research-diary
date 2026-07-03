@@ -44,15 +44,21 @@ shutdown -P "+${WATCHDOG_MIN}" 2>/dev/null \
 RESULTS=routes/co2_to_fuels_nevpt2_results.json
 LOG=routes/co2_to_fuels_nevpt2_aws.log
 
-upload() {   # best-effort: results, log, restart checkpoints
+upload() {   # best-effort: results, log, restart checkpoints, diagnostics
   [ -n "${S3_OUT}" ] || { echo "[warn] S3_OUT not set — nothing uploaded"; return 0; }
   for f in "${RESULTS}" "${LOG}" \
            routes/co2_to_fuels_nevpt2_Cu2.chk.npz \
-           routes/co2_to_fuels_nevpt2_CuAl.chk.npz; do
+           routes/co2_to_fuels_nevpt2_CuAl.chk.npz \
+           /tmp/setup.log; do
     if [ -f "${f}" ]; then
       aws s3 cp "${f}" "${S3_OUT%/}/$(basename "${f}")" || true
     fi
   done
+  # full user-data trace — the only forensic artifact if setup dies early
+  if [ -f /var/log/cloud-init-output.log ]; then
+    aws s3 cp /var/log/cloud-init-output.log \
+      "${S3_OUT%/}/co2_nevpt2_cloud-init-output.log" || true
+  fi
 }
 
 terminate() {   # layer 2: explicit self-terminate via IMDSv2; poweroff fallback
