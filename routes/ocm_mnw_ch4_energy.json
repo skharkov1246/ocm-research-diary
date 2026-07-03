@@ -57,5 +57,42 @@
   ],
   "n_unpaired_beyond_spin": 0.617,
   "wall_s": 29.4
- }
+ },
+ "TS": {
+  "tag": "ch4_TS",
+  "avas_sel_weights": [
+   0.997,
+   0.982,
+   0.937,
+   0.358,
+   0.029
+  ],
+  "cas": [
+   9,
+   10
+  ],
+  "e_rohf_h": -1264.4250174411407,
+  "rohf_converged": true,
+  "e_casci_h": -1264.4373848179184,
+  "e_casscf_h": -1264.6107459658888,
+  "casscf_converged": true,
+  "e_nevpt2_h": -1265.150256498657,
+  "nevpt2_corr_h": -0.5395105327680996,
+  "noon": [
+   1.971,
+   1.294,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   0.707,
+   0.025,
+   0.002
+  ],
+  "n_unpaired_beyond_spin": 1.468,
+  "wall_s": 37.1
+ },
+ "casscf_barrier_kcal": 6.09,
+ "nevpt2_barrier_kcal": 2.1
 }
