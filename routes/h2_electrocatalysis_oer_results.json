@@ -1,0 +1,101 @@
+{
+ "meta": {
+  "track": "h2-electrocatalysis",
+  "what": "Relaxed-geometry OER dG-ladder (CHE) on minimal [Ni(OH)2(X)] cluster; successor of the 2026-06-08 single-point ladder (eta~1.40 V, unrelaxed)",
+  "smoke": false,
+  "method": {
+   "scf": "UKS-PBE/def2-SVP, density fitting (auto aux basis)",
+   "scf_robustness": "level_shift=0.25 + SOSCF(newton) fallback (same recipe as the 2026-06-08 diary entry)",
+   "geometry": "geomeTRIC via pyscf.geomopt.geometric_solver; cluster core FROZEN: Ni + both hydroxide O (geomeTRIC '$freeze xyz 1,2,4', 1-based); hydroxide H and all adsorbate atoms relaxed; H2O/H2 references fully relaxed",
+   "multiplicities": "2-3 per state, lowest converged energy taken"
+  },
+  "o2_reference": {
+   "how": "G(O2) := 2 G(H2O) - 2 G(H2) + 4.92 eV (experimental water-splitting dG); equivalently dG4 = 4.92 - sum(dG1..3)",
+   "why": "PBE triplet O2 has a notorious ~0.3-0.7 eV binding error; direct O2 DFT deliberately avoided (standard CHE practice)"
+  },
+  "thermal_corrections": {
+   "computed_here": false,
+   "source": "literature",
+   "citation": "Norskov et al. J. Phys. Chem. B 2004, 108, 17886 (CHE); aggregate values as reused in Man et al. ChemCatChem 2011, 3, 1159 and Bajdich et al. JACS 2013, 135, 13521",
+   "values_eV_dZPE_minus_TdS": {
+    "OH*": 0.35,
+    "O*": 0.05,
+    "OOH*": 0.4
+   },
+   "note": "Applied to adsorbate formation energies; gas-reference ZPE/TS already included in these aggregates. Hessians were NOT computed for this cluster -- these numbers are not ours."
+  },
+  "limitations": [
+   "minimal cluster: no extended NiOOH lattice, Ni oxidation state not pinned to III/IV",
+   "frozen Ni/O core is a crude lattice mimic",
+   "single-determinant DFT; even-electron states are plain UKS (no explicit broken-symmetry guess)",
+   "def2-SVP is a small basis; no dispersion correction (matches the preliminary diary entry for comparability)"
+  ],
+  "versions": {
+   "pyscf": "2.13.1",
+   "geometric": "1.1.1"
+  },
+  "updated": "2026-07-03T00:56:52Z"
+ },
+ "states": {
+  "H2O": {
+   "mults": {
+    "1": {
+     "state": "H2O",
+     "multiplicity": 1,
+     "spin_2S": 0,
+     "charge": 0,
+     "relaxed": true,
+     "frozen_core_atoms": null,
+     "n_atoms": 3,
+     "n_basis": 24,
+     "init_scf_converged": true,
+     "opt_converged": true,
+     "e_final_ha": -76.2726719182484,
+     "scf_converged": true,
+     "used_soscf": false,
+     "s2": 0.0,
+     "s2_ideal": 0.0,
+     "xyz_final": "O     -0.000000    -0.000000     0.134703\nH      0.000000     0.757702    -0.478317\nH     -0.000000    -0.757702    -0.478317",
+     "wall_s": 4.8
+    }
+   },
+   "best": {
+    "multiplicity": 1,
+    "e_final_ha": -76.2726719182484,
+    "s2": 0.0,
+    "relaxed": true,
+    "opt_converged": true
+   }
+  },
+  "H2": {
+   "mults": {
+    "1": {
+     "state": "H2",
+     "multiplicity": 1,
+     "spin_2S": 0,
+     "charge": 0,
+     "relaxed": true,
+     "frozen_core_atoms": null,
+     "n_atoms": 2,
+     "n_basis": 10,
+     "init_scf_converged": true,
+     "opt_converged": true,
+     "e_final_ha": -1.1606863684770397,
+     "scf_converged": true,
+     "used_soscf": false,
+     "s2": 0.0,
+     "s2_ideal": 0.0,
+     "xyz_final": "H      0.000000     0.000000    -0.013335\nH     -0.000000    -0.000000     0.754735",
+     "wall_s": 1.7
+    }
+   },
+   "best": {
+    "multiplicity": 1,
+    "e_final_ha": -1.1606863684770397,
+    "s2": 0.0,
+    "relaxed": true,
+    "opt_converged": true
+   }
+  }
+ }
+}

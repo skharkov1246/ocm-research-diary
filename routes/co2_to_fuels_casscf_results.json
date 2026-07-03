@@ -1,0 +1,25 @@
+{
+ "meta": {
+  "method": "CASSCF(fixed AVAS space)//RKS-PBE(newton+internal-stability)/def2-svp, density fitting throughout",
+  "protocol": "reactant: cold SCF -> internal-stability loop; TS: warm start from reactant dm -> stability again; (nelec,ncas) fixed by AVAS on the REACTANT; TS CASSCF init = project_init_guess(reactant CASSCF orbitals); fcisolver fix_spin ss=0",
+  "avas_labels": [
+   "C 2p",
+   "O 2px",
+   "O 2py"
+  ],
+  "avas_threshold": 0.4,
+  "geometry_source": "co2_to_fuels_results.json ts_barrier.profile, build_ads reconstruction (co2_to_fuels_ts.py)",
+  "tol_barrier_vs_profile_eV": 0.05,
+  "caveats": "frozen-metal cluster, def2-SVP, RI/DF, no constant-potential; cluster-barrier correction, NOT Faradaic efficiency; CASSCF may rotate active orbitals out of the initial pi manifold",
+  "started": "2026-07-03 00:56:45"
+ },
+ "Cu2": {
+  "geom": {
+   "d_reactant": 4.2,
+   "d_ts": 2.6,
+   "e_pbe_profile_reactant": -3506.321353,
+   "e_pbe_profile_ts": -3506.272624,
+   "barrier_pbe_profile_eV": 1.326
+  }
+ }
+}
