@@ -31,7 +31,10 @@ ACCOUNT = "097743207937"
 BUCKET = f"alpha-o-results-{ACCOUNT}"
 PREFIX = "alpha-o/ocm16"
 PROFILE = "alpha-o-instance-profile"
-TAG_PROJECT = "sandbox-agent"          # обязателен: политика terminate по тегу
+TAG_PROJECT = "ocm-agent"     # НЕ sandbox-agent: чужие жнецы (alpha-o) гасят всё
+                              # с их Project-тегом; со своим тегом мы для них невидимы.
+                              # API-terminate себе недоступен (политика) — чистку
+                              # гарантируют shutdown-behavior=terminate + бортовой watchdog.
 TAG_NAME = "ocm-stage16"               # жнец фильтрует ТОЛЬКО свои инстансы
 ITYPE = os.environ.get("OCM16_ITYPE", "r7i.8xlarge")
 REPO = "https://github.com/skharkov1246/ocm-research-diary"
@@ -137,6 +140,9 @@ def main():
         InstanceInitiatedShutdownBehavior="terminate",
         MetadataOptions={"HttpTokens": "required",
                          "HttpPutResponseHopLimit": 1, "HttpEndpoint": "enabled"},
+        NetworkInterfaces=[{"DeviceIndex": 0,
+                            "SubnetId": "subnet-0b1a363f27ecbbf12",
+                            "AssociatePublicIpAddress": True}],
         BlockDeviceMappings=[{"DeviceName": "/dev/xvda",
                               "Ebs": {"VolumeSize": DISK_GB, "VolumeType": "gp3",
                                       "DeleteOnTermination": True}}],
@@ -202,7 +208,7 @@ def main():
             if st in ("shutting-down", "terminated"):
                 print(f"[end] instance {st}; no FINAL in S3 — job died; "
                       f"check s3://{BUCKET}/{PREFIX}/emb_run.log", flush=True)
-                return
+                sys.exit(2)
             print(f"[wait] {int((time.time()-t0)/60)}min, instance={st}",
                   flush=True)
             time.sleep(120)
