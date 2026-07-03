@@ -1,0 +1,61 @@
+{
+ "substrate": "c2h6",
+ "cas": [
+  9,
+  10
+ ],
+ "avas_labels": [
+  "Mn 3d",
+  "O 2p",
+  "2 H 1s"
+ ],
+ "r_index": 0,
+ "ts_index": 5,
+ "ts_interior": true,
+ "rel_kcal": [
+  0.0,
+  3.29,
+  7.66,
+  11.94,
+  14.39,
+  15.26,
+  15.03,
+  13.65
+ ],
+ "dft_barrier_kcal": 15.26,
+ "R": {
+  "tag": "c2h6_R",
+  "avas_sel_weights": [
+   0.997,
+   0.992,
+   0.811,
+   0.187,
+   0.029
+  ],
+  "cas": [
+   9,
+   10
+  ],
+  "e_rohf_h": -1303.4769258382173,
+  "rohf_converged": true,
+  "e_casci_h": -1303.5534886509024,
+  "e_casscf_h": -1303.6492995833507,
+  "casscf_converged": true,
+  "e_nevpt2_h": -1304.3235490648653,
+  "nevpt2_corr_h": -0.6742494815145378,
+  "noon": [
+   1.958,
+   1.727,
+   1.02,
+   1.001,
+   1.0,
+   1.0,
+   1.0,
+   0.268,
+   0.021,
+   0.005
+  ],
+  "n_unpaired_beyond_spin": 0.587,
+  "wall_s": 42.1
+ }
+}
