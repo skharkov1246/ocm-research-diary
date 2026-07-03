@@ -878,6 +878,20 @@
    },
    "B_alt_branch": "cold_newton",
    "B_note": "no distinct SCF solution found by cold/smearing/level-shift probes at the reactant geometry"
+  },
+  "CuAl": {
+   "reactant_repro_mHa": 0.0,
+   "ts_repro_mHa": 0.0,
+   "A_ts_avas_minus_projected_mHa": 37.582,
+   "A_ts_avas_converged": true,
+   "B_scf_branches_vs_chain_eV": {
+    "cold_newton": 0.0,
+    "smearing_anneal": -0.561,
+    "level_shift": -0.561
+   },
+   "B_alt_branch": "smearing_anneal",
+   "B_alt_casscf_minus_chain_mHa": 0.001,
+   "B_alt_casscf_converged": true
   }
  },
  "nevpt2_barrier": {
@@ -889,6 +903,27 @@
    "barrier_casscf_eV": 1.66,
    "barrier_nevpt2_eV": 1.453,
    "quantum_corr_vs_pbe_eV": 0.127
+  },
+  "CuAl": {
+   "reactant_e_casci": -2105.879064,
+   "reactant_pt2": -0.899935,
+   "ts_e_casci": -2105.818603,
+   "ts_pt2": -0.927521,
+   "barrier_casscf_eV": 1.645,
+   "barrier_nevpt2_eV": 0.895,
+   "quantum_corr_vs_pbe_eV": -0.158
+  },
+  "_summary": {
+   "pbe_order": [
+    "CuAl",
+    "Cu2"
+   ],
+   "nevpt2_order": [
+    "CuAl",
+    "Cu2"
+   ],
+   "order_flipped": false,
+   "note": "SC-NEVPT2 on converged fixed-CAS(12e,10o) CASSCF states (CASCI with exact integrals on DF-CASSCF orbitals), same warm-chain SCF branch and PBE-scan geometries. casscf_checks: A = TS CASSCF from independent AVAS guess vs projected (local-minimum test), B = reactant CASSCF from the cold SCF branch (SCF-multiple-solution sensitivity, measured). Frozen-metal cluster, def2-SVP, no constant-potential; state-specific NEVPT2 at two scan points, not a rescanned path."
   }
  }
 }
