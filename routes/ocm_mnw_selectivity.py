@@ -398,11 +398,13 @@ def stage_profile(sub):
     for lvl in ("casscf", "nevpt2"):
         es = [p[f"e_{lvl}_h"] for p in out["points"]]
         rel = [(e - es[0]) * HARTREE_KCAL for e in es]
-        imin = int(np.argmin(rel))
-        imax = imin + 1 + int(np.argmax(rel[imin + 1:]))
+        # форвард-барьер: TS = внутренний максимум, R = минимум слева от TS
+        # (глобальный минимум может лежать на продуктовой стороне — экзотермика)
+        imax = 1 + int(np.argmax(rel[1:-1]))
+        imin = int(np.argmin(rel[:imax + 1]))
         out[f"{lvl}_rel_kcal"] = [round(x, 2) for x in rel]
         out[f"{lvl}_r_index"], out[f"{lvl}_ts_index"] = imin, imax
-        out[f"{lvl}_ts_interior"] = bool(imax < len(rel) - 1)
+        out[f"{lvl}_ts_interior"] = bool(rel[imax] >= max(rel[0], rel[-1]))
         out[f"{lvl}_barrier_kcal"] = round(rel[imax] - rel[imin], 2)
     out["all_converged"] = all(p["casscf_converged"] for p in out["points"])
     with open(path, "w") as f:
