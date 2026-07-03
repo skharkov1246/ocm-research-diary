@@ -1,0 +1,44 @@
+{
+ "bare:s2": {
+  "scf_converged": true,
+  "gmax_ha_bohr": 7e-05,
+  "grms": 5e-05,
+  "e_recomputed": -1659.267939,
+  "e_stored": -1659.267939
+ },
+ "oh:s1": {
+  "scf_converged": true,
+  "gmax_ha_bohr": 0.07059,
+  "grms": 0.02392,
+  "e_recomputed": -1734.916578,
+  "e_stored": -1734.916578
+ },
+ "o:s4": {
+  "scf_converged": true,
+  "gmax_ha_bohr": 0.00032,
+  "grms": 0.00013,
+  "e_recomputed": -1734.297517,
+  "e_stored": -1734.297517
+ },
+ "ooh:s1": {
+  "scf_converged": true,
+  "gmax_ha_bohr": 8e-05,
+  "grms": 2e-05,
+  "e_recomputed": -1809.968066,
+  "e_stored": -1809.968066
+ },
+ "h2o:s0": {
+  "scf_converged": true,
+  "gmax_ha_bohr": 7e-05,
+  "grms": 4e-05,
+  "e_recomputed": -76.272609,
+  "e_stored": -76.272609
+ },
+ "h2:s0": {
+  "scf_converged": true,
+  "gmax_ha_bohr": 0.00575,
+  "grms": 0.00332,
+  "e_recomputed": -1.160554,
+  "e_stored": -1.160554
+ }
+}
