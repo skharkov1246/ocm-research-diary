@@ -38,8 +38,9 @@ if MAX_MIN < 40:
     sys.exit("ALPHA_O_MAX_MIN must be >= 40")
 JOB_MIN = MAX_MIN - 20                                        # on-instance watchdog (terminate)
 JOB_TIMEOUT = JOB_MIN - 15                                    # leaves buffer for S3 upload
-KEY = f"{PREFIX}/fe_zeolite_cha_results.json"
-LOGKEY = f"{PREFIX}/fe_zeolite_cha.log"
+RESULT_BASE = os.environ.get("ALPHA_O_RESULT_BASE", "fe_zeolite_cha")
+KEY = f"{PREFIX}/{RESULT_BASE}_results.json"
+LOGKEY = f"{PREFIX}/{RESULT_BASE}.log"
 
 ec2 = boto3.client("ec2", region_name=REGION)
 ssm = boto3.client("ssm", region_name=REGION)
@@ -62,6 +63,18 @@ aws s3 cp calc/fe_zeolite_cha.log         s3://{BUCKET}/{LOGKEY} || true
 aws s3 cp calc/fe_zeolite_cha_results.json s3://{BUCKET}/{KEY}   || true
 poweroff
 """
+
+# Alternative user-data from a committed run script (it must carry its own
+# watchdog + dead-man trap — calc/aws_run_fe4s4.sh / aws_run_co2_nevpt2.sh do).
+UD_FILE = os.environ.get("ALPHA_O_USERDATA_FILE")
+if UD_FILE:
+    with open(UD_FILE) as _fh:
+        _body = _fh.read().split("\n", 1)[1]          # drop the script's shebang
+    USERDATA = ("#!/bin/bash\n"
+                f"export REPO='{REPO}' BRANCH='{BRANCH}' "
+                f"FE4S4_REPO='{REPO}' FE4S4_BRANCH='{BRANCH}' "
+                f"S3_OUT='s3://{BUCKET}/{PREFIX}' TIMEOUT={JOB_TIMEOUT * 60}\n"
+                + _body)
 
 
 def find_running():
@@ -122,10 +135,13 @@ def main():
         while time.time() - t0 < MAX_MIN * 60:
             try:
                 s3.head_object(Bucket=BUCKET, Key=KEY)
-                s3.download_file(BUCKET, KEY, "calc/fe_zeolite_cha_results.json")
-                v = json.load(open("calc/fe_zeolite_cha_results.json"))
-                print("[ok] results retrieved. VERDICT:",
-                      json.dumps({k: v.get(k) for k in ("verdict_e_cas", "verdict_e_nevpt2")}, ensure_ascii=False), flush=True)
+                local_json = f"calc/{RESULT_BASE}_results.json"
+                s3.download_file(BUCKET, KEY, local_json)
+                v = json.load(open(local_json))
+                print("[ok] results retrieved:", local_json, "|",
+                      json.dumps({k: v.get(k) for k in
+                                  ("status", "verdict_e_cas", "verdict_e_nevpt2")
+                                  if v.get(k) is not None}, ensure_ascii=False), flush=True)
                 return
             except ClientError:
                 pass
