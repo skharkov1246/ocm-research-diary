@@ -7,10 +7,10 @@
  },
  "species": {
   "o": {
-   "e_rohf": -1732.079289969532,
-   "e_casci": -1732.1024463882795,
+   "e_rohf": -1732.0792899695407,
+   "e_casci": -1732.1024463882754,
    "casci_converged": true,
-   "e_static_ha": -0.023156418747475982,
+   "e_static_ha": -0.023156418734743056,
    "cas": [
     14,
     9
@@ -30,13 +30,13 @@
    "n_unpaired": 4.0,
    "n_unpaired_excess": -0.0,
    "spin": 4,
-   "seconds": 16.2
+   "seconds": 16.6
   },
   "ooh": {
-   "e_rohf": -1807.3759983820398,
-   "e_casci": -1807.4632059282314,
+   "e_rohf": -1807.3759983820366,
+   "e_casci": -1807.4632059282262,
    "casci_converged": true,
-   "e_static_ha": -0.08720754619162108,
+   "e_static_ha": -0.08720754618957471,
    "cas": [
     21,
     13
@@ -60,13 +60,13 @@
    "n_unpaired": 1.355,
    "n_unpaired_excess": 0.355,
    "spin": 1,
-   "seconds": 15.2
+   "seconds": 15.0
   },
   "h2o": {
    "e_rohf": -75.959396268007,
-   "e_casci": -75.99957986070757,
+   "e_casci": -75.99957986070754,
    "casci_converged": true,
-   "e_static_ha": -0.040183592700572035,
+   "e_static_ha": -0.04018359270054361,
    "cas": [
     8,
     6
@@ -86,10 +86,10 @@
    "seconds": 0.1
   },
   "h2": {
-   "e_rohf": -1.1286235538547862,
-   "e_casci": -1.1461129803989176,
+   "e_rohf": -1.1286235538547866,
+   "e_casci": -1.1461129803989185,
    "casci_converged": true,
-   "e_static_ha": -0.017489426544131437,
+   "e_static_ha": -0.01748942654413188,
    "cas": [
     2,
     2
@@ -102,7 +102,7 @@
    "n_unpaired": 0.055,
    "n_unpaired_excess": 0.055,
    "spin": 0,
-   "seconds": 0.1
+   "seconds": 0.0
   }
  },
  "step_correction": {
@@ -114,6 +114,23 @@
   "note": "= E_static(prod) − E_static(react); диагностика того, насколько многодетерминантность сдвигает лимитирующий шаг"
  },
  "vqe": {
-  "error": "NameError: name 'hf_state' is not defined"
+  "qubits": 18,
+  "cas": [
+   14,
+   9
+  ],
+  "terms": 9168,
+  "e_casci": -1732.1024463882652,
+  "e_exact_jw": null,
+  "gate_exact_vs_casci_kcal": null,
+  "e_vqe": -1732.102027365948,
+  "vqe_minus_casci_kcal": 0.26,
+  "iters": 68,
+  "energy_trace": [
+   -1732.07929,
+   -1732.100592,
+   -1732.101938
+  ],
+  "seconds": 2244.4
  }
 }
