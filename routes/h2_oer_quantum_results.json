@@ -1,0 +1,36 @@
+{
+ "meta": {
+  "source": "mono",
+  "basis": "def2-svp",
+  "step": "dG3_O_to_OOH",
+  "honest": "CASCI-в-AVAS диагностика; поправка репортится отдельно от PBE-лестницы, не суммируется"
+ },
+ "species": {
+  "o": {
+   "e_rohf": -1732.0792899695386,
+   "e_casci": -1732.10244638827,
+   "casci_converged": true,
+   "e_static_ha": -0.02315641873133245,
+   "cas": [
+    14,
+    9
+   ],
+   "qubits": 18,
+   "noon": [
+    1.998,
+    1.986,
+    1.975,
+    1.934,
+    1.925,
+    1.072,
+    1.069,
+    1.033,
+    1.008
+   ],
+   "n_unpaired": 4.0,
+   "n_unpaired_excess": -0.0,
+   "spin": 4,
+   "seconds": 21.8
+  }
+ }
+}

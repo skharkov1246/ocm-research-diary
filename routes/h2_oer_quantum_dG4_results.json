@@ -1,0 +1,112 @@
+{
+ "meta": {
+  "source": "mono",
+  "basis": "def2-svp",
+  "step": "dG4_OOH_to_O2",
+  "honest": "CASCI-в-AVAS диагностика; поправка репортится отдельно от PBE-лестницы, не суммируется"
+ },
+ "species": {
+  "ooh": {
+   "e_rohf": -1807.375998382037,
+   "e_casci": -1807.4632059282267,
+   "casci_converged": true,
+   "e_static_ha": -0.08720754618957471,
+   "cas": [
+    21,
+    13
+   ],
+   "qubits": 26,
+   "noon": [
+    2.0,
+    1.999,
+    1.998,
+    1.998,
+    1.997,
+    1.996,
+    1.995,
+    1.992,
+    1.95,
+    1.892,
+    1.006,
+    0.122,
+    0.055
+   ],
+   "n_unpaired": 1.355,
+   "n_unpaired_excess": 0.355,
+   "spin": 1,
+   "seconds": 21.7
+  },
+  "bare": {
+   "e_rohf": -1657.4314200596937,
+   "e_casci": -1657.4344897731123,
+   "casci_converged": true,
+   "e_static_ha": -0.0030697134186539188,
+   "cas": [
+    8,
+    5
+   ],
+   "qubits": 10,
+   "noon": [
+    2.0,
+    1.961,
+    1.961,
+    1.039,
+    1.039
+   ],
+   "n_unpaired": 2.0,
+   "n_unpaired_excess": 0.0,
+   "spin": 2,
+   "seconds": 4.2
+  },
+  "h2o": {
+   "e_rohf": -75.95939626800707,
+   "e_casci": -75.99957986070764,
+   "casci_converged": true,
+   "e_static_ha": -0.040183592700572035,
+   "cas": [
+    8,
+    6
+   ],
+   "qubits": 12,
+   "noon": [
+    1.999,
+    1.999,
+    1.982,
+    1.975,
+    0.025,
+    0.02
+   ],
+   "n_unpaired": 0.09,
+   "n_unpaired_excess": 0.09,
+   "spin": 0,
+   "seconds": 0.1
+  },
+  "h2": {
+   "e_rohf": -1.1286235538547862,
+   "e_casci": -1.1461129803989176,
+   "casci_converged": true,
+   "e_static_ha": -0.017489426544131437,
+   "cas": [
+    2,
+    2
+   ],
+   "qubits": 4,
+   "noon": [
+    1.972,
+    0.028
+   ],
+   "n_unpaired": 0.055,
+   "n_unpaired_excess": 0.055,
+   "spin": 0,
+   "seconds": 0.0
+  }
+ },
+ "step_correction": {
+  "step": "dG4_OOH_to_O2",
+  "reactant": "ooh",
+  "product": "bare",
+  "ddE_static_eV": 2.29,
+  "ddE_static_kcal": 52.8,
+  "note": "= E_static(prod) − E_static(react); диагностика того, насколько многодетерминантность сдвигает лимитирующий шаг"
+ }
+}
