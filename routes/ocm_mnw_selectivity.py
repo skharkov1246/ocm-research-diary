@@ -416,6 +416,106 @@ def stage_profile(sub):
           flush=True)
 
 
+def _casscf_own(mf):
+    """Собственное решение точки: fixed-AVAS → CASCI-натурбитали → CASSCF."""
+    ne, no = CAS_TARGET
+    mo, _ = forced_avas(mf)
+    mc0 = mcscf.CASCI(mf, no, ne)
+    mc0.fcisolver = fci.direct_spin1.FCI(mf.mol)
+    fci.addons.fix_spin_(mc0.fcisolver, shift=0.2, ss=SPIN / 2 * (SPIN / 2 + 1))
+    mc0.kernel(mo)
+    mo_nat = mc0.cas_natorb()[0]
+    mc = _casscf_from(mf, mo_nat)
+    return mc
+
+
+def _casscf_from(mf, mo_guess):
+    ne, no = CAS_TARGET
+    mc = mcscf.CASSCF(mf, no, ne)
+    fci.addons.fix_spin_(mc.fcisolver, shift=0.2, ss=SPIN / 2 * (SPIN / 2 + 1))
+    mc.max_cycle_macro = 150
+    mc.conv_tol = 1e-7
+    mc.kernel(mo_guess)
+    return mc
+
+
+def stage_refine(sub):
+    """Орбитально-цепной ремонт коррелированного профиля: CASSCF каждой точки
+    сеется проекцией сошедшихся орбиталей соседа (вперёд и назад), берём нижнее
+    решение. Лечит выбросы типа «CASSCF ушёл в чужой локальный минимум»
+    (c2h6 p6: +95 ккал) и зигзаги PT2 от смены референса."""
+    gpath = os.path.join(DIR, f"ocm_mnw_{sub}_geom.json")
+    ppath = os.path.join(DIR, f"ocm_mnw_{sub}_profile.json")
+    with open(gpath) as f:
+        geom = json.load(f)
+    with open(ppath) as f:
+        prof = json.load(f)
+    n = len(prof["points"])
+
+    def sweep(order, label):
+        prev = None      # (mol, mo) последней сошедшейся точки цепочки
+        for i in order:
+            p = prof["points"][i]
+            atoms = [(s, tuple(c)) for s, c in geom["points"][i]["atoms"]]
+            mol = build_mol(atoms)
+            mol.max_memory = 12000
+            mf = rohf(mol)
+            t0 = time.time()
+            best = None
+            if prev is not None:
+                mol_p, mo_p = prev
+                mo_g = mcscf.project_init_guess(mcscf.CASSCF(mf, *CAS_TARGET[::-1]),
+                                                mo_p, prev_mol=mol_p)
+                mc = _casscf_from(mf, mo_g)
+                if mc.converged:
+                    best = mc
+            if best is None or best.e_tot > p["e_casscf_h"] + 5e-4:
+                mc_own = _casscf_own(mf)
+                if best is None or (mc_own.converged
+                                    and mc_own.e_tot < best.e_tot):
+                    best = mc_own
+            if best.e_tot < p["e_casscf_h"] - 5e-4:
+                e_pt = NEVPT(best).kernel()
+                dm1 = best.fcisolver.make_rdm1(best.ci, best.ncas, best.nelecas)
+                noon = sorted(np.linalg.eigvalsh(dm1), reverse=True)
+                p["e_casscf_h"] = float(best.e_tot)
+                p["casscf_converged"] = bool(best.converged)
+                p["e_nevpt2_h"] = float(best.e_tot + e_pt)
+                p["nevpt2_corr_h"] = float(e_pt)
+                p["noon"] = [round(float(x), 3) for x in noon]
+                p["refined"] = label
+                print(f"[{sub}] refine-{label} {i}: lower CASSCF "
+                      f"{p['e_casscf_h']:.6f} NEVPT2 {p['e_nevpt2_h']:.6f} "
+                      f"({time.time()-t0:.0f}s)", flush=True)
+            else:
+                print(f"[{sub}] refine-{label} {i}: kept ({time.time()-t0:.0f}s)",
+                      flush=True)
+            prev = (mol, best.mo_coeff)
+            with open(ppath, "w") as f:
+                json.dump(prof, f, indent=1)
+
+    sweep(range(n), "fwd")
+    sweep(range(n - 1, -1, -1), "rev")
+    for lvl in ("casscf", "nevpt2"):
+        es = [p[f"e_{lvl}_h"] for p in prof["points"]]
+        rel = [(e - es[0]) * HARTREE_KCAL for e in es]
+        imax = 1 + int(np.argmax(rel[1:-1]))
+        imin = int(np.argmin(rel[:imax + 1]))
+        prof[f"{lvl}_rel_kcal"] = [round(x, 2) for x in rel]
+        prof[f"{lvl}_r_index"], prof[f"{lvl}_ts_index"] = imin, imax
+        prof[f"{lvl}_ts_interior"] = bool(rel[imax] >= max(rel[0], rel[-1]))
+        prof[f"{lvl}_barrier_kcal"] = round(rel[imax] - rel[imin], 2)
+    prof["all_converged"] = all(p["casscf_converged"] for p in prof["points"])
+    prof["refine_done"] = True
+    with open(ppath, "w") as f:
+        json.dump(prof, f, indent=1)
+    print(f"[{sub}] refined profile: CASSCF {prof['casscf_barrier_kcal']} | "
+          f"NEVPT2 {prof['nevpt2_barrier_kcal']} kcal/mol "
+          f"(R={prof['nevpt2_r_index']} TS={prof['nevpt2_ts_index']} "
+          f"interior={prof['nevpt2_ts_interior']} conv={prof['all_converged']})",
+          flush=True)
+
+
 def stage_merge():
     res = {"model": "MnO (sextet) minimal radical-oxygen HAT site, stand-in for "
                     "Mn-Na2WO4/SiO2; NOT the periodic catalyst",
@@ -480,6 +580,8 @@ if __name__ == "__main__":
         stage_polish(sys.argv[2])
     elif stage == "profile":
         stage_profile(sys.argv[2])
+    elif stage == "refine":
+        stage_refine(sys.argv[2])
     elif stage == "energy":
         stage_energy(sys.argv[2])
     elif stage == "merge":
