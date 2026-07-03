@@ -143,7 +143,17 @@ def stage_geom(sub):
     path = os.path.join(DIR, f"ocm_mnw_{sub}_geom.json")
     atoms = start_atoms(sub)
     grid = [R_POINT] + PATH
+    if os.path.exists(path):        # резюме после смерти контейнера
+        with open(path) as f:
+            saved = json.load(f)
+        out["points"] = saved.get("points", [])[:len(grid)]
+        if out["points"]:
+            atoms = [(s, tuple(c)) for s, c in out["points"][-1]["atoms"]]
+            print(f"[{sub}] resume: {len(out['points'])}/{len(grid)} points on disk",
+                  flush=True)
     for i, (rCH, rOH) in enumerate(grid):
+        if i < len(out["points"]):
+            continue
         t0 = time.time()
         atoms, e, conv, ss = constrained_opt(atoms, rCH, rOH, f"{sub}_{i}")
         out["points"].append({
@@ -226,6 +236,7 @@ def stage_polish(sub):
     g["rel_kcal"] = [round(x, 2) for x in rel]
     g["r_index"], g["ts_index"], g["ts_interior"] = imin, imax, interior
     g["dft_barrier_kcal"] = round(rel[imax] - rel[imin], 2)
+    g["polish_done"] = True
     with open(path, "w") as f:
         json.dump(g, f, indent=1)
     print(f"[{sub}] polished profile: {g['rel_kcal']} "
