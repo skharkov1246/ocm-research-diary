@@ -53,11 +53,17 @@ s3 = boto3.client("s3", region_name=REGION)
 
 USERDATA = f"""#!/bin/bash
 shutdown -P +{JOB_MIN}
+exec > /tmp/boot.log 2>&1
 set -x
 export PATH=$PATH:/usr/local/bin:/root/.local/bin
-timeout 15m dnf install -y python3-pip git gcc gcc-c++ >/tmp/setup.log 2>&1
-timeout 25m python3 -m pip install -q awscli numpy scipy pyscf geometric >>/tmp/setup.log 2>&1
-cd /root && timeout 10m git clone --depth 1 -b {BRANCH} {REPO} repo >>/tmp/setup.log 2>&1 && cd repo || {{ aws s3 cp /tmp/setup.log s3://{BUCKET}/{PREFIX}/setup_failed.log; poweroff; }}
+S3=s3://{BUCKET}/{PREFIX}
+for i in 1 2 3; do timeout 10m dnf install -y python3-pip git gcc gcc-c++ && break; sleep 30; done
+for i in 1 2 3; do timeout 10m python3 -m pip install -q awscli && break; sleep 30; done
+( while true; do aws s3 cp /tmp/boot.log $S3/boot.log >/dev/null 2>&1; sleep 60; done ) &
+for i in 1 2 3; do timeout 25m python3 -m pip install -q numpy scipy pyscf geometric && break; sleep 30; done
+for i in 1 2 3; do (cd /root && timeout 10m git clone --depth 1 -b {BRANCH} {REPO} repo) && break; sleep 30; done
+cd /root/repo || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
+python3 -c "import pyscf, geometric" || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 mkdir -p /root/scratch
 export PYSCF_TMPDIR=/root/scratch
 export PYSCF_MAX_MEMORY=$(( $(getconf _PHYS_PAGES) * $(getconf PAGE_SIZE) / 1024 / 1024 * 6 / 10 ))
