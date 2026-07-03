@@ -168,18 +168,23 @@ def vqe_poc(run, basis, maxq, iters=400):
     # ворота корректности: диагонализация JW-гамильтониана В ПРАВИЛЬНОМ
     # (N, Sz)-СЕКТОРЕ vs CASCI. Полный фоковский минимум может лежать в чужом
     # секторе частиц/спина — сравнение с ним было бы ложной «ошибкой ворот».
+    # На ≥18q sparse-сборка ест >12 ГБ (урок Stage 1: OOM на 2¹⁸) — там ворота
+    # пропускаем: рецепт валидирован на меньших пространствах.
     na, nb = int(mc.nelecas[0]), int(mc.nelecas[1])
     ne_tot, sz = na + nb, 0.5 * (na - nb)
-    from openfermion.linalg import jw_sz_restrict_operator
-    sp_ham = of.get_sparse_operator(qubit_op, n_qubits=nq)
-    sp_sector = jw_sz_restrict_operator(sp_ham, sz_value=sz,
-                                        n_electrons=ne_tot, n_qubits=nq)
-    if sp_sector.shape[0] <= 2:
-        e_exact = float(np.linalg.eigvalsh(sp_sector.toarray())[0])
-    else:
-        e_exact = float(eigsh(sp_sector, k=1, which="SA",
-                              return_eigenvectors=False)[0])
-    gate_kcal = abs(e_exact - e_casci) * KCAL
+    gate_maxq = int(os.environ.get("H2_GATE_MAXQ", "16"))
+    e_exact, gate_kcal = None, None
+    if nq <= gate_maxq:
+        from openfermion.linalg import jw_sz_restrict_operator
+        sp_ham = of.get_sparse_operator(qubit_op, n_qubits=nq)
+        sp_sector = jw_sz_restrict_operator(sp_ham, sz_value=sz,
+                                            n_electrons=ne_tot, n_qubits=nq)
+        if sp_sector.shape[0] <= 2:
+            e_exact = float(np.linalg.eigvalsh(sp_sector.toarray())[0])
+        else:
+            e_exact = float(eigsh(sp_sector, k=1, which="SA",
+                                  return_eigenvectors=False)[0])
+        gate_kcal = abs(e_exact - e_casci) * KCAL
 
     # референс и возбуждения — в ТОМ ЖЕ секторе: openfermion/pennylane
     # интерливинг (чётные = α); α занимает na низших орбиталей, β — nb.
@@ -216,7 +221,8 @@ def vqe_poc(run, basis, maxq, iters=400):
     e_vqe = float(cost(w))
     return dict(qubits=nq, cas=[ne_tot, int(ncas)], terms=len(qubit_op.terms),
                 e_casci=e_casci, e_exact_jw=e_exact,
-                gate_exact_vs_casci_kcal=round(gate_kcal, 4),
+                gate_exact_vs_casci_kcal=(None if gate_kcal is None
+                                          else round(gate_kcal, 4)),
                 e_vqe=e_vqe, vqe_minus_casci_kcal=round((e_vqe - e_casci) * KCAL, 2),
                 iters=it + 1, energy_trace=hist,
                 seconds=round(time.time() - t0, 1))
