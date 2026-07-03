@@ -1,0 +1,105 @@
+{
+ "meta": {
+  "params": {
+   "mode": "full",
+   "d_nio": 1.93,
+   "L": 4,
+   "basis": "def2-svp",
+   "xc": "pbe",
+   "cluster_charge": -9,
+   "version": "recovered-pipeline v1 (2026-07-02, issue #12)"
+  },
+  "params_hash": "ccbc1421de11893e",
+  "script": "recovered-pipeline v1 (2026-07-02, issue #12)",
+  "method": "UKS-PBE(DF)/def2-SVP embedded SCF -> UKS natural orbitals -> NOON-ranked nested CASCI windows on frozen NO core; Sz fixed, no fix_spin_ (H2-worker convention)",
+  "honesty": "recovered pipeline; numbers may differ from the lost 2026-06-08 run; embedded-cluster absolute energies are NOT voltages; only within-embedding trends are meaningful",
+  "last_update": "2026-07-03 01:38:58"
+ },
+ "cluster": {
+  "atoms": [
+   [
+    "Ni",
+    [
+     0.0,
+     0.0,
+     0.0
+    ]
+   ],
+   [
+    "O",
+    [
+     1.93,
+     0.0,
+     0.0
+    ]
+   ],
+   [
+    "O",
+    [
+     -1.93,
+     0.0,
+     0.0
+    ]
+   ],
+   [
+    "O",
+    [
+     0.0,
+     1.93,
+     0.0
+    ]
+   ],
+   [
+    "O",
+    [
+     0.0,
+     -1.93,
+     0.0
+    ]
+   ],
+   [
+    "O",
+    [
+     0.0,
+     0.0,
+     1.93
+    ]
+   ],
+   [
+    "O",
+    [
+     0.0,
+     0.0,
+     -1.93
+    ]
+   ]
+  ],
+  "charge": -9,
+  "formal": "Ni3+ d7 + 6 O2-",
+  "d_nio_A": 1.93
+ },
+ "embedding": {
+  "lattice": "idealized layered rock salt (NMC-like LiMO2 abstraction)",
+  "lattice_note": "literature anchor (NOT computed): LiNiO2 R-3m a=2.878 A c=14.19 A [Ohzuku 1993]; here simple-cubic grid with spacing d(Ni-O), (111)-alternating TM(+3)/Li(+1) planes",
+  "d_nio_A": 1.93,
+  "L_cells": 4,
+  "n_charges": 722,
+  "counts": {
+   "O": 358,
+   "TM": 182,
+   "Li": 182
+  },
+  "evjen_weights": true,
+  "raw_sum_before_compensation": 9.0,
+  "edge_compensation_residual": 0.0,
+  "n_outer_shell_sites": 386,
+  "sum_charges": 9.0,
+  "total_system_charge": 0.0,
+  "min_charge_QM_distance_A": 1.93,
+  "assumptions": [
+   "formal charges +3/+1/-2, no cation disorder",
+   "regular octahedron, Jahn-Teller ignored",
+   "no capping ECPs on first cation shell (electron leakage risk)"
+  ]
+ }
+}
