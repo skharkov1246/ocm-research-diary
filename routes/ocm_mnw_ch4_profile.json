@@ -290,10 +290,10 @@
  ],
  "casscf_rel_kcal": [
   0.0,
-  10.1,
+  8.42,
   21.59,
   30.3,
-  37.51,
+  34.4,
   32.45,
   27.68,
   20.03
@@ -301,20 +301,21 @@
  "casscf_r_index": 0,
  "casscf_ts_index": 4,
  "casscf_ts_interior": true,
- "casscf_barrier_kcal": 37.51,
+ "casscf_barrier_kcal": 34.4,
  "nevpt2_rel_kcal": [
   0.0,
-  6.34,
+  7.06,
   -0.76,
   6.2,
-  10.17,
+  5.07,
   3.25,
   1.33,
   -2.14
  ],
- "nevpt2_r_index": 2,
- "nevpt2_ts_index": 4,
+ "nevpt2_r_index": 0,
+ "nevpt2_ts_index": 1,
  "nevpt2_ts_interior": true,
- "nevpt2_barrier_kcal": 10.93,
- "all_converged": true
+ "nevpt2_barrier_kcal": 7.06,
+ "all_converged": true,
+ "refine_done": true
 }
