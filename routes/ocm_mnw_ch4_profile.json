@@ -179,6 +179,41 @@
    ],
    "n_unpaired_beyond_spin": 0.767,
    "wall_s": 48.9
+  },
+  {
+   "tag": "ch4_p5",
+   "avas_sel_weights": [
+    0.997,
+    0.99,
+    0.807,
+    0.26,
+    0.018
+   ],
+   "cas": [
+    9,
+    10
+   ],
+   "e_rohf_h": -1264.3962605760858,
+   "rohf_converged": true,
+   "e_casci_h": -1264.4927139844688,
+   "e_casscf_h": -1264.6031481299997,
+   "casscf_converged": true,
+   "e_nevpt2_h": -1265.1471984505515,
+   "nevpt2_corr_h": -0.5440503205517618,
+   "noon": [
+    1.967,
+    1.382,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    0.618,
+    0.03,
+    0.003
+   ],
+   "n_unpaired_beyond_spin": 1.301,
+   "wall_s": 124.3
   }
  ]
 }
