@@ -370,6 +370,50 @@ def stage_energy(sub):
           flush=True)
 
 
+def stage_profile(sub):
+    """CASSCF(9e,10o)+NEVPT2 во ВСЕХ точках скана: коррелированный профиль
+    сам выбирает свои R и TS — без наследования индексов у DFT-поверхности
+    (реперы честные и симметричные для обоих субстратов)."""
+    gpath = os.path.join(DIR, f"ocm_mnw_{sub}_geom.json")
+    with open(gpath) as f:
+        g = json.load(f)
+    path = os.path.join(DIR, f"ocm_mnw_{sub}_profile.json")
+    out = {"substrate": sub, "cas": list(CAS_TARGET), "points": []}
+    if os.path.exists(path):
+        with open(path) as f:
+            out = json.load(f)
+    for i, p in enumerate(g["points"]):
+        if i < len(out["points"]):
+            continue
+        atoms = [(s, tuple(c)) for s, c in p["atoms"]]
+        t0 = time.time()
+        res = cas_nevpt2(atoms, f"{sub}_p{i}")
+        res["wall_s"] = round(time.time() - t0, 1)
+        out["points"].append(res)
+        with open(path, "w") as f:
+            json.dump(out, f, indent=1)
+        print(f"[{sub}] profile {i}: CASSCF {res['e_casscf_h']:.6f} "
+              f"(conv={res['casscf_converged']}) NEVPT2 {res['e_nevpt2_h']:.6f} "
+              f"({res['wall_s']}s)", flush=True)
+    for lvl in ("casscf", "nevpt2"):
+        es = [p[f"e_{lvl}_h"] for p in out["points"]]
+        rel = [(e - es[0]) * HARTREE_KCAL for e in es]
+        imin = int(np.argmin(rel))
+        imax = imin + 1 + int(np.argmax(rel[imin + 1:]))
+        out[f"{lvl}_rel_kcal"] = [round(x, 2) for x in rel]
+        out[f"{lvl}_r_index"], out[f"{lvl}_ts_index"] = imin, imax
+        out[f"{lvl}_ts_interior"] = bool(imax < len(rel) - 1)
+        out[f"{lvl}_barrier_kcal"] = round(rel[imax] - rel[imin], 2)
+    out["all_converged"] = all(p["casscf_converged"] for p in out["points"])
+    with open(path, "w") as f:
+        json.dump(out, f, indent=1)
+    print(f"[{sub}] correlated profile: CASSCF {out['casscf_barrier_kcal']} | "
+          f"NEVPT2 {out['nevpt2_barrier_kcal']} kcal/mol "
+          f"(R={out['nevpt2_r_index']} TS={out['nevpt2_ts_index']} "
+          f"interior={out['nevpt2_ts_interior']} conv={out['all_converged']})",
+          flush=True)
+
+
 def stage_merge():
     res = {"model": "MnO (sextet) minimal radical-oxygen HAT site, stand-in for "
                     "Mn-Na2WO4/SiO2; NOT the periodic catalyst",
@@ -412,6 +456,8 @@ if __name__ == "__main__":
         stage_geom(sys.argv[2])
     elif stage == "polish":
         stage_polish(sys.argv[2])
+    elif stage == "profile":
+        stage_profile(sys.argv[2])
     elif stage == "energy":
         stage_energy(sys.argv[2])
     elif stage == "merge":

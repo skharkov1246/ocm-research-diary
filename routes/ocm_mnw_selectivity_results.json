@@ -1,0 +1,214 @@
+{
+ "model": "MnO (sextet) minimal radical-oxygen HAT site, stand-in for Mn-Na2WO4/SiO2; NOT the periodic catalyst",
+ "protocol": {
+  "geometry": "UKS-PBE0/def2-svp, 2D-pin r(C-H)+r(O-H) relaxed scan (geomeTRIC), sextet",
+  "energy": "ROHF -> AVAS(Mn 3d + O 2p + transferring H 1s) -> CASSCF(9e,10o) [fix_spin, natural-orbital start] -> SC-NEVPT2; SAME curated CAS for all 4 structures",
+  "descriptor": "ddE = barrier(C2H6) - barrier(CH4); <0 over-oxidizes C2 (BEP wall); +4 needed for 70%"
+ },
+ "substrates": {
+  "ch4": {
+   "substrate": "ch4",
+   "cas": [
+    9,
+    10
+   ],
+   "avas_labels": [
+    "Mn 3d",
+    "O 2p",
+    "2 H 1s"
+   ],
+   "r_index": 2,
+   "ts_index": 6,
+   "ts_interior": true,
+   "rel_kcal": [
+    0.0,
+    2.19,
+    -6.13,
+    -1.22,
+    2.06,
+    3.83,
+    4.47,
+    4.37
+   ],
+   "dft_barrier_kcal": 10.6,
+   "R": {
+    "tag": "ch4_R",
+    "avas_sel_weights": [
+     0.997,
+     0.992,
+     0.807,
+     0.219,
+     0.025
+    ],
+    "cas": [
+     9,
+     10
+    ],
+    "e_rohf_h": -1264.4438853958466,
+    "rohf_converged": true,
+    "e_casci_h": -1264.5221663412424,
+    "e_casscf_h": -1264.6204551123806,
+    "casscf_converged": true,
+    "e_nevpt2_h": -1265.1536008165465,
+    "nevpt2_corr_h": -0.5331457041658986,
+    "noon": [
+     1.962,
+     1.711,
+     1.018,
+     1.001,
+     1.0,
+     1.0,
+     1.0,
+     0.285,
+     0.019,
+     0.005
+    ],
+    "n_unpaired_beyond_spin": 0.617,
+    "wall_s": 29.4
+   },
+   "TS": {
+    "tag": "ch4_TS",
+    "avas_sel_weights": [
+     0.997,
+     0.982,
+     0.937,
+     0.358,
+     0.029
+    ],
+    "cas": [
+     9,
+     10
+    ],
+    "e_rohf_h": -1264.4250174411407,
+    "rohf_converged": true,
+    "e_casci_h": -1264.4373848179184,
+    "e_casscf_h": -1264.6107459658888,
+    "casscf_converged": true,
+    "e_nevpt2_h": -1265.150256498657,
+    "nevpt2_corr_h": -0.5395105327680996,
+    "noon": [
+     1.971,
+     1.294,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     0.707,
+     0.025,
+     0.002
+    ],
+    "n_unpaired_beyond_spin": 1.468,
+    "wall_s": 37.1
+   },
+   "casscf_barrier_kcal": 6.09,
+   "nevpt2_barrier_kcal": 2.1
+  },
+  "c2h6": {
+   "substrate": "c2h6",
+   "cas": [
+    9,
+    10
+   ],
+   "avas_labels": [
+    "Mn 3d",
+    "O 2p",
+    "2 H 1s"
+   ],
+   "r_index": 0,
+   "ts_index": 5,
+   "ts_interior": true,
+   "rel_kcal": [
+    0.0,
+    3.29,
+    7.66,
+    11.94,
+    14.39,
+    15.26,
+    15.03,
+    13.65
+   ],
+   "dft_barrier_kcal": 15.26,
+   "R": {
+    "tag": "c2h6_R",
+    "avas_sel_weights": [
+     0.997,
+     0.992,
+     0.811,
+     0.187,
+     0.029
+    ],
+    "cas": [
+     9,
+     10
+    ],
+    "e_rohf_h": -1303.4769258382173,
+    "rohf_converged": true,
+    "e_casci_h": -1303.5534886509024,
+    "e_casscf_h": -1303.6492995833507,
+    "casscf_converged": true,
+    "e_nevpt2_h": -1304.3235490648653,
+    "nevpt2_corr_h": -0.6742494815145378,
+    "noon": [
+     1.958,
+     1.727,
+     1.02,
+     1.001,
+     1.0,
+     1.0,
+     1.0,
+     0.268,
+     0.021,
+     0.005
+    ],
+    "n_unpaired_beyond_spin": 0.587,
+    "wall_s": 42.1
+   },
+   "TS": {
+    "tag": "c2h6_TS",
+    "avas_sel_weights": [
+     0.996,
+     0.981,
+     0.996,
+     0.362,
+     0.031
+    ],
+    "cas": [
+     9,
+     10
+    ],
+    "e_rohf_h": -1303.408576897821,
+    "rohf_converged": true,
+    "e_casci_h": -1303.5719780415968,
+    "e_casscf_h": -1303.6143843732866,
+    "casscf_converged": true,
+    "e_nevpt2_h": -1304.302931451191,
+    "nevpt2_corr_h": -0.6885470779043356,
+    "noon": [
+     1.967,
+     1.354,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     0.647,
+     0.029,
+     0.003
+    ],
+    "n_unpaired_beyond_spin": 1.357,
+    "wall_s": 50.5
+   },
+   "casscf_barrier_kcal": 21.91,
+   "nevpt2_barrier_kcal": 12.94
+  }
+ },
+ "ddE_kcal": {
+  "dft": 4.66,
+  "casscf": 15.82,
+  "nevpt2": 10.84
+ },
+ "quantum_shift_kcal": 6.18,
+ "all_casscf_converged": true,
+ "all_ts_interior": true
+}
