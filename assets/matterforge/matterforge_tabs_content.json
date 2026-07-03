@@ -160,13 +160,18 @@
    "stage_progress": [
     1.0,
     0.65,
-    0.4,
-    0.05,
+    0.55,
+    0.1,
     0.0
    ],
    "molecules_png": "03_ammonia_FeMoco_molecules.png",
    "descriptor_png": "03_ammonia_FeMoco_descriptor.png",
    "updates": [
+    {
+     "date": "2026-07-03",
+     "stage_label": "Мультиреференс + кубиты",
+     "text": "Этап 17 — сделал обещанный в капстоуне шаг: первый мультиреференсный CASSCF на кубане [4Fe–4S] + сборка кубитного гамильтониана. Собрал реалистичный [Fe₄S₄(SH)₄]²⁻ (def2-SVP, nao=288), сошёлся высокоспиновым ROHF (E=−8230.607 Ha, MO закэшированы). Фронтир из 6 центральных магнитных Fe-3d орбиталей (лёвдиновский Fe-3d-вес 0.65, остальное — ковалентность Fe–S): NOON=[2.00,1.09,1.00,1.00,0.91,0.00], n_u=3.99 из 6 — четыре орбитали у половинного заполнения. Это ИЗМЕРЕННАЯ мультиреференсность — ровно то, что одно-детерминантный BS-DFT (Этап 15, где терялся знак J) держать не может. Кубитный гамильтониан (Jordan–Wigner, 12 кубитов, 1843 члена Паули) воспроизводит точный CASCI до 3.4×10⁻⁹ ккал/моль (тот же гейт движка, что на N₂/Fe–N₂). Стена подтверждена реальным AVAS: полное Fe-3d = 40 кубитов, с серой = 88 (тот самый кубит из капстоуна) — не диагонализуем, это классический предел. Честно: кубан идеализированный, def2-SVP, CASSCF без динкорреляции и не досошёлся (лимит макро-итераций) — но гейт и сигнал мультиреференсности от этого не зависят. Всё в calc/femoco_4fe4s_casscf.py. Плюс: до этого нашёл и починил критический баг (спин-сектор во фронтире ронял CASSCF-блок вхолостую) — поймал adversarial-аудитом ДО публикации."
+    },
     {
      "date": "2026-06-09",
      "stage_label": "Литература + дескриптор",
@@ -616,7 +621,7 @@
     "электролизёрные OEM"
    ],
    "stage_progress": [
-    0.15,
+    1.0,
     0.0,
     0.0,
     0.0,
@@ -624,7 +629,13 @@
    ],
    "molecules_png": "09_oer_scaling_molecules.png",
    "descriptor_png": "09_oer_scaling_descriptor.png",
-   "updates": []
+   "updates": [
+    {
+     "date": "2026-07-02",
+     "stage_label": "Литература + дескриптор",
+     "text": "Направление заведено, дескриптор зафиксирован. Литературные якоря (помечаю КАК литературные, не свой расчёт; все 7 источников прошли фактчек по DOI): универсальная scaling-связь оксо-интермедиатов ΔG(*OOH) = ΔG(*OH) + 3.2 ± 0.2 эВ фиксирует термодинамический потолок перенапряжения OER ≈ 0.37 В на всех оксидах — Man et al., ChemCatChem 2011, 3, 1159 (DOI 10.1002/cctc.201000397); обзор стратегий «под и за» scaling — Nano-Micro Lett. 2022 (DOI 10.1007/s40820-022-00857-x). Заявленные обходы: (1) решёточно-кислородный механизм (LOM): operando-Raman видит пероксо-O₂²⁻, Fe-допинг стабилизирует Co(IV) — Nat. Commun. 2025 (DOI 10.1038/s41467-025-55857-3); (2) дуальные центры — динамическая структурная регуляция молекулярного Ni–Fe₂ (Nat. Commun., DOI 10.1038/s41467-024-55150-9) и двухатомные катализаторы с *O–*O-сочленением в обход scaling (Nat. Commun. 2023, PMC10366111). Модельная система Stage 2 (локально, pyscf, def2-SVP): молекулярный кубан Co₄O₄(OAc)₄(py)₄ — биоинспирированный молекулярный OER-катализатор с эксп. якорем (JACS 2011, DOI 10.1021/ja203877y; честно: intrinsic-активность именно этого комплекса позже оспаривалась — вклад примесного Co(II), JACS 2014, DOI 10.1021/ja5110393 — беру его как структурный мотив с экспериментальной историей, не как идеал). Усечённый кубан-кор (лиганды → OH/NH₃, ≤~25 атомов); зонд — базис-инвариантная метрика N_u = Σ nᵢ(2−nᵢ) через AVAS(Co 3d + O 2p)→CASCI: мультиреференсность Co(IV)=O/пероксо-узла (многодетерминантность 3d-соединений — Jiang, DeYonker, Wilson, JCTC 2012, DOI 10.1021/ct2006852), тем же конвейером, что NiO/FeMoco. Дескриптор двухуровневый: (a) целевой — отклонение ΔG(*OOH)−ΔG(*OH) от 3.2 эВ; (b) считаемый локально — N_u оксо-центра как сито LOM/дуал-сайт-кандидатов. Реальных чисел по кубану пока НЕТ — впишу по прогону. Caveat: кластер ≠ электрод (нет constant-potential) → η и ΔG-дескриптор из кластера не извлекаемы, локально честен только N_u; «сломать scaling» ≠ автоматически ниже η; свежих мультиреференс-работ именно по OER-оксо мало — якоря многодетерминантности пока в основном дореференсные."
+    }
+   ]
   },
   {
    "id": "ch4-to-methanol",
@@ -651,15 +662,21 @@
     "GTL-операторы"
    ],
    "stage_progress": [
-    0.15,
-    0.0,
-    0.0,
+    1.0,
+    0.5,
+    0.5,
     0.0,
     0.0
    ],
    "molecules_png": "10_ch4_to_methanol_molecules.png",
    "descriptor_png": "10_ch4_to_methanol_descriptor.png",
-   "updates": []
+   "updates": [
+    {
+     "date": "2026-07-02",
+     "stage_label": "Мультиреференс-проба",
+     "text": "Первая запись трека — сразу два уровня модели, оба против известного эксп. ответа (α-O: основное состояние S=2 Fe(IV)=O, Nature 2016, DOI 10.1038/nature19059 — это Дорожка B, валидация метода). (1) Минимальная сконструированная модель [Fe(O)(OH)₂]: сошедшийся CASSCF→NEVPT2/def2-SVP — основное состояние КВИНТЕТ (S=2); вертикальные NEVPT2-зазоры: триплет +15.4, синглет +45.6 ккал/моль (calc/fe_zeolite_alpha_o_nevpt2_minimal_results.json); расширенная модель [Fe(O)(OH)₂(H₂O)₂] — та же картина (+35.5/+59.4, calc/fe_zeolite_alpha_o_nevpt2_results.json). (2) Реальный IZA-CHA 6-ring кластер (38 атомов, констрейн-релаксация xTB, def2-SVP, 465 б.ф.): быстрая проба ROKS-PBE → AVAS(Fe 3d + oxo 2p) → state-specific CASCI, CAS(16e,11o) = 22 кубита. Порядок спинов: квинтет 0.0, триплет +3.56, синглет +60.5 ккал/моль — S=2 внизу, согласуется с экспериментом (calc/fe_zeolite_cha_fast_results.json). ЧЕСТНО: ROKS-SCF на реальном кластере НЕ сошёлся за 300 циклов (CASCI сделан на несошедшихся орбиталях) → пункт (2) — КАЧЕСТВЕННАЯ проба порядка, не валидация; зазор до триплета мал (3.6 ккал/моль), и на несошедшихся орбиталях порядок хрупок. Следующий шаг — DF-CASSCF single-point на том же кластере со сходящимся SCF (calc/fe_zeolite_cha_sp.py) — только он закроет пункт «сверка с эксп. S=2» Дорожки B. Caveat: кластер вырезан из IZA-каркаса (не периодика), зазоры моделей (1) — вертикальные, NEVPT2 на реальном кластере ещё не считался."
+    }
+   ]
   }
  ],
  "validated_track": {
@@ -786,8 +803,8 @@
      "en": "High-spin Fe(IV)=O is an open-shell transition-metal site with strong static correlation; single-determinant DFT systematically errs on spin-state ordering."
     },
     "current": {
-     "ru": "Известный ответ засорсён, оценены active space/кубиты. Прогон (DFT-геометрия → AVAS → CASCI → VQE → сверка спинового состояния) — в очереди.",
-     "en": "Known answer sourced, active space/qubits estimated. Run (DFT geometry → AVAS → CASCI → VQE → spin-state cross-check) — queued."
+     "ru": "Известный ответ засорсён. На минимальной сконструированной модели [Fe(O)(OH)₂] CASSCF+NEVPT2 уже выполнен: основное состояние S=2 (квинтет); NEVPT2-зазоры до триплета/синглета 15.4/45.6 ккал/моль (вертикальные, def2-SVP; calc/fe_zeolite_alpha_o_nevpt2_minimal_results.json). Прогон на реальном IZA-CHA кластере (xTB-релаксация активного центра готова) — в работе.",
+     "en": "Known answer sourced. On the minimal constructed [Fe(O)(OH)₂] model, CASSCF+NEVPT2 is already done: S=2 (quintet) ground state; NEVPT2 gaps to triplet/singlet 15.4/45.6 kcal/mol (vertical, def2-SVP; calc/fe_zeolite_alpha_o_nevpt2_minimal_results.json). The run on the real IZA-CHA cluster (xTB relaxation of the active site ready) is in progress."
     }
    },
    {
@@ -889,8 +906,8 @@
    }
   ],
   "caveat": {
-   "ru": "Честно об инструментах и статусе: (1) расчётов Дорожки B пока нет — этот раздел документирует ЦЕЛИ валидации с засорсенным ответом, не результаты; (2) при сборе источников WebFetch в окружении был заблокирован (403), сверка шла по сводкам поиска + перекрёстно, поэтому где первоисточник на число не открыт — число не ставится (см. FeO⁺); (3) полные Cu-oxo кластеры выходят за коридор 12–20 кубитов → нужен редуцированный AVAS/embedding; (4) дифференциатор — строго сильно скоррелированные центры переходных металлов, где DFT систематически врёт, а НЕ «в N раз точнее DFT» и не общая квантовая химия.",
-   "en": "Honest about tools and status: (1) no Track B calculations exist yet — this section documents validation TARGETS with a sourced answer, not results; (2) while sourcing, WebFetch was blocked in this environment (403), so checks went via search summaries + cross-referencing, and where a primary source for a number wasn't opened, the number is omitted (see FeO⁺); (3) full Cu-oxo clusters exceed the 12–20 qubit corridor → a reduced AVAS/embedding is needed; (4) the differentiator is strictly strongly-correlated transition-metal sites where DFT systematically errs — NOT \"N× more accurate than DFT\" and not general quantum chemistry."
+   "ru": "Честно об инструментах и статусе: (1) первый реальный расчёт Дорожки B выполнен (FeO⁺: основное состояние — секстет, совпало с эксп. ⁶Σ⁺; см. карточку выше), остальные системы — пока ЦЕЛИ валидации с засорсенным ответом; количественные зазоры и BDE ещё не валидированы; (2) при сборе источников WebFetch в окружении был заблокирован (403), сверка шла по сводкам поиска + перекрёстно, поэтому где первоисточник на число не открыт — число не ставится (см. FeO⁺); (3) полные Cu-oxo кластеры выходят за коридор 12–20 кубитов → нужен редуцированный AVAS/embedding; (4) дифференциатор — строго сильно скоррелированные центры переходных металлов, где DFT систематически врёт, а НЕ «в N раз точнее DFT» и не общая квантовая химия.",
+   "en": "Honest about tools and status: (1) the first real Track B calculation is done (FeO⁺: sextet ground state, matching the experimental ⁶Σ⁺; see its card above), the remaining systems are still validation TARGETS with a sourced answer; quantitative gaps and BDE are not yet validated; (2) while sourcing, WebFetch was blocked in this environment (403), so checks went via search summaries + cross-referencing, and where a primary source for a number wasn't opened, the number is omitted (see FeO⁺); (3) full Cu-oxo clusters exceed the 12–20 qubit corridor → a reduced AVAS/embedding is needed; (4) the differentiator is strictly strongly-correlated transition-metal sites where DFT systematically errs — NOT \"N× more accurate than DFT\" and not general quantum chemistry."
   }
  }
 }

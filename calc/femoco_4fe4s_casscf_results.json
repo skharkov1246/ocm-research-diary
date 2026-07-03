@@ -1,0 +1,75 @@
+{
+ "status": "ok",
+ "meta": {
+  "system": "[Fe4S4(SH)4]2- cubane",
+  "basis": "def2-svp",
+  "charge": -2,
+  "spin_2S": 18,
+  "geometry": "idealized cubane (Fe-Fe 2.75, Fe-S core 2.30, term Fe-S 2.25, S-H 1.34 A; terminal Fe-S-H linear)",
+  "method": "HS ROHF/DF seed -> AVAS sizing + frontier CASSCF (min-|Sz|) -> JW gate",
+  "note": "CASSCF only, no dynamic correlation; HS(2S=18) is an AVAS SEED not the physical (AF-coupled) ground; full Fe-3d space is SIZED not diagonalized (the classical wall).",
+  "nao": 288,
+  "nelec": [
+   128,
+   110
+  ],
+  "total_seconds": 3819.6
+ },
+ "self_test_h2_jw_vs_fci_Ha": 8.88e-16,
+ "scf": {
+  "e_hs_rohf": -8230.6067069936,
+  "converged": true,
+  "seconds": 0.2
+ },
+ "wall_active_spaces": {
+  "Fe_3d": {
+   "ncas": 20,
+   "nelec": 20,
+   "qubits_jw": 40,
+   "based_on_converged_scf": true,
+   "diagonalized": false
+  },
+  "Fe_3d__all_S_3p": {
+   "ncas": 44,
+   "nelec": 68,
+   "qubits_jw": 88,
+   "based_on_converged_scf": true,
+   "diagonalized": false
+  }
+ },
+ "frontier_casscf": {
+  "based_on_converged_scf": true,
+  "ncas": 6,
+  "nelec": 6,
+  "nelecas": [
+   3,
+   3
+  ],
+  "qubits_jw": 12,
+  "active_mo_idx": [
+   116,
+   117,
+   118,
+   119,
+   120,
+   121
+  ],
+  "frontier_fe3d_fraction": 0.653,
+  "casscf_seconds": 3646.1,
+  "e_casscf_df": -8230.314098491726,
+  "casscf_converged": false,
+  "noon": [
+   2.0,
+   1.089,
+   1.002,
+   0.996,
+   0.913,
+   0.0
+  ],
+  "n_u": 3.985,
+  "jw_terms": 1843,
+  "e_casci_exact": -8230.314104002793,
+  "e_jw": -8230.314104002788,
+  "jw_minus_casci_kcal": 3.42e-09
+ }
+}

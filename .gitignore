@@ -4,3 +4,4 @@ __pycache__/
 *.chk
 calc/cha_scf.chk
 routes/_constr_*.txt
+.claude/
