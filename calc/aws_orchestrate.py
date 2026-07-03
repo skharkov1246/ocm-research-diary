@@ -153,11 +153,18 @@ def main():
             time.sleep(60)
         print("[deadline] no results by reaper deadline", flush=True)
     finally:
-        try:
-            running = find_running()
-        except Exception:
-            running = []
-        reap([iid] + running, "job done / self-terminated / deadline / error")
+        # Fleet mode (default): reap ONLY our own instance — parallel jobs share
+        # the tag and must not kill each other; every instance still has its own
+        # on-box watchdog + terminate-on-exit. ALPHA_O_REAP_ALL=1 restores the
+        # old sweep-everything behaviour (single-job cleanup mode).
+        if os.environ.get("ALPHA_O_REAP_ALL") == "1":
+            try:
+                running = find_running()
+            except Exception:
+                running = []
+            reap([iid] + running, "job done / self-terminated / deadline / error")
+        else:
+            reap([iid], "job done / self-terminated / deadline / error")
 
 
 if __name__ == "__main__":
