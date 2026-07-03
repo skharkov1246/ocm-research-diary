@@ -1,0 +1,666 @@
+{
+ "meta": {
+  "params": {
+   "mode": "full",
+   "d_nio": 1.93,
+   "L": 4,
+   "basis": "def2-svp",
+   "xc": "pbe",
+   "cluster_charge": -9,
+   "version": "recovered-pipeline v1 (2026-07-02, issue #12)"
+  },
+  "params_hash": "ccbc1421de11893e",
+  "script": "recovered-pipeline v1 (2026-07-02, issue #12)",
+  "method": "UKS-PBE(DF)/def2-SVP embedded SCF -> UKS natural orbitals -> NOON-ranked nested CASCI windows on frozen NO core; Sz fixed, no fix_spin_ (H2-worker convention)",
+  "honesty": "recovered pipeline; numbers may differ from the lost 2026-06-08 run; embedded-cluster absolute energies are NOT voltages; only within-embedding trends are meaningful",
+  "last_update": "2026-07-03 01:53:33"
+ },
+ "cluster": {
+  "atoms": [
+   [
+    "Ni",
+    [
+     0.0,
+     0.0,
+     0.0
+    ]
+   ],
+   [
+    "O",
+    [
+     1.93,
+     0.0,
+     0.0
+    ]
+   ],
+   [
+    "O",
+    [
+     -1.93,
+     0.0,
+     0.0
+    ]
+   ],
+   [
+    "O",
+    [
+     0.0,
+     1.93,
+     0.0
+    ]
+   ],
+   [
+    "O",
+    [
+     0.0,
+     -1.93,
+     0.0
+    ]
+   ],
+   [
+    "O",
+    [
+     0.0,
+     0.0,
+     1.93
+    ]
+   ],
+   [
+    "O",
+    [
+     0.0,
+     0.0,
+     -1.93
+    ]
+   ]
+  ],
+  "charge": -9,
+  "formal": "Ni3+ d7 + 6 O2-",
+  "d_nio_A": 1.93
+ },
+ "embedding": {
+  "lattice": "idealized layered rock salt (NMC-like LiMO2 abstraction)",
+  "lattice_note": "literature anchor (NOT computed): LiNiO2 R-3m a=2.878 A c=14.19 A [Ohzuku 1993]; here simple-cubic grid with spacing d(Ni-O), (111)-alternating TM(+3)/Li(+1) planes",
+  "d_nio_A": 1.93,
+  "L_cells": 4,
+  "n_charges": 722,
+  "counts": {
+   "O": 358,
+   "TM": 182,
+   "Li": 182
+  },
+  "evjen_weights": true,
+  "raw_sum_before_compensation": 9.0,
+  "edge_compensation_residual": 0.0,
+  "n_outer_shell_sites": 386,
+  "sum_charges": 9.0,
+  "total_system_charge": 0.0,
+  "min_charge_QM_distance_A": 1.93,
+  "assumptions": [
+   "formal charges +3/+1/-2, no cation disorder",
+   "regular octahedron, Jahn-Teller ignored",
+   "no capping ECPs on first cation shell (electron leakage risk)"
+  ]
+ },
+ "scf": {
+  "spin1": {
+   "e_tot": -1968.4848079050835,
+   "converged": true,
+   "stages": [
+    [
+     "diis+shift0.50",
+     false
+    ],
+    [
+     "diis-noshift",
+     false
+    ],
+    [
+     "newton",
+     true
+    ]
+   ],
+   "s2": 0.7566,
+   "multiplicity": 2.0066,
+   "ni_mulliken_spin": 0.7454,
+   "seconds": 595.1,
+   "xc": "pbe",
+   "grids_level": null,
+   "level_shift": 0.5,
+   "noon_frontier_uks": [
+    1.0,
+    1.9977,
+    0.0023,
+    1.9991,
+    0.0009,
+    0.0,
+    2.0,
+    2.0,
+    0.0,
+    0.0,
+    2.0,
+    0.0,
+    2.0,
+    0.0,
+    2.0,
+    2.0
+   ]
+  },
+  "spin3": {
+   "e_tot": -1968.4374516433209,
+   "converged": true,
+   "stages": [
+    [
+     "diis+shift0.50",
+     false
+    ],
+    [
+     "diis-noshift",
+     true
+    ]
+   ],
+   "s2": 3.7574,
+   "multiplicity": 4.0037,
+   "ni_mulliken_spin": 1.9926,
+   "seconds": 227.1,
+   "xc": "pbe",
+   "grids_level": null,
+   "level_shift": 0.5,
+   "noon_frontier_uks": [
+    1.0,
+    1.0,
+    1.0,
+    0.0029,
+    1.9971,
+    0.0001,
+    1.9999,
+    0.0001,
+    1.9999,
+    1.9999,
+    0.0001,
+    1.9999,
+    0.0001,
+    0.0001,
+    1.9999,
+    1.9999
+   ]
+  }
+ },
+ "cas_series": {
+  "spin1": {
+   "4o": {
+    "ncas": 4,
+    "qubits": 8,
+    "nelecas": 5,
+    "na": 3,
+    "nb": 2,
+    "ncore": 40,
+    "ndet": 24,
+    "window_noon_uks": [
+     1.9991,
+     1.9977,
+     1.0,
+     0.0023
+    ],
+    "e_tot": -1965.1833424365614,
+    "converged": true,
+    "noon": [
+     2.0,
+     1.9987,
+     1.0,
+     0.0013
+    ],
+    "n_u": 1.0054,
+    "n_u_min": 1.0027,
+    "excess": 0.0054,
+    "s2": 0.75,
+    "multiplicity": 2.0,
+    "seconds": 2.4
+   },
+   "6o": {
+    "ncas": 6,
+    "qubits": 12,
+    "nelecas": 5,
+    "na": 3,
+    "nb": 2,
+    "ncore": 40,
+    "ndet": 300,
+    "window_noon_uks": [
+     1.9991,
+     1.9977,
+     1.0,
+     0.0023,
+     0.0009,
+     0.0
+    ],
+    "e_tot": -1965.2635220880597,
+    "converged": true,
+    "noon": [
+     1.9756,
+     1.8721,
+     1.02,
+     0.13,
+     0.002,
+     0.0003
+    ],
+    "n_u": 1.5349,
+    "n_u_min": 1.2646,
+    "excess": 0.5349,
+    "s2": 0.75,
+    "multiplicity": 2.0,
+    "seconds": 2.4
+   },
+   "8o": {
+    "ncas": 8,
+    "qubits": 16,
+    "nelecas": 9,
+    "na": 5,
+    "nb": 4,
+    "ncore": 38,
+    "ndet": 3920,
+    "window_noon_uks": [
+     2.0,
+     2.0,
+     1.9991,
+     1.9977,
+     1.0,
+     0.0023,
+     0.0009,
+     0.0
+    ],
+    "e_tot": -1965.273088714682,
+    "converged": true,
+    "noon": [
+     1.9975,
+     1.9972,
+     1.9743,
+     1.8748,
+     1.0212,
+     0.1278,
+     0.0039,
+     0.0034
+    ],
+    "n_u": 1.5496,
+    "n_u_min": 1.2702,
+    "excess": 0.5496,
+    "s2": 0.75,
+    "multiplicity": 2.0,
+    "seconds": 2.6
+   },
+   "10o": {
+    "ncas": 10,
+    "qubits": 20,
+    "nelecas": 9,
+    "na": 5,
+    "nb": 4,
+    "ncore": 38,
+    "ndet": 52920,
+    "window_noon_uks": [
+     2.0,
+     2.0,
+     1.9991,
+     1.9977,
+     1.0,
+     0.0023,
+     0.0009,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "e_tot": -1965.289284946543,
+    "converged": true,
+    "noon": [
+     1.9946,
+     1.9911,
+     1.9692,
+     1.8758,
+     1.0225,
+     0.1269,
+     0.0095,
+     0.0076,
+     0.0026,
+     0.0002
+    ],
+    "n_u": 1.5987,
+    "n_u_min": 1.2935,
+    "excess": 0.5987,
+    "s2": 0.75,
+    "multiplicity": 2.0,
+    "seconds": 3.8
+   },
+   "12o": {
+    "ncas": 12,
+    "qubits": 24,
+    "nelecas": 11,
+    "na": 6,
+    "nb": 5,
+    "ncore": 37,
+    "ndet": 731808,
+    "window_noon_uks": [
+     2.0,
+     2.0,
+     2.0,
+     1.9991,
+     1.9977,
+     1.0,
+     0.0023,
+     0.0009,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "e_tot": -1965.318883847809,
+    "converged": true,
+    "noon": [
+     1.9945,
+     1.9907,
+     1.9846,
+     1.9734,
+     1.9049,
+     1.0185,
+     0.1025,
+     0.0112,
+     0.0088,
+     0.0081,
+     0.0027,
+     0.0001
+    ],
+    "n_u": 1.5488,
+    "n_u_min": 1.2665,
+    "excess": 0.5488,
+    "s2": 0.75,
+    "multiplicity": 2.0,
+    "seconds": 19.8
+   }
+  },
+  "spin3": {
+   "4o": {
+    "ncas": 4,
+    "qubits": 8,
+    "nelecas": 3,
+    "na": 3,
+    "nb": 0,
+    "ncore": 41,
+    "ndet": 4,
+    "window_noon_uks": [
+     1.0,
+     1.0,
+     1.0,
+     0.0029
+    ],
+    "e_tot": -1965.1904554317812,
+    "converged": true,
+    "noon": [
+     1.0,
+     1.0,
+     1.0,
+     0.0
+    ],
+    "n_u": 3.0,
+    "n_u_min": 3.0,
+    "excess": 0.0,
+    "s2": 3.75,
+    "multiplicity": 4.0,
+    "seconds": 2.4
+   },
+   "6o": {
+    "ncas": 6,
+    "qubits": 12,
+    "nelecas": 5,
+    "na": 4,
+    "nb": 1,
+    "ncore": 40,
+    "ndet": 90,
+    "window_noon_uks": [
+     1.9971,
+     1.0,
+     1.0,
+     1.0,
+     0.0029,
+     0.0001
+    ],
+    "e_tot": -1965.2248483142025,
+    "converged": true,
+    "noon": [
+     1.999,
+     1.0003,
+     1.0,
+     0.9997,
+     0.0007,
+     0.0003
+    ],
+    "n_u": 3.004,
+    "n_u_min": 3.0014,
+    "excess": 0.004,
+    "s2": 3.75,
+    "multiplicity": 4.0,
+    "seconds": 2.4
+   },
+   "8o": {
+    "ncas": 8,
+    "qubits": 16,
+    "nelecas": 7,
+    "na": 5,
+    "nb": 2,
+    "ncore": 39,
+    "ndet": 1568,
+    "window_noon_uks": [
+     1.9999,
+     1.9971,
+     1.0,
+     1.0,
+     1.0,
+     0.0029,
+     0.0001,
+     0.0001
+    ],
+    "e_tot": -1965.2786402378567,
+    "converged": true,
+    "noon": [
+     1.9943,
+     1.9921,
+     1.0052,
+     1.0028,
+     0.9998,
+     0.0027,
+     0.002,
+     0.0012
+    ],
+    "n_u": 3.0389,
+    "n_u_min": 3.0113,
+    "excess": 0.0389,
+    "s2": 3.75,
+    "multiplicity": 4.0,
+    "seconds": 2.4
+   },
+   "10o": {
+    "ncas": 10,
+    "qubits": 20,
+    "nelecas": 11,
+    "na": 7,
+    "nb": 4,
+    "ncore": 37,
+    "ndet": 25200,
+    "window_noon_uks": [
+     1.9999,
+     1.9999,
+     1.9999,
+     1.9971,
+     1.0,
+     1.0,
+     1.0,
+     0.0029,
+     0.0001,
+     0.0001
+    ],
+    "e_tot": -1965.325480417481,
+    "converged": true,
+    "noon": [
+     1.996,
+     1.9916,
+     1.9873,
+     1.9852,
+     1.0138,
+     1.0099,
+     1.0052,
+     0.0051,
+     0.0043,
+     0.0015
+    ],
+    "n_u": 3.1007,
+    "n_u_min": 3.0218,
+    "excess": 0.1007,
+    "s2": 3.75,
+    "multiplicity": 4.0,
+    "seconds": 3.0
+   },
+   "12o": {
+    "ncas": 12,
+    "qubits": 24,
+    "nelecas": 13,
+    "na": 8,
+    "nb": 5,
+    "ncore": 36,
+    "ndet": 392040,
+    "window_noon_uks": [
+     1.9999,
+     1.9999,
+     1.9999,
+     1.9999,
+     1.9971,
+     1.0,
+     1.0,
+     1.0,
+     0.0029,
+     0.0001,
+     0.0001,
+     0.0001
+    ],
+    "e_tot": -1965.3551004888102,
+    "converged": true,
+    "noon": [
+     1.9999,
+     1.9956,
+     1.9874,
+     1.9855,
+     1.985,
+     1.0126,
+     1.0092,
+     1.0052,
+     0.0091,
+     0.0046,
+     0.0044,
+     0.0017
+    ],
+    "n_u": 3.1319,
+    "n_u_min": 3.0394,
+    "excess": 0.1319,
+    "s2": 3.75,
+    "multiplicity": 4.0,
+    "seconds": 10.3
+   }
+  }
+ },
+ "analysis": {
+  "spin1": {
+   "deltas": [
+    {
+     "from_o": 4,
+     "to_o": 6,
+     "from_q": 8,
+     "to_q": 12,
+     "dE_eV": -2.1818,
+     "d_n_u": 0.5295
+    },
+    {
+     "from_o": 6,
+     "to_o": 8,
+     "from_q": 12,
+     "to_q": 16,
+     "dE_eV": -0.2603,
+     "d_n_u": 0.0147
+    },
+    {
+     "from_o": 8,
+     "to_o": 10,
+     "from_q": 16,
+     "to_q": 20,
+     "dE_eV": -0.4407,
+     "d_n_u": 0.0491
+    },
+    {
+     "from_o": 10,
+     "to_o": 12,
+     "from_q": 20,
+     "to_q": 24,
+     "dE_eV": -0.8054,
+     "d_n_u": -0.0499
+    }
+   ],
+   "plateau_ncas": null,
+   "plateau_qubits": null,
+   "plateau_criteria": {
+    "dE_eV": 0.03,
+    "d_n_u": 0.05,
+    "note": "heuristic convention, not physics"
+   },
+   "note": "plateau = first window whose increment vs the previous window is below both thresholds; None = no plateau inside the computed series"
+  },
+  "spin3": {
+   "deltas": [
+    {
+     "from_o": 4,
+     "to_o": 6,
+     "from_q": 8,
+     "to_q": 12,
+     "dE_eV": -0.9359,
+     "d_n_u": 0.004
+    },
+    {
+     "from_o": 6,
+     "to_o": 8,
+     "from_q": 12,
+     "to_q": 16,
+     "dE_eV": -1.4638,
+     "d_n_u": 0.0349
+    },
+    {
+     "from_o": 8,
+     "to_o": 10,
+     "from_q": 16,
+     "to_q": 20,
+     "dE_eV": -1.2746,
+     "d_n_u": 0.0618
+    },
+    {
+     "from_o": 10,
+     "to_o": 12,
+     "from_q": 20,
+     "to_q": 24,
+     "dE_eV": -0.806,
+     "d_n_u": 0.0312
+    }
+   ],
+   "plateau_ncas": null,
+   "plateau_qubits": null,
+   "plateau_criteria": {
+    "dE_eV": 0.03,
+    "d_n_u": 0.05,
+    "note": "heuristic convention, not physics"
+   },
+   "note": "plateau = first window whose increment vs the previous window is below both thresholds; None = no plateau inside the computed series"
+  },
+  "spin_gap_eV": {
+   "gaps": {
+    "4o": -0.1936,
+    "6o": 1.0524,
+    "8o": -0.1511,
+    "10o": -0.9849,
+    "12o": -0.9855
+   },
+   "sign": "spin3 minus spin1",
+   "caveat": "different frozen NO cores per spin -> gap includes core relaxation error; qualitative only"
+  }
+ }
+}

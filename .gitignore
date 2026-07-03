@@ -5,3 +5,5 @@ __pycache__/
 calc/cha_scf.chk
 routes/_constr_*.txt
 .claude/
+*.chk.npz
+routes/*_scf_spin*.npz

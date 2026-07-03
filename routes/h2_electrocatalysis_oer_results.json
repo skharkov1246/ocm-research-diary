@@ -1,0 +1,412 @@
+{
+ "meta": {
+  "track": "h2-electrocatalysis",
+  "what": "Relaxed-geometry OER dG-ladder (CHE) on minimal [Ni(OH)2(X)] cluster; successor of the 2026-06-08 single-point ladder (eta~1.40 V, unrelaxed)",
+  "smoke": false,
+  "method": {
+   "scf": "UKS-PBE/def2-SVP, density fitting (auto aux basis)",
+   "scf_robustness": "level_shift=0.25 + SOSCF(newton) fallback (same recipe as the 2026-06-08 diary entry)",
+   "geometry": "geomeTRIC via pyscf.geomopt.geometric_solver; cluster core FROZEN: Ni + both hydroxide O (geomeTRIC '$freeze xyz 1,2,4', 1-based); hydroxide H and all adsorbate atoms relaxed; H2O/H2 references fully relaxed",
+   "multiplicities": "2-3 per state, lowest converged energy taken"
+  },
+  "o2_reference": {
+   "how": "G(O2) := 2 G(H2O) - 2 G(H2) + 4.92 eV (experimental water-splitting dG); equivalently dG4 = 4.92 - sum(dG1..3)",
+   "why": "PBE triplet O2 has a notorious ~0.3-0.7 eV binding error; direct O2 DFT deliberately avoided (standard CHE practice)"
+  },
+  "thermal_corrections": {
+   "computed_here": false,
+   "source": "literature",
+   "citation": "Norskov et al. J. Phys. Chem. B 2004, 108, 17886 (CHE); aggregate values as reused in Man et al. ChemCatChem 2011, 3, 1159 and Bajdich et al. JACS 2013, 135, 13521",
+   "values_eV_dZPE_minus_TdS": {
+    "OH*": 0.35,
+    "O*": 0.05,
+    "OOH*": 0.4
+   },
+   "note": "Applied to adsorbate formation energies; gas-reference ZPE/TS already included in these aggregates. Hessians were NOT computed for this cluster -- these numbers are not ours."
+  },
+  "limitations": [
+   "minimal cluster: no extended NiOOH lattice, Ni oxidation state not pinned to III/IV",
+   "frozen Ni/O core is a crude lattice mimic",
+   "single-determinant DFT; even-electron states are plain UKS (no explicit broken-symmetry guess)",
+   "def2-SVP is a small basis; no dispersion correction (matches the preliminary diary entry for comparability)"
+  ],
+  "versions": {
+   "pyscf": "2.13.1",
+   "geometric": "1.1.1"
+  },
+  "updated": "2026-07-03T04:58:02Z"
+ },
+ "states": {
+  "H2O": {
+   "mults": {
+    "1": {
+     "state": "H2O",
+     "multiplicity": 1,
+     "spin_2S": 0,
+     "charge": 0,
+     "relaxed": true,
+     "frozen_core_atoms": null,
+     "n_atoms": 3,
+     "n_basis": 24,
+     "init_scf_converged": true,
+     "opt_converged": true,
+     "e_final_ha": -76.2726719182484,
+     "scf_converged": true,
+     "used_soscf": false,
+     "s2": 0.0,
+     "s2_ideal": 0.0,
+     "xyz_final": "O     -0.000000    -0.000000     0.134703\nH      0.000000     0.757702    -0.478317\nH     -0.000000    -0.757702    -0.478317",
+     "wall_s": 4.8
+    }
+   },
+   "best": {
+    "multiplicity": 1,
+    "e_final_ha": -76.2726719182484,
+    "s2": 0.0,
+    "relaxed": true,
+    "opt_converged": true
+   }
+  },
+  "H2": {
+   "mults": {
+    "1": {
+     "state": "H2",
+     "multiplicity": 1,
+     "spin_2S": 0,
+     "charge": 0,
+     "relaxed": true,
+     "frozen_core_atoms": null,
+     "n_atoms": 2,
+     "n_basis": 10,
+     "init_scf_converged": true,
+     "opt_converged": true,
+     "e_final_ha": -1.1606863684770397,
+     "scf_converged": true,
+     "used_soscf": false,
+     "s2": 0.0,
+     "s2_ideal": 0.0,
+     "xyz_final": "H      0.000000     0.000000    -0.013335\nH     -0.000000    -0.000000     0.754735",
+     "wall_s": 1.7
+    }
+   },
+   "best": {
+    "multiplicity": 1,
+    "e_final_ha": -1.1606863684770397,
+    "s2": 0.0,
+    "relaxed": true,
+    "opt_converged": true
+   }
+  },
+  "*": {
+   "mults": {
+    "3": {
+     "state": "*",
+     "multiplicity": 3,
+     "spin_2S": 2,
+     "charge": 0,
+     "relaxed": true,
+     "frozen_core_atoms": "xyz 1,2,4",
+     "n_atoms": 5,
+     "n_basis": 69,
+     "init_scf_converged": false,
+     "opt_converged": true,
+     "e_final_ha": -1659.2564360401188,
+     "scf_converged": true,
+     "used_soscf": false,
+     "s2": 2.0028,
+     "s2_ideal": 2.0,
+     "xyz_final": "Ni     0.000000     0.000000    -0.000000\nO      1.849995     0.000028     0.000000\nH      2.323197     0.851585    -0.000016\nO     -1.849996    -0.000025    -0.000000\nH     -2.323199    -0.851582     0.000016",
+     "wall_s": 205.7
+    },
+    "1": {
+     "state": "*",
+     "multiplicity": 1,
+     "spin_2S": 0,
+     "charge": 0,
+     "relaxed": true,
+     "frozen_core_atoms": "xyz 1,2,4",
+     "n_atoms": 5,
+     "n_basis": 69,
+     "init_scf_converged": false,
+     "opt_converged": true,
+     "e_final_ha": -1659.2449588521174,
+     "scf_converged": true,
+     "used_soscf": true,
+     "s2": 0.8987,
+     "s2_ideal": 0.0,
+     "xyz_final": "Ni    -0.000000    -0.000000    -0.000000\nO      1.849994     0.000026     0.000000\nH      2.271034     0.880998    -0.000004\nO     -1.849994    -0.000023    -0.000000\nH     -2.271037    -0.880994     0.000004",
+     "wall_s": 232.2
+    },
+    "5": {
+     "state": "*",
+     "multiplicity": 5,
+     "spin_2S": 4,
+     "charge": 0,
+     "relaxed": true,
+     "frozen_core_atoms": "xyz 1,2,4",
+     "n_atoms": 5,
+     "n_basis": 69,
+     "init_scf_converged": false,
+     "opt_converged": true,
+     "e_final_ha": -1659.0949831847315,
+     "scf_converged": true,
+     "used_soscf": true,
+     "s2": 6.0024,
+     "s2_ideal": 6.0,
+     "xyz_final": "Ni     0.000000     0.000000    -0.000000\nO      1.849986     0.000075    -0.000000\nH      2.526873     0.725055    -0.000071\nO     -1.849987    -0.000066     0.000000\nH     -2.526854    -0.725065     0.000023",
+     "wall_s": 361.4
+    }
+   },
+   "best": {
+    "multiplicity": 3,
+    "e_final_ha": -1659.2564360401188,
+    "s2": 2.0028,
+    "relaxed": true,
+    "opt_converged": true
+   }
+  },
+  "OH*": {
+   "mults": {
+    "2": {
+     "state": "OH*",
+     "multiplicity": 2,
+     "spin_2S": 1,
+     "charge": 0,
+     "relaxed": true,
+     "frozen_core_atoms": "xyz 1,2,4",
+     "n_atoms": 7,
+     "n_basis": 88,
+     "init_scf_converged": true,
+     "opt_converged": true,
+     "e_final_ha": -1734.9373378058408,
+     "scf_converged": true,
+     "used_soscf": true,
+     "s2": 0.7776,
+     "s2_ideal": 0.75,
+     "xyz_final": "Ni     0.000023     0.000004    -0.000047\nO      1.849965     0.000033    -0.000022\nH      2.110841    -0.804431     0.497890\nO     -1.850031     0.000010    -0.000014\nH     -2.188842     0.820263    -0.417432\nO     -0.052858    -1.435161     1.045143\nH     -1.026568    -1.534559     1.151641",
+     "wall_s": 1507.4
+    },
+    "4": {
+     "state": "OH*",
+     "multiplicity": 4,
+     "spin_2S": 3,
+     "charge": 0,
+     "relaxed": true,
+     "frozen_core_atoms": "xyz 1,2,4",
+     "n_atoms": 7,
+     "n_basis": 88,
+     "init_scf_converged": false,
+     "opt_converged": true,
+     "e_final_ha": -1734.9274258938349,
+     "scf_converged": true,
+     "used_soscf": false,
+     "s2": 3.7559,
+     "s2_ideal": 3.75,
+     "xyz_final": "Ni     0.000074    -0.000036     0.000073\nO      1.849906    -0.000149     0.000035\nH      2.082154    -0.708605     0.638071\nO     -1.850092    -0.000016     0.000120\nH     -2.298245     0.626160    -0.602591\nO     -0.075489    -1.307709     1.299611\nH     -1.048744    -1.425601     1.408184",
+     "wall_s": 974.1
+    }
+   },
+   "best": {
+    "multiplicity": 2,
+    "e_final_ha": -1734.9373378058408,
+    "s2": 0.7776,
+    "relaxed": true,
+    "opt_converged": true
+   }
+  },
+  "O*": {
+   "mults": {
+    "3": {
+     "state": "O*",
+     "multiplicity": 3,
+     "spin_2S": 2,
+     "charge": 0,
+     "relaxed": true,
+     "frozen_core_atoms": "xyz 1,2,4",
+     "n_atoms": 6,
+     "n_basis": 83,
+     "init_scf_converged": false,
+     "opt_converged": true,
+     "e_final_ha": -1734.2847506373582,
+     "scf_converged": true,
+     "used_soscf": true,
+     "s2": 2.0055,
+     "s2_ideal": 2.0,
+     "xyz_final": "Ni     0.000001     0.000146     0.000049\nO      1.850011     0.000264     0.000188\nH      2.007325    -0.020238     0.974108\nO     -1.849970     0.000093    -0.000152\nH     -1.998974     0.012121     0.976439\nO     -0.003019     0.000617     1.696935",
+     "wall_s": 850.1
+    },
+    "1": {
+     "state": "O*",
+     "multiplicity": 1,
+     "spin_2S": 0,
+     "charge": 0,
+     "relaxed": true,
+     "frozen_core_atoms": "xyz 1,2,4",
+     "n_atoms": 6,
+     "n_basis": 83,
+     "init_scf_converged": false,
+     "opt_converged": true,
+     "e_final_ha": -1734.2656693233953,
+     "scf_converged": true,
+     "used_soscf": true,
+     "s2": 1.0476,
+     "s2_ideal": 0.0,
+     "xyz_final": "Ni    -0.000007    -0.000064    -0.000196\nO      1.849893     0.000421    -0.000477\nH      2.192563     0.178772    -0.906283\nO     -1.850025    -0.000198     0.000248\nH     -2.001333    -0.211979     0.954560\nO     -0.094561    -0.428935     1.648054",
+     "wall_s": 889.0
+    },
+    "5": {
+     "state": "O*",
+     "multiplicity": 5,
+     "spin_2S": 4,
+     "charge": 0,
+     "relaxed": true,
+     "frozen_core_atoms": "xyz 1,2,4",
+     "n_atoms": 6,
+     "n_basis": 83,
+     "init_scf_converged": false,
+     "opt_converged": true,
+     "e_final_ha": -1734.2653474568665,
+     "scf_converged": true,
+     "used_soscf": true,
+     "s2": 6.0093,
+     "s2_ideal": 6.0,
+     "xyz_final": "Ni     0.000009    -0.000026    -0.000027\nO      1.849904     0.000227    -0.000009\nH      2.265899     0.214349    -0.862673\nO     -1.849953    -0.000174     0.000023\nH     -2.123051    -0.248646     0.906422\nO     -0.033495    -0.441762     1.681299",
+     "wall_s": 463.1
+    }
+   },
+   "best": {
+    "multiplicity": 3,
+    "e_final_ha": -1734.2847506373582,
+    "s2": 2.0055,
+    "relaxed": true,
+    "opt_converged": true
+   }
+  },
+  "OOH*": {
+   "mults": {
+    "2": {
+     "state": "OOH*",
+     "multiplicity": 2,
+     "spin_2S": 1,
+     "charge": 0,
+     "relaxed": true,
+     "frozen_core_atoms": "xyz 1,2,4",
+     "n_atoms": 8,
+     "n_basis": 102,
+     "init_scf_converged": false,
+     "opt_converged": true,
+     "e_final_ha": -1809.9651433616957,
+     "scf_converged": true,
+     "used_soscf": false,
+     "s2": 1.0367,
+     "s2_ideal": 0.75,
+     "xyz_final": "Ni     0.000029    -0.000061     0.000023\nO      1.850024    -0.000039     0.000002\nH      2.396647     0.691910    -0.416812\nO     -1.850001    -0.000286     0.000009\nH     -2.165651    -0.706741     0.597328\nO      0.138429    -0.110087     1.815415\nO      1.332069    -0.115815     2.350485\nH      2.019265    -0.011983     1.034647",
+     "wall_s": 1245.5
+    },
+    "4": {
+     "state": "OOH*",
+     "multiplicity": 4,
+     "spin_2S": 3,
+     "charge": 0,
+     "relaxed": true,
+     "frozen_core_atoms": "xyz 1,2,4",
+     "n_atoms": 8,
+     "n_basis": 102,
+     "init_scf_converged": true,
+     "opt_converged": true,
+     "e_final_ha": -1809.9696070645364,
+     "scf_converged": true,
+     "used_soscf": true,
+     "s2": 3.7551,
+     "s2_ideal": 3.75,
+     "xyz_final": "Ni    -0.000005    -0.000006     0.000008\nO      1.850021    -0.000041     0.000005\nH      2.475790     0.051921    -0.740905\nO     -1.849974     0.000023    -0.000005\nH     -2.164765    -0.095224     0.921774\nO      0.203672    -0.240153     1.919497\nO      1.474724    -0.311692     2.334789\nH      1.981942    -0.192902     1.380060",
+     "wall_s": 904.8
+    }
+   },
+   "best": {
+    "multiplicity": 4,
+    "e_final_ha": -1809.9696070645364,
+    "s2": 3.7551,
+    "relaxed": true,
+    "opt_converged": true
+   }
+  }
+ },
+ "ladder": {
+  "conditions": {
+   "U_V": 0.0,
+   "pH": 0,
+   "T_K": 298.15
+  },
+  "formation_dE_eV": {
+   "OH*": 0.311,
+   "O*": 2.277,
+   "OOH*": 2.48
+  },
+  "formation_dG_eV": {
+   "OH*": 0.661,
+   "O*": 2.327,
+   "OOH*": 2.88
+  },
+  "steps_eV": {
+   "dG1": 0.661,
+   "dG2": 1.666,
+   "dG3": 0.553,
+   "dG4": 2.04
+  },
+  "step_labels": [
+   "* + H2O -> OH* + (H+ + e-)",
+   "OH* -> O* + (H+ + e-)",
+   "O* + H2O -> OOH* + (H+ + e-)",
+   "OOH* -> * + O2 + (H+ + e-)"
+  ],
+  "limiting_step": "OOH* -> * + O2 + (H+ + e-)",
+  "eta_V": 0.81,
+  "dG4_closure": "dG4 = 4.92 eV - (dG1+dG2+dG3); experimental water splitting dG, avoids direct triplet-O2 DFT",
+  "best_states": {
+   "*": {
+    "multiplicity": 3,
+    "e_final_ha": -1659.2564360401188,
+    "s2": 2.0028,
+    "relaxed": true,
+    "opt_converged": true
+   },
+   "OH*": {
+    "multiplicity": 2,
+    "e_final_ha": -1734.9373378058408,
+    "s2": 0.7776,
+    "relaxed": true,
+    "opt_converged": true
+   },
+   "O*": {
+    "multiplicity": 3,
+    "e_final_ha": -1734.2847506373582,
+    "s2": 2.0055,
+    "relaxed": true,
+    "opt_converged": true
+   },
+   "OOH*": {
+    "multiplicity": 4,
+    "e_final_ha": -1809.9696070645364,
+    "s2": 3.7551,
+    "relaxed": true,
+    "opt_converged": true
+   },
+   "H2O": {
+    "multiplicity": 1,
+    "e_final_ha": -76.2726719182484,
+    "s2": 0.0,
+    "relaxed": true,
+    "opt_converged": true
+   },
+   "H2": {
+    "multiplicity": 1,
+    "e_final_ha": -1.1606863684770397,
+    "s2": 0.0,
+    "relaxed": true,
+    "opt_converged": true
+   }
+  },
+  "warnings": []
+ }
+}
