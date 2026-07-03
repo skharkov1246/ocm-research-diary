@@ -27,8 +27,14 @@ from botocore.exceptions import ClientError
 
 REGION = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
 REPO = "https://github.com/skharkov1246/ocm-research-diary.git"
-ROLE = "ocm-diary-ec2-results"
-PROFILE = ROLE
+# Существующая инфраструктура аккаунта (создана владельцем): у сессионного
+# пользователя alpha-o-agent нет IAM/CreateBucket, но есть ec2:RunInstances,
+# iam:PassRole на alpha-o-instance-profile и s3:GetObject на префикс alpha-o/.
+# Инстансы пишут результаты через профиль; сессия читает из префикса.
+PROFILE = "alpha-o-instance-profile"
+BUCKET = "alpha-o-results-097743207937"
+PREFIX = "alpha-o"
+FALLBACK_AMI = "ami-051bfa33df3949860"   # AMI работающего alpha-o инстанса
 TAG = {"Key": "project", "Value": "ocm-research-diary"}
 
 JOBS = {
@@ -36,7 +42,7 @@ JOBS = {
     "cha-sp": dict(
         cmd="CHA_NEVPT2=1 python3 -u calc/fe_zeolite_cha_sp.py",
         instance="r7i.2xlarge", hours=10,
-        results=["calc/fe_zeolite_cha_sp_results.json"]),
+        results=["calc/fe_zeolite_cha_results.json"]),
     # Track #13 (CO2->C2+): полное AVAS-пространство CAS(36e,22o) на эндпойнтах Cu2
     "co2-fullcas": dict(
         cmd="python3 -u routes/co2_to_fuels_fullcas.py",
@@ -45,88 +51,70 @@ JOBS = {
 }
 
 
-def _account():
-    return boto3.client("sts", region_name=REGION).get_caller_identity()["Account"]
-
-
 def bucket_name():
-    return f"ocm-diary-results-{_account()}-{REGION}"
+    return BUCKET
 
 
 def ensure_infra():
+    """Инфраструктура уже существует (bucket + instance profile). Проверяем только
+    читаемость префикса результатов из сессии (NoSuchKey = авторизация есть)."""
     s3 = boto3.client("s3", region_name=REGION)
-    b = bucket_name()
     try:
-        s3.head_bucket(Bucket=b)
-        print(f"bucket ok: {b}")
-    except ClientError:
-        kw = {} if REGION == "us-east-1" else {
-            "CreateBucketConfiguration": {"LocationConstraint": REGION}}
-        s3.create_bucket(Bucket=b, **kw)
-        print(f"bucket created: {b}")
-
-    iam = boto3.client("iam", region_name=REGION)
-    trust = {"Version": "2012-10-17", "Statement": [{
-        "Effect": "Allow", "Principal": {"Service": "ec2.amazonaws.com"},
-        "Action": "sts:AssumeRole"}]}
-    policy = {"Version": "2012-10-17", "Statement": [
-        {"Effect": "Allow", "Action": ["s3:PutObject"],
-         "Resource": f"arn:aws:s3:::{b}/*"}]}
-    try:
-        iam.create_role(RoleName=ROLE, AssumeRolePolicyDocument=json.dumps(trust))
-        print(f"role created: {ROLE}")
+        s3.get_object(Bucket=BUCKET, Key=f"{PREFIX}/__probe__")
     except ClientError as e:
-        if e.response["Error"]["Code"] != "EntityAlreadyExists":
-            raise
-        print(f"role ok: {ROLE}")
-    iam.put_role_policy(RoleName=ROLE, PolicyName="put-results",
-                        PolicyDocument=json.dumps(policy))
-    try:
-        iam.create_instance_profile(InstanceProfileName=PROFILE)
-        iam.add_role_to_instance_profile(InstanceProfileName=PROFILE, RoleName=ROLE)
-        print(f"instance profile created: {PROFILE}")
-    except ClientError as e:
-        if e.response["Error"]["Code"] != "EntityAlreadyExists":
-            raise
-        print(f"instance profile ok: {PROFILE}")
+        code = e.response["Error"]["Code"]
+        if code != "NoSuchKey":
+            raise RuntimeError(f"prefix {PREFIX}/ not readable: {code}")
+    print(f"infra ok: s3://{BUCKET}/{PREFIX}/ readable, profile {PROFILE}")
+    return True
 
 
 def _ami(ec2):
-    ssm = boto3.client("ssm", region_name=REGION)
-    return ssm.get_parameter(
-        Name="/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
-    )["Parameter"]["Value"]
+    try:
+        ssm = boto3.client("ssm", region_name=REGION)
+        return ssm.get_parameter(
+            Name="/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
+        )["Parameter"]["Value"]
+    except Exception:
+        return FALLBACK_AMI
 
 
-def _user_data(job, spec):
+def _user_data(job, spec, embed_creds):
     b = bucket_name()
     uploads = "\n".join(
-        f"aws s3 cp {f} s3://{b}/{job}/$(basename {f}) || true" for f in spec["results"])
+        f"aws s3 cp {f} s3://{b}/{PREFIX}/{job}/$(basename {f}) || true" for f in spec["results"])
     minutes = int(spec["hours"] * 60)
+    cred_lines = ""
+    if embed_creds:
+        c = boto3.Session().get_credentials().get_frozen_credentials()
+        cred_lines = (f"export AWS_ACCESS_KEY_ID={c.access_key}\n"
+                      f"export AWS_SECRET_ACCESS_KEY={c.secret_key}\n"
+                      f"export AWS_DEFAULT_REGION={REGION}\n")
     return f"""#!/bin/bash
 set -ux
 shutdown -h +{minutes}
-dnf install -y -q git python3-pip || yum install -y -q git python3-pip
+{cred_lines}dnf install -y -q git python3-pip || yum install -y -q git python3-pip
 python3 -m pip install -q numpy scipy h5py pyscf
 cd /root && git clone --depth 1 {REPO} job && cd job
 ( {spec['cmd']} ) > run.log 2>&1
 echo $? > exit_code
-aws s3 cp run.log s3://{b}/{job}/run.log || true
-aws s3 cp exit_code s3://{b}/{job}/exit_code || true
+aws s3 cp run.log s3://{b}/{PREFIX}/{job}/run.log || true
+aws s3 cp exit_code s3://{b}/{PREFIX}/{job}/exit_code || true
 {uploads}
 shutdown -h now
 """
 
 
-def launch(job):
+def launch(job, has_iam):
     spec = JOBS[job]
     ec2 = boto3.client("ec2", region_name=REGION)
+    kw = dict(IamInstanceProfile={"Name": PROFILE}) if has_iam else {}
     r = ec2.run_instances(
         ImageId=_ami(ec2), InstanceType=spec["instance"],
         MinCount=1, MaxCount=1,
-        IamInstanceProfile={"Name": PROFILE},
         InstanceInitiatedShutdownBehavior="terminate",
-        UserData=_user_data(job, spec),
+        UserData=_user_data(job, spec, embed_creds=not has_iam),
+        **kw,
         BlockDeviceMappings=[{"DeviceName": "/dev/xvda",
                               "Ebs": {"VolumeSize": 60, "VolumeType": "gp3",
                                       "DeleteOnTermination": True}}],
@@ -151,12 +139,14 @@ def status():
                   f"{i['InstanceType']:12s}  job={tags.get('job','?')}  "
                   f"up since {i.get('LaunchTime')}")
     s3 = boto3.client("s3", region_name=REGION)
-    try:
-        objs = s3.list_objects_v2(Bucket=bucket_name()).get("Contents", [])
-        for o in objs:
-            print(f"  s3://{bucket_name()}/{o['Key']}  {o['Size']}B  {o['LastModified']}")
-    except ClientError as e:
-        print("  s3:", e.response["Error"]["Code"])
+    for job, spec in JOBS.items():
+        for f in ["exit_code", "run.log"] + [os.path.basename(x) for x in spec["results"]]:
+            key = f"{PREFIX}/{job}/{f}"
+            try:
+                h = s3.head_object(Bucket=BUCKET, Key=key)
+                print(f"  s3://{BUCKET}/{key}  {h['ContentLength']}B  {h['LastModified']}")
+            except ClientError:
+                pass
 
 
 def fetch(job):
@@ -165,7 +155,7 @@ def fetch(job):
     b = bucket_name()
     got = []
     for f in spec["results"] + ["run.log", "exit_code"]:
-        key = f"{job}/{os.path.basename(f)}"
+        key = f"{PREFIX}/{job}/{os.path.basename(f)}"
         dst = f if "/" in f else f"/tmp/{job}_{f}"
         try:
             s3.download_file(b, key, dst)
@@ -193,7 +183,7 @@ if __name__ == "__main__":
     if cmd == "infra":
         ensure_infra()
     elif cmd == "launch":
-        ensure_infra(); launch(sys.argv[2])
+        launch(sys.argv[2], has_iam=ensure_infra())
     elif cmd == "fetch":
         fetch(sys.argv[2])
     elif cmd == "kill":
