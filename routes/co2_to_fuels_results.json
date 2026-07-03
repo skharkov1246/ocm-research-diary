@@ -868,12 +868,27 @@
  "casscf_checks": {
   "Cu2": {
    "reactant_repro_mHa": -0.0,
-   "ts_repro_mHa": 0.008,
+   "ts_repro_mHa": -0.0,
    "A_ts_avas_minus_projected_mHa": -0.008,
-   "A_ts_avas_converged": true
+   "A_ts_avas_converged": true,
+   "B_scf_branches_vs_chain_eV": {
+    "cold_newton": 0.0,
+    "smearing_anneal": -0.0,
+    "level_shift": -0.0
+   },
+   "B_alt_branch": "cold_newton",
+   "B_note": "no distinct SCF solution found by cold/smearing/level-shift probes at the reactant geometry"
   }
  },
  "nevpt2_barrier": {
-  "Cu2": {}
+  "Cu2": {
+   "reactant_e_casci": -3502.808295,
+   "reactant_pt2": -1.234682,
+   "ts_e_casci": -3502.747299,
+   "ts_pt2": -1.242275,
+   "barrier_casscf_eV": 1.66,
+   "barrier_nevpt2_eV": 1.453,
+   "quantum_corr_vs_pbe_eV": 0.127
+  }
  }
 }
