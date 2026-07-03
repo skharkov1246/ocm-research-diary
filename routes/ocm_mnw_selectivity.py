@@ -269,15 +269,41 @@ def rohf(mol):
     return mfn
 
 
-def forced_avas(mf, target=CAS_TARGET):
-    """AVAS с курированными метками; порог подбирается, чтобы (ne,no) совпали
-    с целевыми у ВСЕХ структур. Если не выходит — честный отказ (не считаем)."""
-    for thr in (0.20, 0.15, 0.12, 0.10, 0.08, 0.06, 0.05, 0.04, 0.03, 0.25, 0.30):
-        ncas, nelec, mo = avas.avas(mf, AVAS_LABELS, threshold=thr)
-        ne = nelec if isinstance(nelec, (int, np.integer)) else sum(nelec)
-        if (int(ne), int(ncas)) == target:
-            return mo, thr
-    raise RuntimeError(f"AVAS cannot hit CAS{target} (last: {ne}e,{ncas}o)")
+def forced_avas(mf, n_docc=2, n_vir=3):
+    """Fixed-AVAS: активное пространство ФИКСИРОВАННОГО состава на любой
+    геометрии — все SOMO (секстет: 5) + топ-n_docc закрытых пар + топ-n_vir
+    виртуалей по проекции на референсные АО (Mn 3d, O 2p, 1s переносимого H).
+    Гарантирует CAS(9e,10o) конструкцией — подбор порога (Этап 14/первый
+    прогон Этапа 15) «прыгал» размером между R и TS."""
+    mol = mf.mol
+    pmol = mol.copy()
+    pmol.basis = "minao"
+    pmol.build(False, False)
+    baslst = pmol.search_ao_label(AVAS_LABELS)
+    s2 = pmol.intor_symmetric("int1e_ovlp")[np.ix_(baslst, baslst)]
+    s21 = gto.intor_cross("int1e_ovlp", pmol, mol)[baslst]
+    sa = s21.T @ np.linalg.solve(s2, s21)     # метрика проекции в АО-базисе
+
+    occ = np.asarray(mf.mo_occ)
+    C = np.asarray(mf.mo_coeff)
+    idx_d, idx_s, idx_v = (np.where(occ == 2)[0], np.where(occ == 1)[0],
+                           np.where(occ == 0)[0])
+
+    def split(idx, n_keep):
+        Cb = C[:, idx]
+        w, v = np.linalg.eigh(Cb.T @ sa @ Cb)
+        order = np.argsort(w)[::-1]           # по убыванию проекции
+        Cr = Cb @ v[:, order]
+        return Cr[:, :n_keep], Cr[:, n_keep:], w[order][:n_keep]
+
+    act_d, core_d, w_d = split(idx_d, n_docc)
+    act_v, rest_v, w_v = split(idx_v, n_vir)
+    mo = np.hstack([core_d, act_d, C[:, idx_s], act_v, rest_v])
+    ne = 2 * n_docc + len(idx_s)
+    no = n_docc + len(idx_s) + n_vir
+    assert (ne, no) == CAS_TARGET, (ne, no)
+    weights = [round(float(x), 3) for x in list(w_d) + list(w_v)]
+    return mo, weights
 
 
 def cas_nevpt2(atoms, tag):
@@ -285,7 +311,7 @@ def cas_nevpt2(atoms, tag):
     mol = build_mol(atoms)
     mol.max_memory = 12000
     mf = rohf(mol)
-    mo, thr = forced_avas(mf)
+    mo, wsel = forced_avas(mf)
     ne, no = CAS_TARGET
     # шаг 1: CASCI + натурбитали — устойчивый старт для CASSCF (рецепт Этапа 14)
     mc0 = mcscf.CASCI(mf, no, ne)
@@ -303,7 +329,7 @@ def cas_nevpt2(atoms, tag):
     noon = sorted(np.linalg.eigvalsh(dm1), reverse=True)
     e_pt = NEVPT(mc).kernel()          # SC-NEVPT2 корреляционная поправка
     return {
-        "tag": tag, "avas_threshold": thr, "cas": list(CAS_TARGET),
+        "tag": tag, "avas_sel_weights": wsel, "cas": list(CAS_TARGET),
         "e_rohf_h": float(mf.e_tot), "rohf_converged": bool(mf.converged),
         "e_casci_h": float(mc0.e_tot),
         "e_casscf_h": float(mc.e_tot), "casscf_converged": bool(mc.converged),
