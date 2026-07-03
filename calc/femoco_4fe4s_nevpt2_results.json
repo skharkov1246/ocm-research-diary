@@ -1,0 +1,69 @@
+{
+ "status": "ok",
+ "meta": {
+  "system": "[Fe4S4(SH)4]2- cubane, frontier CAS(6e,6o)",
+  "basis": "def2-svp",
+  "message": "dynamic correlation (NEVPT2) is cheap; a CONVERGED multireference reference (CASSCF) is the cost wall; the n_u metric is orbital-fragile -> Stage 17's 3.99 is an unconverged estimate.",
+  "note": "same frontier subspace as Stage 17; a demonstration subspace, not the 40-qubit full Fe-3d magnetic space.",
+  "total_seconds": 696.3
+ },
+ "scf": {
+  "e_hs_rohf": -8230.6067069936,
+  "converged": true
+ },
+ "frontier": {
+  "ncas": 6,
+  "nelec": 6,
+  "nelecas": [
+   3,
+   3
+  ],
+  "qubits_jw": 12,
+  "active_mo_idx": [
+   116,
+   117,
+   118,
+   119,
+   120,
+   121
+  ],
+  "fe3d_char_initial": 0.653
+ },
+ "casci_rohf_orbitals": {
+  "e_casci": -8220.579487143561,
+  "s_squared": 2.0,
+  "gap_above_hs_kcal": 6292.2,
+  "n_u": 2.054,
+  "noon": [
+   1.998,
+   1.988,
+   1.008,
+   0.993,
+   0.011,
+   0.002
+  ],
+  "seconds": 12.7,
+  "nevpt2_corr": -17.188286185550687,
+  "e_nevpt2": -8237.767773329111,
+  "nevpt2_seconds": 69.2
+ },
+ "casscf_bounded_3macro": {
+  "e_casscf_3iter": -8227.493881778515,
+  "converged": false,
+  "seconds": 614.3,
+  "energy_recovered_Ha": -6.914,
+  "still_needed_Ha_to_stage17": -2.82,
+  "n_u_after_3iter": 2.007,
+  "noon_after_3iter": [
+   1.999,
+   1.999,
+   1.001,
+   1.0,
+   0.001,
+   0.001
+  ],
+  "n_u_casci": 2.054,
+  "n_u_stage17_unconverged": 3.985,
+  "comment": "3 macro-iters recover only a fraction of the ~10 Ha orbital relaxation; n_u already drifting CASCI->Stage17 (orbital-fragile)."
+ }
+}
