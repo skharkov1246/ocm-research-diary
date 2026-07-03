@@ -878,7 +878,7 @@ const ENTRIES = [
              <li><strong>Мультиреференс:</strong> NOON = [2.00, 1.09, 1.00, 1.00, 0.91, 0.00], n_u = Σnᵢ(2−nᵢ) = <strong>3.985</strong> — почти 4 эффективно-неспаренных электрона из 6.</li>
              <li><strong>JW-гейт:</strong> кубитный гамильтониан (Jordan–Wigner, <strong>1843 члена Паули</strong>) в секторе N=6 → нижняя энергия −8230.31410400 Ha против CASCI −8230.31410400 Ha в тех же орбиталях и том же (3,3)-секторе → Δ = <strong>3.4×10⁻⁹ ккал/моль</strong>. Self-test H₂ CAS(2,2): JW=FCI до 9×10⁻¹⁶ Ha.</li>
            </ul>
-           <p><strong>Оговорки (честно).</strong> (1) Кубан идеализированный, терминальный Fe–S–H линейный — не кристаллографический сайт. (2) def2-SVP, скромный базис. (3) CASSCF без динамической корреляции. (4) HS-детерминант (2S=18) — только затравка для отбора орбиталей AVAS, а не физическое (антиферромагнитно-связанное) основное состояние. (5) CASSCF не досошёлся (лимит 50 макро-итераций, ~61 мин): но JW-гейт сверяет CASCI и кубитный H в <em>одних</em> орбиталях, поэтому 10⁻⁹-совпадение и вывод «пространство собрано в кубиты» от этого не зависят, а n_u≈4 качественно робастен. (6) AVAS для открытой оболочки даёт приближённый счёт электронов активного пространства. Всё посчитано в этой сессии (PySCF/PennyLane); скрипт и results-JSON — в <code>calc/femoco_4fe4s_casscf.py</code>.</p>`,
+           <p><strong>Оговорки (честно).</strong> (1) Кубан идеализированный, терминальный Fe–S–H линейный — не кристаллографический сайт. (2) def2-SVP, скромный базис. (3) CASSCF без динамической корреляции. (4) HS-детерминант (2S=18) — только затравка для отбора орбиталей AVAS, а не физическое (антиферромагнитно-связанное) основное состояние. (5) CASSCF не досошёлся (лимит 50 макро-итераций, ~61 мин): но JW-гейт сверяет CASCI и кубитный H в <em>одних</em> орбиталях, поэтому 10⁻⁹-совпадение и вывод «пространство собрано в кубиты» от этого не зависят. <em>Уточнение (Этап 18):</em> само значение n_u не сошлось и сильно зависит от релаксации орбиталей (2.0↔4.0 по ходу оптимизации); факт мультиреференсности (n_u≫0) робастен, точное число классически дёшево не фиксируется — 3.99 здесь читать как неконвергентную оценку. (6) AVAS для открытой оболочки даёт приближённый счёт электронов активного пространства. Всё посчитано в этой сессии (PySCF/PennyLane); скрипт и results-JSON — в <code>calc/femoco_4fe4s_casscf.py</code>.</p>`,
       en: `<p>[Fe₄S₄(SH)₄]²⁻, def2-SVP, charge −2, HS seed spin=18 (2 Fe³⁺ d⁵ + 2 Fe²⁺ d⁶). nao=288, nelec (128,110). ROHF/DF: short DIIS → Newton/SOSCF, E_HS=−8230.607 Ha (converged; MOs cached to a chkfile — a restart is 0.2 s instead of ~70 min).</p>
            <ul>
              <li><strong>Wall (AVAS-sized, NOT diagonalized):</strong> Fe 3d → CAS(20e,20o)=<strong>40 qubits</strong>; Fe 3d + 3p on all 8 S → CAS(68e,44o)=<strong>88 qubits</strong>. Exact CASCI of these (C(20,10)²≈3.4×10¹⁰ determinants, far more for 88) is not computed — the documented wall.</li>
@@ -886,7 +886,7 @@ const ENTRIES = [
              <li><strong>Multireference:</strong> NOON = [2.00, 1.09, 1.00, 1.00, 0.91, 0.00], n_u = Σnᵢ(2−nᵢ) = <strong>3.985</strong> — nearly 4 effectively-unpaired electrons of 6.</li>
              <li><strong>JW gate:</strong> the qubit Hamiltonian (Jordan–Wigner, <strong>1843 Pauli terms</strong>) in the N=6 sector → lowest energy −8230.31410400 Ha vs CASCI −8230.31410400 Ha in the same orbitals and same (3,3) split → Δ = <strong>3.4×10⁻⁹ kcal/mol</strong>. Self-test H₂ CAS(2,2): JW=FCI to 9×10⁻¹⁶ Ha.</li>
            </ul>
-           <p><strong>Honest caveats.</strong> (1) Idealized cubane, terminal Fe–S–H linear — not a crystallographic site. (2) def2-SVP, a modest basis. (3) CASSCF without dynamic correlation. (4) The HS determinant (2S=18) is only a seed for AVAS orbital selection, not the physical (antiferromagnetically-coupled) ground state. (5) CASSCF did not fully converge (50-macro-iteration cap, ~61 min): but the JW gate compares CASCI and the qubit H in the <em>same</em> orbitals, so the 10⁻⁹ agreement and the "space mapped to qubits" claim don't depend on it, and n_u≈4 is qualitatively robust. (6) AVAS on an open shell gives an approximate active-electron count. Everything computed this session (PySCF/PennyLane); script and results-JSON in <code>calc/femoco_4fe4s_casscf.py</code>.</p>`
+           <p><strong>Honest caveats.</strong> (1) Idealized cubane, terminal Fe–S–H linear — not a crystallographic site. (2) def2-SVP, a modest basis. (3) CASSCF without dynamic correlation. (4) The HS determinant (2S=18) is only a seed for AVAS orbital selection, not the physical (antiferromagnetically-coupled) ground state. (5) CASSCF did not fully converge (50-macro-iteration cap, ~61 min): but the JW gate compares CASCI and the qubit H in the <em>same</em> orbitals, so the 10⁻⁹ agreement and the "space mapped to qubits" claim don't depend on it. <em>Refinement (Stage 18):</em> the value of n_u is itself unconverged and strongly orbital-dependent (2.0↔4.0 along the optimization); the multireference fact (n_u≫0) is robust, but the precise number is not cheaply pinned classically — read 3.99 here as an unconverged estimate. (6) AVAS on an open shell gives an approximate active-electron count. Everything computed this session (PySCF/PennyLane); script and results-JSON in <code>calc/femoco_4fe4s_casscf.py</code>.</p>`
     },
     table: {
       title: { ru: "[4Fe–4S] Этап 17: первый CASSCF + кубитный гамильтониан — реальный расчёт",
@@ -904,6 +904,60 @@ const ENTRIES = [
       { src: "assets/femoco/fe4s4_casscf_noon.png",
         caption: { ru: "Реальный расчёт (PySCF CASSCF, def2-SVP): заселённости натуральных орбиталей фронтира [4Fe–4S] CAS(6,6). Четыре орбитали у половинного заполнения (n_u=3.99 из 6) — измеренная мультиреференсность, которую одно-детерминантный BS-DFT (Этап 15) держать не может. CASSCF не досошёлся — помечено честно; вывод качественно робастен.",
                    en: "Real computation (PySCF CASSCF, def2-SVP): frontier natural-orbital occupations of the [4Fe–4S] CAS(6,6). Four orbitals near half-filling (n_u=3.99 of 6) — the measured multireference character a single-determinant BS-DFT (Stage 15) cannot hold. CASSCF not fully converged — flagged honestly; the conclusion is qualitatively robust." } }
+    ]
+  },
+  {
+    id: "fe4s4-nevpt2",
+    date: "2026-07",
+    stage: { ru: "Этап 18", en: "Stage 18" },
+    title: { ru: "[4Fe–4S], NEVPT2 и цена сходимости: динамическую корреляцию посчитать дёшево, а сошедшийся мультиреференс — вот где стена",
+             en: "[4Fe–4S], NEVPT2 and the price of convergence: dynamic correlation is cheap, the converged multireference reference is the wall" },
+    simple: {
+      ru: `<p>Хотели сделать следующий шаг строгости после Этапа 17: досчитать <em>сошедшийся</em> CASSCF и добавить динамическую корреляцию (NEVPT2). Получили результат честнее и интереснее одной цифры — и он сам по себе аргумент «зачем квант».</p>
+           <p>Оказалось, NEVPT2 (динамическая корреляция) на этом фронтире считается за <strong>~минуту</strong> — дёшево. Но она обязана стоять на хорошо оптимизированных орбиталях. Возьмёшь «сырые» орбитали высокоспинового ROHF — и фронтир-конфигурация лежит на <strong>6292 ккал/моль ВЫШЕ</strong> основного состояния (локализованные магнитные орбитали железа плохо описывают спаренное состояние), а NEVPT2 на такой опоре выдаёт бессмысленную поправку <strong>−17 Ha</strong>. Плохую опору она не спасает.</p>
+           <p>А досчитать CASSCF, который эти орбитали исправит — вот где стена. Нужно отыграть <strong>~10 Ha</strong> релаксации орбиталей; каждая макро-итерация ~3.4 мин, градиент падает медленно. За 3 итерации отыграли 6.9 Ha, но всё ещё <strong>2.8 Ha не хватает</strong> до точки Этапа 17 — которая сама не сошлась за ~час.</p>
+           <p>И индикатор мультиреференсности n_u оказался неустойчив: <strong>2.05</strong> (CASCI) → <strong>2.01</strong> (CASSCF, 3 итерации) → <strong>3.99</strong> (Этап 17, ~50 итераций) — ни одно значение не сошлось. Сам факт мультиреференсности (n_u≫0) робастен, но точное число классически дёшево не зафиксировать. Поэтому n_u=3.99 из Этапа 17 честно читаем как <em>неконвергентную</em> оценку (мы это пометили и там).</p>
+           <p>Что это даёт для «зачем квант»: лёгкий пост-шаг (NEVPT2) дёшев, а СУТЬ — сошедшаяся мультиреференсная опора — это ровно то, на чём классика буксует, и ответ вдобавок хрупок. Именно этот режим и убирает отказоустойчивый квантовый компьютер.</p>`,
+      en: `<p>We meant to take the next step in rigor after Stage 17: get a <em>converged</em> CASSCF and add dynamic correlation (NEVPT2). What we got is more honest and more interesting than a single number — and is itself an argument for "why quantum".</p>
+           <p>It turns out NEVPT2 (dynamic correlation) on this frontier runs in <strong>~a minute</strong> — cheap. But it must sit on well-optimized orbitals. Take the "raw" high-spin-ROHF orbitals and the frontier configuration sits <strong>6292 kcal/mol ABOVE</strong> the ground state (localized iron magnetic orbitals describe the paired state poorly), and NEVPT2 on such a reference returns a meaningless <strong>−17 Ha</strong> correction. It cannot rescue a bad reference.</p>
+           <p>And converging the CASSCF that would fix those orbitals is the wall. It has to recover <strong>~10 Ha</strong> of orbital relaxation; each macro-iteration is ~3.4 min and the gradient falls slowly. Three iterations recover 6.9 Ha but are still <strong>2.8 Ha short</strong> of Stage 17's point — which itself did not converge in ~an hour.</p>
+           <p>And the multireference index n_u is unstable: <strong>2.05</strong> (CASCI) → <strong>2.01</strong> (CASSCF, 3 iters) → <strong>3.99</strong> (Stage 17, ~50 iters) — none converged. The multireference fact (n_u≫0) is robust, but the precise number cannot be pinned cheaply on a classical machine. So Stage 17's n_u=3.99 is honestly an <em>unconverged</em> estimate (we flagged it there too).</p>
+           <p>What this buys for "why quantum": the easy post-hoc step (NEVPT2) is cheap, but the ESSENCE — a converged multireference reference — is exactly where classical methods choke, and the answer is delicate on top. That is precisely the regime a fault-tolerant quantum computer removes.</p>`
+    },
+    tech: {
+      ru: `<p>[Fe₄S₄(SH)₄]²⁻, def2-SVP, SCF загружен из chkfile Этапа 17 (E_HS=−8230.607 Ha, сошёлся). Фронтир CAS(6e,6o), сплит (3,3) минимального |Sz|.</p>
+           <ul>
+             <li><strong>CASCI в сырых ROHF-орбиталях:</strong> E=−8220.579 Ha = <strong>+6292 ккал/моль над HS</strong>, ⟨S²⟩=2.0, n_u=<strong>2.054</strong>, NOON [2.00, 1.99, 1.01, 0.99, 0.01, 0.00] — чистый 2-электронный дирадикал. Локализованные магнитные орбитали — плохая опора для спаренного состояния.</li>
+             <li><strong>SC-NEVPT2 (pyscf.mrpt) на этом CASCI:</strong> ~<strong>69 с</strong>, поправка <strong>−17.19 Ha</strong> — огромная, потому что опора плохая. Вывод: NEVPT2 недорога, но плохую опору не спасает.</li>
+             <li><strong>CASSCF (полный виртуал, 3 макро-итерации, DF):</strong> E=−8227.494 Ha (+1953 ккал/моль над HS), отыграно <strong>6.91 Ha</strong>, до точки Этапа 17 ещё <strong>2.82 Ha</strong>; ~614 с (~3.4 мин/итер), не сошёлся. n_u 2.05→2.01.</li>
+             <li><strong>Лестница n_u (все неконвергентны):</strong> 2.05 (CASCI) / 2.01 (CASSCF 3 итер) / 3.99 (Этап 17 ~50 итер). Даже направление немонотонно — метрика реально не зафиксирована; мультиреференсность (n_u≫0) при этом робастна.</li>
+           </ul>
+           <p><strong>Оговорки (честно).</strong> Тот же 6-орбитальный фронтир-субпространство, что на Этапе 17 — демонстрационное, а не полное магнитное пространство Fe-3d (40 кубитов, стена, которую мы не диагонализуем). Идеализированный кубан, def2-SVP, NEVPT2 одностостояние. Стена здесь — не «невозможно в принципе», а «сошедшаяся мультиреференсная опора для реального кластера дорога и хрупка»: это и есть измеренный аргумент за квантовое железо. Всё посчитано в этой сессии; скрипт и results-JSON — <code>calc/femoco_4fe4s_nevpt2.py</code>.</p>`,
+      en: `<p>[Fe₄S₄(SH)₄]²⁻, def2-SVP, SCF loaded from the Stage-17 chkfile (E_HS=−8230.607 Ha, converged). Frontier CAS(6e,6o), minimal-|Sz| (3,3) split.</p>
+           <ul>
+             <li><strong>CASCI in the raw ROHF orbitals:</strong> E=−8220.579 Ha = <strong>+6292 kcal/mol above HS</strong>, ⟨S²⟩=2.0, n_u=<strong>2.054</strong>, NOON [2.00, 1.99, 1.01, 0.99, 0.01, 0.00] — a clean two-electron diradical. The localized magnetic orbitals are a poor reference for the paired state.</li>
+             <li><strong>SC-NEVPT2 (pyscf.mrpt) on that CASCI:</strong> ~<strong>69 s</strong>, correction <strong>−17.19 Ha</strong> — huge, because the reference is poor. Conclusion: NEVPT2 is cheap but cannot rescue a bad reference.</li>
+             <li><strong>CASSCF (full virtual space, 3 macro-iters, DF):</strong> E=−8227.494 Ha (+1953 kcal/mol above HS), recovered <strong>6.91 Ha</strong>, still <strong>2.82 Ha</strong> short of Stage 17's point; ~614 s (~3.4 min/iter), not converged. n_u 2.05→2.01.</li>
+             <li><strong>The n_u ladder (all unconverged):</strong> 2.05 (CASCI) / 2.01 (CASSCF 3 iter) / 3.99 (Stage 17 ~50 iter). Even the direction is non-monotonic — the metric is genuinely not pinned; the multireference fact (n_u≫0) is nonetheless robust.</li>
+           </ul>
+           <p><strong>Honest caveats.</strong> The same six-orbital frontier subspace as Stage 17 — a demonstration space, not the full Fe-3d magnetic space (40 qubits, the wall we do not diagonalize). Idealized cubane, def2-SVP, single-state NEVPT2. The wall here is not "impossible in principle" but "a converged multireference reference for a real cluster is costly and delicate" — that is the measured argument for quantum iron. Everything computed this session; script and results-JSON in <code>calc/femoco_4fe4s_nevpt2.py</code>.</p>`
+    },
+    table: {
+      title: { ru: "[4Fe–4S] Этап 18: NEVPT2 дёшев, сходимость мультиреференса — стена (реальный расчёт)",
+               en: "[4Fe–4S] Stage 18: NEVPT2 is cheap, converging the multireference reference is the wall (real computation)" },
+      head: { ru: ["Величина", "Значение"], en: ["Quantity", "Value"] },
+      rows: [
+        ["NEVPT2 (dynamic correlation)", "~69 s — cheap"],
+        ["CASCI in ROHF orbitals", "+6292 kcal/mol above HS — a poor reference"],
+        ["NEVPT2 on that poor reference", "−17.2 Ha (meaningless)"],
+        ["CASSCF 3 macro-iter (full virtual)", "recovered 6.9 Ha, still 2.8 Ha to Stage 17, not converged"],
+        ["n_u (all unconverged)", "2.05 → 2.01 → 3.99 (orbital-fragile)"]
+      ]
+    },
+    figures: [
+      { src: "assets/femoco/fe4s4_nevpt2_wall.png",
+        caption: { ru: "Реальный расчёт (PySCF/NEVPT2, def2-SVP): релаксация орбиталей фронтира [4Fe–4S] — энергия над высокоспиновой опорой (лог-шкала) для CASCI, CASSCF за 3 итерации и точки Этапа 17 (~50 итераций); все неконвергентны, n_u скачет 2.0↔4.0. NEVPT2 (динам. корреляция) считается за ~минуту, но на плохой опоре бесполезна. Сошедшийся мультиреференс — классическая стена.",
+                   en: "Real computation (PySCF/NEVPT2, def2-SVP): orbital relaxation of the [4Fe–4S] frontier — energy above the high-spin reference (log scale) at CASCI, CASSCF after 3 iters, and Stage 17's ~50-iter point; all unconverged, n_u swinging 2.0↔4.0. NEVPT2 (dynamic correlation) runs in ~a minute but is useless on a poor reference. A converged multireference reference is the classical wall." } }
     ]
   }
 ];
