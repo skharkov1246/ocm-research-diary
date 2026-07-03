@@ -230,7 +230,13 @@ def relax_geometry(mf, freeze, maxsteps):
     if freeze:
         kwargs["constraints"] = constraints_file()
     try:
-        mol_eq = geometric_solver.optimize(mf, assert_convergence=True,
+        # v2: optimize through a SOSCF(newton) solver. The plain level-shifted
+        # DF-UKS scanner fails to converge at displaced geometries
+        # ("Nuclear gradients ... not converged" -> the whole optimization
+        # died and v1 silently fell back to initial-geometry single points).
+        solver = mf.newton()
+        solver.max_cycle = 100
+        mol_eq = geometric_solver.optimize(solver, assert_convergence=True,
                                            **kwargs)
         return mol_eq, True, None
     except Exception as exc:                      # noqa: BLE001 -- recorded
