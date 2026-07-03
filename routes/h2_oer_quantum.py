@@ -154,15 +154,36 @@ def vqe_poc(run, basis, maxq, iters=400):
     qubit_op = of.jordan_wigner(of.get_fermion_operator(ham))
     H = qml.qchem.import_operator(qubit_op, format="openfermion")
 
-    # ворота корректности: sparse-диагонализация JW-гамильтониана vs CASCI
+    # ворота корректности: диагонализация JW-гамильтониана В ПРАВИЛЬНОМ
+    # (N, Sz)-СЕКТОРЕ vs CASCI. Полный фоковский минимум может лежать в чужом
+    # секторе частиц/спина — сравнение с ним было бы ложной «ошибкой ворот».
+    na, nb = int(mc.nelecas[0]), int(mc.nelecas[1])
+    ne_tot, sz = na + nb, 0.5 * (na - nb)
+    from openfermion.linalg import jw_sz_restrict_operator
     sp_ham = of.get_sparse_operator(qubit_op, n_qubits=nq)
-    e_exact = float(eigsh(sp_ham, k=1, which="SA",
-                          return_eigenvectors=False)[0])
+    sp_sector = jw_sz_restrict_operator(sp_ham, sz_value=sz,
+                                        n_electrons=ne_tot, n_qubits=nq)
+    if sp_sector.shape[0] <= 2:
+        e_exact = float(np.linalg.eigvalsh(sp_sector.toarray())[0])
+    else:
+        e_exact = float(eigsh(sp_sector, k=1, which="SA",
+                              return_eigenvectors=False)[0])
     gate_kcal = abs(e_exact - e_casci) * KCAL
 
-    ne_tot = int(sum(mc.nelecas))
-    hf_state = qml.qchem.hf_state(ne_tot, nq)
-    singles, doubles = qml.qchem.excitations(ne_tot, nq)
+    # референс и возбуждения — в ТОМ ЖЕ секторе: openfermion/pennylane
+    # интерливинг (чётные = α); α занимает na низших орбиталей, β — nb.
+    # Это ROHF-детерминант при упорядоченных активных орбиталях (docc→socc).
+    init_state = np.zeros(nq, dtype=int)
+    init_state[[2 * i for i in range(na)]] = 1
+    init_state[[2 * i + 1 for i in range(nb)]] = 1
+    occ = [i for i in range(nq) if init_state[i]]
+    virt = [i for i in range(nq) if not init_state[i]]
+    szf = lambda i: 0.5 if i % 2 == 0 else -0.5
+    singles = [[o, v] for o in occ for v in virt if szf(o) == szf(v)]
+    doubles = [[o1, o2, v1, v2]
+               for ii, o1 in enumerate(occ) for o2 in occ[ii + 1:]
+               for jj, v1 in enumerate(virt) for v2 in virt[jj + 1:]
+               if abs(szf(o1) + szf(o2) - szf(v1) - szf(v2)) < 1e-9]
     s_w, d_w = qml.qchem.excitations_to_wires(singles, doubles)
     dev = qml.device("lightning.qubit", wires=nq)
 
