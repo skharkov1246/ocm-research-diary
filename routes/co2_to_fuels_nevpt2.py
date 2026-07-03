@@ -34,7 +34,8 @@ from co2_to_fuels_sites import METALS, _mol, HARTREE_EV, RESULTS
 from co2_to_fuels_ts import build_ads, _scf
 from co2_to_fuels_casscf import (NCAS, NELECAS, chain_scf, casscf_fixed,
                                  avas_guess, _persist)
-from pyscf import mcscf, mrpt
+from pyscf import mcscf, mrpt, dft
+from pyscf.scf import addons as scf_addons
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MO_NPZ = os.path.join(HERE, "co2_to_fuels_casscf_mo.npz")
@@ -69,6 +70,8 @@ def run_site(tag, res):
 
     mfs, drift = chain_scf(tag, site)
     mf_r, mf_t = mfs[site["d_reactant"]], mfs[site["d_ts"]]
+    # дозаполнить casscf_barrier, если запись сделана старой версией скрипта
+    base.setdefault("scf_branch_drift_mHa", drift)
 
     # reactant CASSCF (AVAS-гесс) — сверка с сохранённым = тест воспроизводимости
     mc_r, _, _ = casscf_fixed(mf_r, avas_guess(mf_r)[0], f"{tag} reactant(re)")
@@ -92,23 +95,47 @@ def run_site(tag, res):
     chk["A_ts_avas_converged"] = bool(mc_t2.converged)
     _persist(res)
 
-    # CHECK B: реактант с ХОЛОДНОЙ SCF-ветки — восстанавливает ли CASSCF то же решение?
+    # CHECK B: ПОИСК других SCF-решений в геометрии реактанта (у кластера их
+    # несколько; для CuAl «холодный» newton совпадает с цепочкой, поэтому одной
+    # холодной пробы мало) → CASSCF с самой удалённой ветки: то же решение?
     ads_r = build_ads(site["d_reactant"],
                       np.array([p["free"] for p in site["profile"]
                                 if p["d"] == site["d_reactant"]][0]))
-    mf_cold = _scf(_mol(METALS[tag], ads_r))          # cold start, без dm0
-    chk["B_cold_scf_minus_warm_eV"] = round(
-        (float(mf_cold.e_tot) - float(mf_r.e_tot)) * HARTREE_EV, 3)
-    mc_cold, _, _ = casscf_fixed(mf_cold, avas_guess(mf_cold)[0],
-                                 f"{tag} reactant(cold-SCF)")
-    chk["B_cold_casscf_minus_warm_mHa"] = round(
-        (float(mc_cold.e_tot) - float(mc_r.e_tot)) * 1e3, 3)
-    chk["B_cold_casscf_converged"] = bool(mc_cold.converged)
+    branches = {"cold_newton": _scf(_mol(METALS[tag], ads_r))}
+    mol_r = _mol(METALS[tag], ads_r)                  # smearing-anneal ветка
+    mf_sm = dft.RKS(mol_r).density_fit(); mf_sm.xc = "pbe"; mf_sm.verbose = 0
+    mf_sm = scf_addons.smearing_(mf_sm, sigma=0.01, method="fermi")
+    mf_sm.max_cycle = 200; mf_sm.conv_tol = 1e-6; mf_sm.kernel()
+    mfn = mf_sm.newton(); mfn.kernel(mf_sm.make_rdm1())
+    branches["smearing_anneal"] = mfn
+    mol_r2 = _mol(METALS[tag], ads_r)                 # level-shift/damp ветка
+    mf_ls = dft.RKS(mol_r2).density_fit(); mf_ls.xc = "pbe"; mf_ls.verbose = 0
+    mf_ls.level_shift = 0.4; mf_ls.damp = 0.3
+    mf_ls.max_cycle = 300; mf_ls.conv_tol = 1e-6; mf_ls.kernel()
+    mfn2 = mf_ls.newton(); mfn2.kernel(mf_ls.make_rdm1())
+    branches["level_shift"] = mfn2
+    gaps = {k: round((float(m.e_tot) - float(mf_r.e_tot)) * HARTREE_EV, 3)
+            for k, m in branches.items()}
+    chk["B_scf_branches_vs_chain_eV"] = gaps
+    alt = max(gaps, key=lambda k: abs(gaps[k]))
+    chk["B_alt_branch"] = alt
+    if abs(gaps[alt]) < 0.005:
+        chk["B_note"] = ("no distinct SCF solution found by cold/smearing/"
+                         "level-shift probes at the reactant geometry")
+        print(f"  checks: repro r/ts={chk['reactant_repro_mHa']}/{chk['ts_repro_mHa']} mHa;  "
+              f"A(avas-proj)={chk['A_ts_avas_minus_projected_mHa']} mHa;  "
+              f"B: no distinct branch ({gaps})", flush=True)
+    else:
+        mc_alt, _, _ = casscf_fixed(branches[alt], avas_guess(branches[alt])[0],
+                                    f"{tag} reactant({alt})")
+        chk["B_alt_casscf_minus_chain_mHa"] = round(
+            (float(mc_alt.e_tot) - float(mc_r.e_tot)) * 1e3, 3)
+        chk["B_alt_casscf_converged"] = bool(mc_alt.converged)
+        print(f"  checks: repro r/ts={chk['reactant_repro_mHa']}/{chk['ts_repro_mHa']} mHa;  "
+              f"A(avas-proj)={chk['A_ts_avas_minus_projected_mHa']} mHa;  "
+              f"B: SCF branch '{alt}' gap={gaps[alt]} eV → "
+              f"CASSCF gap={chk['B_alt_casscf_minus_chain_mHa']} mHa", flush=True)
     _persist(res)
-    print(f"  checks: repro r/ts={chk['reactant_repro_mHa']}/{chk['ts_repro_mHa']} mHa;  "
-          f"A(avas-proj)={chk['A_ts_avas_minus_projected_mHa']} mHa;  "
-          f"B: SCF gap={chk['B_cold_scf_minus_warm_eV']} eV → "
-          f"CASSCF gap={chk['B_cold_casscf_minus_warm_mHa']} mHa", flush=True)
 
     # CHECK C / NEVPT2: динамическая корреляция на обоих концах
     e_r_ci, dpt_r = _nevpt2(mf_r, mc_r, f"{tag} reactant")

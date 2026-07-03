@@ -800,21 +800,60 @@
    "scf_branch_max_drift_mHa": 22.864,
    "barrier_pbe_eV": 1.053,
    "avas_dims_reactant": "(14e,11o)",
-   "reactant_e_casscf": -2105.878935,
-   "reactant_converged": false,
+   "reactant_e_casscf": -2105.879064,
+   "reactant_converged": true,
    "reactant_noon": [
-    1.9942,
-    1.9813,
-    1.9579,
-    1.9528,
+    1.9936,
+    1.9796,
+    1.9574,
+    1.9526,
     1.9465,
-    1.9394,
-    0.0647,
-    0.0629,
+    1.9386,
+    0.0658,
+    0.0651,
     0.0536,
-    0.0467
+    0.047
    ],
-   "reactant_nu": 0.4558
+   "reactant_nu": 0.4632,
+   "scf_branch_drift_mHa": {
+    "1.8": 2.335,
+    "2.2": 22.864,
+    "2.6": -22.075,
+    "3.0": 20.617,
+    "3.4": -18.626,
+    "3.8": 0.0,
+    "4.2": -18.465
+   },
+   "barrier_pbe_profile_eV": 0.992,
+   "ts_e_casscf": -2105.818603,
+   "ts_converged": true,
+   "ts_noon": [
+    1.992,
+    1.9713,
+    1.9533,
+    1.9363,
+    1.9279,
+    1.925,
+    0.0967,
+    0.0765,
+    0.0645,
+    0.0566
+   ],
+   "ts_nu": 0.5885,
+   "barrier_casscf_eV": 1.645,
+   "quantum_corr_eV": 0.592
+  },
+  "_summary": {
+   "pbe_order": [
+    "CuAl",
+    "Cu2"
+   ],
+   "casscf_order": [
+    "CuAl",
+    "Cu2"
+   ],
+   "order_flipped": false,
+   "note": "Fixed CAS(12e,10o) CASSCF (orbital-optimized, DF) on the reproduced warm-chain SCF branch; TS orbitals projected from converged reactant CASSCF → consistent active space, no per-geometry AVAS artifact. Frozen-metal cluster, def2-SVP, no constant-potential, no dynamic correlation (NEVPT2 = next); cluster-model barrier, not Faradaic efficiency. Supersedes barrier_casci_eV (casci_barrier_reliable=false)."
   }
  }
 }

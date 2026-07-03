@@ -41,7 +41,10 @@ STATE_NPZ = os.path.join(HERE, "co2_to_fuels_casscf_state.npz")
 
 
 def _persist(res):
-    json.dump(res, open(RESULTS, "w"), ensure_ascii=False, indent=1)
+    # атомарно: kill во время записи не должен уносить results всех стадий
+    tmp = RESULTS + ".tmp"
+    json.dump(res, open(tmp, "w"), ensure_ascii=False, indent=1)
+    os.replace(tmp, RESULTS)
 
 
 def _save_npz(tag, **arrs):
