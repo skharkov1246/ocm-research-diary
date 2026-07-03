@@ -39,6 +39,14 @@ shutdown -P +$(( TIMEOUT / 60 + 30 )) 2>/dev/null || \
 # --- dead-man #2: terminate on ANY exit (IMDSv2-aware) -----------------------
 terminate() {
   echo "[dead-man] terminating instance to avoid leaks…"
+  # forensic uploads first — the only trace if setup died early
+  if [ -n "${S3_OUT:-}" ] && command -v aws >/dev/null 2>&1; then
+    [ -f "${WORK}/setup.log" ] && aws s3 cp "${WORK}/setup.log" \
+      "${S3_OUT%/}/fe4s4_setup.log" || true
+    [ -f /var/log/cloud-init-output.log ] && aws s3 cp \
+      /var/log/cloud-init-output.log \
+      "${S3_OUT%/}/fe4s4_cloud-init-output.log" || true
+  fi
   TOK="$(curl -sX PUT --max-time 3 \
         -H 'X-aws-ec2-metadata-token-ttl-seconds: 60' \
         http://169.254.169.254/latest/api/token || true)"
