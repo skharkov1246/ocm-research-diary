@@ -73,27 +73,35 @@ def run_site(tag, res):
     # дозаполнить casscf_barrier, если запись сделана старой версией скрипта
     base.setdefault("scf_branch_drift_mHa", drift)
 
-    # reactant CASSCF (AVAS-гесс) — сверка с сохранённым = тест воспроизводимости
-    mc_r, _, _ = casscf_fixed(mf_r, avas_guess(mf_r)[0], f"{tag} reactant(re)")
+    saved = dict(np.load(MO_NPZ)) if os.path.exists(MO_NPZ) else {}
+
+    # reactant CASSCF — сверка с сохранённым = тест воспроизводимости; если
+    # орбитали уже в npz (краш-resume) — стартуем с них, иначе AVAS-гесс
+    mo0_r = saved.get(f"{tag}_reactant", None)
+    mc_r, _, _ = casscf_fixed(mf_r, mo0_r if mo0_r is not None
+                              else avas_guess(mf_r)[0], f"{tag} reactant(re)")
     chk["reactant_repro_mHa"] = round(
         (float(mc_r.e_tot) - base["reactant_e_casscf"]) * 1e3, 3)
     _save_mo(tag, "reactant", mc_r)
 
     # TS CASSCF из проекции (как в основном прогоне) — сверка с сохранённым
-    mo_ts = mcscf.project_init_guess(
-        mcscf.CASSCF(mf_t, NCAS, NELECAS).density_fit(), mc_r.mo_coeff,
-        prev_mol=mf_r.mol)
-    mc_t, _, _ = casscf_fixed(mf_t, mo_ts, f"{tag} TS(projected,re)")
+    mo0_t = saved.get(f"{tag}_ts", None)
+    if mo0_t is None:
+        mo0_t = mcscf.project_init_guess(
+            mcscf.CASSCF(mf_t, NCAS, NELECAS).density_fit(), mc_r.mo_coeff,
+            prev_mol=mf_r.mol)
+    mc_t, _, _ = casscf_fixed(mf_t, mo0_t, f"{tag} TS(projected,re)")
     chk["ts_repro_mHa"] = round((float(mc_t.e_tot) - base["ts_e_casscf"]) * 1e3, 3)
     _save_mo(tag, "ts", mc_t)
     _persist(res)
 
     # CHECK A: TS из независимого AVAS-гесса — тот же минимум CASSCF?
-    mc_t2, _, _ = casscf_fixed(mf_t, avas_guess(mf_t)[0], f"{tag} TS(avas)")
-    chk["A_ts_avas_minus_projected_mHa"] = round(
-        (float(mc_t2.e_tot) - float(mc_t.e_tot)) * 1e3, 3)
-    chk["A_ts_avas_converged"] = bool(mc_t2.converged)
-    _persist(res)
+    if chk.get("A_ts_avas_minus_projected_mHa") is None:
+        mc_t2, _, _ = casscf_fixed(mf_t, avas_guess(mf_t)[0], f"{tag} TS(avas)")
+        chk["A_ts_avas_minus_projected_mHa"] = round(
+            (float(mc_t2.e_tot) - float(mc_t.e_tot)) * 1e3, 3)
+        chk["A_ts_avas_converged"] = bool(mc_t2.converged)
+        _persist(res)
 
     # CHECK B: ПОИСК других SCF-решений в геометрии реактанта (у кластера их
     # несколько; для CuAl «холодный» newton совпадает с цепочкой, поэтому одной
@@ -106,14 +114,16 @@ def run_site(tag, res):
     mf_sm = dft.RKS(mol_r).density_fit(); mf_sm.xc = "pbe"; mf_sm.verbose = 0
     mf_sm = scf_addons.smearing_(mf_sm, sigma=0.01, method="fermi")
     mf_sm.max_cycle = 200; mf_sm.conv_tol = 1e-6; mf_sm.kernel()
-    mfn = mf_sm.newton(); mfn.kernel(mf_sm.make_rdm1())
-    branches["smearing_anneal"] = mfn
+    # newton() поверх smeared-объекта падает (дробные mo_occ в unpack_uniq_var)
+    # → пере-затяжка чистым newton-RKS, warm-start от smeared-плотности
+    branches["smearing_anneal"] = _scf(_mol(METALS[tag], ads_r),
+                                       mf_sm.make_rdm1())
     mol_r2 = _mol(METALS[tag], ads_r)                 # level-shift/damp ветка
     mf_ls = dft.RKS(mol_r2).density_fit(); mf_ls.xc = "pbe"; mf_ls.verbose = 0
     mf_ls.level_shift = 0.4; mf_ls.damp = 0.3
     mf_ls.max_cycle = 300; mf_ls.conv_tol = 1e-6; mf_ls.kernel()
-    mfn2 = mf_ls.newton(); mfn2.kernel(mf_ls.make_rdm1())
-    branches["level_shift"] = mfn2
+    branches["level_shift"] = _scf(_mol(METALS[tag], ads_r),
+                                   mf_ls.make_rdm1())
     gaps = {k: round((float(m.e_tot) - float(mf_r.e_tot)) * HARTREE_EV, 3)
             for k, m in branches.items()}
     chk["B_scf_branches_vs_chain_eV"] = gaps
