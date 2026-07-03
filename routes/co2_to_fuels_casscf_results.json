@@ -20,6 +20,194 @@
    "e_pbe_profile_reactant": -3506.321353,
    "e_pbe_profile_ts": -3506.272624,
    "barrier_pbe_profile_eV": 1.326
-  }
+  },
+  "reactant": {
+   "e_scf": -3506.321353,
+   "scf_converged": true,
+   "internally_stable": true,
+   "stability_rotations": 0,
+   "gap_eV": 1.787,
+   "warm_start": false,
+   "t_scf_s": 171.8,
+   "de_vs_profile_eV": 0.0,
+   "e_casscf": -3502.804755,
+   "casscf_converged": true,
+   "ncas": 10,
+   "nelecas": 12,
+   "noon": [
+    1.9984,
+    1.9912,
+    1.9515,
+    1.95,
+    1.9488,
+    1.9474,
+    0.0581,
+    0.0552,
+    0.0512,
+    0.0481
+   ],
+   "n_u": 0.4252,
+   "spin_square": 0.0,
+   "t_casscf_s": 601.3
+  },
+  "cas_space": {
+   "ncas": 10,
+   "nelecas": 12,
+   "avas_labels": [
+    "C 2p",
+    "O 2px",
+    "O 2py"
+   ],
+   "avas_threshold": 0.4,
+   "defined_on": "reactant"
+  },
+  "ts": {
+   "e_scf": -3506.272633,
+   "scf_converged": true,
+   "internally_stable": true,
+   "stability_rotations": 0,
+   "gap_eV": 0.187,
+   "warm_start": true,
+   "t_scf_s": 76.4,
+   "de_vs_profile_eV": -0.0,
+   "e_casscf": -3502.743653,
+   "casscf_converged": true,
+   "ncas": 10,
+   "nelecas": 12,
+   "noon": [
+    1.9984,
+    1.9911,
+    1.9548,
+    1.9503,
+    1.9479,
+    1.946,
+    0.0571,
+    0.0567,
+    0.0502,
+    0.0475
+   ],
+   "n_u": 0.423,
+   "spin_square": 0.0,
+   "t_casscf_s": 140.6
+  },
+  "barrier_pbe_eV": 1.326,
+  "barrier_casscf_eV": 1.663,
+  "quantum_corr_eV": 0.337,
+  "d_barrier_vs_profile_eV": -0.0,
+  "scf_branch_consistent": true,
+  "reliable": true,
+  "unreliable_reasons": []
+ },
+ "CuAl": {
+  "geom": {
+   "d_reactant": 3.0,
+   "d_ts": 2.2,
+   "e_pbe_profile_reactant": -2108.43464,
+   "e_pbe_profile_ts": -2108.398192,
+   "barrier_pbe_profile_eV": 0.992
+  },
+  "reactant": {
+   "e_scf": -2108.434649,
+   "scf_converged": true,
+   "internally_stable": true,
+   "stability_rotations": 1,
+   "gap_eV": -0.025,
+   "warm_start": false,
+   "t_scf_s": 125.4,
+   "de_vs_profile_eV": -0.0,
+   "e_casscf": -2105.883704,
+   "casscf_converged": true,
+   "ncas": 11,
+   "nelecas": 14,
+   "noon": [
+    1.9935,
+    1.9927,
+    1.9775,
+    1.9568,
+    1.951,
+    1.945,
+    1.9383,
+    0.068,
+    0.0662,
+    0.0594,
+    0.0516
+   ],
+   "n_u": 0.4904,
+   "spin_square": 0.0,
+   "t_casscf_s": 1027.3
+  },
+  "cas_space": {
+   "ncas": 11,
+   "nelecas": 14,
+   "avas_labels": [
+    "C 2p",
+    "O 2px",
+    "O 2py"
+   ],
+   "avas_threshold": 0.4,
+   "defined_on": "reactant"
+  },
+  "ts": {
+   "e_scf": -2108.398132,
+   "scf_converged": true,
+   "internally_stable": true,
+   "stability_rotations": 0,
+   "gap_eV": -0.044,
+   "warm_start": true,
+   "t_scf_s": 44.9,
+   "de_vs_profile_eV": 0.002,
+   "e_casscf": -2105.823077,
+   "casscf_converged": true,
+   "ncas": 11,
+   "nelecas": 14,
+   "noon": [
+    1.9934,
+    1.9912,
+    1.9711,
+    1.9526,
+    1.9351,
+    1.9272,
+    1.9127,
+    0.1099,
+    0.0784,
+    0.0691,
+    0.0593
+   ],
+   "n_u": 0.6336,
+   "spin_square": 0.0,
+   "t_casscf_s": 225.1
+  },
+  "barrier_pbe_eV": 0.994,
+  "barrier_casscf_eV": 1.65,
+  "quantum_corr_eV": 0.656,
+  "d_barrier_vs_profile_eV": 0.002,
+  "scf_branch_consistent": true,
+  "reliable": true,
+  "unreliable_reasons": []
+ },
+ "_summary": {
+  "pbe_order": [
+   "CuAl",
+   "Cu2"
+  ],
+  "casscf_order": [
+   "CuAl",
+   "Cu2"
+  ],
+  "order_flipped": false,
+  "all_reliable": true,
+  "barrier_pbe_eV": {
+   "Cu2": 1.326,
+   "CuAl": 0.994
+  },
+  "barrier_casscf_eV": {
+   "Cu2": 1.663,
+   "CuAl": 1.65
+  },
+  "quantum_corr_eV": {
+   "Cu2": 0.337,
+   "CuAl": 0.656
+  },
+  "note": "Δ(CASSCF−PBE) to the coupling barrier on a single held SCF branch with a per-site FIXED active space (the casci_note remedy). Frozen-metal cluster, def2-SVP, DF, no constant-potential. If all_reliable=false — see per-site unreliable_reasons; numbers then must NOT be quoted as physics."
  }
 }

@@ -4,3 +4,4 @@ __pycache__/
 *.chk
 calc/cha_scf.chk
 .claude/
+*.chk.npz
