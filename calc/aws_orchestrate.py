@@ -172,8 +172,16 @@ if __name__ == "__main__":
         main()
     except Exception as e:
         print("ERROR:", type(e).__name__, e, file=sys.stderr)
-        try:
-            reap(find_running(), "orchestrator exception")
-        except Exception:
-            pass
+        # Fleet mode: do NOT sweep here. A pre-launch failure (e.g.
+        # VcpuLimitExceeded in run_instances) has nothing of ours to reap,
+        # and sweeping find_running() kills SIBLING jobs sharing the tag —
+        # exactly what murdered a healthy fe4s4 run 2 min after its launch.
+        # Post-launch failures are already reaped (own iid) in main()'s
+        # finally. ALPHA_O_REAP_ALL=1 restores the old sweep for single-job
+        # cleanup mode.
+        if os.environ.get("ALPHA_O_REAP_ALL") == "1":
+            try:
+                reap(find_running(), "orchestrator exception")
+            except Exception:
+                pass
         raise
