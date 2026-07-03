@@ -34,7 +34,7 @@
    "pyscf": "2.13.1",
    "geometric": "1.1.1"
   },
-  "updated": "2026-07-03T01:37:33Z"
+  "updated": "2026-07-03T01:52:16Z"
  },
  "states": {
   "H2O": {
@@ -294,6 +294,38 @@
     "multiplicity": 3,
     "e_final_ha": -1734.2607122424915,
     "s2": 2.0135,
+    "relaxed": false,
+    "opt_converged": false
+   }
+  },
+  "OOH*": {
+   "mults": {
+    "2": {
+     "state": "OOH*",
+     "multiplicity": 2,
+     "spin_2S": 1,
+     "charge": 0,
+     "relaxed": false,
+     "frozen_core_atoms": "xyz 1,2,4",
+     "n_atoms": 8,
+     "n_basis": 102,
+     "init_scf_converged": false,
+     "opt_converged": false,
+     "opt_error": "RuntimeError: Nuclear gradients of <pyscf.scf.hf.DFUKS_Scanner object at 0x7fbadd8a1a10> not converged",
+     "warning": "geometry optimization failed; energy below is a single point at the INITIAL geometry",
+     "e_final_ha": -1809.9083256729223,
+     "scf_converged": true,
+     "used_soscf": true,
+     "s2": 1.2299,
+     "s2_ideal": 0.75,
+     "xyz_final": "Ni     0.000000     0.000000     0.000000\nO      1.850000     0.000000     0.000000\nH      2.400000     0.800000     0.000000\nO     -1.850000     0.000000     0.000000\nH     -2.400000    -0.800000     0.000000\nO      0.000000     0.000000     1.900000\nO      1.100000     0.000000     2.800000\nH      1.950000     0.250000     2.550000",
+     "wall_s": 882.4
+    }
+   },
+   "best": {
+    "multiplicity": 2,
+    "e_final_ha": -1809.9083256729223,
+    "s2": 1.2299,
     "relaxed": false,
     "opt_converged": false
    }
