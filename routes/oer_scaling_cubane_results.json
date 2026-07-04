@@ -20,6 +20,17 @@
    ],
    "xyz": "32\nidealized truncated Co4O4 cubane core (v1, not optimized)\nCo     0.000000     0.000000     0.000000\nCo     1.900000     1.900000     0.000000\nCo     1.900000     0.000000     1.900000\nCo     0.000000     1.900000     1.900000\nO     1.900000     0.000000     0.000000\nO     0.000000     1.900000     0.000000\nO     0.000000     0.000000     1.900000\nO     1.900000     1.900000     1.900000\nO    -1.870000     0.000000     0.000000\nH    -1.546207    -0.646552    -0.646552\nN     0.000000    -1.960000     0.000000\nH    -0.677752    -2.308861    -0.677752\nH     0.925827    -2.308861    -0.248075\nH    -0.248075    -2.308861     0.925827\nO     3.770000     1.900000     0.000000\nH     3.446207     2.546552    -0.646552\nN     1.900000     3.860000     0.000000\nH     2.577752     4.208861    -0.677752\nH     0.974173     4.208861    -0.248075\nH     2.148075     4.208861     0.925827\nO     3.770000     0.000000     1.900000\nH     3.446207    -0.646552     2.546552\nN     1.900000    -1.960000     1.900000\nH     2.577752    -2.308861     2.577752\nH     0.974173    -2.308861     2.148075\nH     2.148075    -2.308861     0.974173\nO    -1.870000     1.900000     1.900000\nH    -1.546207     2.546552     2.546552\nN     0.000000     3.860000     1.900000\nH    -0.677752     4.208861     2.577752\nH     0.925827     4.208861     2.148075\nH    -0.248075     4.208861     0.974173",
    "honesty": "idealized single-point v1: cube edge Co-O=1.90 A, Co-OH=1.87, Co(IV)=O=1.68, Co-N=1.96, O-H=0.97, N-H=1.02 A are typical literature-motif values, NOT optimized and NOT our calculation; no geometry relaxation anywhere in v1; azimuthal phases of the NH3 umbrellas and O-H tilts are set by a deterministic greedy grid search that maximizes the minimal nonbonded contact of the rigid cage (steric de-clash only, not an optimization)"
+  },
+  "oxidized": {
+   "natoms": 31,
+   "formula": "Co4H15N4O8",
+   "min_nonbonded_A": 1.66,
+   "min_nonbonded_pair": [
+    "17:H",
+    "18:H"
+   ],
+   "xyz": "31\nidealized truncated Co4O4 cubane core (v1, not optimized)\nCo     0.000000     0.000000     0.000000\nCo     1.900000     1.900000     0.000000\nCo     1.900000     0.000000     1.900000\nCo     0.000000     1.900000     1.900000\nO     1.900000     0.000000     0.000000\nO     0.000000     1.900000     0.000000\nO     0.000000     0.000000     1.900000\nO     1.900000     1.900000     1.900000\nO    -1.680000     0.000000     0.000000\nN     0.000000    -1.960000     0.000000\nH    -0.677752    -2.308861    -0.677752\nH     0.925827    -2.308861    -0.248075\nH    -0.248075    -2.308861     0.925827\nO     3.770000     1.900000     0.000000\nH     3.446207     2.546552    -0.646552\nN     1.900000     3.860000     0.000000\nH     2.577752     4.208861    -0.677752\nH     0.974173     4.208861    -0.248075\nH     2.148075     4.208861     0.925827\nO     3.770000     0.000000     1.900000\nH     3.446207    -0.646552     2.546552\nN     1.900000    -1.960000     1.900000\nH     2.577752    -2.308861     2.577752\nH     0.974173    -2.308861     2.148075\nH     2.148075    -2.308861     0.974173\nO    -1.870000     1.900000     1.900000\nH    -1.546207     2.546552     2.546552\nN     0.000000     3.860000     1.900000\nH    -0.677752     4.208861     2.577752\nH     0.925827     4.208861     2.148075\nH    -0.248075     4.208861     0.974173",
+   "honesty": "idealized single-point v1: cube edge Co-O=1.90 A, Co-OH=1.87, Co(IV)=O=1.68, Co-N=1.96, O-H=0.97, N-H=1.02 A are typical literature-motif values, NOT optimized and NOT our calculation; no geometry relaxation anywhere in v1; azimuthal phases of the NH3 umbrellas and O-H tilts are set by a deterministic greedy grid search that maximizes the minimal nonbonded contact of the rigid cage (steric de-clash only, not an optimization)"
   }
  },
  "resting": {
@@ -41,6 +52,220 @@
     "14:O": -0.096,
     "20:O": 0.096,
     "26:O": -0.096
+   }
+  },
+  "triplet": {
+   "e_scf": -6358.460327,
+   "scf_converged": true,
+   "internally_stable": true,
+   "stability_rotations": 1,
+   "used_newton": true,
+   "s2": 2.2536,
+   "gap_eV": 0.008,
+   "t_scf_s": 8403.0,
+   "mulliken_spin": {
+    "0:Co": 0.34,
+    "1:Co": 0.34,
+    "2:Co": 0.346,
+    "3:Co": 0.347,
+    "8:O": 0.168,
+    "14:O": 0.168,
+    "20:O": 0.168,
+    "26:O": 0.168
+   }
+  },
+  "uks_gap_eV": {
+   "triplet_minus_singlet": -0.056,
+   "caveat": "идеализированная single-point геометрия — качественно"
+  },
+  "casci": {
+   "uno": {
+    "reference_state": "singlet",
+    "n_u_uno": 1.3364,
+    "uno_fractional_occ": [
+     1.9698,
+     1.6599,
+     0.3401,
+     0.0302
+    ]
+   },
+   "avas": {
+    "error": "AVAS did not fit the cap",
+    "escalation": [
+     {
+      "threshold": 0.3,
+      "ncas": 24,
+      "nelecas": 42
+     },
+     {
+      "threshold": 0.4,
+      "ncas": 23,
+      "nelecas": 42
+     },
+     {
+      "threshold": 0.5,
+      "ncas": 23,
+      "nelecas": 42
+     },
+     {
+      "threshold": 0.6,
+      "ncas": 23,
+      "nelecas": 42
+     },
+     {
+      "threshold": 0.7,
+      "ncas": 22,
+      "nelecas": 40
+     },
+     {
+      "threshold": 0.8,
+      "ncas": 18,
+      "nelecas": 34
+     },
+     {
+      "threshold": 0.9,
+      "ncas": 13,
+      "nelecas": 26
+     },
+     {
+      "threshold": 0.95,
+      "ncas": 12,
+      "nelecas": 24
+     }
+    ],
+    "labels": [
+     "0 Co 3d",
+     "8 O 2p",
+     "4 O 2p",
+     "5 O 2p",
+     "6 O 2p"
+    ]
+   },
+   "site_atoms": {
+    "co": "0:Co",
+    "o": "8:O"
+   }
+  }
+ },
+ "oxidized": {
+  "doublet": {
+   "e_scf": -6357.863006,
+   "scf_converged": true,
+   "internally_stable": true,
+   "stability_rotations": 0,
+   "used_newton": true,
+   "s2": 3.3915,
+   "gap_eV": 0.312,
+   "t_scf_s": 4559.2,
+   "mulliken_spin": {
+    "0:Co": 1.538,
+    "1:Co": 1.146,
+    "2:Co": -1.312,
+    "3:Co": -1.114,
+    "4:O": -0.093,
+    "6:O": 0.056,
+    "8:O": 0.888,
+    "13:O": 0.137,
+    "19:O": -0.168,
+    "25:O": -0.124
+   }
+  },
+  "quartet": {
+   "e_scf": -6357.860343,
+   "scf_converged": true,
+   "internally_stable": true,
+   "stability_rotations": 0,
+   "used_newton": true,
+   "s2": 5.1517,
+   "gap_eV": 0.296,
+   "t_scf_s": 4932.7,
+   "mulliken_spin": {
+    "0:Co": 1.601,
+    "1:Co": 1.045,
+    "2:Co": 0.129,
+    "3:Co": -1.063,
+    "6:O": 0.161,
+    "8:O": 0.909,
+    "13:O": 0.157,
+    "19:O": 0.174,
+    "25:O": -0.116
+   }
+  },
+  "uks_gap_eV": {
+   "quartet_minus_doublet": 0.072,
+   "caveat": "идеализированная single-point геометрия — качественно"
+  },
+  "casci": {
+   "uno": {
+    "reference_state": "doublet",
+    "n_u_uno": 6.283,
+    "uno_fractional_occ": [
+     1.8538,
+     1.5946,
+     1.5309,
+     1.2372,
+     1.0,
+     0.7628,
+     0.4691,
+     0.4054,
+     0.1462
+    ]
+   },
+   "avas": {
+    "error": "AVAS did not fit the cap",
+    "escalation": [
+     {
+      "threshold": 0.3,
+      "ncas": 23,
+      "nelecas": 37
+     },
+     {
+      "threshold": 0.4,
+      "ncas": 21,
+      "nelecas": 35
+     },
+     {
+      "threshold": 0.5,
+      "ncas": 20,
+      "nelecas": 33
+     },
+     {
+      "threshold": 0.6,
+      "ncas": 19,
+      "nelecas": 33
+     },
+     {
+      "threshold": 0.7,
+      "ncas": 17,
+      "nelecas": 31
+     },
+     {
+      "threshold": 0.8,
+      "ncas": 16,
+      "nelecas": 29
+     },
+     {
+      "threshold": 0.9,
+      "ncas": 12,
+      "nelecas": 23
+     },
+     {
+      "threshold": 0.95,
+      "ncas": 11,
+      "nelecas": 21
+     }
+    ],
+    "labels": [
+     "0 Co 3d",
+     "8 O 2p",
+     "4 O 2p",
+     "5 O 2p",
+     "6 O 2p"
+    ]
+   },
+   "site_atoms": {
+    "co": "0:Co",
+    "o": "8:O"
    }
   }
  }
