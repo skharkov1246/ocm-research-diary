@@ -13,6 +13,13 @@ from pyscf import gto, scf, mcscf, mrpt
 from pyscf.mcscf import avas
 
 SPINS = {"quintet": 4, "triplet": 2, "singlet": 0}
+RESULTS = "calc/fe_zeolite_cha_results.json"
+
+
+def _persist(out):
+    with open(RESULTS + ".tmp", "w") as f:
+        json.dump(out, f, indent=2)
+    os.replace(RESULTS + ".tmp", RESULTS)
 
 
 def _read_xyz(path):
@@ -58,7 +65,21 @@ def run():
     ncas, nelec = int(ncas), int(nelec)
     out["active_space"] = {"ncas": ncas, "nelec": nelec, "qubits_jw": 2 * ncas}
     print(f"curated CAS({nelec}e,{ncas}o) = {2*ncas} qubits")
+    # чекпойнт-resume: dead-man на AWS может убить многочасовой прогон — каждое
+    # спиновое состояние персистится сразу; повторный запуск досчитывает хвост
+    if os.path.exists(RESULTS):
+        try:
+            prev = json.load(open(RESULTS)).get("spins", {})
+            out["spins"].update({k: v for k, v in prev.items() if "e_cas" in v})
+            if out["spins"]:
+                print("resume: reusing", list(out["spins"]))
+        except Exception:
+            pass
     for name, s2 in SPINS.items():
+        done = out["spins"].get(name, {})
+        if "e_cas" in done and (os.environ.get("CHA_NEVPT2") != "1"
+                                or "e_nevpt2" in done or "nevpt2_err" in done):
+            print(f"  {name:8s} checkpointed, skip"); continue
         na = (nelec + s2) // 2; nb = nelec - na
         mc = mcscf.CASSCF(mf, ncas, (na, nb))
         try: mc.fix_spin_(ss=(s2/2)*(s2/2+1))
@@ -66,12 +87,15 @@ def run():
         mc.max_cycle_macro = 200
         e = mc.kernel(mo)[0]
         d = {"e_cas": float(e), "cas_conv": bool(mc.converged)}
+        out["spins"][name] = d
+        _persist(out)                                # CASSCF готов — сохранить до NEVPT2
         if os.environ.get("CHA_NEVPT2") == "1":      # NEVPT2 is the AWS-scale part; off by default
             try:
                 d["e_nevpt2"] = float(e + mrpt.NEVPT(mc).kernel())
             except Exception as ex:
                 d["nevpt2_err"] = f"{type(ex).__name__}: {str(ex)[:60]}"
         out["spins"][name] = d
+        _persist(out)
         print(f"  {name:8s} cas_conv={d['cas_conv']} E_cas={d['e_cas']:.4f} "
               f"E_nevpt2={d.get('e_nevpt2','-')} ({time.time()-t:.0f}s)")
 
@@ -90,6 +114,5 @@ if __name__ == "__main__":
         out = run()
     except Exception as e:
         out = {"error": f"{type(e).__name__}: {e}"}; print("ERROR:", out["error"], file=sys.stderr)
-    with open("calc/fe_zeolite_cha_results.json", "w") as f:
-        json.dump(out, f, indent=2)
-    print("wrote calc/fe_zeolite_cha_results.json")
+    _persist(out)
+    print(f"wrote {RESULTS}")
