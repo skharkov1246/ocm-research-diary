@@ -1,0 +1,25 @@
+{
+ "meta": {
+  "track": "oer-scaling",
+  "stage": 2,
+  "system": "truncated cubane core: resting [Co4O4(OH)4(NH3)4]^0 (Co(III)4) and oxidized [Co4O4(OH)3(O)(NH3)4]^0 (formally one Co(IV)=O after PCET H removal); OH-/NH3 are surrogates for acetate/pyridine of Co4O4(OAc)4(py)4 (JACS 2011, 10.1021/ja203877y)",
+  "method": "UKS-PBE(level shift 0.25 -> newton fallback -> internal-stability loop)/def2-svp/DF; UNO bridge; site-AVAS(Co 3d + oxo/OH O 2p + 3 cubane O 2p, threshold escalation, cap (14e,12o), openshell_option=2); CASCI fix_spin, active space fixed once per geometry on the reference spin state (resting->singlet, oxidized->doublet), both spins solved in the SAME space",
+  "metric": "N_u = sum n_i(2-n_i) over CASCI NOON; excess = N_u - 2S",
+  "geometry_honesty": "idealized single-point v1: cube edge Co-O=1.90 A, Co-OH=1.87, Co(IV)=O=1.68, Co-N=1.96, O-H=0.97, N-H=1.02 A are typical literature-motif values, NOT optimized and NOT our calculation; no geometry relaxation anywhere in v1; azimuthal phases of the NH3 umbrellas and O-H tilts are set by a deterministic greedy grid search that maximizes the minimal nonbonded contact of the rigid cage (steric de-clash only, not an optimization)",
+  "caveats": "v1 single-point, no relaxation; cluster != electrode (no solvent/potential) -> no eta/dG here, only N_u; E(CASCI) on HF core over UNO(UKS) orbitals — NOT comparable with E(UKS); 'one Co(IV)=O' is a formal label — hole may delocalize, see mulliken_spin; 32 atoms slightly exceed the ~25 estimate of the Stage 1 note",
+  "started": "2026-07-04 07:46:35"
+ },
+ "geometry": {
+  "resting": {
+   "natoms": 32,
+   "formula": "Co4H16N4O8",
+   "min_nonbonded_A": 1.66,
+   "min_nonbonded_pair": [
+    "18:H",
+    "19:H"
+   ],
+   "xyz": "32\nidealized truncated Co4O4 cubane core (v1, not optimized)\nCo     0.000000     0.000000     0.000000\nCo     1.900000     1.900000     0.000000\nCo     1.900000     0.000000     1.900000\nCo     0.000000     1.900000     1.900000\nO     1.900000     0.000000     0.000000\nO     0.000000     1.900000     0.000000\nO     0.000000     0.000000     1.900000\nO     1.900000     1.900000     1.900000\nO    -1.870000     0.000000     0.000000\nH    -1.546207    -0.646552    -0.646552\nN     0.000000    -1.960000     0.000000\nH    -0.677752    -2.308861    -0.677752\nH     0.925827    -2.308861    -0.248075\nH    -0.248075    -2.308861     0.925827\nO     3.770000     1.900000     0.000000\nH     3.446207     2.546552    -0.646552\nN     1.900000     3.860000     0.000000\nH     2.577752     4.208861    -0.677752\nH     0.974173     4.208861    -0.248075\nH     2.148075     4.208861     0.925827\nO     3.770000     0.000000     1.900000\nH     3.446207    -0.646552     2.546552\nN     1.900000    -1.960000     1.900000\nH     2.577752    -2.308861     2.577752\nH     0.974173    -2.308861     2.148075\nH     2.148075    -2.308861     0.974173\nO    -1.870000     1.900000     1.900000\nH    -1.546207     2.546552     2.546552\nN     0.000000     3.860000     1.900000\nH    -0.677752     4.208861     2.577752\nH     0.925827     4.208861     2.148075\nH    -0.248075     4.208861     0.974173",
+   "honesty": "idealized single-point v1: cube edge Co-O=1.90 A, Co-OH=1.87, Co(IV)=O=1.68, Co-N=1.96, O-H=0.97, N-H=1.02 A are typical literature-motif values, NOT optimized and NOT our calculation; no geometry relaxation anywhere in v1; azimuthal phases of the NH3 umbrellas and O-H tilts are set by a deterministic greedy grid search that maximizes the minimal nonbonded contact of the rigid cage (steric de-clash only, not an optimization)"
+  }
+ }
+}
