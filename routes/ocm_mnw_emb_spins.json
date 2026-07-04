@@ -9,31 +9,31 @@
  "ladder": [
   {
    "spin_2S": 1,
-   "e_h": -1871.4430832701087,
+   "e_h": -1871.4430832701105,
    "converged": true,
    "spin_square": 2.677,
-   "wall_s": 649.1
+   "wall_s": 712.1
   },
   {
    "spin_2S": 3,
-   "e_h": -1871.4668177117455,
+   "e_h": -1871.466817711735,
    "converged": true,
    "spin_square": 4.812,
-   "wall_s": 389.5
+   "wall_s": 420.6
   },
   {
    "spin_2S": 5,
-   "e_h": -1871.4763255358876,
+   "e_h": -1871.4763255358848,
    "converged": true,
    "spin_square": 8.833,
-   "wall_s": 438.0
+   "wall_s": 506.8
   },
   {
    "spin_2S": 7,
-   "e_h": -1871.3883004670452,
+   "e_h": -1871.3883004670483,
    "converged": true,
    "spin_square": 15.792,
-   "wall_s": 450.3
+   "wall_s": 500.4
   }
  ],
  "ground_2S": 5,
