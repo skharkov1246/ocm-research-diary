@@ -50,6 +50,9 @@ PREF = os.environ.get("OCM_PREFIX", "ocm_mnw" if MODEL == "bare" else "ocm_mnw_e
 N_DOCC, N_VIR = 2, 3
 CAS_TARGET = (2 * N_DOCC + SPIN, N_DOCC + SPIN + N_VIR)
 AVAS_LABELS = ["Mn 3d", "O 2p", "2 H 1s"]   # атом 2 (0-based) — переносимый H
+# версия геометрического протокола: при несовпадении resume пересчитывает точки
+# (frozen-frame сменил floppy-relax — старые точки несовместимы, отбрасываются)
+GEOM_VERSION = "embedded-frozen-frame-v2" if MODEL == "embedded" else "bare-v1"
 
 # HAT-сетка: пары (r_CH, r_OH), Å. R-точка: пин только r(O–H)=2.2 (пре-комплекс).
 R_POINT = (None, 2.20)
@@ -216,6 +219,17 @@ def constrained_opt(atoms, rCH, rOH, tag, dm0=None, maxsteps=200):
         lines.append(f"distance 2 3 {rOH:.4f}")   # O(2)–H(3), 1-based
     if rCH is not None:
         lines.append(f"distance 3 4 {rCH:.4f}")   # H(3)–C(4)
+    if MODEL == "embedded":
+        # embedded-cluster приближение: первая Na/W-оболочка удерживается решёткой —
+        # замораживаем её (последние len(env) атомов), релаксируем только реактивный
+        # центр Mn=O + переносимый H + субстрат. Быстрее (30-50 шагов вместо 200+)
+        # И физичнее (каркас не «плывёт» в газовой фазе); каркас идентичен во всех
+        # точках → согласованный профиль. Оговорка: каркас при идеализированной
+        # геометрии, не крист. координатах.
+        n = len(atoms)
+        n_env = len(environment_atoms())
+        lines.append("$freeze")
+        lines.append(f"xyz {n - n_env + 1}-{n}")   # 1-based, последние n_env атомов
     with open(cfile, "w") as f:
         f.write("\n".join(lines) + "\n")
     mf = uks(build_mol(atoms), dm0=dm0)
@@ -241,15 +255,22 @@ def constrained_opt(atoms, rCH, rOH, tag, dm0=None, maxsteps=200):
 
 
 def stage_geom(sub):
-    out = {"substrate": sub, "protocol": f"UKS-{XC.upper()}/{BASIS}, sextet, "
-           "2D-pin r(C-H)+r(O-H) (geomeTRIC), frame relaxed", "points": []}
+    fr = "frozen frame" if MODEL == "embedded" else "frame relaxed"
+    out = {"substrate": sub, "geom_version": GEOM_VERSION,
+           "protocol": f"UKS-{XC.upper()}/{BASIS}, sextet, "
+           f"2D-pin r(C-H)+r(O-H) (geomeTRIC), {fr}", "points": []}
     path = os.path.join(DIR, f"{PREF}_{sub}_geom.json")
     atoms = start_atoms(sub)
     grid = [R_POINT] + PATH
     if os.path.exists(path):        # резюме после смерти контейнера
         with open(path) as f:
             saved = json.load(f)
-        out["points"] = saved.get("points", [])[:len(grid)]
+        if saved.get("geom_version") != GEOM_VERSION:
+            print(f"[{sub}] geom_version mismatch "
+                  f"({saved.get('geom_version')} != {GEOM_VERSION}) — recompute all",
+                  flush=True)
+        else:
+            out["points"] = saved.get("points", [])[:len(grid)]
         if out["points"]:
             atoms = [(s, tuple(c)) for s, c in out["points"][-1]["atoms"]]
             print(f"[{sub}] resume: {len(out['points'])}/{len(grid)} points on disk",
