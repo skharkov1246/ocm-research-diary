@@ -74,15 +74,16 @@ export OCM_MODEL=embedded
 S3=s3://{BUCKET}/{PREFIX}
 sync_up() {{ aws s3 cp routes/ $S3/ --recursive --exclude '*' --include 'ocm_mnw_emb_*' >/dev/null 2>&1 || true; aws s3 cp /root/repo/emb_run.log $S3/emb_run.log >/dev/null 2>&1 || true; }}
 ( while true; do sleep 180; sync_up; done ) &
-run() {{ OMP_NUM_THREADS=$2 OCM_SPIN=${{BEST:-5}} timeout {JOB_TIMEOUT}m python3 -u routes/ocm_mnw_selectivity.py $1 $3 >> emb_run.log 2>&1; }}
+T=$(( $(nproc) / 2 ))
+run() {{ OMP_NUM_THREADS=$T OCM_SPIN=${{BEST:-5}} timeout {JOB_TIMEOUT}m python3 -u routes/ocm_mnw_selectivity.py $1 $3 >> emb_run.log 2>&1; }}
 echo "[aws] spins ladder" >> emb_run.log
-OMP_NUM_THREADS=32 timeout 120m python3 -u routes/ocm_mnw_selectivity.py spins >> emb_run.log 2>&1
+OMP_NUM_THREADS=$(nproc) timeout 120m python3 -u routes/ocm_mnw_selectivity.py spins >> emb_run.log 2>&1
 BEST=$(python3 -c "import json;print(json.load(open('routes/ocm_mnw_emb_spins.json')).get('ground_2S',3))" 2>/dev/null || echo 3)
 echo "[aws] ground 2S=$BEST — full pipeline both substrates" >> emb_run.log
 for st in geom polish profile refine; do
-  ( run $st 16 ch4 ) &
+  ( run $st x ch4 ) &
   P1=$!
-  ( run $st 16 c2h6 ) &
+  ( run $st x c2h6 ) &
   P2=$!
   wait $P1 $P2
   sync_up

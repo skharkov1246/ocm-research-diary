@@ -197,10 +197,15 @@ def constrained_opt(atoms, rCH, rOH, tag, dm0=None):
     with open(cfile, "w") as f:
         f.write("\n".join(lines) + "\n")
     mf = uks(build_mol(atoms), dm0=dm0)
-    mol_eq = optimize(mf, constraints=cfile, maxsteps=200,
-                      convergence_energy=1e-6, convergence_grms=3e-4,
-                      convergence_gmax=6e-4, convergence_drms=1.5e-3,
-                      convergence_dmax=2.5e-3)
+    if MODEL == "embedded":   # больше DOF: щадящие критерии (релакс-скан, не минимум)
+        conv = dict(convergence_energy=2e-6, convergence_grms=4.5e-4,
+                    convergence_gmax=9e-4, convergence_drms=2.3e-3,
+                    convergence_dmax=3.6e-3)
+    else:
+        conv = dict(convergence_energy=1e-6, convergence_grms=3e-4,
+                    convergence_gmax=6e-4, convergence_drms=1.5e-3,
+                    convergence_dmax=2.5e-3)
+    mol_eq = optimize(mf, constraints=cfile, maxsteps=200, **conv)
     os.remove(cfile)
     new_atoms = [(mol_eq.atom_symbol(i), tuple(c))
                  for i, c in enumerate(mol_eq.atom_coords(unit="Angstrom"))]
