@@ -21,5 +21,27 @@
    "xyz": "32\nidealized truncated Co4O4 cubane core (v1, not optimized)\nCo     0.000000     0.000000     0.000000\nCo     1.900000     1.900000     0.000000\nCo     1.900000     0.000000     1.900000\nCo     0.000000     1.900000     1.900000\nO     1.900000     0.000000     0.000000\nO     0.000000     1.900000     0.000000\nO     0.000000     0.000000     1.900000\nO     1.900000     1.900000     1.900000\nO    -1.870000     0.000000     0.000000\nH    -1.546207    -0.646552    -0.646552\nN     0.000000    -1.960000     0.000000\nH    -0.677752    -2.308861    -0.677752\nH     0.925827    -2.308861    -0.248075\nH    -0.248075    -2.308861     0.925827\nO     3.770000     1.900000     0.000000\nH     3.446207     2.546552    -0.646552\nN     1.900000     3.860000     0.000000\nH     2.577752     4.208861    -0.677752\nH     0.974173     4.208861    -0.248075\nH     2.148075     4.208861     0.925827\nO     3.770000     0.000000     1.900000\nH     3.446207    -0.646552     2.546552\nN     1.900000    -1.960000     1.900000\nH     2.577752    -2.308861     2.577752\nH     0.974173    -2.308861     2.148075\nH     2.148075    -2.308861     0.974173\nO    -1.870000     1.900000     1.900000\nH    -1.546207     2.546552     2.546552\nN     0.000000     3.860000     1.900000\nH    -0.677752     4.208861     2.577752\nH     0.925827     4.208861     2.148075\nH    -0.248075     4.208861     0.974173",
    "honesty": "idealized single-point v1: cube edge Co-O=1.90 A, Co-OH=1.87, Co(IV)=O=1.68, Co-N=1.96, O-H=0.97, N-H=1.02 A are typical literature-motif values, NOT optimized and NOT our calculation; no geometry relaxation anywhere in v1; azimuthal phases of the NH3 umbrellas and O-H tilts are set by a deterministic greedy grid search that maximizes the minimal nonbonded contact of the rigid cage (steric de-clash only, not an optimization)"
   }
+ },
+ "resting": {
+  "singlet": {
+   "e_scf": -6358.458269,
+   "scf_converged": true,
+   "internally_stable": true,
+   "stability_rotations": 0,
+   "used_newton": true,
+   "s2": 0.6682,
+   "gap_eV": 0.154,
+   "t_scf_s": 4671.5,
+   "mulliken_spin": {
+    "0:Co": 0.102,
+    "1:Co": -0.102,
+    "2:Co": 0.102,
+    "3:Co": -0.102,
+    "8:O": 0.096,
+    "14:O": -0.096,
+    "20:O": 0.096,
+    "26:O": -0.096
+   }
+  }
  }
 }
