@@ -39,9 +39,11 @@ TAG = {"Key": "project", "Value": "ocm-research-diary"}
 
 JOBS = {
     # Track #17 (CH4->metanol): реальный IZA-CHA кластер, CASSCF(+NEVPT2) spin ordering
+    # 24h: первый прогон (10h) dead-man убил ДО выгрузки; r7i.2xlarge — чтобы
+    # влезать в квоту 16 vCPU рядом с джобами других сессий (ocm-stage16)
     "cha-sp": dict(
         cmd="CHA_NEVPT2=1 python3 -u calc/fe_zeolite_cha_sp.py",
-        instance="r7i.2xlarge", hours=10,
+        instance="r7i.2xlarge", hours=24,
         results=["calc/fe_zeolite_cha_results.json"]),
     # Track #13 (CO2->C2+): полное AVAS-пространство CAS(36e,22o) на эндпойнтах Cu2
     "co2-fullcas": dict(
@@ -90,14 +92,30 @@ def _user_data(job, spec, embed_creds):
         cred_lines = (f"export AWS_ACCESS_KEY_ID={c.access_key}\n"
                       f"export AWS_SECRET_ACCESS_KEY={c.secret_key}\n"
                       f"export AWS_DEFAULT_REGION={REGION}\n")
+    partials = "\n      ".join(
+        f"aws s3 cp {f} s3://{b}/{PREFIX}/{job}/$(basename {f}) || true"
+        for f in spec["results"])
+    # cross-instance resume: подтянуть чекпойнты прошлого (убитого dead-man'ом) прогона
+    downloads = "\n".join(
+        f"aws s3 cp s3://{b}/{PREFIX}/{job}/$(basename {f}) {f} || true"
+        for f in spec["results"])
     return f"""#!/bin/bash
 set -ux
 shutdown -h +{minutes}
-{cred_lines}dnf install -y -q git python3-pip || yum install -y -q git python3-pip
+{cred_lines}echo "started $(date -u +%FT%TZ) $(uname -a)" | \\
+  aws s3 cp - s3://{b}/{PREFIX}/{job}/started || true
+dnf install -y -q git python3-pip || yum install -y -q git python3-pip
 python3 -m pip install -q numpy scipy h5py pyscf
 cd /root && git clone --depth 1 {REPO} job && cd job
+{downloads}
+( while true; do sleep 600
+      aws s3 cp run.log s3://{b}/{PREFIX}/{job}/run.log || true
+      {partials}
+  done ) &
+UPLOADER=$!
 ( {spec['cmd']} ) > run.log 2>&1
 echo $? > exit_code
+kill $UPLOADER || true
 aws s3 cp run.log s3://{b}/{PREFIX}/{job}/run.log || true
 aws s3 cp exit_code s3://{b}/{PREFIX}/{job}/exit_code || true
 {uploads}
