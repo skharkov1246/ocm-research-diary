@@ -129,8 +129,20 @@ def environment_atoms():
 
 def stage_spins():
     """Лестница спинов UKS-PBE0 на стартовой R-геометрии (кластер + CH₄):
-    выбираем основное спиновое состояние ПЕРЕД пайплайном, не постулируем."""
+    выбираем основное спиновое состояние ПЕРЕД пайплайном, не постулируем.
+    Resume: если лестница уже посчитана (есть ground_2S) — пропускаем (иначе
+    каждое поколение впустую гоняло бы 4 UKS на 201-AO кластере, часы)."""
     global SPIN
+    path = os.path.join(DIR, f"{PREF}_spins.json")
+    if os.path.exists(path):
+        try:
+            done = json.load(open(path))
+            if "ground_2S" in done:
+                print(f"[spins] resume: ground 2S={done['ground_2S']} on disk "
+                      f"(ladder {done.get('rel_kcal')}) — skip recompute", flush=True)
+                return
+        except Exception:
+            pass
     atoms = start_atoms("ch4")
     # чётность электронов без пробной сборки (ECP-остов чётный, заряд 0)
     parity = sum(gto.charge(a[0]) for a in atoms) % 2
