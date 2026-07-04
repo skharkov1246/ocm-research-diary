@@ -182,7 +182,7 @@ def uks(mol, dm0=None):
     return mfn
 
 
-def constrained_opt(atoms, rCH, rOH, tag, dm0=None):
+def constrained_opt(atoms, rCH, rOH, tag, dm0=None, maxsteps=200):
     """Релакс-оптимизация с пином r(C–H) и/или r(O–H) (geomeTRIC, $set).
     dm0 — плотность предыдущей точки (тёплый старт: быстрее и держит одну
     электронную ветку вдоль скана — урок polish Этапа 15). Возвращает также
@@ -205,7 +205,7 @@ def constrained_opt(atoms, rCH, rOH, tag, dm0=None):
         conv = dict(convergence_energy=1e-6, convergence_grms=3e-4,
                     convergence_gmax=6e-4, convergence_drms=1.5e-3,
                     convergence_dmax=2.5e-3)
-    mol_eq = optimize(mf, constraints=cfile, maxsteps=200, **conv)
+    mol_eq = optimize(mf, constraints=cfile, maxsteps=maxsteps, **conv)
     os.remove(cfile)
     new_atoms = [(mol_eq.atom_symbol(i), tuple(c))
                  for i, c in enumerate(mol_eq.atom_coords(unit="Angstrom"))]
@@ -234,8 +234,9 @@ def stage_geom(sub):
         if i < len(out["points"]):
             continue
         t0 = time.time()
-        atoms, e, conv, ss, dm = constrained_opt(atoms, rCH, rOH, f"{sub}_{i}",
-                                                 dm0=dm)
+        atoms, e, conv, ss, dm = constrained_opt(
+            atoms, rCH, rOH, f"{sub}_{i}", dm0=dm,
+            maxsteps=90 if (MODEL == "embedded" and i == 0) else 200)
         out["points"].append({
             "rCH_pin": rCH, "rOH_pin": rOH, "e_h": e, "scf_converged": conv,
             "spin_square": round(ss, 3), "wall_s": round(time.time() - t0, 1),
