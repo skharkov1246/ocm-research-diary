@@ -227,7 +227,10 @@ def constrained_opt(atoms, rCH, rOH, tag, dm0=None, maxsteps=200):
         conv = dict(convergence_energy=1e-6, convergence_grms=3e-4,
                     convergence_gmax=6e-4, convergence_drms=1.5e-3,
                     convergence_dmax=2.5e-3)
-    mol_eq = optimize(mf, constraints=cfile, maxsteps=maxsteps, **conv)
+    # assert_convergence=False: при упоре в maxsteps вернуть последнюю геометрию,
+    # а не падать (для скан-точки на floppy-каркасе это приемлемо — не стационар)
+    mol_eq = optimize(mf, constraints=cfile, maxsteps=maxsteps,
+                      assert_convergence=False, **conv)
     os.remove(cfile)
     new_atoms = [(mol_eq.atom_symbol(i), tuple(c))
                  for i, c in enumerate(mol_eq.atom_coords(unit="Angstrom"))]
@@ -256,9 +259,12 @@ def stage_geom(sub):
         if i < len(out["points"]):
             continue
         t0 = time.time()
+        if MODEL == "embedded":
+            ms = 90 if i == 0 else 130   # ограниченный кран на floppy-каркасе
+        else:
+            ms = 200
         atoms, e, conv, ss, dm = constrained_opt(
-            atoms, rCH, rOH, f"{sub}_{i}", dm0=dm,
-            maxsteps=90 if (MODEL == "embedded" and i == 0) else 200)
+            atoms, rCH, rOH, f"{sub}_{i}", dm0=dm, maxsteps=ms)
         out["points"].append({
             "rCH_pin": rCH, "rOH_pin": rOH, "e_h": e, "scf_converged": conv,
             "spin_square": round(ss, 3), "wall_s": round(time.time() - t0, 1),
