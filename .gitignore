@@ -7,3 +7,6 @@ routes/_constr_*.txt
 .claude/
 *.chk.npz
 routes/*_scf_spin*.npz
+routes/_hx_*.txt
+routes/halogen_*.log
+routes/*_geom.log
