@@ -89,16 +89,13 @@ def rohf(mol):
 def relax_uks(atoms, spin):
     # одноатомный медиатор (напр. атомарный O 3P) — оптимизировать нечего,
     # geomeTRIC падает на построении internal-coords → одноточечно.
-    if len(atoms) <= 1:
-        mf = uks(M(atoms, spin))
-        na = [(atoms[0][0], tuple(atoms[0][1]))]
-        return na, mf
-    from pyscf.geomopt.geometric_solver import optimize
+    # ЖЁСТКИЙ дескриптор: реагенты берём на идеальных длинах связей (одноточечно),
+    # без geomeTRIC-релакса — он был узким местом (127с/шаг + «Inverse iteration»
+    # на линейных фрагментах), а для screening-ΔΔE‡ (один и тот же субстрат по обе
+    # стороны) релакс-поправка почти сокращается. Оговорка уже в note результатов.
     mf = uks(M(atoms, spin))
-    mol = optimize(mf, maxsteps=100, assert_convergence=False)
-    na = [(mol.atom_symbol(i), tuple(c))
-          for i, c in enumerate(mol.atom_coords(unit="Angstrom"))]
-    return na, uks(mol)
+    na = [(s, tuple(c)) for s, c in atoms]
+    return na, mf
 
 
 def nevpt2(atoms, spin, avas_labels, thr=0.5):
