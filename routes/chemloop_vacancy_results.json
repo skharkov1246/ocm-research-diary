@@ -1,0 +1,62 @@
+{
+ "descriptor": "oxygen-vacancy formation energy Ev = E(red)+1/2E(O2)-E(oxo)",
+ "note": "minimal [O=M(OH)2] stand-in clusters; screen = relative volcano, not absolute. NEVPT2 column is the multireference-corrected Ev.",
+ "carriers": [
+  {
+   "metal": "Ti",
+   "Ev_dft": 92.2,
+   "Ev_casscf": 43.01,
+   "Ev_nevpt2": 100.24,
+   "q_oxo": -0.6084019219777659
+  },
+  {
+   "metal": "V",
+   "Ev_dft": 70.29,
+   "Ev_casscf": -1.08,
+   "Ev_nevpt2": 77.57,
+   "q_oxo": -0.612817758254149
+  },
+  {
+   "metal": "Cr",
+   "Ev_dft": 60.79,
+   "Ev_casscf": -27.44,
+   "Ev_nevpt2": 45.24,
+   "q_oxo": -0.5932537739481614
+  },
+  {
+   "metal": "Mn",
+   "Ev_dft": 6.88,
+   "Ev_casscf": -99.88,
+   "Ev_nevpt2": -6.4,
+   "q_oxo": -0.608955840169827
+  },
+  {
+   "metal": "Fe",
+   "Ev_dft": 3.43,
+   "Ev_casscf": -101.61,
+   "Ev_nevpt2": 1.73,
+   "q_oxo": -0.48098500516118925
+  },
+  {
+   "metal": "Co",
+   "Ev_dft": -9.46,
+   "Ev_casscf": -117.14,
+   "Ev_nevpt2": -10.47,
+   "q_oxo": -0.4563429588363128
+  },
+  {
+   "metal": "Ni",
+   "Ev_dft": -28.34,
+   "Ev_casscf": -136.42,
+   "Ev_nevpt2": -33.45,
+   "q_oxo": -0.018079480047687113
+  },
+  {
+   "metal": "Cu",
+   "Ev_dft": -44.18,
+   "Ev_casscf": -127.27,
+   "Ev_nevpt2": -33.46,
+   "q_oxo": -0.32256745143623533
+  }
+ ]
+}
