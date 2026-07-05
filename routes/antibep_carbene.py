@@ -61,23 +61,29 @@ def M(atoms, spin, charge=0):
 
 
 def uks(mol, dm0=None):
-    mf = dft.UKS(mol).density_fit(); mf.xc = XC; mf.conv_tol = 1e-8
-    mfn = scf.newton(mf)
-    mfn.kernel(dm0=dm0) if dm0 is not None else mfn.kernel()
-    if not mfn.converged:
-        m2 = dft.UKS(mol).density_fit(); m2.xc = XC; m2.level_shift = 0.2
-        m2.max_cycle = 300; m2.kernel(dm0=dm0)
-        mfn = scf.newton(m2); mfn.kernel(m2.make_rdm1())
-    return mfn
+    # без density_fit: молекулы крошечные, а DF+newton+threading иногда даёт
+    # 0%-CPU дедлок. Плейн-DIIS сначала, newton только как ускоритель с cap.
+    mf = dft.UKS(mol); mf.xc = XC; mf.conv_tol = 1e-8; mf.max_cycle = 200
+    mf.kernel(dm0=dm0) if dm0 is not None else mf.kernel()
+    if not mf.converged:
+        mf.level_shift = 0.3; mf.max_cycle = 300; mf.kernel(mf.make_rdm1())
+    if not mf.converged:
+        mfn = scf.newton(mf); mfn.max_cycle = 60; mfn.kernel(mf.make_rdm1())
+        if mfn.converged:
+            return mfn
+    return mf
 
 
 def rohf(mol):
-    mf = scf.ROHF(mol); mf.conv_tol = 1e-8
-    mfn = scf.newton(mf); mfn.kernel()
-    if not mfn.converged:
-        m2 = scf.ROHF(mol); m2.level_shift = 0.4; m2.max_cycle = 300; m2.kernel()
-        mfn = scf.newton(m2); mfn.kernel(m2.make_rdm1())
-    return mfn
+    mf = scf.ROHF(mol); mf.conv_tol = 1e-8; mf.max_cycle = 200
+    mf.kernel()
+    if not mf.converged:
+        mf.level_shift = 0.4; mf.max_cycle = 300; mf.kernel(mf.make_rdm1())
+    if not mf.converged:
+        mfn = scf.newton(mf); mfn.max_cycle = 60; mfn.kernel(mf.make_rdm1())
+        if mfn.converged:
+            return mfn
+    return mf
 
 
 def relax_uks(atoms, spin):
