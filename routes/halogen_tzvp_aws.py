@@ -66,9 +66,19 @@ def main():
           .get_caller_identity()["Arn"], flush=True)
     print(f"region={REGION} type={ITYPE} branch={BRANCH} "
           f"bucket=s3://{BUCKET}/{PREFIX} X={XS}", flush=True)
-    ami = ssm.get_parameter(
-        Name="/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
-    )["Parameter"]["Value"]
+    try:
+        ami = ssm.get_parameter(
+            Name="/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
+        )["Parameter"]["Value"]
+    except ClientError:
+        # ssm:GetParameter скоупнут us-east-1 — берём свежий AL2023 напрямую
+        imgs = ec2.describe_images(
+            Owners=["amazon"],
+            Filters=[{"Name": "name",
+                      "Values": ["al2023-ami-2023*-kernel-*-x86_64"]},
+                     {"Name": "state", "Values": ["available"]}])["Images"]
+        ami = max(imgs, key=lambda i: i["CreationDate"])["ImageId"]
+    print("ami:", ami, flush=True)
     common = dict(
         ImageId=ami, InstanceType=ITYPE, MinCount=1, MaxCount=1,
         IamInstanceProfile={"Name": PROFILE},
