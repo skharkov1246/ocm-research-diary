@@ -1,0 +1,45 @@
+{
+ "stage": "add",
+ "model": "gas-phase, def2-svp",
+ "dft": {
+  "barrier_add_kcal": -6.53,
+  "dE_reac_kcal": -26.16,
+  "barrier_bscission_kcal": 19.63,
+  "ts_rcs": 2.15,
+  "profile": [
+   {
+    "rcs": 2.6,
+    "e_h": -662.8536867868263
+   },
+   {
+    "rcs": 2.35,
+    "e_h": -662.8539950271415
+   },
+   {
+    "rcs": 2.15,
+    "e_h": -662.8532868071925
+   },
+   {
+    "rcs": 1.95,
+    "e_h": -662.8755845648247
+   },
+   {
+    "rcs": 1.8,
+    "e_h": -662.8848145692737
+   }
+  ]
+ },
+ "casscf": {
+  "barrier_add_kcal": 9.39,
+  "barrier_bscission_kcal": 2.26
+ },
+ "nevpt2": {
+  "barrier_add_kcal": -5.04,
+  "barrier_bscission_kcal": -5.97
+ },
+ "ts_cas": [
+  11,
+  7
+ ],
+ "wall_s": 1089.5
+}
