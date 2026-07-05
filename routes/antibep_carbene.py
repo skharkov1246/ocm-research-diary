@@ -81,6 +81,12 @@ def rohf(mol):
 
 
 def relax_uks(atoms, spin):
+    # одноатомный медиатор (напр. атомарный O 3P) — оптимизировать нечего,
+    # geomeTRIC падает на построении internal-coords → одноточечно.
+    if len(atoms) <= 1:
+        mf = uks(M(atoms, spin))
+        na = [(atoms[0][0], tuple(atoms[0][1]))]
+        return na, mf
     from pyscf.geomopt.geometric_solver import optimize
     mf = uks(M(atoms, spin))
     mol = optimize(mf, maxsteps=100, assert_convergence=False)
