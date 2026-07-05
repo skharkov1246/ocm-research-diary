@@ -13,3 +13,6 @@ routes/*_geom.log
 routes/_ab_*.txt
 routes/antibep_*.json
 routes/antibep_carbene_results.json
+routes/_t_*.txt
+routes/_msa_*.txt
+routes/_dife_*.txt
