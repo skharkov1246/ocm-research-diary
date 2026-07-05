@@ -37,7 +37,8 @@ from pyscf.mrpt import NEVPT
 
 HARTREE_KCAL = 627.509474
 DIR = os.path.dirname(os.path.abspath(__file__))
-BASIS = "def2-svp"
+BASIS = os.environ.get("HAL_BASIS", "def2-svp")   # напр. def2-tzvp для рефайна
+SUF = os.environ.get("HAL_SUFFIX", "")            # напр. "_tzvp" — суффикс файлов
 XC = "pbe0"
 
 # np-метка валентной p-оболочки галогена для AVAS
@@ -156,8 +157,8 @@ def ts_scan(X, rHX_ts):
 
 def stage_run(X):
     cfg = XCONF[X]
-    out = {"halogen": X, "model": "gas-phase X + CH4 -> CH3 + HX, def2-SVP+ECP"}
-    path = os.path.join(DIR, f"halogen_{X}.json")
+    out = {"halogen": X, "model": f"gas-phase X + CH4 -> CH3 + HX, {BASIS}+ECP"}
+    path = os.path.join(DIR, f"halogen{SUF}_{X}.json")
     t0 = time.time()
     # реагенты/продукты (релакс DFT, затем NEVPT2 на релакс-геометрии)
     ch4, mf_ch4 = relax_uks(ch4_atoms(), 0)
@@ -198,7 +199,7 @@ def stage_run(X):
 def stage_merge():
     rows = []
     for X in ("F", "Cl", "Br", "I"):
-        p = os.path.join(DIR, f"halogen_{X}.json")
+        p = os.path.join(DIR, f"halogen{SUF}_{X}.json")
         if os.path.exists(p):
             d = json.load(open(p))
             rows.append({"X": X,
@@ -211,7 +212,7 @@ def stage_merge():
                    "the multireference-corrected barrier; DFT-NEVPT2 gap = the de-risk. "
                    "Lit. reference order: Br~18, I~34 kcal/mol.",
            "halogens": rows}
-    json.dump(res, open(os.path.join(DIR, "halogen_descriptor_results.json"), "w"),
+    json.dump(res, open(os.path.join(DIR, f"halogen_descriptor{SUF}_results.json"), "w"),
               indent=1)
     print(json.dumps(res, ensure_ascii=False, indent=1))
 
