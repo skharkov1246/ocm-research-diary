@@ -119,17 +119,16 @@ def valid_spins(atoms, charge=0, n=None):
 
 
 def uks(mol, dm0=None):
-    # без density_fit: DF+newton+threading иногда даёт 0%-CPU дедлок (урок antibep);
-    # плейн-DIIS сначала, newton только как ускоритель с cap.
-    mf = dft.UKS(mol); mf.xc = XC; mf.conv_tol = 1e-8; mf.max_cycle = 300
-    mf.kernel(dm0=dm0) if dm0 is not None else mf.kernel()
-    if not mf.converged:
-        mf.level_shift = 0.3; mf.max_cycle = 400; mf.kernel(mf.make_rdm1())
-    if not mf.converged:
-        mfn = scf.newton(mf); mfn.max_cycle = 60; mfn.kernel(mf.make_rdm1())
-        if mfn.converged:
-            return mfn
-    return mf
+    mf = dft.UKS(mol).density_fit()
+    mf.xc = XC
+    mf.conv_tol = 1e-8
+    mfn = scf.newton(mf)
+    mfn.kernel(dm0=dm0) if dm0 is not None else mfn.kernel()
+    if not mfn.converged:
+        m2 = dft.UKS(mol).density_fit(); m2.xc = XC; m2.level_shift = 0.3
+        m2.max_cycle = 400; m2.kernel(dm0=dm0)
+        mfn = scf.newton(m2); mfn.kernel(m2.make_rdm1())
+    return mfn
 
 
 # PYRO_SP=1 — быстрый режим одноточечных энергий (без геом-оптимизации): для
