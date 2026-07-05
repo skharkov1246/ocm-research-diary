@@ -57,6 +57,62 @@
    "Ebind_C_casscf": -17.82,
    "Ebind_C_nevpt2": -70.84,
    "dEdiss_CH4_dft": 4.14
+  },
+  {
+   "pair": "Pt-Sn",
+   "Ebind_C_dft": -67.07,
+   "Ebind_C_casscf": -31.43,
+   "Ebind_C_nevpt2": -100.11,
+   "dEdiss_CH4_dft": 2.91
+  },
+  {
+   "pair": "Pd-In",
+   "Ebind_C_dft": -53.82,
+   "Ebind_C_casscf": -40.42,
+   "Ebind_C_nevpt2": -113.23,
+   "dEdiss_CH4_dft": 22.56
+  },
+  {
+   "pair": "Cu-Sn",
+   "Ebind_C_dft": -94.9,
+   "Ebind_C_casscf": 1854.48,
+   "Ebind_C_nevpt2": 1885.55,
+   "dEdiss_CH4_dft": 9.54
+  },
+  {
+   "pair": "Fe-Bi",
+   "Ebind_C_dft": -122.87,
+   "Ebind_C_casscf": -35.61,
+   "Ebind_C_nevpt2": -111.25,
+   "dEdiss_CH4_dft": -41.15
+  },
+  {
+   "pair": "Ni-Ga",
+   "Ebind_C_dft": -51.94,
+   "Ebind_C_casscf": -17.35,
+   "Ebind_C_nevpt2": -37.31,
+   "dEdiss_CH4_dft": -3.05
+  },
+  {
+   "pair": "Co-Bi",
+   "Ebind_C_dft": -60.95,
+   "Ebind_C_casscf": -29.83,
+   "Ebind_C_nevpt2": -90.36,
+   "dEdiss_CH4_dft": -3.61
+  },
+  {
+   "pair": "Cu-In",
+   "Ebind_C_dft": -57.45,
+   "Ebind_C_casscf": -27.51,
+   "Ebind_C_nevpt2": -50.11,
+   "dEdiss_CH4_dft": 11.7
+  },
+  {
+   "pair": "Pd-Sn",
+   "Ebind_C_dft": -50.83,
+   "Ebind_C_casscf": -7.75,
+   "Ebind_C_nevpt2": -45.22,
+   "dEdiss_CH4_dft": 3.41
   }
  ]
 }
