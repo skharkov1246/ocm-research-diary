@@ -1,0 +1,16 @@
+{
+ "route": "direct CH4 + CO2 -> CH3COOH (radical chain feasibility, phase 1)",
+ "numbers_nevpt2": {
+  "cc_coupling_barrier": 25.57,
+  "decarboxylation_barrier": 4.03,
+  "hat_propagation_barrier": 71.21,
+  "cc_dE_reac": 21.54
+ },
+ "numbers_dft": {
+  "cc_coupling_barrier": 12.72,
+  "decarboxylation_barrier": 7.22,
+  "hat_propagation_barrier": 62.01
+ },
+ "chain_verdict": "DEAD in free gas phase: acetoxyl decarboxylates faster than it harvests H from CH4 \u2014 need stabilization of RCO2 (complexation/field/surface) to slow step 2",
+ "note": "gas-phase skeleton; DFT-vs-NEVPT2 gap on RCO2* states is the de-risk (DFT notoriously wrong on acetoxyl). Screen-grade."
+}
