@@ -42,6 +42,20 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 BASIS = os.environ.get("MSA_BASIS", "def2-svp")
 XC = "pbe0"
 
+# MSA_RADCAS=1 — симметричные активные пространства S-частиц: SOMO CH3SO3•
+# делокализован по ВСЕМ трём O; кривобокий CAS (S 3p + один O) ломал CASSCF
+# (β-scission NEVPT2 −5.9 vs DFT +19.6). Все три O в пространство; threshold
+# повыше — AVAS сам подрежет слабые компоненты до NEVPT2-подъёмного размера.
+RADCAS = os.environ.get("MSA_RADCAS", "0") == "1"
+LAB_TS_ADD = (["0 S 3p", "1 O 2p", "2 O 2p", "3 O 2p", "4 C 2p"] if RADCAS
+              else ["0 S 3p", "4 C 2p"])
+LAB_SO3 = (["0 S 3p", "1 O 2p", "2 O 2p", "3 O 2p"] if RADCAS
+           else ["0 S 3p", "1 O 2p"])
+LAB_RAD = (["0 S 3p", "2 O 2p", "3 O 2p", "4 O 2p"] if RADCAS
+           else ["0 S 3p", "2 O 2p"])
+THR_S = 0.6 if RADCAS else 0.45
+
+
 
 def M(atoms, spin, charge=0):
     return gto.M(atom=atoms, basis=BASIS, charge=charge, spin=spin,
@@ -204,10 +218,10 @@ def stage_add():
                   "dE_reac_kcal": round((m_rad.e_tot - eR) * HARTREE_KCAL, 2),
                   "barrier_bscission_kcal": round((e_ts - m_rad.e_tot) * HARTREE_KCAL, 2),
                   "ts_rcs": rcs, "profile": prof}
-    n_ts = nevpt2(ts, 1, ["0 S 3p", "4 C 2p"])
+    n_ts = nevpt2(ts, 1, LAB_TS_ADD, thr=THR_S)
     n_ch3 = nevpt2(ch3, 1, ["0 C 2p"])
-    n_so3 = nevpt2(so3, 0, ["0 S 3p", "1 O 2p"])
-    n_rad = nevpt2(rad, 1, ["0 S 3p", "2 O 2p"])
+    n_so3 = nevpt2(so3, 0, LAB_SO3, thr=THR_S)
+    n_rad = nevpt2(rad, 1, LAB_RAD, thr=THR_S)
     for lvl in ("casscf", "nevpt2"):
         eRc = n_ch3[f"e_{lvl}"] + n_so3[f"e_{lvl}"]
         out[lvl] = {
@@ -262,7 +276,7 @@ def stage_hat():
                   "ts_rCH": rCH, "ts_rOH": rOH}
     n_ts = nevpt2(ts, 1, ["0 C 2p", "1 H 1s", "2 O 2p"], thr=0.4)
     n_ch4 = nevpt2(ch4, 0, ["0 C 2p", "1 H 1s"], thr=0.6)
-    n_rad = nevpt2(rad, 1, ["0 S 3p", "2 O 2p"])
+    n_rad = nevpt2(rad, 1, LAB_RAD, thr=THR_S)
     for lvl in ("casscf", "nevpt2"):
         eRc = n_rad[f"e_{lvl}"] + n_ch4[f"e_{lvl}"]
         out[lvl] = {"barrier_hat_kcal":
