@@ -1,0 +1,62 @@
+{
+ "descriptor": "molten-metal pyrolysis: C-binding volcano E_bind(C) on active-solvent dimer + CH4 dissociative activation dE_diss",
+ "note": "minimal hetero-bimetallic dimer stand-in (NOT periodic melt); screen = relative volcano. Strong C-binding => carbide/coking; weak => no CH4 activation. NEVPT2 column is the multireference-corrected C-binding (metal-C bond de-risk). Ni-Bi = working ref.",
+ "pairs": [
+  {
+   "pair": "Ni-Bi",
+   "Ebind_C_dft": -50.12,
+   "Ebind_C_casscf": null,
+   "Ebind_C_nevpt2": null,
+   "dEdiss_CH4_dft": 6.46
+  },
+  {
+   "pair": "Cu-Bi",
+   "Ebind_C_dft": -395.02,
+   "Ebind_C_casscf": null,
+   "Ebind_C_nevpt2": null,
+   "dEdiss_CH4_dft": -336.31
+  },
+  {
+   "pair": "Ni-In",
+   "Ebind_C_dft": -89.87,
+   "Ebind_C_casscf": null,
+   "Ebind_C_nevpt2": null,
+   "dEdiss_CH4_dft": 4.0
+  },
+  {
+   "pair": "Pt-Bi",
+   "Ebind_C_dft": -94.02,
+   "Ebind_C_casscf": null,
+   "Ebind_C_nevpt2": null,
+   "dEdiss_CH4_dft": -7.72
+  },
+  {
+   "pair": "Ni-Sn",
+   "Ebind_C_dft": -65.66,
+   "Ebind_C_casscf": null,
+   "Ebind_C_nevpt2": null,
+   "dEdiss_CH4_dft": 1.41
+  },
+  {
+   "pair": "Fe-Sn",
+   "Ebind_C_dft": -111.15,
+   "Ebind_C_casscf": null,
+   "Ebind_C_nevpt2": null,
+   "dEdiss_CH4_dft": 3.8
+  },
+  {
+   "pair": "Co-Ga",
+   "Ebind_C_dft": -107.44,
+   "Ebind_C_casscf": null,
+   "Ebind_C_nevpt2": null,
+   "dEdiss_CH4_dft": -6.22
+  },
+  {
+   "pair": "Pd-Bi",
+   "Ebind_C_dft": -60.2,
+   "Ebind_C_casscf": null,
+   "Ebind_C_nevpt2": null,
+   "dEdiss_CH4_dft": 4.14
+  }
+ ]
+}
