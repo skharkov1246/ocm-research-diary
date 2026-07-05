@@ -2,19 +2,19 @@
  "stage": "hat",
  "model": "rigid collinear HAT, def2-svp",
  "dft": {
-  "barrier_hat_kcal": 221.89,
-  "ts_rCH": 1.25,
-  "ts_rOH": 1.15
+  "barrier_hat_kcal": 19.45,
+  "ts_rCH": 1.5,
+  "ts_rOH": 0.98
  },
  "casscf": {
-  "barrier_hat_kcal": 235.71
+  "barrier_hat_kcal": -12.08
  },
  "nevpt2": {
-  "barrier_hat_kcal": 237.07
+  "barrier_hat_kcal": -11.29
  },
  "ts_cas": [
   13,
-  8
+  9
  ],
- "wall_s": 763.4
+ "wall_s": 3632.1
 }

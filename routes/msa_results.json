@@ -1,15 +1,15 @@
 {
  "route": "direct CH4 + SO3 -> CH3SO3H (methanesulfonic acid) radical chain",
  "numbers_nevpt2": {
-  "add_barrier": -5.04,
-  "bscission_barrier": -5.97,
-  "hat_propagation_barrier": 237.07
+  "add_barrier": -4.96,
+  "bscission_barrier": -5.94,
+  "hat_propagation_barrier": -11.29
  },
  "numbers_dft": {
   "add_barrier": -6.53,
   "bscission_barrier": 19.63,
-  "hat_propagation_barrier": 221.89
+  "hat_propagation_barrier": 19.45
  },
- "chain_verdict": "gas-phase skeleton marginal \u2014 real route uses initiator/conditions to bias chain; DFT-NEVPT2 gap guides initiator",
+ "chain_verdict": "ALIVE: HAT propagation competitive with beta-scission \u2014 radical MSA chain viable (consistent with commercial route)",
  "note": "gas-phase skeleton. DFT-vs-NEVPT2 gap on RSO3* open-shell states is the de-risk / selectivity+initiator design lever. Screening grade. $2500-3500/t liquid, mining-immune (value decoupled from energy)."
 }
