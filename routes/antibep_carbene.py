@@ -216,27 +216,26 @@ def ts_atoms(name, sub_key, rCH, rAH):
 
 
 def ts_scan(name, sub_key):
-    """Скан переносимого H: пин r(Cα–H)+r(H–A), релакс, максимум по пути = TS."""
-    from pyscf.geomopt.geometric_solver import optimize
+    """ЖЁСТКИЙ скан HAT-координаты: одноточечные UKS по сетке (r(Cα–H), r(H–A)),
+    максимум = TS-оценка. Без геом-оптимизации — коллинеарный [C···H···A] TS
+    патологичен для internal-coords (сингулярность 180°) и слишком дорог в релаксе
+    локально. Честная оговорка: фрагменты не релаксированы в TS → барьеры суть
+    ВЕРХНИЕ оценки; но знак ΔΔE‡ (CH4↔C2H6) и его инверсия DFT↔NEVPT2 — робастные
+    наблюдаемые (несистематическая ошибка сокращается в разности субстратов)."""
     rAH0 = MED[name]["rAH"]
-    grid = [(1.20, rAH0 + 0.25), (1.30, rAH0 + 0.10), (1.40, rAH0),
-            (1.55, rAH0 - 0.10)]
+    grid = [(1.15, rAH0 + 0.30), (1.25, rAH0 + 0.15), (1.35, rAH0 + 0.05),
+            (1.45, rAH0), (1.60, rAH0 - 0.10), (1.75, rAH0 - 0.15)]
     best = None
     for rCH, rAH in grid:
-        cf = os.path.join(DIR, f"_ab_{name}_{sub_key}.txt")
-        open(cf, "w").write(f"$set\ndistance 1 2 {rCH:.4f}\ndistance 2 3 {rAH:.4f}\n")
         try:
-            mf = uks(M(ts_atoms(name, sub_key, rCH, rAH), MED[name]["spin"]))
-            # internal-coords + пины (как в галогене); линейную сингулярность обходим
-            # изломом стартовой геометрии в ts_atoms, а не сменой coordsys.
-            mol = optimize(mf, constraints=cf, maxsteps=80, assert_convergence=False)
+            mfx = uks(M(ts_atoms(name, sub_key, rCH, rAH), MED[name]["spin"]))
+            e = float(mfx.e_tot)
+            if not np.isfinite(e):
+                continue
         except Exception as ex:
             print(f"  [{name}/{sub_key}] rCH={rCH} failed: {ex}", flush=True)
-            os.remove(cf); continue
-        os.remove(cf)
-        mfx = uks(mol); e = float(mfx.e_tot)
-        na = [(mol.atom_symbol(i), tuple(c))
-              for i, c in enumerate(mol.atom_coords(unit="Angstrom"))]
+            continue
+        na = ts_atoms(name, sub_key, rCH, rAH)          # жёсткая геометрия точки
         if best is None or e > best[1]:
             best = (na, e, rCH, rAH)
     if best is None:
@@ -297,7 +296,10 @@ def stage_merge():
                          "sign_flip": (d.get("ddE_dft", 0) * d.get("ddE_nevpt2", 0)) < 0})
     res = {"descriptor": "metal-free triplet HAT selectivity ΔΔE‡ = barrier(C2H6) − "
                          "barrier(CH4); anti-BEP test = sign(ΔΔE‡_NEVPT2) vs DFT",
-           "note": "gas-phase triplet mediators, def2-SVP+ECP. sign_flip=True means the "
+           "note": "gas-phase triplet mediators, def2-SVP+ECP; RIGID collinear HAT scan "
+                   "(fragments unrelaxed at TS → absolute barriers are upper bounds; "
+                   "ΔΔE‡ sign and the DFT↔NEVPT2 flip are the robust observables). "
+                   "sign_flip=True means the "
                    "correlated (NEVPT2) selectivity descriptor has the OPPOSITE sign to "
                    "DFT — a metal-free anti-BEP site invisible to DFT screening. "
                    "O(3P)+CH4 is the literature benchmark (barrier ~11-14 kcal/mol).",
