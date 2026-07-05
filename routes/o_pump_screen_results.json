@@ -81,6 +81,46 @@
     -0.51
    ],
    "dft_window_error_V": -0.23
+  },
+  {
+   "metal": "Mo",
+   "Ev_nevpt2": 88.3,
+   "Ev_dft": 89.3,
+   "U_window_V": [
+    0.94,
+    2.13
+   ],
+   "dft_window_error_V": 0.02
+  },
+  {
+   "metal": "W",
+   "Ev_nevpt2": 106.39,
+   "Ev_dft": 103.92,
+   "U_window_V": [
+    1.33,
+    2.52
+   ],
+   "dft_window_error_V": -0.05
+  },
+  {
+   "metal": "Sn",
+   "Ev_nevpt2": -5.38,
+   "Ev_dft": -12.47,
+   "U_window_V": [
+    -1.09,
+    0.1
+   ],
+   "dft_window_error_V": -0.15
+  },
+  {
+   "metal": "Pb",
+   "Ev_nevpt2": -39.26,
+   "Ev_dft": -42.93,
+   "U_window_V": [
+    -1.83,
+    -0.63
+   ],
+   "dft_window_error_V": -0.08
   }
  ],
  "reading": {

@@ -57,6 +57,48 @@
    "Ev_casscf": -127.27,
    "Ev_nevpt2": -33.46,
    "q_oxo": -0.32256745143623533
+  },
+  {
+   "metal": "Zr",
+   "Ev_dft": 106.73,
+   "Ev_casscf": null,
+   "Ev_nevpt2": null,
+   "q_oxo": null
+  },
+  {
+   "metal": "Nb",
+   "Ev_dft": 101.91,
+   "Ev_casscf": null,
+   "Ev_nevpt2": null,
+   "q_oxo": null
+  },
+  {
+   "metal": "Mo",
+   "Ev_dft": 89.3,
+   "Ev_casscf": 15.75,
+   "Ev_nevpt2": 88.3,
+   "q_oxo": -0.5799627374024894
+  },
+  {
+   "metal": "W",
+   "Ev_dft": 103.92,
+   "Ev_casscf": 33.2,
+   "Ev_nevpt2": 106.39,
+   "q_oxo": -0.5467461389592749
+  },
+  {
+   "metal": "Sn",
+   "Ev_dft": -12.47,
+   "Ev_casscf": -75.71,
+   "Ev_nevpt2": -5.38,
+   "q_oxo": -0.7014557622850823
+  },
+  {
+   "metal": "Pb",
+   "Ev_dft": -42.93,
+   "Ev_casscf": -94.95,
+   "Ev_nevpt2": -39.26,
+   "q_oxo": -0.6027822935408302
   }
  ]
 }
