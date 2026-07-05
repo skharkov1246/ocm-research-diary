@@ -186,10 +186,14 @@ SUBSTRATE = {
 
 
 def ts_atoms(name, sub_key, rCH, rAH):
-    """Коллинеарный [Cα···H···A]‡ по z: Cα(0) — H_t — A(медиатор), субстрат-хвост вниз."""
+    """Почти-коллинеарный [Cα···H···A]‡ по z: Cα(0) — H_t — A(медиатор), хвост вниз.
+    Намеренный лёгкий излом (dx) от оси: точно линейный C–H–A = 180° — координатная
+    сингулярность internal-coords (geomeTRIC «Inverse iteration failed»). Пины на
+    расстояния r(C–H)/r(H–A) держатся, угол свободен → TS сам досогнётся."""
+    dxH, dxA = 0.22, 0.44                               # излом ~8-10° от оси z
     zC, zH, zA = 0.0, rCH, rCH + rAH
-    a = [("C", (0, 0, zC)), ("H", (0, 0, zH))]        # Cα, переносимый H
-    a += med_atoms(name, zA)                            # A + хвост медиатора (+z)
+    a = [("C", (0, 0, zC)), ("H", (dxH, 0, zH))]        # Cα, переносимый H (сдвинут)
+    a += [(s, (x + dxA, y, z)) for s, (x, y, z) in med_atoms(name, zA)]  # A + хвост, сдвинут
     # хвост субстрата (вниз, -z), чтобы не мешать линейному каналу
     d, th = 1.09, math.radians(105.0)
     if sub_key == "ch4":
@@ -223,10 +227,9 @@ def ts_scan(name, sub_key):
         open(cf, "w").write(f"$set\ndistance 1 2 {rCH:.4f}\ndistance 2 3 {rAH:.4f}\n")
         try:
             mf = uks(M(ts_atoms(name, sub_key, rCH, rAH), MED[name]["spin"]))
-            # коллинеарный [C···H···A] TS сингулярен для internal-coords (geomeTRIC
-            # «Inverse iteration failed» → тормозит); декартовы координаты устойчивы.
-            mol = optimize(mf, constraints=cf, maxsteps=80,
-                           assert_convergence=False, coordsys="cart")
+            # internal-coords + пины (как в галогене); линейную сингулярность обходим
+            # изломом стартовой геометрии в ts_atoms, а не сменой coordsys.
+            mol = optimize(mf, constraints=cf, maxsteps=80, assert_convergence=False)
         except Exception as ex:
             print(f"  [{name}/{sub_key}] rCH={rCH} failed: {ex}", flush=True)
             os.remove(cf); continue
