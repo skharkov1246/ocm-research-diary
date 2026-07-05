@@ -5,7 +5,7 @@
     "basis": "def2-svp",
     "active_space": "CAS(16e,11o)=22q",
     "known_answer": "alpha-O ground state = S=2",
-    "honesty": "coarse (CASCI on DFT orbitals) \u2014 gives ORDERING, not a quantitative gap"
+    "honesty": "coarse (CASCI on DFT orbitals) — gives ORDERING, not a quantitative gap"
   },
   "spins": {
     "quintet": {
@@ -26,5 +26,11 @@
       "triplet": 3.56,
       "singlet": 60.54
     }
+  },
+  "scf": {
+    "e_roks_pbe": -4337.1622,
+    "converged": false,
+    "seconds": 5572,
+    "note": "ROKS-PBE (level shift 0.2, DF) NOT converged in 300 cycles; CASCI ordering below is on non-converged orbitals -> PRELIMINARY (also disclosed in the diary entry)"
   }
 }

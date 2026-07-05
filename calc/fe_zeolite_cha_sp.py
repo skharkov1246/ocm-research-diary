@@ -13,6 +13,7 @@ from pyscf import gto, scf, mcscf, mrpt
 from pyscf.mcscf import avas
 
 SPINS = {"quintet": 4, "triplet": 2, "singlet": 0}
+OUT = "calc/fe_zeolite_cha_results.json"
 
 
 def _read_xyz(path):
@@ -58,7 +59,20 @@ def run():
     ncas, nelec = int(ncas), int(nelec)
     out["active_space"] = {"ncas": ncas, "nelec": nelec, "qubits_jw": 2 * ncas}
     print(f"curated CAS({nelec}e,{ncas}o) = {2*ncas} qubits")
+    # incremental restart: ephemeral containers kill multi-hour CASSCF runs;
+    # per-spin results are saved immediately and reloaded on rerun
+    if os.path.exists(OUT):
+        try:
+            prev = json.load(open(OUT))
+            for k, v in prev.get("spins", {}).items():
+                if v.get("cas_conv"):
+                    out["spins"][k] = v
+                    print(f"  {k:8s} reloaded from {OUT} (restart)")
+        except Exception:
+            pass
     for name, s2 in SPINS.items():
+        if name in out["spins"]:
+            continue
         na = (nelec + s2) // 2; nb = nelec - na
         mc = mcscf.CASSCF(mf, ncas, (na, nb))
         try: mc.fix_spin_(ss=(s2/2)*(s2/2+1))
@@ -72,6 +86,10 @@ def run():
             except Exception as ex:
                 d["nevpt2_err"] = f"{type(ex).__name__}: {str(ex)[:60]}"
         out["spins"][name] = d
+        _tmp = OUT + ".tmp"
+        with open(_tmp, "w") as f:
+            json.dump(out, f, indent=2)
+        os.replace(_tmp, OUT)                         # atomic per-spin save
         print(f"  {name:8s} cas_conv={d['cas_conv']} E_cas={d['e_cas']:.4f} "
               f"E_nevpt2={d.get('e_nevpt2','-')} ({time.time()-t:.0f}s)")
 
