@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "model": "REAL IZA CHA 6-ring, 2 Al (para), Fe(IV)=O, silanol caps; xTB-relaxed active site; def2-SVP + density fitting",
+    "known_answer": "alpha-O ground state = S=2 (Nature 2016)",
+    "honesty": "cluster (not periodic), def2-SVP, para Al-siting, xTB geometry; validates spin ORDERING on real-framework geometry.",
+    "nbf": 465,
+    "scf_conv": true
+  },
+  "spins": {
+    "quintet": {
+      "e_cas": -4330.812813863766,
+      "cas_conv": true,
+      "e_nevpt2": -4335.073221891057
+    }
+  },
+  "active_space": {
+    "ncas": 11,
+    "nelec": 16,
+    "qubits_jw": 22
+  }
+}
