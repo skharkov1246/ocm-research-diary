@@ -153,8 +153,11 @@ def stage_profile(spin2s):
         atoms = [(s, tuple(c)) for s, c in p["atoms"]]
         mol = build(atoms, spin); mol.max_memory = 24000
         mf = rohf(mol)
-        # фикс-состав AVAS: 2×Fe 3d + реагирующий мостиковый O_a 2p (индекс 2)
-        labels = ["Fe 3d", "2 O 2p"]
+        # фикс-состав AVAS: ТОЛЬКО 2×Fe 3d. Полное «Fe 3d + O 2p» дало CAS(18,16) —
+        # AFM-синглет там ~1e8 детерминантов, FCI-стена (ди-Fe MMO = DMRG-grade).
+        # Fe-3d-only (~CAS(8,10)) ловит суть AFM Fe–Fe связи; корреляцию рвущейся
+        # O–H связи NEVPT2 добирает пертурбативно. Честная screening-усечёнка.
+        labels = ["Fe 3d"]
         ncas, nelec, mo = avas.avas(mf, labels, threshold=0.15)
         ss = spin / 2 * (spin / 2 + 1)
         mc = mcscf.CASSCF(mf, ncas, nelec)
@@ -181,7 +184,7 @@ def stage_sanity():
         mol = build(atoms, spin); mol.max_memory = 8000
         mf = scf.ROHF(mol); mf.max_cycle = 80; mf.kernel()
         try:
-            ncas, nelec, mo = avas.avas(mf, ["Fe 3d", "2 O 2p"], threshold=0.15)
+            ncas, nelec, mo = avas.avas(mf, ["Fe 3d"], threshold=0.15)
             print(f"[sanity] 2S={spin} ROHF conv={mf.converged} E={mf.e_tot:.4f} "
                   f"AVAS CAS=({int(np.sum(nelec))},{int(ncas)})", flush=True)
         except Exception as e:
