@@ -1,0 +1,43 @@
+{
+ "basis": "1.0 MMscf/day flare = 7300 t CH4/yr = 4.64 MW electric (genset 0.38)",
+ "mining": {
+  "mw": 4.64,
+  "ph": 265.1,
+  "gross_yr1": 4.84,
+  "capex": 9.02,
+  "net_per_yr": 0.78,
+  "asics": 1325
+ },
+ "chem": {
+  "I4 OCM\u2192\u044d\u0442\u0438\u043b\u0435\u043d (Y=35%)": {
+   "gross_yr": 2.01,
+   "ebitda_yr": 1.61,
+   "capex": 3.5,
+   "life": 12
+  },
+  "OCM\u2192\u044d\u0442\u0438\u043b\u0435\u043d \u0441\u0442\u0435\u043d\u0430 (Y=25%)": {
+   "gross_yr": 1.44,
+   "ebitda_yr": 1.04,
+   "capex": 3.5,
+   "life": 12
+  },
+  "\u041c\u0435\u0442\u0430\u043d\u043e\u043b (\u03b1-O, Y=40%)": {
+   "gross_yr": 2.34,
+   "ebitda_yr": 1.94,
+   "capex": 3.0,
+   "life": 12
+  },
+  "\u041f\u0438\u0440\u043e\u043b\u0438\u0437 H2+C(\u0442\u0432)": {
+   "gross_yr": 5.84,
+   "ebitda_yr": 5.34,
+   "capex": 4.0,
+   "life": 15
+  }
+ },
+ "verdict": {
+  "mining_net_per_yr_musd": 0.78,
+  "breakeven_price_to_beat_mining_3x": 751.0,
+  "breakeven_price_to_beat_mining_1x": 323.0,
+  "reading": "commodity products (ethylene/methanol/H2) only MATCH mining, not multiples. To beat mining 3x needs a product > ~$751.0/t \u2014 i.e. a SPECIALTY/material molecule whose value is decoupled from energy content. Chemistry's structural edge over mining is qualitative: durable 12-15yr asset (vs ASIC 2yr->$0), price-stable commodity (vs BTC \u00b15x), and product that can carry carbon credit \u2014 mining just burns the molecule to CO2."
+ }
+}
