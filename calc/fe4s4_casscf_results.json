@@ -1,0 +1,240 @@
+{
+ "status": "ok",
+ "meta": {
+  "system": "[Fe4S4(SH)4]2- cubane",
+  "basis": "def2-svp",
+  "charge": -2,
+  "mean_field": "UKS-PBE",
+  "bs_pattern": "Fe0 up, Fe1 up | Fe2 down, Fe3 down (Ms=0; two mixed-valence Fe2.5+ pairs, Noodleman BS state of the [Fe4S4]2+ core)",
+  "ladder": [
+   10,
+   12,
+   14
+  ],
+  "macro_max": 60,
+  "stage_timeout_s": 5400,
+  "total_budget_s": 19800,
+  "geometry_note": "identical idealized cubane core to Stage 17/18 (energies comparable)",
+  "note": "BS-UNO start = the fix for Stage 18's wall (CASSCF orbital relaxation from a poor HS-ROHF frontier). CASSCF only, no dynamic correlation. DF-accelerated CASSCF; qubit H built from exact active integrals. The big qubit H is counted, not diagonalized.",
+  "nao": 288,
+  "nelec_total": 238,
+  "total_seconds": 12948.5
+ },
+ "qubit_backend": "MISSING — install openfermion (pip install openfermion); CASSCF results below are unaffected",
+ "scf": {
+  "hs": {
+   "e": -8239.319145821899,
+   "converged": true,
+   "seconds": 310.1
+  },
+  "bs": {
+   "e": -8239.37555809387,
+   "converged": true,
+   "seconds": 1137.1,
+   "s_squared": 7.462,
+   "fe_mulliken_spin": [
+    3.359,
+    -3.358,
+    -3.358,
+    3.359
+   ],
+   "flip_atoms": [
+    2,
+    3
+   ],
+   "pattern_ok": false
+  },
+  "uhf_retry": {
+   "hs": {
+    "e": -8230.937464459972,
+    "converged": true,
+    "seconds": 563.0
+   },
+   "bs": {
+    "e": -8230.946361913759,
+    "converged": true,
+    "seconds": 119.6,
+    "s_squared": 9.037,
+    "fe_mulliken_spin": [
+     4.545,
+     3.969,
+     -4.545,
+     -3.969
+    ],
+    "flip_atoms": [
+     2,
+     3
+    ],
+    "pattern_ok": true
+   }
+  },
+  "reference_used": "BS"
+ },
+ "uno": {
+  "n_fractional_0.02_1.98": 18,
+  "fractional_occs": [
+   1.134,
+   1.093,
+   1.086,
+   1.086,
+   1.076,
+   1.062,
+   1.053,
+   1.018,
+   1.0,
+   1.0,
+   0.982,
+   0.947,
+   0.938,
+   0.924,
+   0.914,
+   0.914,
+   0.907,
+   0.866
+  ],
+  "from_reference": "BS"
+ },
+ "casscf_ladder": [
+  {
+   "ncas": 10,
+   "nelec": 10,
+   "nelecas": [
+    5,
+    5
+   ],
+   "qubits_jw": 20,
+   "converged": true,
+   "e_casscf_df": -8230.472015030804,
+   "noon": [
+    1.125,
+    1.098,
+    1.069,
+    1.033,
+    1.028,
+    0.971,
+    0.968,
+    0.929,
+    0.903,
+    0.875
+   ],
+   "n_u": 9.936,
+   "cas_s_squared": 0.02,
+   "active_fe3d_bridgeS3p_mean": 0.792,
+   "seconds": 3945.7,
+   "selection": {
+    "active_uno_occ": [
+     1.076,
+     1.062,
+     1.053,
+     1.018,
+     1.0,
+     1.0,
+     0.982,
+     0.947,
+     0.938,
+     0.924
+    ],
+    "occ_sum": 10.0,
+    "nelec": 10,
+    "ncore": 114,
+    "fe3d_bridgeS3p_frac": [
+     0.768,
+     0.792,
+     0.79,
+     0.777,
+     0.824,
+     0.821,
+     0.8,
+     0.804,
+     0.807,
+     0.813
+    ],
+    "min_core_occ": 1.086,
+    "max_virt_occ": 0.914
+   },
+   "based_on_reference": "BS"
+  },
+  {
+   "ncas": 12,
+   "nelec": 12,
+   "nelecas": [
+    6,
+    6
+   ],
+   "qubits_jw": 24,
+   "converged": true,
+   "e_casscf_df": -8230.576987495386,
+   "noon": [
+    1.622,
+    1.107,
+    1.084,
+    1.072,
+    1.038,
+    1.016,
+    0.984,
+    0.963,
+    0.929,
+    0.916,
+    0.892,
+    0.377
+   ],
+   "n_u": 11.175,
+   "cas_s_squared": 0.032,
+   "active_fe3d_bridgeS3p_mean": 0.755,
+   "seconds": 3082.4,
+   "selection": {
+    "promoted_core_frac": 0.739,
+    "promoted_virt_frac": 0.565,
+    "nelec": 12
+   },
+   "based_on_reference": "BS"
+  },
+  {
+   "ncas": 14,
+   "nelec": 14,
+   "nelecas": [
+    7,
+    7
+   ],
+   "qubits_jw": 28,
+   "converged": true,
+   "e_casscf_df": -8230.698401982043,
+   "noon": [
+    1.621,
+    1.132,
+    1.116,
+    1.097,
+    1.059,
+    1.054,
+    1.001,
+    1.0,
+    0.946,
+    0.941,
+    0.902,
+    0.884,
+    0.868,
+    0.378
+   ],
+   "n_u": 13.135,
+   "cas_s_squared": 2.005,
+   "active_fe3d_bridgeS3p_mean": 0.766,
+   "seconds": 3785.2,
+   "selection": {
+    "promoted_core_frac": 0.738,
+    "promoted_virt_frac": 0.564,
+    "nelec": 14
+   },
+   "based_on_reference": "BS"
+  }
+ ],
+ "qubit_hamiltonian": {
+  "ncas": 14,
+  "nelec": 14,
+  "qubits_jw": 28,
+  "mapping": "Jordan-Wigner",
+  "integrals": "exact (non-DF) active integrals in the DF-CASSCF-converged orbitals",
+  "note": "counted, NOT diagonalized: the fixed-N sector is ~C(28,14)^2-determinant scale — the classical wall this track is about",
+  "integrals_npz": "fe4s4_casscf_integrals.npz",
+  "error": "no qubit backend on this box"
+ }
+}
