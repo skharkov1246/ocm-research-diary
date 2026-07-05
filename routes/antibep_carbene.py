@@ -223,7 +223,10 @@ def ts_scan(name, sub_key):
         open(cf, "w").write(f"$set\ndistance 1 2 {rCH:.4f}\ndistance 2 3 {rAH:.4f}\n")
         try:
             mf = uks(M(ts_atoms(name, sub_key, rCH, rAH), MED[name]["spin"]))
-            mol = optimize(mf, constraints=cf, maxsteps=80, assert_convergence=False)
+            # коллинеарный [C···H···A] TS сингулярен для internal-coords (geomeTRIC
+            # «Inverse iteration failed» → тормозит); декартовы координаты устойчивы.
+            mol = optimize(mf, constraints=cf, maxsteps=80,
+                           assert_convergence=False, coordsys="cart")
         except Exception as ex:
             print(f"  [{name}/{sub_key}] rCH={rCH} failed: {ex}", flush=True)
             os.remove(cf); continue
