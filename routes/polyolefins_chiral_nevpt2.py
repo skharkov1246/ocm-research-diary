@@ -45,7 +45,7 @@ def load_xyz(face):
 
 def build(face):
     atoms, comment = load_xyz(face)
-    mol = gto.M(atom=atoms, basis="def2-svp", charge=0, spin=0, verbose=0,
+    mol = gto.M(atom=atoms, basis="def2-svp", charge=1, spin=0, verbose=0,  # катионный металлоцен: референс model.nelec=154 (155 Z - 1)
                 max_memory=float(os.environ.get("PYSCF_MAX_MEMORY", 40000)))
     return mol, comment
 
