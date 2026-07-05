@@ -1,0 +1,34 @@
+{
+ "descriptor": "H-abstraction barrier X. + CH4 -> CH3 + HX (Cl<Br<I ladder)",
+ "note": "gas-phase, def2-SVP+ECP, open-shell doublet TS (3c-3e). NEVPT2 is the multireference-corrected barrier; DFT-NEVPT2 gap = the de-risk. Lit. reference order: Br~18, I~34 kcal/mol.",
+ "halogens": [
+  {
+   "X": "F",
+   "barrier_dft": -9.8,
+   "barrier_casscf": 9.61,
+   "barrier_nevpt2": -4.94,
+   "dE_reac_nevpt2": -30.53
+  },
+  {
+   "X": "Cl",
+   "barrier_dft": 9.78,
+   "barrier_casscf": 18.88,
+   "barrier_nevpt2": 19.2,
+   "dE_reac_nevpt2": 6.67
+  },
+  {
+   "X": "Br",
+   "barrier_dft": 23.22,
+   "barrier_casscf": 31.75,
+   "barrier_nevpt2": 24.17,
+   "dE_reac_nevpt2": 19.9
+  },
+  {
+   "X": "I",
+   "barrier_dft": 162.98,
+   "barrier_casscf": 13.5,
+   "barrier_nevpt2": 20.75,
+   "dE_reac_nevpt2": 34.29
+  }
+ ]
+}
