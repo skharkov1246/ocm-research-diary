@@ -10,3 +10,4 @@ routes/*_scf_spin*.npz
 routes/_hx_*.txt
 routes/halogen_*.log
 routes/*_geom.log
+routes/_ab_*.txt
