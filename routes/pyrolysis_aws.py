@@ -47,9 +47,17 @@ for i in 1 2 3; do python3 -m pip install -q numpy scipy pyscf geometric && brea
 cd /root && git clone --depth 1 -b {BRANCH} {REPO} repo && cd repo || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 sync_up() {{ aws s3 cp routes/ $S3/ --recursive --exclude '*' --include 'pyrolysis_*' >/dev/null 2>&1 || true; aws s3 cp /root/repo/pyro.log $S3/pyro.log >/dev/null 2>&1 || true; }}
 ( while true; do sleep 120; sync_up; done ) &
-run_pair() {{ P=$1; OMP_NUM_THREADS=4 timeout 150m python3 -u routes/pyrolysis_descriptor.py dft $P >> pyro.log 2>&1; OMP_NUM_THREADS=4 timeout 150m python3 -u routes/pyrolysis_descriptor.py corr $P >> pyro.log 2>&1; echo "[done] $P" >> pyro.log; }}
-export -f run_pair
-echo "{PAIRS}" | tr ' ' '\\n' | xargs -P 2 -I{{}} bash -c 'run_pair "$@"' _ {{}}
+# Фаза 1: ВСЕ пары на уровне DFT (быстро, embarrassingly parallel) → DFT-волкан
+# готов первым как чекпойнт; Фаза 2: ВСЕ пары на CASSCF/NEVPT2 (дорого). Такой
+# порядок даёт полный DFT-скрин даже если инстанс умрёт до конца корреляции.
+run_dft() {{ P=$1; OMP_NUM_THREADS=4 timeout 120m python3 -u routes/pyrolysis_descriptor.py dft $P >> pyro.log 2>&1; echo "[dft done] $P" >> pyro.log; }}
+run_corr() {{ P=$1; OMP_NUM_THREADS=4 timeout 150m python3 -u routes/pyrolysis_descriptor.py corr $P >> pyro.log 2>&1; echo "[corr done] $P" >> pyro.log; }}
+export -f run_dft run_corr
+echo "{PAIRS}" | tr ' ' '\\n' | xargs -P 2 -I{{}} bash -c 'run_dft "$@"' _ {{}}
+python3 -u routes/pyrolysis_descriptor.py merge >> pyro.log 2>&1
+sync_up
+echo "[aws] DFT PHASE DONE" >> pyro.log
+echo "{PAIRS}" | tr ' ' '\\n' | xargs -P 2 -I{{}} bash -c 'run_corr "$@"' _ {{}}
 python3 -u routes/pyrolysis_descriptor.py merge >> pyro.log 2>&1
 sync_up
 echo "[aws] ALL DONE" >> pyro.log
