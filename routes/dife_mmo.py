@@ -74,7 +74,7 @@ def core_atoms(rCH=None, rOH=None):
 
 def build(atoms, spin, charge=0):
     return gto.M(atom=atoms, basis=BASIS, ecp=BASIS, charge=charge, spin=spin,
-                 verbose=0, max_memory=0)
+                 verbose=0, max_memory=16000)
 
 
 def uks(atoms, spin, dm0=None):
