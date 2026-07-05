@@ -118,6 +118,14 @@ def uks(mol, dm0=None):
     return mfn
 
 
+# PYRO_SP=1 — быстрый режим одноточечных энергий (без геом-оптимизации): для
+# локальной валидации арифметики/I-O и как аварийный fallback. Голые металл-димеры
+# патологичны для internal-coord оптимизатора → релакс идёт в декартовых (coordsys
+# 'cart', устойчивее для крошечных систем), а при сбое — одноточечно на входной
+# геометрии (честная оговорка: неполный релакс, скрин-оценка).
+SINGLE_POINT = os.environ.get("PYRO_SP", "0") == "1"
+
+
 def relax_lowest(atoms, charge=0, tag=""):
     """Релакс UKS по нескольким спинам, вернуть НИЖНИЙ по энергии (геометрия+E)."""
     from pyscf.geomopt.geometric_solver import optimize
@@ -125,9 +133,20 @@ def relax_lowest(atoms, charge=0, tag=""):
     for spin in valid_spins(atoms, charge):
         try:
             mf = uks(build(atoms, spin, charge))
-            mol = optimize(mf, maxsteps=100, assert_convergence=False)
-            mfx = uks(mol)
+            if SINGLE_POINT:
+                mol = build(atoms, spin, charge); mfx = mf
+            else:
+                try:
+                    mol = optimize(mf, maxsteps=80, assert_convergence=False,
+                                   coordsys="cart")
+                    mfx = uks(mol)
+                except Exception as ox:
+                    print(f"  [{tag}] spin={spin} opt fell back to SP: {ox}",
+                          flush=True)
+                    mol = build(atoms, spin, charge); mfx = mf
             e = float(mfx.e_tot)
+            if not np.isfinite(e):
+                raise ValueError("non-finite energy")
         except Exception as ex:
             print(f"  [{tag}] spin={spin} failed: {ex}", flush=True)
             continue
