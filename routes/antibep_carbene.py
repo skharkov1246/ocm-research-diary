@@ -253,10 +253,13 @@ def barrier_set(name, sub_key, mf_med, e_med_dft, med_corr):
     ts_a, e_ts_dft, rCH, rAH = ts_scan(name, sub_key)
     out = {"dft_barrier": round((e_ts_dft - e_med_dft - mf_sub.e_tot) * HARTREE_KCAL, 2),
            "ts_rCH": rCH, "ts_rAH": round(rAH, 3)}
-    # NEVPT2: TS и субстрат (медиатор-репер общий, посчитан снаружи)
-    lab_ts = ["C 2p", MED[name]["plab"], "H 1s"]
+    # NEVPT2: TS и субстрат (медиатор-репер общий, посчитан снаружи).
+    # ИНДЕКСИРОВАННЫЕ AVAS-метки — только реагирующие атомы (Cα=0, H_t=1,
+    # абстрактор=2): жадное "C 2p"+"H 1s" на этановом TS матчит все C и все 7 H
+    # → CAS взрывается → Davidson-скретч съедает диск (Errno 28 на AWS).
+    lab_ts = ["0 C 2p", "1 H 1s", f"2 {MED[name]['plab']}"]
     n_ts = nevpt2(ts_a, MED[name]["spin"], lab_ts, thr=0.4)
-    n_sub = nevpt2(sub_a, 0, ["C 2p", "H 1s"], thr=0.6)
+    n_sub = nevpt2(sub_a, 0, ["0 C 2p", "1 H 1s"], thr=0.6)
     for lvl in ("casscf", "nevpt2"):
         b = (n_ts[f"e_{lvl}"] - med_corr[f"e_{lvl}"] - n_sub[f"e_{lvl}"]) * HARTREE_KCAL
         out[f"{lvl}_barrier"] = round(b, 2)
