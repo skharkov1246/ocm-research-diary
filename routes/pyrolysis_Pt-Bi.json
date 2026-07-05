@@ -124,5 +124,27 @@
  },
  "Ebind_C_dft_kcal": -94.02,
  "dEdiss_CH4_dft_kcal": -7.72,
- "wall_s": 2745.8
+ "wall_s": 2745.8,
+ "Ebind_C_casscf_kcal": -75.72,
+ "Ebind_C_nevpt2_kcal": -116.53,
+ "dimer_corr": {
+  "cas": [
+   13,
+   8
+  ],
+  "e_casscf_h": -331.99221211192685,
+  "casscf_converged": true,
+  "e_nevpt2_h": -332.3871955879415
+ },
+ "dimerC_corr": {
+  "cas": [
+   15,
+   12
+  ],
+  "e_casscf_h": -369.8098934258887,
+  "casscf_converged": true,
+  "e_nevpt2_h": -370.2699101622532
+ },
+ "e_C_corr_h": -37.69701553025515,
+ "corr_wall_s": 771.7
 }
