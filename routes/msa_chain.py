@@ -226,16 +226,34 @@ def stage_hat():
     t0 = time.time(); out = {"stage": "hat", "model": f"rigid collinear HAT, {BASIS}"}
     ch4, m_ch4 = relax(ch4_atoms(), 0)
     rad, m_rad = relax(ch3so3_atoms(), 1)
+    from pyscf.geomopt.geometric_solver import optimize
     best = None
     for rCH, rOH in ((1.15, 1.30), (1.25, 1.15), (1.35, 1.05), (1.50, 0.98)):
+        # РЕЛАКС TS (не rigid!): пин r(C–H)=dist 1-2, r(H–O)=dist 2-3, остальное
+        # (сульфонил-хвост) релаксируется → убирает раздутый rigid-барьер. Изогнутый
+        # старт (H_t сдвинут) обходит линейную сингулярность. Fallback — одноточка.
+        cf = os.path.join(DIR, f"_msa_hat_{rCH:.2f}.txt")
+        open(cf, "w").write(f"$set\ndistance 1 2 {rCH:.4f}\ndistance 2 3 {rOH:.4f}\n")
         try:
-            mfx = uks(M(hat_ts(rCH, rOH), 1)); e = float(mfx.e_tot)
-            if not np.isfinite(e):
-                continue
+            mf0 = uks(M(hat_ts(rCH, rOH), 1))
+            mol = optimize(mf0, constraints=cf, maxsteps=60, assert_convergence=False)
+            mfx = uks(mol); e = float(mfx.e_tot)
+            na = [(mol.atom_symbol(i), tuple(c))
+                  for i, c in enumerate(mol.atom_coords(unit="Angstrom"))]
         except Exception as ex:
-            print(f"  [hat] rCH={rCH} failed: {ex}", flush=True); continue
+            print(f"  [hat] rCH={rCH} relax fell back to SP: {ex}", flush=True)
+            try:
+                mfx = uks(M(hat_ts(rCH, rOH), 1)); e = float(mfx.e_tot)
+                na = hat_ts(rCH, rOH)
+            except Exception:
+                continue
+        finally:
+            if os.path.exists(cf):
+                os.remove(cf)
+        if not np.isfinite(e):
+            continue
         if best is None or e > best[1]:
-            best = (hat_ts(rCH, rOH), e, rCH, rOH)
+            best = (na, e, rCH, rOH)
     if best is None:
         raise RuntimeError("hat scan failed")
     ts, e_ts, rCH, rOH = best

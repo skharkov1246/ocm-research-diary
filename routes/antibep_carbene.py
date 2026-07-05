@@ -239,17 +239,32 @@ def ts_scan(name, sub_key):
     rAH0 = MED[name]["rAH"]
     grid = [(1.15, rAH0 + 0.30), (1.25, rAH0 + 0.15), (1.35, rAH0 + 0.05),
             (1.45, rAH0), (1.60, rAH0 - 0.10), (1.75, rAH0 - 0.15)]
+    from pyscf.geomopt.geometric_solver import optimize
     best = None
     for rCH, rAH in grid:
+        # РЕЛАКС TS: пин r(Cα–H)=dist 1-2, r(H–A)=dist 2-3, остальное релаксируется
+        # (убирает раздутый rigid-барьер этана/полиатомного акцептора). Изогнутый
+        # старт (H_t сдвинут по x в ts_atoms) обходит линейную сингулярность.
+        cf = os.path.join(DIR, f"_ab_{name}_{sub_key}_{rCH:.2f}.txt")
+        open(cf, "w").write(f"$set\ndistance 1 2 {rCH:.4f}\ndistance 2 3 {rAH:.4f}\n")
         try:
-            mfx = uks(M(ts_atoms(name, sub_key, rCH, rAH), MED[name]["spin"]))
-            e = float(mfx.e_tot)
-            if not np.isfinite(e):
-                continue
+            mf0 = uks(M(ts_atoms(name, sub_key, rCH, rAH), MED[name]["spin"]))
+            mol = optimize(mf0, constraints=cf, maxsteps=60, assert_convergence=False)
+            mfx = uks(mol); e = float(mfx.e_tot)
+            na = [(mol.atom_symbol(i), tuple(c))
+                  for i, c in enumerate(mol.atom_coords(unit="Angstrom"))]
         except Exception as ex:
-            print(f"  [{name}/{sub_key}] rCH={rCH} failed: {ex}", flush=True)
+            print(f"  [{name}/{sub_key}] rCH={rCH} relax->SP: {ex}", flush=True)
+            try:
+                mfx = uks(M(ts_atoms(name, sub_key, rCH, rAH), MED[name]["spin"]))
+                e = float(mfx.e_tot); na = ts_atoms(name, sub_key, rCH, rAH)
+            except Exception:
+                continue
+        finally:
+            if os.path.exists(cf):
+                os.remove(cf)
+        if not np.isfinite(e):
             continue
-        na = ts_atoms(name, sub_key, rCH, rAH)          # жёсткая геометрия точки
         if best is None or e > best[1]:
             best = (na, e, rCH, rAH)
     if best is None:
