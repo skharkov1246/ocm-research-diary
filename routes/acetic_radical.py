@@ -232,10 +232,12 @@ def stage_hat():
     eR = mf_ace.e_tot + mf_ch4.e_tot
     out["dft"] = {"barrier_hat_kcal": round((e_ts - eR) * HARTREE_KCAL, 2),
                   "ts_rCH": rCH, "ts_rOH": rOH}
-    lab = ["C 2p", "O 2p", "H 1s"]
-    n_ts = nevpt2(ts_a, 1, lab, thr=0.4)
-    n_ch4 = nevpt2(ch4, 0, ["C 2p", "H 1s"], thr=0.6)
-    n_ace = nevpt2(ace, 1, ["C 2p", "O 2p"])
+    # ИНДЕКСИРОВАННЫЕ AVAS-метки (урок antibep/Errno28): на 12-атомном TS жадные
+    # "C 2p"+"O 2p"+"H 1s" матчат всё → CAS-взрыв (2.9 ТиБ FCI). Реагирующий
+    # центр: Cα=0, H_t=1, акцепторный O=5 (см. hat_ts_atoms).
+    n_ts = nevpt2(ts_a, 1, ["0 C 2p", "1 H 1s", "5 O 2p"], thr=0.4)
+    n_ch4 = nevpt2(ch4, 0, ["0 C 2p", "1 H 1s"], thr=0.6)
+    n_ace = nevpt2(ace, 1, ["4 C 2p", "5 O 2p", "6 O 2p"])   # COO π/σ-система
     for lvl in ("casscf", "nevpt2"):
         eRc = n_ace[f"e_{lvl}"] + n_ch4[f"e_{lvl}"]
         out[lvl] = {"barrier_hat_kcal":

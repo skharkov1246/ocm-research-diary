@@ -1,0 +1,47 @@
+{
+ "stage": "cc",
+ "model": "gas-phase radical, def2-svp",
+ "dft": {
+  "barrier_cc_kcal": 12.72,
+  "dE_reac_kcal": 5.5,
+  "barrier_decarb_kcal": 7.22,
+  "ts_rcc": 1.8,
+  "profile": [
+   {
+    "rcc": 2.3,
+    "e_h": -227.9861166054797
+   },
+   {
+    "rcc": 2.1,
+    "e_h": -227.97983982261195
+   },
+   {
+    "rcc": 1.95,
+    "e_h": -227.97667462279915
+   },
+   {
+    "rcc": 1.8,
+    "e_h": -227.97646989386396
+   },
+   {
+    "rcc": 1.65,
+    "e_h": -227.9789848348495
+   }
+  ]
+ },
+ "casscf": {
+  "barrier_cc_kcal": 35.35,
+  "dE_reac_kcal": -7.22,
+  "barrier_decarb_kcal": 42.57
+ },
+ "nevpt2": {
+  "barrier_cc_kcal": 25.57,
+  "dE_reac_kcal": 21.54,
+  "barrier_decarb_kcal": 4.03
+ },
+ "ts_cas": [
+  19,
+  12
+ ],
+ "wall_s": 599.2
+}
