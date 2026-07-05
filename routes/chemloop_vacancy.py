@@ -59,6 +59,15 @@ METALS = {
     "Ni": {"Z": 28, "spin_ox": 2, "spin_red": 2, "orb": "Ni 3d"},
     "Cu": {"Z": 29, "spin_ox": 1, "spin_red": 1, "orb": "Cu 3d"},
     "Ce": {"Z": 58, "spin_ox": 0, "spin_red": 2, "orb": "Ce 4f"},
+    # расширение панели (Франкфурт): 4d/5d + главная подгруппа. W — компонент
+    # нашего же Na2WO4/Mn катализатора OCM (связка с Этапом 16); Sn/Pb — классика
+    # оксидных носителей POx; вместе питают карту I4 (O2--насос: окно напряжений).
+    "Zr": {"Z": 40, "spin_ox": 0, "spin_red": 2, "orb": "Zr 4d"},
+    "Nb": {"Z": 41, "spin_ox": 1, "spin_red": 3, "orb": "Nb 4d"},
+    "Mo": {"Z": 42, "spin_ox": 2, "spin_red": 4, "orb": "Mo 4d"},
+    "W":  {"Z": 74, "spin_ox": 2, "spin_red": 4, "orb": "W 5d"},
+    "Sn": {"Z": 50, "spin_ox": 0, "spin_red": 0, "orb": "Sn 5p"},
+    "Pb": {"Z": 82, "spin_ox": 0, "spin_red": 0, "orb": "Pb 6p"},
 }
 CAS_NO = 8          # целевое число активных орбиталей (M nd + oxo O 2p), фикс-состав
 

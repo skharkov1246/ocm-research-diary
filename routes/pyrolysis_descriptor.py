@@ -80,7 +80,20 @@ PANEL = {
     "Fe-Sn": ("Fe", "Sn", 2.55, 1.80),
     "Co-Ga": ("Co", "Ga", 2.45, 1.75),
     "Pd-Bi": ("Pd", "Bi", 2.65, 1.82),
+    # волна 2 (Франкфурт): достроить решётку активный×растворитель
+    "Pt-Sn": ("Pt", "Sn", 2.60, 1.80),
+    "Pd-In": ("Pd", "In", 2.60, 1.80),
+    "Cu-Sn": ("Cu", "Sn", 2.55, 1.80),
+    "Fe-Bi": ("Fe", "Bi", 2.60, 1.80),
+    "Ni-Ga": ("Ni", "Ga", 2.45, 1.75),
+    "Co-Bi": ("Co", "Bi", 2.55, 1.78),
+    "Cu-In": ("Cu", "In", 2.55, 1.80),
+    "Pd-Sn": ("Pd", "Sn", 2.60, 1.80),
 }
+# ручки Франкфурт-прогонов: PYRO_NSPIN=3 — расширить лестницу спинов (пере-прогон
+# Cu-Bi артефакта); PYRO_SUFFIX="_v2" — не затирать прежние JSON.
+NSPIN = int(os.environ.get("PYRO_NSPIN", "2"))
+SUF = os.environ.get("PYRO_SUFFIX", "")
 
 
 def build(atoms, spin, charge=0):
@@ -88,7 +101,7 @@ def build(atoms, spin, charge=0):
                  verbose=0, max_memory=8000)
 
 
-def valid_spins(atoms, charge=0, n=2):
+def valid_spins(atoms, charge=0, n=None):
     """Нижняя чётность-совместимая лестница мультиплетностей (2S = 0/1,+2,+4…).
     Скрин-компромисс: 2 мультиплетности (базовая + базовая+2) — обычная HS/LS
     конкуренция биметалл-димера; берём нижнюю по энергии (честная оговорка)."""
@@ -102,7 +115,7 @@ def valid_spins(atoms, charge=0, n=2):
             continue
     if base is None:
         base = 0
-    return [base + 2 * k for k in range(n)]
+    return [base + 2 * k for k in range(n or NSPIN)]
 
 
 def uks(mol, dm0=None):
@@ -248,7 +261,7 @@ def cas_nevpt2(atoms, spin, avas_labels):
 
 def stage_dft(PAIR):
     M, Sol, dMM, dMC = PANEL[PAIR]
-    path = os.path.join(DIR, f"pyrolysis_{PAIR}.json")
+    path = os.path.join(DIR, f"pyrolysis{SUF}_{PAIR}.json")
     out = json.load(open(path)) if os.path.exists(path) else {}
     out.update({"pair": PAIR, "active": M, "solvent": Sol,
                 "model": "hetero-bimetallic dimer stand-in for molten alloy"})
@@ -281,7 +294,7 @@ def stage_dft(PAIR):
 
 def stage_corr(PAIR):
     M, Sol, dMM, dMC = PANEL[PAIR]
-    path = os.path.join(DIR, f"pyrolysis_{PAIR}.json")
+    path = os.path.join(DIR, f"pyrolysis{SUF}_{PAIR}.json")
     out = json.load(open(path))
     cfg_a = ACTIVE[M]; cfg_s = SOLVENT[Sol]
     t0 = time.time()
@@ -305,7 +318,7 @@ def stage_corr(PAIR):
 def stage_merge():
     rows = []
     for PAIR in PANEL:
-        p = os.path.join(DIR, f"pyrolysis_{PAIR}.json")
+        p = os.path.join(DIR, f"pyrolysis{SUF}_{PAIR}.json")
         if os.path.exists(p):
             d = json.load(open(p))
             rows.append({"pair": PAIR,
@@ -320,7 +333,7 @@ def stage_merge():
                    "weak => no CH4 activation. NEVPT2 column is the multireference-"
                    "corrected C-binding (metal-C bond de-risk). Ni-Bi = working ref.",
            "pairs": rows}
-    json.dump(res, open(os.path.join(DIR, "pyrolysis_descriptor_results.json"), "w"),
+    json.dump(res, open(os.path.join(DIR, f"pyrolysis_descriptor{SUF}_results.json"), "w"),
               indent=1)
     print(json.dumps(res, ensure_ascii=False, indent=1))
 
