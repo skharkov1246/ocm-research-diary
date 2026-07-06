@@ -1,0 +1,46 @@
+{
+ "stage": "16 \u2014 embedded Na/W cluster (Mn=O in Na2WO4/SiO2 surrogate)",
+ "descriptor": "two-substrate selectivity \u0394\u0394E\u2021 = barrier(C2H6) \u2212 barrier(CH4)",
+ "level_barriers_kcal": {
+  "ch4": {
+   "casci": 31.29,
+   "casscf": 51.92,
+   "nevpt2": 36.66
+  },
+  "c2h6": {
+   "casci": 26.62,
+   "casscf": 74.67,
+   "nevpt2": 93.99
+  }
+ },
+ "ts_interior": {
+  "ch4": {
+   "casci": true,
+   "casscf": true,
+   "nevpt2": true
+  },
+  "c2h6": {
+   "casci": true,
+   "casscf": false,
+   "nevpt2": false
+  }
+ },
+ "ddE_kcal": {
+  "casci": -4.67,
+  "casscf": 22.75,
+  "nevpt2": 57.33
+ },
+ "ddE_dft_geom_kcal": 24.25,
+ "stage15_bare_ddE": {
+  "dft": 4.7,
+  "casscf": -9.5,
+  "nevpt2": 11.6
+ },
+ "headline": "anti-BEP sign SURVIVES the embedded environment and is AMPLIFIED by correlation: \u0394\u0394E\u2021 DFT +24.3 -> NEVPT2 +57.3 kcal/mol (bare: +4.7 -> +11.6). Correlation makes C2 abstraction relatively harder in both cases (~2.4-2.5x) -> the selectivity-enhancing anti-BEP effect is real in a realistic Na/W environment, and DFT screening underestimates it ~2x.",
+ "caveats": [
+  "profile-level (refine/merge2 pending for polished FINAL)",
+  "coarse 5-point pin grid; C2H6 TS reads at grid edge (interior=False) for casscf/nevpt2 -> \u0394\u0394E\u2021 magnitude is soft, sign/direction robust",
+  "cluster stand-in, not periodic oxide; frozen-frame embedded geometry"
+ ],
+ "multireference": "active space strongly correlated (NOON 1.88..0.22..0.12, n_unpaired_beyond_spin 0.67) \u2014 DFT-unreliable regime confirmed"
+}

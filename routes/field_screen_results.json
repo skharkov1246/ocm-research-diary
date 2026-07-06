@@ -1,0 +1,40 @@
+{
+ "screen": "off-label #3: piezo/external E-field lowering of HAT barrier",
+ "method": "Hellmann-Feynman slope dE/dFz = -mu_z on rigid TZVP TS geometries + finite-field linearity check (+-0.002 au)",
+ "ts": [
+  {
+   "X": "Cl",
+   "rCH": 1.5,
+   "rHX": 1.25,
+   "mu_z_debye": -1.482,
+   "dBarrier_kcal_per_Vnm_HF": 0.71,
+   "dBarrier_kcal_per_Vnm_ff": 0.71,
+   "at_1Vnm_kcal": 0.71,
+   "at_0p1Vnm_kcal": 0.071
+  },
+  {
+   "X": "Br",
+   "rCH": 1.5,
+   "rHX": 1.35,
+   "mu_z_debye": -1.341,
+   "dBarrier_kcal_per_Vnm_HF": 0.64,
+   "dBarrier_kcal_per_Vnm_ff": 0.64,
+   "at_1Vnm_kcal": 0.64,
+   "at_0p1Vnm_kcal": 0.064
+  },
+  {
+   "X": "I",
+   "rCH": 1.2,
+   "rHX": 1.9,
+   "mu_z_debye": -1.431,
+   "dBarrier_kcal_per_Vnm_HF": 0.69,
+   "dBarrier_kcal_per_Vnm_ff": 0.69,
+   "at_1Vnm_kcal": 0.69,
+   "at_0p1Vnm_kcal": 0.069
+  }
+ ],
+ "verdict": {
+  "reading": "TS dipole too small \u2014 piezo lever weak",
+  "honest_caveats": "rigid TS, orientation-averaged real reactor would see ~1/3 of aligned value; piezo hot-spot fields are local and transient"
+ }
+}

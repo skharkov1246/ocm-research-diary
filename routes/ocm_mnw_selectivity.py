@@ -41,15 +41,33 @@ from pyscf.mrpt import NEVPT
 HARTREE_KCAL = 627.509474
 DIR = os.path.dirname(os.path.abspath(__file__))
 BASIS = "def2-svp"
-SPIN = 5                    # секстет: MnO(⁶Σ⁺) + закрытооболочечный субстрат
+MODEL = os.environ.get("OCM_MODEL", "bare")   # bare (MnO) | embedded (Na/W-оболочка)
+SPIN = int(os.environ.get("OCM_SPIN", "5"))   # 2S = число SOMO (bare-секстет: 5)
 XC = "pbe0"
-CAS_TARGET = (9, 10)        # (ne, no) — единое для всех 4 структур
+PREF = os.environ.get("OCM_PREFIX", "ocm_mnw" if MODEL == "bare" else "ocm_mnw_emb")
+# единое активное пространство фиксированного СОСТАВА: 2 закрытые пары + все SOMO
+# + 3 виртуали => (ne,no) зависит только от спина (bare-секстет: CAS(9e,10o))
+N_DOCC, N_VIR = 2, 3
+CAS_TARGET = (2 * N_DOCC + SPIN, N_DOCC + SPIN + N_VIR)
 AVAS_LABELS = ["Mn 3d", "O 2p", "2 H 1s"]   # атом 2 (0-based) — переносимый H
+# версия геометрического протокола: при несовпадении resume пересчитывает точки
+# (frozen-frame сменил floppy-relax — старые точки несовместимы, отбрасываются)
+GEOM_VERSION = "embedded-frozen-frame-v2" if MODEL == "embedded" else "bare-v1"
 
 # HAT-сетка: пары (r_CH, r_OH), Å. R-точка: пин только r(O–H)=2.2 (пре-комплекс).
 R_POINT = (None, 2.20)
-PATH = [(1.15, 1.70), (1.20, 1.50), (1.25, 1.35), (1.30, 1.25),
-        (1.35, 1.17), (1.40, 1.10), (1.50, 1.02)]
+# bare — плотная 8-точечная сетка (Этап 15); embedded — грубая 5-точечная
+# (R + подход + два вокруг TS + продукт): точка эмбеддед-кластера в разы дороже
+# (R-точка ≈ 8 ч), а дескриптор ΔΔE‡ требует лишь профиль, брекетящий TS.
+# ПЕРВЫЕ ДВА индекса грубой сетки совпадают с плотной — уже посчитанные точки
+# (в т.ч. дорогая R) переиспользуются resume-логикой, не пересчитываются.
+if MODEL == "embedded":
+    # первые 3 индекса (R,1,2) совпадают с плотной сеткой — resume-совместимо
+    # с уже начатым 8-точечным прогоном (какие точки тот ни успел сохранить)
+    PATH = [(1.15, 1.70), (1.20, 1.50), (1.35, 1.17), (1.50, 1.02)]
+else:
+    PATH = [(1.15, 1.70), (1.20, 1.50), (1.25, 1.35), (1.30, 1.25),
+            (1.35, 1.17), (1.40, 1.10), (1.50, 1.02)]
 
 
 # ---------------------------------------------------------------- геометрии
@@ -86,11 +104,87 @@ def start_atoms(sub):
                                 zC2 + d * math.cos(th))))
     else:
         raise ValueError(sub)
+    if MODEL == "embedded":
+        atoms += environment_atoms()
     return atoms
 
 
+def environment_atoms():
+    """Первая Na/W-оболочка рабочего центра Mn–Na₂WO₄/SiO₂ (минимальный
+    нейтральный мотив): [O=Mn(–O–Na)(μ-O)₂W(=O)(OH)]. Формальные степени:
+    Mn(IV), W(VI); заряд 0. Стартовые длины — типовые (Mn=O 1.60 уже в оси,
+    Mn–O 1.8–1.9, W–O 1.75–1.95, Na–O ~2.2); всё релаксируется в R-точке.
+    Позиции относительно Mn (см. start_atoms: Mn в (0,0,zMn), oxo выше по z)."""
+    zMn = -1.65
+    def rel(dx, dy, dz):
+        return (dx, dy, zMn + dz)
+    return [
+        ("O",  rel(-1.75, 0.0, 0.45)),    # O(–Na), мостик заряда
+        ("Na", rel(-3.05, 0.0, 1.65)),
+        ("O",  rel(1.10, 1.25, -0.80)),   # μ-O(1)
+        ("O",  rel(1.10, -1.25, -0.80)),  # μ-O(2)
+        ("W",  rel(2.65, 0.0, -1.45)),
+        ("O",  rel(3.55, 0.0, -2.95)),    # W=O
+        ("O",  rel(4.10, 0.0, -0.35)),    # W–O(H)
+        ("H",  rel(4.35, 0.85, 0.05)),
+    ]
+
+
+def stage_spins():
+    """Лестница спинов UKS-PBE0 на стартовой R-геометрии (кластер + CH₄):
+    выбираем основное спиновое состояние ПЕРЕД пайплайном, не постулируем.
+    Resume: если лестница уже посчитана (есть ground_2S) — пропускаем (иначе
+    каждое поколение впустую гоняло бы 4 UKS на 201-AO кластере, часы)."""
+    global SPIN
+    path = os.path.join(DIR, f"{PREF}_spins.json")
+    if os.path.exists(path):
+        try:
+            done = json.load(open(path))
+            if "ground_2S" in done:
+                print(f"[spins] resume: ground 2S={done['ground_2S']} on disk "
+                      f"(ladder {done.get('rel_kcal')}) — skip recompute", flush=True)
+                return
+        except Exception:
+            pass
+    atoms = start_atoms("ch4")
+    # чётность электронов без пробной сборки (ECP-остов чётный, заряд 0)
+    parity = sum(gto.charge(a[0]) for a in atoms) % 2
+    cands = [s for s in range(parity, 8, 2)][:4]   # 4 нижних мультиплетности
+    out = {"model": MODEL, "candidates_2S": cands, "ladder": []}
+    path = os.path.join(DIR, f"{PREF}_spins.json")
+    for s2 in cands:
+        t0 = time.time()
+        try:
+            mol = gto.M(atom=atoms, basis=BASIS, ecp=BASIS, charge=0, spin=s2,
+                        verbose=0, max_memory=6000)
+            mf = dft.UKS(mol).density_fit()
+            mf.xc = XC
+            mf.conv_tol = 1e-7
+            mfn = scf.newton(mf)
+            mfn.kernel()
+            out["ladder"].append({"spin_2S": s2, "e_h": float(mfn.e_tot),
+                                  "converged": bool(mfn.converged),
+                                  "spin_square": round(float(mfn.spin_square()[0]), 3),
+                                  "wall_s": round(time.time() - t0, 1)})
+        except Exception as e:
+            out["ladder"].append({"spin_2S": s2, "error": str(e)[:200]})
+        with open(path, "w") as f:
+            json.dump(out, f, indent=1)
+        print(f"[spins] 2S={s2}: {out['ladder'][-1]}", flush=True)
+    ok = [x for x in out["ladder"] if x.get("converged")]
+    if ok:
+        best = min(ok, key=lambda x: x["e_h"])
+        out["ground_2S"] = best["spin_2S"]
+        rel = [(x["e_h"] - best["e_h"]) * HARTREE_KCAL for x in ok]
+        out["rel_kcal"] = {str(x["spin_2S"]): round(r, 2) for x, r in zip(ok, rel)}
+        print(f"[spins] ground 2S={best['spin_2S']}; ladder {out['rel_kcal']}",
+              flush=True)
+    with open(path, "w") as f:
+        json.dump(out, f, indent=1)
+
+
 def build_mol(atoms):
-    return gto.M(atom=atoms, basis=BASIS, charge=0, spin=SPIN,
+    return gto.M(atom=atoms, basis=BASIS, ecp=BASIS, charge=0, spin=SPIN,
                  verbose=0, max_memory=6000)
 
 
@@ -113,8 +207,11 @@ def uks(mol, dm0=None):
     return mfn
 
 
-def constrained_opt(atoms, rCH, rOH, tag):
-    """Релакс-оптимизация с пином r(C–H) и/или r(O–H) (geomeTRIC, $set)."""
+def constrained_opt(atoms, rCH, rOH, tag, dm0=None, maxsteps=200):
+    """Релакс-оптимизация с пином r(C–H) и/или r(O–H) (geomeTRIC, $set).
+    dm0 — плотность предыдущей точки (тёплый старт: быстрее и держит одну
+    электронную ветку вдоль скана — урок polish Этапа 15). Возвращает также
+    итоговую плотность для цепочки."""
     from pyscf.geomopt.geometric_solver import optimize
     cfile = os.path.join(DIR, f"_constr_{tag}.txt")
     lines = ["$set"]
@@ -122,40 +219,73 @@ def constrained_opt(atoms, rCH, rOH, tag):
         lines.append(f"distance 2 3 {rOH:.4f}")   # O(2)–H(3), 1-based
     if rCH is not None:
         lines.append(f"distance 3 4 {rCH:.4f}")   # H(3)–C(4)
+    if MODEL == "embedded":
+        # embedded-cluster приближение: первая Na/W-оболочка удерживается решёткой —
+        # замораживаем её (последние len(env) атомов), релаксируем только реактивный
+        # центр Mn=O + переносимый H + субстрат. Быстрее (30-50 шагов вместо 200+)
+        # И физичнее (каркас не «плывёт» в газовой фазе); каркас идентичен во всех
+        # точках → согласованный профиль. Оговорка: каркас при идеализированной
+        # геометрии, не крист. координатах.
+        n = len(atoms)
+        n_env = len(environment_atoms())
+        lines.append("$freeze")
+        lines.append(f"xyz {n - n_env + 1}-{n}")   # 1-based, последние n_env атомов
     with open(cfile, "w") as f:
         f.write("\n".join(lines) + "\n")
-    mf = uks(build_mol(atoms))
-    mol_eq = optimize(mf, constraints=cfile, maxsteps=120,
-                      convergence_energy=1e-6, convergence_grms=3e-4,
-                      convergence_gmax=6e-4, convergence_drms=1.5e-3,
-                      convergence_dmax=2.5e-3)
+    mf = uks(build_mol(atoms), dm0=dm0)
+    if MODEL == "embedded":   # больше DOF: щадящие критерии (релакс-скан, не минимум)
+        conv = dict(convergence_energy=2e-6, convergence_grms=4.5e-4,
+                    convergence_gmax=9e-4, convergence_drms=2.3e-3,
+                    convergence_dmax=3.6e-3)
+    else:
+        conv = dict(convergence_energy=1e-6, convergence_grms=3e-4,
+                    convergence_gmax=6e-4, convergence_drms=1.5e-3,
+                    convergence_dmax=2.5e-3)
+    # assert_convergence=False: при упоре в maxsteps вернуть последнюю геометрию,
+    # а не падать (для скан-точки на floppy-каркасе это приемлемо — не стационар)
+    mol_eq = optimize(mf, constraints=cfile, maxsteps=maxsteps,
+                      assert_convergence=False, **conv)
     os.remove(cfile)
     new_atoms = [(mol_eq.atom_symbol(i), tuple(c))
                  for i, c in enumerate(mol_eq.atom_coords(unit="Angstrom"))]
-    mf_final = uks(mol_eq)
+    mf_final = uks(mol_eq, dm0=mf.make_rdm1())
     ss = mf_final.spin_square()[0]
-    return new_atoms, float(mf_final.e_tot), bool(mf_final.converged), float(ss)
+    return (new_atoms, float(mf_final.e_tot), bool(mf_final.converged),
+            float(ss), mf_final.make_rdm1())
 
 
 def stage_geom(sub):
-    out = {"substrate": sub, "protocol": f"UKS-{XC.upper()}/{BASIS}, sextet, "
-           "2D-pin r(C-H)+r(O-H) (geomeTRIC), frame relaxed", "points": []}
-    path = os.path.join(DIR, f"ocm_mnw_{sub}_geom.json")
+    fr = "frozen frame" if MODEL == "embedded" else "frame relaxed"
+    out = {"substrate": sub, "geom_version": GEOM_VERSION,
+           "protocol": f"UKS-{XC.upper()}/{BASIS}, sextet, "
+           f"2D-pin r(C-H)+r(O-H) (geomeTRIC), {fr}", "points": []}
+    path = os.path.join(DIR, f"{PREF}_{sub}_geom.json")
     atoms = start_atoms(sub)
     grid = [R_POINT] + PATH
     if os.path.exists(path):        # резюме после смерти контейнера
         with open(path) as f:
             saved = json.load(f)
-        out["points"] = saved.get("points", [])[:len(grid)]
+        if saved.get("geom_version") != GEOM_VERSION:
+            print(f"[{sub}] geom_version mismatch "
+                  f"({saved.get('geom_version')} != {GEOM_VERSION}) — recompute all",
+                  flush=True)
+        else:
+            out["points"] = saved.get("points", [])[:len(grid)]
         if out["points"]:
             atoms = [(s, tuple(c)) for s, c in out["points"][-1]["atoms"]]
             print(f"[{sub}] resume: {len(out['points'])}/{len(grid)} points on disk",
                   flush=True)
+    dm = None
     for i, (rCH, rOH) in enumerate(grid):
         if i < len(out["points"]):
             continue
         t0 = time.time()
-        atoms, e, conv, ss = constrained_opt(atoms, rCH, rOH, f"{sub}_{i}")
+        if MODEL == "embedded":
+            ms = 90 if i == 0 else 130   # ограниченный кран на floppy-каркасе
+        else:
+            ms = 200
+        atoms, e, conv, ss, dm = constrained_opt(
+            atoms, rCH, rOH, f"{sub}_{i}", dm0=dm, maxsteps=ms)
         out["points"].append({
             "rCH_pin": rCH, "rOH_pin": rOH, "e_h": e, "scf_converged": conv,
             "spin_square": round(ss, 3), "wall_s": round(time.time() - t0, 1),
@@ -197,7 +327,7 @@ def stage_polish(sub):
     """Полировка профиля: по сохранённым геометриям — цепочка warm-start
     (dm предыдущей точки) + стабильность UKS. Снимает перескоки состояний,
     из-за которых профиль «зубчатый» (артефакт холодных SCF-стартов)."""
-    path = os.path.join(DIR, f"ocm_mnw_{sub}_geom.json")
+    path = os.path.join(DIR, f"{PREF}_{sub}_geom.json")
     with open(path) as f:
         g = json.load(f)
     dm = None
@@ -341,14 +471,14 @@ def cas_nevpt2(atoms, tag):
 
 
 def stage_energy(sub):
-    with open(os.path.join(DIR, f"ocm_mnw_{sub}_geom.json")) as f:
+    with open(os.path.join(DIR, f"{PREF}_{sub}_geom.json")) as f:
         g = json.load(f)
     rel, iR, iTS, interior = analyze_scan(g)
     out = {"substrate": sub, "cas": list(CAS_TARGET), "avas_labels": AVAS_LABELS,
            "r_index": iR, "ts_index": iTS, "ts_interior": interior,
            "rel_kcal": [round(x, 2) for x in rel],
            "dft_barrier_kcal": round(rel[iTS] - rel[iR], 2)}
-    path = os.path.join(DIR, f"ocm_mnw_{sub}_energy.json")
+    path = os.path.join(DIR, f"{PREF}_{sub}_energy.json")
     for name, idx in (("R", iR), ("TS", iTS)):
         atoms = [(s, tuple(c)) for s, c in g["points"][idx]["atoms"]]
         t0 = time.time()
@@ -374,10 +504,10 @@ def stage_profile(sub):
     """CASSCF(9e,10o)+NEVPT2 во ВСЕХ точках скана: коррелированный профиль
     сам выбирает свои R и TS — без наследования индексов у DFT-поверхности
     (реперы честные и симметричные для обоих субстратов)."""
-    gpath = os.path.join(DIR, f"ocm_mnw_{sub}_geom.json")
+    gpath = os.path.join(DIR, f"{PREF}_{sub}_geom.json")
     with open(gpath) as f:
         g = json.load(f)
-    path = os.path.join(DIR, f"ocm_mnw_{sub}_profile.json")
+    path = os.path.join(DIR, f"{PREF}_{sub}_profile.json")
     out = {"substrate": sub, "cas": list(CAS_TARGET), "points": []}
     if os.path.exists(path):
         with open(path) as f:
@@ -444,8 +574,8 @@ def stage_refine(sub):
     сеется проекцией сошедшихся орбиталей соседа (вперёд и назад), берём нижнее
     решение. Лечит выбросы типа «CASSCF ушёл в чужой локальный минимум»
     (c2h6 p6: +95 ккал) и зигзаги PT2 от смены референса."""
-    gpath = os.path.join(DIR, f"ocm_mnw_{sub}_geom.json")
-    ppath = os.path.join(DIR, f"ocm_mnw_{sub}_profile.json")
+    gpath = os.path.join(DIR, f"{PREF}_{sub}_geom.json")
+    ppath = os.path.join(DIR, f"{PREF}_{sub}_profile.json")
     with open(gpath) as f:
         geom = json.load(f)
     with open(ppath) as f:
@@ -516,6 +646,41 @@ def stage_refine(sub):
           flush=True)
 
 
+def stage_merge2():
+    """Итог из refined-ПРОФИЛЕЙ (каждая поверхность — свои R/TS): барьеры и
+    ΔΔE‡ по уровням DFT/CASSCF/NEVPT2 + лестница спинов, один самодостаточный
+    JSON (его и забираем с AWS)."""
+    res = {"model": MODEL, "spin_2S": SPIN, "cas": list(CAS_TARGET),
+           "avas_labels": AVAS_LABELS, "substrates": {}}
+    sp = os.path.join(DIR, f"{PREF}_spins.json")
+    if os.path.exists(sp):
+        with open(sp) as f:
+            res["spin_ladder"] = json.load(f)
+    for sub in ("ch4", "c2h6"):
+        with open(os.path.join(DIR, f"{PREF}_{sub}_geom.json")) as f:
+            g = json.load(f)
+        with open(os.path.join(DIR, f"{PREF}_{sub}_profile.json")) as f:
+            pr = json.load(f)
+        res["substrates"][sub] = {
+            "dft_rel_kcal": g["rel_kcal"], "dft_r_index": g.get("r_index", 0),
+            "dft_ts_index": g["ts_index"], "dft_ts_interior": g["ts_interior"],
+            "dft_barrier_kcal": g["dft_barrier_kcal"],
+            "noon_ts": pr["points"][pr["nevpt2_ts_index"]]["noon"],
+            **{k: pr[k] for k in pr if k.startswith(("casscf_", "nevpt2_", "all_"))}}
+    res["ddE_kcal"] = {}
+    for lvl in ("dft", "casscf", "nevpt2"):
+        b = {s: res["substrates"][s][f"{lvl}_barrier_kcal"] for s in ("ch4", "c2h6")}
+        res["ddE_kcal"][lvl] = round(b["c2h6"] - b["ch4"], 2)
+    res["quantum_shift_kcal"] = round(
+        res["ddE_kcal"]["nevpt2"] - res["ddE_kcal"]["dft"], 2)
+    out = os.path.join(DIR, f"{PREF}_final.json")
+    with open(out, "w") as f:
+        json.dump(res, f, indent=1)
+    print(json.dumps({k: v for k, v in res.items() if k != "substrates"},
+                     ensure_ascii=False, indent=1))
+    print("saved", out, flush=True)
+
+
 def stage_merge():
     res = {"model": "MnO (sextet) minimal radical-oxygen HAT site, stand-in for "
                     "Mn-Na2WO4/SiO2; NOT the periodic catalyst",
@@ -529,9 +694,9 @@ def stage_merge():
            "substrates": {}}
     ok = True
     for sub in ("ch4", "c2h6"):
-        ep = os.path.join(DIR, f"ocm_mnw_{sub}_energy.json")
-        pp = os.path.join(DIR, f"ocm_mnw_{sub}_profile.json")
-        gp = os.path.join(DIR, f"ocm_mnw_{sub}_geom.json")
+        ep = os.path.join(DIR, f"{PREF}_{sub}_energy.json")
+        pp = os.path.join(DIR, f"{PREF}_{sub}_profile.json")
+        gp = os.path.join(DIR, f"{PREF}_{sub}_geom.json")
         if not (os.path.exists(pp) and os.path.exists(gp)):
             ok = False
             continue
@@ -567,7 +732,7 @@ def stage_merge():
         res["all_ts_interior"] = all(
             res["substrates"][s][f"{lvl}_ts_interior"]
             for s in ("ch4", "c2h6") for lvl in ("dft", "nevpt2"))
-    with open(os.path.join(DIR, "ocm_mnw_selectivity_results.json"), "w") as f:
+    with open(os.path.join(DIR, f"{PREF}_selectivity_results.json"), "w") as f:
         json.dump(res, f, indent=1)
     print(json.dumps({k: v for k, v in res.items() if k != "substrates"}, indent=1))
 
@@ -582,6 +747,10 @@ if __name__ == "__main__":
         stage_profile(sys.argv[2])
     elif stage == "refine":
         stage_refine(sys.argv[2])
+    elif stage == "spins":
+        stage_spins()
+    elif stage == "merge2":
+        stage_merge2()
     elif stage == "energy":
         stage_energy(sys.argv[2])
     elif stage == "merge":

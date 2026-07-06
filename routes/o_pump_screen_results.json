@@ -1,0 +1,131 @@
+{
+ "screen": "off-label #6: automotive lambda-sensor (YSZ) as pulsed O2- pump for OCM",
+ "relation": "Ev_eff(U) = Ev - 2*F*U; window = NEVPT2 selective band [-10.0, 45.0] kcal/mol from our chemloop volcano",
+ "carriers": [
+  {
+   "metal": "Ti",
+   "Ev_nevpt2": 100.24,
+   "Ev_dft": 92.2,
+   "U_window_V": [
+    1.2,
+    2.39
+   ],
+   "dft_window_error_V": -0.17
+  },
+  {
+   "metal": "V",
+   "Ev_nevpt2": 77.57,
+   "Ev_dft": 70.29,
+   "U_window_V": [
+    0.71,
+    1.9
+   ],
+   "dft_window_error_V": -0.16
+  },
+  {
+   "metal": "Cr",
+   "Ev_nevpt2": 45.24,
+   "Ev_dft": 60.79,
+   "U_window_V": [
+    0.01,
+    1.2
+   ],
+   "dft_window_error_V": 0.34
+  },
+  {
+   "metal": "Mn",
+   "Ev_nevpt2": -6.4,
+   "Ev_dft": 6.88,
+   "U_window_V": [
+    -1.11,
+    0.08
+   ],
+   "dft_window_error_V": 0.29
+  },
+  {
+   "metal": "Fe",
+   "Ev_nevpt2": 1.73,
+   "Ev_dft": 3.43,
+   "U_window_V": [
+    -0.94,
+    0.25
+   ],
+   "dft_window_error_V": 0.04
+  },
+  {
+   "metal": "Co",
+   "Ev_nevpt2": -10.47,
+   "Ev_dft": -9.46,
+   "U_window_V": [
+    -1.2,
+    -0.01
+   ],
+   "dft_window_error_V": 0.02
+  },
+  {
+   "metal": "Ni",
+   "Ev_nevpt2": -33.45,
+   "Ev_dft": -28.34,
+   "U_window_V": [
+    -1.7,
+    -0.51
+   ],
+   "dft_window_error_V": 0.11
+  },
+  {
+   "metal": "Cu",
+   "Ev_nevpt2": -33.46,
+   "Ev_dft": -44.18,
+   "U_window_V": [
+    -1.7,
+    -0.51
+   ],
+   "dft_window_error_V": -0.23
+  },
+  {
+   "metal": "Mo",
+   "Ev_nevpt2": 88.3,
+   "Ev_dft": 89.3,
+   "U_window_V": [
+    0.94,
+    2.13
+   ],
+   "dft_window_error_V": 0.02
+  },
+  {
+   "metal": "W",
+   "Ev_nevpt2": 106.39,
+   "Ev_dft": 103.92,
+   "U_window_V": [
+    1.33,
+    2.52
+   ],
+   "dft_window_error_V": -0.05
+  },
+  {
+   "metal": "Sn",
+   "Ev_nevpt2": -5.38,
+   "Ev_dft": -12.47,
+   "U_window_V": [
+    -1.09,
+    0.1
+   ],
+   "dft_window_error_V": -0.15
+  },
+  {
+   "metal": "Pb",
+   "Ev_nevpt2": -39.26,
+   "Ev_dft": -42.93,
+   "U_window_V": [
+    -1.83,
+    -0.63
+   ],
+   "dft_window_error_V": -0.08
+  }
+ ],
+ "reading": {
+  "knob": "voltage moves any carrier along the Sabatier volcano \u2014 composition is no longer destiny; pulsed dosing decouples CH4 activation from C2 overoxidation (no gas-phase O2)",
+  "our_edge": "U-windows computed on NEVPT2 Ev; dft_window_error_V shows how far a DFT-designed voltage window would miss (up to volts for early metals) \u2014 DFT-blind design fails here",
+  "hardware": "mass-produced YSZ lambda sensors / SOFC electrolyte plates; wellhead skid compatible"
+ }
+}

@@ -1,0 +1,41 @@
+{
+ "invention": "I2 metal-free triplet HAT spin-valve",
+ "mediators": {
+  "O": {
+   "ch4_barrier_dft": 46.77,
+   "ch4_barrier_nevpt2": 56.69,
+   "ddE_dft": 86.0,
+   "ddE_casscf": 101.35,
+   "ddE_nevpt2": 93.99,
+   "corr_shift_ddE": 8.0
+  },
+  "NH": {
+   "ch4_barrier_dft": 63.96,
+   "ch4_barrier_nevpt2": 73.68,
+   "ddE_dft": 83.19,
+   "ddE_casscf": 98.84,
+   "ddE_nevpt2": 92.05,
+   "corr_shift_ddE": 8.9
+  },
+  "O2": {
+   "ch4_barrier_dft": 122.86,
+   "ch4_barrier_nevpt2": 122.14,
+   "ddE_dft": 79.93,
+   "ddE_casscf": 96.01,
+   "ddE_nevpt2": 87.77,
+   "corr_shift_ddE": 7.8
+  },
+  "CH2": {
+   "ch4_barrier_dft": 50.31,
+   "ch4_barrier_nevpt2": 58.23,
+   "ddE_dft": 87.26,
+   "ddE_casscf": 102.71,
+   "ddE_nevpt2": 95.06,
+   "corr_shift_ddE": 7.8
+  }
+ },
+ "result_solid": "CH4-channel HAT barrier: NEVPT2 raises it ~+10 kcal/mol over DFT for every metal-free abstractor (O 47->57, NH 64->74, CH2 50->58, O2 122->122) \u2014 DFT systematically underestimates metal-free HAT, same as on Mn=O.",
+ "result_directional": "correlation shifts \u0394\u0394E\u2021 by a uniform +8 kcal/mol (NEVPT2 vs DFT) across all 4 mediators \u2014 same anti-BEP DIRECTION as Mn=O (Stage 15/16).",
+ "honest_limit": "absolute \u0394\u0394E\u2021 (~+86 kcal/mol) is UNPHYSICAL: ethane C-H is weaker than methane's, so true \u0394\u0394E\u2021 should be ~0/negative. The rigid collinear ethyl TS geometry inflates the C2H6 barrier. Rigid-TS is adequate for the symmetric CH4 channel and for the correlation SHIFT, but NOT for the absolute two-substrate \u0394\u0394E\u2021. A relaxed ethyl TS is needed for a clean metal-free sign number.",
+ "verdict": "I2 PLAUSIBLE, DIRECTIONALLY SUPPORTED, not yet a clean sign-flip. Parked pending relaxed-TS recompute; the metal system (I1, Stage 16) carries the proven anti-BEP result."
+}

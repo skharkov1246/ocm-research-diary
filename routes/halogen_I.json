@@ -1,0 +1,23 @@
+{
+ "halogen": "I",
+ "model": "gas-phase X + CH4 -> CH3 + HX, def2-SVP+ECP",
+ "dft": {
+  "barrier_kcal": 164.45,
+  "dE_reac_kcal": 33.24,
+  "ts_rCH": 1.2,
+  "ts_rHX": 1.9
+ },
+ "casscf": {
+  "barrier_kcal": 13.65,
+  "dE_reac_kcal": 52.21
+ },
+ "nevpt2": {
+  "barrier_kcal": 23.48,
+  "dE_reac_kcal": 38.62
+ },
+ "ts_cas": [
+  13,
+  10
+ ],
+ "wall_s": 922.5
+}
