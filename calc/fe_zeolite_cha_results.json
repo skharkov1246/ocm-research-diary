@@ -11,6 +11,10 @@
       "e_cas": -4330.812813863766,
       "cas_conv": true,
       "e_nevpt2": -4335.073221891057
+    },
+    "triplet": {
+      "e_cas": -4330.762278746887,
+      "cas_conv": true
     }
   },
   "active_space": {
