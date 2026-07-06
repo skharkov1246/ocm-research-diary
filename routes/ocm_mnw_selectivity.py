@@ -43,13 +43,20 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 BASIS = "def2-svp"
 MODEL = os.environ.get("OCM_MODEL", "bare")   # bare (MnO) | embedded (Na/W-оболочка)
 SPIN = int(os.environ.get("OCM_SPIN", "5"))   # 2S = число SOMO (bare-секстет: 5)
+# Этап 17: активный оксо-металл параметризован — Mn (базовый) | Cr | Fe (окно
+# Cr/Mn/Fe вакансионного волкана). Свап меняет чётность/основной спин: сначала
+# гоняем стадию `spins`, читаем ground_2S, выставляем OCM_SPIN, потом пайплайн.
+METAL = os.environ.get("OCM_METAL", "Mn")
 XC = "pbe0"
-PREF = os.environ.get("OCM_PREFIX", "ocm_mnw" if MODEL == "bare" else "ocm_mnw_emb")
+_defpref = "ocm_mnw" if MODEL == "bare" else "ocm_mnw_emb"
+if METAL != "Mn":
+    _defpref += "_" + METAL.lower()          # ocm_mnw_emb_cr / _fe — не пересекается
+PREF = os.environ.get("OCM_PREFIX", _defpref)
 # единое активное пространство фиксированного СОСТАВА: 2 закрытые пары + все SOMO
 # + 3 виртуали => (ne,no) зависит только от спина (bare-секстет: CAS(9e,10o))
 N_DOCC, N_VIR = 2, 3
 CAS_TARGET = (2 * N_DOCC + SPIN, N_DOCC + SPIN + N_VIR)
-AVAS_LABELS = ["Mn 3d", "O 2p", "2 H 1s"]   # атом 2 (0-based) — переносимый H
+AVAS_LABELS = [f"{METAL} 3d", "O 2p", "2 H 1s"]   # атом 2 (0-based) — переносимый H
 # версия геометрического протокола: при несовпадении resume пересчитывает точки
 # (frozen-frame сменил floppy-relax — старые точки несовместимы, отбрасываются)
 GEOM_VERSION = "embedded-frozen-frame-v2" if MODEL == "embedded" else "bare-v1"
@@ -79,7 +86,7 @@ def start_atoms(sub):
     zH = rOH0
     zC = rOH0 + rCH0
     d, th = 1.09, math.radians(108.0)
-    atoms = [("Mn", (0.0, 0.0, zMn)), ("O", (0.0, 0.0, zO)),
+    atoms = [(METAL, (0.0, 0.0, zMn)), ("O", (0.0, 0.0, zO)),
              ("H", (0.0, 0.0, zH)), ("C", (0.0, 0.0, zC))]
     if sub == "ch4":
         for k in range(3):
