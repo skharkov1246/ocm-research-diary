@@ -43,13 +43,20 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 BASIS = "def2-svp"
 MODEL = os.environ.get("OCM_MODEL", "bare")   # bare (MnO) | embedded (Na/W-оболочка)
 SPIN = int(os.environ.get("OCM_SPIN", "5"))   # 2S = число SOMO (bare-секстет: 5)
+# Этап 17: активный оксо-металл параметризован — Mn (базовый) | Cr | Fe (окно
+# Cr/Mn/Fe вакансионного волкана). Свап меняет чётность/основной спин: сначала
+# гоняем стадию `spins`, читаем ground_2S, выставляем OCM_SPIN, потом пайплайн.
+METAL = os.environ.get("OCM_METAL", "Mn")
 XC = "pbe0"
-PREF = os.environ.get("OCM_PREFIX", "ocm_mnw" if MODEL == "bare" else "ocm_mnw_emb")
+_defpref = "ocm_mnw" if MODEL == "bare" else "ocm_mnw_emb"
+if METAL != "Mn":
+    _defpref += "_" + METAL.lower()          # ocm_mnw_emb_cr / _fe — не пересекается
+PREF = os.environ.get("OCM_PREFIX", _defpref)
 # единое активное пространство фиксированного СОСТАВА: 2 закрытые пары + все SOMO
 # + 3 виртуали => (ne,no) зависит только от спина (bare-секстет: CAS(9e,10o))
 N_DOCC, N_VIR = 2, 3
 CAS_TARGET = (2 * N_DOCC + SPIN, N_DOCC + SPIN + N_VIR)
-AVAS_LABELS = ["Mn 3d", "O 2p", "2 H 1s"]   # атом 2 (0-based) — переносимый H
+AVAS_LABELS = [f"{METAL} 3d", "O 2p", "2 H 1s"]   # атом 2 (0-based) — переносимый H
 # версия геометрического протокола: при несовпадении resume пересчитывает точки
 # (frozen-frame сменил floppy-relax — старые точки несовместимы, отбрасываются)
 GEOM_VERSION = "embedded-frozen-frame-v2" if MODEL == "embedded" else "bare-v1"
@@ -79,7 +86,7 @@ def start_atoms(sub):
     zH = rOH0
     zC = rOH0 + rCH0
     d, th = 1.09, math.radians(108.0)
-    atoms = [("Mn", (0.0, 0.0, zMn)), ("O", (0.0, 0.0, zO)),
+    atoms = [(METAL, (0.0, 0.0, zMn)), ("O", (0.0, 0.0, zO)),
              ("H", (0.0, 0.0, zH)), ("C", (0.0, 0.0, zC))]
     if sub == "ch4":
         for k in range(3):
@@ -213,7 +220,10 @@ def constrained_opt(atoms, rCH, rOH, tag, dm0=None, maxsteps=200):
     электронную ветку вдоль скана — урок polish Этапа 15). Возвращает также
     итоговую плотность для цепочки."""
     from pyscf.geomopt.geometric_solver import optimize
-    cfile = os.path.join(DIR, f"_constr_{tag}.txt")
+    # имя файла ограничений неймспейсим ПРЕФИКСОМ (=металлом): при параллельном
+    # прогоне нескольких металлов в одной директории общий `_constr_ch4_0.txt`
+    # вызывал гонку (один процесс os.remove — у другого FileNotFoundError).
+    cfile = os.path.join(DIR, f"_constr_{PREF}_{tag}.txt")
     lines = ["$set"]
     if rOH is not None:
         lines.append(f"distance 2 3 {rOH:.4f}")   # O(2)–H(3), 1-based
@@ -245,7 +255,8 @@ def constrained_opt(atoms, rCH, rOH, tag, dm0=None, maxsteps=200):
     # а не падать (для скан-точки на floppy-каркасе это приемлемо — не стационар)
     mol_eq = optimize(mf, constraints=cfile, maxsteps=maxsteps,
                       assert_convergence=False, **conv)
-    os.remove(cfile)
+    if os.path.exists(cfile):
+        os.remove(cfile)
     new_atoms = [(mol_eq.atom_symbol(i), tuple(c))
                  for i, c in enumerate(mol_eq.atom_coords(unit="Angstrom"))]
     mf_final = uks(mol_eq, dm0=mf.make_rdm1())
