@@ -220,7 +220,10 @@ def constrained_opt(atoms, rCH, rOH, tag, dm0=None, maxsteps=200):
     электронную ветку вдоль скана — урок polish Этапа 15). Возвращает также
     итоговую плотность для цепочки."""
     from pyscf.geomopt.geometric_solver import optimize
-    cfile = os.path.join(DIR, f"_constr_{tag}.txt")
+    # имя файла ограничений неймспейсим ПРЕФИКСОМ (=металлом): при параллельном
+    # прогоне нескольких металлов в одной директории общий `_constr_ch4_0.txt`
+    # вызывал гонку (один процесс os.remove — у другого FileNotFoundError).
+    cfile = os.path.join(DIR, f"_constr_{PREF}_{tag}.txt")
     lines = ["$set"]
     if rOH is not None:
         lines.append(f"distance 2 3 {rOH:.4f}")   # O(2)–H(3), 1-based
@@ -252,7 +255,8 @@ def constrained_opt(atoms, rCH, rOH, tag, dm0=None, maxsteps=200):
     # а не падать (для скан-точки на floppy-каркасе это приемлемо — не стационар)
     mol_eq = optimize(mf, constraints=cfile, maxsteps=maxsteps,
                       assert_convergence=False, **conv)
-    os.remove(cfile)
+    if os.path.exists(cfile):
+        os.remove(cfile)
     new_atoms = [(mol_eq.atom_symbol(i), tuple(c))
                  for i, c in enumerate(mol_eq.atom_coords(unit="Angstrom"))]
     mf_final = uks(mol_eq, dm0=mf.make_rdm1())

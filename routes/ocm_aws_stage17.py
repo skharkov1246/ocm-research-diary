@@ -38,7 +38,8 @@ BUCKET_REGION = "us-east-1"
 PREFIX = "alpha-o/ocm17"
 PROFILE = "alpha-o-instance-profile"           # IAM instance profile — глобальный
 TAG_PROJECT = "ocm-agent"
-TAG_NAME = "ocm-stage17"
+TAG_NAME = os.environ.get("OCM17_TAG", "ocm-stage17")   # отд. тег → параллельный
+                                                        # solo-прогон металла
 ITYPE = os.environ.get("OCM17_ITYPE", "r7i.12xlarge")   # 48 vCPU, 384 GB
 SUBNET = {"eu-central-1": "subnet-057e6f5ca6d3c6d8d",
           "us-east-1": "subnet-0b1a363f27ecbbf12"}[REGION]
