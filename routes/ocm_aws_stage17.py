@@ -55,6 +55,10 @@ JOB_TIMEOUT = JOB_MIN - 20
 DISK_GB = 120
 FINAL_KEYS = {m: f"{PREFIX}/ocm_mnw_emb_{m.lower()}_final.json"
               for m in METALS.split()}
+# глоб синка выводим ИЗ METALS (не хардкод cr/fe): иначе прогон другого металла
+# заливал бы закоммиченные чужие JSON и пропускал свои реальные результаты
+SYNC_INCLUDES = " ".join(f"--include 'ocm_mnw_emb_{m.lower()}_*'"
+                         for m in METALS.split())
 
 for var in ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"):
     os.environ.pop(var, None)          # битые env-креды → ~/.aws/credentials
@@ -86,7 +90,7 @@ export PYSCF_TMPDIR=/root/scratch
 export OCM_MODEL=embedded
 NPROC=$(nproc)
 THREADS=$(( NPROC / 4 )); [ $THREADS -lt 1 ] && THREADS=1
-sync_up() {{ aws s3 cp routes/ $S3/ --recursive --exclude '*' --include 'ocm_mnw_emb_cr_*' --include 'ocm_mnw_emb_fe_*' >/dev/null 2>&1 || true; aws s3 cp /root/repo/stage17.log $S3/stage17.log >/dev/null 2>&1 || true; }}
+sync_up() {{ aws s3 cp routes/ $S3/ --recursive --exclude '*' {SYNC_INCLUDES} >/dev/null 2>&1 || true; aws s3 cp /root/repo/stage17.log $S3/stage17.log >/dev/null 2>&1 || true; }}
 ( while true; do sleep 180; sync_up; done ) &
 
 run_metal() {{
