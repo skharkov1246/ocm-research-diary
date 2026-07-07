@@ -35,7 +35,8 @@ REGION = os.environ.get("AWS_DEFAULT_REGION", "eu-central-1")
 ACCOUNT = "097743207937"
 BUCKET = f"alpha-o-results-{ACCOUNT}"          # bucket в us-east-1 — cross-region OK
 BUCKET_REGION = "us-east-1"
-PREFIX = "alpha-o/ocm17"
+PREFIX = os.environ.get("OCM17_PREFIX", "alpha-o/ocm17")   # отд. префикс для
+                                                           # solo-прогона (без клоббера)
 PROFILE = "alpha-o-instance-profile"           # IAM instance profile — глобальный
 TAG_PROJECT = "ocm-agent"
 TAG_NAME = os.environ.get("OCM17_TAG", "ocm-stage17")   # отд. тег → параллельный
