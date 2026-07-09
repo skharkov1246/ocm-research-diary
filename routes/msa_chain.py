@@ -237,43 +237,60 @@ def stage_add():
 
 
 def stage_hat():
-    t0 = time.time(); out = {"stage": "hat", "model": f"rigid collinear HAT, {BASIS}"}
+    t0 = time.time()
+    out = {"stage": "hat", "model": f"pinned-relax collinear HAT, {BASIS}"}
     ch4, m_ch4 = relax(ch4_atoms(), 0)
     rad, m_rad = relax(ch3so3_atoms(), 1)
     from pyscf.geomopt.geometric_solver import optimize
-    best = None
+    # РЕЛАКС TS: пин r(C–H)=dist 1-2, r(H–O)=dist 2-3, хвост релаксируется.
+    # Урок radcas-прогона (806 ккал): optimize с клэш-старта может вернуть
+    # геометрию хуже стартовой, а свежий SCF на ней — чужую ветку. Поэтому:
+    # warm-start плотностью по цепочке, проверка сходимости КАЖДОЙ точки,
+    # весь скан в JSON, TS = максимум только по сошедшимся точкам,
+    # sanity-гейт на нефизичный барьер.
+    pts, dm = [], None
     for rCH, rOH in ((1.15, 1.30), (1.25, 1.15), (1.35, 1.05), (1.50, 0.98)):
-        # РЕЛАКС TS (не rigid!): пин r(C–H)=dist 1-2, r(H–O)=dist 2-3, остальное
-        # (сульфонил-хвост) релаксируется → убирает раздутый rigid-барьер. Изогнутый
-        # старт (H_t сдвинут) обходит линейную сингулярность. Fallback — одноточка.
         cf = os.path.join(DIR, f"_msa_hat_{rCH:.2f}.txt")
         open(cf, "w").write(f"$set\ndistance 1 2 {rCH:.4f}\ndistance 2 3 {rOH:.4f}\n")
+        e, na, conv = None, None, False
         try:
-            mf0 = uks(M(hat_ts(rCH, rOH), 1))
-            mol = optimize(mf0, constraints=cf, maxsteps=60, assert_convergence=False)
-            mfx = uks(mol); e = float(mfx.e_tot)
+            mf0 = uks(M(hat_ts(rCH, rOH), 1), dm0=dm)
+            mol = optimize(mf0, constraints=cf, maxsteps=180,
+                           assert_convergence=False)
+            mfx = uks(mol, dm0=mf0.make_rdm1())
+            e, conv = float(mfx.e_tot), bool(mfx.converged)
+            dm = mfx.make_rdm1()
             na = [(mol.atom_symbol(i), tuple(c))
                   for i, c in enumerate(mol.atom_coords(unit="Angstrom"))]
         except Exception as ex:
-            print(f"  [hat] rCH={rCH} relax fell back to SP: {ex}", flush=True)
-            try:
-                mfx = uks(M(hat_ts(rCH, rOH), 1)); e = float(mfx.e_tot)
-                na = hat_ts(rCH, rOH)
-            except Exception:
-                continue
+            print(f"  [hat] rCH={rCH} relax failed: {ex}", flush=True)
         finally:
             if os.path.exists(cf):
                 os.remove(cf)
-        if not np.isfinite(e):
-            continue
-        if best is None or e > best[1]:
-            best = (na, e, rCH, rOH)
-    if best is None:
-        raise RuntimeError("hat scan failed")
-    ts, e_ts, rCH, rOH = best
+        if e is not None and np.isfinite(e):
+            pts.append({"rCH": rCH, "rOH": rOH, "e_h": e,
+                        "scf_converged": conv, "atoms": na})
+            print(f"  [hat] point rCH={rCH} rOH={rOH} E={e:.6f} conv={conv}",
+                  flush=True)
     eR = m_rad.e_tot + m_ch4.e_tot
-    out["dft"] = {"barrier_hat_kcal": round((e_ts - eR) * HARTREE_KCAL, 2),
+    out["scan"] = [{k: p[k] for k in ("rCH", "rOH", "e_h", "scf_converged")}
+                   for p in pts]
+    out["scan_rel_kcal"] = [round((p["e_h"] - eR) * HARTREE_KCAL, 2) for p in pts]
+    ok = [p for p in pts if p["scf_converged"]]
+    if len(ok) < 2:
+        raise RuntimeError(f"hat scan: only {len(ok)} converged points")
+    best = max(ok, key=lambda p: p["e_h"])
+    ts, e_ts, rCH, rOH = best["atoms"], best["e_h"], best["rCH"], best["rOH"]
+    dft_bar = (e_ts - eR) * HARTREE_KCAL
+    out["dft"] = {"barrier_hat_kcal": round(dft_bar, 2),
                   "ts_rCH": rCH, "ts_rOH": rOH}
+    if not (0.0 < dft_bar < 150.0):
+        out["hat_stage_failed"] = (f"unphysical DFT barrier {dft_bar:.1f} kcal "
+                                   f"— broken scan point, not chemistry")
+        out["wall_s"] = round(time.time() - t0, 1)
+        json.dump(out, open(os.path.join(DIR, "msa_hat.json"), "w"), indent=1)
+        print(f"[hat] FAILED sanity gate: {out['hat_stage_failed']}", flush=True)
+        return
     n_ts = nevpt2(ts, 1, ["0 C 2p", "1 H 1s", "2 O 2p"], thr=0.4)
     n_ch4 = nevpt2(ch4, 0, ["0 C 2p", "1 H 1s"], thr=0.6)
     n_rad = nevpt2(rad, 1, LAB_RAD, thr=THR_S)
@@ -301,6 +318,17 @@ def stage_sanity():
 def stage_merge():
     add = json.load(open(os.path.join(DIR, "msa_add.json")))
     hat = json.load(open(os.path.join(DIR, "msa_hat.json")))
+    if hat.get("hat_stage_failed") or "nevpt2" not in hat:
+        res = {"route": "direct CH4 + SO3 -> CH3SO3H radical chain",
+               "numbers_nevpt2": {
+                   "add_barrier": add["nevpt2"]["barrier_add_kcal"],
+                   "bscission_barrier": add["nevpt2"]["barrier_bscission_kcal"]},
+               "chain_verdict": "NO VERDICT: HAT stage failed sanity gate — "
+                                "needs rerun, add/bscission numbers stand",
+               "hat_failure": hat.get("hat_stage_failed", "no nevpt2 block")}
+        json.dump(res, open(os.path.join(DIR, "msa_results.json"), "w"), indent=1)
+        print(json.dumps(res, ensure_ascii=False, indent=1))
+        return
     alive = hat["nevpt2"]["barrier_hat_kcal"] <= add["nevpt2"]["barrier_bscission_kcal"] + 5
     res = {"route": "direct CH4 + SO3 -> CH3SO3H (methanesulfonic acid) radical chain",
            "numbers_nevpt2": {

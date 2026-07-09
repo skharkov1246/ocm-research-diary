@@ -36,6 +36,12 @@ BRANCH = os.environ.get("MSA_BRANCH") or subprocess.run(
     ["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True,
     text=True).stdout.strip()
 MAX_MIN = int(os.environ.get("MSA_MAX_MIN", "600"))
+STAGES = os.environ.get("MSA_STAGES", "add hat merge")   # rerun-нацеливание
+# удаляем на боте ТОЛЬКО выходы перегоняемых стадий (урок Этапа 18: стейл-JSON
+# из клона в свежем префиксе = ложная готовность); чужие стадии остаются как resume
+STAGE_OUT = {"add": "routes/msa_add.json", "hat": "routes/msa_hat.json",
+             "merge": "routes/msa_results.json"}
+RM_FILES = " ".join(STAGE_OUT[s] for s in STAGES.split())
 JOB_MIN = MAX_MIN - 20
 DISK_GB = 60
 
@@ -60,14 +66,14 @@ for i in 1 2 3; do timeout 25m python3 -m pip install -q numpy scipy pyscf geome
 for i in 1 2 3; do (cd /root && timeout 10m git clone --depth 1 -b {BRANCH} {REPO} repo) && break; sleep 30; done
 cd /root/repo || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 python3 -c "import pyscf" || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
-rm -f routes/msa_add.json routes/msa_hat.json routes/msa_results.json
+rm -f {RM_FILES}
 mkdir -p /root/scratch
 export PYSCF_TMPDIR=/root/scratch
 export MSA_RADCAS=1
 export OMP_NUM_THREADS=$(nproc)
 sync_up() {{ aws s3 cp routes/ $S3/ --recursive --exclude '*' --include 'msa_*.json' >/dev/null 2>&1 || true; aws s3 cp /root/repo/msa.log $S3/msa.log >/dev/null 2>&1 || true; }}
 ( while true; do sleep 120; sync_up; done ) &
-for st in add hat merge; do
+for st in {STAGES}; do
   echo "[aws][msa] stage $st" >> /root/repo/msa.log
   timeout 480m python3 -u routes/msa_chain.py $st >> /root/repo/msa.log 2>&1
   sync_up
