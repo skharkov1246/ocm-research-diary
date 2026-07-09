@@ -1,0 +1,46 @@
+{
+ "model": "embedded",
+ "candidates_2S": [
+  0,
+  2,
+  4,
+  6
+ ],
+ "ladder": [
+  {
+   "spin_2S": 0,
+   "e_h": -1570.147361595029,
+   "converged": true,
+   "spin_square": 1.031,
+   "wall_s": 135.4
+  },
+  {
+   "spin_2S": 2,
+   "e_h": -1570.147225256269,
+   "converged": true,
+   "spin_square": 2.032,
+   "wall_s": 110.7
+  },
+  {
+   "spin_2S": 4,
+   "e_h": -1569.8090039931394,
+   "converged": true,
+   "spin_square": 6.038,
+   "wall_s": 230.1
+  },
+  {
+   "spin_2S": 6,
+   "e_h": -1569.8594983305475,
+   "converged": true,
+   "spin_square": 12.055,
+   "wall_s": 192.7
+  }
+ ],
+ "ground_2S": 0,
+ "rel_kcal": {
+  "0": 0.0,
+  "2": 0.09,
+  "4": 212.32,
+  "6": 180.64
+ }
+}
