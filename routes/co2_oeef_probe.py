@@ -33,7 +33,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from pyscf import gto, dft, lib  # noqa: E402
 
-OUT = os.path.join(HERE, "co2_oeef_results.json")
+SITE = os.environ.get("OEEF_SITE", "Cu2")
+OUT = os.path.join(HERE, f"co2_oeef_{SITE.lower()}_results.json" if SITE!="Cu2" else "co2_oeef_results.json")
 HARTREE_EV = 27.211386245988
 AU_FIELD_V_PER_A = 51.42206747  # 1 а.е. поля = 51.422 В/Å
 FIELDS = [0.0, 0.002, -0.002, 0.005, -0.005, 0.010, -0.010]  # а.е., вдоль x
@@ -122,13 +123,13 @@ def main_real(args):
     from co2_to_fuels_ts import build_ads
     say(f"OEEF probe — threads={lib.num_threads()}")
     with open(os.path.join(HERE, "co2_to_fuels_results.json")) as f:
-        tb = json.load(f)["ts_barrier"]["Cu2"]
+        tb = json.load(f)["ts_barrier"][SITE]
     prof = {round(p["d"], 2): p for p in tb["profile"]}
     geoms = {"reactant": tb["d_reactant"], "ts": tb["d_ts"]}
     res = json.load(open(OUT)) if os.path.exists(OUT) else {}
     res.setdefault("meta", {
-        "what": "OEEF probe: uniform E-field along the C...C axis vs coupling "
-                "barrier, Cu2+2*CO cluster, DF-RKS PBE/def2-SVP, warm-chain in field",
+        "what": f"OEEF probe ({SITE}): uniform E-field along the C...C axis vs coupling "
+                "barrier, metal+2*CO cluster, DF-RKS PBE/def2-SVP, warm-chain in field",
         "fields_au": FIELDS, "axis": "x (C...C)",
         "geometry_source": "ts_barrier.profile of co2_to_fuels_results.json "
                            "(reactant d=4.2, TS d=2.6), build_ads reconstruction",
@@ -143,7 +144,7 @@ def main_real(args):
     for tag, d in geoms.items():
         p = prof[round(float(d), 2)]
         ads = build_ads(float(d), np.array(p["free"], dtype=float))
-        mol = _mol(METALS["Cu2"], ads)
+        mol = _mol(METALS[SITE], ads)
         say(f"[{tag}] d={d} Å, nao={mol.nao}")
         run_geometry(tag, mol, res, args)
     summarize(res)
