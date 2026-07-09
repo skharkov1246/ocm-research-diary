@@ -86,6 +86,10 @@ for i in 1 2 3; do timeout 25m python3 -m pip install -q numpy scipy pyscf geome
 for i in 1 2 3; do (cd /root && timeout 10m git clone --depth 1 -b {BRANCH} {REPO} repo) && break; sleep 30; done
 cd /root/repo || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 python3 -c "import pyscf, geometric" || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
+# стейл-финалы из git УДАЛЯЕМ до старта: иначе первый же sync_up заливает их в
+# свежий S3-префикс, оркестратор принимает за готовый результат и гасит инстанс
+# посреди счёта (случилось на relaunch Этапа 18). merge2 пересоздаст в конце.
+for M in {METALS}; do rm -f routes/ocm_mnw_emb_$(echo $M | tr A-Z a-z)_final.json; done
 mkdir -p /root/scratch
 export PYSCF_TMPDIR=/root/scratch
 export OCM_MODEL=embedded
