@@ -56,7 +56,11 @@ PREF = os.environ.get("OCM_PREFIX", _defpref)
 # + 3 виртуали => (ne,no) зависит только от спина (bare-секстет: CAS(9e,10o))
 N_DOCC, N_VIR = 2, 3
 CAS_TARGET = (2 * N_DOCC + SPIN, N_DOCC + SPIN + N_VIR)
-AVAS_LABELS = [f"{METAL} 3d", "O 2p", "2 H 1s"]   # атом 2 (0-based) — переносимый H
+# валентная d-оболочка металла: 3d-ряд по умолчанию; Этап 19 добавляет 4d-ряд
+# (Zr/Nb — гомологи Ti/V; def2-SVP несёт для них ECP-28, ecp=BASIS уже передаётся)
+_DSHELL = {"Zr": "4d", "Nb": "4d", "Mo": "4d"}
+AVAS_LABELS = [f"{METAL} {_DSHELL.get(METAL, '3d')}",
+               "O 2p", "2 H 1s"]   # атом 2 (0-based) — переносимый H
 # версия геометрического протокола: при несовпадении resume пересчитывает точки
 # (frozen-frame сменил floppy-relax — старые точки несовместимы, отбрасываются)
 GEOM_VERSION = "embedded-frozen-frame-v2" if MODEL == "embedded" else "bare-v1"
