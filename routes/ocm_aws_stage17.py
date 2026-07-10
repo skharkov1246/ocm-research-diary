@@ -45,6 +45,7 @@ ITYPE = os.environ.get("OCM17_ITYPE", "r7i.12xlarge")   # 48 vCPU, 384 GB
 SUBNET = {"eu-central-1": "subnet-057e6f5ca6d3c6d8d",
           "us-east-1": "subnet-0b1a363f27ecbbf12"}[REGION]
 METALS = os.environ.get("OCM17_METALS", "Cr Fe")
+GRID = os.environ.get("OCM17_GRID", "")   # "ext" → расширенная сетка (Этап 18)
 REPO = "https://github.com/skharkov1246/ocm-research-diary"
 BRANCH = os.environ.get("OCM17_BRANCH") or subprocess.run(
     ["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True,
@@ -85,9 +86,14 @@ for i in 1 2 3; do timeout 25m python3 -m pip install -q numpy scipy pyscf geome
 for i in 1 2 3; do (cd /root && timeout 10m git clone --depth 1 -b {BRANCH} {REPO} repo) && break; sleep 30; done
 cd /root/repo || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 python3 -c "import pyscf, geometric" || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
+# стейл-финалы из git УДАЛЯЕМ до старта: иначе первый же sync_up заливает их в
+# свежий S3-префикс, оркестратор принимает за готовый результат и гасит инстанс
+# посреди счёта (случилось на relaunch Этапа 18). merge2 пересоздаст в конце.
+for M in {METALS}; do rm -f routes/ocm_mnw_emb_$(echo $M | tr A-Z a-z)_final.json; done
 mkdir -p /root/scratch
 export PYSCF_TMPDIR=/root/scratch
 export OCM_MODEL=embedded
+export OCM_GRID={GRID}
 NPROC=$(nproc)
 THREADS=$(( NPROC / 4 )); [ $THREADS -lt 1 ] && THREADS=1
 sync_up() {{ aws s3 cp routes/ $S3/ --recursive --exclude '*' {SYNC_INCLUDES} >/dev/null 2>&1 || true; aws s3 cp /root/repo/stage17.log $S3/stage17.log >/dev/null 2>&1 || true; }}
