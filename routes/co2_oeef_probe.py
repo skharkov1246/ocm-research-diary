@@ -34,7 +34,8 @@ sys.path.insert(0, HERE)
 from pyscf import gto, dft, lib  # noqa: E402
 
 SITE = os.environ.get("OEEF_SITE", "Cu2")
-OUT = os.path.join(HERE, f"co2_oeef_{SITE.lower()}_results.json" if SITE!="Cu2" else "co2_oeef_results.json")
+AXIS = {"x":0,"y":1,"z":2}[os.environ.get("OEEF_AXIS","x")]
+OUT = os.path.join(HERE, f"co2_oeef_{SITE.lower()}{'_'+os.environ['OEEF_AXIS'] if os.environ.get('OEEF_AXIS','x')!='x' else ''}_results.json" if (SITE!="Cu2" or os.environ.get("OEEF_AXIS","x")!="x") else "co2_oeef_results.json")
 HARTREE_EV = 27.211386245988
 AU_FIELD_V_PER_A = 51.42206747  # 1 а.е. поля = 51.422 В/Å
 FIELDS = [0.0, 0.002, -0.002, 0.005, -0.005, 0.010, -0.010]  # а.е., вдоль x
@@ -59,7 +60,7 @@ def scf_in_field(mol, efield_x, dm0=None, verbose=0):
                                       mol.atom_coords()) / mol.atom_charges().sum())
         ao_dip = mol.intor_symmetric("int1e_r", comp=3)
         h0 = mf.get_hcore()
-        E = np.array([efield_x, 0.0, 0.0])
+        E = np.zeros(3); E[AXIS] = efield_x
         mf.get_hcore = lambda *a: h0 + np.einsum("x,xij->ij", E, ao_dip)
     e = mf.kernel(dm0=dm0) if dm0 is not None else mf.kernel()
     if not mf.converged:
