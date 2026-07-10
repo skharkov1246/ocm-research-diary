@@ -1199,11 +1199,13 @@
   34.13,
   49.06,
   52.7,
-  55.98,
-  58.63,
-  61.94
+  55.91,
+  58.0,
+  60.04
  ],
  "ts_index": 8,
  "ts_interior": false,
- "dft_barrier_kcal": 61.94
+ "dft_barrier_kcal": 60.04,
+ "r_index": 0,
+ "polish_done": true
 }

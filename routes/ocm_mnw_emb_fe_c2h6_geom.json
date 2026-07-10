@@ -1421,5 +1421,7 @@
  ],
  "ts_index": 2,
  "ts_interior": true,
- "dft_barrier_kcal": 9.56
+ "dft_barrier_kcal": 9.56,
+ "r_index": 0,
+ "polish_done": true
 }
