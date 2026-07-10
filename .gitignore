@@ -7,3 +7,6 @@ routes/_constr_*.txt
 .claude/
 *.chk.npz
 routes/*_scf_spin*.npz
+
+# in-flight probe checkpoint (force-add the completed file on finish)
+routes/nh3_n2_oeef_results.json
