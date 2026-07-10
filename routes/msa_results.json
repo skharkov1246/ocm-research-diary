@@ -3,12 +3,12 @@
  "numbers_nevpt2": {
   "add_barrier": 19.76,
   "bscission_barrier": 36.4,
-  "hat_propagation_barrier": 828.81
+  "hat_propagation_barrier": 61.49
  },
  "numbers_dft": {
   "add_barrier": -6.53,
   "bscission_barrier": 19.63,
-  "hat_propagation_barrier": 806.1
+  "hat_propagation_barrier": 82.05
  },
  "chain_verdict": "gas-phase skeleton marginal \u2014 real route uses initiator/conditions to bias chain; DFT-NEVPT2 gap guides initiator",
  "note": "gas-phase skeleton. DFT-vs-NEVPT2 gap on RSO3* open-shell states is the de-risk / selectivity+initiator design lever. Screening grade. $2500-3500/t liquid, mining-immune (value decoupled from energy)."

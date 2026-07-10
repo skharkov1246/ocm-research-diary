@@ -1,20 +1,52 @@
 {
  "stage": "hat",
- "model": "rigid collinear HAT, def2-svp",
+ "model": "pinned-relax collinear HAT, def2-svp",
+ "scan": [
+  {
+   "rCH": 1.15,
+   "rOH": 1.3,
+   "e_h": -703.1823772814645,
+   "scf_converged": true
+  },
+  {
+   "rCH": 1.25,
+   "rOH": 1.15,
+   "e_h": -703.3035508481463,
+   "scf_converged": true
+  },
+  {
+   "rCH": 1.35,
+   "rOH": 1.05,
+   "e_h": -703.3006018028259,
+   "scf_converged": true
+  },
+  {
+   "rCH": 1.5,
+   "rOH": 0.98,
+   "e_h": -703.287210195602,
+   "scf_converged": true
+  }
+ ],
+ "scan_rel_kcal": [
+  82.05,
+  6.01,
+  7.86,
+  16.26
+ ],
  "dft": {
-  "barrier_hat_kcal": 806.1,
+  "barrier_hat_kcal": 82.05,
   "ts_rCH": 1.15,
   "ts_rOH": 1.3
  },
  "casscf": {
-  "barrier_hat_kcal": 852.62
+  "barrier_hat_kcal": 86.2
  },
  "nevpt2": {
-  "barrier_hat_kcal": 828.81
+  "barrier_hat_kcal": 61.49
  },
  "ts_cas": [
-  13,
+  11,
   8
  ],
- "wall_s": 5199.6
+ "wall_s": 13067.5
 }

@@ -248,8 +248,12 @@ def stage_hat():
     # warm-start плотностью по цепочке, проверка сходимости КАЖДОЙ точки,
     # весь скан в JSON, TS = максимум только по сошедшимся точкам,
     # sanity-гейт на нефизичный барьер.
+    # v3: точка (1.15,1.30) выбросила +82 ккал (застрявший релакс) и хвост рос
+    # до края — скан сдвинут в позднюю сторону и продлён, чтобы забракетировать
+    # вершину; TS обязан быть интерьерным локальным максимумом после отбраковки.
     pts, dm = [], None
-    for rCH, rOH in ((1.15, 1.30), (1.25, 1.15), (1.35, 1.05), (1.50, 0.98)):
+    for rCH, rOH in ((1.25, 1.15), (1.35, 1.05), (1.50, 0.98),
+                     (1.65, 0.965), (1.80, 0.955)):
         cf = os.path.join(DIR, f"_msa_hat_{rCH:.2f}.txt")
         open(cf, "w").write(f"$set\ndistance 1 2 {rCH:.4f}\ndistance 2 3 {rOH:.4f}\n")
         e, na, conv = None, None, False
@@ -277,16 +281,31 @@ def stage_hat():
                    for p in pts]
     out["scan_rel_kcal"] = [round((p["e_h"] - eR) * HARTREE_KCAL, 2) for p in pts]
     ok = [p for p in pts if p["scf_converged"]]
-    if len(ok) < 2:
+    if len(ok) < 3:
         raise RuntimeError(f"hat scan: only {len(ok)} converged points")
-    best = max(ok, key=lambda p: p["e_h"])
-    ts, e_ts, rCH, rOH = best["atoms"], best["e_h"], best["rCH"], best["rOH"]
-    dft_bar = (e_ts - eR) * HARTREE_KCAL
+    # отбраковка выбросов: точка на >25 ккал выше ОБОИХ соседей (или
+    # единственного соседа на краю) — застрявший релакс, не поверхность
+    rel = [(p["e_h"] - eR) * HARTREE_KCAL for p in ok]
+    keep = []
+    for i, p in enumerate(ok):
+        nb = [rel[j] for j in (i - 1, i + 1) if 0 <= j < len(ok)]
+        if all(rel[i] - x > 25.0 for x in nb):
+            print(f"  [hat] outlier dropped: rCH={p['rCH']} rel={rel[i]:.1f}",
+                  flush=True)
+            continue
+        keep.append((p, rel[i]))
+    if len(keep) < 3:
+        raise RuntimeError("hat scan: too few points after outlier rejection")
+    imax = max(range(len(keep)), key=lambda i: keep[i][1])
+    best, dft_bar = keep[imax]
+    interior = 0 < imax < len(keep) - 1
+    ts, rCH, rOH = best["atoms"], best["rCH"], best["rOH"]
     out["dft"] = {"barrier_hat_kcal": round(dft_bar, 2),
-                  "ts_rCH": rCH, "ts_rOH": rOH}
-    if not (0.0 < dft_bar < 150.0):
-        out["hat_stage_failed"] = (f"unphysical DFT barrier {dft_bar:.1f} kcal "
-                                   f"— broken scan point, not chemistry")
+                  "ts_rCH": rCH, "ts_rOH": rOH, "ts_interior": interior}
+    if not interior or not (0.0 < dft_bar < 150.0):
+        out["hat_stage_failed"] = (
+            f"TS not bracketed/unphysical: barrier {dft_bar:.1f} kcal, "
+            f"interior={interior} — extend scan, no verdict")
         out["wall_s"] = round(time.time() - t0, 1)
         json.dump(out, open(os.path.join(DIR, "msa_hat.json"), "w"), indent=1)
         print(f"[hat] FAILED sanity gate: {out['hat_stage_failed']}", flush=True)
