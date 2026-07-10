@@ -338,7 +338,10 @@ def stage_hat():
         json.dump(out, open(os.path.join(DIR, "msa_hat.json"), "w"), indent=1)
         print(f"[hat] FAILED sanity gate: {out['hat_stage_failed']}", flush=True)
         return
-    n_ts = nevpt2(ts, 1, ["0 C 2p", "1 H 1s", "2 O 2p"], thr=0.4)
+    ts_labels = (["0 C 2p", "1 H 1s", "2 O 2p", "3 S 3p", "4 O 2p", "5 O 2p"]
+                 if RADCAS else ["0 C 2p", "1 H 1s", "2 O 2p"])
+    out["ts_atoms"] = [[s, [round(x, 6) for x in c]] for s, c in ts]
+    n_ts = nevpt2(ts, 1, ts_labels, thr=0.45)
     n_ch4 = nevpt2(ch4, 0, ["0 C 2p", "1 H 1s"], thr=0.6)
     n_rad = nevpt2(rad, 1, LAB_RAD, thr=THR_S)
     for lvl in ("casscf", "nevpt2"):
@@ -376,7 +379,25 @@ def stage_merge():
         json.dump(res, open(os.path.join(DIR, "msa_results.json"), "w"), indent=1)
         print(json.dumps(res, ensure_ascii=False, indent=1))
         return
-    alive = hat["nevpt2"]["barrier_hat_kcal"] <= add["nevpt2"]["barrier_bscission_kcal"] + 5
+    nv = hat["nevpt2"]["barrier_hat_kcal"]
+    if not (0.0 < nv < 100.0):
+        res = {"route": "direct CH4 + SO3 -> CH3SO3H radical chain",
+               "numbers_nevpt2": {
+                   "add_barrier": add["nevpt2"]["barrier_add_kcal"],
+                   "bscission_barrier": add["nevpt2"]["barrier_bscission_kcal"],
+                   "hat_flagged": nv},
+               "numbers_dft": {
+                   "add_barrier": add["dft"]["barrier_add_kcal"],
+                   "bscission_barrier": add["dft"]["barrier_bscission_kcal"],
+                   "hat_propagation_barrier": hat["dft"]["barrier_hat_kcal"]},
+               "chain_verdict": "DFT-ALIVE; NEVPT2-HAT flagged unphysical "
+                                "(CAS imbalance) — no correlated verdict",
+               }
+        json.dump(res, open(os.path.join(DIR, "msa_results.json"), "w"),
+                  indent=1)
+        print(json.dumps(res, ensure_ascii=False, indent=1))
+        return
+    alive = nv <= add["nevpt2"]["barrier_bscission_kcal"] + 5
     res = {"route": "direct CH4 + SO3 -> CH3SO3H (methanesulfonic acid) radical chain",
            "numbers_nevpt2": {
                "add_barrier": add["nevpt2"]["barrier_add_kcal"],
