@@ -107,6 +107,7 @@ def relax(atoms, spin, maxsteps=150):
 
 def nevpt2_point(atoms, spin, thr=0.5):
     mol = M(atoms, spin)
+    mol.max_memory = 24000     # c7 (211 AO) уронил NEVPT2 по MemoryError на 8 ГБ
     mf = rohf(mol)
     ncas, nelec, mo = avas.avas(mf, ["Cr 3d"], threshold=thr)
     ss = spin / 2 * (spin / 2 + 1)
