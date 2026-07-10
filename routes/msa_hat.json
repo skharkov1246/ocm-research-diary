@@ -3,50 +3,49 @@
  "model": "pinned-relax collinear HAT, def2-svp",
  "scan": [
   {
-   "rCH": 1.15,
-   "rOH": 1.3,
-   "e_h": -703.1823772814645,
-   "scf_converged": true
-  },
-  {
    "rCH": 1.25,
    "rOH": 1.15,
-   "e_h": -703.3035508481463,
+   "e_h": -703.3025157440053,
    "scf_converged": true
   },
   {
    "rCH": 1.35,
    "rOH": 1.05,
-   "e_h": -703.3006018028259,
+   "e_h": -703.3067929264355,
    "scf_converged": true
   },
   {
    "rCH": 1.5,
    "rOH": 0.98,
-   "e_h": -703.287210195602,
+   "e_h": -703.3050878035295,
+   "scf_converged": true
+  },
+  {
+   "rCH": 1.65,
+   "rOH": 0.965,
+   "e_h": -703.3049414115718,
+   "scf_converged": true
+  },
+  {
+   "rCH": 1.8,
+   "rOH": 0.955,
+   "e_h": -703.3094616849216,
    "scf_converged": true
   }
  ],
  "scan_rel_kcal": [
-  82.05,
-  6.01,
-  7.86,
-  16.26
+  6.66,
+  3.97,
+  5.04,
+  5.14,
+  2.3
  ],
  "dft": {
-  "barrier_hat_kcal": 82.05,
-  "ts_rCH": 1.15,
-  "ts_rOH": 1.3
+  "barrier_hat_kcal": 6.66,
+  "ts_rCH": 1.25,
+  "ts_rOH": 1.15,
+  "ts_interior": false
  },
- "casscf": {
-  "barrier_hat_kcal": 86.2
- },
- "nevpt2": {
-  "barrier_hat_kcal": 61.49
- },
- "ts_cas": [
-  11,
-  8
- ],
- "wall_s": 13067.5
+ "hat_stage_failed": "TS not bracketed/unphysical: barrier 6.7 kcal, interior=False \u2014 extend scan, no verdict",
+ "wall_s": 16148.3
 }

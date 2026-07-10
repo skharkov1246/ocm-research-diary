@@ -248,34 +248,59 @@ def stage_hat():
     # warm-start плотностью по цепочке, проверка сходимости КАЖДОЙ точки,
     # весь скан в JSON, TS = максимум только по сошедшимся точкам,
     # sanity-гейт на нефизичный барьер.
-    # v3: точка (1.15,1.30) выбросила +82 ккал (застрявший релакс) и хвост рос
-    # до края — скан сдвинут в позднюю сторону и продлён, чтобы забракетировать
-    # вершину; TS обязан быть интерьерным локальным максимумом после отбраковки.
-    pts, dm = [], None
-    for rCH, rOH in ((1.25, 1.15), (1.35, 1.05), (1.50, 0.98),
-                     (1.65, 0.965), (1.80, 0.955)):
+    # v4: v3 дал плоский низкий профиль с максимумом на РАННЕМ краю ⇒ перевал
+    # раньше rCH=1.25, а идеализированный коллинеарный старт там застревает
+    # (v2: +82 ккал). Решение: ранние точки стартуют С РЕЛАКСИРОВАННОЙ
+    # ГЕОМЕТРИИ якоря (1.25,1.15) — geomeTRIC сам дожимает пины; поздняя ветка
+    # как в v3. Профиль собирается в порядке пути (по rCH).
+    def _hat_point(start_atoms, rCH, rOH, dm):
         cf = os.path.join(DIR, f"_msa_hat_{rCH:.2f}.txt")
-        open(cf, "w").write(f"$set\ndistance 1 2 {rCH:.4f}\ndistance 2 3 {rOH:.4f}\n")
-        e, na, conv = None, None, False
+        open(cf, "w").write(
+            f"$set\ndistance 1 2 {rCH:.4f}\ndistance 2 3 {rOH:.4f}\n")
         try:
-            mf0 = uks(M(hat_ts(rCH, rOH), 1), dm0=dm)
+            mf0 = uks(M(start_atoms, 1), dm0=dm)
             mol = optimize(mf0, constraints=cf, maxsteps=180,
                            assert_convergence=False)
             mfx = uks(mol, dm0=mf0.make_rdm1())
-            e, conv = float(mfx.e_tot), bool(mfx.converged)
-            dm = mfx.make_rdm1()
             na = [(mol.atom_symbol(i), tuple(c))
                   for i, c in enumerate(mol.atom_coords(unit="Angstrom"))]
+            return (float(mfx.e_tot), bool(mfx.converged), na,
+                    mfx.make_rdm1())
         except Exception as ex:
-            print(f"  [hat] rCH={rCH} relax failed: {ex}", flush=True)
+            print(f"  [hat] rCH={rCH} failed: {ex}", flush=True)
+            return None, False, None, dm
         finally:
             if os.path.exists(cf):
                 os.remove(cf)
+
+    pts = []
+    # якорь + поздняя ветка (v3-проверенная): идеализированный старт, цепь dm
+    anchor_atoms, anchor_dm = None, None
+    dm = None
+    for rCH, rOH in ((1.25, 1.15), (1.35, 1.05), (1.50, 0.98),
+                     (1.65, 0.965), (1.80, 0.955)):
+        e, conv, na, dm = _hat_point(hat_ts(rCH, rOH), rCH, rOH, dm)
         if e is not None and np.isfinite(e):
             pts.append({"rCH": rCH, "rOH": rOH, "e_h": e,
                         "scf_converged": conv, "atoms": na})
             print(f"  [hat] point rCH={rCH} rOH={rOH} E={e:.6f} conv={conv}",
                   flush=True)
+            if anchor_atoms is None:
+                anchor_atoms, anchor_dm = na, dm
+    # ранняя ветка: старт с релакс-геометрии якоря, пины стягиваются к реагентам
+    dm = anchor_dm
+    start = anchor_atoms
+    for rCH, rOH in ((1.18, 1.24), (1.12, 1.36)):
+        if start is None:
+            break
+        e, conv, na, dm = _hat_point(start, rCH, rOH, dm)
+        if e is not None and np.isfinite(e):
+            pts.append({"rCH": rCH, "rOH": rOH, "e_h": e,
+                        "scf_converged": conv, "atoms": na})
+            print(f"  [hat] early rCH={rCH} rOH={rOH} E={e:.6f} conv={conv}",
+                  flush=True)
+            start = na
+    pts.sort(key=lambda p: p["rCH"])          # порядок пути для TS-логики
     eR = m_rad.e_tot + m_ch4.e_tot
     out["scan"] = [{k: p[k] for k in ("rCH", "rOH", "e_h", "scf_converged")}
                    for p in pts]
