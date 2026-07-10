@@ -40,7 +40,8 @@ from pyscf.mrpt import NEVPT
 
 HARTREE_KCAL = 627.509474
 DIR = os.path.dirname(os.path.abspath(__file__))
-BASIS = "def2-svp"
+BASIS = os.environ.get("OCM_BASIS") or "def2-svp"   # TZVP-чек: OCM_BASIS=def2-tzvp
+MAXMEM = int(os.environ.get("OCM_MAXMEM") or "6000")  # TZVP ~2.2x AO — поднять
 MODEL = os.environ.get("OCM_MODEL", "bare")   # bare (MnO) | embedded (Na/W-оболочка)
 SPIN = int(os.environ.get("OCM_SPIN", "5"))   # 2S = число SOMO (bare-секстет: 5)
 # Этап 17: активный оксо-металл параметризован — Mn (базовый) | Cr | Fe (окно
@@ -51,7 +52,7 @@ XC = "pbe0"
 _defpref = "ocm_mnw" if MODEL == "bare" else "ocm_mnw_emb"
 if METAL != "Mn":
     _defpref += "_" + METAL.lower()          # ocm_mnw_emb_cr / _fe — не пересекается
-PREF = os.environ.get("OCM_PREFIX", _defpref)
+PREF = os.environ.get("OCM_PREFIX") or _defpref
 # единое активное пространство фиксированного СОСТАВА: 2 закрытые пары + все SOMO
 # + 3 виртуали => (ne,no) зависит только от спина (bare-секстет: CAS(9e,10o))
 N_DOCC, N_VIR = 2, 3
@@ -174,7 +175,7 @@ def stage_spins():
         t0 = time.time()
         try:
             mol = gto.M(atom=atoms, basis=BASIS, ecp=BASIS, charge=0, spin=s2,
-                        verbose=0, max_memory=6000)
+                        verbose=0, max_memory=MAXMEM)
             mf = dft.UKS(mol).density_fit()
             mf.xc = XC
             mf.conv_tol = 1e-7
@@ -203,7 +204,7 @@ def stage_spins():
 
 def build_mol(atoms):
     return gto.M(atom=atoms, basis=BASIS, ecp=BASIS, charge=0, spin=SPIN,
-                 verbose=0, max_memory=6000)
+                 verbose=0, max_memory=MAXMEM)
 
 
 def uks(mol, dm0=None):
@@ -461,7 +462,7 @@ def forced_avas(mf, n_docc=2, n_vir=3):
 def cas_nevpt2(atoms, tag):
     """ROHF → AVAS(единое CAS(9e,10o)) → робастный CASSCF → SC-NEVPT2 + NOON."""
     mol = build_mol(atoms)
-    mol.max_memory = 12000
+    mol.max_memory = max(12000, MAXMEM)
     mf = rohf(mol)
     mo, wsel = forced_avas(mf)
     ne, no = CAS_TARGET
@@ -610,7 +611,7 @@ def stage_refine(sub):
             p = prof["points"][i]
             atoms = [(s, tuple(c)) for s, c in geom["points"][i]["atoms"]]
             mol = build_mol(atoms)
-            mol.max_memory = 12000
+            mol.max_memory = max(12000, MAXMEM)
             mf = rohf(mol)
             t0 = time.time()
             best = None

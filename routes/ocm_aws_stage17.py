@@ -46,6 +46,11 @@ SUBNET = {"eu-central-1": "subnet-057e6f5ca6d3c6d8d",
           "us-east-1": "subnet-0b1a363f27ecbbf12"}[REGION]
 METALS = os.environ.get("OCM17_METALS", "Cr Fe")
 GRID = os.environ.get("OCM17_GRID", "")   # "ext" → расширенная сетка (Этап 18)
+BASIS17 = os.environ.get("OCM17_BASIS", "")   # def2-tzvp → базис-чек (Этап 20)
+MAXMEM17 = os.environ.get("OCM17_MAXMEM", "")
+# OCM17_PREF: override OCM_PREFIX (single-metal режим, напр. ocm_mnw_emb_cr_tzvp
+# — TZVP-энергии на скопированных SVP-геометриях); финалы/синк — от него же
+PREF17 = os.environ.get("OCM17_PREF", "")
 REPO = "https://github.com/skharkov1246/ocm-research-diary"
 BRANCH = os.environ.get("OCM17_BRANCH") or subprocess.run(
     ["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True,
@@ -54,12 +59,15 @@ MAX_MIN = int(os.environ.get("OCM17_MAX_MIN", "1100"))
 JOB_MIN = MAX_MIN - 20
 JOB_TIMEOUT = JOB_MIN - 20
 DISK_GB = 120
-FINAL_KEYS = {m: f"{PREFIX}/ocm_mnw_emb_{m.lower()}_final.json"
-              for m in METALS.split()}
+FINAL_KEYS = ({m: f"{PREFIX}/{PREF17}_final.json" for m in METALS.split()}
+              if PREF17 else
+              {m: f"{PREFIX}/ocm_mnw_emb_{m.lower()}_final.json"
+               for m in METALS.split()})
 # глоб синка выводим ИЗ METALS (не хардкод cr/fe): иначе прогон другого металла
 # заливал бы закоммиченные чужие JSON и пропускал свои реальные результаты
-SYNC_INCLUDES = " ".join(f"--include 'ocm_mnw_emb_{m.lower()}_*'"
-                         for m in METALS.split())
+SYNC_INCLUDES = (f"--include '{PREF17}_*'" if PREF17 else
+                 " ".join(f"--include 'ocm_mnw_emb_{m.lower()}_*'"
+                          for m in METALS.split()))
 
 for var in ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"):
     os.environ.pop(var, None)          # битые env-креды → ~/.aws/credentials
@@ -90,10 +98,14 @@ python3 -c "import pyscf, geometric" || {{ aws s3 cp /tmp/boot.log $S3/setup_fai
 # свежий S3-префикс, оркестратор принимает за готовый результат и гасит инстанс
 # посреди счёта (случилось на relaunch Этапа 18). merge2 пересоздаст в конце.
 for M in {METALS}; do rm -f routes/ocm_mnw_emb_$(echo $M | tr A-Z a-z)_final.json; done
+[ -n "{PREF17}" ] && rm -f routes/{PREF17}_final.json routes/{PREF17}_*_profile.json
 mkdir -p /root/scratch
 export PYSCF_TMPDIR=/root/scratch
 export OCM_MODEL=embedded
 export OCM_GRID={GRID}
+export OCM_BASIS={BASIS17}
+export OCM_MAXMEM={MAXMEM17}
+export OCM_PREFIX={PREF17}
 NPROC=$(nproc)
 THREADS=$(( NPROC / 4 )); [ $THREADS -lt 1 ] && THREADS=1
 sync_up() {{ aws s3 cp routes/ $S3/ --recursive --exclude '*' {SYNC_INCLUDES} >/dev/null 2>&1 || true; aws s3 cp /root/repo/stage17.log $S3/stage17.log >/dev/null 2>&1 || true; }}
@@ -166,26 +178,25 @@ def s3_text(key, max_bytes=1500):
 
 
 def pull_metal(m):
-    """Скачать FINAL и промежуточные JSON конкретного металла из S3 в routes/."""
-    ml = m.lower()
+    """Скачать FINAL и промежуточные JSON конкретного металла из S3 в routes/.
+    При PREF17 — файлы под override-префиксом (не клобберить базовые SVP!)."""
+    base = PREF17 or f"ocm_mnw_emb_{m.lower()}"
     got = False
     try:
-        s3.download_file(BUCKET, FINAL_KEYS[m],
-                         f"routes/ocm_mnw_emb_{ml}_final.json")
+        s3.download_file(BUCKET, FINAL_KEYS[m], f"routes/{base}_final.json")
         got = True
     except ClientError:
         pass
     for sub in ("ch4", "c2h6"):
         for kind in ("geom", "profile"):
-            k = f"{PREFIX}/ocm_mnw_emb_{ml}_{sub}_{kind}.json"
+            k = f"{PREFIX}/{base}_{sub}_{kind}.json"
             try:
-                s3.download_file(BUCKET, k,
-                                 f"routes/ocm_mnw_emb_{ml}_{sub}_{kind}.json")
+                s3.download_file(BUCKET, k, f"routes/{base}_{sub}_{kind}.json")
             except ClientError:
                 pass
     try:
-        s3.download_file(BUCKET, f"{PREFIX}/ocm_mnw_emb_{ml}_spins.json",
-                         f"routes/ocm_mnw_emb_{ml}_spins.json")
+        s3.download_file(BUCKET, f"{PREFIX}/{base}_spins.json",
+                         f"routes/{base}_spins.json")
     except ClientError:
         pass
     return got
@@ -255,7 +266,7 @@ def main():
                     continue
                 if pull_metal(m):
                     v = json.load(open(
-                        f"routes/ocm_mnw_emb_{m.lower()}_final.json"))
+                        f"routes/{PREF17 or 'ocm_mnw_emb_' + m.lower()}_final.json"))
                     print(f"[ok][{m}] FINAL:", json.dumps(
                         {k: v.get(k) for k in ("spin_2S", "cas", "ddE_kcal",
                                                "quantum_shift_kcal")},
