@@ -1,0 +1,110 @@
+{
+ "metal": "zr",
+ "rule": "neighbor-outlier > 25.0 kcal masked",
+ "substrates": {
+  "ch4": {
+   "casscf": {
+    "barrier_kcal": 47.48,
+    "r_index": 0,
+    "ts_index": 4,
+    "ts_interior": true,
+    "dropped_points": [
+     8
+    ],
+    "rel_kcal": [
+     0.0,
+     6.86,
+     15.85,
+     30.26,
+     47.48,
+     19.76,
+     9.45,
+     6.28,
+     154.4
+    ]
+   },
+   "nevpt2": {
+    "barrier_kcal": 17.48,
+    "r_index": 3,
+    "ts_index": 4,
+    "ts_interior": true,
+    "dropped_points": [
+     8
+    ],
+    "rel_kcal": [
+     0.0,
+     4.15,
+     9.68,
+     -0.33,
+     17.15,
+     -6.29,
+     -11.4,
+     -15.85,
+     117.41
+    ]
+   },
+   "dft": {
+    "barrier_kcal": 26.25,
+    "r_index": 0,
+    "ts_index": 4,
+    "ts_interior": true,
+    "dropped_points": [
+     8
+    ]
+   }
+  },
+  "c2h6": {
+   "casscf": {
+    "barrier_kcal": 44.25,
+    "r_index": 0,
+    "ts_index": 5,
+    "ts_interior": true,
+    "dropped_points": [],
+    "rel_kcal": [
+     0.0,
+     6.97,
+     16.18,
+     27.45,
+     20.29,
+     44.25,
+     8.65,
+     2.62,
+     10.84
+    ]
+   },
+   "nevpt2": {
+    "barrier_kcal": 9.19,
+    "r_index": 0,
+    "ts_index": 2,
+    "ts_interior": true,
+    "dropped_points": [
+     5
+    ],
+    "rel_kcal": [
+     0.0,
+     4.0,
+     9.19,
+     -0.73,
+     -7.77,
+     31.23,
+     3.04,
+     -2.03,
+     7.14
+    ]
+   },
+   "dft": {
+    "barrier_kcal": 22.7,
+    "r_index": 0,
+    "ts_index": 5,
+    "ts_interior": true,
+    "dropped_points": []
+   }
+  }
+ },
+ "ddE_kcal": {
+  "dft": -3.55,
+  "casscf": -3.23,
+  "nevpt2": -8.29
+ },
+ "quantum_shift_kcal": -4.74
+}
