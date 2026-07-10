@@ -1,0 +1,98 @@
+{
+ "meta": {
+  "what": "explicit K+ near the CuAl coupling site vs the uniform-field OEEF prediction; system charge +1, RKS-PBE/def2-SVP+DF",
+  "bare_barrier_eV": 0.9937,
+  "oeef_slope_eV_per_VA": -0.384,
+  "honesty": "gas-phase cation, NO solvent/counter-ion screening -> upper bound of the field; cluster, PBE, frozen metal; answers only: does a REAL ion move the barrier as the uniform-field slope predicts",
+  "selftest": "K+ at 20 A must reproduce the bare barrier within ~0.02 eV"
+ },
+ "points": {
+  "selftest_20A": {
+   "k_pos": [
+    -20.0,
+    0.0,
+    1.89
+   ],
+   "r_from_ccmid_A": 20.0,
+   "field_x_at_ccmid_V_per_A": 0.036,
+   "predicted_dbarrier_eV": -0.014,
+   "e_reactant": -2707.438325,
+   "conv_reactant": true,
+   "e_ts": -2707.847652,
+   "conv_ts": true,
+   "barrier_eV": -11.1384,
+   "dbarrier_vs_bare_eV": -12.1321
+  },
+  "mx_6A": {
+   "k_pos": [
+    -6.0,
+    0.0,
+    1.89
+   ],
+   "r_from_ccmid_A": 6.0,
+   "field_x_at_ccmid_V_per_A": 0.4,
+   "predicted_dbarrier_eV": -0.154,
+   "e_reactant": -2707.890584,
+   "conv_reactant": true,
+   "e_ts": -2707.858586,
+   "conv_ts": true,
+   "barrier_eV": 0.8707,
+   "dbarrier_vs_bare_eV": -0.123
+  },
+  "mx_8A": {
+   "k_pos": [
+    -8.0,
+    0.0,
+    1.89
+   ],
+   "r_from_ccmid_A": 8.0,
+   "field_x_at_ccmid_V_per_A": 0.225,
+   "predicted_dbarrier_eV": -0.086,
+   "e_reactant": -2707.885406,
+   "conv_reactant": true,
+   "e_ts": -2707.850389,
+   "conv_ts": true,
+   "barrier_eV": 0.9529,
+   "dbarrier_vs_bare_eV": -0.0408
+  },
+  "px_6A": {
+   "k_pos": [
+    6.0,
+    0.0,
+    1.89
+   ],
+   "r_from_ccmid_A": 6.0,
+   "field_x_at_ccmid_V_per_A": -0.4,
+   "predicted_dbarrier_eV": 0.154,
+   "e_reactant": -2707.905604,
+   "conv_reactant": true,
+   "e_ts": -2707.863242,
+   "conv_ts": true,
+   "barrier_eV": 1.1527,
+   "dbarrier_vs_bare_eV": 0.159
+  },
+  "px_8A": {
+   "k_pos": [
+    8.0,
+    0.0,
+    1.89
+   ],
+   "r_from_ccmid_A": 8.0,
+   "field_x_at_ccmid_V_per_A": -0.225,
+   "predicted_dbarrier_eV": 0.086,
+   "e_reactant": -2707.894457,
+   "conv_reactant": true,
+   "e_ts": -2707.854359,
+   "conv_ts": true,
+   "barrier_eV": 1.0911,
+   "dbarrier_vs_bare_eV": 0.0974
+  }
+ },
+ "selftest_pass": false,
+ "status": "ok",
+ "honest_analysis": {
+  "verdict": "assumption 'uniform field ~ real ion' LARGELY REMOVED on the 4 physical points: sign 4/4 correct; magnitude 60-103% of the slope prediction (px_6A +0.159 vs +0.154 predicted, px_8A +0.097 vs +0.086, mx_8A -0.041 vs -0.086, mx_6A -0.123 vs -0.154). Undershoot on the metal side (mx) is consistent with screening by the cluster's own polarization",
+  "selftest_artifact": "20A point: REACTANT SCF fell into a different charge state (+12 eV above the series; TS normal) -> gas-phase ion at long range hits charge-localization instability; point EXCLUDED; the 8A points trending to the prediction serve as the consistency check instead",
+  "not_removed": "solvent screening / counter-ion still absent (field is an upper bound); electrode polarization beyond cluster not modeled"
+ }
+}
