@@ -145,20 +145,21 @@
    "e_rohf_h": -1699.4188161558777,
    "rohf_converged": true,
    "e_casci_h": -1699.4324396061104,
-   "e_casscf_h": -1699.5338457121209,
+   "e_casscf_h": -1699.5387428381562,
    "casscf_converged": true,
-   "e_nevpt2_h": -1701.7181333057326,
-   "nevpt2_corr_h": -2.184287593611869,
+   "e_nevpt2_h": -1701.6597661289068,
+   "nevpt2_corr_h": -2.1210232907505597,
    "noon": [
-    1.906,
-    1.865,
-    1.0,
-    0.132,
-    0.094,
-    0.004
+    1.978,
+    1.048,
+    1.001,
+    0.952,
+    0.018,
+    0.003
    ],
    "n_unpaired_beyond_spin": 0.459,
-   "wall_s": 174.7
+   "wall_s": 174.7,
+   "refined": "rev"
   },
   {
    "tag": "c2h6_p5",
@@ -176,20 +177,21 @@
    "e_rohf_h": -1699.4089018611298,
    "rohf_converged": true,
    "e_casci_h": -1699.4202414453496,
-   "e_casscf_h": -1699.523440819985,
+   "e_casscf_h": -1699.5540745930005,
    "casscf_converged": true,
-   "e_nevpt2_h": -1701.7119042940049,
-   "nevpt2_corr_h": -2.1884634740199127,
+   "e_nevpt2_h": -1701.6740057425864,
+   "nevpt2_corr_h": -2.119931149585846,
    "noon": [
-    1.902,
-    1.857,
-    1.0,
-    0.139,
-    0.098,
-    0.004
+    1.98,
+    1.052,
+    1.001,
+    0.948,
+    0.017,
+    0.003
    ],
    "n_unpaired_beyond_spin": 0.482,
-   "wall_s": 273.8
+   "wall_s": 273.8,
+   "refined": "rev"
   },
   {
    "tag": "c2h6_p6",
@@ -293,31 +295,31 @@
   9.85,
   21.95,
   59.9,
-  84.25,
-  90.78,
-  115.71,
-  111.99,
-  111.56
+  81.18,
+  71.56,
+  41.2,
+  44.66,
+  36.23
  ],
  "casscf_r_index": 0,
- "casscf_ts_index": 6,
+ "casscf_ts_index": 4,
  "casscf_ts_interior": true,
- "casscf_barrier_kcal": 115.71,
+ "casscf_barrier_kcal": 81.18,
  "nevpt2_rel_kcal": [
   0.0,
   5.79,
   13.52,
   37.75,
-  52.04,
-  55.95,
-  159.46,
-  168.65,
-  174.38
+  88.66,
+  79.73,
+  47.74,
+  49.77,
+  46.72
  ],
  "nevpt2_r_index": 0,
- "nevpt2_ts_index": 7,
- "nevpt2_ts_interior": false,
- "nevpt2_barrier_kcal": 168.65,
+ "nevpt2_ts_index": 4,
+ "nevpt2_ts_interior": true,
+ "nevpt2_barrier_kcal": 88.66,
  "all_converged": true,
  "refine_done": true
 }
