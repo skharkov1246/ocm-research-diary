@@ -5,5 +5,5 @@
   "bscission_barrier": 36.4
  },
  "chain_verdict": "NO VERDICT: HAT stage failed sanity gate \u2014 needs rerun, add/bscission numbers stand",
- "hat_failure": "TS not bracketed/unphysical: barrier 6.7 kcal, interior=False \u2014 extend scan, no verdict"
+ "hat_failure": "TS not bracketed/unphysical: barrier 18.8 kcal, interior=False \u2014 extend scan, no verdict"
 }
