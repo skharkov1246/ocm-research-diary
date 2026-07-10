@@ -30,6 +30,11 @@ BRANCH = os.environ.get("LAO_BRANCH") or subprocess.run(
     ["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True,
     text=True).stdout.strip()
 MAX_MIN = int(os.environ.get("LAO_MAX_MIN", "420"))
+STAGES = os.environ.get("LAO_STAGES", "spins int")
+# spins не резюмится файлом → его выход чистим; int резюмится ПО-ТЭГОВО
+# (тег без nevpt2-блока пересчитывается) → int.json сохраняем (c5 готов)
+_OUT = {"spins": "routes/lao_cr_spins.json", "int": ""}
+RM_FILES = " ".join(f for f in (_OUT[s] for s in STAGES.split()) if f) or "/dev/null"
 JOB_MIN = MAX_MIN - 20
 DISK_GB = 60
 
@@ -54,13 +59,13 @@ for i in 1 2 3; do timeout 25m python3 -m pip install -q numpy scipy pyscf geome
 for i in 1 2 3; do (cd /root && timeout 10m git clone --depth 1 -b {BRANCH} {REPO} repo) && break; sleep 30; done
 cd /root/repo || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 python3 -c "import pyscf" || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
-rm -f routes/lao_cr_spins.json routes/lao_cr_int.json
+rm -f {RM_FILES}
 mkdir -p /root/scratch
 export PYSCF_TMPDIR=/root/scratch
 export OMP_NUM_THREADS=$(nproc)
 sync_up() {{ aws s3 cp routes/ $S3/ --recursive --exclude '*' --include 'lao_cr_*.json' >/dev/null 2>&1 || true; aws s3 cp /root/repo/lao.log $S3/lao.log >/dev/null 2>&1 || true; }}
 ( while true; do sleep 120; sync_up; done ) &
-for st in spins int; do
+for st in {STAGES}; do
   echo "[aws][lao] stage $st" >> /root/repo/lao.log
   timeout 300m python3 -u routes/lao_cr_trimer.py $st >> /root/repo/lao.log 2>&1
   sync_up
