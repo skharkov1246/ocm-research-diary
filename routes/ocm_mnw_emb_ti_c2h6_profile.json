@@ -141,19 +141,20 @@
    "e_rohf_h": -1605.0367650035043,
    "rohf_converged": true,
    "e_casci_h": -1605.0413660805036,
-   "e_casscf_h": -1605.0955143481788,
+   "e_casscf_h": -1605.1002069411093,
    "casscf_converged": true,
-   "e_nevpt2_h": -1607.24031827541,
-   "nevpt2_corr_h": -2.1448039272311155,
+   "e_nevpt2_h": -1607.3347592333341,
+   "nevpt2_corr_h": -2.234552292224796,
    "noon": [
-    1.973,
-    1.968,
-    0.03,
-    0.026,
-    0.004
+    1.956,
+    1.954,
+    0.045,
+    0.043,
+    0.003
    ],
    "n_unpaired_beyond_spin": 0.119,
-   "wall_s": 507.8
+   "wall_s": 507.8,
+   "refined": "rev"
   },
   {
    "tag": "c2h6_p5",
@@ -201,19 +202,20 @@
    "e_rohf_h": -1605.041900870066,
    "rohf_converged": true,
    "e_casci_h": -1605.0456020475851,
-   "e_casscf_h": -1605.095707777955,
+   "e_casscf_h": -1605.1001137619078,
    "casscf_converged": true,
-   "e_nevpt2_h": -1607.2666939689277,
-   "nevpt2_corr_h": -2.170986190972582,
+   "e_nevpt2_h": -1607.2785490627323,
+   "nevpt2_corr_h": -2.1784353008243955,
    "noon": [
-    1.977,
-    1.976,
-    0.023,
-    0.022,
-    0.002
+    1.958,
+    1.952,
+    0.046,
+    0.041,
+    0.003
    ],
    "n_unpaired_beyond_spin": 0.095,
-   "wall_s": 251.2
+   "wall_s": 251.2,
+   "refined": "rev"
   },
   {
    "tag": "c2h6_p7",
@@ -231,19 +233,20 @@
    "e_rohf_h": -1605.0464566162964,
    "rohf_converged": true,
    "e_casci_h": -1605.0502173388531,
-   "e_casscf_h": -1605.101865878002,
+   "e_casscf_h": -1605.1126065125015,
    "casscf_converged": true,
-   "e_nevpt2_h": -1607.2907116757342,
-   "nevpt2_corr_h": -2.1888457977323585,
+   "e_nevpt2_h": -1607.3167152152835,
+   "nevpt2_corr_h": -2.2041087027819284,
    "noon": [
-    1.975,
-    1.974,
-    0.025,
-    0.024,
-    0.002
+    1.955,
+    1.951,
+    0.048,
+    0.043,
+    0.003
    ],
    "n_unpaired_beyond_spin": 0.102,
-   "wall_s": 250.3
+   "wall_s": 250.3,
+   "refined": "rev"
   },
   {
    "tag": "c2h6_p8",
@@ -281,31 +284,31 @@
   3.56,
   -0.58,
   30.48,
-  51.0,
+  48.05,
   46.74,
-  50.87,
-  47.01,
+  48.11,
+  40.27,
   62.66
  ],
  "casscf_r_index": 2,
- "casscf_ts_index": 4,
+ "casscf_ts_index": 6,
  "casscf_ts_interior": false,
- "casscf_barrier_kcal": 51.58,
+ "casscf_barrier_kcal": 48.69,
  "nevpt2_rel_kcal": [
   0.0,
   1.03,
   -3.89,
   19.51,
-  45.09,
+  -14.17,
   -7.19,
-  28.54,
-  13.47,
+  21.1,
+  -2.85,
   73.82
  ],
- "nevpt2_r_index": 2,
- "nevpt2_ts_index": 4,
+ "nevpt2_r_index": 4,
+ "nevpt2_ts_index": 6,
  "nevpt2_ts_interior": false,
- "nevpt2_barrier_kcal": 48.98,
+ "nevpt2_barrier_kcal": 35.27,
  "all_converged": true,
  "refine_done": true
 }
