@@ -1,0 +1,160 @@
+{
+ "meta": {
+  "what": "CASSCF(2,2) sigma/sigma* single-points on the saved COGEF scan geometries (biradical-honest homolysis tail); RHF start HOMO/LUMO window; fix_spin ss=0",
+  "source": "cc_cogef_results.json (UKS-PBE relaxed constrained scan)",
+  "honesty": "(2,2) minimal window; vertical on PBE geometries; butane model"
+ },
+ "points": {
+  "1.53": {
+   "d_A": 1.53,
+   "e_hf": -157.18714922553622,
+   "e_cas": -157.203400647311,
+   "cas_converged": true,
+   "noon": [
+    1.981,
+    0.019
+   ],
+   "n_u": 0.038,
+   "t_s": 90.1
+  },
+  "1.65": {
+   "d_A": 1.65,
+   "e_hf": -157.18067322825132,
+   "e_cas": -157.1898205323041,
+   "cas_converged": true,
+   "noon": [
+    1.9903,
+    0.0097
+   ],
+   "n_u": 0.0194,
+   "t_s": 167.7
+  },
+  "1.80": {
+   "d_A": 1.8,
+   "e_hf": -157.16175712242207,
+   "e_cas": -157.17790391154082,
+   "cas_converged": true,
+   "noon": [
+    1.9814,
+    0.0186
+   ],
+   "n_u": 0.0372,
+   "t_s": 213.1
+  },
+  "1.95": {
+   "d_A": 1.95,
+   "e_hf": -157.13799611997496,
+   "e_cas": -157.16647070267146,
+   "cas_converged": true,
+   "noon": [
+    1.938,
+    0.062
+   ],
+   "n_u": 0.124,
+   "t_s": 48.1
+  },
+  "2.10": {
+   "d_A": 2.1,
+   "e_hf": -157.11330569514683,
+   "e_cas": -157.1158081636359,
+   "cas_converged": true,
+   "noon": [
+    1.9978,
+    0.0022
+   ],
+   "n_u": 0.0044,
+   "t_s": 96.4
+  },
+  "2.25": {
+   "d_A": 2.25,
+   "e_hf": -157.0894253052867,
+   "e_cas": -157.13108926102402,
+   "cas_converged": true,
+   "noon": [
+    1.8615,
+    0.1385
+   ],
+   "n_u": 0.277,
+   "t_s": 16.5
+  },
+  "2.40": {
+   "d_A": 2.4,
+   "e_hf": -157.06709228890975,
+   "e_cas": -157.11680268985245,
+   "cas_converged": true,
+   "noon": [
+    1.8042,
+    0.1958
+   ],
+   "n_u": 0.3917,
+   "t_s": 16.9
+  },
+  "2.60": {
+   "d_A": 2.6,
+   "e_hf": -157.0402289090439,
+   "e_cas": -157.1020609910193,
+   "cas_converged": true,
+   "noon": [
+    1.7093,
+    0.2907
+   ],
+   "n_u": 0.5814,
+   "t_s": 15.6
+  },
+  "3.00": {
+   "d_A": 3.0,
+   "e_hf": -156.99600985182892,
+   "e_cas": -157.08496240990556,
+   "cas_converged": true,
+   "noon": [
+    1.4902,
+    0.5098
+   ],
+   "n_u": 1.0195,
+   "t_s": 13.1
+  }
+ },
+ "cogef_cas22": {
+  "F_max_nN": 9.02,
+  "barrier_vs_force": [
+   {
+    "F_nN": 0.0,
+    "barrier_eV": 3.223
+   },
+   {
+    "F_nN": 0.5,
+    "barrier_eV": 2.764
+   },
+   {
+    "F_nN": 1.0,
+    "barrier_eV": 2.305
+   },
+   {
+    "F_nN": 1.5,
+    "barrier_eV": 1.85
+   },
+   {
+    "F_nN": 2.0,
+    "barrier_eV": 1.672
+   },
+   {
+    "F_nN": 2.5,
+    "barrier_eV": 1.494
+   },
+   {
+    "F_nN": 3.0,
+    "barrier_eV": 1.316
+   },
+   {
+    "F_nN": 3.5,
+    "barrier_eV": 1.138
+   },
+   {
+    "F_nN": 4.0,
+    "barrier_eV": 1.004
+   }
+  ],
+  "onset_biradical_A": "2.60"
+ },
+ "status": "ok"
+}
