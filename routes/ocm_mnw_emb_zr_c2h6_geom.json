@@ -6,7 +6,7 @@
   {
    "rCH_pin": null,
    "rOH_pin": 2.2,
-   "e_h": -807.2963821795729,
+   "e_h": -807.2963821889593,
    "scf_converged": true,
    "spin_square": 0.975,
    "wall_s": 8767.7,
@@ -156,13 +156,13 @@
      ]
     ]
    ],
-   "e_h_raw": -807.2963822947013,
+   "e_h_raw": -807.2963821795729,
    "polished": true
   },
   {
    "rCH_pin": 1.15,
    "rOH_pin": 1.7,
-   "e_h": -807.2927772468512,
+   "e_h": -807.2927772468882,
    "scf_converged": true,
    "spin_square": 0.978,
    "wall_s": 1921.0,
@@ -312,13 +312,13 @@
      ]
     ]
    ],
-   "e_h_raw": -807.2927773288952,
+   "e_h_raw": -807.2927772468512,
    "polished": true
   },
   {
    "rCH_pin": 1.2,
    "rOH_pin": 1.5,
-   "e_h": -807.2887759555583,
+   "e_h": -807.2887759555595,
    "scf_converged": true,
    "spin_square": 0.985,
    "wall_s": 1407.2,
@@ -468,13 +468,13 @@
      ]
     ]
    ],
-   "e_h_raw": -807.2887760553241,
+   "e_h_raw": -807.2887759555583,
    "polished": true
   },
   {
    "rCH_pin": 1.35,
    "rOH_pin": 1.17,
-   "e_h": -807.2910123747675,
+   "e_h": -807.2910123747682,
    "scf_converged": true,
    "spin_square": 1.01,
    "wall_s": 1640.1,
@@ -624,13 +624,13 @@
      ]
     ]
    ],
-   "e_h_raw": -807.2910123660536,
+   "e_h_raw": -807.2910123747675,
    "polished": true
   },
   {
    "rCH_pin": 1.5,
    "rOH_pin": 1.02,
-   "e_h": -807.295303053385,
+   "e_h": -807.295303053421,
    "scf_converged": true,
    "spin_square": 1.011,
    "wall_s": 11955.0,
@@ -780,13 +780,13 @@
      ]
     ]
    ],
-   "e_h_raw": -807.2953030358075,
+   "e_h_raw": -807.295303053385,
    "polished": true
   },
   {
    "rCH_pin": 1.6,
    "rOH_pin": 0.99,
-   "e_h": -807.2602012918105,
+   "e_h": -807.2602012918005,
    "scf_converged": true,
    "spin_square": 0.94,
    "wall_s": 13628.9,
@@ -936,13 +936,13 @@
      ]
     ]
    ],
-   "e_h_raw": -807.2602012076885,
+   "e_h_raw": -807.2602012918105,
    "polished": true
   },
   {
    "rCH_pin": 1.75,
    "rOH_pin": 0.97,
-   "e_h": -807.3036505772701,
+   "e_h": -807.3036505771007,
    "scf_converged": true,
    "spin_square": 0.97,
    "wall_s": 3715.2,
@@ -1092,13 +1092,13 @@
      ]
     ]
    ],
-   "e_h_raw": -807.3036505146118,
+   "e_h_raw": -807.3036505772701,
    "polished": true
   },
   {
    "rCH_pin": 1.9,
    "rOH_pin": 0.96,
-   "e_h": -807.3108184520794,
+   "e_h": -807.3108184523124,
    "scf_converged": true,
    "spin_square": 0.968,
    "wall_s": 1293.2,
@@ -1248,13 +1248,13 @@
      ]
     ]
    ],
-   "e_h_raw": -807.3108183021642,
+   "e_h_raw": -807.3108184520794,
    "polished": true
   },
   {
    "rCH_pin": 2.1,
    "rOH_pin": 0.95,
-   "e_h": -807.2990794641639,
+   "e_h": -807.2990794614063,
    "scf_converged": true,
    "spin_square": 0.965,
    "wall_s": 10773.7,
@@ -1404,7 +1404,7 @@
      ]
     ]
    ],
-   "e_h_raw": -807.2990794950874,
+   "e_h_raw": -807.2990794641639,
    "polished": true
   }
  ],
@@ -1421,5 +1421,7 @@
  ],
  "ts_index": 5,
  "ts_interior": true,
- "dft_barrier_kcal": 22.7
+ "dft_barrier_kcal": 22.7,
+ "r_index": 0,
+ "polish_done": true
 }

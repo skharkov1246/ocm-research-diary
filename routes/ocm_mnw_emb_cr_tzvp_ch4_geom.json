@@ -1,14 +1,14 @@
 {
  "substrate": "ch4",
  "geom_version": "embedded-frozen-frame-v2",
- "protocol": "UKS-PBE0/def2-svp, sextet, 2D-pin r(C-H)+r(O-H) (geomeTRIC), frozen frame",
+ "protocol": "UKS-PBE0/def2-tzvp, sextet, 2D-pin r(C-H)+r(O-H) (geomeTRIC), frozen frame",
  "points": [
   {
    "rCH_pin": null,
    "rOH_pin": 2.2,
-   "e_h": -1764.99484279083,
+   "e_h": -1765.817767824545,
    "scf_converged": true,
-   "spin_square": 6.042,
+   "spin_square": 6.041,
    "wall_s": 3043.1,
    "atoms": [
     [
@@ -132,15 +132,15 @@
      ]
     ]
    ],
-   "e_h_raw": -1764.994842789701,
+   "e_h_raw": -1764.99484279083,
    "polished": true
   },
   {
    "rCH_pin": 1.15,
    "rOH_pin": 1.7,
-   "e_h": -1764.9889136763782,
+   "e_h": -1765.8122200277558,
    "scf_converged": true,
-   "spin_square": 6.052,
+   "spin_square": 6.05,
    "wall_s": 1126.9,
    "atoms": [
     [
@@ -264,15 +264,15 @@
      ]
     ]
    ],
-   "e_h_raw": -1764.9889136763359,
+   "e_h_raw": -1764.9889136763782,
    "polished": true
   },
   {
    "rCH_pin": 1.2,
    "rOH_pin": 1.5,
-   "e_h": -1764.9798929140939,
+   "e_h": -1765.802212211684,
    "scf_converged": true,
-   "spin_square": 6.049,
+   "spin_square": 6.047,
    "wall_s": 716.7,
    "atoms": [
     [
@@ -396,7 +396,7 @@
      ]
     ]
    ],
-   "e_h_raw": -1764.9798929141002,
+   "e_h_raw": -1764.9798929140939,
    "polished": true
   },
   {
@@ -1205,7 +1205,5 @@
  ],
  "ts_index": 7,
  "ts_interior": true,
- "dft_barrier_kcal": 143.65,
- "r_index": 0,
- "polish_done": true
+ "dft_barrier_kcal": 143.65
 }
