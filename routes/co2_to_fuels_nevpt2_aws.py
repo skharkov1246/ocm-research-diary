@@ -24,20 +24,20 @@ co2_to_fuels_casscf_results.json (repro в mHa; |Δ|>TOL_REPRO_MHA → попр�
 
 Отказоустойчивость: каждая тяжёлая стадия — под env-таймаутом
 (NEVPT2_STAGE_TIMEOUT_S, default 5400 c; 0 = выключить) и в try/except —
-отказ NEVPT2 на одной точке пишется честным fail'ом и НЕ валит джобу.
+отказ NEVPT2 на одной точке пишется явным fail'ом и НЕ валит джобу.
 Incremental atomic-save в routes/co2_to_fuels_nevpt2_results.json после каждой
 стадии; собственные чекпойнты co2_to_fuels_nevpt2_<site>.chk.npz (не коммитить)
 делают скрипт рестартопригодным.
 
 Итог на сайт: barrier_pbe_eV / barrier_casscf_eV / barrier_nevpt2_eV,
 quantum_corr_casscf_eV, quantum_corr_nevpt2_eV, nevpt2_minus_casscf_eV,
-флаги честности. Порядок сайтов — в "_summary".
+флаги достоверности. Порядок сайтов — в "_summary".
 
 Запуск полный:  OMP_NUM_THREADS=8 python3 -u routes/co2_to_fuels_nevpt2_aws.py
 Дым-тест (2×CO в вакууме, малый CAS + NEVPT2, ~2 мин, 1 ядро):
                 OMP_NUM_THREADS=1 python3 routes/co2_to_fuels_nevpt2_aws.py --smoke
 
-ЧЕСТНО: замороженный металл-кластер, def2-SVP, DF в SCF/CASSCF (интегралы NEVPT2 —
+Ограничения: замороженный металл-кластер, def2-SVP, DF в SCF/CASSCF (интегралы NEVPT2 —
 по реализации pyscf.mrpt), нет constant-potential; state-specific NEVPT2 в двух
 точках PBE-скана, путь не пересканирован — геометрии наследуются от PBE.
 Это поправка Δ(NEVPT2−PBE) к кластерному барьеру, НЕ фарадеевская эффективность.
@@ -108,7 +108,7 @@ def _nev_ok(point):
 #  SC-NEVPT2 на одной точке: primary NEVPT(mc), fallback exact-CASCI→NEVPT
 # ════════════════════════════════════════════════════════════════════════
 def nevpt2_point(mf, mc, tag, timeout_s):
-    """Возвращает dict: ok/path/e_ref/e_pt2_corr/e_tot либо честный fail (ok=False,
+    """Возвращает dict: ok/path/e_ref/e_pt2_corr/e_tot либо объективный fail (ok=False,
     error=...). Никогда не бросает — отказ одной точки не валит джобу."""
     out = {}
     t0 = time.time()
@@ -299,7 +299,7 @@ def nevpt2_pair(tag, mol_r, mol_t, labels, threshold, res, out_path, chk_path,
     else:
         say(f"  [{tag}] TS complete (restart), skipping")
 
-    # ---- барьеры на трёх уровнях, поправки, флаги честности ------------------
+    # ---- барьеры на трёх уровнях, поправки, флаги достоверности ------------------
     reasons = []
     bp = bc = bn = None
     if r.get("e_scf") is not None and t.get("e_scf") is not None:

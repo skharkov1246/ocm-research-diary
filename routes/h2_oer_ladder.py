@@ -19,7 +19,7 @@ routes/h2_oer_ladder.py — Этап 2 водородного трека: ΔG-л
   ΔG4: OOH*   → * + O₂ + (H⁺+e⁻) = 4.92 эВ − (ΔG1+ΔG2+ΔG3)  [обход DFT-ошибки O₂]
   η = max(ΔGᵢ)/e − 1.23 В
 
-ЧЕСТНО (границы применимости):
+Оговорка (границы применимости):
   • ZPE−TS поправки — ЛИТЕРАТУРНЫЕ стандартные (Valdés/Nørskov), не считаны
     для этого кластера (числа в GCORR_EV ниже); электронные энергии — реальные.
   • Мононуклеарный [Ni(OH)₂(X)] — минимальная модель; нет решётки NiOOH,
@@ -92,7 +92,7 @@ def _mol(species, basis, spin, coords=None):
 def _scf(mol, dm0=None):
     """UKS-PBE(DF), Newton первичен; fallback: level-shift DIIS →
     smearing-DIIS → warm-start level-shift DIIS. Незаcошедшийся SCF —
-    ошибка (честно), а не тихо возвращённая энергия."""
+    ошибка (с оговоркой), а не тихо возвращённая энергия."""
     mf = dft.UKS(mol).density_fit(); mf.xc = "pbe"; mf.verbose = 0
     mf.conv_tol = 1e-8
     mfn = mf.newton()
@@ -164,7 +164,7 @@ def optimize_species(species, spin, basis, do_opt=True, maxsteps=60,
             coords = mol_eq.atom_coords(unit="Angstrom").tolist()
             converged_opt = True if gmax < GMAX_TOL else \
                 f"UNCONVERGED gmax={gmax:.5f} after {restarts+1} berny runs"
-        except Exception as exc:            # честно фиксируем неудачу оптимизации
+        except Exception as exc:            # строго говоря фиксируем неудачу оптимизации
             converged_opt = f"FAILED: {type(exc).__name__}: {exc}"
     e_final = float(mf.e_tot)
     ss = float(mf.spin_square()[0]) if spin >= 0 else 0.0

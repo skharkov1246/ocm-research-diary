@@ -194,7 +194,7 @@ def fig_descriptor(res):
     snu = tb.get("_summary", {}).get("ts_sigma_nu", {}) or {}
     cu_nu = snu.get("Cu2") or 0.10; al_nu = snu.get("CuAl") or 0.11
     axA.text(0.05, 0.275,
-             "Честно: барьеры PBE реальны (CuAl ниже Cu₂ — DFT-преимущество сплава).",
+             "Примечание: барьеры PBE реальны (CuAl ниже Cu₂ — DFT-преимущество сплава).",
              transform=axA.transAxes, fontsize=8.5, color="#dd6b20", fontweight="bold", zorder=6)
     axA.text(0.05, 0.05,
              f"σ-фронтир связи C–C в TS НЕ дирадикал (n_u≈{cu_nu:.2f}/{al_nu:.2f}, strong=0; вопреки лит. 1.92/0.09).\n"
