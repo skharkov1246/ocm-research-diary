@@ -76,7 +76,9 @@ METALS = {
 
 def say(m): print(f"[{time.strftime('%H:%M:%S')}] {m}", flush=True)
 
-def outpath(metal): return os.path.join(HERE, f"nh3_nitride_{metal.lower()}_results.json")
+TAG = os.environ.get("RUN_TAG", "")          # напр. "_pbe0" для гибрид-прогона
+XC = os.environ.get("XC", "pbe")
+def outpath(metal): return os.path.join(HERE, f"nh3_nitride_{metal.lower()}{TAG}_results.json")
 
 def atomic_save(obj, path):
     fd, tmp = tempfile.mkstemp(dir=HERE, suffix=".tmp")
@@ -107,7 +109,7 @@ def mk_mol(atoms, spin, charge=0):
 
 def mkmf(mol):
     mf = dft.UKS(mol).density_fit()
-    mf.xc = "pbe"; mf.conv_tol = 1e-9; mf.max_cycle = 200; mf.level_shift = 0.2
+    mf.xc = os.environ.get("XC","pbe"); mf.conv_tol = 1e-9; mf.max_cycle = 200; mf.level_shift = 0.2
     return mf
 
 def scf_e(mol):

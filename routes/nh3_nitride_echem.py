@@ -60,7 +60,7 @@ def atomic_save(obj, path):
 
 def mkmf(mol):
     mf = dft.UKS(mol).density_fit()
-    mf.xc = "pbe"; mf.conv_tol = 1e-9; mf.max_cycle = 200; mf.level_shift = 0.2
+    mf.xc = os.environ.get("XC","pbe"); mf.conv_tol = 1e-9; mf.max_cycle = 200; mf.level_shift = 0.2
     return mf
 
 def scf_e(mol):

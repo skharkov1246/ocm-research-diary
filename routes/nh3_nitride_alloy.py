@@ -60,7 +60,8 @@ def a_mm(els):
     return sum(A_ELEM.get(e, 3.1) for e in els) / len(els)
 
 def say(m): print(f"[{time.strftime('%H:%M:%S')}] {m}", flush=True)
-def outpath(c): return os.path.join(HERE, f"nh3_nitride_alloy_{c.lower()}_results.json")
+TAG = os.environ.get("RUN_TAG", "")
+def outpath(c): return os.path.join(HERE, f"nh3_nitride_alloy_{c.lower()}{TAG}_results.json")
 
 def atomic_save(obj, path):
     fd, tmp = tempfile.mkstemp(dir=HERE, suffix=".tmp")
@@ -78,7 +79,7 @@ def parity_spins(atoms, charge, want):
 
 def mkmf(mol):
     mf = dft.UKS(mol).density_fit()
-    mf.xc = "pbe"; mf.conv_tol = 1e-9; mf.max_cycle = 200; mf.level_shift = 0.2
+    mf.xc = os.environ.get("XC","pbe"); mf.conv_tol = 1e-9; mf.max_cycle = 200; mf.level_shift = 0.2
     return mf
 
 def scf_e(mol):
