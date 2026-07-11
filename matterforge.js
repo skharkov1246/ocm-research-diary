@@ -11,7 +11,7 @@
          – "Дневник операций" = the project's operations log.
        For OCM the operations log is the existing bilingual diary (entries.js,
        rendered into .hero/#toc/#diary/#glossary); other projects use an optional
-       per-tab `updates[]` array in the JSON (empty → honest placeholder).
+       per-tab `updates[]` array in the JSON (empty → explicit placeholder).
 
    Nothing on screen is invented — every value comes from the JSON / entries.js.
    IIFE-scoped so helpers never collide with app.js.
@@ -251,7 +251,7 @@
     grid.appendChild(card("Квантовый потенциал",
       e.quantum_potential != null ? e.quantum_potential + "<span class='mf-card-unit'> / 10</span>" : "—",
       "применимость квантовых вычислений", e.quantum_potential != null ? { meter: e.quantum_potential } : {}));
-    grid.appendChild(card("Таймлайн quantum advantage", t.timeline || "—", "честная оценка", { isText: true }));
+    grid.appendChild(card("Таймлайн quantum advantage", t.timeline || "—", "верифицированная оценка", { isText: true }));
     grid.appendChild(card("Первые клиенты",
       (t.first_clients || []).map((c) => `<span class="mf-chip">${c}</span>`).join("") || "—", "", { isText: true }));
     if (e.catalyst_cost_share_pct != null)
@@ -259,7 +259,7 @@
     wrap.appendChild(grid);
     if (e.caveat) {
       const cav = el("div", "mf-caveat");
-      cav.appendChild(el("div", "mf-caveat-label", "⚠ Честная оговорка"));
+      cav.appendChild(el("div", "mf-caveat-label", "⚠ Методическая оговорка"));
       cav.appendChild(el("p", "mf-caveat-body", e.caveat));
       wrap.appendChild(cav);
     }
@@ -409,7 +409,7 @@
       cta.appendChild(go);
       view.appendChild(cta);
     }
-    if (meta.honesty_note) view.appendChild(el("p", "mf-disclaimer", `<strong>Честно:</strong> ${meta.honesty_note}`));
+    if (meta.honesty_note) view.appendChild(el("p", "mf-disclaimer", `<strong>Оговорки:</strong> ${meta.honesty_note}`));
   }
   /* ---------- TESTING: early-screening group (inverse-design hypotheses) ---------- */
   function renderTesting(view) {
@@ -425,7 +425,7 @@
     const grid = el("div", "mf-dash-grid");
     TEST.forEach((t) => grid.appendChild(homeCard(t)));
     view.appendChild(grid);
-    if (meta.honesty_note) view.appendChild(el("p", "mf-disclaimer", `<strong>Честно:</strong> ${meta.honesty_note}`));
+    if (meta.honesty_note) view.appendChild(el("p", "mf-disclaimer", `<strong>Оговорки:</strong> ${meta.honesty_note}`));
   }
 
   /* ---------- PROJECT: sub-nav + (dashboard | operations log) ---------- */
@@ -471,7 +471,7 @@
     view.appendChild(economics(t));
     appendFigures(view, t);
 
-    if (meta.honesty_note) view.appendChild(el("p", "mf-disclaimer", `<strong>Честно:</strong> ${meta.honesty_note}`));
+    if (meta.honesty_note) view.appendChild(el("p", "mf-disclaimer", `<strong>Оговорки:</strong> ${meta.honesty_note}`));
   }
 
   function appendLog(view, t) {
@@ -603,7 +603,7 @@
 
     if (vt.caveat) {
       const cav = el("div", "mf-proven-caveat");
-      cav.appendChild(el("div", "mf-caveat-label", "⚠ " + tt({ ru: "Честно", en: "Honest" })));
+      cav.appendChild(el("div", "mf-caveat-label", "⚠ " + tt({ ru: "Оговорки", en: "Caveats" })));
       cav.appendChild(el("p", "mf-caveat-body", tt(vt.caveat)));
       view.appendChild(cav);
     }
