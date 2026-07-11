@@ -526,7 +526,7 @@ def stage_energy(sub):
 def stage_profile(sub):
     """CASSCF(9e,10o)+NEVPT2 во ВСЕХ точках скана: коррелированный профиль
     сам выбирает свои R и TS — без наследования индексов у DFT-поверхности
-    (реперы честные и симметричные для обоих субстратов)."""
+    (реперы объективные и симметричные для обоих субстратов)."""
     gpath = os.path.join(DIR, f"{PREF}_{sub}_geom.json")
     with open(gpath) as f:
         g = json.load(f)

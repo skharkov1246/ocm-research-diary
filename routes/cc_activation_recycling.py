@@ -220,7 +220,7 @@ def fig_descriptor():
     # --- ECONOMICS box (bottom-right) ---
     ax.add_patch(FancyBboxPatch((17, -4.6), 30.5, 10.2, boxstyle='round,pad=0.3',
                  fc='#fffaf0', ec='#dd6b20', lw=1.6, zorder=4))
-    ax.text(32.2, 0.4, 'Экономика честно: катализатор — малая доля\nсебестоимости рециклинга. Рычаг — '
+    ax.text(32.2, 0.4, 'Экономика оговорка: катализатор — малая доля\nсебестоимости рециклинга. Рычаг — '
             'селективность /\nмягкая T / чистота мономера vs пиролиз, НЕ\nцена катализатора; '
             'feedstock доминирует.',
             fontsize=9.4, color='#9c4221', ha='center', va='center', zorder=5)

@@ -1,0 +1,177 @@
+{
+ "meta": {
+  "what": "OEEF probe (CuAl): uniform E-field along the C...C axis vs coupling barrier, metal+2*CO cluster, DF-RKS PBE/def2-SVP, warm-chain in field",
+  "fields_au": [
+   0.0,
+   0.002,
+   -0.002,
+   0.005,
+   -0.005,
+   0.01,
+   -0.01
+  ],
+  "axis": "x (C...C)",
+  "geometry_source": "ts_barrier.profile of co2_to_fuels_results.json (reactant d=4.2, TS d=2.6), build_ads reconstruction",
+  "honesty": "cluster != electrode; uniform field != double layer; PBE underestimates the barrier (known); frozen metal; def2-SVP. This measures SENSITIVITY dE^/dF, not an operating potential.",
+  "flip_motivation": "44q full-CAS showed weak/saturated correlation (n_u~0.49) -> the lever for co2 coupling is electrostatics, not quantum correlation"
+ },
+ "reactant": {
+  "+0.000": {
+   "efield_au": 0.0,
+   "efield_V_per_A": 0.0,
+   "e_pbe": -2108.434649,
+   "converged": true,
+   "t_s": 160.6
+  },
+  "+0.002": {
+   "efield_au": 0.002,
+   "efield_V_per_A": 0.103,
+   "e_pbe": -2108.432264,
+   "converged": true,
+   "t_s": 138.8
+  },
+  "-0.002": {
+   "efield_au": -0.002,
+   "efield_V_per_A": -0.103,
+   "e_pbe": -2108.4376,
+   "converged": true,
+   "t_s": 141.1
+  },
+  "+0.005": {
+   "efield_au": 0.005,
+   "efield_V_per_A": 0.257,
+   "e_pbe": -2108.429822,
+   "converged": true,
+   "t_s": 140.2
+  },
+  "-0.005": {
+   "efield_au": -0.005,
+   "efield_V_per_A": -0.257,
+   "e_pbe": -2108.443048,
+   "converged": true,
+   "t_s": 139.8
+  },
+  "+0.010": {
+   "efield_au": 0.01,
+   "efield_V_per_A": 0.514,
+   "e_pbe": -2108.429304,
+   "converged": true,
+   "t_s": 146.2
+  },
+  "-0.010": {
+   "efield_au": -0.01,
+   "efield_V_per_A": -0.514,
+   "e_pbe": -2108.429882,
+   "converged": true,
+   "t_s": 148.8
+  }
+ },
+ "ts": {
+  "+0.000": {
+   "efield_au": 0.0,
+   "efield_V_per_A": 0.0,
+   "e_pbe": -2108.398132,
+   "converged": true,
+   "t_s": 158.2
+  },
+  "+0.002": {
+   "efield_au": 0.002,
+   "efield_V_per_A": 0.103,
+   "e_pbe": -2108.397183,
+   "converged": true,
+   "t_s": 138.2
+  },
+  "-0.002": {
+   "efield_au": -0.002,
+   "efield_V_per_A": -0.103,
+   "e_pbe": -2108.399659,
+   "converged": true,
+   "t_s": 143.1
+  },
+  "+0.005": {
+   "efield_au": 0.005,
+   "efield_V_per_A": 0.257,
+   "e_pbe": -2108.396929,
+   "converged": true,
+   "t_s": 151.3
+  },
+  "-0.005": {
+   "efield_au": -0.005,
+   "efield_V_per_A": -0.257,
+   "e_pbe": -2108.402972,
+   "converged": true,
+   "t_s": 145.2
+  },
+  "+0.010": {
+   "efield_au": 0.01,
+   "efield_V_per_A": 0.514,
+   "e_pbe": -2108.400106,
+   "converged": true,
+   "t_s": 16.1
+  },
+  "-0.010": {
+   "efield_au": -0.01,
+   "efield_V_per_A": -0.514,
+   "e_pbe": -2108.411083,
+   "converged": true,
+   "t_s": 161.6
+  }
+ },
+ "barrier_vs_field": [
+  {
+   "efield_au": -0.01,
+   "efield_V_per_A": -0.514,
+   "barrier_eV": 0.5115
+  },
+  {
+   "efield_au": -0.005,
+   "efield_V_per_A": -0.257,
+   "barrier_eV": 1.0905
+  },
+  {
+   "efield_au": -0.002,
+   "efield_V_per_A": -0.103,
+   "barrier_eV": 1.0324
+  },
+  {
+   "efield_au": 0.0,
+   "efield_V_per_A": 0.0,
+   "barrier_eV": 0.9937
+  },
+  {
+   "efield_au": 0.002,
+   "efield_V_per_A": 0.103,
+   "barrier_eV": 0.9546
+  },
+  {
+   "efield_au": 0.005,
+   "efield_V_per_A": 0.257,
+   "barrier_eV": 0.8951
+  },
+  {
+   "efield_au": 0.01,
+   "efield_V_per_A": 0.514,
+   "barrier_eV": 0.7945
+  }
+ ],
+ "summary": {
+  "dBarrier_dField_eV_per_au": 6.579,
+  "dBarrier_dField_eV_per_VA": 0.1279,
+  "barrier_zero_field_eV": 0.9937,
+  "best_field": {
+   "efield_au": -0.01,
+   "efield_V_per_A": -0.514,
+   "barrier_eV": 0.5115
+  },
+  "note": "dΔE‡/dF вдоль оси C···C; знак минус = поле в +x снижает барьер. Кластер/PBE/однородное поле — чувствительность, не предсказание потенциала."
+ },
+ "status": "ok",
+ "honest_analysis": {
+  "outlier": "F=-0.51 V/A point (0.5115 eV) breaks the otherwise monotonic trend — suspected SCF branch hop at extreme field; EXCLUDED from the slope",
+  "clean_slope_eV_per_VA": -0.384,
+  "monotonic_clean_points": true,
+  "zero_field_consistency": "barrier(F=0)=0.9937 eV matches the published warm-branch CuAl barrier 0.992 eV -> SAME SCF branch as the profile (branch-lock passed, unlike Cu2 v1)",
+  "physics": "asymmetric CuAl site has d(mu)!=0 -> first-order Stark handle CONFIRMED: field +0.5 V/A along C-C lowers the coupling barrier by ~0.2 eV (~x2000 rate at 300K), field -0.26 V/A raises it by ~0.1 eV",
+  "contrast": "symmetric Cu2 (v1): no first-order handle (symmetry); alloy site: strong handle -> 'alloying makes the barrier FIELD-TUNABLE', selectivity via electrode, not via chemistry"
+ }
+}

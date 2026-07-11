@@ -1,0 +1,67 @@
+{
+ "meta": {
+  "what": "CASSCF(6,6)+SC-NEVPT2 vertical stereo-ddE at the DFT TS geometries (cc=2.0) of both faces; single active space defined on si, re via project_init_guess",
+  "geoms": "polyolefins_chiral_ts_{si,re}.xyz (relaxed DFT PBE constrained scan, 2026-07-05 Frankfurt run; ligand frozen there)",
+  "basis": "def2-svp",
+  "convention": "ddE = E(si) - E(re); mirror ligand => -ddE",
+  "honesty": "vertical correction on DFT geometries; no CASSCF re-relaxation; gas-phase cluster; reference CASCI diagnostic gave ddE_TS -0.328 vs DFT -1.858 kcal/mol"
+ },
+ "si": {
+  "geom_comment": "relaxed TS-point (cc=2.0), face=si, E_dft=-1760.460472693266",
+  "e_hf": -1755.6889525789259,
+  "hf_converged": true,
+  "t_hf_s": 35.9,
+  "e_casscf": -1755.7644408879335,
+  "casscf_converged": false,
+  "ncas": 6,
+  "nelecas": 6,
+  "noon": [
+   1.9897,
+   1.9885,
+   1.8646,
+   0.1366,
+   0.0106,
+   0.0099
+  ],
+  "n_u": 0.3143,
+  "t_casscf_s": 14181.4,
+  "nevpt2_corr": -2.6574962291584168,
+  "e_nevpt2": -1758.4219371170918,
+  "t_nevpt2_s": 43.6
+ },
+ "re": {
+  "geom_comment": "relaxed TS-point (cc=2.0), face=re, E_dft=-1760.4575123122727",
+  "e_hf": -1755.6878298439676,
+  "hf_converged": true,
+  "t_hf_s": 33.7,
+  "e_casscf": -1755.7661646815138,
+  "casscf_converged": true,
+  "ncas": 6,
+  "nelecas": 6,
+  "noon": [
+   1.9886,
+   1.988,
+   1.8624,
+   0.1393,
+   0.011,
+   0.0107
+  ],
+  "n_u": 0.3221,
+  "t_casscf_s": 2457.5,
+  "nevpt2_corr": -2.64424959108542,
+  "e_nevpt2": -1758.4104142725992,
+  "t_nevpt2_s": 43.6
+ },
+ "stereo_nevpt2": {
+  "ddE_ts_hf_kcal": -0.705,
+  "ddE_ts_casscf_kcal": 1.082,
+  "ddE_ts_nevpt2_kcal": -7.231,
+  "reference": {
+   "ddE_ts_dft_kcal": -1.858,
+   "ddE_ts_casci_kcal": -0.328,
+   "source": "polyolefins_chiral_results.json (2026-07-05)"
+  },
+  "note": "vertical at DFT TS geometries; ddE=E(si)-E(re)"
+ },
+ "status": "ok"
+}

@@ -1,0 +1,162 @@
+{
+ "meta": {
+  "mode": "smoke"
+ },
+ "reactant": {
+  "+0.000": {
+   "efield_au": 0.0,
+   "efield_V_per_A": 0.0,
+   "e_pbe": -226.198871,
+   "converged": true,
+   "t_s": 3.2
+  },
+  "+0.005": {
+   "efield_au": 0.005,
+   "efield_V_per_A": 0.257,
+   "e_pbe": -226.199101,
+   "converged": true,
+   "t_s": 1.7
+  },
+  "-0.005": {
+   "efield_au": -0.005,
+   "efield_V_per_A": -0.257,
+   "e_pbe": -226.199101,
+   "converged": true,
+   "t_s": 1.9
+  },
+  "+0.002": {
+   "efield_au": 0.002,
+   "efield_V_per_A": 0.103,
+   "e_pbe": -3506.321607,
+   "converged": true,
+   "t_s": 31.3
+  },
+  "-0.002": {
+   "efield_au": -0.002,
+   "efield_V_per_A": -0.103,
+   "e_pbe": -3506.321617,
+   "converged": true,
+   "t_s": 9.0
+  },
+  "+0.010": {
+   "efield_au": 0.01,
+   "efield_V_per_A": 0.514,
+   "e_pbe": -3506.327803,
+   "converged": true,
+   "t_s": 12.1
+  },
+  "-0.010": {
+   "efield_au": -0.01,
+   "efield_V_per_A": -0.514,
+   "e_pbe": -3506.327854,
+   "converged": true,
+   "t_s": 14.6
+  }
+ },
+ "ts": {
+  "+0.000": {
+   "efield_au": 0.0,
+   "efield_V_per_A": 0.0,
+   "e_pbe": -226.187953,
+   "converged": true,
+   "t_s": 2.5
+  },
+  "+0.005": {
+   "efield_au": 0.005,
+   "efield_V_per_A": 0.257,
+   "e_pbe": -226.188261,
+   "converged": true,
+   "t_s": 2.2
+  },
+  "-0.005": {
+   "efield_au": -0.005,
+   "efield_V_per_A": -0.257,
+   "e_pbe": -226.188261,
+   "converged": true,
+   "t_s": 2.3
+  },
+  "+0.002": {
+   "efield_au": 0.002,
+   "efield_V_per_A": 0.103,
+   "e_pbe": -3506.272896,
+   "converged": true,
+   "t_s": 29.6
+  },
+  "-0.002": {
+   "efield_au": -0.002,
+   "efield_V_per_A": -0.103,
+   "e_pbe": -3506.272892,
+   "converged": true,
+   "t_s": 12.2
+  },
+  "+0.010": {
+   "efield_au": 0.01,
+   "efield_V_per_A": 0.514,
+   "e_pbe": -3506.279201,
+   "converged": true,
+   "t_s": 16.1
+  },
+  "-0.010": {
+   "efield_au": -0.01,
+   "efield_V_per_A": -0.514,
+   "e_pbe": -3506.279183,
+   "converged": true,
+   "t_s": 16.2
+  }
+ },
+ "barrier_vs_field": [
+  {
+   "efield_au": -0.01,
+   "efield_V_per_A": -0.514,
+   "barrier_eV": 1.3244
+  },
+  {
+   "efield_au": -0.005,
+   "efield_V_per_A": -0.257,
+   "barrier_eV": 0.295
+  },
+  {
+   "efield_au": -0.002,
+   "efield_V_per_A": -0.103,
+   "barrier_eV": 1.3259
+  },
+  {
+   "efield_au": 0.0,
+   "efield_V_per_A": 0.0,
+   "barrier_eV": 0.2971
+  },
+  {
+   "efield_au": 0.002,
+   "efield_V_per_A": 0.103,
+   "barrier_eV": 1.3255
+  },
+  {
+   "efield_au": 0.005,
+   "efield_V_per_A": 0.257,
+   "barrier_eV": 0.295
+  },
+  {
+   "efield_au": 0.01,
+   "efield_V_per_A": 0.514,
+   "barrier_eV": 1.3225
+  }
+ ],
+ "summary": {
+  "dBarrier_dField_eV_per_au": -0.077,
+  "dBarrier_dField_eV_per_VA": -0.0015,
+  "barrier_zero_field_eV": 0.2971,
+  "best_field": {
+   "efield_au": -0.005,
+   "efield_V_per_A": -0.257,
+   "barrier_eV": 0.295
+  },
+  "note": "dΔE‡/dF вдоль оси C···C; знак минус = поле в +x снижает барьер. Кластер/PBE/однородное поле — чувствительность, не предсказание потенциала."
+ },
+ "status": "ok_with_caveats",
+ "honest_analysis": {
+  "branch_artifact": "barrier alternates 1.32/0.30 eV across field points — NOT field physics but the documented Cu2 TS SCF multi-solution swamp (casci_note): part of the points (incl. F=0 from a stale partial) sit on a lower SCF branch; mixed-branch data must not be read as field dependence",
+  "within_branch_field_effect": "within a consistent branch the axial field effect is ~1-3 meV over 1 V/A — negligible",
+  "symmetry_explanation": "expected: Cu2 homocoupling is symmetric along the C-C axis, so d(mu_x) between reactant and TS ~ 0 -> no first-order Stark handle; v1 target was symmetry-blind",
+  "next": "asymmetric site CuAl (d(mu)!=0) is the correct OEEF target; also branch-locking (stability analysis + single warm reference) required for any field scan on Cu2"
+ }
+}

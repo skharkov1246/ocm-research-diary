@@ -13,7 +13,7 @@ barrier_casci / quantum_corr — артефакты, не физика.
     ВНУТРЕННЕЙ стабильности до internal-stable. TS: ТА ЖЕ ветка warm-стартом
     (dm реактанта) + снова стабильность. Критерий консистентности ветки: наш
     ΔE‡(PBE) совпадает с warm-барьером опубликованного профиля в пределах
-    TOL_BARRIER_EV (иначе — честный отказ, reliable=false с причиной).
+    TOL_BARRIER_EV (иначе — объективный отказ, reliable=false с причиной).
  2) ФИКСИРОВАННОЕ активное пространство на сайт: AVAS(π-многообразие: C 2p,
     O 2px, O 2py) на РЕАКТАНТЕ определяет (nelec, ncas); на TS те же (nelec, ncas)
     принудительно, стартовые орбитали — project_init_guess CASSCF-орбиталей
@@ -27,7 +27,7 @@ barrier_casci / quantum_corr — артефакты, не физика.
   CuAl: реактант d=3.0, TS d=2.2  (профильный warm-барьер PBE 0.992 эВ)
 
 Итог на сайт: barrier_pbe_eV (наша стабильная ветка), barrier_casscf_eV,
-quantum_corr_eV = CASSCF−PBE, NOON/n_u обеих точек, флаги честности.
+quantum_corr_eV = CASSCF−PBE, NOON/n_u обеих точек, флаги достоверности.
 Порядок сайтов — в "_summary".
 
 Файлы: co2_to_fuels_casscf_results.json — atomic write после КАЖДОЙ стадии
@@ -38,7 +38,7 @@ quantum_corr_eV = CASSCF−PBE, NOON/n_u обеих точек, флаги че�
 Дым-тест (плаумбинг на 2×CO в вакууме, малый CAS, ~1 мин, 1 ядро):
                 OMP_NUM_THREADS=1 python3 routes/co2_to_fuels_casscf.py --smoke
 
-ЧЕСТНО: замороженный металл-кластер, def2-SVP, RI/DF везде, нет constant-potential.
+Ограничения: замороженный металл-кластер, def2-SVP, RI/DF везде, нет constant-potential.
 Это поправка Δ(CASSCF−PBE) к кластерному барьеру сочленения, НЕ фарадеевская
 эффективность. CASSCF может увести активные орбитали из π-многообразия в металл —
 это вариационно легально, но метку «π» тогда читать как «стартовавшее из π».
@@ -213,7 +213,7 @@ def run_casscf(mf, ncas, nelecas, mo_guess, tag="", max_macro=100, verbose=0):
     mc.conv_tol = CONV_TOL_CAS
     try:
         fci.addons.fix_spin_(mc.fcisolver, ss=0)          # держим синглет
-    except Exception as exc:                              # честно фиксируем, если нет
+    except Exception as exc:                              # строго говоря фиксируем, если нет
         say(f"    [{tag}] fix_spin_ unavailable: {exc!r}")
     mc.kernel(mo_guess)
     dm1 = mc.fcisolver.make_rdm1(mc.ci, mc.ncas, mc.nelecas)
@@ -334,7 +334,7 @@ def compute_pair(tag, mol_r, mol_t, labels, threshold, res, out_path, chk_path,
     else:
         say(f"  [{tag}] TS already done (restart), skipping")
 
-    # ---- барьеры, поправка, флаги честности ---------------------------------
+    # ---- барьеры, поправка, флаги достоверности ---------------------------------
     bp = (t["e_scf"] - r["e_scf"]) * HARTREE_EV
     bc = (t["e_casscf"] - r["e_casscf"]) * HARTREE_EV
     entry["barrier_pbe_eV"] = round(bp, 3)

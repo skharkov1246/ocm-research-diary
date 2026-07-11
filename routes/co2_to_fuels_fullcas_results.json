@@ -1,0 +1,82 @@
+{
+ "_meta": {
+  "what": "full-AVAS CASCI(36e,22o)=44q on Cu2 scan endpoints (reactant, TS)",
+  "why": "classical ceiling of the quantum-relevant space; NOON beyond the pi-manifold; barrier vs CAS(12e,10o) size-convergence",
+  "honesty": "CASCI on PBE orbitals, NO orbital optimization (CASSCF infeasible at 22o); frozen-metal cluster, def2-SVP, no constant-potential; singlet"
+ },
+ "Cu2": {
+  "reactant": {
+   "e_pbe": -3506.321353,
+   "scf_converged": true,
+   "avas_native": "(32e,20o)",
+   "e_casci": -3502.731454,
+   "converged": true,
+   "cas": "(36e,22o)",
+   "ndet_est": "C(22,18)^2 ~ 5.4e7",
+   "noon": [
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    1.9999,
+    1.9996,
+    1.9992,
+    1.9981,
+    1.998,
+    1.9976,
+    1.9974,
+    1.9907,
+    1.9475,
+    1.9469,
+    1.9413,
+    1.9409,
+    0.0624,
+    0.0616,
+    0.0601,
+    0.0592
+   ],
+   "n_u": 0.4865,
+   "wall_s": 1185.5
+  },
+  "ts": {
+   "e_pbe": -3506.272633,
+   "scf_converged": true,
+   "avas_native": "(32e,20o)",
+   "e_casci": -3502.666477,
+   "converged": true,
+   "cas": "(36e,22o)",
+   "ndet_est": "C(22,18)^2 ~ 5.4e7",
+   "noon": [
+    2.0,
+    2.0,
+    2.0,
+    1.9999,
+    1.9999,
+    1.9999,
+    1.9997,
+    1.9996,
+    1.9986,
+    1.9979,
+    1.9967,
+    1.9966,
+    1.9963,
+    1.9874,
+    1.9529,
+    1.9447,
+    1.9442,
+    1.9419,
+    0.0685,
+    0.0635,
+    0.0597,
+    0.0523
+   ],
+   "n_u": 0.4877,
+   "wall_s": 1519.7
+  },
+  "barrier_casci_fullcas_eV": 1.768,
+  "barrier_pbe_eV": 1.326,
+  "ref_barrier_casscf_12e10o_eV": 1.66
+ }
+}
