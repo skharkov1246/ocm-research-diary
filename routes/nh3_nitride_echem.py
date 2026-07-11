@@ -43,7 +43,9 @@ from pyscf.geomopt.geometric_solver import optimize  # noqa: E402
 
 EV = 27.211386245988
 # стандартные потенциалы осаждения M^n+/M (В vs SHE) — лит., для контекста размена
-E_DEPOSIT_V = {"Li": -3.04, "Ca": -2.87, "Mg": -2.37, "Mn": -1.18, "Fe": -0.44}
+E_DEPOSIT_V = {"Li": -3.04, "Ca": -2.87, "Mg": -2.37, "Mn": -1.18, "Fe": -0.44,
+               "Na": -2.71, "K": -2.93, "Sr": -2.89, "Ba": -2.91, "Al": -1.66,
+               "V": -1.18, "Cr": -0.91, "Mo": -0.20}
 
 def say(m): print(f"[{time.strftime('%H:%M:%S')}] {m}", flush=True)
 
