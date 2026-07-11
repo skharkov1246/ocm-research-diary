@@ -273,16 +273,37 @@ def stage_hat():
             if os.path.exists(cf):
                 os.remove(cf)
 
+    # v7: поточечное сохранение скана (v6 убит timeout за полчаса до конца —
+    # 8 ч скана пропали, т.к. JSON писался только в финале). Resume по (rCH,rOH).
+    scan_path = os.path.join(DIR, "msa_hat_scan.json")
     pts = []
+    if os.path.exists(scan_path):
+        try:
+            pts = json.load(open(scan_path))["pts"]
+            print(f"[hat] resume: {len(pts)} точек скана с диска", flush=True)
+        except Exception:
+            pts = []
+    done_keys = {(p["rCH"], p["rOH"]) for p in pts}
+
+    def _save_scan():
+        with open(scan_path, "w") as f:
+            json.dump({"pts": pts}, f, indent=1)
+
     # якорь + поздняя ветка (v3-проверенная): идеализированный старт, цепь dm
     anchor_atoms, anchor_dm = None, None
     dm = None
     for rCH, rOH in ((1.25, 1.15), (1.35, 1.05), (1.50, 0.98),
                      (1.65, 0.965), (1.80, 0.955)):
+        if (rCH, rOH) in done_keys:
+            saved = next(p for p in pts if (p["rCH"], p["rOH"]) == (rCH, rOH))
+            if anchor_atoms is None:
+                anchor_atoms = [(s, tuple(c)) for s, c in saved["atoms"]]
+            continue
         e, conv, na, dm = _hat_point(hat_ts(rCH, rOH), rCH, rOH, dm)
         if e is not None and np.isfinite(e):
             pts.append({"rCH": rCH, "rOH": rOH, "e_h": e,
                         "scf_converged": conv, "atoms": na})
+            _save_scan()
             print(f"  [hat] point rCH={rCH} rOH={rOH} E={e:.6f} conv={conv}",
                   flush=True)
             if anchor_atoms is None:
@@ -294,12 +315,17 @@ def stage_hat():
     dm = anchor_dm
     start = anchor_atoms
     for rCH, rOH in ((1.18, 1.24), (1.12, 1.36), (1.10, 1.48), (1.09, 1.62)):
+        if (rCH, rOH) in done_keys:
+            saved = next(p for p in pts if (p["rCH"], p["rOH"]) == (rCH, rOH))
+            start = [(s, tuple(c)) for s, c in saved["atoms"]]
+            continue
         if start is None:
             break
         e, conv, na, dm = _hat_point(start, rCH, rOH, dm)
         if e is not None and np.isfinite(e):
             pts.append({"rCH": rCH, "rOH": rOH, "e_h": e,
                         "scf_converged": conv, "atoms": na})
+            _save_scan()
             print(f"  [hat] early rCH={rCH} rOH={rOH} E={e:.6f} conv={conv}",
                   flush=True)
             start = na

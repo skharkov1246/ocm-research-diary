@@ -43,6 +43,7 @@ STAGE_OUT = {"add": "routes/msa_add.json", "hat": "routes/msa_hat.json",
              "merge": "routes/msa_results.json"}
 RM_FILES = " ".join(STAGE_OUT[s] for s in STAGES.split())
 JOB_MIN = MAX_MIN - 20
+STAGE_TO = JOB_MIN - 30
 DISK_GB = 60
 
 for var in ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"):
@@ -67,6 +68,7 @@ for i in 1 2 3; do (cd /root && timeout 10m git clone --depth 1 -b {BRANCH} {REP
 cd /root/repo || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 python3 -c "import pyscf" || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 rm -f {RM_FILES}
+aws s3 cp $S3/msa_hat_scan.json routes/msa_hat_scan.json || true
 mkdir -p /root/scratch
 export PYSCF_TMPDIR=/root/scratch
 export MSA_RADCAS=1
@@ -75,7 +77,7 @@ sync_up() {{ aws s3 cp routes/ $S3/ --recursive --exclude '*' --include 'msa_*.j
 ( while true; do sleep 120; sync_up; done ) &
 for st in {STAGES}; do
   echo "[aws][msa] stage $st" >> /root/repo/msa.log
-  timeout 480m python3 -u routes/msa_chain.py $st >> /root/repo/msa.log 2>&1
+  timeout {STAGE_TO}m python3 -u routes/msa_chain.py $st >> /root/repo/msa.log 2>&1
   sync_up
 done
 echo "[aws][msa] ALL DONE" >> /root/repo/msa.log
