@@ -329,7 +329,34 @@ def stage_hat():
             print(f"  [hat] early rCH={rCH} rOH={rOH} E={e:.6f} conv={conv}",
                   flush=True)
             start = na
-    pts.sort(key=lambda p: p["rCH"])          # порядок пути для TS-логики
+    # v9: перепроверка SCF-ветки — интерьерная точка на >10 ккал выше ОБОИХ
+    # соседей пере-релаксируется со старта из геометрии нижнего соседа
+    # (warm-chain, как в OCM-протоколе). Это не маска: точка остаётся, берётся
+    # МИНИМУМ, обе энергии документируются в чекпойнте. Ловит застрявший релакс
+    # /чужую SCF-ветку идеализированного старта (кандидат: (1.50,0.98) v7).
+    pts.sort(key=lambda p: p["rCH"])
+    for i in range(1, len(pts) - 1):
+        p = pts[i]
+        if p.get("recheck_done"):
+            continue
+        gapL = (p["e_h"] - pts[i - 1]["e_h"]) * HARTREE_KCAL
+        gapR = (p["e_h"] - pts[i + 1]["e_h"]) * HARTREE_KCAL
+        if gapL > 10.0 and gapR > 10.0:
+            nb = pts[i - 1] if pts[i - 1]["e_h"] < pts[i + 1]["e_h"] else pts[i + 1]
+            st = [(s, tuple(c)) for s, c in nb["atoms"]]
+            e, conv, na, _ = _hat_point(st, p["rCH"], p["rOH"], None)
+            p["recheck_done"] = True
+            p["e_h_first"] = p["e_h"]
+            if (e is not None and np.isfinite(e) and conv
+                    and e < p["e_h"] - 1e-4):
+                print(f"  [hat] recheck rCH={p['rCH']}: нижняя ветка на "
+                      f"{(p['e_h'] - e) * HARTREE_KCAL:.1f} ккал ниже — заменяю",
+                      flush=True)
+                p["e_h"], p["atoms"], p["scf_converged"] = e, na, conv
+            else:
+                print(f"  [hat] recheck rCH={p['rCH']}: исходная точка "
+                      f"подтверждена", flush=True)
+            _save_scan()
     eR = m_rad.e_tot + m_ch4.e_tot
     out["scan"] = [{k: p[k] for k in ("rCH", "rOH", "e_h", "scf_converged")}
                    for p in pts]
@@ -393,7 +420,11 @@ def stage_sanity():
 
 def stage_merge():
     add = json.load(open(os.path.join(DIR, "msa_add.json")))
-    hat = json.load(open(os.path.join(DIR, "msa_hat.json")))
+    hat_path = os.path.join(DIR, "msa_hat.json")
+    if os.path.exists(hat_path):
+        hat = json.load(open(hat_path))
+    else:  # v8: hat убит таймаутом до записи файла — merge не падает
+        hat = {"hat_stage_failed": "msa_hat.json missing (stage killed?)"}
     if hat.get("hat_stage_failed") or "nevpt2" not in hat:
         res = {"route": "direct CH4 + SO3 -> CH3SO3H radical chain",
                "numbers_nevpt2": {
