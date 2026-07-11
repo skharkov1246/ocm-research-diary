@@ -25,6 +25,7 @@
   const HOME = "__home__";
   const PROVEN = "proven";   // Track-B validation-benchmark tab ("Обкатанные технологии")
   const TESTING = "__testing__";
+  const JOURNAL = "__journal__";   // единый архив: все операции всех треков + OCM
 
   /* author-supplied figure captions (not in the JSON) */
   const CAPTIONS = {
@@ -109,19 +110,24 @@
     applyView();
   }
 
+  let journalFilter = null;   // track id to pre-filter the journal, or null
+
   function routeFromHash() {
     const [id, s] = location.hash.replace(/^#/, "").split("/");
     if (id === PROVEN && DATA && DATA.validated_track) { active = PROVEN; sub = "dash"; }
     else if (id === "testing") { active = TESTING; sub = "dash"; }
+    else if (id === "journal") { active = JOURNAL; sub = "dash"; journalFilter = s || null; }
     else if (TABS.some((t) => t.id === id)) { active = id; sub = s === "log" ? "log" : "dash"; }
     else { active = HOME; sub = "dash"; }
   }
   function syncHash() {
     const target = active === HOME ? location.pathname + location.search
       : active === TESTING ? "#testing"
+      : active === JOURNAL ? "#journal" + (journalFilter ? "/" + journalFilter : "")
       : "#" + active + (sub === "log" ? "/log" : "");
     history.replaceState(null, "", target);
   }
+  function goJournal(filter) { active = JOURNAL; sub = "dash"; journalFilter = filter || null; renderTabs(); applyView(); syncHash(); window.scrollTo({ top: 0, behavior: "smooth" }); }
 
   function goHome() { active = HOME; sub = "dash"; renderTabs(); applyView(); syncHash(); window.scrollTo({ top: 0 }); }
   function goTesting() { active = TESTING; sub = "dash"; renderTabs(); applyView(); syncHash(); window.scrollTo({ top: 0, behavior: "smooth" }); }
@@ -140,19 +146,18 @@
   function renderTabs() {
     const nav = $("#mf-tabs");
     nav.innerHTML = "";
-    const home = el("button", "mf-tab mf-tab-home" + (active === HOME ? " active" : ""), "← Обзор");
+    const home = el("button", "mf-tab mf-tab-home" + (active === HOME ? " active" : ""), "★ Обзор применений");
     home.type = "button"; home.addEventListener("click", goHome);
     nav.appendChild(home);
-    PROD.forEach((t) => nav.appendChild(tabButton(t.id, t.color, t.title)));
-    if (TEST.length) {
-      const onTest = active === TESTING || TEST.some((t) => t.id === active);
-      const tb = el("button", "mf-tab mf-tab-testing" + (onTest ? " active" : ""),
-        `🧪 К тестированию <span class="mf-tab-count">${TEST.length}</span>`);
-      tb.type = "button";
-      tb.setAttribute("title", "Ранний скрининг — гипотезы «просчёт от обратного»");
-      tb.addEventListener("click", goTesting);
-      nav.appendChild(tb);
-    }
+    // единый журнал вместо пер-трековых вкладок
+    const onJ = active === JOURNAL || TABS.some((t) => t.id === active);
+    const allUps = mergeAllUpdates();
+    const jb = el("button", "mf-tab mf-tab-journal" + (onJ ? " active" : ""),
+      `📓 Журнал <span class="mf-tab-count">${allUps.length}</span>`);
+    jb.type = "button";
+    jb.setAttribute("title", "Единый лабораторный журнал — все операции всех направлений и OCM");
+    jb.addEventListener("click", () => goJournal(null));
+    nav.appendChild(jb);
     if (DATA && DATA.validated_track) {
       const vt = DATA.validated_track;
       nav.appendChild(tabButton(PROVEN, vt.color || "#48bb78", tt(vt.title)));
@@ -166,8 +171,10 @@
     view.hidden = false;
     if (active === HOME) renderHome(view);
     else if (active === PROVEN) renderValidated(view);
-    else if (active === TESTING) renderTesting(view);
-    else renderProject(view, TABS.find((t) => t.id === active));
+    else if (active === JOURNAL) renderJournal(view);
+    else if (active === TESTING) renderJournal(view);
+    else if (TABS.some((t) => t.id === active)) { journalFilter = active; renderJournal(view); }
+    else renderHome(view);
   }
 
   /* ---------- shared content helpers ---------- */
@@ -251,7 +258,7 @@
     grid.appendChild(card("Квантовый потенциал",
       e.quantum_potential != null ? e.quantum_potential + "<span class='mf-card-unit'> / 10</span>" : "—",
       "применимость квантовых вычислений", e.quantum_potential != null ? { meter: e.quantum_potential } : {}));
-    grid.appendChild(card("Таймлайн quantum advantage", t.timeline || "—", "честная оценка", { isText: true }));
+    grid.appendChild(card("Таймлайн quantum advantage", t.timeline || "—", "оценка порядка", { isText: true }));
     grid.appendChild(card("Первые клиенты",
       (t.first_clients || []).map((c) => `<span class="mf-chip">${c}</span>`).join("") || "—", "", { isText: true }));
     if (e.catalyst_cost_share_pct != null)
@@ -259,7 +266,7 @@
     wrap.appendChild(grid);
     if (e.caveat) {
       const cav = el("div", "mf-caveat");
-      cav.appendChild(el("div", "mf-caveat-label", "⚠ Честная оговорка"));
+      cav.appendChild(el("div", "mf-caveat-label", "⚠ Ограничение метода"));
       cav.appendChild(el("p", "mf-caveat-body", e.caveat));
       wrap.appendChild(cav);
     }
@@ -364,52 +371,151 @@
       `<span class="mf-dash-tam">TAM $${e.tam_2035_busd ?? "—"} млрд</span></div>`;
     return c;
   }
+  const READY = ["идея", "модель", "расчёт", "проверено", "к железу"];
+  function readyWord(v) { return READY[Math.max(0, Math.min(4, Math.round((v / 10) * 4)))]; }
+  function meterRow(label, val, hint) {
+    const pct = Math.max(0, Math.min(10, val)) * 10;
+    const r = el("div", "mf-flag-meter");
+    r.innerHTML =
+      `<div class="mf-flag-meter-top"><span class="mf-flag-meter-l">${label}</span>` +
+      `<span class="mf-flag-meter-v">${hint}</span></div>` +
+      `<div class="mf-meter"><div class="mf-meter-fill" style="width:${pct}%"></div></div>`;
+    return r;
+  }
+  function flagCard(app) {
+    const c = el("button", "mf-flag");
+    c.type = "button";
+    c.style.setProperty("--tab", app.color || "#4c9be8");
+    const ups = (app.tracks || []).reduce((n, id) => {
+      const t = TABS.find((x) => x.id === id); return n + (t ? updatesFor(t).length : 0);
+    }, 0);
+    c.innerHTML =
+      `<div class="mf-flag-head"><span class="mf-flag-dot"></span><span class="mf-flag-title">${app.title}</span></div>` +
+      `<div class="mf-flag-flip"><span class="mf-flag-kicker">Дерзкий ход</span>${app.flip}</div>` +
+      `<div class="mf-flag-impact"><span class="mf-flag-kicker">Что меняет</span>${app.impact}</div>` +
+      `<div class="mf-flag-result"><span class="mf-flag-kicker">Уже посчитано</span>${app.result}</div>`;
+    const meters = el("div", "mf-flag-meters");
+    meters.appendChild(meterRow("Готовность к железу", app.hw, readyWord(app.hw)));
+    meters.appendChild(meterRow("Проработанность идеи", app.mat, app.mat + "/10"));
+    c.appendChild(meters);
+    c.appendChild(el("div", "mf-flag-foot", `${ups} записей в журнале →`));
+    c.addEventListener("click", () => goJournal((app.tracks || [])[0] || null));
+    return c;
+  }
   function renderHome(view) {
     const meta = DATA._meta || {};
-    const stages = meta.stage_model || [];
-    view.className = "mf-panel mf-dash";
+    const apps = DATA.flagship || [];
+    view.className = "mf-panel mf-dash mf-home2";
     view.style.removeProperty("--tab");
     view.innerHTML = "";
-    const totalTam = PROD.reduce((s, t) => s + (Number(t.economics && t.economics.tam_2035_busd) || 0), 0);
 
     const head = el("div", "mf-head");
-    head.appendChild(el("h2", "mf-title-h", "Обзор проекта"));
+    head.appendChild(el("h2", "mf-title-h", "Технологии, меняющие мир"));
     head.appendChild(el("p", "mf-sub",
-      "Пять основных направлений квантовой разработки катализаторов и наш прогресс по этапам — от литературы до пилота с партнёром. Открой направление, чтобы увидеть его дашборд и дневник операций."));
+      "Наш необычный подход — переворачивать способ, которым меняют состояние вещества: поле вместо жара, сила вместо тепла, воздух и вода вместо ископаемого сырья. Ниже — дерзкие применения, что из этого уже посчитано и насколько они готовы к проверке на железе. Всё детальное — в едином журнале."));
     view.appendChild(head);
 
+    const withResult = apps.length;
     const agg = el("div", "mf-dash-agg");
     agg.innerHTML =
-      `<div class="mf-agg-item"><span class="mf-agg-n">${PROD.length}</span><span class="mf-agg-l">основных направления</span></div>` +
-      `<div class="mf-agg-item"><span class="mf-agg-n">$${totalTam} млрд</span><span class="mf-agg-l">суммарный TAM 2035</span></div>` +
-      `<div class="mf-agg-item"><span class="mf-agg-n">${stages.length}</span><span class="mf-agg-l">этапов до пилота</span></div>`;
+      `<div class="mf-agg-item"><span class="mf-agg-n">${apps.length}</span><span class="mf-agg-l">дерзких применений</span></div>` +
+      `<div class="mf-agg-item"><span class="mf-agg-n">${withResult}</span><span class="mf-agg-l">с реальными расчётами</span></div>` +
+      `<div class="mf-agg-item"><span class="mf-agg-n">${mergeAllUpdates().length}</span><span class="mf-agg-l">операций в журнале</span></div>`;
     view.appendChild(agg);
 
-    const grid = el("div", "mf-dash-grid");
-    PROD.forEach((t) => grid.appendChild(homeCard(t)));
+    const grid = el("div", "mf-flag-grid");
+    apps.forEach((a) => grid.appendChild(flagCard(a)));
     view.appendChild(grid);
 
-    if (TEST.length) {
-      const promo = el("button", "mf-testing-promo");
-      promo.type = "button";
-      promo.innerHTML =
-        `<span class="mf-testing-promo-l">🧪 К тестированию</span>` +
-        `<span class="mf-testing-promo-r">${TEST.length} гипотез раннего скрининга («просчёт от обратного») →</span>`;
-      promo.addEventListener("click", goTesting);
-      view.appendChild(promo);
-    }
+    const jcta = el("button", "mf-testing-promo");
+    jcta.type = "button";
+    jcta.innerHTML =
+      `<span class="mf-testing-promo-l">📓 Единый журнал</span>` +
+      `<span class="mf-testing-promo-r">${mergeAllUpdates().length} операций всех направлений и OCM — хронологический архив →</span>`;
+    jcta.addEventListener("click", () => goJournal(null));
+    view.appendChild(jcta);
+
     if (DATA.validated_track) {
       const vt = DATA.validated_track;
       const cta = el("div", "mf-proven-cta");
       cta.style.setProperty("--tab", vt.color || "#48bb78");
-      cta.appendChild(el("div", "mf-proven-cta-tag", tt({ ru: "Дорожка B · валидация", en: "Track B · validation" })));
+      cta.appendChild(el("div", "mf-proven-cta-tag", tt({ ru: "Дорожка B · валидация метода", en: "Track B · validation" })));
       cta.appendChild(el("div", "mf-proven-cta-body", tt(vt.subtitle)));
       const go = el("button", "mf-link", tt({ ru: "Открыть «Обкатанные технологии» →", en: "Open \"Proven systems\" →" }));
       go.type = "button"; go.addEventListener("click", () => selectProject(PROVEN));
       cta.appendChild(go);
       view.appendChild(cta);
     }
-    if (meta.honesty_note) view.appendChild(el("p", "mf-disclaimer", `<strong>Честно:</strong> ${meta.honesty_note}`));
+    if (meta.honesty_note) view.appendChild(el("p", "mf-disclaimer", `<strong>Достоверность:</strong> ${meta.honesty_note}`));
+  }
+
+  /* ---------- JOURNAL: единый архив всех операций ---------- */
+  function mergeAllUpdates() {
+    const out = [];
+    (TABS || []).forEach((t) => {
+      updatesFor(t).forEach((u) => out.push({ ...u, track: t.id, trackTitle: t.title, color: t.color }));
+    });
+    return out.sort((a, b) => (parseDate(b.date) - parseDate(a.date)));
+  }
+  function journalItem(u) {
+    const full = u.title || "";
+    const long = full.length > 96;
+    const lead = long ? full.slice(0, 92).trim() + "…" : full;
+    const head =
+      `<span class="mf-op-date">${u.date}</span>` +
+      `<span class="mf-op-track" style="--tab:${u.color || "#888"}">${u.trackTitle}</span>` +
+      (u.tag ? `<span class="mf-op-tag">${u.tag}</span>` : "") +
+      `<span class="mf-op-lead">${lead}</span>`;
+    if (!long) { const row = el("div", "mf-op mf-op-flat", head); row.dataset.track = u.track; return row; }
+    const d = el("details", "mf-op"); d.dataset.track = u.track;
+    d.appendChild(el("summary", "mf-op-head", head));
+    d.appendChild(el("div", "mf-op-body", full));
+    return d;
+  }
+  function renderJournal(view) {
+    const meta = DATA._meta || {};
+    view.className = "mf-panel mf-journal";
+    view.style.removeProperty("--tab");
+    view.innerHTML = "";
+    const all = mergeAllUpdates();
+
+    const head = el("div", "mf-head");
+    head.appendChild(el("h2", "mf-title-h", "Лабораторный журнал"));
+    head.appendChild(el("p", "mf-sub",
+      "Единый хронологический архив всех операций по всем направлениям и OCM: расчёты, проверки, тупики и выводы. Нажми запись, чтобы развернуть; фильтруй по направлению."));
+    view.appendChild(head);
+
+    // фильтр по направлению
+    const tracks = [...new Set(all.map((u) => u.track))]
+      .map((id) => TABS.find((t) => t.id === id)).filter(Boolean);
+    const bar = el("div", "mf-filter");
+    const mkBtn = (label, val, color) => {
+      const b = el("button", "mf-chip-btn" + (val === journalFilter ? " active" : ""), label);
+      b.type = "button";
+      if (color) b.style.setProperty("--tab", color);
+      b.addEventListener("click", () => {
+        journalFilter = val;
+        bar.querySelectorAll(".mf-chip-btn").forEach((x) => x.classList.toggle("active", x === b));
+        view.querySelectorAll(".mf-feed-full .mf-op").forEach((op) => {
+          op.style.display = (val === null || op.dataset.track === val) ? "" : "none";
+        });
+        syncHash();
+      });
+      return b;
+    };
+    bar.appendChild(mkBtn("Все направления", null));
+    tracks.forEach((t) => bar.appendChild(mkBtn(t.title, t.id, t.color)));
+    view.appendChild(bar);
+
+    view.appendChild(el("p", "mf-op-count", "Операций в журнале: " + all.length + " · нажми запись, чтобы развернуть"));
+    const list = el("div", "mf-feed mf-feed-full");
+    all.forEach((u) => {
+      const it = journalItem(u);
+      if (journalFilter && u.track !== journalFilter) it.style.display = "none";
+      list.appendChild(it);
+    });
+    view.appendChild(list);
+    if (meta.honesty_note) view.appendChild(el("p", "mf-disclaimer", `<strong>Достоверность:</strong> ${meta.honesty_note}`));
   }
   /* ---------- TESTING: early-screening group (inverse-design hypotheses) ---------- */
   function renderTesting(view) {
@@ -425,7 +531,7 @@
     const grid = el("div", "mf-dash-grid");
     TEST.forEach((t) => grid.appendChild(homeCard(t)));
     view.appendChild(grid);
-    if (meta.honesty_note) view.appendChild(el("p", "mf-disclaimer", `<strong>Честно:</strong> ${meta.honesty_note}`));
+    if (meta.honesty_note) view.appendChild(el("p", "mf-disclaimer", `<strong>Достоверность:</strong> ${meta.honesty_note}`));
   }
 
   /* ---------- PROJECT: sub-nav + (dashboard | operations log) ---------- */
@@ -471,7 +577,7 @@
     view.appendChild(economics(t));
     appendFigures(view, t);
 
-    if (meta.honesty_note) view.appendChild(el("p", "mf-disclaimer", `<strong>Честно:</strong> ${meta.honesty_note}`));
+    if (meta.honesty_note) view.appendChild(el("p", "mf-disclaimer", `<strong>Достоверность:</strong> ${meta.honesty_note}`));
   }
 
   function appendLog(view, t) {
@@ -603,7 +709,7 @@
 
     if (vt.caveat) {
       const cav = el("div", "mf-proven-caveat");
-      cav.appendChild(el("div", "mf-caveat-label", "⚠ " + tt({ ru: "Честно", en: "Honest" })));
+      cav.appendChild(el("div", "mf-caveat-label", "⚠ " + tt({ ru: "Оговорка", en: "Caveat" })));
       cav.appendChild(el("p", "mf-caveat-body", tt(vt.caveat)));
       view.appendChild(cav);
     }
