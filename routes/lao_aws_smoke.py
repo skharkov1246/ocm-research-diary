@@ -39,6 +39,7 @@ _OUT = {"spins": "routes/lao_cr_spins.json", "int": "",
         "desc": "routes/lao_cr_desc_results.json"}
 RM_FILES = " ".join(f for f in (_OUT[s] for s in STAGES.split()) if f) or "/dev/null"
 JOB_MIN = MAX_MIN - 20
+STAGE_TO = max(300, JOB_MIN // 2 - 20)
 DISK_GB = 60
 
 for var in ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"):
@@ -71,7 +72,7 @@ sync_up() {{ aws s3 cp routes/ $S3/ --recursive --exclude '*' --include 'lao_cr_
 ( while true; do sleep 120; sync_up; done ) &
 for st in {STAGES}; do
   echo "[aws][lao] stage $st" >> /root/repo/lao.log
-  timeout 300m python3 -u routes/lao_cr_trimer.py $st >> /root/repo/lao.log 2>&1
+  timeout {STAGE_TO}m python3 -u routes/lao_cr_trimer.py $st >> /root/repo/lao.log 2>&1
   sync_up
 done
 echo "[aws][lao] ALL DONE" >> /root/repo/lao.log
