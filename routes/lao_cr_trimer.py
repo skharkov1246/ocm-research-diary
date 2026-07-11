@@ -217,10 +217,6 @@ def stage_sanity():
             print(f"[sanity] {tag} FAIL: {e}", flush=True)
 
 
-if __name__ == "__main__":
-    st = sys.argv[1] if len(sys.argv) > 1 else "sanity"
-    {"spins": stage_spins, "int": stage_int, "sanity": stage_sanity,
-     "bhe": stage_bhe, "ins": stage_ins, "desc": stage_desc}[st]()
 
 
 # ---------------------------------------------------------- TS-стадии (v2)
@@ -410,3 +406,8 @@ def stage_desc():
     with open(os.path.join(DIR, "lao_cr_desc_results.json"), "w") as f:
         json.dump(res, f, indent=1)
     print(json.dumps(res, indent=1, ensure_ascii=False))
+
+if __name__ == "__main__":
+    st = sys.argv[1] if len(sys.argv) > 1 else "sanity"
+    {"spins": stage_spins, "int": stage_int, "sanity": stage_sanity,
+     "bhe": stage_bhe, "ins": stage_ins, "desc": stage_desc}[st]()
