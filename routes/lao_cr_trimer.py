@@ -298,7 +298,8 @@ def stage_bhe():
     c7, spin = _c7_relaxed()
     mf_ref = uks(M(c7, spin))
     ref = float(mf_ref.e_tot)
-    pts, path = _scan("bhe", lambda pin: c7, (2.40, 2.10, 1.90, 1.75, 1.62),
+    pts, path = _scan("bhe", lambda pin: c7,
+                      (2.40, 2.10, 1.90, 1.75, 1.62, 1.52, 1.44),
                       ref, spin, (1, 12))
     ts, bar, rel, interior = _readout(pts, ref)
     out = {"ref_e_h": ref, "rel_kcal": rel, "interior": bool(interior),
@@ -391,8 +392,13 @@ def stage_ins():
 
 
 def stage_desc():
-    b = json.load(open(os.path.join(DIR, "lao_cr_bhe_result.json")))
-    i = json.load(open(os.path.join(DIR, "lao_cr_ins_result.json")))
+    def _load(tag):
+        try:
+            return json.load(open(os.path.join(DIR, f"lao_cr_{tag}_result.json")))
+        except FileNotFoundError:
+            return {"failed": "no result file (stage killed/failed)"}
+    b = _load("bhe")
+    i = _load("ins")
     res = {"descriptor": "ddE_LAO = E‡(insertion) − E‡(beta-H elim); "
                          ">0 = selective 1-hexene (LAO/PAO)",
            "bhe": {k: b.get(k) for k in ("dft_barrier", "casscf_barrier",
