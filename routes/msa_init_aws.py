@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-routes/lao_aws_smoke.py — leak-proof смок-прогон варианта 2 (ЛАО/ПАО):
-lao_cr_trimer.py spins→int на r7i.4xlarge в us-west-2 (свежая квота 116 vCPU).
+routes/msa_init_aws.py — leak-proof смок-прогон варианта 2 (ЛАО/ПАО):
+msa_initiator.py bde→hat→merge на r7i.4xlarge в us-west-2 (свежая квота 116 vCPU).
 Смок отвечает: сходится ли CASSCF/NEVPT2 на хромациклах и мультиреференсны ли
 они (NOON) — есть ли наша ниша в C6/C8-селективности до постройки TS-стадий.
 Защита: terminate-on-shutdown + бортовой shutdown + жнец; DONE-маркер отдельно.
 
-Запуск: python3 routes/lao_aws_smoke.py [--dryrun]
+Запуск: python3 routes/msa_init_aws.py [--dryrun]
 """
 import os
 import subprocess
@@ -17,29 +17,27 @@ import time
 import boto3
 from botocore.exceptions import ClientError
 
-REGION = os.environ.get("LAO_REGION", "us-west-2")
+REGION = os.environ.get("MSAI_REGION", "us-west-2")
 ACCOUNT = "097743207937"
 BUCKET = f"alpha-o-results-{ACCOUNT}"          # us-east-1, cross-region OK
-PREFIX = "alpha-o/lao-smoke"
+PREFIX = "alpha-o/msa-init"
 PROFILE = "alpha-o-instance-profile"
 TAG_PROJECT = "ocm-agent"
-TAG_NAME = "lao-smoke"
-ITYPE = os.environ.get("LAO_ITYPE", "r7i.4xlarge")
+TAG_NAME = "msa-init"
+ITYPE = os.environ.get("MSAI_ITYPE", "r7i.4xlarge")
 REPO = "https://github.com/skharkov1246/ocm-research-diary"
-BRANCH = os.environ.get("LAO_BRANCH") or subprocess.run(
+BRANCH = os.environ.get("MSAI_BRANCH") or subprocess.run(
     ["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True,
     text=True).stdout.strip()
-MAX_MIN = int(os.environ.get("LAO_MAX_MIN", "420"))
-STAGES = os.environ.get("LAO_STAGES", "spins int")
+MAX_MIN = int(os.environ.get("MSAI_MAX_MIN", "420"))
+STAGES = os.environ.get("MSAI_STAGES", "bde hat merge")
 # spins не резюмится файлом → его выход чистим; int резюмится ПО-ТЭГОВО
 # (тег без nevpt2-блока пересчитывается) → int.json сохраняем (c5 готов)
-_OUT = {"spins": "routes/lao_cr_spins.json", "int": "",
-        "bhe": "routes/lao_cr_bhe_result.json",
-        "ins": "routes/lao_cr_ins_result.json",
-        "desc": "routes/lao_cr_desc_results.json"}
+_OUT = {"bde": "routes/msa_initiator_bde.json",
+        "hat": "routes/msa_initiator_hat.json",
+        "merge": "routes/msa_initiator_results.json"}
 RM_FILES = " ".join(f for f in (_OUT[s] for s in STAGES.split()) if f) or "/dev/null"
 JOB_MIN = MAX_MIN - 20
-STAGE_TO = max(300, JOB_MIN // 2 - 20)
 DISK_GB = 60
 
 for var in ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"):
@@ -64,18 +62,17 @@ for i in 1 2 3; do (cd /root && timeout 10m git clone --depth 1 -b {BRANCH} {REP
 cd /root/repo || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 python3 -c "import pyscf" || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 rm -f {RM_FILES}
-for f in lao_cr_bhe.json lao_cr_ins.json; do aws s3 cp $S3/$f routes/$f || true; done
 mkdir -p /root/scratch
 export PYSCF_TMPDIR=/root/scratch
 export OMP_NUM_THREADS=$(nproc)
-sync_up() {{ aws s3 cp routes/ $S3/ --recursive --exclude '*' --include 'lao_cr_*.json' >/dev/null 2>&1 || true; aws s3 cp /root/repo/lao.log $S3/lao.log >/dev/null 2>&1 || true; }}
+sync_up() {{ aws s3 cp routes/ $S3/ --recursive --exclude '*' --include 'msa_initiator_*.json' >/dev/null 2>&1 || true; aws s3 cp /root/repo/msai.log $S3/msai.log >/dev/null 2>&1 || true; }}
 ( while true; do sleep 120; sync_up; done ) &
 for st in {STAGES}; do
-  echo "[aws][lao] stage $st" >> /root/repo/lao.log
-  timeout {STAGE_TO}m python3 -u routes/lao_cr_trimer.py $st >> /root/repo/lao.log 2>&1
+  echo "[aws][msai] stage $st" >> /root/repo/msai.log
+  timeout 300m python3 -u routes/msa_initiator.py $st >> /root/repo/msai.log 2>&1
   sync_up
 done
-echo "[aws][lao] ALL DONE" >> /root/repo/lao.log
+echo "[aws][msai] ALL DONE" >> /root/repo/msai.log
 sync_up
 echo done > /tmp/DONE && aws s3 cp /tmp/DONE $S3/DONE
 poweroff
@@ -145,7 +142,7 @@ def main():
         return
     existing = my_instances()
     if existing:
-        sys.exit(f"lao-smoke instance(s) already exist: {existing}")
+        sys.exit(f"msa-init instance(s) already exist: {existing}")
     iid = ec2.run_instances(**common)["Instances"][0]["InstanceId"]
     print(f"launched {iid}", flush=True)
     t0 = time.time()
@@ -153,13 +150,13 @@ def main():
         while time.time() - t0 < MAX_MIN * 60:
             try:
                 s3.head_object(Bucket=BUCKET, Key=f"{PREFIX}/DONE")
-                for f in ("lao_cr_bhe_result.json", "lao_cr_ins_result.json",
-                          "lao_cr_desc_results.json"):
+                for f in ("msa_initiator_bde.json", "msa_initiator_hat.json",
+                          "msa_initiator_results.json"):
                     try:
                         s3.download_file(BUCKET, f"{PREFIX}/{f}", f"routes/{f}")
                     except ClientError:
                         pass
-                print("[ok] LAO smoke DONE — results pulled", flush=True)
+                print("[ok] MSA-init DONE — results pulled", flush=True)
                 return
             except ClientError:
                 pass

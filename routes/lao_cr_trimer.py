@@ -105,11 +105,11 @@ def relax(atoms, spin, maxsteps=150):
     return na, mfx
 
 
-def nevpt2_point(atoms, spin, thr=0.5):
+def nevpt2_point(atoms, spin, thr=0.5, labels=None):
     mol = M(atoms, spin)
     mol.max_memory = 24000     # c7 (211 AO) уронил NEVPT2 по MemoryError на 8 ГБ
     mf = rohf(mol)
-    ncas, nelec, mo = avas.avas(mf, ["Cr 3d"], threshold=thr)
+    ncas, nelec, mo = avas.avas(mf, labels or ["Cr 3d"], threshold=thr)
     ss = spin / 2 * (spin / 2 + 1)
     mc = mcscf.CASSCF(mf, ncas, nelec)
     fci.addons.fix_spin_(mc.fcisolver, shift=0.2, ss=ss)
@@ -217,6 +217,203 @@ def stage_sanity():
             print(f"[sanity] {tag} FAIL: {e}", flush=True)
 
 
+
+
+# ---------------------------------------------------------- TS-стадии (v2)
+# Дескриптор: ddE_LAO = E‡(внедрение C2H4 в c7) − E‡(β-H элиминирование из c7);
+# >0 — элиминирование выигрывает => селективный 1-гексен (ЛАО/ПАО-скид);
+# <0 — рост цепи (C8+/полимер). DFT vs NEVPT2 — флипает ли корреляция.
+# Атомный порядок c7 (chromacycle_atoms(6), сохраняется релаксом):
+# Cr=0, Cl=1,2, кольцевые C=3..8 (C3/C8 — альфа), H: C3->9,10; C4->11,12; ...
+# β-H для элиминирования: H idx 11 (на C4, соседнем с альфа-C3).
+
+def _c7_relaxed():
+    d = json.load(open(os.path.join(DIR, "lao_cr_int.json")))
+    rec = d["c7"]
+    return [(s, tuple(c)) for s, c in rec["atoms"]], rec["spin_2S"]
+
+
+def _scan(tag, build_start, pins, ref_e, spin, pin_atoms_1based):
+    """Общий пин-скан с поточечным сохранением/resume (урок msa v6)."""
+    from pyscf.geomopt.geometric_solver import optimize
+    path = os.path.join(DIR, f"lao_cr_{tag}.json")
+    pts = []
+    if os.path.exists(path):
+        try:
+            pts = json.load(open(path))["pts"]
+            print(f"[{tag}] resume: {len(pts)} точек", flush=True)
+        except Exception:
+            pts = []
+    done = {round(p["pin"], 3) for p in pts}
+    dm, start = None, None
+    for pin in pins:
+        if round(pin, 3) in done:
+            saved = next(p for p in pts if round(p["pin"], 3) == round(pin, 3))
+            start = [(s, tuple(c)) for s, c in saved["atoms"]]
+            continue
+        cf = os.path.join(DIR, f"_lao_{tag}_{pin:.2f}.txt")
+        i, j = pin_atoms_1based
+        open(cf, "w").write(f"$set\ndistance {i} {j} {pin:.4f}\n")
+        try:
+            atoms0 = start if start is not None else build_start(pin)
+            mf0 = uks(M(atoms0, spin), dm0=dm)
+            mol = optimize(mf0, constraints=cf, maxsteps=150,
+                           assert_convergence=False)
+            mfx = uks(mol, dm0=mf0.make_rdm1())
+            na = [(mol.atom_symbol(k), tuple(c)) for k, c in
+                  enumerate(mol.atom_coords(unit="Angstrom"))]
+            dm = mfx.make_rdm1()
+            start = na
+            pts.append({"pin": pin, "e_h": float(mfx.e_tot),
+                        "conv": bool(mfx.converged), "atoms": na})
+            with open(path, "w") as f:
+                json.dump({"pts": pts}, f, indent=1)
+            print(f"  [{tag}] pin={pin} rel="
+                  f"{(mfx.e_tot - ref_e) * HARTREE_KCAL:.2f} "
+                  f"conv={mfx.converged}", flush=True)
+        except Exception as ex:
+            print(f"  [{tag}] pin={pin} failed: {ex}", flush=True)
+        finally:
+            if os.path.exists(cf):
+                os.remove(cf)
+    return pts, path
+
+
+def _readout(pts, ref_e):
+    """Интерьерный максимум + маска выбросов (>25 над обоими соседями)."""
+    pts = sorted(pts, key=lambda p: -p["pin"])     # путь: пин уменьшается
+    rel = [(p["e_h"] - ref_e) * HARTREE_KCAL for p in pts]
+    keep = [i for i in range(len(pts)) if pts[i]["conv"] and not all(
+        rel[i] - rel[j] > 25.0 for j in (i - 1, i + 1) if 0 <= j < len(pts))]
+    kr = [rel[i] for i in keep]
+    if len(kr) < 4:
+        return None, None, rel, False
+    imax = max(range(1, len(kr) - 1), key=lambda i: kr[i])
+    interior = kr[imax] >= max(kr[0], kr[-1])
+    return pts[keep[imax]], round(kr[imax], 2), [round(x, 2) for x in rel], interior
+
+
+def stage_bhe():
+    """β-H элиминирование из хромациклогептана: пин r(Cr–H_β) стягивается."""
+    c7, spin = _c7_relaxed()
+    mf_ref = uks(M(c7, spin))
+    ref = float(mf_ref.e_tot)
+    pts, path = _scan("bhe", lambda pin: c7,
+                      (2.40, 2.10, 1.90, 1.75, 1.62, 1.52, 1.44),
+                      ref, spin, (1, 12))
+    ts, bar, rel, interior = _readout(pts, ref)
+    out = {"ref_e_h": ref, "rel_kcal": rel, "interior": bool(interior),
+           "dft_barrier": bar}
+    if ts is not None and interior and bar is not None and 0 < bar < 100:
+        out["ts_atoms"] = [[s, [round(x, 6) for x in c]] for s, c in ts["atoms"]]
+        try:
+            n_ts = nevpt2_point(ts["atoms"], spin)
+            n_r = nevpt2_point(c7, spin)
+            for lv in ("e_casscf", "e_nevpt2"):
+                out[lv.replace("e_", "") + "_barrier"] = round(
+                    (n_ts[lv] - n_r[lv]) * HARTREE_KCAL, 2)
+        except Exception as e:
+            out["nevpt2_error"] = str(e)[:200]
+    else:
+        out["failed"] = "TS not interior/unphysical"
+    with open(os.path.join(DIR, "lao_cr_bhe_result.json"), "w") as f:
+        json.dump(out, f, indent=1)
+    print("[bhe]", json.dumps({k: v for k, v in out.items()
+                               if k != "ts_atoms"})[:400], flush=True)
+
+
+def stage_ins():
+    """Внедрение C2H4 в c7: этилен у Cr, пин r(C_alpha–C_eth) стягивается."""
+    import numpy as _np
+    c7, spin = _c7_relaxed()
+    # этилен: релакс отдельно, референс = E(c7)+E(C2H4)
+    eth0 = [("C", (0.0, 0.0, 0.0)), ("C", (1.33, 0.0, 0.0)),
+            ("H", (-0.56, 0.92, 0.0)), ("H", (-0.56, -0.92, 0.0)),
+            ("H", (1.89, 0.92, 0.0)), ("H", (1.89, -0.92, 0.0))]
+    eth, mf_eth = relax(eth0, 0, maxsteps=60)
+    mf_c7 = uks(M(c7, spin))
+    ref = float(mf_c7.e_tot) + float(mf_eth.e_tot)
+
+    def build(pin):
+        # открытая грань: перебор направлений вокруг Cr, берём максимально
+        # свободное (наивное «прочь от Cl-Cl» утыкалось в кольцо: 0.87 A клэш;
+        # перебор даёт клиренс ~2.85 A)
+        cr = _np.array(c7[0][1])
+        others = _np.array([x[1] for x in c7[1:]])
+        best_u, best_d = None, -1.0
+        for i in range(200):
+            th = _np.arccos(1 - 2 * ((i * 0.618034) % 1.0))
+            ph = 2 * _np.pi * ((i * 0.381966) % 1.0)
+            uu = _np.array([_np.sin(th) * _np.cos(ph),
+                            _np.sin(th) * _np.sin(ph), _np.cos(th)])
+            dmin = _np.min(_np.linalg.norm(others - (cr + uu * 2.25), axis=1))
+            if dmin > best_d:
+                best_d, best_u = dmin, uu
+        u = best_u
+        print(f"  [ins] placement clearance {best_d:.2f} A", flush=True)
+        v = _np.cross(u, [0, 0, 1.0])
+        if _np.linalg.norm(v) < 0.3:
+            v = _np.cross(u, [0, 1.0, 0])
+        v = v / _np.linalg.norm(v)
+        w = _np.cross(u, v)
+        c1 = cr + u * 2.35
+        atoms = list(c7)
+        ec = (_np.array(eth[0][1]) + _np.array(eth[1][1])) / 2
+        for s, xyz in eth:
+            rel_ = _np.array(xyz) - ec
+            atoms.append((s, tuple(c1 + rel_[0] * v + rel_[1] * u
+                                   + rel_[2] * w)))
+        return atoms
+
+    # пин: C_alpha(кольцевой C3, 1-based 4) – C_eth(первый C этилена, 1-based 22)
+    pts, path = _scan("ins", build, (2.80, 2.45, 2.20, 2.00, 1.80),
+                      ref, spin, (4, 22))
+    ts, bar, rel, interior = _readout(pts, ref)
+    out = {"ref_e_h": ref, "rel_kcal": rel, "interior": bool(interior),
+           "dft_barrier": bar}
+    if ts is not None and interior and bar is not None and 0 < bar < 100:
+        out["ts_atoms"] = [[s, [round(x, 6) for x in c]] for s, c in ts["atoms"]]
+        try:
+            n_ts = nevpt2_point(ts["atoms"], spin,
+                                labels=["Cr 3d", "21 C 2p", "22 C 2p"])
+            n_c7 = nevpt2_point(c7, spin)
+            n_eth = nevpt2_point(eth, 0, thr=0.4, labels=["C 2p"])
+            for lv in ("e_casscf", "e_nevpt2"):
+                out[lv.replace("e_", "") + "_barrier"] = round(
+                    (n_ts[lv] - n_c7[lv] - n_eth[lv]) * HARTREE_KCAL, 2)
+        except Exception as e:
+            out["nevpt2_error"] = str(e)[:200]
+    else:
+        out["failed"] = "TS not interior/unphysical"
+    with open(os.path.join(DIR, "lao_cr_ins_result.json"), "w") as f:
+        json.dump(out, f, indent=1)
+    print("[ins]", json.dumps({k: v for k, v in out.items()
+                               if k != "ts_atoms"})[:400], flush=True)
+
+
+def stage_desc():
+    def _load(tag):
+        try:
+            return json.load(open(os.path.join(DIR, f"lao_cr_{tag}_result.json")))
+        except FileNotFoundError:
+            return {"failed": "no result file (stage killed/failed)"}
+    b = _load("bhe")
+    i = _load("ins")
+    res = {"descriptor": "ddE_LAO = E‡(insertion) − E‡(beta-H elim); "
+                         ">0 = selective 1-hexene (LAO/PAO)",
+           "bhe": {k: b.get(k) for k in ("dft_barrier", "casscf_barrier",
+                                         "nevpt2_barrier", "interior", "failed")},
+           "ins": {k: i.get(k) for k in ("dft_barrier", "casscf_barrier",
+                                         "nevpt2_barrier", "interior", "failed")}}
+    for lv in ("dft", "casscf", "nevpt2"):
+        bb, ii = b.get(f"{lv}_barrier"), i.get(f"{lv}_barrier")
+        if bb is not None and ii is not None:
+            res[f"ddE_{lv}"] = round(ii - bb, 2)
+    with open(os.path.join(DIR, "lao_cr_desc_results.json"), "w") as f:
+        json.dump(res, f, indent=1)
+    print(json.dumps(res, indent=1, ensure_ascii=False))
+
 if __name__ == "__main__":
     st = sys.argv[1] if len(sys.argv) > 1 else "sanity"
-    {"spins": stage_spins, "int": stage_int, "sanity": stage_sanity}[st]()
+    {"spins": stage_spins, "int": stage_int, "sanity": stage_sanity,
+     "bhe": stage_bhe, "ins": stage_ins, "desc": stage_desc}[st]()

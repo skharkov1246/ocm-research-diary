@@ -273,16 +273,37 @@ def stage_hat():
             if os.path.exists(cf):
                 os.remove(cf)
 
+    # v7: поточечное сохранение скана (v6 убит timeout за полчаса до конца —
+    # 8 ч скана пропали, т.к. JSON писался только в финале). Resume по (rCH,rOH).
+    scan_path = os.path.join(DIR, "msa_hat_scan.json")
     pts = []
+    if os.path.exists(scan_path):
+        try:
+            pts = json.load(open(scan_path))["pts"]
+            print(f"[hat] resume: {len(pts)} точек скана с диска", flush=True)
+        except Exception:
+            pts = []
+    done_keys = {(p["rCH"], p["rOH"]) for p in pts}
+
+    def _save_scan():
+        with open(scan_path, "w") as f:
+            json.dump({"pts": pts}, f, indent=1)
+
     # якорь + поздняя ветка (v3-проверенная): идеализированный старт, цепь dm
     anchor_atoms, anchor_dm = None, None
     dm = None
     for rCH, rOH in ((1.25, 1.15), (1.35, 1.05), (1.50, 0.98),
                      (1.65, 0.965), (1.80, 0.955)):
+        if (rCH, rOH) in done_keys:
+            saved = next(p for p in pts if (p["rCH"], p["rOH"]) == (rCH, rOH))
+            if anchor_atoms is None:
+                anchor_atoms = [(s, tuple(c)) for s, c in saved["atoms"]]
+            continue
         e, conv, na, dm = _hat_point(hat_ts(rCH, rOH), rCH, rOH, dm)
         if e is not None and np.isfinite(e):
             pts.append({"rCH": rCH, "rOH": rOH, "e_h": e,
                         "scf_converged": conv, "atoms": na})
+            _save_scan()
             print(f"  [hat] point rCH={rCH} rOH={rOH} E={e:.6f} conv={conv}",
                   flush=True)
             if anchor_atoms is None:
@@ -294,16 +315,48 @@ def stage_hat():
     dm = anchor_dm
     start = anchor_atoms
     for rCH, rOH in ((1.18, 1.24), (1.12, 1.36), (1.10, 1.48), (1.09, 1.62)):
+        if (rCH, rOH) in done_keys:
+            saved = next(p for p in pts if (p["rCH"], p["rOH"]) == (rCH, rOH))
+            start = [(s, tuple(c)) for s, c in saved["atoms"]]
+            continue
         if start is None:
             break
         e, conv, na, dm = _hat_point(start, rCH, rOH, dm)
         if e is not None and np.isfinite(e):
             pts.append({"rCH": rCH, "rOH": rOH, "e_h": e,
                         "scf_converged": conv, "atoms": na})
+            _save_scan()
             print(f"  [hat] early rCH={rCH} rOH={rOH} E={e:.6f} conv={conv}",
                   flush=True)
             start = na
-    pts.sort(key=lambda p: p["rCH"])          # порядок пути для TS-логики
+    # v9: перепроверка SCF-ветки — интерьерная точка на >10 ккал выше ОБОИХ
+    # соседей пере-релаксируется со старта из геометрии нижнего соседа
+    # (warm-chain, как в OCM-протоколе). Это не маска: точка остаётся, берётся
+    # МИНИМУМ, обе энергии документируются в чекпойнте. Ловит застрявший релакс
+    # /чужую SCF-ветку идеализированного старта (кандидат: (1.50,0.98) v7).
+    pts.sort(key=lambda p: p["rCH"])
+    for i in range(1, len(pts) - 1):
+        p = pts[i]
+        if p.get("recheck_done"):
+            continue
+        gapL = (p["e_h"] - pts[i - 1]["e_h"]) * HARTREE_KCAL
+        gapR = (p["e_h"] - pts[i + 1]["e_h"]) * HARTREE_KCAL
+        if gapL > 10.0 and gapR > 10.0:
+            nb = pts[i - 1] if pts[i - 1]["e_h"] < pts[i + 1]["e_h"] else pts[i + 1]
+            st = [(s, tuple(c)) for s, c in nb["atoms"]]
+            e, conv, na, _ = _hat_point(st, p["rCH"], p["rOH"], None)
+            p["recheck_done"] = True
+            p["e_h_first"] = p["e_h"]
+            if (e is not None and np.isfinite(e) and conv
+                    and e < p["e_h"] - 1e-4):
+                print(f"  [hat] recheck rCH={p['rCH']}: нижняя ветка на "
+                      f"{(p['e_h'] - e) * HARTREE_KCAL:.1f} ккал ниже — заменяю",
+                      flush=True)
+                p["e_h"], p["atoms"], p["scf_converged"] = e, na, conv
+            else:
+                print(f"  [hat] recheck rCH={p['rCH']}: исходная точка "
+                      f"подтверждена", flush=True)
+            _save_scan()
     eR = m_rad.e_tot + m_ch4.e_tot
     out["scan"] = [{k: p[k] for k in ("rCH", "rOH", "e_h", "scf_converged")}
                    for p in pts]
@@ -338,7 +391,10 @@ def stage_hat():
         json.dump(out, open(os.path.join(DIR, "msa_hat.json"), "w"), indent=1)
         print(f"[hat] FAILED sanity gate: {out['hat_stage_failed']}", flush=True)
         return
-    n_ts = nevpt2(ts, 1, ["0 C 2p", "1 H 1s", "2 O 2p"], thr=0.4)
+    ts_labels = (["0 C 2p", "1 H 1s", "2 O 2p", "3 S 3p", "4 O 2p", "5 O 2p"]
+                 if RADCAS else ["0 C 2p", "1 H 1s", "2 O 2p"])
+    out["ts_atoms"] = [[s, [round(x, 6) for x in c]] for s, c in ts]
+    n_ts = nevpt2(ts, 1, ts_labels, thr=0.45)
     n_ch4 = nevpt2(ch4, 0, ["0 C 2p", "1 H 1s"], thr=0.6)
     n_rad = nevpt2(rad, 1, LAB_RAD, thr=THR_S)
     for lvl in ("casscf", "nevpt2"):
@@ -364,7 +420,11 @@ def stage_sanity():
 
 def stage_merge():
     add = json.load(open(os.path.join(DIR, "msa_add.json")))
-    hat = json.load(open(os.path.join(DIR, "msa_hat.json")))
+    hat_path = os.path.join(DIR, "msa_hat.json")
+    if os.path.exists(hat_path):
+        hat = json.load(open(hat_path))
+    else:  # v8: hat убит таймаутом до записи файла — merge не падает
+        hat = {"hat_stage_failed": "msa_hat.json missing (stage killed?)"}
     if hat.get("hat_stage_failed") or "nevpt2" not in hat:
         res = {"route": "direct CH4 + SO3 -> CH3SO3H radical chain",
                "numbers_nevpt2": {
@@ -376,7 +436,25 @@ def stage_merge():
         json.dump(res, open(os.path.join(DIR, "msa_results.json"), "w"), indent=1)
         print(json.dumps(res, ensure_ascii=False, indent=1))
         return
-    alive = hat["nevpt2"]["barrier_hat_kcal"] <= add["nevpt2"]["barrier_bscission_kcal"] + 5
+    nv = hat["nevpt2"]["barrier_hat_kcal"]
+    if not (0.0 < nv < 100.0):
+        res = {"route": "direct CH4 + SO3 -> CH3SO3H radical chain",
+               "numbers_nevpt2": {
+                   "add_barrier": add["nevpt2"]["barrier_add_kcal"],
+                   "bscission_barrier": add["nevpt2"]["barrier_bscission_kcal"],
+                   "hat_flagged": nv},
+               "numbers_dft": {
+                   "add_barrier": add["dft"]["barrier_add_kcal"],
+                   "bscission_barrier": add["dft"]["barrier_bscission_kcal"],
+                   "hat_propagation_barrier": hat["dft"]["barrier_hat_kcal"]},
+               "chain_verdict": "DFT-ALIVE; NEVPT2-HAT flagged unphysical "
+                                "(CAS imbalance) — no correlated verdict",
+               }
+        json.dump(res, open(os.path.join(DIR, "msa_results.json"), "w"),
+                  indent=1)
+        print(json.dumps(res, ensure_ascii=False, indent=1))
+        return
+    alive = nv <= add["nevpt2"]["barrier_bscission_kcal"] + 5
     res = {"route": "direct CH4 + SO3 -> CH3SO3H (methanesulfonic acid) radical chain",
            "numbers_nevpt2": {
                "add_barrier": add["nevpt2"]["barrier_add_kcal"],

@@ -1,6 +1,6 @@
 # OCM Lab — research diary
 
-An honest, bilingual (RU/EN), two-level (simple/technical) diary of quantum-chemistry experiments on turning methane into ethylene in one step.
+An verified, bilingual (RU/EN), two-level (simple/technical) diary of quantum-chemistry experiments on turning methane into ethylene in one step.
 
 Live site: https://skharkov1246.github.io/ocm-research-diary/
 
