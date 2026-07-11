@@ -100,7 +100,10 @@ def build_m4n(metal, a_mm, a_mn):
     return atoms
 
 def mk_mol(atoms, spin, charge=0):
-    return gto.M(atom=atoms, basis="def2-svp", spin=spin, charge=charge, verbose=0)
+    # ecp="def2-svp" даёт def2-ECP тяжёлым (Sr/Ba/Mo, Z>36) и игнорируется для
+    # лёгких — чётность числа электронов сохраняется (ECP убирает чётный кор).
+    return gto.M(atom=atoms, basis="def2-svp", ecp="def2-svp", spin=spin,
+                 charge=charge, verbose=0)
 
 def mkmf(mol):
     mf = dft.UKS(mol).density_fit()

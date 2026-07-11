@@ -72,7 +72,8 @@ def scf_e(mol):
     return float(e), bool(mf.converged)
 
 def relax_e(atoms, spin, maxsteps=40):
-    mol = gto.M(atom=atoms, basis="def2-svp", spin=spin, charge=0, verbose=0)
+    mol = gto.M(atom=atoms, basis="def2-svp", ecp="def2-svp", spin=spin,
+                charge=0, verbose=0)
     mf = mkmf(mol)
     try:
         meq = optimize(mf, maxsteps=maxsteps)
