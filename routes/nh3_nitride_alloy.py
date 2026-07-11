@@ -41,7 +41,23 @@ COMPOS = {
     "Li2Mg2": ["Li", "Li", "Mg", "Mg"],
     "LiMg3": ["Li", "Mg", "Mg", "Mg"],
 }
-A_MM = 3.1        # средняя длина ребра Li/Mg (грубо; релаксируется)
+# грубые ребра M-M (Å) для средней геометрии сплава; релаксируется
+A_ELEM = {"Li": 3.0, "Na": 3.7, "K": 4.6, "Mg": 3.2, "Ca": 3.9, "Sr": 4.3,
+          "Ba": 4.3, "Al": 2.8}
+
+import re  # noqa: E402
+def parse_compo(s):
+    """'Li3Al' / 'Li2Ca2' / 'Mg3Al1' -> список из 4 символов вершин."""
+    toks = re.findall(r"([A-Z][a-z]?)(\d*)", s)
+    els = []
+    for el, n in toks:
+        if el: els += [el] * (int(n) if n else 1)
+    if len(els) != 4:
+        raise ValueError(f"состав {s} даёт {len(els)} вершин, нужно 4")
+    return els
+
+def a_mm(els):
+    return sum(A_ELEM.get(e, 3.1) for e in els) / len(els)
 
 def say(m): print(f"[{time.strftime('%H:%M:%S')}] {m}", flush=True)
 def outpath(c): return os.path.join(HERE, f"nh3_nitride_alloy_{c.lower()}_results.json")
@@ -131,7 +147,8 @@ def add_H(atoms, target_idx, existing, r=1.02):
     return atoms + [["H", tuple(t + r*d)]], existing + [d]
 
 def run(compo, smoke=False):
-    els = COMPOS[compo]; OUT = outpath(compo)
+    els = COMPOS[compo] if compo in COMPOS else parse_compo(compo)
+    OUT = outpath(compo)
     res = json.load(open(OUT)) if os.path.exists(OUT) else {}
     res.setdefault("meta", {
         "compo": compo, "elements": els,
@@ -153,18 +170,19 @@ def run(compo, smoke=False):
     r = refs(res, save)
     e_n2, e_h2, e_nh3 = r["N2"]["e"], r["H2"]["e"], r["NH3"]["e"]
 
-    coords = tetra(A_MM)
+    coords = tetra(a_mm(els))
     m4 = [[els[i], tuple(coords[i])] for i in range(4)]
     m4n = m4 + [["N", (0.0, 0.0, 0.0)]]
-    want = [0, 2, 4] if not smoke else [0, 2]
+    # широкие списки; parity_spins сам отберёт нужную чётность по числу электронов
+    want = [0, 1, 2, 3, 4] if not smoke else [0, 1, 2]
     lowest(m4, want, "M4", sp, save)
     lowest(m4n, want, "M4N", sp, save)
 
-    # H* на Li-вершине (индекс первого Li)
-    li_idx = els.index("Li")
+    # H* на самой электроположительной вершине (Li если есть, иначе 1-й металл)
+    li_idx = els.index("Li") if "Li" in els else 0
     m4_xyz = [[el, tuple(map(float, xyz))] for el, xyz in sp["M4"]["xyz"]]
     ah, _ = add_H(m4_xyz, li_idx, [])
-    lowest(ah, [1, 3], "M4H", sp, save)
+    lowest(ah, [0, 1, 2, 3], "M4H", sp, save)
 
     # протон-лестница на нитриде (N последний)
     cur = [[el, tuple(map(float, xyz))] for el, xyz in sp["M4N"]["xyz"]]
@@ -174,7 +192,7 @@ def run(compo, smoke=False):
     for n in range(1, steps + 1):
         cur, dirs = add_H(cur, n_idx, dirs)
         label = f"M4NH{n if n > 1 else ''}"
-        best = lowest(cur, [0, 2, 4], label, sp, save)
+        best = lowest(cur, [0, 1, 2, 3, 4], label, sp, save)
         if best.get("xyz"):
             cur = [[el, tuple(map(float, xyz))] for el, xyz in best["xyz"]]
         ladder.append(label)
