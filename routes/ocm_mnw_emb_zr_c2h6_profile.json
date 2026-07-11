@@ -1,0 +1,316 @@
+{
+ "substrate": "c2h6",
+ "cas": [
+  4,
+  5
+ ],
+ "points": [
+  {
+   "tag": "c2h6_p0",
+   "avas_sel_weights": [
+    0.989,
+    0.984,
+    0.606,
+    0.576,
+    0.545
+   ],
+   "cas": [
+    4,
+    5
+   ],
+   "e_rohf_h": -803.3580845752833,
+   "rohf_converged": true,
+   "e_casci_h": -803.3581058787888,
+   "e_casscf_h": -803.5296881249643,
+   "casscf_converged": true,
+   "e_nevpt2_h": -805.5152387066979,
+   "nevpt2_corr_h": -1.9855505817336432,
+   "noon": [
+    1.981,
+    1.049,
+    0.947,
+    0.018,
+    0.005
+   ],
+   "n_unpaired_beyond_spin": 1.942,
+   "wall_s": 226.3
+  },
+  {
+   "tag": "c2h6_p1",
+   "avas_sel_weights": [
+    0.989,
+    0.984,
+    0.61,
+    0.577,
+    0.546
+   ],
+   "cas": [
+    4,
+    5
+   ],
+   "e_rohf_h": -803.3505550940666,
+   "rohf_converged": true,
+   "e_casci_h": -803.3505752926517,
+   "e_casscf_h": -803.5185735356852,
+   "casscf_converged": true,
+   "e_nevpt2_h": -805.5088709310023,
+   "nevpt2_corr_h": -1.9902973953171272,
+   "noon": [
+    1.981,
+    1.047,
+    0.948,
+    0.018,
+    0.005
+   ],
+   "n_unpaired_beyond_spin": 1.943,
+   "wall_s": 367.1
+  },
+  {
+   "tag": "c2h6_p2",
+   "avas_sel_weights": [
+    0.989,
+    0.984,
+    0.612,
+    0.581,
+    0.547
+   ],
+   "cas": [
+    4,
+    5
+   ],
+   "e_rohf_h": -803.3413922639593,
+   "rohf_converged": true,
+   "e_casci_h": -803.3414101600818,
+   "e_casscf_h": -803.50390628467,
+   "casscf_converged": true,
+   "e_nevpt2_h": -805.5005940348602,
+   "nevpt2_corr_h": -1.996687750190202,
+   "noon": [
+    1.981,
+    1.047,
+    0.948,
+    0.018,
+    0.005
+   ],
+   "n_unpaired_beyond_spin": 1.943,
+   "wall_s": 328.3
+  },
+  {
+   "tag": "c2h6_p3",
+   "avas_sel_weights": [
+    0.989,
+    0.984,
+    0.612,
+    0.601,
+    0.548
+   ],
+   "cas": [
+    4,
+    5
+   ],
+   "e_rohf_h": -803.3113885535275,
+   "rohf_converged": true,
+   "e_casci_h": -803.3114014248101,
+   "e_casscf_h": -803.4859403283283,
+   "casscf_converged": true,
+   "e_nevpt2_h": -805.5164058919171,
+   "nevpt2_corr_h": -2.030465563588816,
+   "noon": [
+    1.966,
+    1.023,
+    0.978,
+    0.03,
+    0.003
+   ],
+   "n_unpaired_beyond_spin": 2.023,
+   "wall_s": 105.8
+  },
+  {
+   "tag": "c2h6_p4",
+   "avas_sel_weights": [
+    0.988,
+    0.985,
+    0.678,
+    0.605,
+    0.546
+   ],
+   "cas": [
+    4,
+    5
+   ],
+   "e_rohf_h": -803.3123033083826,
+   "rohf_converged": true,
+   "e_casci_h": -803.3124231223028,
+   "e_casscf_h": -803.4973591569878,
+   "casscf_converged": true,
+   "e_nevpt2_h": -805.5276142987296,
+   "nevpt2_corr_h": -2.030255141741812,
+   "noon": [
+    1.977,
+    1.019,
+    0.983,
+    0.019,
+    0.003
+   ],
+   "n_unpaired_beyond_spin": 0.112,
+   "wall_s": 147.4,
+   "refined": "fwd"
+  },
+  {
+   "tag": "c2h6_p5",
+   "avas_sel_weights": [
+    0.988,
+    0.985,
+    0.648,
+    0.6,
+    0.578
+   ],
+   "cas": [
+    4,
+    5
+   ],
+   "e_rohf_h": -803.4087524526299,
+   "rohf_converged": true,
+   "e_casci_h": -803.4088952423755,
+   "e_casscf_h": -803.4591759933702,
+   "casscf_converged": true,
+   "e_nevpt2_h": -805.4654668993999,
+   "nevpt2_corr_h": -2.0062909060296352,
+   "noon": [
+    1.984,
+    1.98,
+    0.018,
+    0.016,
+    0.003
+   ],
+   "n_unpaired_beyond_spin": 0.072,
+   "wall_s": 142.7,
+   "refined": "rev"
+  },
+  {
+   "tag": "c2h6_p6",
+   "avas_sel_weights": [
+    0.99,
+    0.987,
+    0.675,
+    0.599,
+    0.586
+   ],
+   "cas": [
+    4,
+    5
+   ],
+   "e_rohf_h": -803.4602426214507,
+   "rohf_converged": true,
+   "e_casci_h": -803.460618323969,
+   "e_casscf_h": -803.5158996284185,
+   "casscf_converged": true,
+   "e_nevpt2_h": -805.5103884366209,
+   "nevpt2_corr_h": -1.994488808202445,
+   "noon": [
+    1.979,
+    1.976,
+    0.022,
+    0.02,
+    0.003
+   ],
+   "n_unpaired_beyond_spin": 0.078,
+   "wall_s": 126.4,
+   "refined": "rev"
+  },
+  {
+   "tag": "c2h6_p7",
+   "avas_sel_weights": [
+    0.99,
+    0.987,
+    0.678,
+    0.6,
+    0.587
+   ],
+   "cas": [
+    4,
+    5
+   ],
+   "e_rohf_h": -803.4704584382583,
+   "rohf_converged": true,
+   "e_casci_h": -803.4707790004827,
+   "e_casscf_h": -803.52551353351,
+   "casscf_converged": true,
+   "e_nevpt2_h": -805.5184763677414,
+   "nevpt2_corr_h": -1.9929628342314805,
+   "noon": [
+    1.979,
+    1.977,
+    0.021,
+    0.02,
+    0.003
+   ],
+   "n_unpaired_beyond_spin": 0.075,
+   "wall_s": 122.6,
+   "refined": "rev"
+  },
+  {
+   "tag": "c2h6_p8",
+   "avas_sel_weights": [
+    0.99,
+    0.987,
+    0.664,
+    0.595,
+    0.584
+   ],
+   "cas": [
+    4,
+    5
+   ],
+   "e_rohf_h": -803.4561052521635,
+   "rohf_converged": true,
+   "e_casci_h": -803.4565140840564,
+   "e_casscf_h": -803.5124191927641,
+   "casscf_converged": true,
+   "e_nevpt2_h": -805.5038557192654,
+   "nevpt2_corr_h": -1.991436526501298,
+   "noon": [
+    1.978,
+    1.974,
+    0.025,
+    0.019,
+    0.003
+   ],
+   "n_unpaired_beyond_spin": 0.075,
+   "wall_s": 118.2,
+   "refined": "fwd"
+  }
+ ],
+ "casscf_rel_kcal": [
+  0.0,
+  6.97,
+  16.18,
+  27.45,
+  20.29,
+  44.25,
+  8.65,
+  2.62,
+  10.84
+ ],
+ "casscf_r_index": 0,
+ "casscf_ts_index": 5,
+ "casscf_ts_interior": true,
+ "casscf_barrier_kcal": 44.25,
+ "nevpt2_rel_kcal": [
+  0.0,
+  4.0,
+  9.19,
+  -0.73,
+  -7.77,
+  31.23,
+  3.04,
+  -2.03,
+  7.14
+ ],
+ "nevpt2_r_index": 4,
+ "nevpt2_ts_index": 5,
+ "nevpt2_ts_interior": true,
+ "nevpt2_barrier_kcal": 39.0,
+ "all_converged": true,
+ "refine_done": true
+}

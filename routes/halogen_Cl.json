@@ -1,0 +1,23 @@
+{
+ "halogen": "Cl",
+ "model": "gas-phase X + CH4 -> CH3 + HX, def2-SVP+ECP",
+ "dft": {
+  "barrier_kcal": 11.66,
+  "dE_reac_kcal": 7.36,
+  "ts_rCH": 1.5,
+  "ts_rHX": 1.25
+ },
+ "casscf": {
+  "barrier_kcal": 21.51,
+  "dE_reac_kcal": 29.69
+ },
+ "nevpt2": {
+  "barrier_kcal": 15.88,
+  "dE_reac_kcal": 11.85
+ },
+ "ts_cas": [
+  13,
+  10
+ ],
+ "wall_s": 673.2
+}

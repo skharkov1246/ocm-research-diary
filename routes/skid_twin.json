@@ -1,0 +1,167 @@
+{
+ "scenarios": [
+  {
+   "product": "ethylene_I4",
+   "gas": "flare",
+   "prod_t_y": 2230.0,
+   "revenue_musd": 2.01,
+   "ebitda_musd": 1.24,
+   "capex_musd": 3.2,
+   "payback_y": 2.6,
+   "x_mining": 1.5
+  },
+  {
+   "product": "ethylene_I4",
+   "gas": "pipeline",
+   "prod_t_y": 2230.0,
+   "revenue_musd": 2.01,
+   "ebitda_musd": 0.14,
+   "capex_musd": 3.2,
+   "payback_y": 22.6,
+   "x_mining": 0.2
+  },
+  {
+   "product": "MSA",
+   "gas": "flare",
+   "prod_t_y": 1093.0,
+   "revenue_musd": 3.06,
+   "ebitda_musd": 1.79,
+   "capex_musd": 4.5,
+   "payback_y": 2.5,
+   "x_mining": 2.2
+  },
+  {
+   "product": "MSA",
+   "gas": "pipeline",
+   "prod_t_y": 1093.0,
+   "revenue_musd": 3.06,
+   "ebitda_musd": 0.69,
+   "capex_musd": 4.5,
+   "payback_y": 6.5,
+   "x_mining": 0.9
+  },
+  {
+   "product": "PAO",
+   "gas": "flare",
+   "prod_t_y": 1896.0,
+   "revenue_musd": 6.07,
+   "ebitda_musd": 4.46,
+   "capex_musd": 5.0,
+   "payback_y": 1.1,
+   "x_mining": 5.6
+  },
+  {
+   "product": "PAO",
+   "gas": "pipeline",
+   "prod_t_y": 1896.0,
+   "revenue_musd": 6.07,
+   "ebitda_musd": 3.37,
+   "capex_musd": 5.0,
+   "payback_y": 1.5,
+   "x_mining": 4.2
+  },
+  {
+   "product": "urea_synergy",
+   "gas": "flare",
+   "prod_t_y": 8030.0,
+   "revenue_musd": 3.05,
+   "ebitda_musd": 1.56,
+   "capex_musd": 6.0,
+   "payback_y": 3.9,
+   "x_mining": 1.9
+  },
+  {
+   "product": "urea_synergy",
+   "gas": "pipeline",
+   "prod_t_y": 8030.0,
+   "revenue_musd": 3.05,
+   "ebitda_musd": 0.46,
+   "capex_musd": 6.0,
+   "payback_y": 13.0,
+   "x_mining": 0.6
+  }
+ ],
+ "knobs": {
+  "GAS": {
+   "flare": {
+    "gas_usd_t": 30.0,
+    "note": "факел: $0-100/т, часто отрицательно"
+   },
+   "pipeline": {
+    "gas_usd_t": 180.0,
+    "note": "труба: ~$3.5/MMBtu"
+   }
+  },
+  "PRODUCTS": {
+   "ethylene_I4": {
+    "yield_t_per_t": 0.30548628428927677,
+    "price": 900,
+    "opex_per_t": 180,
+    "capex_musd": 3.2,
+    "logistics": "криоцистерна/труба — ТОЛЬКО при близком потребителе",
+    "note": "Y=35% НЕ доказан (риск A1: центр даёт 1.4x, нужен стек рычагов); при Y=25% выход x0.71"
+   },
+   "MSA": {
+    "yield_t_per_t": 0.14978179551122195,
+    "price": 2800,
+    "opex_per_t": 830,
+    "capex_musd": 4.5,
+    "logistics": "хим-автоцистерна (нерж.) — отлично",
+    "note": "рынок ~50-70 кт/г: ниша 10-30 скидов (риск B1); upside x8 при конверсии 20% — и тогда рынок насыщается 6 скидами"
+   },
+   "PAO": {
+    "yield_t_per_t": 0.2596633416458852,
+    "price": 3200,
+    "opex_per_t": 650,
+    "capex_musd": 5.0,
+    "logistics": "бочки/цистерна при 25C — отлично",
+    "note": "надстройка над I4; дескриптор селективности в работе"
+   },
+   "urea_synergy": {
+    "yield_t_per_t": 1.1,
+    "price": 380,
+    "opex_per_t": 140,
+    "capex_musd": 6.0,
+    "logistics": "навалом/мешки — идеально",
+    "note": "двойной поезд (пиролиз+NH3) — капекс выше; C и урея считаются вместе"
+   }
+  },
+  "MINING": {
+   "hashprice_usd_ph_day": 50.0,
+   "net_musd_y": 0.8,
+   "note": "чистая майнинга при $50/PH/д; ±5x с BTC"
+  },
+  "CARBON": {
+   "usd_t_co2": 0.0,
+   "t_co2_per_skid_y": 20000,
+   "note": "0 в базовом кейсе (методология не зачтена — риск E4)"
+  }
+ },
+ "honesty": "скрин-уровень ±2-3x; Y=35% этилена НЕ доказан (риск A1); рынок MSA — ниша 10-30 скидов (риск B1)",
+ "sensitivity": {
+  "ethylene_I4": {
+   "yield-30%": 0.75,
+   "price-30%": 0.63,
+   "capex+50%_payback": 3.9,
+   "base": 1.24
+  },
+  "MSA": {
+   "yield-30%": 1.14,
+   "price-30%": 0.87,
+   "capex+50%_payback": 3.8,
+   "base": 1.79
+  },
+  "PAO": {
+   "yield-30%": 3.01,
+   "price-30%": 2.64,
+   "capex+50%_payback": 1.7,
+   "base": 4.46
+  },
+  "urea_synergy": {
+   "yield-30%": 0.98,
+   "price-30%": 0.64,
+   "capex+50%_payback": 5.8,
+   "base": 1.56
+  }
+ }
+}

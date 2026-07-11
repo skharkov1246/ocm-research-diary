@@ -1,0 +1,73 @@
+{
+ "c5": {
+  "ladder": [
+   {
+    "spin_2S": 0,
+    "e_h": -2120.2209509286054,
+    "converged": true,
+    "spin_square": 0.0,
+    "wall_s": 70.5
+   },
+   {
+    "spin_2S": 2,
+    "e_h": -2120.3014874879905,
+    "converged": true,
+    "spin_square": 3.325,
+    "wall_s": 78.3
+   },
+   {
+    "spin_2S": 4,
+    "e_h": -2120.3047840836557,
+    "converged": true,
+    "spin_square": 6.161,
+    "wall_s": 41.8
+   }
+  ],
+  "candidates_2S": [
+   0,
+   2,
+   4
+  ],
+  "ground_2S": 4,
+  "rel_kcal": {
+   "0": 52.61,
+   "2": 2.07,
+   "4": 0.0
+  }
+ },
+ "c7": {
+  "ladder": [
+   {
+    "spin_2S": 0,
+    "e_h": -2198.199914676462,
+    "converged": false,
+    "spin_square": 0.015,
+    "wall_s": 1436.2
+   },
+   {
+    "spin_2S": 2,
+    "e_h": -2198.2553339562974,
+    "converged": true,
+    "spin_square": 3.26,
+    "wall_s": 426.0
+   },
+   {
+    "spin_2S": 4,
+    "e_h": -2198.3089984319176,
+    "converged": true,
+    "spin_square": 6.506,
+    "wall_s": 53.8
+   }
+  ],
+  "candidates_2S": [
+   0,
+   2,
+   4
+  ],
+  "ground_2S": 4,
+  "rel_kcal": {
+   "2": 33.67,
+   "4": 0.0
+  }
+ }
+}

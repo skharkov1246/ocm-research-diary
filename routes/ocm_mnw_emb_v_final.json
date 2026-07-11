@@ -1,0 +1,179 @@
+{
+ "model": "embedded",
+ "spin_2S": 1,
+ "cas": [
+  5,
+  6
+ ],
+ "avas_labels": [
+  "V 3d",
+  "O 2p",
+  "2 H 1s"
+ ],
+ "substrates": {
+  "ch4": {
+   "dft_rel_kcal": [
+    0.0,
+    4.85,
+    11.77,
+    34.13,
+    49.06,
+    52.7,
+    55.91,
+    58.0,
+    60.04
+   ],
+   "dft_r_index": 0,
+   "dft_ts_index": 8,
+   "dft_ts_interior": false,
+   "dft_barrier_kcal": 60.04,
+   "noon_ts": [
+    1.903,
+    1.862,
+    1.0,
+    0.134,
+    0.096,
+    0.004
+   ],
+   "casscf_rel_kcal": [
+    0.0,
+    9.58,
+    21.37,
+    58.04,
+    81.14,
+    86.31,
+    90.87,
+    94.55,
+    99.19
+   ],
+   "casscf_r_index": 0,
+   "casscf_ts_index": 7,
+   "casscf_ts_interior": false,
+   "casscf_barrier_kcal": 94.55,
+   "nevpt2_rel_kcal": [
+    0.0,
+    5.8,
+    13.38,
+    36.9,
+    50.6,
+    53.31,
+    55.33,
+    56.99,
+    59.22
+   ],
+   "nevpt2_r_index": 0,
+   "nevpt2_ts_index": 7,
+   "nevpt2_ts_interior": false,
+   "nevpt2_barrier_kcal": 56.99,
+   "all_converged": true
+  },
+  "c2h6": {
+   "dft_rel_kcal": [
+    0.0,
+    4.99,
+    12.08,
+    34.94,
+    50.07,
+    53.59,
+    39.76,
+    41.65,
+    38.41
+   ],
+   "dft_r_index": 0,
+   "dft_ts_index": 5,
+   "dft_ts_interior": true,
+   "dft_barrier_kcal": 53.59,
+   "noon_ts": [
+    1.978,
+    1.048,
+    1.001,
+    0.952,
+    0.018,
+    0.003
+   ],
+   "casscf_rel_kcal": [
+    0.0,
+    9.85,
+    21.95,
+    59.9,
+    81.18,
+    71.56,
+    41.2,
+    44.66,
+    36.23
+   ],
+   "casscf_r_index": 0,
+   "casscf_ts_index": 4,
+   "casscf_ts_interior": true,
+   "casscf_barrier_kcal": 81.18,
+   "nevpt2_rel_kcal": [
+    0.0,
+    5.79,
+    13.52,
+    37.75,
+    88.66,
+    79.73,
+    47.74,
+    49.77,
+    46.72
+   ],
+   "nevpt2_r_index": 0,
+   "nevpt2_ts_index": 4,
+   "nevpt2_ts_interior": true,
+   "nevpt2_barrier_kcal": 88.66,
+   "all_converged": true
+  }
+ },
+ "spin_ladder": {
+  "model": "embedded",
+  "candidates_2S": [
+   1,
+   3,
+   5,
+   7
+  ],
+  "ladder": [
+   {
+    "spin_2S": 1,
+    "e_h": -1664.6230323070572,
+    "converged": true,
+    "spin_square": 0.76,
+    "wall_s": 88.0
+   },
+   {
+    "spin_2S": 3,
+    "e_h": -1664.6008622741115,
+    "converged": true,
+    "spin_square": 3.799,
+    "wall_s": 146.1
+   },
+   {
+    "spin_2S": 5,
+    "e_h": -1664.4885257008214,
+    "converged": true,
+    "spin_square": 8.809,
+    "wall_s": 201.8
+   },
+   {
+    "spin_2S": 7,
+    "e_h": -1664.3637315268033,
+    "converged": true,
+    "spin_square": 15.785,
+    "wall_s": 316.3
+   }
+  ],
+  "ground_2S": 1,
+  "rel_kcal": {
+   "1": 0.0,
+   "3": 13.91,
+   "5": 84.4,
+   "7": 162.71
+  }
+ },
+ "ddE_kcal": {
+  "dft": -6.45,
+  "casscf": -13.37,
+  "nevpt2": 31.67
+ },
+ "quantum_shift_kcal": 38.12
+}

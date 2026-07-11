@@ -1,0 +1,32 @@
+{
+ "screen": "MSA initiator design: O-O BDE + HAT(X*+CH4), DFT vs NEVPT2",
+ "propagation_reference_kcal": 19.0,
+ "candidates": {
+  "OH": {
+   "bde_OO": {
+    "dft": 55.51,
+    "casscf": 33.29,
+    "nevpt2": 61.75
+   },
+   "hat_CH4": {
+    "dft": 13.21,
+    "casscf": 26.36,
+    "nevpt2": 18.98,
+    "failed": null
+   }
+  },
+  "HSO4": {
+   "bde_OO": {
+    "dft": 10.93,
+    "casscf": -121.11,
+    "nevpt2": -20.77
+   },
+   "hat_CH4": {
+    "dft": 8.73,
+    "casscf": 67.32,
+    "nevpt2": -14.49,
+    "failed": null
+   }
+  }
+ }
+}

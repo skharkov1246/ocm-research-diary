@@ -1,0 +1,242 @@
+{
+ "screen": "off-label #1 magnetic-valve spin fingerprint",
+ "observable": "channel divergence of <S2> along HAT profile (radical-pair character), CH4 vs C2H6",
+ "sources": [
+  "ocm_mnw_emb_ch4_geom.json",
+  "ocm_mnw_emb_c2h6_geom.json",
+  "ocm_mnw_ch4_geom.json",
+  "ocm_mnw_c2h6_geom.json"
+ ],
+ "tables": {
+  "stage16_embedded": {
+   "ch4": {
+    "contam_per_point": [
+     [
+      0,
+      0.08,
+      false
+     ],
+     [
+      1,
+      0.084,
+      false
+     ],
+     [
+      2,
+      0.087,
+      false
+     ],
+     [
+      3,
+      0.137,
+      true
+     ],
+     [
+      4,
+      0.17,
+      false
+     ]
+    ],
+    "max_contam": [
+     4,
+     0.17,
+     false
+    ],
+    "ts_contam": [
+     3,
+     0.137,
+     true
+    ]
+   },
+   "c2h6": {
+    "contam_per_point": [
+     [
+      0,
+      0.08,
+      false
+     ],
+     [
+      1,
+      0.084,
+      false
+     ],
+     [
+      2,
+      0.087,
+      false
+     ],
+     [
+      3,
+      0.141,
+      false
+     ],
+     [
+      4,
+      0.168,
+      true
+     ]
+    ],
+    "max_contam": [
+     4,
+     0.168,
+     true
+    ],
+    "ts_contam": [
+     4,
+     0.168,
+     true
+    ]
+   }
+  },
+  "stage15_bare": {
+   "ch4": {
+    "contam_per_point": [
+     [
+      0,
+      0.374,
+      false
+     ],
+     [
+      1,
+      0.399,
+      false
+     ],
+     [
+      2,
+      0.186,
+      false
+     ],
+     [
+      3,
+      0.286,
+      false
+     ],
+     [
+      4,
+      0.415,
+      false
+     ],
+     [
+      5,
+      0.552,
+      false
+     ],
+     [
+      6,
+      0.677,
+      true
+     ],
+     [
+      7,
+      0.815,
+      false
+     ]
+    ],
+    "max_contam": [
+     7,
+     0.815,
+     false
+    ],
+    "ts_contam": [
+     6,
+     0.677,
+     true
+    ]
+   },
+   "c2h6": {
+    "contam_per_point": [
+     [
+      0,
+      0.117,
+      false
+     ],
+     [
+      1,
+      0.144,
+      false
+     ],
+     [
+      2,
+      0.205,
+      false
+     ],
+     [
+      3,
+      0.328,
+      false
+     ],
+     [
+      4,
+      0.474,
+      false
+     ],
+     [
+      5,
+      0.615,
+      true
+     ],
+     [
+      6,
+      0.734,
+      false
+     ],
+     [
+      7,
+      0.856,
+      false
+     ]
+    ],
+    "max_contam": [
+     7,
+     0.856,
+     false
+    ],
+    "ts_contam": [
+     5,
+     0.615,
+     true
+    ]
+   }
+  }
+ },
+ "verdict": {
+  "stage16_embedded": {
+   "delta_max_contam_c2h6_minus_ch4": -0.002,
+   "reading": "channels similar -> weak magnetic leverage"
+  },
+  "stage15_bare": {
+   "delta_max_contam_c2h6_minus_ch4": 0.041,
+   "reading": "channels similar -> weak magnetic leverage"
+  }
+ },
+ "profile_multireference": {
+  "ch4": {
+   "noon_tail": [
+    1.88,
+    1.78,
+    1.006,
+    1.0,
+    1.0,
+    1.0,
+    0.987,
+    0.224,
+    0.117
+   ],
+   "n_unpaired_beyond_spin": 0.668
+  },
+  "c2h6": {
+   "noon_tail": [
+    1.88,
+    1.78,
+    1.006,
+    1.0,
+    1.0,
+    1.0,
+    0.987,
+    0.224,
+    0.117
+   ],
+   "n_unpaired_beyond_spin": 0.668
+  }
+ }
+}
