@@ -32,7 +32,8 @@ BRANCH = os.environ.get("FLD_BRANCH") or subprocess.run(
     text=True).stdout.strip()
 MAX_MIN = int(os.environ.get("FLD_MAX_MIN", "840"))
 STAGES = os.environ.get("FLD_STAGES", "field readout")
-_OUT = {"field": "", "readout": "routes/ocm_field_dde_results.json"}
+_OUT = {"field": "", "readout": "routes/ocm_field_dde_results.json",
+        "field2": "", "readout2": "routes/ocm_field_dde2_results.json"}
 RM_FILES = " ".join(f for f in (_OUT[s] for s in STAGES.split()) if f) or "/dev/null"
 JOB_MIN = MAX_MIN - 20
 STAGE_TO = JOB_MIN - 30
@@ -61,6 +62,7 @@ cd /root/repo || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 python3 -c "import pyscf" || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 rm -f {RM_FILES}
 aws s3 cp $S3/ocm_field_scan.json routes/ocm_field_scan.json || true
+aws s3 cp $S3/ocm_field_scan2.json routes/ocm_field_scan2.json || true
 mkdir -p /root/scratch
 export PYSCF_TMPDIR=/root/scratch
 export OMP_NUM_THREADS=$(nproc)
@@ -149,7 +151,9 @@ def main():
         while time.time() - t0 < MAX_MIN * 60:
             try:
                 s3.head_object(Bucket=BUCKET, Key=f"{PREFIX}/DONE")
-                for f in ("ocm_field_scan.json", "ocm_field_dde_results.json"):
+                for f in ("ocm_field_scan.json", "ocm_field_scan2.json",
+                          "ocm_field_dde_results.json",
+                          "ocm_field_dde2_results.json"):
                     try:
                         s3.download_file(BUCKET, f"{PREFIX}/{f}", f"routes/{f}")
                     except ClientError:
