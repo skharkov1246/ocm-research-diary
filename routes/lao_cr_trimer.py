@@ -366,7 +366,7 @@ def stage_ins():
         return atoms
 
     # пин: C_alpha(кольцевой C3, 1-based 4) – C_eth(первый C этилена, 1-based 22)
-    pts, path = _scan("ins", build, (2.80, 2.45, 2.20, 2.00, 1.85, 1.70),
+    pts, path = _scan("ins", build, (2.80, 2.45, 2.20, 2.00, 1.85, 1.70, 1.60, 1.52, 1.46),
                       ref, spin, (4, 22))
     ts, bar, rel, interior = _readout(pts, ref)
     out = {"ref_e_h": ref, "rel_kcal": rel, "interior": bool(interior),
@@ -413,7 +413,125 @@ def stage_desc():
         json.dump(res, f, indent=1)
     print(json.dumps(res, indent=1, ensure_ascii=False))
 
+
+
+def _scan2d(tag, start_atoms, grid, ref_e, spin, pairA, pairB):
+    """2D-пин-скан (две дистанции, путь по порядку grid) с resume по паре."""
+    from pyscf.geomopt.geometric_solver import optimize
+    path = os.path.join(DIR, f"lao_cr_{tag}.json")
+    pts = []
+    if os.path.exists(path):
+        try:
+            pts = json.load(open(path))["pts"]
+            print(f"[{tag}] resume: {len(pts)} точек", flush=True)
+        except Exception:
+            pts = []
+    done = {(round(p["pinA"], 3), round(p["pinB"], 3)) for p in pts}
+    dm, start = None, start_atoms
+    for dA, dB in grid:
+        key = (round(dA, 3), round(dB, 3))
+        if key in done:
+            saved = next(p for p in pts if (round(p["pinA"], 3),
+                                            round(p["pinB"], 3)) == key)
+            start = [(sy, tuple(c)) for sy, c in saved["atoms"]]
+            continue
+        cf = os.path.join(DIR, f"_lao_{tag}_{dA:.2f}_{dB:.2f}.txt")
+        (a1, a2), (b1, b2) = pairA, pairB
+        open(cf, "w").write(f"$set\ndistance {a1} {a2} {dA:.4f}\n"
+                            f"distance {b1} {b2} {dB:.4f}\n")
+        try:
+            mf0 = uks(M(start, spin), dm0=dm)
+            mol = optimize(mf0, constraints=cf, maxsteps=150,
+                           assert_convergence=False)
+            mfx = uks(mol, dm0=mf0.make_rdm1())
+            na = [(mol.atom_symbol(k), tuple(c)) for k, c in
+                  enumerate(mol.atom_coords(unit="Angstrom"))]
+            dm = mfx.make_rdm1()
+            start = na
+            pts.append({"pinA": dA, "pinB": dB, "e_h": float(mfx.e_tot),
+                        "conv": bool(mfx.converged), "atoms": na})
+            with open(path, "w") as f:
+                json.dump({"pts": pts}, f, indent=1)
+            print(f"  [{tag}] pin=({dA},{dB}) rel="
+                  f"{(mfx.e_tot - ref_e) * HARTREE_KCAL:.2f} "
+                  f"conv={mfx.converged}", flush=True)
+        except Exception as ex:
+            print(f"  [{tag}] pin=({dA},{dB}) failed: {ex}", flush=True)
+        finally:
+            if os.path.exists(cf):
+                os.remove(cf)
+    return pts, path
+
+
+def _readout_path(pts, ref_e, grid):
+    """Как _readout, но порядок пути задаёт grid (для 2D-пинов)."""
+    order = {(round(a, 3), round(b, 3)): k for k, (a, b) in enumerate(grid)}
+    pts = sorted([p for p in pts if (round(p["pinA"], 3),
+                                     round(p["pinB"], 3)) in order],
+                 key=lambda p: order[(round(p["pinA"], 3),
+                                      round(p["pinB"], 3))])
+    rel = [(p["e_h"] - ref_e) * HARTREE_KCAL for p in pts]
+    keep = [i for i in range(len(pts)) if pts[i]["conv"] and not all(
+        rel[i] - rel[j] > 25.0 for j in (i - 1, i + 1) if 0 <= j < len(pts))]
+    kr = [rel[i] for i in keep]
+    if len(kr) < 4:
+        return None, None, [round(x, 2) for x in rel], False
+    imax = max(range(1, len(kr) - 1), key=lambda i: kr[i])
+    interior = kr[imax] >= max(kr[0], kr[-1])
+    return (pts[keep[imax]], round(kr[imax], 2),
+            [round(x, 2) for x in rel], interior)
+
+
+BHE2_GRID = ((1.90, 1.12), (1.75, 1.18), (1.66, 1.28),
+             (1.60, 1.40), (1.56, 1.55), (1.55, 1.63), (1.54, 1.74),
+             (1.53, 1.88))
+# v6: хвост 2D-сетки перепроложен мельче — точка (1.53,1.72) v5 взорвалась
+# (370399 ккал, развал релакса с крупным шагом пинов); (1.53,1.72) осталась
+# в чекпойнте, но исключена из сетки — _readout_path фильтрует по grid.
+
+
+def stage_bhe2():
+    """v5: β-H согласованным 2D-пином r(Cr–H_β) + r(C_β–H_β). Урок v4: 1D
+    Cr–H-пин упирается в стену (69 ккал при 1.28) при нерастянутом C–H 1.15 —
+    канал переноса не открывается без второй координаты (как в OCM/MSA HAT).
+    Старт — с релаксированной v4-геометрии пина 1.90 (одна SCF-ветка)."""
+    c7, spin = _c7_relaxed()
+    mf_ref = uks(M(c7, spin))
+    ref = float(mf_ref.e_tot)
+    start = c7
+    try:
+        v4 = json.load(open(os.path.join(DIR, "lao_cr_bhe.json")))["pts"]
+        s190 = next(p for p in v4 if round(p["pin"], 2) == 1.90)
+        start = [(sy, tuple(c)) for sy, c in s190["atoms"]]
+        print("[bhe2] старт с v4-геометрии пина 1.90", flush=True)
+    except Exception:
+        pass
+    pts, _ = _scan2d("bhe2", start, BHE2_GRID, ref, spin, (1, 12), (5, 12))
+    ts, bar, rel, interior = _readout_path(pts, ref, BHE2_GRID)
+    out = {"protocol": "2D-pin v5: r(Cr1-H12) + r(C5-H12)", "ref_e_h": ref,
+           "rel_kcal": rel, "interior": bool(interior), "dft_barrier": bar}
+    if ts is not None and interior and bar is not None and 0 < bar < 100:
+        out["ts_atoms"] = [[sy, [round(x, 6) for x in c]]
+                           for sy, c in ts["atoms"]]
+        try:
+            lab = ["Cr 3d", "4 C 2p", "11 H 1s"]
+            n_ts = nevpt2_point(ts["atoms"], spin, labels=lab)
+            n_r = nevpt2_point(c7, spin, labels=lab)
+            for lv in ("e_casscf", "e_nevpt2"):
+                out[lv.replace("e_", "") + "_barrier"] = round(
+                    (n_ts[lv] - n_r[lv]) * HARTREE_KCAL, 2)
+        except Exception as e:
+            out["nevpt2_error"] = str(e)[:200]
+    else:
+        out["failed"] = "TS not interior/unphysical"
+    with open(os.path.join(DIR, "lao_cr_bhe_result.json"), "w") as f:
+        json.dump(out, f, indent=1)
+    print("[bhe2]", json.dumps({k: v for k, v in out.items()
+                                if k != "ts_atoms"})[:400], flush=True)
+
+
 if __name__ == "__main__":
     st = sys.argv[1] if len(sys.argv) > 1 else "sanity"
     {"spins": stage_spins, "int": stage_int, "sanity": stage_sanity,
-     "bhe": stage_bhe, "ins": stage_ins, "desc": stage_desc}[st]()
+     "bhe": stage_bhe, "bhe2": stage_bhe2, "ins": stage_ins,
+     "desc": stage_desc}[st]()

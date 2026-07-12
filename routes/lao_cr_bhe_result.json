@@ -1,13 +1,15 @@
 {
- "ref_e_h": -2199.451211007975,
+ "protocol": "2D-pin v5: r(Cr1-H12) + r(C5-H12)",
+ "ref_e_h": -2199.451211007976,
  "rel_kcal": [
-  -0.95,
-  -1.87,
-  -1.52,
-  0.59,
-  6.14
+  -1.48,
+  1.11,
+  7.47,
+  32.59,
+  38.55,
+  370399.02
  ],
  "interior": false,
- "dft_barrier": 0.59,
+ "dft_barrier": 32.59,
  "failed": "TS not interior/unphysical"
 }

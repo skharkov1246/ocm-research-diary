@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-routes/ocm_field_aws.py — leak-proof прогон Этапа 21-F (изобретение I5):
-полевая поляризуемость селективности dΔΔE‡/dF на Cr-центре, NEVPT2.
-ocm_field_dde.py field→readout на r7i.8xlarge в us-west-2.
-Геометрии из гита (Cr-профили Этапа 17/18), скан = чистые синглпойнты;
-поточечный чекпойнт ocm_field_scan.json тянется с S3 при буте (урок msa-v7).
+routes/ocm_vol_aws.py — leak-proof лаунчер: routes/ocm_volatility.py на r7i.4xlarge в us-west-2.
 Защита: terminate-on-shutdown + бортовой shutdown + жнец; DONE-маркер отдельно.
 
-Запуск: python3 routes/ocm_field_aws.py [--dryrun]
+Запуск: python3 routes/ocm_vol_aws.py [--dryrun]
 """
 import os
 import subprocess
@@ -18,24 +14,22 @@ import time
 import boto3
 from botocore.exceptions import ClientError
 
-REGION = os.environ.get("FLD_REGION", "us-west-2")
+REGION = os.environ.get("JOB_REGION", "us-west-2")
 ACCOUNT = "097743207937"
 BUCKET = f"alpha-o-results-{ACCOUNT}"          # us-east-1, cross-region OK
-PREFIX = "alpha-o/ocm-field"
+PREFIX = "alpha-o/ocm-vol"
 PROFILE = "alpha-o-instance-profile"
 TAG_PROJECT = "ocm-agent"
-TAG_NAME = "ocm-field"
-ITYPE = os.environ.get("FLD_ITYPE", "r7i.8xlarge")
+TAG_NAME = "ocm-vol"
+ITYPE = os.environ.get("JOB_ITYPE", "r7i.4xlarge")
 REPO = "https://github.com/skharkov1246/ocm-research-diary"
-BRANCH = os.environ.get("FLD_BRANCH") or subprocess.run(
+BRANCH = os.environ.get("JOB_BRANCH") or subprocess.run(
     ["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True,
     text=True).stdout.strip()
-MAX_MIN = int(os.environ.get("FLD_MAX_MIN", "840"))
-STAGES = os.environ.get("FLD_STAGES", "field readout")
-_OUT = {"field": "", "readout": "routes/ocm_field_dde_results.json",
-        "field2": "", "readout2": "routes/ocm_field_dde2_results.json",
-        "field3": "", "readout3": "routes/ocm_field_dde3_results.json"}
-RM_FILES = " ".join(f for f in (_OUT[s] for s in STAGES.split()) if f) or "/dev/null"
+MAX_MIN = int(os.environ.get("JOB_MAX_MIN", "600"))
+STAGES = os.environ.get("JOB_STAGES", "gas site nev desc")
+_OUT = {"gas": "", "site": "", "nev": "", "desc": ""}
+RM_FILES = " ".join(f for f in (_OUT[s] for s in STAGES.split()) if f) or "/tmp/_rm_noop"
 JOB_MIN = MAX_MIN - 20
 STAGE_TO = JOB_MIN - 30
 DISK_GB = 60
@@ -57,25 +51,23 @@ export AWS_DEFAULT_REGION=us-east-1
 for i in 1 2 3; do timeout 10m dnf install -y python3-pip git gcc gcc-c++ && break; sleep 30; done
 for i in 1 2 3; do timeout 10m python3 -m pip install -q awscli && break; sleep 30; done
 ( while true; do aws s3 cp /tmp/boot.log $S3/boot.log >/dev/null 2>&1; sleep 60; done ) &
-for i in 1 2 3; do timeout 25m python3 -m pip install -q numpy scipy pyscf && break; sleep 30; done
+for i in 1 2 3; do timeout 25m python3 -m pip install -q numpy scipy pyscf geometric && break; sleep 30; done
 for i in 1 2 3; do (cd /root && timeout 10m git clone --depth 1 -b {BRANCH} {REPO} repo) && break; sleep 30; done
 cd /root/repo || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 python3 -c "import pyscf" || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 rm -f {RM_FILES}
-aws s3 cp $S3/ocm_field_scan.json routes/ocm_field_scan.json || true
-aws s3 cp $S3/ocm_field_scan2.json routes/ocm_field_scan2.json || true
-aws s3 cp $S3/ocm_field_scan3.json routes/ocm_field_scan3.json || true
+for f in ocm_vol_results.json; do aws s3 cp $S3/$f routes/$f || true; done
 mkdir -p /root/scratch
 export PYSCF_TMPDIR=/root/scratch
 export OMP_NUM_THREADS=$(nproc)
-sync_up() {{ aws s3 cp routes/ $S3/ --recursive --exclude '*' --include 'ocm_field_*.json' >/dev/null 2>&1 || true; aws s3 cp /root/repo/fld.log $S3/fld.log >/dev/null 2>&1 || true; }}
+sync_up() {{ aws s3 cp routes/ $S3/ --recursive --exclude '*' --include 'ocm_vol_*.json' >/dev/null 2>&1 || true; aws s3 cp /root/repo/ocm-vol.log $S3/ocm-vol.log >/dev/null 2>&1 || true; }}
 ( while true; do sleep 120; sync_up; done ) &
 for st in {STAGES}; do
-  echo "[aws][fld] stage $st" >> /root/repo/fld.log
-  timeout {STAGE_TO}m python3 -u routes/ocm_field_dde.py $st >> /root/repo/fld.log 2>&1
+  echo "[aws][ocm-vol] stage $st" >> /root/repo/ocm-vol.log
+  timeout {STAGE_TO}m python3 -u routes/ocm_volatility.py $st >> /root/repo/ocm-vol.log 2>&1
   sync_up
 done
-echo "[aws][fld] ALL DONE" >> /root/repo/fld.log
+echo "[aws][ocm-vol] ALL DONE" >> /root/repo/ocm-vol.log
 sync_up
 echo done > /tmp/DONE && aws s3 cp /tmp/DONE $S3/DONE
 poweroff
@@ -145,7 +137,7 @@ def main():
         return
     existing = my_instances()
     if existing:
-        sys.exit(f"ocm-field instance(s) already exist: {existing}")
+        sys.exit(f"ocm-vol instance(s) already exist: {existing}")
     iid = ec2.run_instances(**common)["Instances"][0]["InstanceId"]
     print(f"launched {iid}", flush=True)
     t0 = time.time()
@@ -153,16 +145,12 @@ def main():
         while time.time() - t0 < MAX_MIN * 60:
             try:
                 s3.head_object(Bucket=BUCKET, Key=f"{PREFIX}/DONE")
-                for f in ("ocm_field_scan.json", "ocm_field_scan2.json",
-                          "ocm_field_scan3.json",
-                          "ocm_field_dde_results.json",
-                          "ocm_field_dde2_results.json",
-                          "ocm_field_dde3_results.json"):
+                for f in ("ocm_vol_results.json",):
                     try:
                         s3.download_file(BUCKET, f"{PREFIX}/{f}", f"routes/{f}")
                     except ClientError:
                         pass
-                print("[ok] field sweep DONE — results pulled", flush=True)
+                print("[ok] ocm-vol DONE — results pulled", flush=True)
                 return
             except ClientError:
                 pass

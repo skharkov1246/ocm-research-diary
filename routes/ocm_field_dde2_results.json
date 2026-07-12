@@ -1,0 +1,266 @@
+{
+ "model": "embedded Cr, frozen-frame SVP geometries",
+ "protocol": "v2 field-chain: anchor F=0 (gate vs committed profile) -> \u00b1F warm-started (dm + CASSCF mo); interior-in-window rule",
+ "fields_au": [
+  0.0,
+  -0.005,
+  0.005
+ ],
+ "anchor_gate_kcal": {
+  "ch4": {
+   "0": 0.0,
+   "1": 17.584,
+   "2": 26.618,
+   "3": 3.844,
+   "4": 0.001
+  },
+  "c2h6": {
+   "0": -0.0,
+   "1": 15.68,
+   "2": 25.594,
+   "3": -0.0,
+   "4": 75.029
+  }
+ },
+ "per_field": {
+  "+0.000": {
+   "ch4": {
+    "dft": {
+     "barrier_kcal": 12.92,
+     "interior_in_window": true,
+     "rel_kcal": [
+      0.0,
+      3.72,
+      9.38,
+      12.92,
+      3.91
+     ]
+    },
+    "casscf": {
+     "barrier_kcal": 94.98,
+     "interior_in_window": true,
+     "rel_kcal": [
+      0.0,
+      79.45,
+      94.98,
+      82.1,
+      38.57
+     ]
+    },
+    "nevpt2": {
+     "barrier_kcal": 41.95,
+     "interior_in_window": true,
+     "rel_kcal": [
+      0.0,
+      29.62,
+      41.95,
+      18.05,
+      3.38
+     ]
+    }
+   },
+   "c2h6": {
+    "dft": {
+     "barrier_kcal": 9.38,
+     "interior_in_window": true,
+     "rel_kcal": [
+      0.0,
+      3.81,
+      9.38,
+      8.52,
+      1.98
+     ]
+    },
+    "casscf": {
+     "barrier_kcal": 94.41,
+     "interior_in_window": true,
+     "rel_kcal": [
+      0.0,
+      78.58,
+      94.41,
+      58.9,
+      85.0
+     ]
+    },
+    "nevpt2": {
+     "barrier_kcal": 77.75,
+     "interior_in_window": false,
+     "rel_kcal": [
+      0.0,
+      29.14,
+      41.65,
+      9.62,
+      77.75
+     ]
+    }
+   }
+  },
+  "-0.005": {
+   "ch4": {
+    "dft": {
+     "barrier_kcal": 10.4,
+     "interior_in_window": true,
+     "rel_kcal": [
+      0.0,
+      2.62,
+      7.94,
+      10.4,
+      2.47
+     ]
+    },
+    "casscf": {
+     "barrier_kcal": 88.29,
+     "interior_in_window": true,
+     "rel_kcal": [
+      0.0,
+      72.95,
+      88.29,
+      76.33,
+      33.89
+     ]
+    },
+    "nevpt2": {
+     "barrier_kcal": 36.96,
+     "interior_in_window": true,
+     "rel_kcal": [
+      0.0,
+      25.07,
+      36.96,
+      13.48,
+      1.24
+     ]
+    }
+   },
+   "c2h6": {
+    "dft": {
+     "barrier_kcal": 7.82,
+     "interior_in_window": true,
+     "rel_kcal": [
+      0.0,
+      2.52,
+      7.82,
+      6.85,
+      0.15
+     ]
+    },
+    "casscf": {
+     "barrier_kcal": 91.3,
+     "interior_in_window": false,
+     "rel_kcal": [
+      0.0,
+      71.73,
+      87.43,
+      53.65,
+      91.3
+     ]
+    },
+    "nevpt2": {
+     "barrier_kcal": 83.09,
+     "interior_in_window": false,
+     "rel_kcal": [
+      0.0,
+      24.3,
+      36.44,
+      6.95,
+      83.09
+     ]
+    }
+   }
+  },
+  "+0.005": {
+   "ch4": {
+    "dft": {
+     "barrier_kcal": 15.5,
+     "interior_in_window": true,
+     "rel_kcal": [
+      0.0,
+      4.67,
+      10.51,
+      15.5,
+      5.56
+     ]
+    },
+    "casscf": {
+     "barrier_kcal": 101.52,
+     "interior_in_window": true,
+     "rel_kcal": [
+      0.0,
+      85.89,
+      101.52,
+      87.92,
+      43.42
+     ]
+    },
+    "nevpt2": {
+     "barrier_kcal": 46.56,
+     "interior_in_window": true,
+     "rel_kcal": [
+      0.0,
+      33.94,
+      46.56,
+      22.68,
+      5.77
+     ]
+    }
+   },
+   "c2h6": {
+    "dft": {
+     "barrier_kcal": 10.48,
+     "interior_in_window": true,
+     "rel_kcal": [
+      0.0,
+      4.89,
+      10.48,
+      10.1,
+      4.01
+     ]
+    },
+    "casscf": {
+     "barrier_kcal": 101.22,
+     "interior_in_window": true,
+     "rel_kcal": [
+      0.0,
+      85.38,
+      101.22,
+      63.92,
+      78.68
+     ]
+    },
+    "nevpt2": {
+     "barrier_kcal": 71.82,
+     "interior_in_window": false,
+     "rel_kcal": [
+      0.0,
+      33.72,
+      46.42,
+      12.29,
+      71.82
+     ]
+    }
+   }
+  }
+ },
+ "ddE": {
+  "+0.000": {
+   "dft": -3.54,
+   "casscf": -0.57,
+   "nevpt2": "NO-VERDICT (edge/missing)"
+  },
+  "-0.005": {
+   "dft": -2.58,
+   "casscf": "NO-VERDICT (edge/missing)",
+   "nevpt2": "NO-VERDICT (edge/missing)"
+  },
+  "+0.005": {
+   "dft": -5.02,
+   "casscf": -0.3,
+   "nevpt2": "NO-VERDICT (edge/missing)"
+  }
+ },
+ "slope_kcal_per_au": {
+  "dft": -244.0
+ },
+ "slope_kcal_per_V_A": {
+  "dft": -4.75
+ }
+}
