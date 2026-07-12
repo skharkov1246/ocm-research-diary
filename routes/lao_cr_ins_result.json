@@ -1,0 +1,14 @@
+{
+ "ref_e_h": -2277.876741211254,
+ "rel_kcal": [
+  81.36,
+  2.65,
+  26.18,
+  32.25,
+  38.08,
+  42.0
+ ],
+ "interior": false,
+ "dft_barrier": 38.08,
+ "failed": "TS not interior/unphysical"
+}
