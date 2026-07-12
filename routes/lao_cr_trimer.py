@@ -299,7 +299,7 @@ def stage_bhe():
     mf_ref = uks(M(c7, spin))
     ref = float(mf_ref.e_tot)
     pts, path = _scan("bhe", lambda pin: c7,
-                      (2.40, 2.10, 1.90, 1.75, 1.62, 1.52, 1.44),
+                      (2.40, 2.10, 1.90, 1.75, 1.62, 1.52, 1.44, 1.36, 1.28),
                       ref, spin, (1, 12))
     ts, bar, rel, interior = _readout(pts, ref)
     out = {"ref_e_h": ref, "rel_kcal": rel, "interior": bool(interior),
@@ -366,7 +366,7 @@ def stage_ins():
         return atoms
 
     # пин: C_alpha(кольцевой C3, 1-based 4) – C_eth(первый C этилена, 1-based 22)
-    pts, path = _scan("ins", build, (2.80, 2.45, 2.20, 2.00, 1.80),
+    pts, path = _scan("ins", build, (2.80, 2.45, 2.20, 2.00, 1.85, 1.70),
                       ref, spin, (4, 22))
     ts, bar, rel, interior = _readout(pts, ref)
     out = {"ref_e_h": ref, "rel_kcal": rel, "interior": bool(interior),
