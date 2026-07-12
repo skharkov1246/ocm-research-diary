@@ -449,33 +449,48 @@ def stage_field3():
         g = json.load(open(os.path.join(DIR,
                            f"ocm_mnw_emb_cr_{sub}_geom.json")))
         print(f"[field3] {sub}: окно {win}", flush=True)
-        dm_chain, mo_chain, dmd_chain = None, None, None
+        dm_chain, mo_chain, dmd_chain, mol_prev = None, None, None, None
         for i in win:
             atoms = [(s, tuple(c)) for s, c in g["points"][i]["atoms"]]
             axis = site_axis(atoms)
             mol = sel.build_mol(atoms)
             mol.max_memory = max(12000, sel.MAXMEM)
-            # якорь F=0 — warm-chain вдоль пути
+            # якорь F=0 — warm-chain вдоль пути. v4: перенос орбиталей между
+            # ГЕОМЕТРИЯМИ только через project_init_guess (v3 передавал
+            # mo_coeff напрямую — AO-базис едет за атомами, CASSCF
+            # коллапсировал на тысячи ккал). Санити: gate < −10 ккал =
+            # коллапс, решение отбрасывается.
+            from pyscf import mcscf as _mc
             FIELD = np.zeros(3)
             t0 = time.time()
             mfd0 = sel.uks(sel.build_mol(atoms), dm0=dmd_chain)
             mf0 = _rohf_warm(mol, dm0=dm_chain)
-            if mo_chain is None:
-                mo0, _ = sel.forced_avas(mf0)
-                mc, e_cas0, e_pt0 = _cas_pt2(mf0, mo0, natorb_first=True)
-            else:
-                mc, e_cas0, e_pt0 = _cas_pt2(mf0, mo_chain,
+            eref = prof["points"][i]["e_nevpt2_h"]
+            cand = []
+            if mo_chain is not None:
+                try:
+                    ne_, no_ = sel.CAS_TARGET
+                    mct = _mc.CASSCF(mf0, no_, ne_)
+                    mo_proj = _mc.addons.project_init_guess(
+                        mct, mo_chain, prev_mol=mol_prev)
+                    mc1, ec1, ep1 = _cas_pt2(mf0, mo_proj,
                                              natorb_first=False)
-            gate = (e_pt0 - prof["points"][i]["e_nevpt2_h"]) * HK
-            branch = "chained"
-            if gate > 2.0:                     # фолбэк: холодный AVAS-путь
-                mfc = _rohf_warm(mol)
-                moc, _ = sel.forced_avas(mfc)
-                mc2, e_cas2, e_pt2 = _cas_pt2(mfc, moc, natorb_first=True)
-                if e_pt2 < e_pt0:
-                    mf0, mc, e_cas0, e_pt0 = mfc, mc2, e_cas2, e_pt2
-                    gate = (e_pt0 - prof["points"][i]["e_nevpt2_h"]) * HK
-                    branch = "cold-fallback"
+                    cand.append(("chained-proj", mc1, ec1, ep1,
+                                 (ep1 - eref) * HK))
+                except Exception as ex:
+                    print(f"[field3] proj-chain fail idx={i}: {ex}",
+                          flush=True)
+            need_cold = (not cand or cand[0][4] > 2.0
+                         or cand[0][4] < -10.0)
+            if need_cold:
+                moc, _ = sel.forced_avas(mf0)
+                mc2, ec2, ep2 = _cas_pt2(mf0, moc, natorb_first=True)
+                cand.append(("cold", mc2, ec2, ep2, (ep2 - eref) * HK))
+            sane = [c for c in cand if c[4] > -10.0]
+            pick = min(sane or cand, key=lambda c: c[3])
+            branch, mc, e_cas0, e_pt0, gate = pick
+            if not sane:
+                branch += "-COLLAPSED"
             if (sub, i, 0.0) not in done:
                 pts.append({"sub": sub, "idx": i, "field": 0.0,
                             "e_dft_h": float(mfd0.e_tot),
@@ -487,7 +502,7 @@ def stage_field3():
             print(f"[field3] {sub} idx={i} F=0 [{branch}]: NEVPT2 "
                   f"{e_pt0:.6f} (Δпрофиль {gate:.2f} ккал)", flush=True)
             dm_chain, dmd_chain = mf0.make_rdm1(), mfd0.make_rdm1()
-            mo_chain = mc.mo_coeff
+            mo_chain, mol_prev = mc.mo_coeff, mol
             for f in FIELDS:
                 if (sub, i, round(f, 4)) in done:
                     continue
