@@ -417,6 +417,110 @@ def stage_readout2():
     print(f"[readout2] slope: {out.get('slope_kcal_per_V_A')}", flush=True)
 
 
+# -------------------------------------------- v3: якоря warm-chain вдоль пути
+# Диагноз v2: холодные ЯКОРЯ F=0 в серединных точках садятся на CASSCF-ветки
+# на 16–26 ккал выше профильных (c2h6 idx4 — ROHF-ветка +75), потому что
+# закоммиченный профиль считался warm-chain ВДОЛЬ ПУТИ. v3 воспроизводит
+# профильный протокол: якорь точки i стартует с dm и CASSCF-орбиталей якоря
+# точки i-1; гейт против профиля; при Δ>2 ккал — фолбэк на холодный
+# AVAS-путь, берётся НИЖНЕЕ решение (обе энергии в чекпойнте).
+SCAN3 = os.path.join(DIR, "ocm_field_scan3.json")
+RES3 = os.path.join(DIR, "ocm_field_dde3_results.json")
+
+
+def stage_field3():
+    global FIELD
+    pts = []
+    if os.path.exists(SCAN3):
+        try:
+            pts = json.load(open(SCAN3))["pts"]
+            print(f"[field3] resume: {len(pts)} записей", flush=True)
+        except Exception:
+            pts = []
+    done = {(p["sub"], p["idx"], round(p["field"], 4)) for p in pts}
+
+    def save():
+        json.dump({"pts": pts}, open(SCAN3, "w"), indent=1)
+
+    for sub in ("ch4", "c2h6"):
+        win, its, _ = robust_window(sub)
+        prof = json.load(open(os.path.join(DIR,
+                              f"ocm_mnw_emb_cr_{sub}_profile.json")))
+        g = json.load(open(os.path.join(DIR,
+                           f"ocm_mnw_emb_cr_{sub}_geom.json")))
+        print(f"[field3] {sub}: окно {win}", flush=True)
+        dm_chain, mo_chain, dmd_chain = None, None, None
+        for i in win:
+            atoms = [(s, tuple(c)) for s, c in g["points"][i]["atoms"]]
+            axis = site_axis(atoms)
+            mol = sel.build_mol(atoms)
+            mol.max_memory = max(12000, sel.MAXMEM)
+            # якорь F=0 — warm-chain вдоль пути
+            FIELD = np.zeros(3)
+            t0 = time.time()
+            mfd0 = sel.uks(sel.build_mol(atoms), dm0=dmd_chain)
+            mf0 = _rohf_warm(mol, dm0=dm_chain)
+            if mo_chain is None:
+                mo0, _ = sel.forced_avas(mf0)
+                mc, e_cas0, e_pt0 = _cas_pt2(mf0, mo0, natorb_first=True)
+            else:
+                mc, e_cas0, e_pt0 = _cas_pt2(mf0, mo_chain,
+                                             natorb_first=False)
+            gate = (e_pt0 - prof["points"][i]["e_nevpt2_h"]) * HK
+            branch = "chained"
+            if gate > 2.0:                     # фолбэк: холодный AVAS-путь
+                mfc = _rohf_warm(mol)
+                moc, _ = sel.forced_avas(mfc)
+                mc2, e_cas2, e_pt2 = _cas_pt2(mfc, moc, natorb_first=True)
+                if e_pt2 < e_pt0:
+                    mf0, mc, e_cas0, e_pt0 = mfc, mc2, e_cas2, e_pt2
+                    gate = (e_pt0 - prof["points"][i]["e_nevpt2_h"]) * HK
+                    branch = "cold-fallback"
+            if (sub, i, 0.0) not in done:
+                pts.append({"sub": sub, "idx": i, "field": 0.0,
+                            "e_dft_h": float(mfd0.e_tot),
+                            "e_casscf_h": e_cas0, "e_nevpt2_h": e_pt0,
+                            "anchor_diff_kcal": round(gate, 3),
+                            "branch": branch,
+                            "wall_s": round(time.time() - t0, 1)})
+                save()
+            print(f"[field3] {sub} idx={i} F=0 [{branch}]: NEVPT2 "
+                  f"{e_pt0:.6f} (Δпрофиль {gate:.2f} ккал)", flush=True)
+            dm_chain, dmd_chain = mf0.make_rdm1(), mfd0.make_rdm1()
+            mo_chain = mc.mo_coeff
+            for f in FIELDS:
+                if (sub, i, round(f, 4)) in done:
+                    continue
+                FIELD = f * axis
+                nf = nuc_field(atoms)
+                t0 = time.time()
+                mfd = sel.uks(sel.build_mol(atoms), dm0=dmd_chain)
+                mf = _rohf_warm(mol, dm0=dm_chain)
+                _, e_cas, e_pt = _cas_pt2(mf, mo_chain, natorb_first=False)
+                pts.append({"sub": sub, "idx": i, "field": f,
+                            "e_dft_h": float(mfd.e_tot) + nf,
+                            "e_casscf_h": e_cas + nf,
+                            "e_nevpt2_h": e_pt + nf,
+                            "rohf_conv": bool(mf.converged),
+                            "wall_s": round(time.time() - t0, 1)})
+                save()
+                print(f"[field3] {sub} idx={i} F={f:+.3f}: "
+                      f"NEVPT2 {e_pt + nf:.6f}", flush=True)
+    print("[field3] цепочка завершена", flush=True)
+
+
+def stage_readout3():
+    global SCAN2, RES2
+    scan2_orig, res2_orig = SCAN2, RES2
+    # readout2 читает SCAN2/RES2 — подменяем на v3-файлы
+    globals()["SCAN2"], globals()["RES2"] = SCAN3, RES3
+    try:
+        stage_readout2()
+    finally:
+        globals()["SCAN2"], globals()["RES2"] = scan2_orig, res2_orig
+
+
 if __name__ == "__main__":
     {"field": stage_field, "readout": stage_readout,
-     "field2": stage_field2, "readout2": stage_readout2}[sys.argv[1]]()
+     "field2": stage_field2, "readout2": stage_readout2,
+     "field3": stage_field3, "readout3": stage_readout3}[sys.argv[1]]()
