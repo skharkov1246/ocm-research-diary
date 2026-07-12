@@ -1,11 +1,11 @@
 {
  "descriptor": "ddE_LAO = E\u2021(insertion) \u2212 E\u2021(beta-H elim); >0 = selective 1-hexene (LAO/PAO)",
  "bhe": {
-  "dft_barrier": 32.59,
+  "dft_barrier": null,
   "casscf_barrier": null,
   "nevpt2_barrier": null,
-  "interior": false,
-  "failed": "TS not interior/unphysical"
+  "interior": null,
+  "failed": "no result file (stage killed/failed)"
  },
  "ins": {
   "dft_barrier": 42.0,
@@ -13,6 +13,5 @@
   "nevpt2_barrier": 50.86,
   "interior": true,
   "failed": null
- },
- "ddE_dft": 9.41
+ }
 }
