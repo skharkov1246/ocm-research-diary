@@ -1,0 +1,30 @@
+{
+ "stage": "hat",
+ "model": "pinned-relax collinear HAT NH2+CH4",
+ "scan_rel_kcal": [
+  4.48,
+  6.54,
+  9.0,
+  8.8,
+  8.18,
+  6.14,
+  3.62
+ ],
+ "dft": {
+  "barrier_kcal": 9.0,
+  "ts_rCH": 1.24,
+  "ts_rNH": 1.32,
+  "ts_interior": true
+ },
+ "casscf": {
+  "barrier_kcal": 16.41
+ },
+ "nevpt2": {
+  "barrier_kcal": 15.98
+ },
+ "ts_cas": [
+  13,
+  8
+ ],
+ "wall_s": 2557.3
+}

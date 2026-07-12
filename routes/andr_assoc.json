@@ -1,0 +1,45 @@
+{
+ "pts": [
+  {
+   "r": 3.2,
+   "rel_kcal": -2.98,
+   "conv": true
+  },
+  {
+   "r": 2.8,
+   "rel_kcal": -6.65,
+   "conv": true
+  },
+  {
+   "r": 2.4,
+   "rel_kcal": -17.67,
+   "conv": true
+  },
+  {
+   "r": 2.1,
+   "rel_kcal": -40.28,
+   "conv": true
+  },
+  {
+   "r": 1.9,
+   "rel_kcal": -59.15,
+   "conv": true
+  },
+  {
+   "r": 1.7,
+   "rel_kcal": -77.88,
+   "conv": true
+  },
+  {
+   "r": 1.55,
+   "rel_kcal": -88.63,
+   "conv": true
+  },
+  {
+   "r": 1.47,
+   "rel_kcal": -93.5,
+   "conv": true
+  }
+ ],
+ "barrierless_dft": true
+}

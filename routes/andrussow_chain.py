@@ -236,8 +236,8 @@ def stage_assoc():
             at = [(mol.atom_symbol(i), tuple(c)) for i, c in
                   enumerate(mol.atom_coords(unit="Angstrom"))]
             dm = mfx.make_rdm1()
-            pts.append({"r": r, "rel_kcal": round(
-                (mfx.e_tot - eR) * HARTREE_KCAL, 2),
+            pts.append({"r": r, "rel_kcal": round(float(
+                (mfx.e_tot - eR) * HARTREE_KCAL), 2),
                 "conv": bool(mfx.converged)})
             print(f"  [assoc] r={r} rel={pts[-1]['rel_kcal']}", flush=True)
         except Exception as ex:
@@ -245,8 +245,8 @@ def stage_assoc():
         finally:
             if os.path.exists(cf):
                 os.remove(cf)
-    rels = [p["rel_kcal"] for p in pts if p["conv"]]
-    barrierless = bool(rels) and max(rels) <= 1.0
+    rels = [float(p["rel_kcal"]) for p in pts if p["conv"]]
+    barrierless = bool(rels) and bool(max(rels) <= 1.0)
     json.dump({"pts": pts, "barrierless_dft": barrierless},
               open(os.path.join(DIR, "andr_assoc.json"), "w"), indent=1)
     print(f"[assoc] barrierless={barrierless}", flush=True)
