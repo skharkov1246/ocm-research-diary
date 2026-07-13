@@ -1,0 +1,18 @@
+{
+ "protocol": "2D-pin v7: r(C3-H18 forming) + r(C7-H18 breaking), concerted 3,7-H shift",
+ "ref_e_h": -2199.451211007974,
+ "rel_kcal": [
+  -1.76,
+  1.37,
+  10.1,
+  24.69,
+  44.67,
+  67.11,
+  100.08,
+  77.15,
+  72.88
+ ],
+ "interior": true,
+ "dft_barrier": 100.08,
+ "failed": "TS not interior/unphysical"
+}
