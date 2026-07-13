@@ -384,6 +384,20 @@ def stage_ins():
     ts, bar, rel, interior = _readout(pts, ref)
     out = {"ref_e_h": ref, "rel_kcal": rel, "interior": bool(interior),
            "dft_barrier": bar}
+    # На катионе этилен коордируется экзотермично => барьер вставки «подводный»
+    # относительно разнесённых реагентов. Внутренний (intrinsic) барьер меряем
+    # от π-комплекса (глубочайшая точка ДО интерьерного максимума) — это
+    # физически сопоставимо с барьером выхода гексена (оба из C7-резонанса).
+    spath = sorted([p for p in pts if p["conv"]], key=lambda p: -p["pin"])
+    srel = [(p["e_h"] - ref) * HARTREE_KCAL for p in spath]
+    if len(srel) >= 3:
+        imax = max(range(1, len(srel) - 1), key=lambda i: srel[i])
+        pre = min(range(0, imax + 1), key=lambda i: srel[i])
+        out["pi_complex_rel_kcal"] = round(srel[pre], 2)
+        out["dft_barrier_intrinsic"] = round(srel[imax] - srel[pre], 2)
+        out["ins_ts_pin"] = spath[imax]["pin"]
+        out["ins_ts_atoms_intrinsic"] = [
+            [s, [round(x, 6) for x in c]] for s, c in spath[imax]["atoms"]]
     if ts is not None and interior and bar is not None and 0 < bar < 100:
         out["ts_atoms"] = [[s, [round(x, 6) for x in c]] for s, c in ts["atoms"]]
         try:
@@ -395,6 +409,21 @@ def stage_ins():
             for lv in ("e_casscf", "e_nevpt2"):
                 out[lv.replace("e_", "") + "_barrier"] = round(
                     (n_ts[lv] - n_c7[lv] - n_eth[lv]) * HARTREE_KCAL, 2)
+        except Exception as e:
+            out["nevpt2_error"] = str(e)[:200]
+    elif "ins_ts_atoms_intrinsic" in out and out["dft_barrier_intrinsic"] > 0:
+        # «подводный» случай (катион): NEVPT2 барьера от π-комплекса к TS
+        try:
+            lab = ["Cr 3d", f"{N0} C 2p", f"{N0 + 1} C 2p"]
+            pre_atoms = [(s, tuple(c)) for s, c in spath[pre]["atoms"]]
+            n_ts = nevpt2_point(out["ins_ts_atoms_intrinsic"], spin,
+                                charge=CHARGE, labels=lab)
+            n_pre = nevpt2_point(pre_atoms, spin, charge=CHARGE, labels=lab)
+            for lv in ("e_casscf", "e_nevpt2"):
+                out[lv.replace("e_", "") + "_barrier_intrinsic"] = round(
+                    (n_ts[lv] - n_pre[lv]) * HARTREE_KCAL, 2)
+            out["barrier_note"] = ("submerged vs separated reactants; "
+                                   "intrinsic barrier from pi-complex")
         except Exception as e:
             out["nevpt2_error"] = str(e)[:200]
     else:
@@ -424,10 +453,16 @@ def stage_desc():
            "shift": {k: sh.get(k) for k in ("dft_barrier", "casscf_barrier",
                                             "nevpt2_barrier", "interior",
                                             "spin_crossover", "failed")},
-           "ins": {k: i.get(k) for k in ("dft_barrier", "casscf_barrier",
-                                         "nevpt2_barrier", "interior", "failed")}}
+           "ins": {k: i.get(k) for k in (
+               "dft_barrier", "casscf_barrier", "nevpt2_barrier",
+               "dft_barrier_intrinsic", "casscf_barrier_intrinsic",
+               "nevpt2_barrier_intrinsic", "pi_complex_rel_kcal",
+               "interior", "barrier_note", "failed")}}
     for lv in ("dft", "casscf", "nevpt2"):
+        # для катиона вставка «подводная» => берём intrinsic барьер от π-комплекса
         ii = i.get(f"{lv}_barrier")
+        if ii is None:
+            ii = i.get(f"{lv}_barrier_intrinsic")
         for tag, d in (("shift", sh), ("bhe", b)):
             ee = d.get(f"{lv}_barrier")
             if ee is not None and ii is not None:

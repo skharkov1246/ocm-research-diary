@@ -1,0 +1,31 @@
+{
+ "model": "cation",
+ "descriptor": "ddE_LAO = E\u2021(insertion/growth) \u2212 E\u2021(hexene exit); >0 = selective 1-hexene (LAO/PAO). Exit = concerted 3,7-H shift (v7); beta-H via (Cr-H,C-H) = no-verdict",
+ "bhe": {
+  "dft_barrier": null,
+  "casscf_barrier": null,
+  "nevpt2_barrier": null,
+  "interior": null,
+  "failed": "no result file (stage killed/failed)"
+ },
+ "shift": {
+  "dft_barrier": 18.95,
+  "casscf_barrier": 40.18,
+  "nevpt2_barrier": 25.44,
+  "interior": true,
+  "spin_crossover": {
+   "alt_2S": 1,
+   "gap_ts_kcal": 24.9,
+   "gap_ref_kcal": 55.02,
+   "crossing_at_ts": false
+  },
+  "failed": null
+ },
+ "ins": {
+  "dft_barrier": null,
+  "casscf_barrier": null,
+  "nevpt2_barrier": null,
+  "interior": null,
+  "failed": "no result file (stage killed/failed)"
+ }
+}
