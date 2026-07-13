@@ -1,11 +1,19 @@
 {
- "descriptor": "ddE_LAO = E\u2021(insertion) \u2212 E\u2021(beta-H elim); >0 = selective 1-hexene (LAO/PAO)",
+ "descriptor": "ddE_LAO = E\u2021(insertion/growth) \u2212 E\u2021(hexene exit); >0 = selective 1-hexene (LAO/PAO). Exit = concerted 3,7-H shift (v7); beta-H via (Cr-H,C-H) = no-verdict",
  "bhe": {
-  "dft_barrier": null,
+  "dft_barrier": 32.59,
   "casscf_barrier": null,
   "nevpt2_barrier": null,
-  "interior": null,
-  "failed": "no result file (stage killed/failed)"
+  "interior": false,
+  "failed": "TS not interior/unphysical"
+ },
+ "shift": {
+  "dft_barrier": 100.08,
+  "casscf_barrier": null,
+  "nevpt2_barrier": null,
+  "interior": true,
+  "spin_crossover": null,
+  "failed": "TS not interior/unphysical"
  },
  "ins": {
   "dft_barrier": 42.0,
@@ -13,5 +21,7 @@
   "nevpt2_barrier": 50.86,
   "interior": true,
   "failed": null
- }
+ },
+ "ddE_dft_vs_shift": -58.08,
+ "ddE_dft_vs_bhe": 9.41
 }
