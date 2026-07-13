@@ -1,0 +1,79 @@
+{
+ "stoichiometry_per_t_urea": {
+  "NH3_t": 0.567,
+  "CO2_consumed_t": 0.733,
+  "H2_t": 0.101,
+  "CH4_t": 0.401,
+  "carbon_coproduct_t": 0.3
+ },
+ "assumptions_usd": {
+  "co2": 30.0,
+  "util_pyro": 90.0,
+  "util_haber": 110.0,
+  "util_urea": 80.0,
+  "fixed_skid": 350.0,
+  "capital": 216.0,
+  "capex_note": "капекс $18M (мини-NH3 — болевая точка), 12%/г, 10 кт/г",
+  "urea_price": 350.0
+ },
+ "skid_flare_carbon400": {
+  "variable": 314.0,
+  "carbon_credit": 120.0,
+  "cash": 544.0,
+  "full": 760.0,
+  "margin_vs_urea": -410.0
+ },
+ "skid_pipeline_carbon400": {
+  "variable": 374.0,
+  "carbon_credit": 120.0,
+  "cash": 604.0,
+  "full": 820.0,
+  "margin_vs_urea": -470.0
+ },
+ "skid_flare_carbon0_dump": {
+  "variable": 314.0,
+  "carbon_credit": 0.0,
+  "cash": 664.0,
+  "full": 880.0,
+  "margin_vs_urea": -530.0
+ },
+ "skid_flare_carbon1500_cb": {
+  "variable": 314.0,
+  "carbon_credit": 450.0,
+  "cash": 214.0,
+  "full": 430.0,
+  "margin_vs_urea": -80.0
+ },
+ "skid_flare_cb1500_plus_co2credit50": {
+  "variable": 314.0,
+  "carbon_credit": 450.0,
+  "cash": 214.0,
+  "full": 430.0,
+  "margin_vs_urea": -80.0,
+  "co2_credit_usd": 116.0,
+  "margin_with_credit": 36.0,
+  "note": "апсайд: 2.33 т CO2e/т × $50 — только с сертификацией"
+ },
+ "benchmarks": {
+  "worldscale_urea_SMR": {
+   "full_est": [
+    180,
+    280
+   ],
+   "note": "большой завод на паровой конверсии: дешевле нас по $/т, но +0.9 т CO2/т NH3 выбросов; наш маршрут CO2-НЕГАТИВЕН (0.73 т потребляется, пиролиз без CO2)"
+  },
+  "green_urea_electrolysis": {
+   "full_est": [
+    500,
+    900
+   ],
+   "note": "электролизный H2: дороже нас при факельном газе"
+  }
+ },
+ "co2_balance_per_t": {
+  "consumed_urea": -0.73,
+  "smr_reference_emission": 1.6,
+  "note": "против SMR-уреи скид экономит ~2.3 т CO2/т — кандидат на carbon-кредиты (не считаем в марже, апсайд)"
+ },
+ "honesty": "скрин ±30-50%. Болевые точки: (1) мини-Габер капексоёмок и любит масштаб — интегральные мини-NH3 скиды (Syzygy/Talus-тип) существуют, но дороги; (2) качество пиро-углерода из расплава НЕ подтверждено (наш пиро-трек считает связывание C, не морфологию) — вилка $0-1500/т ломает/делает экономику; (3) урея-узел 150 бар — не 'скид' в строгом смысле; (4) CO2 на факельной площадке ещё найти надо (дымтруба компрессора). Квант-часть варианта: газофазный якорь NH3+CO2 (urea_chain) — отрицательный контроль метода M (закрытые оболочки)."
+}
