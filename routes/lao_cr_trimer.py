@@ -36,6 +36,18 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 BASIS = os.environ.get("LAO_BASIS", "def2-svp")
 XC = "pbe0"
 
+# v8: модель выбирается env LAO_MODEL: neutral = Cl2Cr(кольцо) (v1–v7,
+# вердикт — запирает все каналы, не каталитическое состояние) |
+# cation = [Cr(кольцо)]+ (Cr(III) d3, как в Sasol/Phillips-тримеризации).
+MODEL = os.environ.get("LAO_MODEL", "neutral")
+CAT = MODEL == "cation"
+CHARGE = 1 if CAT else 0        # заряд МЕТАЛЛОКОМПЛЕКСА (этилен всегда 0)
+SUF = "_cat" if CAT else ""     # суффикс всех чекпойнтов/результатов модели
+RC0 = 1 if CAT else 3           # 0-based индекс первого кольцевого C
+# 0-based: Cr=0, [Cl=1,2 только neutral], кольцо C=RC0..RC0+5,
+# H кольца: C_k (k=0..5) -> RC0+6+2k, RC0+6+2k+1; всего атомов c7:
+N0 = RC0 + 18                   # 21 neutral / 19 cation
+
 
 def M(atoms, spin, charge=0):
     return gto.M(atom=atoms, basis=BASIS, ecp=BASIS, charge=charge, spin=spin,
@@ -81,9 +93,10 @@ def _ring_carbons(n, r0=2.05, ccb=1.53):
 
 
 def chromacycle_atoms(n_c):
-    """[Cl2Cr(CnH2n)] метацикл: Cr + 2 Cl (тетраэдрично сверху) + кольцо CH2."""
-    a = [("Cr", (0.0, 0.0, 0.0)),
-         ("Cl", (1.65, 1.45, -0.85)), ("Cl", (-1.65, 1.45, -0.85))]
+    """Метацикл: neutral [Cl2Cr(CnH2n)] | cation [Cr(CnH2n)]+ (без Cl)."""
+    a = [("Cr", (0.0, 0.0, 0.0))]
+    if not CAT:
+        a += [("Cl", (1.65, 1.45, -0.85)), ("Cl", (-1.65, 1.45, -0.85))]
     cs = _ring_carbons(n_c)
     for x, y, z in cs:
         a.append(("C", (x, y, z)))
@@ -95,9 +108,9 @@ def chromacycle_atoms(n_c):
     return a
 
 
-def relax(atoms, spin, maxsteps=150):
+def relax(atoms, spin, maxsteps=150, charge=0):
     from pyscf.geomopt.geometric_solver import optimize
-    mf = uks(M(atoms, spin))
+    mf = uks(M(atoms, spin, charge))
     mol = optimize(mf, maxsteps=maxsteps, assert_convergence=False)
     na = [(mol.atom_symbol(i), tuple(c))
           for i, c in enumerate(mol.atom_coords(unit="Angstrom"))]
@@ -105,8 +118,8 @@ def relax(atoms, spin, maxsteps=150):
     return na, mfx
 
 
-def nevpt2_point(atoms, spin, thr=0.5, labels=None):
-    mol = M(atoms, spin)
+def nevpt2_point(atoms, spin, thr=0.5, labels=None, charge=0):
+    mol = M(atoms, spin, charge)
     mol.max_memory = 24000     # c7 (211 AO) уронил NEVPT2 по MemoryError на 8 ГБ
     mf = rohf(mol)
     ncas, nelec, mo = avas.avas(mf, labels or ["Cr 3d"], threshold=thr)
@@ -129,19 +142,19 @@ RINGS = {"c5": 4, "c7": 6}     # хромациклопентан (4 CH2), -ге
 
 
 def stage_spins():
-    """Лестницы спинов обоих циклов. Нейтральный Cl2Cr(кольцо) = формально
-    Cr(IV) d2 (кольцо −2, 2 Cl −1) — чётный счёт: кандидаты по чётности."""
-    out = {}
-    path = os.path.join(DIR, "lao_cr_spins.json")
+    """Лестницы спинов обоих циклов. neutral: Cr(IV) d2, чётный счёт;
+    cation: Cr(III) d3, нечётный (2S = 1/3/5)."""
+    out = {"model": MODEL}
+    path = os.path.join(DIR, f"lao_cr_spins{SUF}.json")
     for tag, n in RINGS.items():
         atoms = chromacycle_atoms(n)
-        parity = sum(gto.charge(a[0]) for a in atoms) % 2
+        parity = (sum(gto.charge(a[0]) for a in atoms) - CHARGE) % 2
         cands = [s for s in range(parity, parity + 6, 2)][:3]
         out[tag] = {"ladder": [], "candidates_2S": cands}
         for s2 in cands:
             t0 = time.time()
             try:
-                mf = uks(M(atoms, s2))
+                mf = uks(M(atoms, s2, CHARGE))
                 out[tag]["ladder"].append(
                     {"spin_2S": s2, "e_h": float(mf.e_tot),
                      "converged": bool(mf.converged),
@@ -168,8 +181,8 @@ def stage_spins():
 def stage_int():
     """Релакс интермедиатов в основном спине + CASSCF/NEVPT2-одноточка:
     сходимость + NOON (мультиреференсность = есть ли ниша)."""
-    sp = json.load(open(os.path.join(DIR, "lao_cr_spins.json")))
-    path = os.path.join(DIR, "lao_cr_int.json")
+    sp = json.load(open(os.path.join(DIR, f"lao_cr_spins{SUF}.json")))
+    path = os.path.join(DIR, f"lao_cr_int{SUF}.json")
     out = {}
     if os.path.exists(path):
         out = json.load(open(path))
@@ -179,12 +192,12 @@ def stage_int():
             continue
         s2 = sp[tag]["ground_2S"]
         t0 = time.time()
-        atoms, mf = relax(chromacycle_atoms(n), s2)
+        atoms, mf = relax(chromacycle_atoms(n), s2, charge=CHARGE)
         rec = {"spin_2S": s2, "e_dft": float(mf.e_tot),
                "dft_converged": bool(mf.converged),
                "atoms": [[s, [round(x, 6) for x in c]] for s, c in atoms]}
         try:
-            rec.update({"nevpt2": nevpt2_point(atoms, s2)})
+            rec.update({"nevpt2": nevpt2_point(atoms, s2, charge=CHARGE)})
         except Exception as e:
             rec["nevpt2_error"] = str(e)[:200]
         rec["wall_s"] = round(time.time() - t0, 1)
@@ -228,7 +241,7 @@ def stage_sanity():
 # β-H для элиминирования: H idx 11 (на C4, соседнем с альфа-C3).
 
 def _c7_relaxed():
-    d = json.load(open(os.path.join(DIR, "lao_cr_int.json")))
+    d = json.load(open(os.path.join(DIR, f"lao_cr_int{SUF}.json")))
     rec = d["c7"]
     return [(s, tuple(c)) for s, c in rec["atoms"]], rec["spin_2S"]
 
@@ -236,7 +249,7 @@ def _c7_relaxed():
 def _scan(tag, build_start, pins, ref_e, spin, pin_atoms_1based):
     """Общий пин-скан с поточечным сохранением/resume (урок msa v6)."""
     from pyscf.geomopt.geometric_solver import optimize
-    path = os.path.join(DIR, f"lao_cr_{tag}.json")
+    path = os.path.join(DIR, f"lao_cr_{tag}{SUF}.json")
     pts = []
     if os.path.exists(path):
         try:
@@ -256,7 +269,7 @@ def _scan(tag, build_start, pins, ref_e, spin, pin_atoms_1based):
         open(cf, "w").write(f"$set\ndistance {i} {j} {pin:.4f}\n")
         try:
             atoms0 = start if start is not None else build_start(pin)
-            mf0 = uks(M(atoms0, spin), dm0=dm)
+            mf0 = uks(M(atoms0, spin, CHARGE), dm0=dm)
             mol = optimize(mf0, constraints=cf, maxsteps=150,
                            assert_convergence=False)
             mfx = uks(mol, dm0=mf0.make_rdm1())
@@ -296,19 +309,19 @@ def _readout(pts, ref_e):
 def stage_bhe():
     """β-H элиминирование из хромациклогептана: пин r(Cr–H_β) стягивается."""
     c7, spin = _c7_relaxed()
-    mf_ref = uks(M(c7, spin))
+    mf_ref = uks(M(c7, spin, CHARGE))
     ref = float(mf_ref.e_tot)
     pts, path = _scan("bhe", lambda pin: c7,
                       (2.40, 2.10, 1.90, 1.75, 1.62, 1.52, 1.44, 1.36, 1.28),
-                      ref, spin, (1, 12))
+                      ref, spin, (1, RC0 + 9))
     ts, bar, rel, interior = _readout(pts, ref)
     out = {"ref_e_h": ref, "rel_kcal": rel, "interior": bool(interior),
            "dft_barrier": bar}
     if ts is not None and interior and bar is not None and 0 < bar < 100:
         out["ts_atoms"] = [[s, [round(x, 6) for x in c]] for s, c in ts["atoms"]]
         try:
-            n_ts = nevpt2_point(ts["atoms"], spin)
-            n_r = nevpt2_point(c7, spin)
+            n_ts = nevpt2_point(ts["atoms"], spin, charge=CHARGE)
+            n_r = nevpt2_point(c7, spin, charge=CHARGE)
             for lv in ("e_casscf", "e_nevpt2"):
                 out[lv.replace("e_", "") + "_barrier"] = round(
                     (n_ts[lv] - n_r[lv]) * HARTREE_KCAL, 2)
@@ -316,7 +329,7 @@ def stage_bhe():
             out["nevpt2_error"] = str(e)[:200]
     else:
         out["failed"] = "TS not interior/unphysical"
-    with open(os.path.join(DIR, "lao_cr_bhe_result.json"), "w") as f:
+    with open(os.path.join(DIR, f"lao_cr_bhe_result{SUF}.json"), "w") as f:
         json.dump(out, f, indent=1)
     print("[bhe]", json.dumps({k: v for k, v in out.items()
                                if k != "ts_atoms"})[:400], flush=True)
@@ -331,7 +344,7 @@ def stage_ins():
             ("H", (-0.56, 0.92, 0.0)), ("H", (-0.56, -0.92, 0.0)),
             ("H", (1.89, 0.92, 0.0)), ("H", (1.89, -0.92, 0.0))]
     eth, mf_eth = relax(eth0, 0, maxsteps=60)
-    mf_c7 = uks(M(c7, spin))
+    mf_c7 = uks(M(c7, spin, CHARGE))
     ref = float(mf_c7.e_tot) + float(mf_eth.e_tot)
 
     def build(pin):
@@ -365,27 +378,57 @@ def stage_ins():
                                    + rel_[2] * w)))
         return atoms
 
-    # пин: C_alpha(кольцевой C3, 1-based 4) – C_eth(первый C этилена, 1-based 22)
+    # пин: C_alpha (1-based RC0+1) – C_eth (первый C этилена, 1-based N0+1)
     pts, path = _scan("ins", build, (2.80, 2.45, 2.20, 2.00, 1.85, 1.70, 1.60, 1.52, 1.46),
-                      ref, spin, (4, 22))
+                      ref, spin, (RC0 + 1, N0 + 1))
     ts, bar, rel, interior = _readout(pts, ref)
     out = {"ref_e_h": ref, "rel_kcal": rel, "interior": bool(interior),
            "dft_barrier": bar}
+    # На катионе этилен коордируется экзотермично => барьер вставки «подводный»
+    # относительно разнесённых реагентов. Внутренний (intrinsic) барьер меряем
+    # от π-комплекса (глубочайшая точка ДО интерьерного максимума) — это
+    # физически сопоставимо с барьером выхода гексена (оба из C7-резонанса).
+    spath = sorted([p for p in pts if p["conv"]], key=lambda p: -p["pin"])
+    srel = [(p["e_h"] - ref) * HARTREE_KCAL for p in spath]
+    if len(srel) >= 3:
+        imax = max(range(1, len(srel) - 1), key=lambda i: srel[i])
+        pre = min(range(0, imax + 1), key=lambda i: srel[i])
+        out["pi_complex_rel_kcal"] = round(srel[pre], 2)
+        out["dft_barrier_intrinsic"] = round(srel[imax] - srel[pre], 2)
+        out["ins_ts_pin"] = spath[imax]["pin"]
+        out["ins_ts_atoms_intrinsic"] = [
+            [s, [round(x, 6) for x in c]] for s, c in spath[imax]["atoms"]]
     if ts is not None and interior and bar is not None and 0 < bar < 100:
         out["ts_atoms"] = [[s, [round(x, 6) for x in c]] for s, c in ts["atoms"]]
         try:
-            n_ts = nevpt2_point(ts["atoms"], spin,
-                                labels=["Cr 3d", "21 C 2p", "22 C 2p"])
-            n_c7 = nevpt2_point(c7, spin)
+            n_ts = nevpt2_point(ts["atoms"], spin, charge=CHARGE,
+                                labels=["Cr 3d", f"{N0} C 2p",
+                                        f"{N0 + 1} C 2p"])
+            n_c7 = nevpt2_point(c7, spin, charge=CHARGE)
             n_eth = nevpt2_point(eth, 0, thr=0.4, labels=["C 2p"])
             for lv in ("e_casscf", "e_nevpt2"):
                 out[lv.replace("e_", "") + "_barrier"] = round(
                     (n_ts[lv] - n_c7[lv] - n_eth[lv]) * HARTREE_KCAL, 2)
         except Exception as e:
             out["nevpt2_error"] = str(e)[:200]
+    elif "ins_ts_atoms_intrinsic" in out and out["dft_barrier_intrinsic"] > 0:
+        # «подводный» случай (катион): NEVPT2 барьера от π-комплекса к TS
+        try:
+            lab = ["Cr 3d", f"{N0} C 2p", f"{N0 + 1} C 2p"]
+            pre_atoms = [(s, tuple(c)) for s, c in spath[pre]["atoms"]]
+            n_ts = nevpt2_point(out["ins_ts_atoms_intrinsic"], spin,
+                                charge=CHARGE, labels=lab)
+            n_pre = nevpt2_point(pre_atoms, spin, charge=CHARGE, labels=lab)
+            for lv in ("e_casscf", "e_nevpt2"):
+                out[lv.replace("e_", "") + "_barrier_intrinsic"] = round(
+                    (n_ts[lv] - n_pre[lv]) * HARTREE_KCAL, 2)
+            out["barrier_note"] = ("submerged vs separated reactants; "
+                                   "intrinsic barrier from pi-complex")
+        except Exception as e:
+            out["nevpt2_error"] = str(e)[:200]
     else:
         out["failed"] = "TS not interior/unphysical"
-    with open(os.path.join(DIR, "lao_cr_ins_result.json"), "w") as f:
+    with open(os.path.join(DIR, f"lao_cr_ins_result{SUF}.json"), "w") as f:
         json.dump(out, f, indent=1)
     print("[ins]", json.dumps({k: v for k, v in out.items()
                                if k != "ts_atoms"})[:400], flush=True)
@@ -394,13 +437,15 @@ def stage_ins():
 def stage_desc():
     def _load(tag):
         try:
-            return json.load(open(os.path.join(DIR, f"lao_cr_{tag}_result.json")))
+            return json.load(open(os.path.join(
+                DIR, f"lao_cr_{tag}_result{SUF}.json")))
         except FileNotFoundError:
             return {"failed": "no result file (stage killed/failed)"}
     b = _load("bhe")
     i = _load("ins")
     sh = _load("shift")
-    res = {"descriptor": "ddE_LAO = E‡(insertion/growth) − E‡(hexene exit); "
+    res = {"model": MODEL,
+           "descriptor": "ddE_LAO = E‡(insertion/growth) − E‡(hexene exit); "
                          ">0 = selective 1-hexene (LAO/PAO). Exit = concerted "
                          "3,7-H shift (v7); beta-H via (Cr-H,C-H) = no-verdict",
            "bhe": {k: b.get(k) for k in ("dft_barrier", "casscf_barrier",
@@ -408,15 +453,22 @@ def stage_desc():
            "shift": {k: sh.get(k) for k in ("dft_barrier", "casscf_barrier",
                                             "nevpt2_barrier", "interior",
                                             "spin_crossover", "failed")},
-           "ins": {k: i.get(k) for k in ("dft_barrier", "casscf_barrier",
-                                         "nevpt2_barrier", "interior", "failed")}}
+           "ins": {k: i.get(k) for k in (
+               "dft_barrier", "casscf_barrier", "nevpt2_barrier",
+               "dft_barrier_intrinsic", "casscf_barrier_intrinsic",
+               "nevpt2_barrier_intrinsic", "pi_complex_rel_kcal",
+               "interior", "barrier_note", "failed")}}
     for lv in ("dft", "casscf", "nevpt2"):
-        ii = i.get(f"{lv}_barrier")
+        # для катиона вставка «подводная» (barrier<0 от разнесённых реагентов) =>
+        # intrinsic барьер от π-комплекса в приоритете, когда он посчитан
+        ii = i.get(f"{lv}_barrier_intrinsic")
+        if ii is None:
+            ii = i.get(f"{lv}_barrier")
         for tag, d in (("shift", sh), ("bhe", b)):
             ee = d.get(f"{lv}_barrier")
             if ee is not None and ii is not None:
                 res[f"ddE_{lv}_vs_{tag}"] = round(ii - ee, 2)
-    with open(os.path.join(DIR, "lao_cr_desc_results.json"), "w") as f:
+    with open(os.path.join(DIR, f"lao_cr_desc_results{SUF}.json"), "w") as f:
         json.dump(res, f, indent=1)
     print(json.dumps(res, indent=1, ensure_ascii=False))
 
@@ -425,7 +477,7 @@ def stage_desc():
 def _scan2d(tag, start_atoms, grid, ref_e, spin, pairA, pairB):
     """2D-пин-скан (две дистанции, путь по порядку grid) с resume по паре."""
     from pyscf.geomopt.geometric_solver import optimize
-    path = os.path.join(DIR, f"lao_cr_{tag}.json")
+    path = os.path.join(DIR, f"lao_cr_{tag}{SUF}.json")
     pts = []
     if os.path.exists(path):
         try:
@@ -447,7 +499,7 @@ def _scan2d(tag, start_atoms, grid, ref_e, spin, pairA, pairB):
         open(cf, "w").write(f"$set\ndistance {a1} {a2} {dA:.4f}\n"
                             f"distance {b1} {b2} {dB:.4f}\n")
         try:
-            mf0 = uks(M(start, spin), dm0=dm)
+            mf0 = uks(M(start, spin, CHARGE), dm0=dm)
             mol = optimize(mf0, constraints=cf, maxsteps=150,
                            assert_convergence=False)
             mfx = uks(mol, dm0=mf0.make_rdm1())
@@ -503,27 +555,28 @@ def stage_bhe2():
     канал переноса не открывается без второй координаты (как в OCM/MSA HAT).
     Старт — с релаксированной v4-геометрии пина 1.90 (одна SCF-ветка)."""
     c7, spin = _c7_relaxed()
-    mf_ref = uks(M(c7, spin))
+    mf_ref = uks(M(c7, spin, CHARGE))
     ref = float(mf_ref.e_tot)
     start = c7
     try:
-        v4 = json.load(open(os.path.join(DIR, "lao_cr_bhe.json")))["pts"]
+        v4 = json.load(open(os.path.join(DIR, f"lao_cr_bhe{SUF}.json")))["pts"]
         s190 = next(p for p in v4 if round(p["pin"], 2) == 1.90)
         start = [(sy, tuple(c)) for sy, c in s190["atoms"]]
         print("[bhe2] старт с v4-геометрии пина 1.90", flush=True)
     except Exception:
         pass
-    pts, _ = _scan2d("bhe2", start, BHE2_GRID, ref, spin, (1, 12), (5, 12))
+    pts, _ = _scan2d("bhe2", start, BHE2_GRID, ref, spin,
+                     (1, RC0 + 9), (RC0 + 2, RC0 + 9))
     ts, bar, rel, interior = _readout_path(pts, ref, BHE2_GRID)
-    out = {"protocol": "2D-pin v5: r(Cr1-H12) + r(C5-H12)", "ref_e_h": ref,
+    out = {"protocol": "2D-pin v5: r(Cr-Hb) + r(Cb-Hb)", "ref_e_h": ref,
            "rel_kcal": rel, "interior": bool(interior), "dft_barrier": bar}
     if ts is not None and interior and bar is not None and 0 < bar < 100:
         out["ts_atoms"] = [[sy, [round(x, 6) for x in c]]
                            for sy, c in ts["atoms"]]
         try:
-            lab = ["Cr 3d", "4 C 2p", "11 H 1s"]
-            n_ts = nevpt2_point(ts["atoms"], spin, labels=lab)
-            n_r = nevpt2_point(c7, spin, labels=lab)
+            lab = ["Cr 3d", f"{RC0 + 1} C 2p", f"{RC0 + 8} H 1s"]
+            n_ts = nevpt2_point(ts["atoms"], spin, labels=lab, charge=CHARGE)
+            n_r = nevpt2_point(c7, spin, labels=lab, charge=CHARGE)
             for lv in ("e_casscf", "e_nevpt2"):
                 out[lv.replace("e_", "") + "_barrier"] = round(
                     (n_ts[lv] - n_r[lv]) * HARTREE_KCAL, 2)
@@ -531,7 +584,7 @@ def stage_bhe2():
             out["nevpt2_error"] = str(e)[:200]
     else:
         out["failed"] = "TS not interior/unphysical"
-    with open(os.path.join(DIR, "lao_cr_bhe_result.json"), "w") as f:
+    with open(os.path.join(DIR, f"lao_cr_bhe_result{SUF}.json"), "w") as f:
         json.dump(out, f, indent=1)
     print("[bhe2]", json.dumps({k: v for k, v in out.items()
                                 if k != "ts_atoms"})[:400], flush=True)
@@ -554,31 +607,33 @@ def stage_shift():
     r(C3–H18 форм.) + r(C7–H18 разрыв), 1-based (4,19)+(8,19).
     Спин-кроссовер: UKS-одноточки 2S=2 на TS- и ref-геометриях."""
     c7, spin = _c7_relaxed()
-    mf_ref = uks(M(c7, spin))
+    mf_ref = uks(M(c7, spin, CHARGE))
     ref = float(mf_ref.e_tot)
-    pts, _ = _scan2d("shift", c7, SHIFT_GRID, ref, spin, (4, 19), (8, 19))
+    pts, _ = _scan2d("shift", c7, SHIFT_GRID, ref, spin,
+                     (RC0 + 1, RC0 + 16), (RC0 + 5, RC0 + 16))
     ts, bar, rel, interior = _readout_path(pts, ref, SHIFT_GRID)
-    out = {"protocol": "2D-pin v7: r(C3-H18 forming) + r(C7-H18 breaking), "
+    out = {"protocol": "2D-pin v7: r(C3-H forming) + r(C7-H breaking), "
                        "concerted 3,7-H shift", "ref_e_h": ref,
            "rel_kcal": rel, "interior": bool(interior), "dft_barrier": bar}
     if ts is not None and interior and bar is not None and 0 < bar < 100:
         out["ts_atoms"] = [[sy, [round(x, 6) for x in c]]
                            for sy, c in ts["atoms"]]
         try:
-            lab = ["Cr 3d", "3 C 2p", "7 C 2p", "18 H 1s"]
-            n_ts = nevpt2_point(ts["atoms"], spin, labels=lab)
-            n_r = nevpt2_point(c7, spin, labels=lab)
+            lab = ["Cr 3d", f"{RC0} C 2p", f"{RC0 + 4} C 2p",
+                   f"{RC0 + 15} H 1s"]
+            n_ts = nevpt2_point(ts["atoms"], spin, labels=lab, charge=CHARGE)
+            n_r = nevpt2_point(c7, spin, labels=lab, charge=CHARGE)
             for lv in ("e_casscf", "e_nevpt2"):
                 out[lv.replace("e_", "") + "_barrier"] = round(
                     (n_ts[lv] - n_r[lv]) * HARTREE_KCAL, 2)
         except Exception as e:
             out["nevpt2_error"] = str(e)[:200]
-        # спин-кроссовер: та же геометрия, соседняя чётная поверхность 2S=2
+        # спин-кроссовер: та же геометрия, соседняя поверхность (±2 по 2S)
         try:
-            alt = 2 if spin == 4 else 4
-            gap_ts = (float(uks(M(ts["atoms"], alt)).e_tot)
+            alt = spin - 2 if spin >= 2 else spin + 2
+            gap_ts = (float(uks(M(ts["atoms"], alt, CHARGE)).e_tot)
                       - ts["e_h"]) * HARTREE_KCAL
-            gap_r = (float(uks(M(c7, alt)).e_tot) - ref) * HARTREE_KCAL
+            gap_r = (float(uks(M(c7, alt, CHARGE)).e_tot) - ref) * HARTREE_KCAL
             out["spin_crossover"] = {
                 "alt_2S": alt, "gap_ts_kcal": round(gap_ts, 2),
                 "gap_ref_kcal": round(gap_r, 2),
@@ -587,7 +642,7 @@ def stage_shift():
             out["spin_crossover_error"] = str(e)[:200]
     else:
         out["failed"] = "TS not interior/unphysical"
-    with open(os.path.join(DIR, "lao_cr_shift_result.json"), "w") as f:
+    with open(os.path.join(DIR, f"lao_cr_shift_result{SUF}.json"), "w") as f:
         json.dump(out, f, indent=1)
     print("[shift]", json.dumps({k: v for k, v in out.items()
                                  if k != "ts_atoms"})[:400], flush=True)

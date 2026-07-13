@@ -31,14 +31,16 @@ BRANCH = os.environ.get("LAO_BRANCH") or subprocess.run(
     text=True).stdout.strip()
 MAX_MIN = int(os.environ.get("LAO_MAX_MIN", "420"))
 STAGES = os.environ.get("LAO_STAGES", "spins int")
+MODEL = os.environ.get("LAO_MODEL", "neutral")   # neutral | cation (v8)
+SUF = "_cat" if MODEL == "cation" else ""
 # spins не резюмится файлом → его выход чистим; int резюмится ПО-ТЭГОВО
 # (тег без nevpt2-блока пересчитывается) → int.json сохраняем (c5 готов)
-_OUT = {"spins": "routes/lao_cr_spins.json", "int": "",
-        "bhe": "routes/lao_cr_bhe_result.json",
-        "bhe2": "routes/lao_cr_bhe_result.json",
-        "ins": "routes/lao_cr_ins_result.json",
-        "shift": "routes/lao_cr_shift_result.json",
-        "desc": "routes/lao_cr_desc_results.json"}
+_OUT = {"spins": f"routes/lao_cr_spins{SUF}.json", "int": "",
+        "bhe": f"routes/lao_cr_bhe_result{SUF}.json",
+        "bhe2": f"routes/lao_cr_bhe_result{SUF}.json",
+        "ins": f"routes/lao_cr_ins_result{SUF}.json",
+        "shift": f"routes/lao_cr_shift_result{SUF}.json",
+        "desc": f"routes/lao_cr_desc_results{SUF}.json"}
 RM_FILES = " ".join(f for f in (_OUT[s] for s in STAGES.split()) if f) or "/dev/null"
 JOB_MIN = MAX_MIN - 20
 STAGE_TO = max(300, JOB_MIN // 2 - 20)
@@ -66,10 +68,11 @@ for i in 1 2 3; do (cd /root && timeout 10m git clone --depth 1 -b {BRANCH} {REP
 cd /root/repo || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 python3 -c "import pyscf" || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 rm -f {RM_FILES}
-for f in lao_cr_bhe.json lao_cr_bhe2.json lao_cr_ins.json lao_cr_shift.json; do aws s3 cp $S3/$f routes/$f || true; done
+for f in lao_cr_bhe{SUF}.json lao_cr_bhe2{SUF}.json lao_cr_ins{SUF}.json lao_cr_shift{SUF}.json; do aws s3 cp $S3/$f routes/$f || true; done
 mkdir -p /root/scratch
 export PYSCF_TMPDIR=/root/scratch
 export OMP_NUM_THREADS=$(nproc)
+export LAO_MODEL={MODEL}
 sync_up() {{ aws s3 cp routes/ $S3/ --recursive --exclude '*' --include 'lao_cr_*.json' >/dev/null 2>&1 || true; aws s3 cp /root/repo/lao.log $S3/lao.log >/dev/null 2>&1 || true; }}
 ( while true; do sleep 120; sync_up; done ) &
 for st in {STAGES}; do
