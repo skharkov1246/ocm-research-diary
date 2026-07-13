@@ -399,16 +399,23 @@ def stage_desc():
             return {"failed": "no result file (stage killed/failed)"}
     b = _load("bhe")
     i = _load("ins")
-    res = {"descriptor": "ddE_LAO = E‡(insertion) − E‡(beta-H elim); "
-                         ">0 = selective 1-hexene (LAO/PAO)",
+    sh = _load("shift")
+    res = {"descriptor": "ddE_LAO = E‡(insertion/growth) − E‡(hexene exit); "
+                         ">0 = selective 1-hexene (LAO/PAO). Exit = concerted "
+                         "3,7-H shift (v7); beta-H via (Cr-H,C-H) = no-verdict",
            "bhe": {k: b.get(k) for k in ("dft_barrier", "casscf_barrier",
                                          "nevpt2_barrier", "interior", "failed")},
+           "shift": {k: sh.get(k) for k in ("dft_barrier", "casscf_barrier",
+                                            "nevpt2_barrier", "interior",
+                                            "spin_crossover", "failed")},
            "ins": {k: i.get(k) for k in ("dft_barrier", "casscf_barrier",
                                          "nevpt2_barrier", "interior", "failed")}}
     for lv in ("dft", "casscf", "nevpt2"):
-        bb, ii = b.get(f"{lv}_barrier"), i.get(f"{lv}_barrier")
-        if bb is not None and ii is not None:
-            res[f"ddE_{lv}"] = round(ii - bb, 2)
+        ii = i.get(f"{lv}_barrier")
+        for tag, d in (("shift", sh), ("bhe", b)):
+            ee = d.get(f"{lv}_barrier")
+            if ee is not None and ii is not None:
+                res[f"ddE_{lv}_vs_{tag}"] = round(ii - ee, 2)
     with open(os.path.join(DIR, "lao_cr_desc_results.json"), "w") as f:
         json.dump(res, f, indent=1)
     print(json.dumps(res, indent=1, ensure_ascii=False))
@@ -530,8 +537,64 @@ def stage_bhe2():
                                 if k != "ts_atoms"})[:400], flush=True)
 
 
+SHIFT_GRID = ((2.60, 1.10), (2.30, 1.11), (2.00, 1.13), (1.75, 1.17),
+              (1.55, 1.24), (1.40, 1.34), (1.28, 1.48), (1.18, 1.68),
+              (1.12, 1.95))
+# v7: согласованный 3,7-H сдвиг — литературный канал выхода 1-гексена из
+# хромациклогептана (Cr-тримеризация Phillips/Sasol): H с бета-C одного плеча
+# кольца переносится НАПРЯМУЮ на альфа-C другого плеча, минуя Cr–H гидрид.
+# Координата-якорь — ФОРМИРУЮЩАЯСЯ C···H (pinA стягивается), рвущаяся C–H
+# (pinB) растёт вслед; в отличие от пары (Cr–H, C–H) v5/v6 водород всегда
+# заякорен хотя бы одной короткой связью — против развалов SCF за 1.6 A.
+# Атомы (0-based, релакс c7): донор C7 (H18, 2.73 A до акцептора), акцептор C3.
+
+
+def stage_shift():
+    """v7: выход 1-гексена согласованным 3,7-H сдвигом, 2D-пин
+    r(C3–H18 форм.) + r(C7–H18 разрыв), 1-based (4,19)+(8,19).
+    Спин-кроссовер: UKS-одноточки 2S=2 на TS- и ref-геометриях."""
+    c7, spin = _c7_relaxed()
+    mf_ref = uks(M(c7, spin))
+    ref = float(mf_ref.e_tot)
+    pts, _ = _scan2d("shift", c7, SHIFT_GRID, ref, spin, (4, 19), (8, 19))
+    ts, bar, rel, interior = _readout_path(pts, ref, SHIFT_GRID)
+    out = {"protocol": "2D-pin v7: r(C3-H18 forming) + r(C7-H18 breaking), "
+                       "concerted 3,7-H shift", "ref_e_h": ref,
+           "rel_kcal": rel, "interior": bool(interior), "dft_barrier": bar}
+    if ts is not None and interior and bar is not None and 0 < bar < 100:
+        out["ts_atoms"] = [[sy, [round(x, 6) for x in c]]
+                           for sy, c in ts["atoms"]]
+        try:
+            lab = ["Cr 3d", "3 C 2p", "7 C 2p", "18 H 1s"]
+            n_ts = nevpt2_point(ts["atoms"], spin, labels=lab)
+            n_r = nevpt2_point(c7, spin, labels=lab)
+            for lv in ("e_casscf", "e_nevpt2"):
+                out[lv.replace("e_", "") + "_barrier"] = round(
+                    (n_ts[lv] - n_r[lv]) * HARTREE_KCAL, 2)
+        except Exception as e:
+            out["nevpt2_error"] = str(e)[:200]
+        # спин-кроссовер: та же геометрия, соседняя чётная поверхность 2S=2
+        try:
+            alt = 2 if spin == 4 else 4
+            gap_ts = (float(uks(M(ts["atoms"], alt)).e_tot)
+                      - ts["e_h"]) * HARTREE_KCAL
+            gap_r = (float(uks(M(c7, alt)).e_tot) - ref) * HARTREE_KCAL
+            out["spin_crossover"] = {
+                "alt_2S": alt, "gap_ts_kcal": round(gap_ts, 2),
+                "gap_ref_kcal": round(gap_r, 2),
+                "crossing_at_ts": bool(gap_ts < 0)}
+        except Exception as e:
+            out["spin_crossover_error"] = str(e)[:200]
+    else:
+        out["failed"] = "TS not interior/unphysical"
+    with open(os.path.join(DIR, "lao_cr_shift_result.json"), "w") as f:
+        json.dump(out, f, indent=1)
+    print("[shift]", json.dumps({k: v for k, v in out.items()
+                                 if k != "ts_atoms"})[:400], flush=True)
+
+
 if __name__ == "__main__":
     st = sys.argv[1] if len(sys.argv) > 1 else "sanity"
     {"spins": stage_spins, "int": stage_int, "sanity": stage_sanity,
      "bhe": stage_bhe, "bhe2": stage_bhe2, "ins": stage_ins,
-     "desc": stage_desc}[st]()
+     "shift": stage_shift, "desc": stage_desc}[st]()

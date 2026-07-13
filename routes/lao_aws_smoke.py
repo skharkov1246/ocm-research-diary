@@ -37,6 +37,7 @@ _OUT = {"spins": "routes/lao_cr_spins.json", "int": "",
         "bhe": "routes/lao_cr_bhe_result.json",
         "bhe2": "routes/lao_cr_bhe_result.json",
         "ins": "routes/lao_cr_ins_result.json",
+        "shift": "routes/lao_cr_shift_result.json",
         "desc": "routes/lao_cr_desc_results.json"}
 RM_FILES = " ".join(f for f in (_OUT[s] for s in STAGES.split()) if f) or "/dev/null"
 JOB_MIN = MAX_MIN - 20
@@ -65,7 +66,7 @@ for i in 1 2 3; do (cd /root && timeout 10m git clone --depth 1 -b {BRANCH} {REP
 cd /root/repo || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 python3 -c "import pyscf" || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 rm -f {RM_FILES}
-for f in lao_cr_bhe.json lao_cr_bhe2.json lao_cr_ins.json; do aws s3 cp $S3/$f routes/$f || true; done
+for f in lao_cr_bhe.json lao_cr_bhe2.json lao_cr_ins.json lao_cr_shift.json; do aws s3 cp $S3/$f routes/$f || true; done
 mkdir -p /root/scratch
 export PYSCF_TMPDIR=/root/scratch
 export OMP_NUM_THREADS=$(nproc)
@@ -155,6 +156,7 @@ def main():
             try:
                 s3.head_object(Bucket=BUCKET, Key=f"{PREFIX}/DONE")
                 for f in ("lao_cr_bhe_result.json", "lao_cr_ins_result.json",
+                          "lao_cr_shift_result.json", "lao_cr_shift.json",
                           "lao_cr_desc_results.json"):
                     try:
                         s3.download_file(BUCKET, f"{PREFIX}/{f}", f"routes/{f}")
