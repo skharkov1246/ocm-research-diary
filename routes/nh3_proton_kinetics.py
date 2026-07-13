@@ -73,13 +73,18 @@ def scf(atoms, spin):
         e = mfn.kernel(mf.mo_coeff, mf.mo_occ); mf.converged = bool(mfn.converged); e = float(mfn.e_tot)
     return float(e), bool(mf.converged)
 
+def _mindist(a, k):
+    p = np.array(a[k][1])
+    return min(np.linalg.norm(p - np.array(a[m][1])) for m in range(len(a)) if m != k)
+
 def constrained_relax(atoms, spin, i, j, d, maxsteps=30):
-    """Заморозить расстояние атомов i,j = d (Å), релаксировать остальное."""
-    a = [[el, tuple(xyz)] for el, xyz in atoms]
-    # выставить мишень-H на нужную длину вдоль текущего направления
+    """Заморозить расстояние атомов i,j = d (Å), релаксировать; вернуть (e,conv,geo)."""
+    a = [[el, tuple(map(float, xyz))] for el, xyz in atoms]
     p_i = np.array(a[i][1]); p_j = np.array(a[j][1])
     v = p_j - p_i; v = v / (np.linalg.norm(v) + 1e-9)
     a[j] = [a[j][0], tuple(p_i + v * d)]
+    if _mindist(a, j) < 0.7:                    # H налез на атом — точка невалидна
+        return None, False, None
     mol = gto.M(atom=a, basis="def2-svp", spin=spin, charge=0, verbose=0)
     mf = mkmf(mol)
     fd, cf = tempfile.mkstemp(dir=HERE, suffix=".txt")
@@ -87,32 +92,52 @@ def constrained_relax(atoms, spin, i, j, d, maxsteps=30):
         f.write(f"$freeze\ndistance {i+1} {j+1}\n")     # geomeTRIC 1-индексация
     try:
         meq = optimize(mf, constraints=cf, maxsteps=maxsteps)
-        e, conv = scf([[meq.atom_symbol(k),
-                        tuple(float(x) for x in meq.atom_coord(k, unit="Angstrom"))]
-                       for k in range(meq.natm)], spin)
-        return e, conv
+        geo = [[meq.atom_symbol(k),
+                tuple(float(x) for x in meq.atom_coord(k, unit="Angstrom"))] for k in range(meq.natm)]
+        e, conv = scf(geo, spin)
+        return e, conv, geo
     except Exception as exc:
-        say(f"      relax d={d} FAILED ({type(exc).__name__}: {str(exc)[:50]}) -> SP")
-        return scf(a, spin)
+        say(f"      relax d={d} FAILED ({type(exc).__name__}: {str(exc)[:50]})")
+        try:
+            e, conv = scf(a, spin); return e, conv, a
+        except Exception:
+            return None, False, None
     finally:
         try: os.remove(cf)
         except Exception: pass
 
 def channel(atoms0, spin0, target_idx, label, store, save, grid):
-    """Скан d(H–target); H = добавленный последний атом."""
+    """Скан d(H–target) с warm-chain; H = последний атом, посадка с зазором."""
     coords = np.array([x[1] for x in atoms0], float)
-    t = coords[target_idx]; out = t - coords.mean(0); out = out / (np.linalg.norm(out) + 1e-9)
-    base = atoms0 + [["H", tuple(t + out * 2.2)]]
+    t = coords[target_idx]; cen = coords.mean(0)
+    # выбрать направление посадки H с максимальным зазором до других атомов
+    cands = [t - cen, np.array([0, 0, 1.0]), np.array([0, 0, -1.0]),
+             np.array([1.0, 0, 0]), np.array([0, 1.0, 0]), np.array([0, 0, 1.0]) + (t - cen)]
+    best = None
+    for dvec in cands:
+        nrm = np.linalg.norm(dvec)
+        if nrm < 1e-3: continue                     # t≈cen (μ4-N в центре) — вырожденное направление
+        dvec = dvec / nrm
+        hp = t + dvec * 2.2
+        md = min(np.linalg.norm(hp - coords[m]) for m in range(len(coords)))
+        if not np.isfinite(md): continue
+        if best is None or md > best[0]: best = (md, hp)
+    if best is None:                                 # фолбэк: строго вверх
+        best = (2.2, t + np.array([0, 0, 2.2]))
+    base = atoms0 + [["H", tuple(best[1])]]
     h_idx = len(base) - 1
-    sp = (spin0 + 1) if (spin0 == 0) else (spin0 - 1)   # +H меняет чётность; берём разумный
+    sp = (spin0 + 1) if (spin0 == 0) else (spin0 - 1)   # +H меняет чётность
     blk = store.setdefault(label, {"points": {}, "target_idx": target_idx})
+    cur = base
     for d in grid:
         dk = f"{d:.2f}"
         if blk["points"].get(dk, {}).get("e") is not None: continue
         t0 = time.time()
-        e, conv = constrained_relax(base, sp, target_idx, h_idx, d)
-        blk["points"][dk] = {"e": round(e, 6), "converged": conv, "t_s": round(time.time()-t0, 1)}
-        say(f"    [{label}] d={dk}Å: E={e:.5f} conv={conv} ({blk['points'][dk]['t_s']}s)")
+        e, conv, geo = constrained_relax(cur, sp, target_idx, h_idx, d)
+        blk["points"][dk] = ({"e": round(e, 6), "converged": conv, "t_s": round(time.time()-t0, 1)}
+                             if e is not None else {"e": None, "converged": False})
+        if geo is not None: cur = geo               # warm-chain от предыдущей геометрии
+        say(f"    [{label}] d={dk}Å: E={e if e is None else round(e,5)} conv={conv} ({round(time.time()-t0,1)}s)")
         save()
     pts = sorted((float(k), v["e"]) for k, v in blk["points"].items() if v.get("converged"))
     if len(pts) >= 3:
