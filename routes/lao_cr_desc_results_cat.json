@@ -22,10 +22,18 @@
   "failed": null
  },
  "ins": {
-  "dft_barrier": null,
+  "dft_barrier": -13.73,
   "casscf_barrier": null,
   "nevpt2_barrier": null,
-  "interior": null,
-  "failed": "no result file (stage killed/failed)"
- }
+  "dft_barrier_intrinsic": 12.27,
+  "casscf_barrier_intrinsic": 25.12,
+  "nevpt2_barrier_intrinsic": 8.39,
+  "pi_complex_rel_kcal": -26.0,
+  "interior": true,
+  "barrier_note": "submerged vs separated reactants; intrinsic barrier from pi-complex",
+  "failed": null
+ },
+ "ddE_dft_vs_shift": -6.68,
+ "ddE_casscf_vs_shift": -15.06,
+ "ddE_nevpt2_vs_shift": -17.05
 }

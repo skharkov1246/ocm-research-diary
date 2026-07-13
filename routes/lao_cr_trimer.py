@@ -459,10 +459,11 @@ def stage_desc():
                "nevpt2_barrier_intrinsic", "pi_complex_rel_kcal",
                "interior", "barrier_note", "failed")}}
     for lv in ("dft", "casscf", "nevpt2"):
-        # для катиона вставка «подводная» => берём intrinsic барьер от π-комплекса
-        ii = i.get(f"{lv}_barrier")
+        # для катиона вставка «подводная» (barrier<0 от разнесённых реагентов) =>
+        # intrinsic барьер от π-комплекса в приоритете, когда он посчитан
+        ii = i.get(f"{lv}_barrier_intrinsic")
         if ii is None:
-            ii = i.get(f"{lv}_barrier_intrinsic")
+            ii = i.get(f"{lv}_barrier")
         for tag, d in (("shift", sh), ("bhe", b)):
             ee = d.get(f"{lv}_barrier")
             if ee is not None and ii is not None:
