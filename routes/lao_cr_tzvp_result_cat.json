@@ -1,0 +1,25 @@
+{
+ "model": "cation",
+ "basis": "def2-tzvp",
+ "note": "TZVP//SVP single-points",
+ "shift_casscf_tzvp": 26.69,
+ "ins_casscf_tzvp": 26.56,
+ "ddE_casscf_tzvp": -0.13,
+ "shift_nevpt2_tzvp": 17.41,
+ "ins_nevpt2_tzvp": 11.18,
+ "ddE_nevpt2_tzvp": -6.23,
+ "cas_shift": [
+  15,
+  12
+ ],
+ "cas_ins": [
+  13,
+  11
+ ],
+ "pi_complex_pin": 2.8,
+ "svp_ref": {
+  "shift_nevpt2": 25.44,
+  "ins_nevpt2": 8.39,
+  "ddE_nevpt2_svp": -17.05
+ }
+}
