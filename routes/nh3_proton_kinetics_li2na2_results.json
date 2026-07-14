@@ -1,0 +1,97 @@
+{
+ "meta": {
+  "compo": "Li2Na2",
+  "xc": "pbe",
+  "what": "distinguished-coordinate H-atom-transfer barriers on M4N: channel N (nitride protonation -> NH3) vs channel M (H* on metal -> HER); selectivity = barrier_M - barrier_N; UKS-PBE/def2-SVP+DF, frozen d(H-target)",
+  "limits": "neutral HAT proxy for PCET (no potential/solvent); distinguished coordinate != true saddle (upper bound); frozen scaffold; cluster; measures kinetic PREFERENCE N-vs-metal, not absolute rate"
+ },
+ "channels": {
+  "N": {
+   "points": {
+    "2.20": {
+     "e": -394.433306,
+     "converged": true,
+     "t_s": 43.6
+    },
+    "1.90": {
+     "e": -394.432294,
+     "converged": true,
+     "t_s": 42.0
+    },
+    "1.70": {
+     "e": -394.432583,
+     "converged": true,
+     "t_s": 36.3
+    },
+    "1.50": {
+     "e": -394.437393,
+     "converged": true,
+     "t_s": 36.1
+    },
+    "1.30": {
+     "e": -394.473031,
+     "converged": true,
+     "t_s": 132.7
+    },
+    "1.15": {
+     "e": -394.489261,
+     "converged": true,
+     "t_s": 168.4
+    },
+    "1.00": {
+     "e": -394.491384,
+     "converged": true,
+     "t_s": 131.2
+    }
+   },
+   "target_idx": 4,
+   "barrier_eV": 1.6079,
+   "d_at_max_A": 1.9
+  },
+  "M": {
+   "points": {
+    "2.20": {
+     "e": -394.418164,
+     "converged": true,
+     "t_s": 62.5
+    },
+    "1.90": {
+     "e": -394.426567,
+     "converged": true,
+     "t_s": 39.0
+    },
+    "1.70": {
+     "e": -394.428815,
+     "converged": true,
+     "t_s": 39.6
+    },
+    "1.50": {
+     "e": -394.424547,
+     "converged": true,
+     "t_s": 39.9
+    },
+    "1.30": {
+     "e": -394.407098,
+     "converged": true,
+     "t_s": 42.6
+    },
+    "1.15": {
+     "e": -394.378078,
+     "converged": true,
+     "t_s": 47.1
+    },
+    "1.00": {
+     "e": -394.325283,
+     "converged": true,
+     "t_s": 52.5
+    }
+   },
+   "target_idx": 0,
+   "barrier_eV": 0.0,
+   "d_at_max_A": 1.0
+  }
+ },
+ "selectivity_eV": -1.6079,
+ "N_protonation_wins": false,
+ "status": "ok"
+}

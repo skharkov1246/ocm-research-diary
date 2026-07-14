@@ -1,0 +1,137 @@
+{
+ "meta": {
+  "what": "[Fe(NH3)4(O2)] end-on; scan whole-complex spin 2S=0,2,4 in axial field; descriptors E(spin,F), spin gap and dGap/dF, Mulliken q(O2); UKS-pbe/def2-SVP+DF; looks for FIELD-INDUCED spin-ground-state switch",
+  "limits": "PBE spin gaps are functional-sensitive & unreliable in absolute terms -> probe measures SENSITIVITY of the gap to field, not the gap itself; cluster, gas phase, frozen idealized scaffold; v1",
+  "fields_au": [
+   0.0,
+   0.005,
+   -0.005,
+   0.01,
+   -0.01
+  ],
+  "spins_2S": [
+   0,
+   1,
+   2,
+   3,
+   4
+  ],
+  "metal": "Mn",
+  "spins_used": [
+   1,
+   3
+  ]
+ },
+ "scan": {
+  "+0.000": {
+   "2S=1": {
+    "e": -1526.172644,
+    "converged": true,
+    "q_O2": -0.3730287125679954,
+    "t_s": 328.8
+   },
+   "2S=3": {
+    "e": -1526.20137,
+    "converged": true,
+    "q_O2": 0.6769414945737422,
+    "t_s": 514.1
+   }
+  },
+  "+0.005": {
+   "2S=1": {
+    "e": -1525.789907,
+    "converged": true,
+    "q_O2": 0.44228488529325816,
+    "t_s": 306.2
+   },
+   "2S=3": {
+    "e": -1525.823074,
+    "converged": true,
+    "q_O2": -0.4146281695243328,
+    "t_s": 494.5
+   }
+  },
+  "-0.005": {
+   "2S=1": {
+    "e": -1526.552035,
+    "converged": true,
+    "q_O2": -0.5256770949048146,
+    "t_s": 544.9
+   },
+   "2S=3": {
+    "e": -1526.554042,
+    "converged": true,
+    "q_O2": 0.6401267646398434,
+    "t_s": 363.3
+   }
+  },
+  "+0.010": {
+   "2S=1": {
+    "e": -1525.418791,
+    "converged": true,
+    "q_O2": -0.33524802076446036,
+    "t_s": 425.1
+   },
+   "2S=3": {
+    "e": -1525.447457,
+    "converged": true,
+    "q_O2": -0.364902049965254,
+    "t_s": 182.9
+   }
+  },
+  "-0.010": {
+   "2S=1": {
+    "e": -1526.935525,
+    "converged": true,
+    "q_O2": -0.6060242148807191,
+    "t_s": 739.5
+   },
+   "2S=3": {
+    "e": -1526.920421,
+    "converged": true,
+    "q_O2": 0.6029542255035274,
+    "t_s": 284.3
+   }
+  }
+ },
+ "summary_rows": [
+  {
+   "field_V_per_A": -0.514,
+   "ground_2S": 1,
+   "gap_2S3_minus_2S1_eV": 0.411,
+   "q_O2_ground": -0.6060242148807191
+  },
+  {
+   "field_V_per_A": -0.257,
+   "ground_2S": 3,
+   "gap_2S3_minus_2S1_eV": -0.0546,
+   "q_O2_ground": 0.6401267646398434
+  },
+  {
+   "field_V_per_A": 0.0,
+   "ground_2S": 3,
+   "gap_2S3_minus_2S1_eV": -0.7817,
+   "q_O2_ground": 0.6769414945737422
+  },
+  {
+   "field_V_per_A": 0.257,
+   "ground_2S": 3,
+   "gap_2S3_minus_2S1_eV": -0.9025,
+   "q_O2_ground": -0.4146281695243328
+  },
+  {
+   "field_V_per_A": 0.514,
+   "ground_2S": 3,
+   "gap_2S3_minus_2S1_eV": -0.78,
+   "q_O2_ground": -0.364902049965254
+  }
+ ],
+ "switching_pair_2S": [
+  1,
+  3
+ ],
+ "ground_switches_with_field": true,
+ "dGap_dF_eV_per_VA": -1.2568,
+ "dqO2_dF_e_per_VA": -0.2228,
+ "status": "ok"
+}
