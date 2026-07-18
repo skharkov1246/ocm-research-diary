@@ -1,0 +1,97 @@
+{
+ "meta": {
+  "compo": "Li",
+  "xc": "pbe",
+  "what": "distinguished-coordinate H-atom-transfer barriers on M4N: channel N (nitride protonation -> NH3) vs channel M (H* on metal -> HER); selectivity = barrier_M - barrier_N; UKS-PBE/def2-SVP+DF, frozen d(H-target)",
+  "limits": "neutral HAT proxy for PCET (no potential/solvent); distinguished coordinate != true saddle (upper bound); frozen scaffold; cluster; measures kinetic PREFERENCE N-vs-metal, not absolute rate"
+ },
+ "channels": {
+  "N": {
+   "points": {
+    "2.20": {
+     "e": -85.199337,
+     "converged": true,
+     "t_s": 36.6
+    },
+    "1.90": {
+     "e": -85.193399,
+     "converged": true,
+     "t_s": 35.0
+    },
+    "1.70": {
+     "e": -85.190212,
+     "converged": true,
+     "t_s": 33.6
+    },
+    "1.50": {
+     "e": -85.192268,
+     "converged": true,
+     "t_s": 30.2
+    },
+    "1.30": {
+     "e": -85.203462,
+     "converged": true,
+     "t_s": 25.2
+    },
+    "1.15": {
+     "e": -85.215009,
+     "converged": true,
+     "t_s": 145.4
+    },
+    "1.00": {
+     "e": -85.216568,
+     "converged": true,
+     "t_s": 158.9
+    }
+   },
+   "target_idx": 4,
+   "barrier_eV": 0.7172,
+   "d_at_max_A": 1.7
+  },
+  "M": {
+   "points": {
+    "2.20": {
+     "e": -85.193983,
+     "converged": true,
+     "t_s": 36.4
+    },
+    "1.90": {
+     "e": -85.202819,
+     "converged": true,
+     "t_s": 30.4
+    },
+    "1.70": {
+     "e": -85.205325,
+     "converged": true,
+     "t_s": 25.7
+    },
+    "1.50": {
+     "e": -85.201276,
+     "converged": true,
+     "t_s": 25.9
+    },
+    "1.30": {
+     "e": -85.183986,
+     "converged": true,
+     "t_s": 26.4
+    },
+    "1.15": {
+     "e": -85.155004,
+     "converged": true,
+     "t_s": 25.0
+    },
+    "1.00": {
+     "e": -85.102119,
+     "converged": true,
+     "t_s": 25.0
+    }
+   },
+   "target_idx": 0,
+   "barrier_eV": 0.0,
+   "d_at_max_A": 1.0
+  }
+ },
+ "selectivity_eV": -0.7172,
+ "N_protonation_wins": false,
+ "status": "ok"
+}
