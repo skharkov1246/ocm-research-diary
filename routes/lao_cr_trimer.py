@@ -49,8 +49,9 @@ RC0 = 1 if CAT else 3           # 0-based индекс первого кольц
 N0 = RC0 + 18                   # 21 neutral / 19 cation
 
 
-def M(atoms, spin, charge=0):
-    return gto.M(atom=atoms, basis=BASIS, ecp=BASIS, charge=charge, spin=spin,
+def M(atoms, spin, charge=0, basis=None):
+    b = basis or BASIS
+    return gto.M(atom=atoms, basis=b, ecp=b, charge=charge, spin=spin,
                  verbose=0, max_memory=8000)
 
 
@@ -118,9 +119,11 @@ def relax(atoms, spin, maxsteps=150, charge=0):
     return na, mfx
 
 
-def nevpt2_point(atoms, spin, thr=0.5, labels=None, charge=0):
-    mol = M(atoms, spin, charge)
-    mol.max_memory = 24000     # c7 (211 AO) уронил NEVPT2 по MemoryError на 8 ГБ
+def nevpt2_point(atoms, spin, thr=0.5, labels=None, charge=0, basis=None,
+                 mem=24000):
+    mol = M(atoms, spin, charge, basis=basis)
+    mol.max_memory = mem       # c7 (211 AO) уронил NEVPT2 по MemoryError на 8 ГБ;
+    #                            TZVP (~2× AO) требует больше — mem прокидывается
     mf = rohf(mol)
     ncas, nelec, mo = avas.avas(mf, labels or ["Cr 3d"], threshold=thr)
     ss = spin / 2 * (spin / 2 + 1)
@@ -648,8 +651,67 @@ def stage_shift():
                                  if k != "ts_atoms"})[:400], flush=True)
 
 
+def stage_tzvp():
+    """TZVP//SVP-чек базис-устойчивости флагманских барьеров и дескриптора.
+    Single-points def2-TZVP на SVP-геометриях (без ре-оптимизации): выход
+    (3,7-сдвиг, TS − c7) и вставка (intrinsic, TS − π-комплекс) — те же CAS,
+    что в SVP-прогоне. Проверяем: выживает ли магнитуда ddE и расхождение M."""
+    TZ = "def2-tzvp"
+    MEM = int(os.environ.get("LAO_MEM", "120000"))
+    c7, spin = _c7_relaxed()
+
+    sh = json.load(open(os.path.join(DIR, f"lao_cr_shift_result{SUF}.json")))
+    ins = json.load(open(os.path.join(DIR, f"lao_cr_ins_result{SUF}.json")))
+    scan = json.load(open(os.path.join(DIR, f"lao_cr_ins{SUF}.json")))
+    sh_ts = [(s, tuple(c)) for s, c in sh["ts_atoms"]]
+    ins_ts = [(s, tuple(c)) for s, c in ins["ins_ts_atoms_intrinsic"]]
+    # π-комплекс = точка скана с pin == ins["pi_complex_rel_kcal"]-минимумом:
+    # это самый глубокий предвставочный узел (наибольший pin из сошедшихся).
+    conv = [p for p in scan["pts"] if p["conv"]]
+    pi_pt = max(conv, key=lambda p: p["pin"])
+    pi_atoms = [(s, tuple(c)) for s, c in pi_pt["atoms"]]
+
+    sh_lab = ["Cr 3d", f"{RC0} C 2p", f"{RC0 + 4} C 2p", f"{RC0 + 15} H 1s"]
+    ins_lab = ["Cr 3d", f"{N0} C 2p", f"{N0 + 1} C 2p"]
+
+    def nz(atoms, lab):
+        return nevpt2_point(atoms, spin, labels=lab, charge=CHARGE,
+                            basis=TZ, mem=MEM)
+
+    out = {"model": MODEL, "basis": TZ, "note": "TZVP//SVP single-points"}
+    try:
+        n_sh_ts, n_c7 = nz(sh_ts, sh_lab), nz(c7, sh_lab)
+        n_in_ts, n_pi = nz(ins_ts, ins_lab), nz(pi_atoms, ins_lab)
+        for lv, key in (("e_casscf", "casscf"), ("e_nevpt2", "nevpt2")):
+            shift_b = (n_sh_ts[lv] - n_c7[lv]) * HARTREE_KCAL
+            ins_b = (n_in_ts[lv] - n_pi[lv]) * HARTREE_KCAL
+            out[f"shift_{key}_tzvp"] = round(shift_b, 2)
+            out[f"ins_{key}_tzvp"] = round(ins_b, 2)
+            out[f"ddE_{key}_tzvp"] = round(ins_b - shift_b, 2)
+        out["cas_shift"] = n_c7.get("cas")
+        out["cas_ins"] = n_pi.get("cas")
+        out["pi_complex_pin"] = pi_pt["pin"]
+        # сверка с SVP
+        out["svp_ref"] = {
+            "shift_nevpt2": sh.get("nevpt2_barrier"),
+            "ins_nevpt2": ins.get("nevpt2_barrier_intrinsic"),
+            "ddE_nevpt2_svp": (round(ins.get("nevpt2_barrier_intrinsic")
+                                     - sh.get("nevpt2_barrier"), 2)
+                               if ins.get("nevpt2_barrier_intrinsic") is not None
+                               and sh.get("nevpt2_barrier") is not None else None)}
+    except Exception as e:
+        import traceback
+        out["error"] = str(e)[:300]
+        out["trace"] = traceback.format_exc()[-600:]
+    with open(os.path.join(DIR, f"lao_cr_tzvp_result{SUF}.json"), "w") as f:
+        json.dump(out, f, indent=1)
+    print("[tzvp]", json.dumps({k: v for k, v in out.items()
+                                if k != "trace"}, ensure_ascii=False)[:500],
+          flush=True)
+
+
 if __name__ == "__main__":
     st = sys.argv[1] if len(sys.argv) > 1 else "sanity"
     {"spins": stage_spins, "int": stage_int, "sanity": stage_sanity,
      "bhe": stage_bhe, "bhe2": stage_bhe2, "ins": stage_ins,
-     "shift": stage_shift, "desc": stage_desc}[st]()
+     "shift": stage_shift, "desc": stage_desc, "tzvp": stage_tzvp}[st]()

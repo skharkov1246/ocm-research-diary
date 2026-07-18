@@ -1,0 +1,12 @@
+{
+ "basis": "def2-tzvp",
+ "level": "UKS-PBE0//SVP",
+ "shift_dft_tzvp": 17.83,
+ "ins_dft_tzvp": 13.32,
+ "ddE_dft_tzvp": -4.51,
+ "svp_ref": {
+  "shift": 18.95,
+  "ins": 12.27,
+  "ddE": -6.68
+ }
+}
