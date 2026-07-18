@@ -1,0 +1,394 @@
+{
+ "meta": {
+  "what": "C-H abstraction barrier of CH4 by [FeO]+ oxo vs axial field (0,+-0.51 V/A); RIGID d(O-H) scan, density warm-chain (field-shifts honest, absolute barrier overestimated); does field move HAT barrier/spin?",
+  "metal": "Fe",
+  "xc": "pbe",
+  "fields_au": [
+   0.0,
+   0.01,
+   -0.01
+  ],
+  "limits": "distinguished-coord = upper-bound barrier (not true saddle); functional-sensitive spins/barriers; cluster, gas phase, frozen scaffold (field-shifts honest); v1"
+ },
+ "scan": {
+  "+0.000": {
+   "2S=1": {
+    "points": {
+     "1.55": {
+      "e": -1378.400132,
+      "converged": true
+     },
+     "1.40": {
+      "e": -1378.414145,
+      "converged": true
+     },
+     "1.28": {
+      "e": -1378.412791,
+      "converged": true
+     },
+     "1.18": {
+      "e": -1378.410004,
+      "converged": true
+     },
+     "1.08": {
+      "e": -1378.407307,
+      "converged": true
+     },
+     "1.00": {
+      "e": -1378.403142,
+      "converged": true
+     }
+    },
+    "barrier_eV": 0.0819
+   },
+   "2S=3": {
+    "points": {
+     "1.55": {
+      "e": -1378.430665,
+      "converged": true
+     },
+     "1.40": {
+      "e": -1378.447092,
+      "converged": true
+     },
+     "1.28": {
+      "e": -1378.448154,
+      "converged": true
+     },
+     "1.18": {
+      "e": -1378.447561,
+      "converged": true
+     },
+     "1.08": {
+      "e": -1378.446852,
+      "converged": true
+     },
+     "1.00": {
+      "e": -1378.443908,
+      "converged": true
+     }
+    },
+    "barrier_eV": 0.3604
+   },
+   "2S=5": {
+    "points": {
+     "1.55": {
+      "e": -1378.436806,
+      "converged": true
+     },
+     "1.40": {
+      "e": -1378.447026,
+      "converged": true
+     },
+     "1.28": {
+      "e": -1378.443449,
+      "converged": true
+     },
+     "1.18": {
+      "e": -1378.439896,
+      "converged": true
+     },
+     "1.08": {
+      "e": -1378.438645,
+      "converged": true
+     },
+     "1.00": {
+      "e": -1378.438194,
+      "converged": true
+     }
+    },
+    "barrier_eV": 0.0378
+   },
+   "2S=7": {
+    "points": {
+     "1.55": {
+      "e": -1378.314669,
+      "converged": true
+     },
+     "1.40": {
+      "e": -1378.343976,
+      "converged": true
+     },
+     "1.28": {
+      "e": -1378.354635,
+      "converged": true
+     },
+     "1.18": {
+      "e": -1378.36014,
+      "converged": true
+     },
+     "1.08": {
+      "e": -1378.36269,
+      "converged": true
+     },
+     "1.00": {
+      "e": -1378.360355,
+      "converged": true
+     }
+    },
+    "barrier_eV": 1.2432
+   }
+  },
+  "+0.010": {
+   "2S=1": {
+    "points": {
+     "1.55": {
+      "e": -1377.370076,
+      "converged": true
+     },
+     "1.40": {
+      "e": -1377.389784,
+      "converged": true
+     },
+     "1.28": {
+      "e": -1377.393113,
+      "converged": true
+     },
+     "1.18": {
+      "e": -1377.394101,
+      "converged": true
+     },
+     "1.08": {
+      "e": -1377.394423,
+      "converged": true
+     },
+     "1.00": {
+      "e": -1377.391863,
+      "converged": true
+     }
+    },
+    "barrier_eV": 0.5929
+   },
+   "2S=3": {
+    "points": {
+     "1.55": {
+      "e": -1377.399945,
+      "converged": true
+     },
+     "1.40": {
+      "e": -1377.422677,
+      "converged": true
+     },
+     "1.28": {
+      "e": -1377.428689,
+      "converged": true
+     },
+     "1.18": {
+      "e": -1377.431612,
+      "converged": true
+     },
+     "1.08": {
+      "e": -1377.433401,
+      "converged": true
+     },
+     "1.00": {
+      "e": -1377.431736,
+      "converged": true
+     }
+    },
+    "barrier_eV": 0.8651
+   },
+   "2S=5": {
+    "points": {
+     "1.55": {
+      "e": -1377.405211,
+      "converged": true
+     },
+     "1.40": {
+      "e": -1377.423511,
+      "converged": true
+     },
+     "1.28": {
+      "e": -1377.426032,
+      "converged": true
+     },
+     "1.18": {
+      "e": -1377.426867,
+      "converged": true
+     },
+     "1.08": {
+      "e": -1377.42925,
+      "converged": true
+     },
+     "1.00": {
+      "e": -1377.429701,
+      "converged": true
+     }
+    },
+    "barrier_eV": 0.6664
+   },
+   "2S=7": {
+    "points": {
+     "1.55": {
+      "e": -1377.315343,
+      "converged": true
+     },
+     "1.40": {
+      "e": -1377.347721,
+      "converged": true
+     },
+     "1.28": {
+      "e": -1377.359431,
+      "converged": true
+     },
+     "1.18": {
+      "e": -1377.36472,
+      "converged": true
+     },
+     "1.08": {
+      "e": -1377.366383,
+      "converged": true
+     },
+     "1.00": {
+      "e": -1377.363331,
+      "converged": true
+     }
+    },
+    "barrier_eV": 1.3058
+   }
+  },
+  "-0.010": {
+   "2S=1": {
+    "points": {
+     "1.55": {
+      "e": -1379.442471,
+      "converged": true
+     },
+     "1.40": {
+      "e": -1379.449484,
+      "converged": true
+     },
+     "1.28": {
+      "e": -1379.442422,
+      "converged": true
+     },
+     "1.18": {
+      "e": -1379.435046,
+      "converged": true
+     },
+     "1.08": {
+      "e": -1379.428493,
+      "converged": true
+     },
+     "1.00": {
+      "e": -1379.422237,
+      "converged": true
+     }
+    },
+    "barrier_eV": 0.0
+   },
+   "2S=3": {
+    "points": {
+     "1.55": {
+      "e": -1379.470493,
+      "converged": true
+     },
+     "1.40": {
+      "e": -1379.480428,
+      "converged": true
+     },
+     "1.28": {
+      "e": -1379.476568,
+      "converged": true
+     },
+     "1.18": {
+      "e": -1379.472281,
+      "converged": true
+     },
+     "1.08": {
+      "e": -1379.468681,
+      "converged": true
+     },
+     "1.00": {
+      "e": -1379.464256,
+      "converged": true
+     }
+    },
+    "barrier_eV": 0.0
+   },
+   "2S=5": {
+    "points": {
+     "1.55": {
+      "e": -1379.479728,
+      "converged": true
+     },
+     "1.40": {
+      "e": -1379.483045,
+      "converged": true
+     },
+     "1.28": {
+      "e": -1379.446335,
+      "converged": true
+     },
+     "1.18": {
+      "e": -1379.451813,
+      "converged": true
+     },
+     "1.08": {
+      "e": -1379.460201,
+      "converged": true
+     },
+     "1.00": {
+      "e": -1379.456676,
+      "converged": true
+     }
+    },
+    "barrier_eV": 0.2814
+   },
+   "2S=7": {
+    "points": {
+     "1.55": {
+      "e": -1379.322515,
+      "converged": true
+     },
+     "1.40": {
+      "e": -1379.347803,
+      "converged": true
+     },
+     "1.28": {
+      "e": -1379.35664,
+      "converged": true
+     },
+     "1.18": {
+      "e": -1379.36182,
+      "converged": true
+     },
+     "1.08": {
+      "e": -1379.364882,
+      "converged": true
+     },
+     "1.00": {
+      "e": -1379.363215,
+      "converged": true
+     }
+    },
+    "barrier_eV": 1.1075
+   }
+  }
+ },
+ "summary_rows": [
+  {
+   "field_V_per_A": 0.0,
+   "spin_2S": 5,
+   "barrier_eV": 0.0378
+  },
+  {
+   "field_V_per_A": 0.514,
+   "spin_2S": 1,
+   "barrier_eV": 0.5929
+  },
+  {
+   "field_V_per_A": -0.514,
+   "spin_2S": 1,
+   "barrier_eV": 0.0
+  }
+ ],
+ "barrier_zero_field_eV": 0.0378,
+ "field_shifts_barrier": {
+  "0.0": 0.0378,
+  "0.514": 0.5929,
+  "-0.514": 0.0
+ },
+ "dBarrier_dF_eV_per_VA": 0.5768,
+ "status": "ok"
+}
