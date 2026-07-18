@@ -32,7 +32,8 @@ BRANCH = os.environ.get("LAO_BRANCH") or subprocess.run(
 MAX_MIN = int(os.environ.get("LAO_MAX_MIN", "420"))
 STAGES = os.environ.get("LAO_STAGES", "spins int")
 MODEL = os.environ.get("LAO_MODEL", "neutral")   # neutral | cation (v8)
-SUF = "_cat" if MODEL == "cation" else ""
+LIGAND = os.environ.get("LAO_LIGAND", "")        # "" | pnp (вспом. лиганд)
+SUF = ("_cat" if MODEL == "cation" else "") + ("_pnp" if LIGAND == "pnp" else "")
 # spins не резюмится файлом → его выход чистим; int резюмится ПО-ТЭГОВО
 # (тег без nevpt2-блока пересчитывается) → int.json сохраняем (c5 готов)
 _OUT = {"spins": f"routes/lao_cr_spins{SUF}.json", "int": "",
@@ -74,6 +75,7 @@ mkdir -p /root/scratch
 export PYSCF_TMPDIR=/root/scratch
 export OMP_NUM_THREADS=$(nproc)
 export LAO_MODEL={MODEL}
+export LAO_LIGAND={LIGAND}
 sync_up() {{ aws s3 cp routes/ $S3/ --recursive --exclude '*' --include 'lao_cr_*.json' >/dev/null 2>&1 || true; aws s3 cp /root/repo/lao.log $S3/lao.log >/dev/null 2>&1 || true; }}
 ( while true; do sleep 120; sync_up; done ) &
 for st in {STAGES}; do
