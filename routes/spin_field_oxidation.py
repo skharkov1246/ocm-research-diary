@@ -35,7 +35,8 @@ from pyscf.data.elements import charge as Z  # noqa: E402
 METAL = os.environ.get("METAL", "Fe")
 XC = os.environ.get("XC", "pbe")
 CHARGE = int(os.environ.get("CHARGE", "1"))      # [MO]+ канонический катион (Shaik HAT)
-_tag = ("_" + METAL.lower()) + ("" if XC == "pbe" else "_" + XC)
+RELAX = int(os.environ.get("RELAX", "0"))        # 1 = релаксированный барьер (честнее, дороже)
+_tag = ("_" + METAL.lower()) + ("" if XC == "pbe" else "_" + XC) + ("_relax" if RELAX else "")
 OUT = os.path.join(HERE, f"spin_field_oxidation{_tag}_results.json")
 EV = 27.211386245988
 VA = 51.42206747
@@ -94,10 +95,10 @@ def crelax(atoms, spin, f_au, i, j, d, maxsteps=30):
         meq = optimize(mf, constraints=cf, maxsteps=maxsteps)
         geo = [[meq.atom_symbol(k), tuple(float(x) for x in meq.atom_coord(k, unit="Angstrom"))]
                for k in range(meq.natm)]
-        e, conv = scf(geo, spin, f_au); return e, conv, geo
+        e, conv, _ = scf(geo, spin, f_au); return e, conv, geo
     except Exception as exc:
         say(f"      relax d={d} FAILED ({type(exc).__name__}: {str(exc)[:45]})")
-        try: e, conv = scf(a, spin, f_au); return e, conv, a
+        try: e, conv, _ = scf(a, spin, f_au); return e, conv, a
         except Exception: return None, False, None
     finally:
         try: os.remove(cf)
@@ -114,17 +115,21 @@ def place_H(base, o_i, h_j, d):
 def barrier_at_field(f_au, spin, o_i, h_j, store, save):
     """Жёсткий скан d(O–H) с warm-chain плотности (без релаксации): честны СДВИГИ."""
     blk = store.setdefault(f"{f_au:+.3f}", {}).setdefault(f"2S={spin}", {"points": {}})
-    base = build(); dm = None
+    base = build(); dm = None; cur = base
     for d in DGRID:
         dk = f"{d:.2f}"
         if blk["points"].get(dk, {}).get("e") is not None:
             continue
         t0 = time.time()
         try:
-            e, conv, dm = scf(place_H(base, o_i, h_j, d), spin, f_au, dm0=dm)
+            if RELAX:
+                e, conv, geo = crelax(cur, spin, f_au, o_i, h_j, d)
+                if geo is not None: cur = geo
+            else:
+                e, conv, dm = scf(place_H(base, o_i, h_j, d), spin, f_au, dm0=dm)
         except Exception as exc:
             e, conv = None, False
-            say(f"      SP d={d} FAILED ({type(exc).__name__})")
+            say(f"      pt d={d} FAILED ({type(exc).__name__})")
         blk["points"][dk] = {"e": round(e, 6) if e is not None else None, "converged": conv}
         say(f"    F={f_au:+.3f} 2S={spin} d={dk}: E={e if e is None else round(e,5)} conv={conv} ({round(time.time()-t0,1)}s)")
         save()
