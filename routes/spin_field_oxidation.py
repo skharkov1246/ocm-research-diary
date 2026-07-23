@@ -40,7 +40,8 @@ _tag = ("_" + METAL.lower()) + ("" if XC == "pbe" else "_" + XC) + ("_relax" if 
 OUT = os.path.join(HERE, f"spin_field_oxidation{_tag}_results.json")
 EV = 27.211386245988
 VA = 51.42206747
-FIELDS = [0.0, 0.010, -0.010]                    # 0, ±0.514 В/Å (разный осн. спин)
+FIELDS = ([-0.012,-0.008,-0.004,0.0,0.004,0.008,0.012] if os.environ.get("FINE")=="1"
+          else [0.0, 0.010, -0.010])   # FINE=1 — кривая барьер/поле
 DGRID = [1.55, 1.40, 1.28, 1.18, 1.08, 1.00]     # d(O–H_abs), Å
 SPINS = [0, 1, 2, 3, 4, 5, 6, 7]
 
