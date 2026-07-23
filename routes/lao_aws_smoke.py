@@ -45,7 +45,8 @@ _OUT = {"spins": f"routes/lao_cr_spins{SUF}.json", "int": "",
         "tzvp": f"routes/lao_cr_tzvp_result{SUF}.json"}
 RM_FILES = " ".join(f for f in (_OUT[s] for s in STAGES.split()) if f) or "/dev/null"
 JOB_MIN = MAX_MIN - 20
-STAGE_TO = max(300, JOB_MIN // 2 - 20)
+_NST = max(1, len(STAGES.split()))
+STAGE_TO = max(200, JOB_MIN // _NST - 20)   # делим бюджет на реальное число стадий
 DISK_GB = 60
 
 for var in ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"):
