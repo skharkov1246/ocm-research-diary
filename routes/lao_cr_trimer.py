@@ -715,6 +715,27 @@ def stage_tzvp():
         out["cas_shift"] = n_c7.get("cas")
         out["cas_ins"] = n_pi.get("cas")
         out["pi_complex_pin"] = pi_pt["pin"]
+        # ПОЛНЫЙ барьер вставки: TS(пик) − (c7 + этилен разнесённые). Для лиганда
+        # intrinsic бессмыслен (этилен клэшит на подходе, профиль с +47) —
+        # осмысленный барьер меряем от разнесённых реагентов, как SVP dft_barrier.
+        if ins.get("ts_atoms") and ins.get("dft_barrier"):
+            eth = [("C", (0., 0., 0.)), ("C", (1.33, 0., 0.)),
+                   ("H", (-0.56, 0.92, 0.)), ("H", (-0.56, -0.92, 0.)),
+                   ("H", (1.89, 0.92, 0.)), ("H", (1.89, -0.92, 0.))]
+            full_ts = [(s, tuple(c)) for s, c in ins["ts_atoms"]]
+            n_fts = nz(full_ts, ins_lab)
+            n_c7d = nevpt2_point(c7, spin, charge=CHARGE, basis=TZ, mem=MEM)
+            n_eth = nevpt2_point(eth, 0, thr=0.4, labels=["C 2p"],
+                                 basis=TZ, mem=MEM)
+            for lv, key in (("e_casscf", "casscf"), ("e_nevpt2", "nevpt2")):
+                full_b = (n_fts[lv] - n_c7d[lv] - n_eth[lv]) * HARTREE_KCAL
+                shift_b = (n_sh_ts[lv] - n_c7[lv]) * HARTREE_KCAL
+                out[f"ins_full_{key}_tzvp"] = round(full_b, 2)
+                out[f"ddE_full_{key}_tzvp"] = round(full_b - shift_b, 2)
+            out["svp_ref_full"] = {
+                "ins_dft": ins.get("dft_barrier"),
+                "ins_nevpt2": ins.get("nevpt2_barrier"),
+                "shift_nevpt2": sh.get("nevpt2_barrier")}
         # сверка с SVP
         out["svp_ref"] = {
             "shift_nevpt2": sh.get("nevpt2_barrier"),
