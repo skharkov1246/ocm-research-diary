@@ -45,6 +45,7 @@ ITYPE = os.environ.get("OCM17_ITYPE", "r7i.12xlarge")   # 48 vCPU, 384 GB
 SUBNET = {"eu-central-1": "subnet-057e6f5ca6d3c6d8d",
           "us-east-1": "subnet-0b1a363f27ecbbf12"}[REGION]
 METALS = os.environ.get("OCM17_METALS", "Cr Fe")
+SUB2 = os.environ.get("OCM17_SUB2", "c2h6")   # второй субстрат (ПОМ: ch2o)
 GRID = os.environ.get("OCM17_GRID", "")   # "ext" → расширенная сетка (Этап 18)
 BASIS17 = os.environ.get("OCM17_BASIS", "")   # def2-tzvp → базис-чек (Этап 20)
 MAXMEM17 = os.environ.get("OCM17_MAXMEM", "")
@@ -106,6 +107,7 @@ export OCM_GRID={GRID}
 export OCM_BASIS={BASIS17}
 export OCM_MAXMEM={MAXMEM17}
 export OCM_PREFIX={PREF17}
+export OCM_SUB2={SUB2}
 NPROC=$(nproc)
 THREADS=$(( NPROC / 4 )); [ $THREADS -lt 1 ] && THREADS=1
 sync_up() {{ aws s3 cp routes/ $S3/ --recursive --exclude '*' {SYNC_INCLUDES} >/dev/null 2>&1 || true; aws s3 cp /root/repo/stage17.log $S3/stage17.log >/dev/null 2>&1 || true; }}
@@ -118,6 +120,7 @@ run_metal() {{
     echo "[aws][$M] spins ladder" >> /root/repo/stage17.log
     OMP_NUM_THREADS=$THREADS timeout 120m python3 -u routes/ocm_mnw_selectivity.py spins >> /root/repo/stage17.log 2>&1
     local SP="routes/ocm_mnw_emb_$(echo $M | tr A-Z a-z)_spins.json"
+    [ -n "{PREF17}" ] && SP="routes/{PREF17}_spins.json"
     local BEST=$(python3 -c "import json;print(json.load(open('$SP')).get('ground_2S',2))" 2>/dev/null || echo 2)
     export OCM_SPIN=$BEST
     echo "[aws][$M] ground 2S=$BEST — full pipeline both substrates" >> /root/repo/stage17.log
@@ -125,7 +128,7 @@ run_metal() {{
     for st in geom polish profile refine; do
       OMP_NUM_THREADS=$THREADS timeout {JOB_TIMEOUT}m python3 -u routes/ocm_mnw_selectivity.py $st ch4 >> /root/repo/stage17.log 2>&1 &
       local A=$!
-      OMP_NUM_THREADS=$THREADS timeout {JOB_TIMEOUT}m python3 -u routes/ocm_mnw_selectivity.py $st c2h6 >> /root/repo/stage17.log 2>&1 &
+      OMP_NUM_THREADS=$THREADS timeout {JOB_TIMEOUT}m python3 -u routes/ocm_mnw_selectivity.py $st {SUB2} >> /root/repo/stage17.log 2>&1 &
       local B=$!
       wait $A $B
       sync_up
@@ -187,7 +190,7 @@ def pull_metal(m):
         got = True
     except ClientError:
         pass
-    for sub in ("ch4", "c2h6"):
+    for sub in ("ch4", SUB2):
         for kind in ("geom", "profile"):
             k = f"{PREFIX}/{base}_{sub}_{kind}.json"
             try:
