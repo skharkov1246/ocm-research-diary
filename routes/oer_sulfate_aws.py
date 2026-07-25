@@ -151,7 +151,11 @@ def launch_spec(ami, subnet, name, species_csv, suffix):
 
 
 def main():
-    if SPLIT:
+    only = os.environ.get("OER_ONLY", "")          # sulf|ctrl — перезапуск одной ветки (resume по S3)
+    if only in ("sulf", "ctrl"):
+        jobs = [(TAG_NAME + "-" + only,
+                 SULF_SPECIES if only == "sulf" else CTRL_SPECIES, "_" + only)]
+    elif SPLIT:
         jobs = [(TAG_NAME + "-sulf", SULF_SPECIES, "_sulf"),
                 (TAG_NAME + "-ctrl", CTRL_SPECIES, "_ctrl")]
     else:
