@@ -337,28 +337,64 @@ def stage_bdesym():
                                  - _np.array(perox[7][1])))
     out["r_eq"] = round(r_eq, 3)
     grid = [round(r_eq, 3), 1.60, 1.75, 1.95, 2.20, 2.60, 3.00, 3.60]
-    # (а) геометрии: constrained UKS от eq вверх, цепочка dm0/структуры
+    RIGID = os.environ.get("MSAI_RIGID", "") == "1"
     geoms, at, dm = {}, [(s, tuple(c)) for s, c in perox], None
-    for r in grid:
-        cf = os.path.join(DIR, f"_msai_oo_{r:.2f}.txt")
-        open(cf, "w").write(f"$set\ndistance 2 8 {r:.4f}\n")
+    if RIGID:
+        # v3: floppy H2S2O8 при constrained-релаксе скачет по конформерам
+        # (v2-кривая: провал на 1.6, обвал на 2.6 => BDE −8 нефизичен).
+        # Жёсткий гомолиз: фрагменты HSO4 (атомы 0–5 | 6–11) — жёсткие тела,
+        # второй сдвигается вдоль оси O–O моста. Одна конформация => чистая
+        # кривая; релакс-поправку фрагмента добавляем отдельной парой энергий.
+        out["protocol"] += " + rigid fragments (v3)"
+        axis = (_np.array(perox[7][1]) - _np.array(perox[1][1]))
+        axis = axis / _np.linalg.norm(axis)
+        base = [(s, _np.array(c)) for s, c in perox]
+        for r in grid:
+            shift = (r - r_eq) * axis
+            at = [(s, tuple(c)) for s, c in base[:6]] + \
+                 [(s, tuple(c + shift)) for s, c in base[6:]]
+            try:
+                mfx = uks(M(at, 0), dm0=dm)
+                dm = mfx.make_rdm1()
+                geoms[r] = {"atoms": at, "e_dft": float(mfx.e_tot),
+                            "conv": bool(mfx.converged)}
+                print(f"  [bdesym:geo] r={r} dft_rel="
+                      f"{(mfx.e_tot - e_eq_dft) * HARTREE_KCAL:.2f}",
+                      flush=True)
+            except Exception as ex:
+                print(f"  [bdesym:geo] r={r} FAIL: {ex}", flush=True)
+        # релакс-поправка фрагмента: E(HSO4 relaxed) − E(HSO4 frozen из eq)
         try:
-            mf0 = uks(M(at, 0), dm0=dm)
-            mol = optimize(mf0, constraints=cf, maxsteps=100,
-                           assert_convergence=False)
-            mfx = uks(mol, dm0=mf0.make_rdm1())
-            at = [(mol.atom_symbol(i), tuple(c)) for i, c in
-                  enumerate(mol.atom_coords(unit="Angstrom"))]
-            dm = mfx.make_rdm1()
-            geoms[r] = {"atoms": at, "e_dft": float(mfx.e_tot),
-                        "conv": bool(mfx.converged)}
-            print(f"  [bdesym:geo] r={r} dft_rel="
-                  f"{(mfx.e_tot - e_eq_dft) * HARTREE_KCAL:.2f}", flush=True)
+            frag_frozen = [(s, tuple(c)) for s, c in base[:6]]
+            mf_fz = uks(M(frag_frozen, 1))
+            frag_rx, mf_rx = relax(hso4_atoms(), 1)
+            out["frag_relax_dft_kcal"] = round(
+                (mf_rx.e_tot - mf_fz.e_tot) * HARTREE_KCAL, 2)
         except Exception as ex:
-            print(f"  [bdesym:geo] r={r} FAIL: {ex}", flush=True)
-        finally:
-            if os.path.exists(cf):
-                os.remove(cf)
+            out["frag_relax_error"] = str(ex)[:200]
+    else:
+        # (а) v2: constrained UKS от eq вверх, цепочка dm0/структуры
+        for r in grid:
+            cf = os.path.join(DIR, f"_msai_oo_{r:.2f}.txt")
+            open(cf, "w").write(f"$set\ndistance 2 8 {r:.4f}\n")
+            try:
+                mf0 = uks(M(at, 0), dm0=dm)
+                mol = optimize(mf0, constraints=cf, maxsteps=100,
+                               assert_convergence=False)
+                mfx = uks(mol, dm0=mf0.make_rdm1())
+                at = [(mol.atom_symbol(i), tuple(c)) for i, c in
+                      enumerate(mol.atom_coords(unit="Angstrom"))]
+                dm = mfx.make_rdm1()
+                geoms[r] = {"atoms": at, "e_dft": float(mfx.e_tot),
+                            "conv": bool(mfx.converged)}
+                print(f"  [bdesym:geo] r={r} dft_rel="
+                      f"{(mfx.e_tot - e_eq_dft) * HARTREE_KCAL:.2f}",
+                      flush=True)
+            except Exception as ex:
+                print(f"  [bdesym:geo] r={r} FAIL: {ex}", flush=True)
+            finally:
+                if os.path.exists(cf):
+                    os.remove(cf)
     # (б) CASSCF(2,2)+NEVPT2 от растянутого конца вниз, старт от UNO
     curve, mo_prev = {}, None
     for r in sorted([g for g in geoms], reverse=True):
@@ -409,6 +445,14 @@ def stage_bdesym():
                        ("e_nevpt2", "nevpt2")):
             out[f"bde_sym_{tag}"] = round(
                 (curve[3.60][k] - curve[grid[0]][k]) * HARTREE_KCAL, 2)
+        fr = out.get("frag_relax_dft_kcal")
+        if fr is not None:
+            # rigid-предел = 2 замороженных радикала; истинный BDE ниже на
+            # 2×релакс-поправку фрагмента (DFT-поправка ко всем уровням)
+            for tag in ("dft", "casscf", "nevpt2"):
+                if f"bde_sym_{tag}" in out:
+                    out[f"bde_sym_{tag}_corrected"] = round(
+                        out[f"bde_sym_{tag}"] + 2 * fr, 2)
     out["old_broken"] = {"bde_dft": 10.93, "bde_nevpt2_unbalanced": -20.77,
                          "note": "bde-стадия, несбалансированные CAS"}
     out["wall_s"] = round(time.time() - t0, 1)
