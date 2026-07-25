@@ -42,8 +42,9 @@ EV = 27.211386245988
 VA = 51.42206747
 FIELDS = ([-0.012,-0.008,-0.004,0.0,0.004,0.008,0.012] if os.environ.get("FINE")=="1"
           else [0.0, 0.010, -0.010])   # FINE=1 — кривая барьер/поле
-DGRID = [1.55, 1.40, 1.28, 1.18, 1.08, 1.00]     # d(O–H_abs), Å
-SPINS = [0, 1, 2, 3, 4, 5, 6, 7]
+DGRID = ([1.60, 1.40, 1.22, 1.05] if os.environ.get("COARSE")=="1"
+         else [1.55, 1.40, 1.28, 1.18, 1.08, 1.00])   # d(O–H_abs), Å
+SPINS = [int(x) for x in os.environ.get("SPINS","0,1,2,3,4,5,6,7").split(",")]
 
 def say(m): print(f"[{time.strftime('%H:%M:%S')}] {m}", flush=True)
 
@@ -84,7 +85,7 @@ def scf(atoms, spin, f_au, dm0=None):
         e = mfn.kernel(mf.mo_coeff, mf.mo_occ); mf.converged = bool(mfn.converged); e = float(mfn.e_tot)
     return float(e), bool(mf.converged), mf.make_rdm1()
 
-def crelax(atoms, spin, f_au, i, j, d, maxsteps=30):
+def crelax(atoms, spin, f_au, i, j, d, maxsteps=int(os.environ.get("RELAX_STEPS","30"))):
     a = [[el, tuple(map(float, xyz))] for el, xyz in atoms]
     p_i = np.array(a[i][1]); p_j = np.array(a[j][1]); v = p_j - p_i
     v = v / (np.linalg.norm(v) + 1e-9); a[j] = [a[j][0], tuple(p_i + v * d)]
@@ -136,7 +137,8 @@ def barrier_at_field(f_au, spin, o_i, h_j, store, save):
         save()
     pts = sorted((float(k), v["e"]) for k, v in blk["points"].items() if v.get("converged") and v.get("e") is not None)
     if len(pts) >= 3:
-        E = np.array([p[1] for p in pts]); blk["barrier_eV"] = round(float((E.max() - E[0]) * EV), 4)
+        E = np.array([p[1] for p in pts])  # pts по d возрастанию; реагент = max d = pts[-1]
+        blk["barrier_eV"] = round(float((E.max() - E[-1]) * EV), 4)  # forward: TS − reagent
     return blk.get("barrier_eV")
 
 def main(a):
