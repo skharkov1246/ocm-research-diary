@@ -12,8 +12,10 @@
 
 Метод: [M(NH₃)₄(O₂)] end-on + CH₄ над дистальным O (одна C–H смотрит на O).
 Distinguished-coordinate: замораживаем d(O_dist–H_abs), скан 2.55→1.0 Å (H стартует
-НА углероде — истинный реагент — и уходит на O), релаксируем остальное (geomeTRIC,
-warm-chain); forward-барьер = max(E)−E(реагент при max d).
+НА углероде — истинный реагент — и уходит на O). Протокол v2 (после адверсариального
+ревью 25.07): геометрии релаксируются ПРИ F=0 (geomeTRIC, warm-chain, кадр M@0,
+ось M–O = z), поле прикладывается только в single-point — чистый электронный
+Stark-эффект, энергия с ядерным членом −F·ΣZ_A·z_A; forward-барьер = max(E)−E(max d).
 Finite-field вдоль оси M–O–O (подмена get_hcore). Скан спина (низший берём).
 
 ОГРАНИЧЕНИЯ: distinguished coordinate = верхняя оценка барьера (не истинное седло);
@@ -39,9 +41,15 @@ CHARGE = int(os.environ.get("CHARGE", "1"))      # [MO]+ канонически�
 RELAX = int(os.environ.get("RELAX", "0"))        # 1 = релаксированный барьер (дороже, ближе к седлу)
 SP_XC = os.environ.get("SP_XC")                  # гибрид-контроль: геометрия по XC (надёжный GGA),
                                                  # энергия барьера — single-point по SP_XC (напр. pbe0//pbe)
+SUB = os.environ.get("SUBSTRATE", "ch4").lower() # ch4 | ch3oh (селективность: барьер перекисления продукта)
+SOLV_EPS = float(os.environ["SOLV_EPS"]) if os.environ.get("SOLV_EPS") else None
+                                                 # ddCOSMO single-point на релакс-геометрии (экранировка средой)
 RUN_TAG = os.environ.get("RUN_TAG", "")          # per-instance тег: параллельные поля не затирают друг друга
 _eff = SP_XC if SP_XC else XC                    # эффективный функционал для имени/меты
-_tag = ("_" + METAL.lower()) + ("" if _eff == "pbe" else "_" + _eff) + ("_relax" if RELAX else "") + (("_" + RUN_TAG) if RUN_TAG else "")
+_tag = (("_" + METAL.lower()) + ("" if SUB == "ch4" else "_" + SUB)
+        + ("" if _eff == "pbe" else "_" + _eff)
+        + (f"_eps{int(SOLV_EPS)}" if SOLV_EPS else "")
+        + ("_relax" if RELAX else "") + (("_" + RUN_TAG) if RUN_TAG else ""))
 OUT = os.path.join(HERE, f"spin_field_oxidation{_tag}_results.json")
 EV = 27.211386245988
 VA = 51.42206747
@@ -63,54 +71,96 @@ def atomic_save(o):
     os.replace(tmp, OUT)
 
 def build():
-    """[MO]+ + CH4: канонический оксо-HAT (Shaik). M@0, O@+z, CH4 над O, одна C–H к O."""
+    """[MO]+ + субстрат: канонический оксо-HAT (Shaik). M@0, O@+z, C над O, одна C–H к O.
+    ch4: метан. ch3oh: метанол, отрываем C–H (доминантный HAT-канал, BDE C–H < O–H) —
+    путь перекисления продукта в формальдегид: мера селективности."""
     m_o = 1.63                                    # M=O
     Oz = m_o
     Cz = Oz + 3.69                                # C выше: d(O–H_abs) стартует ~2.6 Å (H ещё НА C, истинный реагент)
     atoms = [[METAL, (0.0, 0.0, 0.0)], ["O", (0.0, 0.0, Oz)],
              ["C", (0.0, 0.0, Cz)], ["H", (0.0, 0.0, Cz - 1.09)]]   # abstractable H, коллинеарно O–H–C
-    for a in (0, 2 * np.pi / 3, 4 * np.pi / 3):
-        atoms.append(["H", (1.03 * np.cos(a), 1.03 * np.sin(a), Cz + 0.36)])
-    return atoms                                  # M, O, C, H_abs, 3×H_methyl = 7
+    angs = (0, 2 * np.pi / 3, 4 * np.pi / 3)
+    if SUB == "ch4":
+        for a in angs:
+            atoms.append(["H", (1.03 * np.cos(a), 1.03 * np.sin(a), Cz + 0.36)])
+    else:                                         # ch3oh: 2 H + OH-группа вместо третьего H (C–O 1.43, O–H 0.96)
+        for a in angs[:2]:
+            atoms.append(["H", (1.03 * np.cos(a), 1.03 * np.sin(a), Cz + 0.36)])
+        a = angs[2]
+        o_alc = np.array([1.352 * np.cos(a), 1.352 * np.sin(a), Cz + 0.472])
+        atoms.append(["O", tuple(o_alc)])
+        cpos = np.array([0.0, 0.0, Cz])           # H_alc под 108.5° к связи O–C (не коллинеарно!)
+        u = (cpos - o_alc); u /= np.linalg.norm(u)
+        zax = np.array([0.0, 0.0, 1.0]); perp = zax - (zax @ u) * u; perp /= np.linalg.norm(perp)
+        th = np.deg2rad(108.5)
+        atoms.append(["H", tuple(o_alc + 0.96 * (np.cos(th) * u + np.sin(th) * perp))])
+    return atoms                                  # ch4: 7 атомов; ch3oh: 8
 
 def idx():
-    return 1, 3, 7                                # O=1, H_abs=3, nat=7
+    return 1, 3, (7 if SUB == "ch4" else 8)       # O_dist=1, H_abs=3, nat
 
-def mkmf(mol, f_au, xc=None):
+def mkmf(mol, f_au, xc=None, eps=None):
+    """SP-фабрика. Поле — ТОЛЬКО для single-point (лямбда замыкает интегралы текущей
+    геометрии — в оптимизатор такой mf отдавать нельзя: интегралы протухнут, а градиент
+    поля не увидит; релаксация всегда при F=0 через relax-mf в crelax)."""
     mf = dft.UKS(mol).density_fit()
     mf.xc = xc or XC; mf.conv_tol = 1e-8; mf.max_cycle = 200; mf.level_shift = 0.3
+    if eps:                                       # солватацию вешаем ДО подмены hcore: ddCOSMO-обёртка
+        from pyscf import solvent                 # создаёт новый объект и потеряла бы instance-лямбду
+        mf = solvent.ddCOSMO(mf); mf.with_solvent.eps = float(eps)
     if abs(f_au) > 0:
         mol.set_common_orig((0.0, 0.0, 0.0)); ao = mol.intor_symmetric("int1e_r", comp=3)
         h0 = mf.get_hcore(); E = np.array([0.0, 0.0, f_au])
         mf.get_hcore = lambda *a: h0 + np.einsum("x,xij->ij", E, ao)
     return mf
 
-def scf(atoms, spin, f_au, dm0=None, xc=None):
+def scf(atoms, spin, f_au, dm0=None, xc=None, eps=None):
     mol = gto.M(atom=atoms, basis="def2-svp", spin=spin, charge=CHARGE, verbose=0)
-    mf = mkmf(mol, f_au, xc)
+    mf = mkmf(mol, f_au, xc, eps)
     e = mf.kernel(dm0=dm0) if dm0 is not None else mf.kernel()
     if not mf.converged:
-        mfn = mf.newton(); mfn.max_cycle = 80
-        e = mfn.kernel(mf.mo_coeff, mf.mo_occ); mf.converged = bool(mfn.converged); e = float(mfn.e_tot)
+        try:
+            mfn = mf.newton(); mfn.max_cycle = 80
+            e = mfn.kernel(mf.mo_coeff, mf.mo_occ); mf.converged = bool(mfn.converged); e = float(mfn.e_tot)
+        except Exception:                         # newton не для всех обёрток (ddCOSMO) — оставляем как есть
+            pass
+    if abs(f_au) > 0:                             # ядерный член поля −F·Σ Z_A z_A (тот же origin (0,0,0));
+        e = float(e) - f_au * float(np.dot(mol.atom_charges(), mol.atom_coords()[:, 2]))
     return float(e), bool(mf.converged), mf.make_rdm1()
 
-def crelax(atoms, spin, f_au, i, j, d, maxsteps=int(os.environ.get("RELAX_STEPS","30"))):
+def align(geo):
+    """Единый кадр после релаксации: M в нуле, ось M→O_dist вдоль +z (ось поля).
+    Обязательно: заряженный кластер + поле → энергия зависит от положения/ориентации."""
+    P = np.array([x[1] for x in geo], float); P = P - P[0]
+    v = P[1] / (np.linalg.norm(P[1]) + 1e-12); z = np.array([0.0, 0.0, 1.0])
+    ax = np.cross(v, z); s = np.linalg.norm(ax); c = float(v @ z)
+    if s > 1e-8:
+        ax = ax / s; K = np.array([[0, -ax[2], ax[1]], [ax[2], 0, -ax[0]], [-ax[1], ax[0], 0]])
+        th = np.arctan2(s, c); R = np.eye(3) + np.sin(th) * K + (1 - np.cos(th)) * (K @ K)
+        P = P @ R.T
+    elif c < 0:                                   # антипараллельно: разворот на π вокруг x
+        P = P * np.array([1.0, -1.0, -1.0])
+    return [[geo[k][0], tuple(float(x) for x in P[k])] for k in range(len(geo))]
+
+def crelax(atoms, spin, i, j, d, maxsteps=int(os.environ.get("RELAX_STEPS", "30"))):
+    """Constrained-релаксация ПРИ F=0 (поле — только single-point на итоговой геометрии).
+    Возвращает (geo, relaxed): relaxed=False — geomeTRIC упал, geo = жёсткая посадка."""
     a = [[el, tuple(map(float, xyz))] for el, xyz in atoms]
     p_i = np.array(a[i][1]); p_j = np.array(a[j][1]); v = p_j - p_i
     v = v / (np.linalg.norm(v) + 1e-9); a[j] = [a[j][0], tuple(p_i + v * d)]
     mol = gto.M(atom=a, basis="def2-svp", spin=spin, charge=CHARGE, verbose=0)
-    mf = mkmf(mol, f_au)
+    mf = dft.UKS(mol).density_fit()               # relax-mf: БЕЗ level_shift (ронял сканер в волне 1)
+    mf.xc = XC; mf.conv_tol = 1e-7; mf.max_cycle = 300
     fd, cf = tempfile.mkstemp(dir=HERE, suffix=".txt")
     with os.fdopen(fd, "w") as fh: fh.write(f"$freeze\ndistance {i+1} {j+1}\n")
     try:
         meq = optimize(mf, constraints=cf, maxsteps=maxsteps)
         geo = [[meq.atom_symbol(k), tuple(float(x) for x in meq.atom_coord(k, unit="Angstrom"))]
                for k in range(meq.natm)]
-        e, conv, _ = scf(geo, spin, f_au); return e, conv, geo
+        return align(geo), True
     except Exception as exc:
-        say(f"      relax d={d} FAILED ({type(exc).__name__}: {str(exc)[:45]})")
-        try: e, conv, _ = scf(a, spin, f_au); return e, conv, a
-        except Exception: return None, False, None
+        say(f"      relax d={d} FAILED ({type(exc).__name__}: {str(exc)[:60]})")
+        return align(a), False
     finally:
         try: os.remove(cf)
         except Exception: pass
@@ -123,24 +173,39 @@ def place_H(base, o_i, h_j, d):
     a[h_j] = [a[h_j][0], tuple(p_o + v * d)]
     return a
 
-def barrier_at_field(f_au, spin, o_i, h_j, store, save):
-    """Жёсткий скан d(O–H) с warm-chain плотности (без релаксации): честны СДВИГИ."""
+def relax_chain(spin, o_i, h_j, res, save):
+    """Релакс-цепочка F=0 по DGRID (warm-chain геометрий), кэш в res['geoms'].
+    Геометрии ОБЩИЕ для всех полей — поле прикладывается только в SP."""
+    g = res.setdefault("geoms", {}).setdefault(f"2S={spin}", {})
+    st = res.setdefault("relax_stats", {}).setdefault(f"2S={spin}", {"relaxed": 0, "fallback": 0})
+    cur = build()
+    for d in DGRID:
+        dk = f"{d:.2f}"
+        if g.get(dk, {}).get("xyz"):
+            cur = [[el, tuple(xyz)] for el, xyz in g[dk]["xyz"]]; continue
+        t0 = time.time()
+        geo, relaxed = crelax(cur, spin, o_i, h_j, d)
+        g[dk] = {"xyz": geo, "relaxed": relaxed}
+        st["relaxed" if relaxed else "fallback"] += 1
+        cur = geo
+        say(f"  relax 2S={spin} d={dk}: relaxed={relaxed} ({round(time.time()-t0,1)}s)")
+        save()
+    return g
+
+def barrier_at_field(f_au, spin, o_i, h_j, store, save, geoms=None):
+    """Скан d(O–H): SP на релакс-геометриях (RELAX) или жёсткий скан; warm-chain плотности.
+    Ядерный член поля включён в scf()."""
     blk = store.setdefault(f"{f_au:+.3f}", {}).setdefault(f"2S={spin}", {"points": {}})
-    base = build(); dm = None; dm_sp = None; cur = base
+    base = build(); dm = None
     for d in DGRID:
         dk = f"{d:.2f}"
         if blk["points"].get(dk, {}).get("e") is not None:
             continue
         t0 = time.time()
         try:
-            if RELAX:
-                e, conv, geo = crelax(cur, spin, f_au, o_i, h_j, d)
-                if geo is not None: cur = geo
-                if SP_XC and geo is not None:           # PBE0//PBE: энергия по SP_XC на GGA-геометрии, warm-chain
-                    e, conv2, dm_sp = scf(geo, spin, f_au, dm0=dm_sp, xc=SP_XC)
-                    conv = bool(conv and conv2)
-            else:
-                e, conv, dm = scf(place_H(base, o_i, h_j, d), spin, f_au, dm0=dm)
+            atoms = ([[el, tuple(xyz)] for el, xyz in geoms[dk]["xyz"]] if geoms
+                     else place_H(base, o_i, h_j, d))
+            e, conv, dm = scf(atoms, spin, f_au, dm0=dm, xc=SP_XC, eps=SOLV_EPS)
         except Exception as exc:
             e, conv = None, False
             say(f"      pt d={d} FAILED ({type(exc).__name__})")
@@ -155,28 +220,41 @@ def barrier_at_field(f_au, spin, o_i, h_j, store, save):
 
 def main(a):
     o_i, h_j, nat = idx()
-    nel = Z(METAL) + 8 + 6 + 4 - CHARGE           # [MO]+ + CH4
+    nel = Z(METAL) + 8 + (10 if SUB == "ch4" else 18) - CHARGE   # [MO]+ + CH4(10e) | CH3OH(18e)
     spins = [s for s in SPINS if s % 2 == nel % 2] or [nel % 2]
-    say(f"spin-field OXIDATION [{METAL}O]+ + CH4 (oxo HAT) — xc={XC} nat={nat} O_dist={o_i} H_abs={h_j} spins={spins} threads={lib.num_threads()}")
+    say(f"spin-field OXIDATION [{METAL}O]+ + {SUB.upper()} (oxo HAT) — xc={XC} sp_xc={SP_XC} eps={SOLV_EPS} "
+        f"nat={nat} O_dist={o_i} H_abs={h_j} spins={spins} threads={lib.num_threads()}")
     res = json.load(open(OUT)) if os.path.exists(OUT) else {}
     res.setdefault("meta", {
-        "what": f"C-H abstraction barrier of CH4 by [{METAL}O]+ oxo vs axial field "
-                "(0,+-0.51 V/A); RIGID d(O-H) scan, density warm-chain (field-shifts "
-                "honest, absolute barrier overestimated); does field move HAT barrier/spin?",
-        "metal": METAL, "xc": XC, "sp_xc": SP_XC,
-        "method": (f"{SP_XC}//{XC}" if SP_XC else XC), "fields_au": FIELDS,
+        "what": f"C-H abstraction barrier of {SUB.upper()} by [{METAL}O]+ oxo vs axial field; "
+                + ("RELAXED distinguished-coordinate d(O-H) scan (geomeTRIC frozen-distance)"
+                   if RELAX else "RIGID d(O-H) scan, density warm-chain")
+                + "; forward barrier = E(TS)-E(reactant, H-on-C at 2.6 A); "
+                  "does field move the HAT barrier, and does it move product over-oxidation equally?",
+        "metal": METAL, "xc": XC, "sp_xc": SP_XC, "substrate": SUB, "solv_eps": SOLV_EPS,
+        "method": (f"{SP_XC}//{XC}" if SP_XC else XC) + (f" + ddCOSMO(eps={SOLV_EPS})//vacuum-geo" if SOLV_EPS else ""),
+        "fields_au": FIELDS,
         "limits": "distinguished-coord = upper-bound barrier (not true saddle); "
-                  "functional-sensitive spins/barriers; cluster, gas phase, frozen "
-                  "scaffold (field-shifts honest); v1",
+                  "functional-sensitive spins/barriers; cluster, gas phase; "
+                  "geometries relaxed at F=0 (field on energies only — pure electronic "
+                  "Stark effect; frame: M at origin, M-O axis = z); nuclear field term "
+                  "-F*sum(Z_A z_A) included; v2",
     })
     res.setdefault("scan", {})
     fields = [0.0] if a.smoke else FIELDS
     sp = [spins[0]] if a.smoke else spins
     rows = []
+    geoms_by_spin = {}
+    if RELAX:
+        for s in sp:                              # релакс-цепочка F=0 один раз на спин; SP-поля дальше
+            geoms_by_spin[s] = relax_chain(s, o_i, h_j, res, lambda: atomic_save(res))
+        st = res.get("relax_stats", {})
+        say(f"  relax_stats: {st}")
     for f in fields:
         best = None
         for s in sp:
-            b = barrier_at_field(f, s, o_i, h_j, res["scan"], lambda: atomic_save(res))
+            b = barrier_at_field(f, s, o_i, h_j, res["scan"], lambda: atomic_save(res),
+                                 geoms=geoms_by_spin.get(s))
             if b is not None and (best is None or b < best[1]): best = (s, b)
         if best: rows.append({"field_V_per_A": round(f * VA, 3), "spin_2S": best[0], "barrier_eV": best[1]})
     res["summary_rows"] = rows
