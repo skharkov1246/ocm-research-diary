@@ -41,6 +41,8 @@ os.environ.setdefault("OCM_SPIN", "4")
 os.environ.setdefault("OCM_MAXMEM", "24000")
 sys.path.insert(0, DIR)
 import ocm_mnw_selectivity as sel                      # noqa: E402
+FLD_SUF = "" if sel.BASIS == "def2-svp" else "_" + sel.BASIS.split("-")[-1]
+NOGATE = bool(FLD_SUF)   # TZVP: сверка с committed-SVP профилем бессмысленна
 from pyscf import scf                                  # noqa: E402
 
 HK = sel.HARTREE_KCAL
@@ -48,8 +50,8 @@ FIELDS = [float(x) for x in
           os.environ.get("OCM_FIELDS", "-0.005,0.005").split(",")]
 AU_FIELD_V_A = 51.42206747                             # 1 а.е. поля в В/Å
 OUTLIER_KCAL = 25.0
-SCAN = os.path.join(DIR, "ocm_field_scan.json")
-RES = os.path.join(DIR, "ocm_field_dde_results.json")
+SCAN = os.path.join(DIR, f"ocm_field_scan{FLD_SUF}.json")
+RES = os.path.join(DIR, f"ocm_field_dde_results{FLD_SUF}.json")
 
 # ---------------------------------------------------------- finite-field патч
 FIELD = np.zeros(3)                                    # а.е., лабораторный вектор
@@ -248,8 +250,8 @@ def stage_readout():
 # закоммиченного профиля), затем ±F тёплым стартом от плотности ROHF/UKS и
 # орбиталей CASSCF якоря. Геометрия и базис между полями идентичны — орбитали
 # передаются без проекции.
-SCAN2 = os.path.join(DIR, "ocm_field_scan2.json")
-RES2 = os.path.join(DIR, "ocm_field_dde2_results.json")
+SCAN2 = os.path.join(DIR, f"ocm_field_scan2{FLD_SUF}.json")
+RES2 = os.path.join(DIR, f"ocm_field_dde2_results{FLD_SUF}.json")
 
 
 def _rohf_warm(mol, dm0=None):
@@ -424,8 +426,8 @@ def stage_readout2():
 # профильный протокол: якорь точки i стартует с dm и CASSCF-орбиталей якоря
 # точки i-1; гейт против профиля; при Δ>2 ккал — фолбэк на холодный
 # AVAS-путь, берётся НИЖНЕЕ решение (обе энергии в чекпойнте).
-SCAN3 = os.path.join(DIR, "ocm_field_scan3.json")
-RES3 = os.path.join(DIR, "ocm_field_dde3_results.json")
+SCAN3 = os.path.join(DIR, f"ocm_field_scan3{FLD_SUF}.json")
+RES3 = os.path.join(DIR, f"ocm_field_dde3_results{FLD_SUF}.json")
 
 
 def stage_field3():
@@ -476,7 +478,7 @@ def stage_field3():
                     mc1, ec1, ep1 = _cas_pt2(mf0, mo_proj,
                                              natorb_first=False)
                     cand.append(("chained-proj", mc1, ec1, ep1,
-                                 (ep1 - eref) * HK))
+                                 ((ep1 - eref) * HK if not NOGATE else 0.0)))
                 except Exception as ex:
                     print(f"[field3] proj-chain fail idx={i}: {ex}",
                           flush=True)
@@ -485,7 +487,8 @@ def stage_field3():
             if need_cold:
                 moc, _ = sel.forced_avas(mf0)
                 mc2, ec2, ep2 = _cas_pt2(mf0, moc, natorb_first=True)
-                cand.append(("cold", mc2, ec2, ep2, (ep2 - eref) * HK))
+                cand.append(("cold", mc2, ec2, ep2,
+                             ((ep2 - eref) * HK if not NOGATE else 0.0)))
             sane = [c for c in cand if c[4] > -10.0]
             pick = min(sane or cand, key=lambda c: c[3])
             branch, mc, e_cas0, e_pt0, gate = pick

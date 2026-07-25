@@ -32,9 +32,11 @@ BRANCH = os.environ.get("FLD_BRANCH") or subprocess.run(
     text=True).stdout.strip()
 MAX_MIN = int(os.environ.get("FLD_MAX_MIN", "840"))
 STAGES = os.environ.get("FLD_STAGES", "field readout")
-_OUT = {"field": "", "readout": "routes/ocm_field_dde_results.json",
-        "field2": "", "readout2": "routes/ocm_field_dde2_results.json",
-        "field3": "", "readout3": "routes/ocm_field_dde3_results.json"}
+FBASIS = os.environ.get("FLD_BASIS", "def2-svp")
+FSUF = "" if FBASIS == "def2-svp" else "_" + FBASIS.split("-")[-1]
+_OUT = {"field": "", "readout": f"routes/ocm_field_dde_results{FSUF}.json",
+        "field2": "", "readout2": f"routes/ocm_field_dde2_results{FSUF}.json",
+        "field3": "", "readout3": f"routes/ocm_field_dde3_results{FSUF}.json"}
 RM_FILES = " ".join(f for f in (_OUT[s] for s in STAGES.split()) if f) or "/dev/null"
 JOB_MIN = MAX_MIN - 20
 STAGE_TO = JOB_MIN - 30
@@ -62,12 +64,14 @@ for i in 1 2 3; do (cd /root && timeout 10m git clone --depth 1 -b {BRANCH} {REP
 cd /root/repo || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 python3 -c "import pyscf" || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 rm -f {RM_FILES}
-aws s3 cp $S3/ocm_field_scan.json routes/ocm_field_scan.json || true
-aws s3 cp $S3/ocm_field_scan2.json routes/ocm_field_scan2.json || true
-aws s3 cp $S3/ocm_field_scan3.json routes/ocm_field_scan3.json || true
+aws s3 cp $S3/ocm_field_scan{FSUF}.json routes/ocm_field_scan{FSUF}.json || true
+aws s3 cp $S3/ocm_field_scan2{FSUF}.json routes/ocm_field_scan2{FSUF}.json || true
+aws s3 cp $S3/ocm_field_scan3{FSUF}.json routes/ocm_field_scan3{FSUF}.json || true
 mkdir -p /root/scratch
 export PYSCF_TMPDIR=/root/scratch
 export OMP_NUM_THREADS=$(nproc)
+export OCM_BASIS={FBASIS}
+export OCM_MAXMEM=120000
 sync_up() {{ aws s3 cp routes/ $S3/ --recursive --exclude '*' --include 'ocm_field_*.json' >/dev/null 2>&1 || true; aws s3 cp /root/repo/fld.log $S3/fld.log >/dev/null 2>&1 || true; }}
 ( while true; do sleep 120; sync_up; done ) &
 for st in {STAGES}; do
