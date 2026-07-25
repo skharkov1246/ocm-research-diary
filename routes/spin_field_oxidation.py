@@ -37,8 +37,11 @@ METAL = os.environ.get("METAL", "Fe")
 XC = os.environ.get("XC", "pbe")
 CHARGE = int(os.environ.get("CHARGE", "1"))      # [MO]+ канонический катион (Shaik HAT)
 RELAX = int(os.environ.get("RELAX", "0"))        # 1 = релаксированный барьер (дороже, ближе к седлу)
+SP_XC = os.environ.get("SP_XC")                  # гибрид-контроль: геометрия по XC (надёжный GGA),
+                                                 # энергия барьера — single-point по SP_XC (напр. pbe0//pbe)
 RUN_TAG = os.environ.get("RUN_TAG", "")          # per-instance тег: параллельные поля не затирают друг друга
-_tag = ("_" + METAL.lower()) + ("" if XC == "pbe" else "_" + XC) + ("_relax" if RELAX else "") + (("_" + RUN_TAG) if RUN_TAG else "")
+_eff = SP_XC if SP_XC else XC                    # эффективный функционал для имени/меты
+_tag = ("_" + METAL.lower()) + ("" if _eff == "pbe" else "_" + _eff) + ("_relax" if RELAX else "") + (("_" + RUN_TAG) if RUN_TAG else "")
 OUT = os.path.join(HERE, f"spin_field_oxidation{_tag}_results.json")
 EV = 27.211386245988
 VA = 51.42206747
@@ -73,18 +76,18 @@ def build():
 def idx():
     return 1, 3, 7                                # O=1, H_abs=3, nat=7
 
-def mkmf(mol, f_au):
+def mkmf(mol, f_au, xc=None):
     mf = dft.UKS(mol).density_fit()
-    mf.xc = XC; mf.conv_tol = 1e-8; mf.max_cycle = 200; mf.level_shift = 0.3
+    mf.xc = xc or XC; mf.conv_tol = 1e-8; mf.max_cycle = 200; mf.level_shift = 0.3
     if abs(f_au) > 0:
         mol.set_common_orig((0.0, 0.0, 0.0)); ao = mol.intor_symmetric("int1e_r", comp=3)
         h0 = mf.get_hcore(); E = np.array([0.0, 0.0, f_au])
         mf.get_hcore = lambda *a: h0 + np.einsum("x,xij->ij", E, ao)
     return mf
 
-def scf(atoms, spin, f_au, dm0=None):
+def scf(atoms, spin, f_au, dm0=None, xc=None):
     mol = gto.M(atom=atoms, basis="def2-svp", spin=spin, charge=CHARGE, verbose=0)
-    mf = mkmf(mol, f_au)
+    mf = mkmf(mol, f_au, xc)
     e = mf.kernel(dm0=dm0) if dm0 is not None else mf.kernel()
     if not mf.converged:
         mfn = mf.newton(); mfn.max_cycle = 80
@@ -123,7 +126,7 @@ def place_H(base, o_i, h_j, d):
 def barrier_at_field(f_au, spin, o_i, h_j, store, save):
     """Жёсткий скан d(O–H) с warm-chain плотности (без релаксации): честны СДВИГИ."""
     blk = store.setdefault(f"{f_au:+.3f}", {}).setdefault(f"2S={spin}", {"points": {}})
-    base = build(); dm = None; cur = base
+    base = build(); dm = None; dm_sp = None; cur = base
     for d in DGRID:
         dk = f"{d:.2f}"
         if blk["points"].get(dk, {}).get("e") is not None:
@@ -133,6 +136,9 @@ def barrier_at_field(f_au, spin, o_i, h_j, store, save):
             if RELAX:
                 e, conv, geo = crelax(cur, spin, f_au, o_i, h_j, d)
                 if geo is not None: cur = geo
+                if SP_XC and geo is not None:           # PBE0//PBE: энергия по SP_XC на GGA-геометрии, warm-chain
+                    e, conv2, dm_sp = scf(geo, spin, f_au, dm0=dm_sp, xc=SP_XC)
+                    conv = bool(conv and conv2)
             else:
                 e, conv, dm = scf(place_H(base, o_i, h_j, d), spin, f_au, dm0=dm)
         except Exception as exc:
@@ -157,7 +163,8 @@ def main(a):
         "what": f"C-H abstraction barrier of CH4 by [{METAL}O]+ oxo vs axial field "
                 "(0,+-0.51 V/A); RIGID d(O-H) scan, density warm-chain (field-shifts "
                 "honest, absolute barrier overestimated); does field move HAT barrier/spin?",
-        "metal": METAL, "xc": XC, "fields_au": FIELDS,
+        "metal": METAL, "xc": XC, "sp_xc": SP_XC,
+        "method": (f"{SP_XC}//{XC}" if SP_XC else XC), "fields_au": FIELDS,
         "limits": "distinguished-coord = upper-bound barrier (not true saddle); "
                   "functional-sensitive spins/barriers; cluster, gas phase, frozen "
                   "scaffold (field-shifts honest); v1",
