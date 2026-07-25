@@ -150,11 +150,12 @@ def crelax(atoms, spin, i, j, d, maxsteps=int(os.environ.get("RELAX_STEPS", "30"
     v = v / (np.linalg.norm(v) + 1e-9); a[j] = [a[j][0], tuple(p_i + v * d)]
     mol = gto.M(atom=a, basis="def2-svp", spin=spin, charge=CHARGE, verbose=0)
     mf = dft.UKS(mol).density_fit()               # relax-mf: БЕЗ level_shift (ронял сканер в волне 1)
-    mf.xc = XC; mf.conv_tol = 1e-7; mf.max_cycle = 300
+    mf.xc = XC; mf.conv_tol = 1e-7; mf.max_cycle = 150
+    mfn = mf.newton(); mfn.max_cycle = 60         # SOSCF: сканер DIIS не сходился на шаге 2 (волна 1 и смок)
     fd, cf = tempfile.mkstemp(dir=HERE, suffix=".txt")
     with os.fdopen(fd, "w") as fh: fh.write(f"$freeze\ndistance {i+1} {j+1}\n")
     try:
-        meq = optimize(mf, constraints=cf, maxsteps=maxsteps)
+        meq = optimize(mfn, constraints=cf, maxsteps=maxsteps)
         geo = [[meq.atom_symbol(k), tuple(float(x) for x in meq.atom_coord(k, unit="Angstrom"))]
                for k in range(meq.natm)]
         return align(geo), True
