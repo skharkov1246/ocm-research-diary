@@ -15,10 +15,23 @@ MatterForge · h2o2-direct — Stage 2 ПРОДАКШЕН-СКРИН дешёв�
 локально на CPU не сходится за разумное время (SCF-стена; проверено 3 попытки: plain,
 density-fit, second-order Newton). Это AWS-нагрузка, как FeMoco / NiO-18q-VQE в др. вкладках.
 
+env-ручки (для AWS-сплита по инстансам, см. routes/h2o2_screen_aws.py):
+  H2O2_METALS        подмножество из Fe,Co,Ni,Pd через запятую (default все 4)
+  H2O2_SUFFIX        суффикс results-JSON, напр. _feco → h2o2_direct_screen_results_feco.json
+  H2O2_STAGE_TIMEOUT таймаут одной стадии, сек (default 5400; SIGALRM, честно пишется в JSON)
+Чекпойнты: results-JSON дописывается после КАЖДОЙ стадии каждого металла; повторный
+запуск резюмирует с места обрыва. RDKit нужен только для build_mp — при кешированной
+в JSON геометрии не требуется.
+
   python3 routes/h2o2_direct_screen.py --selftest   # быстрая проверка ПЛУМБИНГА (мелкие системы)
   python3 routes/h2o2_direct_screen.py --screen      # полный скрин (для AWS/мощной машины)
 """
+import json
+import os
+import signal
 import sys
+import time
+
 import numpy as np
 
 SMI = "c1cc2cc3ccc(cc4ccc(cc5ccc(cc1[nH]2)n5)[nH]4)n3"   # free-base porphine, C20H14N4
@@ -26,6 +39,95 @@ DLABEL = {"Fe": "Fe 3d", "Co": "Co 3d", "Ni": "Ni 3d", "Pd": "Pd 4d"}
 # плауз. мультиплетности M(II)-порфина (2S+1) до *OOH (метрика — основное состояние)
 SPINS = {"Fe": [1, 3, 5], "Co": [2, 4], "Ni": [1, 3], "Pd": [1, 3]}
 
+SUFFIX = os.environ.get("H2O2_SUFFIX", "")
+RESULTS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                            f"h2o2_direct_screen_results{SUFFIX}.json")
+STAGE_TIMEOUT = int(os.environ.get("H2O2_STAGE_TIMEOUT", "5400"))
+
+
+def env_metals():
+    raw = os.environ.get("H2O2_METALS", "Fe,Co,Ni,Pd")
+    ms = [t.strip().capitalize() for t in raw.split(",") if t.strip()]
+    bad = [m for m in ms if m not in SPINS]
+    if bad:
+        sys.exit(f"H2O2_METALS: неизвестные металлы {bad}; можно: {sorted(SPINS)}")
+    return ms
+
+
+# ---------- чекпойнты (поточечные: JSON дописывается после каждой стадии) ----------
+
+def jat(atoms):
+    """atoms → JSON-сериализуемое [[symbol, [x,y,z]], …]."""
+    return [[s, [float(x) for x in c]] for s, c in atoms]
+
+
+def unjat(rows):
+    return [(s, tuple(c)) for s, c in rows]
+
+
+def load_results(path=RESULTS_PATH):
+    if os.path.exists(path):
+        with open(path) as f:
+            return json.load(f)
+    return {"meta": {"script": "h2o2_direct_screen", "suffix": SUFFIX,
+                     "stage_timeout_s": STAGE_TIMEOUT,
+                     "basis": "def2-svp", "xc": "pbe0"},
+            "metals": {}}
+
+
+def save_results(res, path=RESULTS_PATH):
+    tmp = path + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(res, f, indent=1, ensure_ascii=False)
+    os.replace(tmp, path)
+
+
+# ---------- таймаут стадии (SIGALRM; статус честно пишется в JSON) ----------
+
+class StageTimeout(Exception):
+    pass
+
+
+def with_timeout(fn, seconds):
+    def _alrm(signum, frame):
+        raise StageTimeout()
+    old = signal.signal(signal.SIGALRM, _alrm)
+    signal.alarm(int(seconds))
+    try:
+        return fn()
+    finally:
+        signal.alarm(0)
+        signal.signal(signal.SIGALRM, old)
+
+
+def run_stage(res, rec, name, fn):
+    """одна стадия под SIGALRM-таймаутом; статус/время — в JSON сразу же.
+    Возвращает результат fn() либо None (timeout/исключение — записаны честно)."""
+    st = rec.setdefault("stages", {})
+    t0 = time.time()
+    try:
+        out = with_timeout(fn, STAGE_TIMEOUT)
+        st[name] = {"status": "ok", "wall_s": round(time.time() - t0, 1)}
+        return out
+    except StageTimeout:
+        st[name] = {"status": "timeout", "timeout_s": STAGE_TIMEOUT,
+                    "wall_s": round(time.time() - t0, 1)}
+        print(f"  [stage {name}] TIMEOUT {STAGE_TIMEOUT}s — записано в JSON")
+        return None
+    except Exception as e:
+        st[name] = {"status": f"fail:{type(e).__name__}", "error": str(e)[:300],
+                    "wall_s": round(time.time() - t0, 1)}
+        print(f"  [stage {name}] FAIL {type(e).__name__}: {e}")
+        return None
+    finally:
+        save_results(res)
+
+
+def stage_ok(rec, name):
+    return rec.get("stages", {}).get(name, {}).get("status") == "ok"
+
+
+# ---------- научное содержание (дескрипторы/уровни/спины — БЕЗ изменений) ----------
 
 def Nu(occ):
     occ = np.asarray(occ)
@@ -33,7 +135,8 @@ def Nu(occ):
 
 
 def build_mp(metal):
-    """RDKit: порфин → 3D → металлирование (металл в центроид N₄, снять 2 пиррольных N–H)."""
+    """RDKit: порфин → 3D → металлирование (металл в центроид N₄, снять 2 пиррольных N–H).
+    RDKit нужен ТОЛЬКО здесь; при кешированной в чекпойнте геометрии не вызывается."""
     from rdkit import Chem
     from rdkit.Chem import AllChem
     m = Chem.AddHs(Chem.MolFromSmiles(SMI))
@@ -117,43 +220,189 @@ def ground_spin(metal, atoms):
     return best
 
 
-def screen(metals=("Fe", "Co", "Ni", "Pd")):
+def ground_spin_or_raise(metal, atoms):
+    """ground_spin, но «ни один спин не сошёлся» — это fail стадии (честно в JSON)."""
+    gs = ground_spin(metal, atoms)
+    if gs is None:
+        raise RuntimeError("SCF не сошёлся ни в одном спине")
+    return gs
+
+
+def uks_at(atoms, spin_mult):
+    """пересчёт SCF в уже известном (кешированном) спине — для resume между стадиями."""
+    mf = robust_uks(make_mol(atoms, spin=spin_mult - 1))
+    if not mf.converged:
+        raise RuntimeError("SCF not converged on resume")
+    return mf
+
+
+def mole_atoms(mol):
+    """геометрия pyscf Mole → наш формат atoms (Å)."""
+    return [(s, tuple(c)) for s, c in zip(mol.elements, mol.atom_coords() * 0.529177)]
+
+
+# ---------- скрин с чекпойнтами и resume ----------
+
+def screen_metal(M, res):
     from pyscf.geomopt.berny_solver import optimize
-    print("== Stage 2 продакшен-скрин M–N₄ SAC (тяжёлое; для AWS) ==")
-    for M in metals:
-        print(f"\n### {M}-порфин ###")
-        bare = build_mp(M)
-        gs = ground_spin(M, bare)
+    rec = res["metals"].setdefault(M, {})
+    if rec.get("done"):
+        print(f"\n### {M}-порфин ### — уже сделан (resume), пропуск")
+        return
+    print(f"\n### {M}-порфин ###")
+
+    # 1) геометрия (RDKit только здесь; кеш в JSON снимает зависимость от rdkit)
+    if rec.get("atoms_bare"):
+        bare = unjat(rec["atoms_bare"])
+        print(f"  геометрия из чекпойнта ({len(bare)} атомов), RDKit не нужен")
+    else:
+        bare = run_stage(res, rec, "build", lambda: build_mp(M))
+        if bare is None:
+            return
+        rec["atoms_bare"] = jat(bare)
+        save_results(res)
+
+    # 2) основной спин голого центра
+    mf = None
+    if stage_ok(rec, "spin_bare"):
+        spin = rec["bare"]["spin"]
+        print(f"  spin_bare из чекпойнта: (2S+1)={spin} E={rec['bare']['E']:.4f}")
+    else:
+        gs = run_stage(res, rec, "spin_bare",
+                       lambda: ground_spin_or_raise(M, bare))
         if gs is None:
-            print(f"  {M}: SCF не сошёлся ни в одном спине — лог/настройки"); continue
+            return
         E_bare, spin, mf = gs
+        rec["bare"] = {"E": float(E_bare), "spin": int(spin)}
+        save_results(res)
         print(f"  основной спин (2S+1)={spin}  E_bare={E_bare:.4f}")
-        mol_opt = optimize(mf, maxsteps=60)                 # геом-опт голого центра
-        ads = place_ooh([(a.symbol if hasattr(a, 'symbol') else s, tuple(c))
-                         for (s, c), a in zip(bare, mol_opt.atom)])
-        gsa = ground_spin(M, ads)
+
+    # 3) геом-опт голого центра
+    if stage_ok(rec, "opt_bare"):
+        bare_opt = unjat(rec["atoms_bare_opt"])
+        print("  opt_bare из чекпойнта")
+    else:
+        if mf is None:   # resume: SCF заново в кешированном спине
+            mf = run_stage(res, rec, "rescf_bare", lambda: uks_at(bare, spin))
+            if mf is None:
+                return
+        mf_bare = mf
+        mol_opt = run_stage(res, rec, "opt_bare",
+                            lambda: optimize(mf_bare, maxsteps=60))
+        if mol_opt is None:
+            return
+        bare_opt = mole_atoms(mol_opt)
+        rec["atoms_bare_opt"] = jat(bare_opt)
+        save_results(res)
+
+    # 4) *OOH: посадка + основной спин
+    ads = place_ooh(bare_opt)
+    mf_a = None
+    if stage_ok(rec, "spin_ooh"):
+        spin_a = rec["ooh"]["spin"]
+        print(f"  spin_ooh из чекпойнта: (2S+1)={spin_a} E={rec['ooh']['E']:.4f}")
+    else:
+        gsa = run_stage(res, rec, "spin_ooh",
+                        lambda: ground_spin_or_raise(M, ads))
         if gsa is None:
-            print(f"  {M}: *OOH SCF не сошёлся"); continue
+            return
         E_ads, spin_a, mf_a = gsa
-        mol_a = optimize(mf_a, maxsteps=80)
-        coords = mol_a.atom_coords() * 0.529177
+        rec["ooh"] = {"E": float(E_ads), "spin": int(spin_a)}
+        save_results(res)
+
+    # 5) геом-опт *OOH + R(O–O)
+    if stage_ok(rec, "opt_ooh"):
+        roo = rec["ooh"]["roo"]
+        print(f"  opt_ooh из чекпойнта: R(O–O)={roo:.3f}Å")
+    else:
+        if mf_a is None:
+            mf_a = run_stage(res, rec, "rescf_ooh", lambda: uks_at(ads, spin_a))
+            if mf_a is None:
+                return
+        mfa = mf_a
+        mol_a = run_stage(res, rec, "opt_ooh", lambda: optimize(mfa, maxsteps=80))
+        if mol_a is None:
+            return
+        ooh_opt = mole_atoms(mol_a)
+        rec["atoms_ooh_opt"] = jat(ooh_opt)
+        coords = np.array([c for _s, c in ooh_opt])
         # O–O расстояние (последние два O в списке)
-        oidx = [i for i, z in enumerate(mol_a.elements) if z == "O"][-2:]
-        roo = np.linalg.norm(coords[oidx[0]] - coords[oidx[1]])
-        ncas, nelec, nu, occ, e_cas = avas_casci_Nu(mf_a, M)
+        oidx = [i for i, (z, _c) in enumerate(ooh_opt) if z == "O"][-2:]
+        roo = float(np.linalg.norm(coords[oidx[0]] - coords[oidx[1]]))
+        rec["ooh"]["roo"] = roo
+        save_results(res)
+
+    # 6) AVAS→CASCI→N_u (как в оригинале — на mf основного спина *OOH, до-опт геометрия)
+    if stage_ok(rec, "cas"):
+        cas = rec["cas"]
+        print(f"  cas из чекпойнта: CAS({cas['nelec']},{cas['ncas']}o) N_u={cas['nu']:.2f}")
+    else:
+        if mf_a is None:
+            mf_a = run_stage(res, rec, "rescf_ooh", lambda: uks_at(ads, spin_a))
+            if mf_a is None:
+                return
+        mfa2 = mf_a
+        out = run_stage(res, rec, "cas", lambda: avas_casci_Nu(mfa2, M))
+        if out is None:
+            return
+        ncas, nelec, nu, occ, e_cas = out
+        rec["cas"] = {"ncas": int(ncas), "nelec": int(nelec), "nu": float(nu),
+                      "noon": [float(o) for o in occ], "e_cas": float(e_cas)}
+        save_results(res)
         print(f"  *OOH: спин={spin_a} R(O–O)={roo:.3f}Å  "
               f"AVAS->CAS({nelec},{ncas}o) N_u={nu:.2f}")
-        print(f"  => держит O–O (2e⁻): {'да' if roo < 1.55 else 'НЕТ (к 4e⁻)'}")
+
+    rec["holds_oo_2e"] = bool(roo < 1.55)
+    rec["done"] = True
+    save_results(res)
+    print(f"  => держит O–O (2e⁻): {'да' if roo < 1.55 else 'НЕТ (к 4e⁻)'}")
+
+
+def screen(metals=None):
+    metals = metals or env_metals()
+    res = load_results()
+    print(f"== Stage 2 продакшен-скрин M–N₄ SAC (тяжёлое; для AWS) ==")
+    print(f"metals={','.join(metals)} suffix='{SUFFIX}' "
+          f"stage_timeout={STAGE_TIMEOUT}s results={RESULTS_PATH}")
+    for M in metals:
+        screen_metal(M, res)
+    save_results(res)
+    print(f"\n[checkpoint] итог в {RESULTS_PATH}")
 
 
 def selftest():
-    """быстрая проверка плумбинга (без металло-порфиновой SCF-стены)."""
+    """быстрая проверка плумбинга (без металло-порфиновой SCF-стены);
+    rdkit локально НЕ обязателен — при его отсутствии build_mp подменяется мок-N₄."""
+    import tempfile
     print("== SELFTEST: плумбинг скрина на мелких системах ==")
-    fe = build_mp("Fe")
-    print(f"[build] Fe-порфин: {len(fe)} атомов (ожид. 37)")
+    try:
+        fe = build_mp("Fe")
+        print(f"[build] Fe-порфин: {len(fe)} атомов (ожид. 37)")
+    except ImportError:
+        fe = [("Fe", (0.0, 0.0, 0.0)), ("N", (2.0, 0.0, 0.0)), ("N", (-2.0, 0.0, 0.0)),
+              ("N", (0.0, 2.0, 0.0)), ("N", (0.0, -2.0, 0.0))]
+        print("[build] rdkit локально недоступен — build_mp пропущен, мок-N₄ "
+              "(на AWS rdkit ставится pip-ом; при кеше геометрии в JSON не нужен)")
     ads = place_ooh(fe)
     roo = np.linalg.norm(np.array(ads[-2][1]) - np.array(ads[-3][1]))
     print(f"[place_ooh] стартовое R(O–O)={roo:.3f}Å (до опт)")
+    # чекпойнт: json round-trip геометрии + save/load + resume-маркер
+    with tempfile.TemporaryDirectory() as td:
+        p = os.path.join(td, "ckpt.json")
+        res = {"meta": {}, "metals": {"Fe": {"atoms_bare": jat(ads),
+                                             "stages": {"build": {"status": "ok"}}}}}
+        save_results(res, p)
+        back = load_results(p)
+        assert unjat(back["metals"]["Fe"]["atoms_bare"]) == [
+            (s, tuple(c)) for s, c in ads]
+        assert stage_ok(back["metals"]["Fe"], "build")
+        print(f"[checkpoint] save/load/resume-маркер OK ({p})")
+    # SIGALRM-таймаут стадии
+    try:
+        with_timeout(lambda: time.sleep(3), 1)
+        print("[timeout] FAIL — SIGALRM не сработал"); sys.exit(1)
+    except StageTimeout:
+        print("[timeout] SIGALRM-стадийный таймаут работает (1s на sleep 3s)")
     # robust_uks на маленьком открытооболочечном O2 (триплет) — быстро
     mf = robust_uks(make_mol([("O", (0, 0, 0)), ("O", (0, 0, 1.207))], spin=2))
     print(f"[robust_uks] O2 триплет: conv={mf.converged} E={mf.e_tot:.4f}")
