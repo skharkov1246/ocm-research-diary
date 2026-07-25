@@ -755,8 +755,59 @@ def stage_tzvp():
           flush=True)
 
 
+def stage_hemi():
+    """1c: гемилабильность κ²→κ¹. Отводим один P от Cr (раскрываем сайт под
+    этилен вместо клэша), релаксируем, считаем стоимость раскрытия (DFT+NEVPT2).
+    Малая стоимость => чистая вставка facile (dissoc + ~барьер open-site);
+    большая => лиганд держит κ², рост реально заблокирован."""
+    import numpy as _np
+    if LIGAND != "pnp":
+        print("[hemi] только для LAO_LIGAND=pnp", flush=True)
+        return
+    c7, spin = _c7_relaxed()               # κ²-закрытая форма
+    atoms = [(s, tuple(c)) for s, c in c7]
+    mf_closed = uks(M(atoms, spin, CHARGE))
+    e_closed = float(mf_closed.e_tot)
+    # индексы: Cr=0, P=19,20 (0-based). Отводим P20 вдоль Cr->P20 до 3.9 A.
+    cr = _np.array(atoms[0][1]); p = _np.array(atoms[20][1])
+    v = p - cr; v = v / _np.linalg.norm(v)
+    open_atoms = [list(a) for a in atoms]
+    open_atoms[20] = ("P", tuple(cr + 3.9 * v))
+    # P-H водороды P20 (idx 25,26) сдвигаем тем же вектором, чтобы не порвать P-H
+    for hi in (25, 26):
+        open_atoms[hi] = (open_atoms[hi][0],
+                          tuple(_np.array(open_atoms[hi][1]) + (3.9 - _np.linalg.norm(p - cr)) * v))
+    open_atoms = [(s, tuple(c)) for s, c in open_atoms]
+    rel_open, mf_open = relax(open_atoms, spin, maxsteps=120, charge=CHARGE)
+    e_open = float(mf_open.e_tot)
+    # проверить, что P действительно отошёл (κ¹), а не вернулся
+    cr2 = _np.array(rel_open[0][1])
+    crp1 = float(_np.linalg.norm(_np.array(rel_open[19][1]) - cr2))
+    crp2 = float(_np.linalg.norm(_np.array(rel_open[20][1]) - cr2))
+    out = {"model": MODEL, "ligand": LIGAND,
+           "dissoc_dft_kcal": round((e_open - e_closed) * HARTREE_KCAL, 2),
+           "crP1_open": round(crp1, 2), "crP2_open": round(crp2, 2),
+           "kappa1_confirmed": bool(max(crp1, crp2) > 3.2)}
+    try:
+        lab = ["Cr 3d"]
+        n_cl = nevpt2_point(atoms, spin, labels=lab, charge=CHARGE)
+        n_op = nevpt2_point(rel_open, spin, labels=lab, charge=CHARGE)
+        for lv, key in (("e_casscf", "casscf"), ("e_nevpt2", "nevpt2")):
+            out[f"dissoc_{key}_kcal"] = round(
+                (n_op[lv] - n_cl[lv]) * HARTREE_KCAL, 2)
+    except Exception as e:
+        out["nevpt2_error"] = str(e)[:200]
+    out["open_atoms"] = [[s, [round(x, 6) for x in c]] for s, c in rel_open]
+    with open(os.path.join(DIR, f"lao_cr_hemi_result{SUF}.json"), "w") as f:
+        json.dump(out, f, indent=1)
+    print("[hemi]", json.dumps({k: v for k, v in out.items()
+                                if k != "open_atoms"}, ensure_ascii=False)[:400],
+          flush=True)
+
+
 if __name__ == "__main__":
     st = sys.argv[1] if len(sys.argv) > 1 else "sanity"
     {"spins": stage_spins, "int": stage_int, "sanity": stage_sanity,
      "bhe": stage_bhe, "bhe2": stage_bhe2, "ins": stage_ins,
-     "shift": stage_shift, "desc": stage_desc, "tzvp": stage_tzvp}[st]()
+     "shift": stage_shift, "desc": stage_desc, "tzvp": stage_tzvp,
+     "hemi": stage_hemi}[st]()

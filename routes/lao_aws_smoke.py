@@ -42,7 +42,8 @@ _OUT = {"spins": f"routes/lao_cr_spins{SUF}.json", "int": "",
         "ins": f"routes/lao_cr_ins_result{SUF}.json",
         "shift": f"routes/lao_cr_shift_result{SUF}.json",
         "desc": f"routes/lao_cr_desc_results{SUF}.json",
-        "tzvp": f"routes/lao_cr_tzvp_result{SUF}.json"}
+        "tzvp": f"routes/lao_cr_tzvp_result{SUF}.json",
+        "hemi": f"routes/lao_cr_hemi_result{SUF}.json"}
 RM_FILES = " ".join(f for f in (_OUT[s] for s in STAGES.split()) if f) or "/dev/null"
 JOB_MIN = MAX_MIN - 20
 _NST = max(1, len(STAGES.split()))
