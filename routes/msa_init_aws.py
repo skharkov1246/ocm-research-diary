@@ -32,6 +32,7 @@ BRANCH = os.environ.get("MSAI_BRANCH") or subprocess.run(
 MAX_MIN = int(os.environ.get("MSAI_MAX_MIN", "420"))
 STAGES = os.environ.get("MSAI_STAGES", "bde hat merge")
 RIGID = os.environ.get("MSAI_RIGID", "")
+IBASIS = os.environ.get("MSAI_BASIS", "def2-svp")
 # spins не резюмится файлом → его выход чистим; int резюмится ПО-ТЭГОВО
 # (тег без nevpt2-блока пересчитывается) → int.json сохраняем (c5 готов)
 _OUT = {"bdesym": "routes/msa_initiator_bdesym.json",
@@ -70,6 +71,7 @@ export OMP_NUM_THREADS=$(nproc)
 sync_up() {{ aws s3 cp routes/ $S3/ --recursive --exclude '*' --include 'msa_initiator_*.json' >/dev/null 2>&1 || true; aws s3 cp /root/repo/msai.log $S3/msai.log >/dev/null 2>&1 || true; }}
 ( while true; do sleep 120; sync_up; done ) &
 export MSAI_RIGID={RIGID}
+export MSAI_BASIS={IBASIS}
 for st in {STAGES}; do
   echo "[aws][msai] stage $st" >> /root/repo/msai.log
   timeout 300m python3 -u routes/msa_initiator.py $st >> /root/repo/msai.log 2>&1

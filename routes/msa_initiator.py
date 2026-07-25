@@ -34,6 +34,7 @@ from pyscf.mrpt import NEVPT
 HARTREE_KCAL = 627.509474
 DIR = os.path.dirname(os.path.abspath(__file__))
 BASIS = os.environ.get("MSAI_BASIS", "def2-svp")
+MSAI_SUF = "" if BASIS == "def2-svp" else "_" + BASIS.split("-")[-1]
 XC = "pbe0"
 
 
@@ -456,7 +457,7 @@ def stage_bdesym():
     out["old_broken"] = {"bde_dft": 10.93, "bde_nevpt2_unbalanced": -20.77,
                          "note": "bde-стадия, несбалансированные CAS"}
     out["wall_s"] = round(time.time() - t0, 1)
-    json.dump(out, open(os.path.join(DIR, "msa_initiator_bdesym.json"), "w"),
+    json.dump(out, open(os.path.join(DIR, f"msa_initiator_bdesym{MSAI_SUF}.json"), "w"),
               indent=1)
     print("[bdesym]", json.dumps({k: v for k, v in out.items()
                                   if k != "curve"}, ensure_ascii=False)[:400],
