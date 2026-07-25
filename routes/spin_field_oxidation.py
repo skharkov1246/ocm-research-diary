@@ -11,8 +11,9 @@
 электрическая ручка ВКЛ/ВЫКЛ мягкой оксидации метана, а на электроде поле бесплатно.
 
 Метод: [M(NH₃)₄(O₂)] end-on + CH₄ над дистальным O (одна C–H смотрит на O).
-Distinguished-coordinate: замораживаем d(O_dist–H_abs), скан 1.6→1.0 Å (H уходит с
-C на O), релаксируем остальное (geomeTRIC, warm-chain); барьер = max(E)−E(старт).
+Distinguished-coordinate: замораживаем d(O_dist–H_abs), скан 2.55→1.0 Å (H стартует
+НА углероде — истинный реагент — и уходит на O), релаксируем остальное (geomeTRIC,
+warm-chain); forward-барьер = max(E)−E(реагент при max d).
 Finite-field вдоль оси M–O–O (подмена get_hcore). Скан спина (низший берём).
 
 ОГРАНИЧЕНИЯ: distinguished coordinate = верхняя оценка барьера (не истинное седло);
@@ -42,8 +43,8 @@ EV = 27.211386245988
 VA = 51.42206747
 FIELDS = ([-0.012,-0.008,-0.004,0.0,0.004,0.008,0.012] if os.environ.get("FINE")=="1"
           else [0.0, 0.010, -0.010])   # FINE=1 — кривая барьер/поле
-DGRID = ([1.60, 1.40, 1.22, 1.05] if os.environ.get("COARSE")=="1"
-         else [1.55, 1.40, 1.28, 1.18, 1.08, 1.00])   # d(O–H_abs), Å
+DGRID = ([2.55, 2.15, 1.80, 1.50, 1.20, 1.00] if os.environ.get("COARSE")=="1"
+         else [2.55, 2.30, 2.05, 1.85, 1.65, 1.45, 1.25, 1.05])  # d(O–H_abs), Å: реагент H-на-C → продукт O–H
 SPINS = [int(x) for x in os.environ.get("SPINS","0,1,2,3,4,5,6,7").split(",")]
 
 def say(m): print(f"[{time.strftime('%H:%M:%S')}] {m}", flush=True)
@@ -57,9 +58,9 @@ def build():
     """[MO]+ + CH4: канонический оксо-HAT (Shaik). M@0, O@+z, CH4 над O, одна C–H к O."""
     m_o = 1.63                                    # M=O
     Oz = m_o
-    Cz = Oz + 2.55                                # C над оксо-кислородом
+    Cz = Oz + 3.69                                # C выше: d(O–H_abs) стартует ~2.6 Å (H ещё НА C, истинный реагент)
     atoms = [[METAL, (0.0, 0.0, 0.0)], ["O", (0.0, 0.0, Oz)],
-             ["C", (0.0, 0.0, Cz)], ["H", (0.0, 0.0, Cz - 1.09)]]   # abstractable H
+             ["C", (0.0, 0.0, Cz)], ["H", (0.0, 0.0, Cz - 1.09)]]   # abstractable H, коллинеарно O–H–C
     for a in (0, 2 * np.pi / 3, 4 * np.pi / 3):
         atoms.append(["H", (1.03 * np.cos(a), 1.03 * np.sin(a), Cz + 0.36)])
     return atoms                                  # M, O, C, H_abs, 3×H_methyl = 7
