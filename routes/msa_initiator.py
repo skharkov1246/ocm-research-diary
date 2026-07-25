@@ -318,7 +318,108 @@ def stage_sanity():
                 print(f"[sanity] {name} FAIL: {e}", flush=True)
 
 
+def stage_bdesym():
+    """M-1: симметричный CAS(2,2)-BDE персульфата. Стадия bde дала мусор
+    (пероксид CAS(46,24) НЕ сошёлся vs радикал (17,12) => BDE_nevpt2 −20.8):
+    два независимых AVAS-CAS не сбалансировать. Фикс — ОДНА диссоциационная
+    кривая O–O на едином CAS(2,2) σ/σ*(O–O): симметрия по построению.
+    Геометрии: constrained UKS-релакс от eq вверх; CASSCF: старт от UNO на
+    растянутой точке (пара n≈1 очевидна), цепочка mo вниз к равновесию.
+    BDE_sym = E(3.6 Å) − E(eq) на CASSCF/NEVPT2 (DFT-кривая — контроль)."""
+    from pyscf.geomopt.geometric_solver import optimize
+    t0 = time.time()
+    out = {"stage": "bdesym", "species": "H2S2O8 (persulfate)",
+           "protocol": "single dissociation curve, CAS(2,2) sigma/sigma*"}
+    perox, mfp = relax(h2s2o8_atoms(), 0)
+    e_eq_dft = float(mfp.e_tot)
+    import numpy as _np
+    r_eq = float(_np.linalg.norm(_np.array(perox[1][1])
+                                 - _np.array(perox[7][1])))
+    out["r_eq"] = round(r_eq, 3)
+    grid = [round(r_eq, 3), 1.60, 1.75, 1.95, 2.20, 2.60, 3.00, 3.60]
+    # (а) геометрии: constrained UKS от eq вверх, цепочка dm0/структуры
+    geoms, at, dm = {}, [(s, tuple(c)) for s, c in perox], None
+    for r in grid:
+        cf = os.path.join(DIR, f"_msai_oo_{r:.2f}.txt")
+        open(cf, "w").write(f"$set\ndistance 2 8 {r:.4f}\n")
+        try:
+            mf0 = uks(M(at, 0), dm0=dm)
+            mol = optimize(mf0, constraints=cf, maxsteps=100,
+                           assert_convergence=False)
+            mfx = uks(mol, dm0=mf0.make_rdm1())
+            at = [(mol.atom_symbol(i), tuple(c)) for i, c in
+                  enumerate(mol.atom_coords(unit="Angstrom"))]
+            dm = mfx.make_rdm1()
+            geoms[r] = {"atoms": at, "e_dft": float(mfx.e_tot),
+                        "conv": bool(mfx.converged)}
+            print(f"  [bdesym:geo] r={r} dft_rel="
+                  f"{(mfx.e_tot - e_eq_dft) * HARTREE_KCAL:.2f}", flush=True)
+        except Exception as ex:
+            print(f"  [bdesym:geo] r={r} FAIL: {ex}", flush=True)
+        finally:
+            if os.path.exists(cf):
+                os.remove(cf)
+    # (б) CASSCF(2,2)+NEVPT2 от растянутого конца вниз, старт от UNO
+    curve, mo_prev = {}, None
+    for r in sorted([g for g in geoms], reverse=True):
+        atoms = geoms[r]["atoms"]
+        mol = M(atoms, 0)
+        mol.max_memory = 24000
+        try:
+            if mo_prev is None:
+                mfu = scf.UHF(mol)
+                mfu.kernel()
+                for _ in range(3):   # довести до стабильного UHF (бирадикал)
+                    mo1, _, stab, _ = mfu.stability(return_status=True)
+                    if stab:
+                        break
+                    dm1 = mfu.make_rdm1(mo1, mfu.mo_occ)
+                    mfu.kernel(dm0=dm1)
+                noons, natorb = mcscf.addons.make_natural_orbitals(mfu)
+                pair = _np.argsort(_np.abs(noons - 1.0))[:2]
+                print(f"  [bdesym:cas] r={r} UNO pair {sorted(pair)} "
+                      f"n={[round(float(noons[i]), 3) for i in pair]}",
+                      flush=True)
+                mc = mcscf.CASSCF(scf.RHF(mol).run(), 2, 2)
+                mo0 = mc.sort_mo(sorted(int(i) + 1 for i in pair),
+                                 mo_coeff=natorb)
+            else:
+                mc = mcscf.CASSCF(scf.RHF(mol).run(), 2, 2)
+                mo0 = mcscf.project_init_guess(mc, mo_prev)
+            fci.addons.fix_spin_(mc.fcisolver, shift=0.2, ss=0)
+            mc.max_cycle_macro = 150
+            mc.conv_tol = 1e-7
+            mc.kernel(mo0)
+            mo_prev = mc.mo_coeff
+            ept = NEVPT(mc).kernel()
+            curve[r] = {"e_casscf": float(mc.e_tot),
+                        "e_nevpt2": float(mc.e_tot + ept),
+                        "conv": bool(mc.converged),
+                        "e_dft": geoms[r]["e_dft"]}
+            print(f"  [bdesym:cas] r={r} conv={mc.converged}", flush=True)
+        except Exception as ex:
+            print(f"  [bdesym:cas] r={r} FAIL: {str(ex)[:150]}", flush=True)
+    out["curve"] = {str(r): {k: round((v[k] - curve[grid[0]][k])
+                                      * HARTREE_KCAL, 2)
+                             for k in ("e_dft", "e_casscf", "e_nevpt2")
+                             if grid[0] in curve and k in v}
+                    for r, v in sorted(curve.items())}
+    if grid[0] in curve and 3.60 in curve:
+        for k, tag in (("e_dft", "dft"), ("e_casscf", "casscf"),
+                       ("e_nevpt2", "nevpt2")):
+            out[f"bde_sym_{tag}"] = round(
+                (curve[3.60][k] - curve[grid[0]][k]) * HARTREE_KCAL, 2)
+    out["old_broken"] = {"bde_dft": 10.93, "bde_nevpt2_unbalanced": -20.77,
+                         "note": "bde-стадия, несбалансированные CAS"}
+    out["wall_s"] = round(time.time() - t0, 1)
+    json.dump(out, open(os.path.join(DIR, "msa_initiator_bdesym.json"), "w"),
+              indent=1)
+    print("[bdesym]", json.dumps({k: v for k, v in out.items()
+                                  if k != "curve"}, ensure_ascii=False)[:400],
+          flush=True)
+
+
 if __name__ == "__main__":
     st = sys.argv[1] if len(sys.argv) > 1 else "sanity"
     {"bde": stage_bde, "hat": stage_hat, "merge": stage_merge,
-     "sanity": stage_sanity}[st]()
+     "bdesym": stage_bdesym, "sanity": stage_sanity}[st]()

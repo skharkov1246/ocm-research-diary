@@ -33,7 +33,8 @@ MAX_MIN = int(os.environ.get("MSAI_MAX_MIN", "420"))
 STAGES = os.environ.get("MSAI_STAGES", "bde hat merge")
 # spins не резюмится файлом → его выход чистим; int резюмится ПО-ТЭГОВО
 # (тег без nevpt2-блока пересчитывается) → int.json сохраняем (c5 готов)
-_OUT = {"bde": "routes/msa_initiator_bde.json",
+_OUT = {"bdesym": "routes/msa_initiator_bdesym.json",
+        "bde": "routes/msa_initiator_bde.json",
         "hat": "routes/msa_initiator_hat.json",
         "merge": "routes/msa_initiator_results.json"}
 RM_FILES = " ".join(f for f in (_OUT[s] for s in STAGES.split()) if f) or "/dev/null"
