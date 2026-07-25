@@ -11,8 +11,9 @@
 электрическая ручка ВКЛ/ВЫКЛ мягкой оксидации метана, а на электроде поле бесплатно.
 
 Метод: [M(NH₃)₄(O₂)] end-on + CH₄ над дистальным O (одна C–H смотрит на O).
-Distinguished-coordinate: замораживаем d(O_dist–H_abs), скан 1.6→1.0 Å (H уходит с
-C на O), релаксируем остальное (geomeTRIC, warm-chain); барьер = max(E)−E(старт).
+Distinguished-coordinate: замораживаем d(O_dist–H_abs), скан 2.55→1.0 Å (H стартует
+НА углероде — истинный реагент — и уходит на O), релаксируем остальное (geomeTRIC,
+warm-chain); forward-барьер = max(E)−E(реагент при max d).
 Finite-field вдоль оси M–O–O (подмена get_hcore). Скан спина (низший берём).
 
 ОГРАНИЧЕНИЯ: distinguished coordinate = верхняя оценка барьера (не истинное седло);
@@ -35,13 +36,24 @@ from pyscf.data.elements import charge as Z  # noqa: E402
 METAL = os.environ.get("METAL", "Fe")
 XC = os.environ.get("XC", "pbe")
 CHARGE = int(os.environ.get("CHARGE", "1"))      # [MO]+ канонический катион (Shaik HAT)
-_tag = ("_" + METAL.lower()) + ("" if XC == "pbe" else "_" + XC)
+RELAX = int(os.environ.get("RELAX", "0"))        # 1 = релаксированный барьер (дороже, ближе к седлу)
+SP_XC = os.environ.get("SP_XC")                  # гибрид-контроль: геометрия по XC (надёжный GGA),
+                                                 # энергия барьера — single-point по SP_XC (напр. pbe0//pbe)
+RUN_TAG = os.environ.get("RUN_TAG", "")          # per-instance тег: параллельные поля не затирают друг друга
+_eff = SP_XC if SP_XC else XC                    # эффективный функционал для имени/меты
+_tag = ("_" + METAL.lower()) + ("" if _eff == "pbe" else "_" + _eff) + ("_relax" if RELAX else "") + (("_" + RUN_TAG) if RUN_TAG else "")
 OUT = os.path.join(HERE, f"spin_field_oxidation{_tag}_results.json")
 EV = 27.211386245988
 VA = 51.42206747
-FIELDS = [0.0, 0.010, -0.010]                    # 0, ±0.514 В/Å (разный осн. спин)
-DGRID = [1.55, 1.40, 1.28, 1.18, 1.08, 1.00]     # d(O–H_abs), Å
-SPINS = [0, 1, 2, 3, 4, 5, 6, 7]
+if os.environ.get("FIELDS_AU"):                  # явный список полей (а.е.) — один инстанс = одно поле
+    FIELDS = [float(x) for x in os.environ["FIELDS_AU"].split(",")]
+elif os.environ.get("FINE") == "1":
+    FIELDS = [-0.012,-0.008,-0.004,0.0,0.004,0.008,0.012]   # FINE=1 — кривая барьер/поле
+else:
+    FIELDS = [0.0, 0.010, -0.010]
+DGRID = ([2.55, 2.15, 1.80, 1.50, 1.20, 1.00] if os.environ.get("COARSE")=="1"
+         else [2.55, 2.30, 2.05, 1.85, 1.65, 1.45, 1.25, 1.05])  # d(O–H_abs), Å: реагент H-на-C → продукт O–H
+SPINS = [int(x) for x in os.environ.get("SPINS","0,1,2,3,4,5,6,7").split(",")]
 
 def say(m): print(f"[{time.strftime('%H:%M:%S')}] {m}", flush=True)
 
@@ -54,9 +66,9 @@ def build():
     """[MO]+ + CH4: канонический оксо-HAT (Shaik). M@0, O@+z, CH4 над O, одна C–H к O."""
     m_o = 1.63                                    # M=O
     Oz = m_o
-    Cz = Oz + 2.55                                # C над оксо-кислородом
+    Cz = Oz + 3.69                                # C выше: d(O–H_abs) стартует ~2.6 Å (H ещё НА C, истинный реагент)
     atoms = [[METAL, (0.0, 0.0, 0.0)], ["O", (0.0, 0.0, Oz)],
-             ["C", (0.0, 0.0, Cz)], ["H", (0.0, 0.0, Cz - 1.09)]]   # abstractable H
+             ["C", (0.0, 0.0, Cz)], ["H", (0.0, 0.0, Cz - 1.09)]]   # abstractable H, коллинеарно O–H–C
     for a in (0, 2 * np.pi / 3, 4 * np.pi / 3):
         atoms.append(["H", (1.03 * np.cos(a), 1.03 * np.sin(a), Cz + 0.36)])
     return atoms                                  # M, O, C, H_abs, 3×H_methyl = 7
@@ -64,25 +76,25 @@ def build():
 def idx():
     return 1, 3, 7                                # O=1, H_abs=3, nat=7
 
-def mkmf(mol, f_au):
+def mkmf(mol, f_au, xc=None):
     mf = dft.UKS(mol).density_fit()
-    mf.xc = XC; mf.conv_tol = 1e-8; mf.max_cycle = 200; mf.level_shift = 0.3
+    mf.xc = xc or XC; mf.conv_tol = 1e-8; mf.max_cycle = 200; mf.level_shift = 0.3
     if abs(f_au) > 0:
         mol.set_common_orig((0.0, 0.0, 0.0)); ao = mol.intor_symmetric("int1e_r", comp=3)
         h0 = mf.get_hcore(); E = np.array([0.0, 0.0, f_au])
         mf.get_hcore = lambda *a: h0 + np.einsum("x,xij->ij", E, ao)
     return mf
 
-def scf(atoms, spin, f_au, dm0=None):
+def scf(atoms, spin, f_au, dm0=None, xc=None):
     mol = gto.M(atom=atoms, basis="def2-svp", spin=spin, charge=CHARGE, verbose=0)
-    mf = mkmf(mol, f_au)
+    mf = mkmf(mol, f_au, xc)
     e = mf.kernel(dm0=dm0) if dm0 is not None else mf.kernel()
     if not mf.converged:
         mfn = mf.newton(); mfn.max_cycle = 80
         e = mfn.kernel(mf.mo_coeff, mf.mo_occ); mf.converged = bool(mfn.converged); e = float(mfn.e_tot)
     return float(e), bool(mf.converged), mf.make_rdm1()
 
-def crelax(atoms, spin, f_au, i, j, d, maxsteps=30):
+def crelax(atoms, spin, f_au, i, j, d, maxsteps=int(os.environ.get("RELAX_STEPS","30"))):
     a = [[el, tuple(map(float, xyz))] for el, xyz in atoms]
     p_i = np.array(a[i][1]); p_j = np.array(a[j][1]); v = p_j - p_i
     v = v / (np.linalg.norm(v) + 1e-9); a[j] = [a[j][0], tuple(p_i + v * d)]
@@ -94,10 +106,10 @@ def crelax(atoms, spin, f_au, i, j, d, maxsteps=30):
         meq = optimize(mf, constraints=cf, maxsteps=maxsteps)
         geo = [[meq.atom_symbol(k), tuple(float(x) for x in meq.atom_coord(k, unit="Angstrom"))]
                for k in range(meq.natm)]
-        e, conv = scf(geo, spin, f_au); return e, conv, geo
+        e, conv, _ = scf(geo, spin, f_au); return e, conv, geo
     except Exception as exc:
         say(f"      relax d={d} FAILED ({type(exc).__name__}: {str(exc)[:45]})")
-        try: e, conv = scf(a, spin, f_au); return e, conv, a
+        try: e, conv, _ = scf(a, spin, f_au); return e, conv, a
         except Exception: return None, False, None
     finally:
         try: os.remove(cf)
@@ -114,23 +126,31 @@ def place_H(base, o_i, h_j, d):
 def barrier_at_field(f_au, spin, o_i, h_j, store, save):
     """Жёсткий скан d(O–H) с warm-chain плотности (без релаксации): честны СДВИГИ."""
     blk = store.setdefault(f"{f_au:+.3f}", {}).setdefault(f"2S={spin}", {"points": {}})
-    base = build(); dm = None
+    base = build(); dm = None; dm_sp = None; cur = base
     for d in DGRID:
         dk = f"{d:.2f}"
         if blk["points"].get(dk, {}).get("e") is not None:
             continue
         t0 = time.time()
         try:
-            e, conv, dm = scf(place_H(base, o_i, h_j, d), spin, f_au, dm0=dm)
+            if RELAX:
+                e, conv, geo = crelax(cur, spin, f_au, o_i, h_j, d)
+                if geo is not None: cur = geo
+                if SP_XC and geo is not None:           # PBE0//PBE: энергия по SP_XC на GGA-геометрии, warm-chain
+                    e, conv2, dm_sp = scf(geo, spin, f_au, dm0=dm_sp, xc=SP_XC)
+                    conv = bool(conv and conv2)
+            else:
+                e, conv, dm = scf(place_H(base, o_i, h_j, d), spin, f_au, dm0=dm)
         except Exception as exc:
             e, conv = None, False
-            say(f"      SP d={d} FAILED ({type(exc).__name__})")
+            say(f"      pt d={d} FAILED ({type(exc).__name__})")
         blk["points"][dk] = {"e": round(e, 6) if e is not None else None, "converged": conv}
         say(f"    F={f_au:+.3f} 2S={spin} d={dk}: E={e if e is None else round(e,5)} conv={conv} ({round(time.time()-t0,1)}s)")
         save()
     pts = sorted((float(k), v["e"]) for k, v in blk["points"].items() if v.get("converged") and v.get("e") is not None)
     if len(pts) >= 3:
-        E = np.array([p[1] for p in pts]); blk["barrier_eV"] = round(float((E.max() - E[0]) * EV), 4)
+        E = np.array([p[1] for p in pts])  # pts по d возрастанию; реагент = max d = pts[-1]
+        blk["barrier_eV"] = round(float((E.max() - E[-1]) * EV), 4)  # forward: TS − reagent
     return blk.get("barrier_eV")
 
 def main(a):
@@ -143,7 +163,8 @@ def main(a):
         "what": f"C-H abstraction barrier of CH4 by [{METAL}O]+ oxo vs axial field "
                 "(0,+-0.51 V/A); RIGID d(O-H) scan, density warm-chain (field-shifts "
                 "honest, absolute barrier overestimated); does field move HAT barrier/spin?",
-        "metal": METAL, "xc": XC, "fields_au": FIELDS,
+        "metal": METAL, "xc": XC, "sp_xc": SP_XC,
+        "method": (f"{SP_XC}//{XC}" if SP_XC else XC), "fields_au": FIELDS,
         "limits": "distinguished-coord = upper-bound barrier (not true saddle); "
                   "functional-sensitive spins/barriers; cluster, gas phase, frozen "
                   "scaffold (field-shifts honest); v1",
