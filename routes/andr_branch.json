@@ -44,8 +44,9 @@
     "conv": true
    }
   ],
-  "barrierless_dft": false,
-  "ea_dft_kcal": 35.99
+  "n_dropped": 1,
+  "barrierless_dft": true,
+  "ea_dft_kcal": 0.0
  },
  "no2": {
   "pts": [
@@ -56,27 +57,27 @@
    },
    {
     "r": 2.3,
-    "rel_kcal": 128.06,
+    "rel_kcal": 10.82,
     "conv": true
    },
    {
     "r": 2.0,
-    "rel_kcal": 0.82,
+    "rel_kcal": 12.17,
     "conv": true
    },
    {
     "r": 1.8,
-    "rel_kcal": 16.28,
+    "rel_kcal": 10.68,
     "conv": true
    },
    {
     "r": 1.65,
-    "rel_kcal": 40.1,
+    "rel_kcal": 4.33,
     "conv": true
    },
    {
     "r": 1.5,
-    "rel_kcal": -2.08,
+    "rel_kcal": -2.09,
     "conv": true
    },
    {
@@ -85,10 +86,11 @@
     "conv": true
    }
   ],
-  "dft_barrier_kcal": 128.06,
+  "n_dropped": 0,
+  "dft_barrier_kcal": 12.17,
   "ts_interior": true,
-  "casscf_barrier_kcal": 118.37,
-  "nevpt2_barrier_kcal": 135.36,
+  "casscf_barrier_kcal": -28.21,
+  "nevpt2_barrier_kcal": 6.38,
   "ts_cas": [
    14,
    10
@@ -98,9 +100,9 @@
   "nh+o2->hno+o": 6.77,
   "nh+o2->no+oh": -46.92
  },
- "selectivity_descriptor_dft_kcal": 92.07,
- "selectivity_descriptor_casscf_kcal": 82.38,
- "selectivity_descriptor_nevpt2_kcal": 99.37,
+ "selectivity_descriptor_dft_kcal": 12.17,
+ "selectivity_descriptor_casscf_kcal": -28.21,
+ "selectivity_descriptor_nevpt2_kcal": 6.38,
  "descriptor_note": "delta_sel = Ea(NH+O2 -> NOx) \u2212 Ea(NH+CH3 -> C\u2013N); >0 = \u0430\u0437\u043e\u0442 \u0443\u0445\u043e\u0434\u0438\u0442 \u0432 HCN-\u0440\u0443\u0441\u043b\u043e (\u0445\u043e\u0440\u043e\u0448\u043e \u0434\u043b\u044f NaCN-\u0441\u043a\u0438\u0434\u0430), <0 = \u0442\u0435\u0440\u044f\u0435\u0442\u0441\u044f \u0432 NOx",
- "wall_s": 923.9
+ "wall_s": 873.4
 }
