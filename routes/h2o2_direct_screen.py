@@ -207,10 +207,18 @@ def avas_casci_Nu(mf, metal):
     return ncas, nelec, Nu(occ), occ, mc.e_tot
 
 
-def ground_spin(metal, atoms):
+def spins_ooh(metal):
+    """мультиплетности для M-порфин+*OOH: аддукт с дублетным •OOH меняет ЧЁТНОСТЬ
+    числа электронов — берём «голые ±1» (ферро/антиферро связка радикала с центром).
+    Исходный скрипт передавал сюда голые SPINS -> pyscf мгновенно отбрасывал все
+    спины (parity mismatch), стадия падала за 0.0 с — пойман AWS-прогоном 2026-07-25."""
+    return sorted({s + d for s in SPINS[metal] for d in (-1, +1) if s + d >= 1})
+
+
+def ground_spin(metal, atoms, spins=None):
     """скан мультиплетности → основное состояние (E, spin, mf)."""
     best = None
-    for s in SPINS[metal]:
+    for s in (spins if spins is not None else SPINS[metal]):
         try:
             mf = robust_uks(make_mol(atoms, spin=s - 1))   # spin = 2S = (2S+1)-1
             if mf.converged and (best is None or mf.e_tot < best[0]):
@@ -220,9 +228,9 @@ def ground_spin(metal, atoms):
     return best
 
 
-def ground_spin_or_raise(metal, atoms):
+def ground_spin_or_raise(metal, atoms, spins=None):
     """ground_spin, но «ни один спин не сошёлся» — это fail стадии (честно в JSON)."""
-    gs = ground_spin(metal, atoms)
+    gs = ground_spin(metal, atoms, spins=spins)
     if gs is None:
         raise RuntimeError("SCF не сошёлся ни в одном спине")
     return gs
@@ -303,7 +311,7 @@ def screen_metal(M, res):
         print(f"  spin_ooh из чекпойнта: (2S+1)={spin_a} E={rec['ooh']['E']:.4f}")
     else:
         gsa = run_stage(res, rec, "spin_ooh",
-                        lambda: ground_spin_or_raise(M, ads))
+                        lambda: ground_spin_or_raise(M, ads, spins=spins_ooh(M)))
         if gsa is None:
             return
         E_ads, spin_a, mf_a = gsa
