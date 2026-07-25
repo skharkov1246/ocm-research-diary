@@ -281,30 +281,177 @@ def stage_thermo():
     print(f"[thermo] {res['steps_kcal']}", flush=True)
 
 
+def nh_atoms():
+    return [("N", (0, 0, 0)), ("H", (1.04, 0, 0))]
+
+
+def o2_atoms():
+    return [("O", (0, 0, 0)), ("O", (1.21, 0, 0))]
+
+
+def stage_branch():
+    """S1 NaCN: дескриптор ветвления HCN vs NOx — судьба азота на развилке.
+    (A) C–N сочетание CH3•+NH(триплет) на дублете — путь к HCN (продукт);
+    (B) окисление NH+O2 на суммарном триплете — путь к HNO/NO (потеря в NOx).
+    Нитрен NH — MR-зона (триплет ground) => барьер B на DFT/CASSCF/NEVPT2.
+    Дескриптор: delta_sel = Ea(B) − Ea(A); Ea(A)=0, если сочетание безбарьерно."""
+    from pyscf.geomopt.geometric_solver import optimize
+    t0 = time.time()
+    out = {"stage": "branch",
+           "model": "NH branching: CH3+NH coupling (doublet) vs NH+O2 "
+                    "oxidation (triplet), gas-phase screen"}
+
+    # --- ветвь A: CH3 + NH сочетание (дублетная поверхность) ---
+    ch3, e_ch3, _ = relax([("C", (0, 0, 0)), ("H", (1.08, 0, 0)),
+                           ("H", (-0.54, 0.94, 0)), ("H", (-0.54, -0.94, 0))],
+                          1)
+    nh, e_nh, _ = relax(nh_atoms(), 2)
+    eRA = e_ch3 + e_nh
+    at = ([(s, (c[0], c[1], c[2])) for s, c in ch3]
+          + [(s, (c[0], c[1], c[2] + 3.2)) for s, c in nh])
+    ptsA, dm = [], None
+    for r in (3.2, 2.8, 2.4, 2.1, 1.9, 1.7, 1.55, 1.47):
+        cf = os.path.join(DIR, f"_andr_cnh_{r:.2f}.txt")
+        open(cf, "w").write(f"$set\ndistance 1 5 {r:.4f}\n")
+        try:
+            mf0 = uks(M(at, 1), dm0=dm)
+            mol = optimize(mf0, constraints=cf, maxsteps=120,
+                           assert_convergence=False)
+            mfx = uks(mol, dm0=mf0.make_rdm1())
+            at = [(mol.atom_symbol(i), tuple(c)) for i, c in
+                  enumerate(mol.atom_coords(unit="Angstrom"))]
+            dm = mfx.make_rdm1()
+            ptsA.append({"r": r, "rel_kcal": round(float(
+                (mfx.e_tot - eRA) * HARTREE_KCAL), 2),
+                "conv": bool(mfx.converged)})
+            print(f"  [branch:A] r={r} rel={ptsA[-1]['rel_kcal']}", flush=True)
+        except Exception as ex:
+            print(f"  [branch:A] r={r} FAIL: {ex}", flush=True)
+        finally:
+            if os.path.exists(cf):
+                os.remove(cf)
+    relsA = [float(p["rel_kcal"]) for p in ptsA if p["conv"]]
+    ea_A_dft = max(0.0, max(relsA)) if relsA else None
+    out["cn"] = {"pts": ptsA,
+                 "barrierless_dft": bool(relsA) and bool(max(relsA) <= 1.0),
+                 "ea_dft_kcal": (round(ea_A_dft, 2)
+                                 if ea_A_dft is not None else None)}
+
+    # --- ветвь B: NH + O2 окисление (триплетная суммарная поверхность) ---
+    nh_r, e_nh2p, _ = relax(nh_atoms(), 2)
+    o2, e_o2, _ = relax(o2_atoms(), 2)
+    eRB = e_nh2p + e_o2
+    # сборка: N в нуле (H назад под углом), O2 по оси z
+    atB = [("N", (0.0, 0.0, 0.0)), ("H", (-0.74, -0.73, 0.0)),
+           ("O", (0.0, 0.0, 2.6)), ("O", (0.0, 0.0, 3.81))]
+    ptsB, dm = [], None
+    for r in (2.6, 2.3, 2.0, 1.8, 1.65, 1.5, 1.4):
+        cf = os.path.join(DIR, f"_andr_no_{r:.2f}.txt")
+        open(cf, "w").write(f"$set\ndistance 1 3 {r:.4f}\n")
+        try:
+            mf0 = uks(M(atB, 2), dm0=dm)
+            mol = optimize(mf0, constraints=cf, maxsteps=120,
+                           assert_convergence=False)
+            mfx = uks(mol, dm0=mf0.make_rdm1())
+            atB = [(mol.atom_symbol(i), tuple(c)) for i, c in
+                   enumerate(mol.atom_coords(unit="Angstrom"))]
+            dm = mfx.make_rdm1()
+            ptsB.append({"r": r, "rel_kcal": round(float(
+                (mfx.e_tot - eRB) * HARTREE_KCAL), 2),
+                "conv": bool(mfx.converged),
+                "atoms": [[s, [round(x, 6) for x in c]] for s, c in atB]})
+            print(f"  [branch:B] r={r} rel={ptsB[-1]['rel_kcal']}", flush=True)
+        except Exception as ex:
+            print(f"  [branch:B] r={r} FAIL: {ex}", flush=True)
+        finally:
+            if os.path.exists(cf):
+                os.remove(cf)
+    okB = [p for p in ptsB if p["conv"]]
+    out["no2"] = {"pts": [{k: p[k] for k in ("r", "rel_kcal", "conv")}
+                          for p in ptsB]}
+    if len(okB) >= 4:
+        relsB = [float(p["rel_kcal"]) for p in okB]
+        imax = max(range(1, len(relsB) - 1), key=lambda i: relsB[i]) \
+            if len(relsB) >= 3 else None
+        interior = (imax is not None
+                    and relsB[imax] >= max(relsB[0], relsB[-1]))
+        out["no2"]["dft_barrier_kcal"] = round(max(0.0, max(relsB)), 2)
+        out["no2"]["ts_interior"] = bool(interior)
+        if interior:
+            ts_at = [(s, tuple(c)) for s, c in okB[imax]["atoms"]]
+            try:
+                n_ts = nevpt2(ts_at, 2, ["0 N 2p", "2 O 2p", "3 O 2p"],
+                              thr=0.45)
+                n_nh = nevpt2(nh_r, 2, ["0 N 2p"], thr=0.5)
+                n_o2 = nevpt2(o2, 2, ["0 O 2p", "1 O 2p"], thr=0.5)
+                for lv, key in (("e_casscf", "casscf"),
+                                ("e_nevpt2", "nevpt2")):
+                    out["no2"][f"{key}_barrier_kcal"] = round(
+                        (n_ts[lv] - n_nh[lv] - n_o2[lv]) * HARTREE_KCAL, 2)
+                out["no2"]["ts_cas"] = n_ts["cas"]
+            except Exception as ex:
+                out["no2"]["nevpt2_error"] = str(ex)[:200]
+
+    # --- термохимия обеих NOx-развязок ---
+    try:
+        hno, e_hno, _ = relax([("H", (-0.99, 0.17, 0)), ("N", (0, 0, 0)),
+                               ("O", (1.21, 0, 0))], 0)
+        no, e_no, _ = relax([("N", (0, 0, 0)), ("O", (1.15, 0, 0))], 1)
+        oh, e_oh, _ = relax([("O", (0, 0, 0)), ("H", (0.97, 0, 0))], 1)
+        mo_ = uks(M([("O", (0.0, 0.0, 0.0))], 2))
+        e_o = float(mo_.e_tot)
+        out["thermo_kcal"] = {
+            "nh+o2->hno+o": round((e_hno + e_o - eRB) * HARTREE_KCAL, 2),
+            "nh+o2->no+oh": round((e_no + e_oh - eRB) * HARTREE_KCAL, 2)}
+    except Exception as ex:
+        out["thermo_error"] = str(ex)[:200]
+
+    # --- дескриптор селективности ---
+    ea_A = out["cn"].get("ea_dft_kcal") or 0.0
+    for lv in ("dft", "casscf", "nevpt2"):
+        eb = out["no2"].get(f"{lv}_barrier_kcal")
+        if eb is not None:
+            out[f"selectivity_descriptor_{lv}_kcal"] = round(eb - ea_A, 2)
+    out["descriptor_note"] = ("delta_sel = Ea(NH+O2 -> NOx) − Ea(NH+CH3 -> "
+                              "C–N); >0 = азот уходит в HCN-русло (хорошо "
+                              "для NaCN-скида), <0 = теряется в NOx")
+    out["wall_s"] = round(time.time() - t0, 1)
+    json.dump(out, open(os.path.join(DIR, "andr_branch.json"), "w"), indent=1)
+    print("[branch]", json.dumps({k: v for k, v in out.items()
+                                  if k not in ("cn", "no2")},
+                                 ensure_ascii=False)[:400], flush=True)
+
+
 def stage_merge():
     def _ld(f):
         p = os.path.join(DIR, f)
         if os.path.exists(p):
             return json.load(open(p))
         return {"missing": f}
-    hat, asc, th = (_ld("andr_hat.json"), _ld("andr_assoc.json"),
-                    _ld("andr_thermo.json"))
+    hat, asc, th, br = (_ld("andr_hat.json"), _ld("andr_assoc.json"),
+                        _ld("andr_thermo.json"), _ld("andr_branch.json"))
     res = {"route": "Andrussow radical skeleton: NH2-HAT + CH3/NH2 "
-                    "recombination + dehydro thermochemistry to HCN",
+                    "recombination + dehydro thermochemistry to HCN "
+                    "+ NH branching (HCN vs NOx)",
            "hat_barrier": {lv: hat.get(lv, {}).get("barrier_kcal")
                            for lv in ("dft", "casscf", "nevpt2")},
            "hat_lit_anchor_kcal": "13-15 (NH2+CH4, лит.)",
            "hat_failed": hat.get("hat_stage_failed"),
            "recombination_barrierless_dft": asc.get("barrierless_dft"),
            "dehydro_steps_kcal": th.get("steps_kcal"),
-           "note": "скрин-уровень; NOx/O2-ветвь пламени не считалась "
-                   "(отдельная задача); Pt-поверхность заменена газофазным "
+           "branching_descriptor": (
+               {lv: br.get(f"selectivity_descriptor_{lv}_kcal")
+                for lv in ("dft", "casscf", "nevpt2")}
+               if "missing" not in br else br),
+           "branching_note": br.get("descriptor_note"),
+           "nox_thermo_kcal": br.get("thermo_kcal"),
+           "note": "скрин-уровень; Pt-поверхность заменена газофазным "
                    "скелетом — селективность каталитической стадии не "
-                   "утверждается"}
+                   "утверждается; ветвление NH считано стадией branch"}
     json.dump(res, open(RES, "w"), indent=1)
     print(json.dumps(res, indent=1, ensure_ascii=False), flush=True)
 
 
 if __name__ == "__main__":
     {"hat": stage_hat, "assoc": stage_assoc, "thermo": stage_thermo,
-     "merge": stage_merge}[sys.argv[1]]()
+     "branch": stage_branch, "merge": stage_merge}[sys.argv[1]]()

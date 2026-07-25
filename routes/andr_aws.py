@@ -29,6 +29,7 @@ BRANCH = os.environ.get("JOB_BRANCH") or subprocess.run(
 MAX_MIN = int(os.environ.get("JOB_MAX_MIN", "600"))
 STAGES = os.environ.get("JOB_STAGES", "hat assoc thermo merge")
 _OUT = {"hat": "routes/andr_hat.json", "assoc": "routes/andr_assoc.json",
+        "branch": "routes/andr_branch.json",
         "thermo": "routes/andr_thermo.json", "merge": "routes/andr_results.json"}
 RM_FILES = " ".join(f for f in (_OUT[s] for s in STAGES.split()) if f) or "/tmp/_rm_noop"
 JOB_MIN = MAX_MIN - 20
@@ -146,7 +147,7 @@ def main():
         while time.time() - t0 < MAX_MIN * 60:
             try:
                 s3.head_object(Bucket=BUCKET, Key=f"{PREFIX}/DONE")
-                for f in ("andr_hat_scan.json", "andr_hat.json", "andr_assoc.json", "andr_thermo.json", "andr_results.json"):
+                for f in ("andr_hat_scan.json", "andr_hat.json", "andr_assoc.json", "andr_thermo.json", "andr_branch.json", "andr_results.json"):
                     try:
                         s3.download_file(BUCKET, f"{PREFIX}/{f}", f"routes/{f}")
                     except ClientError:
