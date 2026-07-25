@@ -49,10 +49,8 @@ SULF_SPECIES = "sulf_bare,sulf_oh,sulf_o,sulf_ooh,h2o,h2"
 CTRL_SPECIES = "ctrl_bare,ctrl_oh,ctrl_o,ctrl_ooh,h2o,h2"
 ALL_SPECIES = "sulf_bare,sulf_oh,sulf_o,sulf_ooh,ctrl_bare,ctrl_oh,ctrl_o,ctrl_ooh,h2o,h2"
 
-# кредлы окружения не должны утечь в boto3 (используем instance profile / роль)
-for var in ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"):
-    os.environ.pop(var, None)
-
+# ВАЖНО: env-креды нужны ЛАУНЧЕРУ (песочница вызывает EC2/S3 от scoped-юзера);
+# на инстанс они не попадают — user-data кредов не содержит, там instance profile.
 ec2 = boto3.client("ec2", region_name=REGION)
 ssm = boto3.client("ssm", region_name=REGION)
 s3 = boto3.client("s3", region_name="us-east-1")

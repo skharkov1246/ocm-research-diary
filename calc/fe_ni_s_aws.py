@@ -65,10 +65,8 @@ JOB_MIN = MAX_MIN - 20
 FWD = ("FENIS_STAGE_TIMEOUT", "FENIS_LADDER", "FENIS_MF", "FENIS_MACRO",
        "FENIS_RELAX", "PYSCF_MAX_MEMORY")
 
-# drop any ambient creds so boto3 uses the sandbox's own role
-for var in ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"):
-    os.environ.pop(var, None)
-
+# ВАЖНО: env-креды нужны ЛАУНЧЕРУ (песочница вызывает EC2/S3 от scoped-юзера);
+# на инстанс они не попадают — user-data кредов не содержит, там instance profile.
 ec2 = boto3.client("ec2", region_name=REGION)
 ssm = boto3.client("ssm", region_name=REGION)
 s3 = boto3.client("s3", region_name="us-east-1")
