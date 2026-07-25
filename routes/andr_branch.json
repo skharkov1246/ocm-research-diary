@@ -1,0 +1,106 @@
+{
+ "stage": "branch",
+ "model": "NH branching: CH3+NH coupling (doublet) vs NH+O2 oxidation (triplet), gas-phase screen",
+ "cn": {
+  "pts": [
+   {
+    "r": 3.2,
+    "rel_kcal": 35.99,
+    "conv": true
+   },
+   {
+    "r": 2.8,
+    "rel_kcal": -5.55,
+    "conv": true
+   },
+   {
+    "r": 2.4,
+    "rel_kcal": -14.35,
+    "conv": true
+   },
+   {
+    "r": 2.1,
+    "rel_kcal": -32.58,
+    "conv": true
+   },
+   {
+    "r": 1.9,
+    "rel_kcal": -50.91,
+    "conv": true
+   },
+   {
+    "r": 1.7,
+    "rel_kcal": -69.91,
+    "conv": true
+   },
+   {
+    "r": 1.55,
+    "rel_kcal": -81.56,
+    "conv": true
+   },
+   {
+    "r": 1.47,
+    "rel_kcal": -85.08,
+    "conv": true
+   }
+  ],
+  "barrierless_dft": false,
+  "ea_dft_kcal": 35.99
+ },
+ "no2": {
+  "pts": [
+   {
+    "r": 2.6,
+    "rel_kcal": 11.15,
+    "conv": true
+   },
+   {
+    "r": 2.3,
+    "rel_kcal": 128.06,
+    "conv": true
+   },
+   {
+    "r": 2.0,
+    "rel_kcal": 0.82,
+    "conv": true
+   },
+   {
+    "r": 1.8,
+    "rel_kcal": 16.28,
+    "conv": true
+   },
+   {
+    "r": 1.65,
+    "rel_kcal": 40.1,
+    "conv": true
+   },
+   {
+    "r": 1.5,
+    "rel_kcal": -2.08,
+    "conv": true
+   },
+   {
+    "r": 1.4,
+    "rel_kcal": -4.16,
+    "conv": true
+   }
+  ],
+  "dft_barrier_kcal": 128.06,
+  "ts_interior": true,
+  "casscf_barrier_kcal": 118.37,
+  "nevpt2_barrier_kcal": 135.36,
+  "ts_cas": [
+   14,
+   10
+  ]
+ },
+ "thermo_kcal": {
+  "nh+o2->hno+o": 6.77,
+  "nh+o2->no+oh": -46.92
+ },
+ "selectivity_descriptor_dft_kcal": 92.07,
+ "selectivity_descriptor_casscf_kcal": 82.38,
+ "selectivity_descriptor_nevpt2_kcal": 99.37,
+ "descriptor_note": "delta_sel = Ea(NH+O2 -> NOx) \u2212 Ea(NH+CH3 -> C\u2013N); >0 = \u0430\u0437\u043e\u0442 \u0443\u0445\u043e\u0434\u0438\u0442 \u0432 HCN-\u0440\u0443\u0441\u043b\u043e (\u0445\u043e\u0440\u043e\u0448\u043e \u0434\u043b\u044f NaCN-\u0441\u043a\u0438\u0434\u0430), <0 = \u0442\u0435\u0440\u044f\u0435\u0442\u0441\u044f \u0432 NOx",
+ "wall_s": 923.9
+}

@@ -281,6 +281,21 @@ def stage_thermo():
     print(f"[thermo] {res['steps_kcal']}", flush=True)
 
 
+def _drop_outliers(pts, key="rel_kcal", thr=25.0):
+    """Санити из stage_hat: убрать точки, отклоняющиеся >thr ккал от ОБОИХ
+    соседей (SCF-скачки состояний на многоповерхностных системах)."""
+    ok = [p for p in pts if p.get("conv")]
+    if len(ok) < 3:
+        return ok
+    keep = []
+    for i, p in enumerate(ok):
+        nb = [ok[j][key] for j in (i - 1, i + 1) if 0 <= j < len(ok)]
+        if nb and all(abs(p[key] - v) > thr for v in nb):
+            continue
+        keep.append(p)
+    return keep
+
+
 def nh_atoms():
     return [("N", (0, 0, 0)), ("H", (1.04, 0, 0))]
 
@@ -330,10 +345,19 @@ def stage_branch():
         finally:
             if os.path.exists(cf):
                 os.remove(cf)
-    relsA = [float(p["rel_kcal"]) for p in ptsA if p["conv"]]
-    ea_A_dft = max(0.0, max(relsA)) if relsA else None
-    out["cn"] = {"pts": ptsA,
-                 "barrierless_dft": bool(relsA) and bool(max(relsA) <= 1.0),
+    keptA = _drop_outliers(ptsA)
+    relsA = [float(p["rel_kcal"]) for p in keptA]
+    # Ea = интерьерный максимум ПОСЛЕ дропа выбросов; монотонный спуск
+    # (сочетание радикалов) => безбарьерно, Ea=0
+    ea_A_dft = None
+    if len(relsA) >= 3:
+        imaxA = max(range(1, len(relsA) - 1), key=lambda i: relsA[i])
+        interiorA = relsA[imaxA] >= max(relsA[0], relsA[-1])
+        ea_A_dft = max(0.0, relsA[imaxA]) if interiorA else 0.0
+    out["cn"] = {"pts": ptsA, "n_dropped": len([p for p in ptsA
+                                                if p["conv"]]) - len(keptA),
+                 "barrierless_dft": (ea_A_dft is not None
+                                     and ea_A_dft <= 1.0),
                  "ea_dft_kcal": (round(ea_A_dft, 2)
                                  if ea_A_dft is not None else None)}
 
@@ -366,16 +390,18 @@ def stage_branch():
         finally:
             if os.path.exists(cf):
                 os.remove(cf)
-    okB = [p for p in ptsB if p["conv"]]
+    okB = _drop_outliers(ptsB)
     out["no2"] = {"pts": [{k: p[k] for k in ("r", "rel_kcal", "conv")}
-                          for p in ptsB]}
+                          for p in ptsB],
+                  "n_dropped": len([p for p in ptsB if p["conv"]]) - len(okB)}
     if len(okB) >= 4:
         relsB = [float(p["rel_kcal"]) for p in okB]
         imax = max(range(1, len(relsB) - 1), key=lambda i: relsB[i]) \
             if len(relsB) >= 3 else None
         interior = (imax is not None
                     and relsB[imax] >= max(relsB[0], relsB[-1]))
-        out["no2"]["dft_barrier_kcal"] = round(max(0.0, max(relsB)), 2)
+        out["no2"]["dft_barrier_kcal"] = (round(max(0.0, relsB[imax]), 2)
+                                          if imax is not None else None)
         out["no2"]["ts_interior"] = bool(interior)
         if interior:
             ts_at = [(s, tuple(c)) for s, c in okB[imax]["atoms"]]
