@@ -18,7 +18,7 @@ Ni/Cu/Co (Pb-Ca-Sn -> Ti + неблагородное каталитическо
 Скрин-уровень ±2-3x, НЕ банковская модель. Якоря — из наших же файлов:
   h2_oer_ladder_results.json   eta=0.435 В — OER-лестница [Ni(OH)2] (щёлочь);
                                стартовая точка переноса в сульфатную кислоту
-  skid_twin / econ_shock       WACC 12% (аннуализация анодного парка)
+  econ_shock / msa_cost_model  WACC 12% (аннуализация анодного парка)
 Данные Норникеля (объёмы, доля EW, цена э/э, площадки) — ТОЛЬКО диапазоны
 с tier='company_assumption' и пометкой «проверить у компании».
 
@@ -46,8 +46,8 @@ ASSUMPTIONS = {
                "каждые -100 мВ = -91.3 / -84.3 / -91.0 кВт*ч/т"),
     # --- якоря репозитория ---
     "wacc": dict(value=0.12, unit="доля/год", tier="anchor_repo",
-        source="skid_twin / econ_shock_candidates: 12%; здесь — CRF-аннуализация "
-               "анодного парка"),
+        source="econ_shock_candidates / msa_cost_model: 12%; здесь — "
+               "CRF-аннуализация анодного парка"),
     "oer_eta_anchor_v": dict(value=0.435, unit="В", tier="anchor_repo",
         source="h2_oer_ladder_results.json: лестница [Ni(OH)2(X)], лимит "
                "dG4 *OOH->O2; щёлочь, минимальный кластер — стартовая точка, "

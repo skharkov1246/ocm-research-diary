@@ -45,13 +45,13 @@
    "value": 0.12,
    "unit": "доля/год",
    "tier": "anchor_repo",
-   "source": "skid_twin / econ_shock_candidates: 12%"
+   "source": "econ_shock_candidates / msa_cost_model: 12%"
   },
   "life_years": {
    "value": 12,
    "unit": "лет",
    "tier": "anchor_repo",
-   "source": "skid_twin: жизнь актива 12 лет"
+   "source": "econ_vs_mining: жизнь OCM-актива 12 лет"
   },
   "gas_flare_usd_t": {
    "value": 30.0,

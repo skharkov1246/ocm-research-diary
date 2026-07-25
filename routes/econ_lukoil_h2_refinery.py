@@ -53,9 +53,10 @@ def A(value, unit, tier, comment):
 ASSUMPTIONS = {
  # --- якоря репозитория ---
  "wacc": A(0.12, "1/год", "anchor_repo",
-           "skid_twin/econ_shock_candidates: 12% годовых на капитал"),
- "asset_life_y": A(12, "лет", "anchor_repo",
-                   "skid_twin: жизнь актива 12 лет; NPV через аннуитет"),
+           "econ_shock_candidates / msa_cost_model: 12% годовых на капитал"),
+ "asset_life_y": A(15, "лет", "anchor_repo",
+                   "econ_vs_mining: жизнь пиролизного актива 15 лет (та же, "
+                   "что у N3; 12 лет — у OCM-скидов); NPV через аннуитет"),
  "gas_pipeline_usd_t": A(180.0, "$/т CH4", "anchor_repo",
                          "skid_twin GAS.pipeline (~$3.5/MMBtu) — мировой "
                          "уровень; калибровочная точка LCOH-якорей"),
@@ -452,15 +453,18 @@ def main():
      "tier": "screening_pm_2_3x",
      "not_bankable": True,
      "frame": ("скрин ±2-3x; LCOH калиброван к литературной TEA (не наш "
-               f"расчёт); WACC 12%, жизнь 12 лет, аннуитет {AF:.2f}; "
+               f"расчёт); WACC 12%, жизнь пиролизного актива 15 лет "
+               f"(econ_vs_mining, как N3), аннуитет {AF:.2f}; "
                "капитальная строка LCOH -> капекс через перпетуитет "
                "capital*WACC (как в L1/L2); экономия = (SMR_eff - "
                "LCOH_cash), капекс отдельно"),
      "consistency_anchors": {
-      "skid_twin.json": "трубный газ $180/т; WACC 12%; жизнь 12 лет; "
+      "skid_twin.json": "трубный газ $180/т; "
                         "7300 т CH4/г = 1 MMscf/д (для пересчёта)",
+      "econ_shock_candidates.json": "WACC 12%",
       "econ_vs_mining_results.json": "пиролиз H2+C уже был лучшим по EBITDA "
-                                     "на факеле; здесь другой кейс — "
+                                     "на факеле; жизнь пиролизного актива "
+                                     "15 лет (как в N3); здесь другой кейс — "
                                      "captive-замещение SMR на НПЗ",
       "pyrolysis_descriptor_results.json": "Cu-Bi: Ebind_C DFT -395.02 -> "
                                            "NEVPT2 +0.77 (наше IP, гейт G1)",

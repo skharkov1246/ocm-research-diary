@@ -65,7 +65,7 @@ ASSUMPTIONS = {
     "т/т CH4", "literature", "лит. TEA пиролиза: CH4 -> 0.25 H2 + 0.75 C"),
  # --- якоря репозитория ---
  "wacc": A(0.12, "1/год", "anchor_repo",
-    "skid_twin / econ_shock_candidates: 12% годовых на капитал"),
+    "econ_shock_candidates / msa_cost_model: 12% годовых на капитал"),
  "asset_life_y": A(15, "лет", "anchor_repo",
     "econ_vs_mining: жизнь пиролизного актива 15 лет (против 12 у OCM-скидов); "
     "NPV через аннуитет"),
@@ -551,8 +551,8 @@ def main():
                "через перпетуитет capital*WACC (интенсивность E1) x северный "
                "коэффициент; H2 ТОЛЬКО на месте (мираж 6.9x)" % AF),
      "consistency_anchors": {
-        "skid_twin.json": "7300 т CH4/г = 1 MMscf/д (пересчёт масштаба); "
-                          "WACC 12%",
+        "skid_twin.json": "7300 т CH4/г = 1 MMscf/д (пересчёт масштаба)",
+        "econ_shock_candidates.json": "WACC 12%",
         "econ_vs_mining_results.json": "порог $323/$751 паритет/3x — сырая "
                                        "сажа не проходит, carbon black "
                                        "проходит; жизнь пиролиза 15 лет",

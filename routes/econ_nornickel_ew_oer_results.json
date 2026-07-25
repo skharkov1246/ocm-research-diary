@@ -82,7 +82,7 @@
    "value": 0.12,
    "unit": "доля/год",
    "tier": "anchor_repo",
-   "source": "skid_twin / econ_shock_candidates: 12%; здесь — CRF-аннуализация анодного парка"
+   "source": "econ_shock_candidates / msa_cost_model: 12%; здесь — CRF-аннуализация анодного парка"
   },
   "oer_eta_anchor_v": {
    "value": 0.435,

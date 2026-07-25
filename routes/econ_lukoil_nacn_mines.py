@@ -35,10 +35,11 @@ def A(value, unit, tier, comment):
 ASSUMPTIONS = {
  # --- якоря репозитория (не трогать без пересчёта всей линейки) ---
  "wacc": A(0.12, "1/год", "anchor_repo",
-           "skid_twin/econ_shock_candidates: 12% годовых на капитал"),
+           "econ_shock_candidates / msa_cost_model: 12% годовых на капитал"),
  "asset_life_y": A(12, "лет", "anchor_repo",
-                   "skid_twin: жизнь скид-актива; капитальная строка здесь — "
-                   "перпетуитет capex*WACC/т, как в econ_shock_candidates"),
+                   "econ_vs_mining: 12 лет у скид-линейки; капитальная строка "
+                   "здесь — перпетуитет capex*WACC/т, как в "
+                   "econ_shock_candidates"),
  "fix_skid_usd_t_at_1kt": A(380.0, "$/т при 1 кт/г", "anchor_repo",
                             "econ_shock_candidates: фикс малого масштаба, "
                             "нормируется по тоннажу как 380*(1000/т_г)"),
@@ -352,8 +353,9 @@ def main():
      "consistency_anchors": {
       "econ_shock_candidates.json": "S1: 2500 т/г, $3000/т delivered, var "
                                     "$823, full $1263, маржа $1737, EBITDA "
-                                    "$4.34M, окупаемость 1.4 г, выход 65%",
-      "skid_twin.json": "газ факел $30/т; WACC 12%; жизнь 12 лет",
+                                    "$4.34M, окупаемость 1.4 г, выход 65%; "
+                                    "WACC 12%",
+      "skid_twin.json": "газ факел $30/т",
       "econ_vs_mining_results.json": "NaCN $3000/т >> порога 3x к майнингу "
                                      "($751/т) — категория specialty"},
      "assumptions": ASSUMPTIONS,

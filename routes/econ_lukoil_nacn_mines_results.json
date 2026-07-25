@@ -4,8 +4,8 @@
  "not_bankable": true,
  "frame": "скрин ±2-3x; фикс $380/т@1кт/г нормируется по тоннажу; WACC 12%; капитальная строка — перпетуитет capex*WACC/т (как в econ_shock_candidates)",
  "consistency_anchors": {
-  "econ_shock_candidates.json": "S1: 2500 т/г, $3000/т delivered, var $823, full $1263, маржа $1737, EBITDA $4.34M, окупаемость 1.4 г, выход 65%",
-  "skid_twin.json": "газ факел $30/т; WACC 12%; жизнь 12 лет",
+  "econ_shock_candidates.json": "S1: 2500 т/г, $3000/т delivered, var $823, full $1263, маржа $1737, EBITDA $4.34M, окупаемость 1.4 г, выход 65%; WACC 12%",
+  "skid_twin.json": "газ факел $30/т",
   "econ_vs_mining_results.json": "NaCN $3000/т >> порога 3x к майнингу ($751/т) — категория specialty"
  },
  "assumptions": {
@@ -13,13 +13,13 @@
    "value": 0.12,
    "unit": "1/год",
    "tier": "anchor_repo",
-   "comment": "skid_twin/econ_shock_candidates: 12% годовых на капитал"
+   "comment": "econ_shock_candidates / msa_cost_model: 12% годовых на капитал"
   },
   "asset_life_y": {
    "value": 12,
    "unit": "лет",
    "tier": "anchor_repo",
-   "comment": "skid_twin: жизнь скид-актива; капитальная строка здесь — перпетуитет capex*WACC/т, как в econ_shock_candidates"
+   "comment": "econ_vs_mining: 12 лет у скид-линейки; капитальная строка здесь — перпетуитет capex*WACC/т, как в econ_shock_candidates"
   },
   "fix_skid_usd_t_at_1kt": {
    "value": 380.0,

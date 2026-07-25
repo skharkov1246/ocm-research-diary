@@ -2,10 +2,11 @@
  "model": "Лукойл L3: бирюзовый пиролиз-H2 на НПЗ против SMR",
  "tier": "screening_pm_2_3x",
  "not_bankable": true,
- "frame": "скрин ±2-3x; LCOH калиброван к литературной TEA (не наш расчёт); WACC 12%, жизнь 12 лет, аннуитет 6.19; капитальная строка LCOH -> капекс через перпетуитет capital*WACC (как в L1/L2); экономия = (SMR_eff - LCOH_cash), капекс отдельно",
+ "frame": "скрин ±2-3x; LCOH калиброван к литературной TEA (не наш расчёт); WACC 12%, жизнь пиролизного актива 15 лет (econ_vs_mining, как N3), аннуитет 6.81; капитальная строка LCOH -> капекс через перпетуитет capital*WACC (как в L1/L2); экономия = (SMR_eff - LCOH_cash), капекс отдельно",
  "consistency_anchors": {
-  "skid_twin.json": "трубный газ $180/т; WACC 12%; жизнь 12 лет; 7300 т CH4/г = 1 MMscf/д (для пересчёта)",
-  "econ_vs_mining_results.json": "пиролиз H2+C уже был лучшим по EBITDA на факеле; здесь другой кейс — captive-замещение SMR на НПЗ",
+  "skid_twin.json": "трубный газ $180/т; 7300 т CH4/г = 1 MMscf/д (для пересчёта)",
+  "econ_shock_candidates.json": "WACC 12%",
+  "econ_vs_mining_results.json": "пиролиз H2+C уже был лучшим по EBITDA на факеле; жизнь пиролизного актива 15 лет (как в N3); здесь другой кейс — captive-замещение SMR на НПЗ",
   "pyrolysis_descriptor_results.json": "Cu-Bi: Ebind_C DFT -395.02 -> NEVPT2 +0.77 (наше IP, гейт G1)",
   "литературная TEA": "LCOH $1.29-1.53/кг масштаб / $3.06 малый; углерод $250/т -> -25% LCOH; $700/т -> ~$1/кг (DOE); воспроизведено в anchor_reproduction"
  },
@@ -14,13 +15,13 @@
    "value": 0.12,
    "unit": "1/год",
    "tier": "anchor_repo",
-   "comment": "skid_twin/econ_shock_candidates: 12% годовых на капитал"
+   "comment": "econ_shock_candidates / msa_cost_model: 12% годовых на капитал"
   },
   "asset_life_y": {
-   "value": 12,
+   "value": 15,
    "unit": "лет",
    "tier": "anchor_repo",
-   "comment": "skid_twin: жизнь актива 12 лет; NPV через аннуитет"
+   "comment": "econ_vs_mining: жизнь пиролизного актива 15 лет (та же, что у N3; 12 лет — у OCM-скидов); NPV через аннуитет"
   },
   "gas_pipeline_usd_t": {
    "value": 180.0,
@@ -276,7 +277,7 @@
    "savings_musd_y": -1.6,
    "capex_musd": 115.0,
    "payback_y": null,
-   "npv_musd": -125.0,
+   "npv_musd": -126.0,
    "note": "малый НПЗ 20 кт/г; газ мировой $180; углерод — сырая сажа $200/т, продаётся 30% (70% в отвал); конкурент — амортизированный SMR $1.0/кг; CO2 $0 (РФ сегодня); капекс +40%"
   },
   "base": {
@@ -299,7 +300,7 @@
    "savings_musd_y": 59.0,
    "capex_musd": 148.0,
    "payback_y": 2.5,
-   "npv_musd": 217.0,
+   "npv_musd": 254.0,
    "note": "гидрокрекинговый НПЗ 50 кт/г; газ РФ $140; углерод $250/т (лит. якорь), сбыт 70%; SMR $1.4/кг; CO2 $20/т"
   },
   "optimistic": {
@@ -322,7 +323,7 @@
    "savings_musd_y": 266.5,
    "capex_musd": 190.0,
    "payback_y": 0.7,
-   "npv_musd": 1461.0,
+   "npv_musd": 1625.0,
    "note": "крупный НПЗ 100 кт/г; газ $100; углерод $400/т (верх сырой; carbon black $1200+ — НЕ заложен), сбыт 90%; SMR дорогой $1.8; CO2 $50/т; капекс -20%"
   }
  },
@@ -487,15 +488,15 @@
    "computed_context": {
     "sold30_co2_0_smr1.0": {
      "savings_musd_y": 13.5,
-     "npv_musd": -65.0
+     "npv_musd": -56.0
     },
     "sold50_co2_0_smr1.0": {
      "savings_musd_y": 21.5,
-     "npv_musd": -15.0
+     "npv_musd": -2.0
     },
     "sold50_co2_0_smr1.4": {
      "savings_musd_y": 41.5,
-     "npv_musd": 109.0
+     "npv_musd": 134.0
     }
    },
    "why": "без сбыта углерода и без цены CO2 у пиролиза не остаётся ни одного из двух козырей: против амортизированного SMR $1.0/кг NPV уходит в минус (посчитано); жив только против дорогого SMR $1.4+ — ставка «конкурент неэффективен» не наша, вариант закрыть"
@@ -505,11 +506,11 @@
    "computed_context": {
     "gas250_base_carbon_smr_co_moves": {
      "savings_musd_y": 55.1,
-     "npv_musd": 193.0
+     "npv_musd": 227.0
     },
     "gas250_plus_carbon_fail": {
      "savings_musd_y": 9.7,
-     "npv_musd": -89.0
+     "npv_musd": -83.0
     }
    },
    "why": "пиролиз ест 4.0 кг CH4/кг H2 против ~3.3 у SMR — при дорогом газе разрыв удельного расхода работает ПРОТИВ нас (+$0.175/кг на каждые $250/т); при газе >$250 в связке с плохим сбытом углерода NPV<0 (посчитано), и сама премисса «дешёвый газ РФ» мертва — стоп"

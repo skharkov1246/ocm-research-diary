@@ -10,7 +10,8 @@
  },
  "frame": "скрин +-2-3x; WACC 12%, жизнь пиролиза 15 лет, аннуитет 6.81; LCOH-параметрика калибрована к той же лит. TEA, что L3 (econ_lukoil_h2_refinery); капекс = капитальная строка TEA через перпетуитет capital*WACC (интенсивность E1) x северный коэффициент; H2 ТОЛЬКО на месте (мираж 6.9x)",
  "consistency_anchors": {
-  "skid_twin.json": "7300 т CH4/г = 1 MMscf/д (пересчёт масштаба); WACC 12%",
+  "skid_twin.json": "7300 т CH4/г = 1 MMscf/д (пересчёт масштаба)",
+  "econ_shock_candidates.json": "WACC 12%",
   "econ_vs_mining_results.json": "порог $323/$751 паритет/3x — сырая сажа не проходит, carbon black проходит; жизнь пиролиза 15 лет",
   "econ_lukoil_h2_refinery.py": "та же LCOH-калибровка и carbon black $1200-2000 / raw $200-400; рынок техуглерода РФ 700-1100 кт/г",
   "pyrolysis_descriptor_results.json": "Cu-Bi: Ebind_C DFT -395.02 -> NEVPT2 +0.77 (наше IP, G1)",
@@ -45,7 +46,7 @@
    "value": 0.12,
    "unit": "1/год",
    "tier": "anchor_repo",
-   "comment": "skid_twin / econ_shock_candidates: 12% годовых на капитал"
+   "comment": "econ_shock_candidates / msa_cost_model: 12% годовых на капитал"
   },
   "asset_life_y": {
    "value": 15,

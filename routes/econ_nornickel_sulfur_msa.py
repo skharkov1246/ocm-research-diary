@@ -52,7 +52,7 @@ ASSUMPTIONS = {
     "skid_t_y": dict(value=1093.0, unit="т MSA/год/скид", tier="anchor_repo",
         source="msa_cost_model: конверсия CH4->MSA ~2.5% per-pass suite"),
     "wacc": dict(value=0.12, unit="доля/год", tier="anchor_repo",
-        source="skid_twin / econ_shock_candidates: 12% (аморт.+WACC)"),
+        source="msa_cost_model / econ_shock_candidates: 12% (аморт.+WACC)"),
     "skid20_t_y": dict(value=8747.0, unit="т MSA/год/скид",
         tier="anchor_repo", source="msa_cost_model: апсайд конверсии 20% "
         "(x8 тоннаж на тот же скид)"),

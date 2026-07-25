@@ -94,7 +94,7 @@
    "value": 0.12,
    "unit": "доля/год",
    "tier": "anchor_repo",
-   "source": "skid_twin / econ_shock_candidates: 12% (аморт.+WACC)"
+   "source": "msa_cost_model / econ_shock_candidates: 12% (аморт.+WACC)"
   },
   "skid20_t_y": {
    "value": 8747.0,
