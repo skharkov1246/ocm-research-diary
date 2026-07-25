@@ -36,13 +36,18 @@ from pyscf.data.elements import charge as Z  # noqa: E402
 METAL = os.environ.get("METAL", "Fe")
 XC = os.environ.get("XC", "pbe")
 CHARGE = int(os.environ.get("CHARGE", "1"))      # [MO]+ канонический катион (Shaik HAT)
-RELAX = int(os.environ.get("RELAX", "0"))        # 1 = релаксированный барьер (честнее, дороже)
-_tag = ("_" + METAL.lower()) + ("" if XC == "pbe" else "_" + XC) + ("_relax" if RELAX else "")
+RELAX = int(os.environ.get("RELAX", "0"))        # 1 = релаксированный барьер (дороже, ближе к седлу)
+RUN_TAG = os.environ.get("RUN_TAG", "")          # per-instance тег: параллельные поля не затирают друг друга
+_tag = ("_" + METAL.lower()) + ("" if XC == "pbe" else "_" + XC) + ("_relax" if RELAX else "") + (("_" + RUN_TAG) if RUN_TAG else "")
 OUT = os.path.join(HERE, f"spin_field_oxidation{_tag}_results.json")
 EV = 27.211386245988
 VA = 51.42206747
-FIELDS = ([-0.012,-0.008,-0.004,0.0,0.004,0.008,0.012] if os.environ.get("FINE")=="1"
-          else [0.0, 0.010, -0.010])   # FINE=1 — кривая барьер/поле
+if os.environ.get("FIELDS_AU"):                  # явный список полей (а.е.) — один инстанс = одно поле
+    FIELDS = [float(x) for x in os.environ["FIELDS_AU"].split(",")]
+elif os.environ.get("FINE") == "1":
+    FIELDS = [-0.012,-0.008,-0.004,0.0,0.004,0.008,0.012]   # FINE=1 — кривая барьер/поле
+else:
+    FIELDS = [0.0, 0.010, -0.010]
 DGRID = ([2.55, 2.15, 1.80, 1.50, 1.20, 1.00] if os.environ.get("COARSE")=="1"
          else [2.55, 2.30, 2.05, 1.85, 1.65, 1.45, 1.25, 1.05])  # d(O–H_abs), Å: реагент H-на-C → продукт O–H
 SPINS = [int(x) for x in os.environ.get("SPINS","0,1,2,3,4,5,6,7").split(",")]
