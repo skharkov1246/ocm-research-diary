@@ -22,9 +22,13 @@
      "wall_s": 2466.8
     },
     "spin_ooh": {
-     "status": "fail:RuntimeError",
-     "error": "SCF не сошёлся ни в одном спине",
-     "wall_s": 0.0
+     "status": "ok",
+     "wall_s": 5303.0
+    },
+    "opt_ooh": {
+     "status": "timeout",
+     "timeout_s": 5400,
+     "wall_s": 5400.1
     }
    },
    "atoms_bare": [
@@ -626,7 +630,11 @@
       -0.510762050200862
      ]
     ]
-   ]
+   ],
+   "ooh": {
+    "E": -2400.5608289137967,
+    "spin": 4
+   }
   },
   "Co": {
    "stages": {
@@ -643,9 +651,13 @@
      "wall_s": 1160.7
     },
     "spin_ooh": {
-     "status": "fail:RuntimeError",
-     "error": "SCF не сошёлся ни в одном спине",
-     "wall_s": 0.0
+     "status": "ok",
+     "wall_s": 5400.1
+    },
+    "opt_ooh": {
+     "status": "timeout",
+     "timeout_s": 5400,
+     "wall_s": 5400.1
     }
    },
    "atoms_bare": [
@@ -1247,7 +1259,11 @@
       0.670663073196365
      ]
     ]
-   ]
+   ],
+   "ooh": {
+    "E": -2519.5809604357387,
+    "spin": 3
+   }
   }
  }
 }
