@@ -24,15 +24,6 @@
     "spin_ooh": {
      "status": "ok",
      "wall_s": 5303.0
-    },
-    "opt_ooh": {
-     "status": "fail:RuntimeError",
-     "error": "The trust radius got too small, check forces?",
-     "wall_s": 13518.7
-    },
-    "rescf_ooh": {
-     "status": "ok",
-     "wall_s": 2085.4
     }
    },
    "atoms_bare": [
@@ -657,15 +648,6 @@
     "spin_ooh": {
      "status": "ok",
      "wall_s": 5400.1
-    },
-    "opt_ooh": {
-     "status": "fail:RuntimeError",
-     "error": "The trust radius got too small, check forces?",
-     "wall_s": 11464.2
-    },
-    "rescf_ooh": {
-     "status": "ok",
-     "wall_s": 2062.6
     }
    },
    "atoms_bare": [
