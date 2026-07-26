@@ -270,7 +270,11 @@ def spin_candidates(atoms, charge=CHARGE, n=3):
 
 # ----------------------------------------------------------------- mean field
 def build_mol(atoms, spin, maxmem, charge=CHARGE):
-    return gto.M(atom=[(e, tuple(p)) for e, p in atoms], basis=BASIS, ecp=BASIS,
+    # ECP only for the elements that HAVE one in def2-SVP (Mo: ECP-28); passing
+    # ecp=BASIS wholesale makes pyscf print an "ECP not found" line per light
+    # element on every mol build — thousands of lines over a ladder of SCFs.
+    ecp = {e: BASIS for e, _p in atoms if e in ("Mo",)}
+    return gto.M(atom=[(e, tuple(p)) for e, p in atoms], basis=BASIS, ecp=ecp,
                  charge=charge, spin=spin, verbose=0, max_memory=maxmem)
 
 
@@ -516,8 +520,10 @@ def run_composition(key, promoter, title, maxmem, res, gascache):
     ref_mf = mf_bs if mf_bs is not None else mf_hs
     ref_tag = "BS" if mf_bs is not None else f"ground UKS 2S={s2}"
     # the BS solution, if accepted and lower, IS the reference energy
-    if mf_bs is not None and mf_bs.e_tot < mf_hs.e_tot:
-        blk["e_parent_h"] = float(mf_bs.e_tot)
+    e_bs = (float(mf_bs.e_tot) if mf_bs is not None
+            else (blk["bs"].get("e_h") if blk["bs"].get("pattern_ok") else None))
+    if e_bs is not None and e_bs < blk["e_parent_h"]:
+        blk["e_parent_h"] = float(e_bs)
         blk["parent_state_used"] = "BS Ms=parity (lower than the spin ladder)"
     else:
         blk["parent_state_used"] = f"UKS 2S={s2} (BS not accepted or higher)"
