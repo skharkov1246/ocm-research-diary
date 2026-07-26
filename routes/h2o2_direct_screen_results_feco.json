@@ -659,9 +659,9 @@
      "wall_s": 5400.1
     },
     "opt_ooh": {
-     "status": "timeout",
-     "timeout_s": 5400,
-     "wall_s": 5400.1
+     "status": "fail:RuntimeError",
+     "error": "The trust radius got too small, check forces?",
+     "wall_s": 11464.2
     },
     "rescf_ooh": {
      "status": "ok",
