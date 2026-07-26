@@ -193,9 +193,15 @@ def relax_chain(spin, o_i, h_j, res, save):
         save()
     return g
 
+def _finish_barrier(blk):
+    pts = sorted((float(k), v["e"]) for k, v in blk["points"].items() if v.get("converged") and v.get("e") is not None)
+    if len(pts) >= 3:
+        E = np.array([p[1] for p in pts])  # pts по d возрастанию; реагент = max d = pts[-1]
+        blk["barrier_eV"] = round(float((E.max() - E[-1]) * EV), 4)  # forward: TS − reagent
+    return blk.get("barrier_eV")
+
 def barrier_at_field(f_au, spin, o_i, h_j, store, save, geoms=None):
-    """Скан d(O–H): SP на релакс-геометриях (RELAX) или жёсткий скан; warm-chain плотности.
-    Ядерный член поля включён в scf()."""
+    """Жёсткий скан d(O–H) при одном поле; warm-chain плотности по d. Ядерный член в scf()."""
     blk = store.setdefault(f"{f_au:+.3f}", {}).setdefault(f"2S={spin}", {"points": {}})
     base = build(); dm = None
     for d in DGRID:
@@ -213,11 +219,36 @@ def barrier_at_field(f_au, spin, o_i, h_j, store, save, geoms=None):
         blk["points"][dk] = {"e": round(e, 6) if e is not None else None, "converged": conv}
         say(f"    F={f_au:+.3f} 2S={spin} d={dk}: E={e if e is None else round(e,5)} conv={conv} ({round(time.time()-t0,1)}s)")
         save()
-    pts = sorted((float(k), v["e"]) for k, v in blk["points"].items() if v.get("converged") and v.get("e") is not None)
-    if len(pts) >= 3:
-        E = np.array([p[1] for p in pts])  # pts по d возрастанию; реагент = max d = pts[-1]
-        blk["barrier_eV"] = round(float((E.max() - E[-1]) * EV), 4)  # forward: TS − reagent
-    return blk.get("barrier_eV")
+    return _finish_barrier(blk)
+
+def sp_field_chain(spin, store, save, geoms):
+    """v2.1 SP-фаза для RELAX: d — внешний цикл, ПОЛЕ — внутренний с warm-chain плотности
+    (field-continuation при фиксированной геометрии). Против прыжков SCF между решениями
+    (гибриды при холодном старте). Якорь F=0 гибрида затравливается PBE-плотностью."""
+    Fpos = sorted(f for f in FIELDS if f >= 0)
+    Fneg = sorted((f for f in FIELDS if f < 0), reverse=True)
+    for d in DGRID:
+        dk = f"{d:.2f}"
+        atoms = [[el, tuple(xyz)] for el, xyz in geoms[dk]["xyz"]]
+        for seq in (Fpos, Fneg):
+            dm = None
+            for f in seq:
+                blk = store.setdefault(f"{f:+.3f}", {}).setdefault(f"2S={spin}", {"points": {}})
+                if blk["points"].get(dk, {}).get("e") is not None:
+                    continue                      # resume: цепочка продолжится от последней посчитанной
+                t0 = time.time()
+                try:
+                    if dm is None and SP_XC:      # гибридный якорь: затравка PBE-плотностью
+                        _, _, dm = scf(atoms, spin, f if seq is Fneg else 0.0)
+                    e, conv, dm = scf(atoms, spin, f, dm0=dm, xc=SP_XC, eps=SOLV_EPS)
+                except Exception as exc:
+                    e, conv = None, False
+                    say(f"      pt d={dk} F={f:+.3f} FAILED ({type(exc).__name__})")
+                blk["points"][dk] = {"e": round(e, 6) if e is not None else None, "converged": conv}
+                say(f"    d={dk} F={f:+.3f} 2S={spin}: E={e if e is None else round(e,5)} conv={conv} ({round(time.time()-t0,1)}s)")
+                save()
+    for f in FIELDS:                              # барьеры по готовым точкам
+        _finish_barrier(store.setdefault(f"{f:+.3f}", {}).setdefault(f"2S={spin}", {"points": {}}))
 
 def main(a):
     o_i, h_j, nat = idx()
@@ -241,6 +272,8 @@ def main(a):
                   "Stark effect; frame: M at origin, M-O axis = z); nuclear field term "
                   "-F*sum(Z_A z_A) included; v2",
     })
+    if os.environ.get("RESET_SCAN") == "1":       # v2.1-перепрогон SP-фазы: геометрии оставить, точки заново
+        res["scan"] = {}; say("  RESET_SCAN=1: scan очищен, геометрии сохранены")
     res.setdefault("scan", {})
     fields = [0.0] if a.smoke else FIELDS
     sp = [spins[0]] if a.smoke else spins
@@ -251,11 +284,13 @@ def main(a):
             geoms_by_spin[s] = relax_chain(s, o_i, h_j, res, lambda: atomic_save(res))
         st = res.get("relax_stats", {})
         say(f"  relax_stats: {st}")
+        for s in sp:                              # v2.1: field-continuation warm-chain при фикс. геометрии
+            sp_field_chain(s, res["scan"], lambda: atomic_save(res), geoms_by_spin[s])
     for f in fields:
         best = None
         for s in sp:
-            b = barrier_at_field(f, s, o_i, h_j, res["scan"], lambda: atomic_save(res),
-                                 geoms=geoms_by_spin.get(s))
+            b = (res["scan"].get(f"{f:+.3f}", {}).get(f"2S={s}", {}).get("barrier_eV") if RELAX
+                 else barrier_at_field(f, s, o_i, h_j, res["scan"], lambda: atomic_save(res)))
             if b is not None and (best is None or b < best[1]): best = (s, b)
         if best: rows.append({"field_V_per_A": round(f * VA, 3), "spin_2S": best[0], "barrier_eV": best[1]})
     res["summary_rows"] = rows
