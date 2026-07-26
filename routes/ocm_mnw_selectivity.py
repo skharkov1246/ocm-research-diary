@@ -48,6 +48,7 @@ SPIN = int(os.environ.get("OCM_SPIN", "5"))   # 2S = число SOMO (bare-се�
 # Cr/Mn/Fe вакансионного волкана). Свап меняет чётность/основной спин: сначала
 # гоняем стадию `spins`, читаем ground_2S, выставляем OCM_SPIN, потом пайплайн.
 METAL = os.environ.get("OCM_METAL", "Mn")
+SUB2 = os.environ.get("OCM_SUB2", "c2h6")   # второй субстрат ΔΔE‡ (ПОМ: ch2o)
 XC = "pbe0"
 _defpref = "ocm_mnw" if MODEL == "bare" else "ocm_mnw_emb"
 if METAL != "Mn":
@@ -121,6 +122,12 @@ def start_atoms(sub):
             atoms.append(("H", (xC2 + d * math.sin(th) * math.cos(phi),
                                 d * math.sin(th) * math.sin(phi),
                                 zC2 + d * math.cos(th))))
+    elif sub == "ch2o":
+        # формальдегид (трек ПОМ): планарный HCO-фрагмент в xz-плоскости;
+        # переносимый H остаётся атомом 2 на HAT-оси z (пины/AVAS без правок),
+        # карбонильный O ~1.21 A под ~122° к оси, второй H ~1.10 A под ~116°
+        atoms.append(("O", (1.026, 0.0, zC + 0.641)))
+        atoms.append(("H", (-0.989, 0.0, zC + 0.482)))
     else:
         raise ValueError(sub)
     if MODEL == "embedded":
@@ -679,7 +686,7 @@ def stage_merge2():
     if os.path.exists(sp):
         with open(sp) as f:
             res["spin_ladder"] = json.load(f)
-    for sub in ("ch4", "c2h6"):
+    for sub in ("ch4", SUB2):
         with open(os.path.join(DIR, f"{PREF}_{sub}_geom.json")) as f:
             g = json.load(f)
         with open(os.path.join(DIR, f"{PREF}_{sub}_profile.json")) as f:
@@ -692,8 +699,8 @@ def stage_merge2():
             **{k: pr[k] for k in pr if k.startswith(("casscf_", "nevpt2_", "all_"))}}
     res["ddE_kcal"] = {}
     for lvl in ("dft", "casscf", "nevpt2"):
-        b = {s: res["substrates"][s][f"{lvl}_barrier_kcal"] for s in ("ch4", "c2h6")}
-        res["ddE_kcal"][lvl] = round(b["c2h6"] - b["ch4"], 2)
+        b = {s: res["substrates"][s][f"{lvl}_barrier_kcal"] for s in ("ch4", SUB2)}
+        res["ddE_kcal"][lvl] = round(b[SUB2] - b["ch4"], 2)
     res["quantum_shift_kcal"] = round(
         res["ddE_kcal"]["nevpt2"] - res["ddE_kcal"]["dft"], 2)
     out = os.path.join(DIR, f"{PREF}_final.json")
@@ -716,7 +723,7 @@ def stage_merge():
                                       "<0 over-oxidizes C2 (BEP wall); +4 needed for 70%"},
            "substrates": {}}
     ok = True
-    for sub in ("ch4", "c2h6"):
+    for sub in ("ch4", SUB2):
         ep = os.path.join(DIR, f"{PREF}_{sub}_energy.json")
         pp = os.path.join(DIR, f"{PREF}_{sub}_profile.json")
         gp = os.path.join(DIR, f"{PREF}_{sub}_geom.json")
@@ -746,8 +753,8 @@ def stage_merge():
     if ok:
         res["ddE_kcal"] = {}
         for lvl in ("dft", "casscf", "nevpt2"):
-            b = {s: res["substrates"][s][f"{lvl}_barrier_kcal"] for s in ("ch4", "c2h6")}
-            res["ddE_kcal"][lvl] = round(b["c2h6"] - b["ch4"], 2)
+            b = {s: res["substrates"][s][f"{lvl}_barrier_kcal"] for s in ("ch4", SUB2)}
+            res["ddE_kcal"][lvl] = round(b[SUB2] - b["ch4"], 2)
         res["quantum_shift_kcal"] = round(
             res["ddE_kcal"]["nevpt2"] - res["ddE_kcal"]["dft"], 2)
         res["all_casscf_converged"] = all(

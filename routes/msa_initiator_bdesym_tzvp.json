@@ -1,0 +1,61 @@
+{
+ "stage": "bdesym",
+ "species": "H2S2O8 (persulfate)",
+ "protocol": "single dissociation curve, CAS(2,2) sigma/sigma* + rigid fragments (v3)",
+ "r_eq": 1.434,
+ "frag_relax_dft_kcal": -11.6,
+ "curve": {
+  "1.434": {
+   "e_dft": 0.0,
+   "e_casscf": 0.0,
+   "e_nevpt2": 0.0
+  },
+  "1.6": {
+   "e_dft": 6.06,
+   "e_casscf": 1.1,
+   "e_nevpt2": 5.24
+  },
+  "1.75": {
+   "e_dft": 16.8,
+   "e_casscf": 5.36,
+   "e_nevpt2": 15.15
+  },
+  "1.95": {
+   "e_dft": 32.19,
+   "e_casscf": 9.28,
+   "e_nevpt2": 26.97
+  },
+  "2.2": {
+   "e_dft": 48.7,
+   "e_casscf": 10.39,
+   "e_nevpt2": 35.04
+  },
+  "2.6": {
+   "e_dft": 66.56,
+   "e_casscf": 9.43,
+   "e_nevpt2": 38.82
+  },
+  "3.0": {
+   "e_dft": 76.15,
+   "e_casscf": 8.54,
+   "e_nevpt2": 39.58
+  },
+  "3.6": {
+   "e_dft": 82.17,
+   "e_casscf": 7.95,
+   "e_nevpt2": 39.9
+  }
+ },
+ "bde_sym_dft": 82.17,
+ "bde_sym_casscf": 7.95,
+ "bde_sym_nevpt2": 39.9,
+ "bde_sym_dft_corrected": 58.97,
+ "bde_sym_casscf_corrected": -15.25,
+ "bde_sym_nevpt2_corrected": 16.7,
+ "old_broken": {
+  "bde_dft": 10.93,
+  "bde_nevpt2_unbalanced": -20.77,
+  "note": "bde-\u0441\u0442\u0430\u0434\u0438\u044f, \u043d\u0435\u0441\u0431\u0430\u043b\u0430\u043d\u0441\u0438\u0440\u043e\u0432\u0430\u043d\u043d\u044b\u0435 CAS"
+ },
+ "wall_s": 6675.7
+}

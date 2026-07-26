@@ -42,11 +42,34 @@ XC = "pbe0"
 MODEL = os.environ.get("LAO_MODEL", "neutral")
 CAT = MODEL == "cation"
 CHARGE = 1 if CAT else 0        # заряд МЕТАЛЛОКОМПЛЕКСА (этилен всегда 0)
-SUF = "_cat" if CAT else ""     # суффикс всех чекпойнтов/результатов модели
 RC0 = 1 if CAT else 3           # 0-based индекс первого кольцевого C
+
+# Вспомогательный лиганд (Трек: рычаг C6-селективности). Полный PNP
+# (Ph2PN(iPr)PPh2) неподъёмен для CASSCF => минимальный сурогат (H2P)NH(PH2),
+# κ²-P,P бидентат: правильная координация двумя P-донорами при минимальной
+# цене. Аппендится ПОСЛЕ кольца+H, поэтому индексы кольца (RC0..) не меняются,
+# сдвигается только N0 (старт этилена во вставке) на число атомов лиганда.
+LIGAND = os.environ.get("LAO_LIGAND", "")   # "" | "pnp"
+
+
+def _ligand_atoms():
+    """Минимальный PNP (H2P-NH-PH2) на открытой (−z) грани Cr, κ²-P,P.
+    Корректные длины связей (Cr–P 2.40, P–N 1.70, P–H 1.42, N–H 1.01) —
+    напряжённые связи убивали SCF; релакс доводит углы."""
+    if LIGAND != "pnp":
+        return []
+    return [("P", (1.38, 0.0, -1.97)), ("P", (-1.38, 0.0, -1.97)),
+            ("N", (0.0, 0.0, -2.97)), ("H", (0.0, 0.87, -3.48)),
+            ("H", (2.38, 0.85, -1.47)), ("H", (2.38, -0.85, -2.47)),
+            ("H", (-2.38, 0.85, -1.47)), ("H", (-2.38, -0.85, -2.47))]
+
+
+LIG_N = len(_ligand_atoms())
+SUF = ("_cat" if CAT else "") + ("_pnp" if LIGAND == "pnp" else "")
 # 0-based: Cr=0, [Cl=1,2 только neutral], кольцо C=RC0..RC0+5,
-# H кольца: C_k (k=0..5) -> RC0+6+2k, RC0+6+2k+1; всего атомов c7:
-N0 = RC0 + 18                   # 21 neutral / 19 cation
+# H кольца: C_k (k=0..5) -> RC0+6+2k, RC0+6+2k+1; лиганд (LIG_N) в хвосте c7;
+# N0 = число атомов c7 (Cr+кольцо+H+лиганд), старт этилена во вставке
+N0 = RC0 + 18 + LIG_N           # 21 neutral / 19 cation / 27 cation+pnp
 
 
 def M(atoms, spin, charge=0, basis=None):
@@ -106,6 +129,7 @@ def chromacycle_atoms(n_c):
         # два H на каждый C, разнесены из плоскости кольца
         a.append(("H", (x * 1.12, y + d * 0.82, z * 1.12)))
         a.append(("H", (x * 1.12, y - d * 0.82, z * 1.12)))
+    a += _ligand_atoms()        # вспомогательный лиганд в хвосте (индексы кольца целы)
     return a
 
 
@@ -691,6 +715,27 @@ def stage_tzvp():
         out["cas_shift"] = n_c7.get("cas")
         out["cas_ins"] = n_pi.get("cas")
         out["pi_complex_pin"] = pi_pt["pin"]
+        # ПОЛНЫЙ барьер вставки: TS(пик) − (c7 + этилен разнесённые). Для лиганда
+        # intrinsic бессмыслен (этилен клэшит на подходе, профиль с +47) —
+        # осмысленный барьер меряем от разнесённых реагентов, как SVP dft_barrier.
+        if ins.get("ts_atoms") and ins.get("dft_barrier"):
+            eth = [("C", (0., 0., 0.)), ("C", (1.33, 0., 0.)),
+                   ("H", (-0.56, 0.92, 0.)), ("H", (-0.56, -0.92, 0.)),
+                   ("H", (1.89, 0.92, 0.)), ("H", (1.89, -0.92, 0.))]
+            full_ts = [(s, tuple(c)) for s, c in ins["ts_atoms"]]
+            n_fts = nz(full_ts, ins_lab)
+            n_c7d = nevpt2_point(c7, spin, charge=CHARGE, basis=TZ, mem=MEM)
+            n_eth = nevpt2_point(eth, 0, thr=0.4, labels=["C 2p"],
+                                 basis=TZ, mem=MEM)
+            for lv, key in (("e_casscf", "casscf"), ("e_nevpt2", "nevpt2")):
+                full_b = (n_fts[lv] - n_c7d[lv] - n_eth[lv]) * HARTREE_KCAL
+                shift_b = (n_sh_ts[lv] - n_c7[lv]) * HARTREE_KCAL
+                out[f"ins_full_{key}_tzvp"] = round(full_b, 2)
+                out[f"ddE_full_{key}_tzvp"] = round(full_b - shift_b, 2)
+            out["svp_ref_full"] = {
+                "ins_dft": ins.get("dft_barrier"),
+                "ins_nevpt2": ins.get("nevpt2_barrier"),
+                "shift_nevpt2": sh.get("nevpt2_barrier")}
         # сверка с SVP
         out["svp_ref"] = {
             "shift_nevpt2": sh.get("nevpt2_barrier"),
@@ -710,8 +755,59 @@ def stage_tzvp():
           flush=True)
 
 
+def stage_hemi():
+    """1c: гемилабильность κ²→κ¹. Отводим один P от Cr (раскрываем сайт под
+    этилен вместо клэша), релаксируем, считаем стоимость раскрытия (DFT+NEVPT2).
+    Малая стоимость => чистая вставка facile (dissoc + ~барьер open-site);
+    большая => лиганд держит κ², рост реально заблокирован."""
+    import numpy as _np
+    if LIGAND != "pnp":
+        print("[hemi] только для LAO_LIGAND=pnp", flush=True)
+        return
+    c7, spin = _c7_relaxed()               # κ²-закрытая форма
+    atoms = [(s, tuple(c)) for s, c in c7]
+    mf_closed = uks(M(atoms, spin, CHARGE))
+    e_closed = float(mf_closed.e_tot)
+    # индексы: Cr=0, P=19,20 (0-based). Отводим P20 вдоль Cr->P20 до 3.9 A.
+    cr = _np.array(atoms[0][1]); p = _np.array(atoms[20][1])
+    v = p - cr; v = v / _np.linalg.norm(v)
+    open_atoms = [list(a) for a in atoms]
+    open_atoms[20] = ("P", tuple(cr + 3.9 * v))
+    # P-H водороды P20 (idx 25,26) сдвигаем тем же вектором, чтобы не порвать P-H
+    for hi in (25, 26):
+        open_atoms[hi] = (open_atoms[hi][0],
+                          tuple(_np.array(open_atoms[hi][1]) + (3.9 - _np.linalg.norm(p - cr)) * v))
+    open_atoms = [(s, tuple(c)) for s, c in open_atoms]
+    rel_open, mf_open = relax(open_atoms, spin, maxsteps=120, charge=CHARGE)
+    e_open = float(mf_open.e_tot)
+    # проверить, что P действительно отошёл (κ¹), а не вернулся
+    cr2 = _np.array(rel_open[0][1])
+    crp1 = float(_np.linalg.norm(_np.array(rel_open[19][1]) - cr2))
+    crp2 = float(_np.linalg.norm(_np.array(rel_open[20][1]) - cr2))
+    out = {"model": MODEL, "ligand": LIGAND,
+           "dissoc_dft_kcal": round((e_open - e_closed) * HARTREE_KCAL, 2),
+           "crP1_open": round(crp1, 2), "crP2_open": round(crp2, 2),
+           "kappa1_confirmed": bool(max(crp1, crp2) > 3.2)}
+    try:
+        lab = ["Cr 3d"]
+        n_cl = nevpt2_point(atoms, spin, labels=lab, charge=CHARGE)
+        n_op = nevpt2_point(rel_open, spin, labels=lab, charge=CHARGE)
+        for lv, key in (("e_casscf", "casscf"), ("e_nevpt2", "nevpt2")):
+            out[f"dissoc_{key}_kcal"] = round(
+                (n_op[lv] - n_cl[lv]) * HARTREE_KCAL, 2)
+    except Exception as e:
+        out["nevpt2_error"] = str(e)[:200]
+    out["open_atoms"] = [[s, [round(x, 6) for x in c]] for s, c in rel_open]
+    with open(os.path.join(DIR, f"lao_cr_hemi_result{SUF}.json"), "w") as f:
+        json.dump(out, f, indent=1)
+    print("[hemi]", json.dumps({k: v for k, v in out.items()
+                                if k != "open_atoms"}, ensure_ascii=False)[:400],
+          flush=True)
+
+
 if __name__ == "__main__":
     st = sys.argv[1] if len(sys.argv) > 1 else "sanity"
     {"spins": stage_spins, "int": stage_int, "sanity": stage_sanity,
      "bhe": stage_bhe, "bhe2": stage_bhe2, "ins": stage_ins,
-     "shift": stage_shift, "desc": stage_desc, "tzvp": stage_tzvp}[st]()
+     "shift": stage_shift, "desc": stage_desc, "tzvp": stage_tzvp,
+     "hemi": stage_hemi}[st]()

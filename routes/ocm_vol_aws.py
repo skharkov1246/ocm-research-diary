@@ -28,6 +28,8 @@ BRANCH = os.environ.get("JOB_BRANCH") or subprocess.run(
     text=True).stdout.strip()
 MAX_MIN = int(os.environ.get("JOB_MAX_MIN", "600"))
 STAGES = os.environ.get("JOB_STAGES", "gas site nev desc")
+VOLBASIS = os.environ.get("OCM_VOL_BASIS", "def2-svp")
+VSUF = "" if VOLBASIS == "def2-svp" else "_" + VOLBASIS.split("-")[-1]
 _OUT = {"gas": "", "site": "", "nev": "", "desc": ""}
 RM_FILES = " ".join(f for f in (_OUT[s] for s in STAGES.split()) if f) or "/tmp/_rm_noop"
 JOB_MIN = MAX_MIN - 20
@@ -56,10 +58,11 @@ for i in 1 2 3; do (cd /root && timeout 10m git clone --depth 1 -b {BRANCH} {REP
 cd /root/repo || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 python3 -c "import pyscf" || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 rm -f {RM_FILES}
-for f in ocm_vol_results.json; do aws s3 cp $S3/$f routes/$f || true; done
+for f in ocm_vol_results{VSUF}.json; do aws s3 cp $S3/$f routes/$f || true; done
 mkdir -p /root/scratch
 export PYSCF_TMPDIR=/root/scratch
 export OMP_NUM_THREADS=$(nproc)
+export OCM_VOL_BASIS={VOLBASIS}
 sync_up() {{ aws s3 cp routes/ $S3/ --recursive --exclude '*' --include 'ocm_vol_*.json' >/dev/null 2>&1 || true; aws s3 cp /root/repo/ocm-vol.log $S3/ocm-vol.log >/dev/null 2>&1 || true; }}
 ( while true; do sleep 120; sync_up; done ) &
 for st in {STAGES}; do
@@ -145,7 +148,7 @@ def main():
         while time.time() - t0 < MAX_MIN * 60:
             try:
                 s3.head_object(Bucket=BUCKET, Key=f"{PREFIX}/DONE")
-                for f in ("ocm_vol_results.json",):
+                for f in ("ocm_vol_results" + VSUF + ".json",):
                     try:
                         s3.download_file(BUCKET, f"{PREFIX}/{f}", f"routes/{f}")
                     except ClientError:

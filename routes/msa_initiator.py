@@ -34,6 +34,7 @@ from pyscf.mrpt import NEVPT
 HARTREE_KCAL = 627.509474
 DIR = os.path.dirname(os.path.abspath(__file__))
 BASIS = os.environ.get("MSAI_BASIS", "def2-svp")
+MSAI_SUF = "" if BASIS == "def2-svp" else "_" + BASIS.split("-")[-1]
 XC = "pbe0"
 
 
@@ -318,7 +319,152 @@ def stage_sanity():
                 print(f"[sanity] {name} FAIL: {e}", flush=True)
 
 
+def stage_bdesym():
+    """M-1: симметричный CAS(2,2)-BDE персульфата. Стадия bde дала мусор
+    (пероксид CAS(46,24) НЕ сошёлся vs радикал (17,12) => BDE_nevpt2 −20.8):
+    два независимых AVAS-CAS не сбалансировать. Фикс — ОДНА диссоциационная
+    кривая O–O на едином CAS(2,2) σ/σ*(O–O): симметрия по построению.
+    Геометрии: constrained UKS-релакс от eq вверх; CASSCF: старт от UNO на
+    растянутой точке (пара n≈1 очевидна), цепочка mo вниз к равновесию.
+    BDE_sym = E(3.6 Å) − E(eq) на CASSCF/NEVPT2 (DFT-кривая — контроль)."""
+    from pyscf.geomopt.geometric_solver import optimize
+    t0 = time.time()
+    out = {"stage": "bdesym", "species": "H2S2O8 (persulfate)",
+           "protocol": "single dissociation curve, CAS(2,2) sigma/sigma*"}
+    perox, mfp = relax(h2s2o8_atoms(), 0)
+    e_eq_dft = float(mfp.e_tot)
+    import numpy as _np
+    r_eq = float(_np.linalg.norm(_np.array(perox[1][1])
+                                 - _np.array(perox[7][1])))
+    out["r_eq"] = round(r_eq, 3)
+    grid = [round(r_eq, 3), 1.60, 1.75, 1.95, 2.20, 2.60, 3.00, 3.60]
+    RIGID = os.environ.get("MSAI_RIGID", "") == "1"
+    geoms, at, dm = {}, [(s, tuple(c)) for s, c in perox], None
+    if RIGID:
+        # v3: floppy H2S2O8 при constrained-релаксе скачет по конформерам
+        # (v2-кривая: провал на 1.6, обвал на 2.6 => BDE −8 нефизичен).
+        # Жёсткий гомолиз: фрагменты HSO4 (атомы 0–5 | 6–11) — жёсткие тела,
+        # второй сдвигается вдоль оси O–O моста. Одна конформация => чистая
+        # кривая; релакс-поправку фрагмента добавляем отдельной парой энергий.
+        out["protocol"] += " + rigid fragments (v3)"
+        axis = (_np.array(perox[7][1]) - _np.array(perox[1][1]))
+        axis = axis / _np.linalg.norm(axis)
+        base = [(s, _np.array(c)) for s, c in perox]
+        for r in grid:
+            shift = (r - r_eq) * axis
+            at = [(s, tuple(c)) for s, c in base[:6]] + \
+                 [(s, tuple(c + shift)) for s, c in base[6:]]
+            try:
+                mfx = uks(M(at, 0), dm0=dm)
+                dm = mfx.make_rdm1()
+                geoms[r] = {"atoms": at, "e_dft": float(mfx.e_tot),
+                            "conv": bool(mfx.converged)}
+                print(f"  [bdesym:geo] r={r} dft_rel="
+                      f"{(mfx.e_tot - e_eq_dft) * HARTREE_KCAL:.2f}",
+                      flush=True)
+            except Exception as ex:
+                print(f"  [bdesym:geo] r={r} FAIL: {ex}", flush=True)
+        # релакс-поправка фрагмента: E(HSO4 relaxed) − E(HSO4 frozen из eq)
+        try:
+            frag_frozen = [(s, tuple(c)) for s, c in base[:6]]
+            mf_fz = uks(M(frag_frozen, 1))
+            frag_rx, mf_rx = relax(hso4_atoms(), 1)
+            out["frag_relax_dft_kcal"] = round(
+                (mf_rx.e_tot - mf_fz.e_tot) * HARTREE_KCAL, 2)
+        except Exception as ex:
+            out["frag_relax_error"] = str(ex)[:200]
+    else:
+        # (а) v2: constrained UKS от eq вверх, цепочка dm0/структуры
+        for r in grid:
+            cf = os.path.join(DIR, f"_msai_oo_{r:.2f}.txt")
+            open(cf, "w").write(f"$set\ndistance 2 8 {r:.4f}\n")
+            try:
+                mf0 = uks(M(at, 0), dm0=dm)
+                mol = optimize(mf0, constraints=cf, maxsteps=100,
+                               assert_convergence=False)
+                mfx = uks(mol, dm0=mf0.make_rdm1())
+                at = [(mol.atom_symbol(i), tuple(c)) for i, c in
+                      enumerate(mol.atom_coords(unit="Angstrom"))]
+                dm = mfx.make_rdm1()
+                geoms[r] = {"atoms": at, "e_dft": float(mfx.e_tot),
+                            "conv": bool(mfx.converged)}
+                print(f"  [bdesym:geo] r={r} dft_rel="
+                      f"{(mfx.e_tot - e_eq_dft) * HARTREE_KCAL:.2f}",
+                      flush=True)
+            except Exception as ex:
+                print(f"  [bdesym:geo] r={r} FAIL: {ex}", flush=True)
+            finally:
+                if os.path.exists(cf):
+                    os.remove(cf)
+    # (б) CASSCF(2,2)+NEVPT2 от растянутого конца вниз, старт от UNO
+    curve, mo_prev = {}, None
+    for r in sorted([g for g in geoms], reverse=True):
+        atoms = geoms[r]["atoms"]
+        mol = M(atoms, 0)
+        mol.max_memory = 24000
+        try:
+            if mo_prev is None:
+                mfu = scf.UHF(mol)
+                mfu.kernel()
+                for _ in range(3):   # довести до стабильного UHF (бирадикал)
+                    mo1, _, stab, _ = mfu.stability(return_status=True)
+                    if stab:
+                        break
+                    dm1 = mfu.make_rdm1(mo1, mfu.mo_occ)
+                    mfu.kernel(dm0=dm1)
+                noons, natorb = mcscf.addons.make_natural_orbitals(mfu)
+                pair = _np.argsort(_np.abs(noons - 1.0))[:2]
+                print(f"  [bdesym:cas] r={r} UNO pair {sorted(pair)} "
+                      f"n={[round(float(noons[i]), 3) for i in pair]}",
+                      flush=True)
+                mc = mcscf.CASSCF(scf.RHF(mol).run(), 2, 2)
+                mo0 = mc.sort_mo(sorted(int(i) + 1 for i in pair),
+                                 mo_coeff=natorb)
+            else:
+                mc = mcscf.CASSCF(scf.RHF(mol).run(), 2, 2)
+                mo0 = mcscf.project_init_guess(mc, mo_prev)
+            fci.addons.fix_spin_(mc.fcisolver, shift=0.2, ss=0)
+            mc.max_cycle_macro = 150
+            mc.conv_tol = 1e-7
+            mc.kernel(mo0)
+            mo_prev = mc.mo_coeff
+            ept = NEVPT(mc).kernel()
+            curve[r] = {"e_casscf": float(mc.e_tot),
+                        "e_nevpt2": float(mc.e_tot + ept),
+                        "conv": bool(mc.converged),
+                        "e_dft": geoms[r]["e_dft"]}
+            print(f"  [bdesym:cas] r={r} conv={mc.converged}", flush=True)
+        except Exception as ex:
+            print(f"  [bdesym:cas] r={r} FAIL: {str(ex)[:150]}", flush=True)
+    out["curve"] = {str(r): {k: round((v[k] - curve[grid[0]][k])
+                                      * HARTREE_KCAL, 2)
+                             for k in ("e_dft", "e_casscf", "e_nevpt2")
+                             if grid[0] in curve and k in v}
+                    for r, v in sorted(curve.items())}
+    if grid[0] in curve and 3.60 in curve:
+        for k, tag in (("e_dft", "dft"), ("e_casscf", "casscf"),
+                       ("e_nevpt2", "nevpt2")):
+            out[f"bde_sym_{tag}"] = round(
+                (curve[3.60][k] - curve[grid[0]][k]) * HARTREE_KCAL, 2)
+        fr = out.get("frag_relax_dft_kcal")
+        if fr is not None:
+            # rigid-предел = 2 замороженных радикала; истинный BDE ниже на
+            # 2×релакс-поправку фрагмента (DFT-поправка ко всем уровням)
+            for tag in ("dft", "casscf", "nevpt2"):
+                if f"bde_sym_{tag}" in out:
+                    out[f"bde_sym_{tag}_corrected"] = round(
+                        out[f"bde_sym_{tag}"] + 2 * fr, 2)
+    out["old_broken"] = {"bde_dft": 10.93, "bde_nevpt2_unbalanced": -20.77,
+                         "note": "bde-стадия, несбалансированные CAS"}
+    out["wall_s"] = round(time.time() - t0, 1)
+    json.dump(out, open(os.path.join(DIR, f"msa_initiator_bdesym{MSAI_SUF}.json"), "w"),
+              indent=1)
+    print("[bdesym]", json.dumps({k: v for k, v in out.items()
+                                  if k != "curve"}, ensure_ascii=False)[:400],
+          flush=True)
+
+
 if __name__ == "__main__":
     st = sys.argv[1] if len(sys.argv) > 1 else "sanity"
     {"bde": stage_bde, "hat": stage_hat, "merge": stage_merge,
-     "sanity": stage_sanity}[st]()
+     "bdesym": stage_bdesym, "sanity": stage_sanity}[st]()
