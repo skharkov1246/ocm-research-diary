@@ -671,6 +671,19 @@
     "spin_ooh": {
      "status": "ok",
      "wall_s": 2640.5
+    },
+    "rescf_ooh": {
+     "status": "ok",
+     "wall_s": 1210.8
+    },
+    "rescf_ooh_relax": {
+     "status": "ok",
+     "wall_s": 685.2
+    },
+    "opt_ooh": {
+     "status": "fail:RuntimeError",
+     "error": "The trust radius got too small, check forces?",
+     "wall_s": 7031.0
     }
    },
    "atoms_bare": [
