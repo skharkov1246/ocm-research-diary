@@ -43,6 +43,12 @@ SUFFIX = os.environ.get("H2O2_SUFFIX", "")
 RESULTS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                             f"h2o2_direct_screen_results{SUFFIX}.json")
 STAGE_TIMEOUT = int(os.environ.get("H2O2_STAGE_TIMEOUT", "5400"))
+# Функционал энергий/дескрипторов и ОТДЕЛЬНО функционал релаксации геометрии.
+# Гибридные градиенты на открытооболочечном аддукте *OOH разваливались:
+# Fe/Co — RuntimeError, Pd — таймаут (прогон 26.07). Тот же урок, что в
+# spin_field_oxidation v2: релакс на PBE, гибрид — single-point (PBE0//PBE).
+XC = os.environ.get("H2O2_XC", "pbe0")
+RELAX_XC = os.environ.get("H2O2_RELAX_XC", "pbe")
 
 
 def env_metals():
@@ -71,7 +77,12 @@ def load_results(path=RESULTS_PATH):
             return json.load(f)
     return {"meta": {"script": "h2o2_direct_screen", "suffix": SUFFIX,
                      "stage_timeout_s": STAGE_TIMEOUT,
-                     "basis": "def2-svp", "xc": "pbe0"},
+                     "basis": "def2-svp", "xc": XC, "relax_xc": RELAX_XC,
+                     "protocol": (f"{XC}//{RELAX_XC}" if RELAX_XC != XC else XC),
+                     "protocol_note": ("геометрия аддукта *OOH релаксируется на "
+                                       "RELAX_XC, энергии/дескрипторы — на XC; "
+                                       "гибридные градиенты открытой оболочки "
+                                       "не переживали оптимизацию (прогон 26.07)")},
             "metals": {}}
 
 
@@ -182,8 +193,9 @@ def make_mol(atoms, spin, charge=0, basis="def2-svp"):
                  charge=charge, verbose=0)
 
 
-def robust_uks(mol, xc="pbe0"):
+def robust_uks(mol, xc=None):
     """устойчивый открытооболочечный SCF: density-fit + level-shift + second-order Newton."""
+    xc = XC if xc is None else xc
     from pyscf import dft
     mf = dft.UKS(mol, xc=xc).density_fit()
     mf.grids.level = 3
@@ -236,9 +248,9 @@ def ground_spin_or_raise(metal, atoms, spins=None):
     return gs
 
 
-def uks_at(atoms, spin_mult):
+def uks_at(atoms, spin_mult, xc=None):
     """пересчёт SCF в уже известном (кешированном) спине — для resume между стадиями."""
-    mf = robust_uks(make_mol(atoms, spin=spin_mult - 1))
+    mf = robust_uks(make_mol(atoms, spin=spin_mult - 1), xc=xc)
     if not mf.converged:
         raise RuntimeError("SCF not converged on resume")
     return mf
@@ -327,10 +339,19 @@ def screen_metal(M, res):
             mf_a = run_stage(res, rec, "rescf_ooh", lambda: uks_at(ads, spin_a))
             if mf_a is None:
                 return
-        mfa = mf_a
+        # Релакс аддукта идёт на RELAX_XC (по умолчанию PBE): на гибриде
+        # градиенты открытооболочечного *OOH не переживали оптимизацию.
+        if RELAX_XC == XC:
+            mfa = mf_a
+        else:
+            mfa = run_stage(res, rec, "rescf_ooh_relax",
+                            lambda: uks_at(ads, spin_a, xc=RELAX_XC))
+            if mfa is None:
+                return
         mol_a = run_stage(res, rec, "opt_ooh", lambda: optimize(mfa, maxsteps=80))
         if mol_a is None:
             return
+        rec["relax_protocol"] = (f"{XC}//{RELAX_XC}" if RELAX_XC != XC else XC)
         ooh_opt = mole_atoms(mol_a)
         rec["atoms_ooh_opt"] = jat(ooh_opt)
         coords = np.array([c for _s, c in ooh_opt])
