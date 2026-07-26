@@ -104,10 +104,14 @@ def default_subnet():
     return subs[0]["SubnetId"]
 
 
-def my_instances():
+def my_instances(names=None):
+    """Живые инстансы задачи. names=None — все ветки (для жнеца); список имён —
+    только они (для проверки дублей): ветки _a/_b пишут в РАЗНЫЕ файлы S3 и
+    блокировать друг друга не должны — тот же флот-урок, что в aws_orchestrate.
+    """
     r = ec2.describe_instances(Filters=[
         {"Name": "tag:Project", "Values": [TAG_PROJECT]},
-        {"Name": "tag:Name", "Values": [TAG_NAME + "*"]},
+        {"Name": "tag:Name", "Values": names if names else [TAG_NAME + "*"]},
         {"Name": "instance-state-name",
          "Values": ["pending", "running", "stopping", "stopped"]}])
     return [i["InstanceId"] for res in r["Reservations"] for i in res["Instances"]]
@@ -177,7 +181,7 @@ def main():
                          else f"FAILED: {e}"), flush=True)
         return
 
-    existing = my_instances()
+    existing = my_instances([name for name, _m, _s in jobs])
     if existing:
         sys.exit(f"h2o2-screen instance(s) already exist: {existing}")
 
