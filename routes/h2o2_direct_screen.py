@@ -256,6 +256,22 @@ def uks_at(atoms, spin_mult, xc=None):
     return mf
 
 
+def optimize_adsorbate(mf, n_atoms_total, maxsteps=80):
+    """Релакс ТОЛЬКО адсорбата *OOH (последние 3 атома); каркас M–N₄ заморожен.
+
+    Полная оптимизация разваливалась на «trust radius got too small» (Pd — и на
+    PBE, и на PBE0): виноват не функционал, а оптимизатор на 40 степенях свободы
+    жёсткого макроцикла. Дескриптору нужна только геометрия аддукта, поэтому
+    каркас фиксируется — это и устойчивее, и дешевле. Фоллбэк на berny сохранён.
+    """
+    import tempfile
+    from pyscf.geomopt import geometric_solver
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as fh:
+        fh.write(f"$freeze\nxyz 1-{n_atoms_total - 3}\n")
+        cons = fh.name
+    return geometric_solver.optimize(mf, constraints=cons, maxsteps=maxsteps)
+
+
 def mole_atoms(mol):
     """геометрия pyscf Mole → наш формат atoms (Å)."""
     return [(s, tuple(c)) for s, c in zip(mol.elements, mol.atom_coords() * 0.529177)]
@@ -266,9 +282,15 @@ def mole_atoms(mol):
 def screen_metal(M, res):
     from pyscf.geomopt.berny_solver import optimize
     rec = res["metals"].setdefault(M, {})
-    if rec.get("done"):
+    # Флаг done ставится по завершении всех стадий. Если стадии были СБРОШЕНЫ
+    # (смена протокола, пересчёт под единый уровень), флаг обязан уступить:
+    # иначе металл молча пропускается и остаётся со старыми числами.
+    if rec.get("done") and stage_ok(rec, "opt_ooh"):
         print(f"\n### {M}-порфин ### — уже сделан (resume), пропуск")
         return
+    if rec.get("done"):
+        print(f"\n### {M}-порфин ### — флаг done снят: стадии сброшены, пересчёт")
+        rec.pop("done", None)
     print(f"\n### {M}-порфин ###")
 
     # 1) геометрия (RDKit только здесь; кеш в JSON снимает зависимость от rdkit)
@@ -348,9 +370,20 @@ def screen_metal(M, res):
                             lambda: uks_at(ads, spin_a, xc=RELAX_XC))
             if mfa is None:
                 return
-        mol_a = run_stage(res, rec, "opt_ooh", lambda: optimize(mfa, maxsteps=80))
+        def _opt_ooh():
+            try:
+                return optimize_adsorbate(mfa, len(ads), maxsteps=80)
+            except Exception as e:                      # geomeTRIC нет/сорвался
+                print(f"  [opt_ooh] констрейнд-опт не пошёл ({type(e).__name__}: "
+                      f"{e}); фоллбэк на berny по всей геометрии")
+                rec["opt_ooh_fallback"] = f"{type(e).__name__}: {e}"[:200]
+                return optimize(mfa, maxsteps=80)
+
+        mol_a = run_stage(res, rec, "opt_ooh", _opt_ooh)
         if mol_a is None:
             return
+        rec["opt_ooh_mode"] = ("frozen-frame/geomeTRIC"
+                               if "opt_ooh_fallback" not in rec else "berny-full")
         rec["relax_protocol"] = (f"{XC}//{RELAX_XC}" if RELAX_XC != XC else XC)
         ooh_opt = mole_atoms(mol_a)
         rec["atoms_ooh_opt"] = jat(ooh_opt)
