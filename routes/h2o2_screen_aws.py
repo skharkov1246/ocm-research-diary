@@ -149,7 +149,11 @@ def launch_spec(ami, subnet, name, metals_csv, suffix):
 
 
 def main():
-    if SPLIT:
+    only = os.environ.get("H2O2_ONLY", "")   # feco|nipd — перезапуск одной ветки (resume по S3)
+    if only in ("feco", "nipd"):
+        jobs = [(TAG_NAME + ("-a" if only == "feco" else "-b"),
+                 FECO_METALS if only == "feco" else NIPD_METALS, "_" + only)]
+    elif SPLIT:
         jobs = [(TAG_NAME + "-a", FECO_METALS, "_feco"),
                 (TAG_NAME + "-b", NIPD_METALS, "_nipd")]
     else:
