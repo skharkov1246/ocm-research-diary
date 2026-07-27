@@ -70,6 +70,10 @@ for i in 1 2 3; do (cd /root && timeout 10m git clone --depth 1 -b {BRANCH} {REP
 cd /root/repo || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 python3 -c "import pyscf" || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 rm -f {RM_FILES}
+# ВНИМАНИЕ: S3-префетч НЕ РАБОТАЕТ — IAM-роль инстанса имеет PutObject, но не
+# GetObject/HeadObject (403 Forbidden, вскрыто 27.07: три прогона TZVP считали
+# скан заново). Резюм-чекпойнты ДОЛЖНЫ коммититься в репо — git clone надёжен.
+# Строка оставлена как no-op на случай починки IAM.
 aws s3 cp $S3/msa_hat_scan{SUF}.json routes/msa_hat_scan{SUF}.json || true
 mkdir -p /root/scratch
 export PYSCF_TMPDIR=/root/scratch
