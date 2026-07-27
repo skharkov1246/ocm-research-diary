@@ -70,7 +70,7 @@ export AWS_DEFAULT_REGION=us-east-1
 for i in 1 2 3; do timeout 10m dnf install -y python3-pip git gcc gcc-c++ && break; sleep 30; done
 for i in 1 2 3; do timeout 10m python3 -m pip install -q awscli && break; sleep 30; done
 ( while true; do aws s3 cp /tmp/boot.log $S3/boot{suffix}.log >/dev/null 2>&1; sleep 60; done ) &
-for i in 1 2 3; do timeout 25m python3 -m pip install -q numpy scipy pyscf pyberny rdkit && break; sleep 30; done
+for i in 1 2 3; do timeout 25m python3 -m pip install -q numpy scipy pyscf pyberny geometric rdkit && break; sleep 30; done
 for i in 1 2 3; do (cd /root && timeout 10m git clone --depth 1 -b {BRANCH} {REPO} repo) && break; sleep 30; done
 cd /root/repo || {{ aws s3 cp /tmp/boot.log $S3/setup_failed{suffix}.log; poweroff; }}
 python3 -c "import pyscf" || {{ aws s3 cp /tmp/boot.log $S3/setup_failed{suffix}.log; poweroff; }}
