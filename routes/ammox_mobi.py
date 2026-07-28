@@ -131,6 +131,12 @@ STAGE_TIMEOUT = int(os.environ.get("AMMOX_STAGE_TIMEOUT", "5400"))
 N_DOCC = int(os.environ.get("AMMOX_NDOCC", "5"))
 N_VIR = int(os.environ.get("AMMOX_NVIR", "5"))
 SUBSTRATES = ("c3h6", "acrolein")
+# Which substrates THIS process computes. The merge stage always reads BOTH
+# from disk, so splitting the two substrates across two instances is safe:
+# each writes its own *_geom/_profile json, only the summary is rewritten.
+COMPUTE_SUBS = tuple(s.strip() for s in
+                     os.environ.get("AMMOX_SUBSTRATES", "").split(",")
+                     if s.strip() in SUBSTRATES) or SUBSTRATES
 
 # mirage-detector constants (same numbers as routes/ocm_mnw_robust_readout.py)
 OUTLIER_KCAL = 25.0
@@ -919,11 +925,11 @@ def stage_merge():
 # ------------------------------------------------------------------ driver
 def stage_all():
     stage_spins()
-    for sub in SUBSTRATES:
+    for sub in COMPUTE_SUBS:
         stage_geom(sub)
         stage_polish(sub)
     if LEVEL != "dft":
-        for sub in SUBSTRATES:
+        for sub in COMPUTE_SUBS:
             stage_profile(sub)
     stage_merge()
 

@@ -177,6 +177,9 @@ def launch_spec(ami, subnet, name, centers_csv, suffix):
 def main():
     if ONLY in BRANCH_JOBS:                 # перезапуск одной ветки (resume по S3)
         centers_csv, suffix = BRANCH_JOBS[ONLY]
+        # CLER_CENTERS_OVERRIDE — досчитать ТОЛЬКО недостающие центры ветки,
+        # не тратя окно на уже сошедшиеся (резюм по seed-JSON в S3).
+        centers_csv = os.environ.get("CLER_CENTERS_OVERRIDE") or centers_csv
         jobs = [(f"{TAG_NAME}-{ONLY}", centers_csv, suffix)]
     elif ONLY:
         sys.exit(f"CLER_ONLY={ONLY!r}: допустимо только 'a' или 'b'")

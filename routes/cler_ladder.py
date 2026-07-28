@@ -368,10 +368,22 @@ def optimize_species(species, spin, basis, xc, do_opt=True, start_coords=None,
     converged_opt, gmax = None, None
     if do_opt:
         from pyscf.geomopt.berny_solver import optimize as berny_opt
+
+        def _berny(mf_in):
+            """pyberny ≥0.7 выкинул kwarg verbose из BernyParams — старые и
+            новые версии зовём одним кодом, иначе на новой машине падает
+            только оптимизация (кластеры на AWS считались старой версией)."""
+            try:
+                return berny_opt(mf_in, maxsteps=maxsteps, verbose=0)
+            except TypeError as exc:
+                if "verbose" not in str(exc):
+                    raise
+                return berny_opt(mf_in, maxsteps=maxsteps)
+
         try:
             cur_mf = mf
             for _attempt in range(restarts + 1):
-                mol_eq = berny_opt(cur_mf, maxsteps=maxsteps, verbose=0)
+                mol_eq = _berny(cur_mf)
                 atoms = list(zip([mol.atom_symbol(i) for i in range(mol.natm)],
                                  mol_eq.atom_coords(unit="Angstrom")))
                 if progress is not None:     # чекпойнт геометрии ДО дорогого SCF
