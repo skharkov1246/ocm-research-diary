@@ -315,7 +315,11 @@ def stage_hat():
     # он краевой; подход делает его интерьерным.
     dm = anchor_dm
     start = anchor_atoms
-    for rCH, rOH in ((1.18, 1.24), (1.12, 1.36), (1.10, 1.48), (1.09, 1.62)):
+    # TZVP-прогон 27.07: максимум упёрся в край (1.09,1.62) — TS на большом
+    # базисе сдвинулся к реагентам (ранний TS). Продолжаем разведение, чтобы
+    # увидеть спад к реагентному пределу и получить интерьерный перевал.
+    for rCH, rOH in ((1.18, 1.24), (1.12, 1.36), (1.10, 1.48), (1.09, 1.62),
+                     (1.08, 1.85), (1.07, 2.10), (1.06, 2.40)):
         if (rCH, rOH) in done_keys:
             saved = next(p for p in pts if (p["rCH"], p["rOH"]) == (rCH, rOH))
             start = [(s, tuple(c)) for s, c in saved["atoms"]]
@@ -362,7 +366,9 @@ def stage_hat():
     out["scan"] = [{k: p[k] for k in ("rCH", "rOH", "e_h", "scf_converged")}
                    for p in pts]
     out["scan_rel_kcal"] = [round((p["e_h"] - eR) * HARTREE_KCAL, 2) for p in pts]
-    ok = [p for p in pts if p["scf_converged"]]
+    # порядок счёта (якорь-первым) != ход реакции: сортируем по rCH, иначе
+    # соседство/интерьерность считаются по бессмысленным парам (баг вскрыт 27.07)
+    ok = sorted([p for p in pts if p["scf_converged"]], key=lambda p: p["rCH"])
     if len(ok) < 3:
         raise RuntimeError(f"hat scan: only {len(ok)} converged points")
     # отбраковка выбросов: точка на >25 ккал выше ОБОИХ соседей (или

@@ -1,0 +1,79 @@
+{
+ "stage": "hat",
+ "model": "pinned-relax collinear HAT, def2-tzvp",
+ "scan": [
+  {
+   "rCH": 1.09,
+   "rOH": 1.62,
+   "e_h": -703.8415928267955,
+   "scf_converged": true
+  },
+  {
+   "rCH": 1.1,
+   "rOH": 1.48,
+   "e_h": -703.8697838277807,
+   "scf_converged": true
+  },
+  {
+   "rCH": 1.12,
+   "rOH": 1.36,
+   "e_h": -703.856015261437,
+   "scf_converged": true
+  },
+  {
+   "rCH": 1.18,
+   "rOH": 1.24,
+   "e_h": -703.8617656517678,
+   "scf_converged": true
+  },
+  {
+   "rCH": 1.25,
+   "rOH": 1.15,
+   "e_h": -703.8636493718476,
+   "scf_converged": true
+  },
+  {
+   "rCH": 1.35,
+   "rOH": 1.05,
+   "e_h": -703.8644169917188,
+   "scf_converged": true
+  },
+  {
+   "rCH": 1.5,
+   "rOH": 0.98,
+   "e_h": -703.8668232830262,
+   "scf_converged": true
+  },
+  {
+   "rCH": 1.65,
+   "rOH": 0.965,
+   "e_h": -703.8618867308311,
+   "scf_converged": true
+  },
+  {
+   "rCH": 1.8,
+   "rOH": 0.955,
+   "e_h": -703.8811020106016,
+   "scf_converged": true
+  }
+ ],
+ "scan_rel_kcal": [
+  25.12,
+  7.43,
+  16.07,
+  12.46,
+  11.28,
+  10.8,
+  9.29,
+  12.39,
+  0.33
+ ],
+ "dft": {
+  "barrier_hat_kcal": 25.12,
+  "ts_rCH": 1.09,
+  "ts_rOH": 1.62,
+  "ts_interior": false
+ },
+ "hat_stage_failed": "TS not bracketed/unphysical: barrier 25.1 kcal, interior=False \u2014 extend scan, no verdict",
+ "wall_s": 60714.6
+}
