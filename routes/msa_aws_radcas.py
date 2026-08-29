@@ -36,10 +36,12 @@ BRANCH = os.environ.get("MSA_BRANCH") or subprocess.run(
     ["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True,
     text=True).stdout.strip()
 MAX_MIN = int(os.environ.get("MSA_MAX_MIN", "600"))
+BASIS = os.environ.get("MSA_BASIS", "def2-svp")
+SUF = "" if BASIS == "def2-svp" else "_" + BASIS.split("-")[-1]
 STAGES = os.environ.get("MSA_STAGES", "add hat merge")   # rerun-нацеливание
 # удаляем на боте ТОЛЬКО выходы перегоняемых стадий (урок Этапа 18: стейл-JSON
 # из клона в свежем префиксе = ложная готовность); чужие стадии остаются как resume
-STAGE_OUT = {"add": "routes/msa_add.json", "hat": "routes/msa_hat.json",
+STAGE_OUT = {"add": "routes/msa_add.json", "hat": f"routes/msa_hat{SUF}.json",
              "merge": "routes/msa_results.json"}
 RM_FILES = " ".join(STAGE_OUT[s] for s in STAGES.split())
 JOB_MIN = MAX_MIN - 20
@@ -68,10 +70,11 @@ for i in 1 2 3; do (cd /root && timeout 10m git clone --depth 1 -b {BRANCH} {REP
 cd /root/repo || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 python3 -c "import pyscf" || {{ aws s3 cp /tmp/boot.log $S3/setup_failed.log; poweroff; }}
 rm -f {RM_FILES}
-aws s3 cp $S3/msa_hat_scan.json routes/msa_hat_scan.json || true
+aws s3 cp $S3/msa_hat_scan{SUF}.json routes/msa_hat_scan{SUF}.json || true
 mkdir -p /root/scratch
 export PYSCF_TMPDIR=/root/scratch
 export MSA_RADCAS=1
+export MSA_BASIS={BASIS}
 export OMP_NUM_THREADS=$(nproc)
 sync_up() {{ aws s3 cp routes/ $S3/ --recursive --exclude '*' --include 'msa_*.json' >/dev/null 2>&1 || true; aws s3 cp /root/repo/msa.log $S3/msa.log >/dev/null 2>&1 || true; }}
 ( while true; do sleep 120; sync_up; done ) &

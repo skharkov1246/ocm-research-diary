@@ -33,8 +33,9 @@ from pyscf import dft, gto, scf
 
 HARTREE_KCAL = 627.509474
 DIR = os.path.dirname(os.path.abspath(__file__))
-RES = os.path.join(DIR, "ocm_vol_results.json")
-BASIS = "def2-svp"
+BASIS = os.environ.get("OCM_VOL_BASIS", "def2-svp")
+VOL_SUF = "" if BASIS == "def2-svp" else "_" + BASIS.split("-")[-1]
+RES = os.path.join(DIR, f"ocm_vol_results{VOL_SUF}.json")
 _DSH = {"Cr": "3d", "Mn": "3d", "W": "5d"}
 
 

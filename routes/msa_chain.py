@@ -40,6 +40,7 @@ from pyscf.mrpt import NEVPT
 HARTREE_KCAL = 627.509474
 DIR = os.path.dirname(os.path.abspath(__file__))
 BASIS = os.environ.get("MSA_BASIS", "def2-svp")
+MSA_SUF = "" if BASIS == "def2-svp" else "_" + BASIS.split("-")[-1]  # "" | "_tzvp"
 XC = "pbe0"
 
 # MSA_RADCAS=1 — симметричные активные пространства S-частиц: SOMO CH3SO3•
@@ -275,7 +276,7 @@ def stage_hat():
 
     # v7: поточечное сохранение скана (v6 убит timeout за полчаса до конца —
     # 8 ч скана пропали, т.к. JSON писался только в финале). Resume по (rCH,rOH).
-    scan_path = os.path.join(DIR, "msa_hat_scan.json")
+    scan_path = os.path.join(DIR, f"msa_hat_scan{MSA_SUF}.json")
     pts = []
     if os.path.exists(scan_path):
         try:
@@ -388,7 +389,7 @@ def stage_hat():
             f"TS not bracketed/unphysical: barrier {dft_bar:.1f} kcal, "
             f"interior={interior} — extend scan, no verdict")
         out["wall_s"] = round(time.time() - t0, 1)
-        json.dump(out, open(os.path.join(DIR, "msa_hat.json"), "w"), indent=1)
+        json.dump(out, open(os.path.join(DIR, f"msa_hat{MSA_SUF}.json"), "w"), indent=1)
         print(f"[hat] FAILED sanity gate: {out['hat_stage_failed']}", flush=True)
         return
     ts_labels = (["0 C 2p", "1 H 1s", "2 O 2p", "3 S 3p", "4 O 2p", "5 O 2p"]
@@ -402,7 +403,7 @@ def stage_hat():
         out[lvl] = {"barrier_hat_kcal":
                     round((n_ts[f"e_{lvl}"] - eRc) * HARTREE_KCAL, 2)}
     out["ts_cas"] = n_ts["cas"]; out["wall_s"] = round(time.time() - t0, 1)
-    json.dump(out, open(os.path.join(DIR, "msa_hat.json"), "w"), indent=1)
+    json.dump(out, open(os.path.join(DIR, f"msa_hat{MSA_SUF}.json"), "w"), indent=1)
     print(f"[hat] barrier kcal: DFT {out['dft']['barrier_hat_kcal']} | NEVPT2 "
           f"{out['nevpt2']['barrier_hat_kcal']} ({out['wall_s']}s)", flush=True)
 

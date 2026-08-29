@@ -32,7 +32,8 @@ BRANCH = os.environ.get("LAO_BRANCH") or subprocess.run(
 MAX_MIN = int(os.environ.get("LAO_MAX_MIN", "420"))
 STAGES = os.environ.get("LAO_STAGES", "spins int")
 MODEL = os.environ.get("LAO_MODEL", "neutral")   # neutral | cation (v8)
-SUF = "_cat" if MODEL == "cation" else ""
+LIGAND = os.environ.get("LAO_LIGAND", "")        # "" | pnp (вспом. лиганд)
+SUF = ("_cat" if MODEL == "cation" else "") + ("_pnp" if LIGAND == "pnp" else "")
 # spins не резюмится файлом → его выход чистим; int резюмится ПО-ТЭГОВО
 # (тег без nevpt2-блока пересчитывается) → int.json сохраняем (c5 готов)
 _OUT = {"spins": f"routes/lao_cr_spins{SUF}.json", "int": "",
@@ -41,10 +42,12 @@ _OUT = {"spins": f"routes/lao_cr_spins{SUF}.json", "int": "",
         "ins": f"routes/lao_cr_ins_result{SUF}.json",
         "shift": f"routes/lao_cr_shift_result{SUF}.json",
         "desc": f"routes/lao_cr_desc_results{SUF}.json",
-        "tzvp": f"routes/lao_cr_tzvp_result{SUF}.json"}
+        "tzvp": f"routes/lao_cr_tzvp_result{SUF}.json",
+        "hemi": f"routes/lao_cr_hemi_result{SUF}.json"}
 RM_FILES = " ".join(f for f in (_OUT[s] for s in STAGES.split()) if f) or "/dev/null"
 JOB_MIN = MAX_MIN - 20
-STAGE_TO = max(300, JOB_MIN // 2 - 20)
+_NST = max(1, len(STAGES.split()))
+STAGE_TO = max(200, JOB_MIN // _NST - 20)   # делим бюджет на реальное число стадий
 DISK_GB = 60
 
 for var in ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN"):
@@ -74,6 +77,7 @@ mkdir -p /root/scratch
 export PYSCF_TMPDIR=/root/scratch
 export OMP_NUM_THREADS=$(nproc)
 export LAO_MODEL={MODEL}
+export LAO_LIGAND={LIGAND}
 sync_up() {{ aws s3 cp routes/ $S3/ --recursive --exclude '*' --include 'lao_cr_*.json' >/dev/null 2>&1 || true; aws s3 cp /root/repo/lao.log $S3/lao.log >/dev/null 2>&1 || true; }}
 ( while true; do sleep 120; sync_up; done ) &
 for st in {STAGES}; do
