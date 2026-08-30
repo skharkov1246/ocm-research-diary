@@ -1,0 +1,35 @@
+stick-built construction take-off 16681 mh / (60 h x 0.48) = 579 man-weeks REQUIRED for erection+piping+E&I
+
+  activity                                       st  fin  crew  man-wk
+  site establishment / camp / temp utilities      0    6     8      48
+  civil incl. in-situ plinths + 28 d cure         3   15    14     168
+  equipment erection + structural steel          13   23    15     150
+  piping ~157 Cat-M + ~185 utility welds         18   34    26     416
+  E&I 23,100 m cable, 420 home runs              24   38    18     252
+  RT backlog, hydro/He tests, punchlist          34   41     9      63
+  cold + hot commissioning                       39   47    10      80
+  72 h guarantee run                             47   48    10      10
+  construction man-weeks in network = 818 vs required 579 -> 141%  OK
+  duration to first NaCN = 48 weeks = 11.1 months
+  peak direct crew = 44, +30% indirect = 57
+  footprint check: 1200 m2 / 44 = 27 m2 per direct man
+  crew:    8   8   8  22  22  22  14  14  14  14  14  14  14  29  29  15  15  15  41  41  41  41  41  26  44  44  44  44  44  44  44  44  44  44  27  27  27  27   9  19  19  10  10  10  10  10  10  10
+  total man-weeks on site (all disciplines) = 1187 = 71220 paid man-hours
+
+==============================================================================
+22. CORRECTED HEADLINE TABLE
+==============================================================================
+                                                   MODULAR     STICK   ratio
+  site weeks to mechanical completion (RFC)              9        41    4.7x
+  site weeks to first on-spec NaCN                      13        48    3.6x
+  site weeks incl. 30-d availability run                18        52    3.0x
+  peak headcount on site (direct+indirect)              27        57    2.1x
+  paid man-hours spent inside the mine lease         9,900    71,220    7.2x
+  Category M (HCN) welds made in the field              44       157    3.6x
+  instrument cable pulled in the field, m            1,900    23,100   12.2x
+
+  END-TO-END (contract award -> first NaCN):
+    modular    : 34-40 wk China fab+FAT+sea+clearance (PARALLEL with 24 wk
+                 client civil) + 13 wk site = 47-53 wk
+    stick-built: 20-26 wk detail eng.+procurement + 48 wk site = 68-74 wk
+    end-to-end saving = 21 weeks (~29%). The 3.6x is SITE time only - say so.

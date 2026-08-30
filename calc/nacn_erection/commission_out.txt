@@ -1,0 +1,91 @@
+==========================================================================
+8. PRESSURE / LEAK TESTING (ASME B31.3 para 345)
+==========================================================================
+345.4.2 hydrostatic: Pt = 1.5*P_des*(St/S); hold >= 10 min, then examine at P_des
+345.5.5 pneumatic  : Pt = 1.1*P_des; step to 0.5*Pt, then 1/10 steps, hold 10 min
+M345.8 SENSITIVE LEAK TEST (Cat M only): sensitivity >= 1e-3 atm*mL/s,
+   BPVC Sec.V Art.10 gas&bubble or He mass-spec. IN ADDITION to 345.4/345.5.
+   HCN gas   P_des   2.0 barg -> hydro   3.0 barg / pneum   2.2 barg
+   NH3       P_des  16.0 barg -> hydro  24.0 barg / pneum  17.6 barg
+   CW        P_des   6.0 barg -> hydro   9.0 barg / pneum   6.6 barg
+   IA        P_des  10.0 barg -> hydro  15.0 barg / pneum  11.0 barg
+   NG        P_des   6.0 barg -> hydro   9.0 barg / pneum   6.6 barg
+   FW        P_des  12.0 barg -> hydro  18.0 barg / pneum  13.2 barg
+   product   P_des   6.0 barg -> hydro   9.0 barg / pneum   6.6 barg
+test packages: 14 (7 Cat-M + 7 utility); 9.0 h each incl. reinstatement
+  -> 126 test-hours; 2 packs/day in parallel -> 7 working days
+  Cat-M packs additionally get He mass-spec sniffing of all 77 joints (27 mh)
+  and 100% RT film review sign-off BEFORE pressurisation (hold point).
+
+==========================================================================
+9. DRYING AND INERTING THE HCN CIRCUIT
+==========================================================================
+   reactor/burner D1.05x3.0    2.60 m3
+   WHB shell + quench          2.00 m3
+   NH3 absorber D0.8x10        5.03 m3
+   HCN absorber D0.8x9         4.52 m3
+   thermal oxidiser            4.00 m3
+   scrubbers 2x                6.00 m3
+   DN250 x20 m                 0.98 m3
+   DN200 x40 m                 1.26 m3
+   small-bore + relief hdr     1.20 m3
+   HCN-wetted volume = 27.6 m3; +25% dead legs/jackets = 34.5 m3
+dilution purge (perfect mixing): n = ln(C0/C) = ln(20.9/0.5) = 3.73 volume changes
+real geometry (dead legs, gauze pack, packed columns) -> use n = 7
+N2 required = 34.5 x 7 = 241 Nm3 = 302 kg
+  = 0.15 standard 50 L/200 bar packs -> ONE liquid-N2 dewar
+  (180 kg LN2 = 145 Nm3) covers a purge; keep 2 on site + a 500 L bulk vessel for
+  the continuous seal/analyser purge (est. 4-8 Nm3/h -> 100-200 Nm3/day).
+dry-out after hydrotest: 20.0 kg residual water; sweep gas picks up 0.005 kg H2O/kg N2
+  N2 = 20.0/0.005 = 4000 kg = 3200 Nm3; at 100 Nm3/h -> 32 h = 1.3 days
+  WHY IT MATTERS: residual water + HCN + alkali -> HCN polymerisation (black
+  polymer) and hydrolysis to formamide/formate. Wet start-up fouls the gauze
+  and the absorber packing on day one. Dry-out is NOT optional and NOT fast.
+  Mitigation: pneumatic-test the Cat-M gas circuit instead of hydro where B31.3
+  345.5 permits -> removes 32 h from the critical path (but 345.5 needs a written
+  hazard review; Cat M pneumatic testing also needs owner's approval).
+
+==========================================================================
+10. REFRACTORY DRY-OUT (thermal oxidiser M6 + WHB)
+==========================================================================
+   ambient->150 C @25 C/h       4.8 h
+   hold 150 C                  12.0 h
+   150->350 C @25 C/h           8.0 h
+   hold 350 C                  12.0 h
+   350->550 C @30 C/h           6.7 h
+   hold 550 C                   8.0 h
+   controlled cool to standby   6.0 h
+   TOTAL refractory dry-out = 57 h = 2.4 days, CONTINUOUS,
+   operator-attended, needs fuel gas + ID fan + stack + DCS live.
+   SRC=ASSUMPTION: generic castable curve (~1 h hold per 25 mm at each plateau);
+   the vendor's actual curve governs. NOT FOUND: a published curve for this unit.
+
+==========================================================================
+11. HOT COMMISSIONING SEQUENCE (Andrussow specifics)
+==========================================================================
+   N2 leak/tightness at operating P, gas detection live         8 h
+   air blower + oxidiser on fuel gas only, stack in service    16 h
+   caustic circulation M3/M6, pH loop tuned to >11.5, deluge test  24 h
+   Pt/Rh gauze pack installed (last item - $155k, theft/damage)   6 h
+   start-up burner light, gauze preheat to ~600 C on CH4/air   10 h
+   NH3 cut-in, ratio ramp to Andrussow mix, LIGHT-OFF ~1100 C   8 h
+   gauze conditioning ('cauliflower' restructuring), yield climbs  48 h
+   ramp 40%->70%->100% load, 3 plateaus x 12 h                 36 h
+   stabilise, tune, snag close-out before guarantee run        24 h
+   subtotal hot commissioning = 180 h = 7.5 days elapsed (24/7 shift work)
+   NOTE: gauze conditioning (48 h) is why a 72 h guarantee run cannot start on
+   the day of light-off - HCN yield on a fresh Pt/Rh gauze is below steady state.
+
+==========================================================================
+12. GUARANTEE / PERFORMANCE TEST
+==========================================================================
+     72 h run ->   22.5 t NaCN(100%) =   75.0 t of 30% solution
+    168 h run ->   52.5 t NaCN(100%) =  175.0 t of 30% solution
+    720 h run ->  225.0 t NaCN(100%) =  750.0 t of 30% solution
+   72 h @ nameplate is the standard mechanical/performance guarantee.
+   For a SAFETY-BENCHMARK plant add a 30-day AVAILABILITY test (720 h): it is the
+   only test that exposes trip-rate, scrubber saturation and unmanned-night
+   behaviour. Cost of that: 225 t NaCN(100%) - which the mine consumes anyway.
+   KEY PLUG-AND-PLAY ADVANTAGE: there is NO off-spec disposal problem. Commissioning
+   liquor at any strength goes into the leach circuit provided pH>11.5 and free-CN
+   is assayed. The customer IS the sink. (Contrast: a merchant plant must dispose.)

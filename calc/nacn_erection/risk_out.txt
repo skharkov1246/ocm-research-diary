@@ -1,0 +1,68 @@
+corrected stick-built construction crews -> 636 man-weeks vs 579 required = 110%. Durations unchanged (they are set by work-front sequence,
+not by crew size; the man-hour check only confirms the crews are not fantasy).
+=> stick-built to first NaCN stays 48 weeks; peak headcount drops 57 -> 43.
+
+==============================================================================
+23. SCHEDULE RISK - MONTE CARLO ON THE MODULAR SITE PHASE
+==============================================================================
+  deterministic (most-likely, 24% overlap credit) = 12.7 weeks
+  P10  =  15.9 weeks
+  P50  =  17.6 weeks
+  P80  =  18.8 weeks
+  P90  =  19.4 weeks
+  P95  =  20.0 weeks
+  P80/P50 = 1.07  -> carry 1.2 weeks of schedule contingency, not 'a bit'.
+  QUOTE 13 weeks INTERNALLY, COMMIT 17 weeks CONTRACTUALLY.
+
+  top-3 variance contributors (pessimistic minus most-likely):
+    + 2.8 wk  gauze light-off + conditioning + ramp  <- THE big one: gauze not lighting, ratio control, HCN in stack
+    + 2.6 wk  pressure test + He sniff               <- He tech visa; leaks at 33 Cat-M flanges
+    + 2.4 wk  steel + Cat-M welding                  <- coded welder availability; plinth survey error
+    + 2.2 wk  module setting (crane availability)    <- crane not on site / ground bearing
+    + 2.2 wk  loop check + 26 SIF validation         <- SIS logic bugs found only in field
+
+==============================================================================
+24. WHAT ACTUALLY BREAKS 'PLUG-AND-PLAY' (ranked, with days)
+==============================================================================
+   +25-40 d  as-built anchor-bolt survey not sent to China (or sent late)
+             -> every module base frame is re-drilled in the field; all 44 Cat-M spools re-cut
+   +10-15 d  no ASME IX coded SS316L 6G welder available in Ghana
+             -> fly in 2 welders + re-qualify to the WPS on site (test coupons + RT)
+    +8-12 d  He mass-spec leak test (B31.3 M345.8) treated as 'optional'
+             -> it is NOT optional for Cat M; discovering this at RFC means re-blinding all 7 Cat-M packs
+   +15-30 d  IECEx / ATEX certificates of the Chinese gas detectors not accepted
+             -> gas detection is a SIF; no cert = no permit to introduce HCN
+    +7-14 d  crane booked as 100 t class (marginal at 14 m radius)
+             -> re-book 130-160 t; in Ghana that is a Takoradi/Tema mobilisation
+    +5-20 d  gas at battery limit not at spec (Genser line pressure/Wobbe)
+             -> burner ratio control cannot hold; light-off aborts
+     +3-4 d  hydrotesting the HCN gas circuit instead of pneumatic
+             -> adds the full 32 h N2 dry-out plus a second tightness check
+   +10-20 d  3rd-party/insurer pre-op audit scheduled AFTER mechanical completion
+             -> auditor availability in West Africa; run it CONCURRENT with loop checks
+
+  Sum of the top three, if all hit: +43 to +67 days = the entire schedule
+  contingency. Every one of them is a DOCUMENT problem, not a steel problem.
+  Plug-and-play is won or lost in the 8 weeks BEFORE the ship sails.
+
+==============================================================================
+25. SITE-PHASE COST (order of magnitude, SRC=ASSUMPTION rates)
+==============================================================================
+    expat_specialist_day       $950
+    expat_supervisor_day       $650
+    local_skilled_day          $95
+    local_helper_day           $45
+    crane_130t_day             $2200
+    NDT_crew_day               $900
+    camp_per_man_day           $85
+
+  modular site phase   : 79 working days -> $0.73 M
+  stick-built site phase: 288 working days -> $4.56 M
+  delta = $3.83 M of SITE cost avoided, on a $4.2 M CAPEX base = 91% of CAPEX.
+  (the modular premium paid to the Chinese shop must be < $3.83 M
+   for modular to be cost-neutral; it typically is, so modular is not just
+   faster and safer here - on this cost base it is cheaper.)
+
+  TIME-VALUE: 35 weeks earlier production x 2500 t/y x (price $2300 - cash
+  cost $1228)/t = 1.80 M$ of gross margin pulled forward.
+  That number alone pays for the entire modularisation premium.

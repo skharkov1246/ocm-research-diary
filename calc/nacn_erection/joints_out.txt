@@ -1,0 +1,56 @@
+========================================================================
+1. SIZING OF INTER-MODULE PROCESS LINES  (D = sqrt(4*Q/(pi*v)))
+========================================================================
+M1->M2 reactor off-gas: Q=1596 Nm3/h @250C = 0.849 m3/s, v=15 m/s -> D=268 mm -> DN250
+M2->M3 gas to HCN abs : Q=1946 m3/h @60C = 0.541 m3/s, v=15 m/s -> D=214 mm -> DN200
+M3->M6 tail gas (H2)  : Q=1712 m3/h, v=18 m/s -> D=183 mm -> DN200
+M4->M1 process air    : Q=1155 Nm3/h @1.5 barg = 0.130 m3/s, v=20 m/s -> D=91 mm -> DN150
+BL->M1 natural gas    : Q=230 Nm3/h @3 barg = 0.0162 m3/s, v=20 m/s -> D=32 mm -> DN50
+M3->T2 product 30%    : Q=0.90 m3/h, v=1.5 m/s -> D=15 mm -> DN25 (DN40 chosen for fouling margin)
+
+========================================================================
+2. FIELD JOINT CENSUS (inter-module + battery-limit tie-ins)
+========================================================================
+tie-in                               DN  weld  flg     DI  catM
+M1-M2 reactor off-gas               250     2    2   19.7  YES
+M2-M3 gas to HCN absorber           200     2    2   15.7  YES
+M3-M6 tail gas to oxidiser          200     2    1   15.7  YES
+M2-M1 NH3 recycle (AP/MP)            50     2    1    3.9  YES
+M2 NH3 feed ex hydrolyser            25     2    1    2.0  YES
+M1 PSV/rupture-disc header          100     3    2   11.8  YES
+M2 relief header to M6              100     3    2   11.8  YES
+M3 relief header to M6              100     3    2   11.8  YES
+M3-M6 emergency scrubber vent       150     2    1   11.8  YES
+M3-T2 product line                   40     4    4    6.3  YES
+T2 loading/return loop               40     4    4    6.3  YES
+M3 analyser/sample tie-ins           15     6    6    3.5  YES
+M6 scrubber blowdown to T5           50     3    2    5.9  YES
+M1/M2/M3 closed drains to T6         50     6    3   11.8  YES
+M3 NaOH dosing ex T1                 25     3    2    3.0  -
+M6 caustic make-up ex T1             25     3    2    3.0  -
+M4-all cooling water S+R            150     8    8   47.2  -
+M4-all instrument air                50     4    6    7.9  -
+N2 header to M1/M2/M3/M6             50     5    6    9.8  -
+BL-M1 natural gas                    50     3    3    5.9  -
+M4-M1 process air                   150     2    2   11.8  -
+M1-M2 BFW / steam / condensate       50     6    4   11.8  -
+Firewater ring + deluge             150    10    8   59.1  -
+Service/potable water, drains        50     8    6   15.7  -
+M6-S5 stack duct (thin-wall, 0.5 mh/DI - see note)  900     3    1  106.3  -
+------------------------------------------------------------------------
+Category M :  44 butt welds,  138.2 dia-inch,  33 flanged joints
+Utility    :  55 butt welds,  281.5 dia-inch,  48 flanged joints
+TOTAL      :  99 butt welds,  419.7 dia-inch,  81 flanged joints
+
+========================================================================
+3. MECHANICAL COMPLETION MAN-HOURS (piping)
+========================================================================
+  Cat-M welding                              401 mh   [138.2 DI x 2.9 mh/DI]
+  Utility welding                            366 mh   [281.5 DI x 1.3 mh/DI]
+  Cat-M flange bolt-up                        99 mh   [33 x 3.0 mh]
+  Utility flange bolt-up                      53 mh   [48 x 1.1 mh]
+  RT 100% Cat-M (M341.4)                      70 mh   [44 welds x 1.6 mh]
+  RT 10% utility                               9 mh   [55x0.1 x 1.6 mh]
+  Helium sensitive leak test (M345.8)         27 mh   [77 joints x 0.35 mh]
+  Weld repair allowance                       62 mh   [6% reject x 2.2 rework factor]
+  SUBTOTAL interconnect piping              1087 mh

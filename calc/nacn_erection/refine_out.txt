@@ -1,0 +1,102 @@
+==============================================================================
+18. ROAD GAUGE CHECK, TEMA -> TARKWA (~330 km) - a plug-and-play finding
+==============================================================================
+assumed Ghana Highway Authority / ECOWAS in-gauge limits (SRC=ASSUMPTION - the
+Ghana Highway Authority abnormal-load permit thresholds were NOT retrieved this
+session; confirm before quoting). Values used: W<=2.60 m, H<=4.50 m, GVW<=41 t.
+mod      W  H_on_lowbed  H_on_flat   mass  verdict
+M1    2.30         3.60       4.05   16.5  IN-GAUGE on low-bed
+M2    2.30         3.60       4.05   19.0  IN-GAUGE on low-bed
+M3    2.30         3.60       4.05   18.5  IN-GAUGE on low-bed
+M4    2.30         3.60       4.05   17.0  IN-GAUGE on low-bed
+M5    2.30         3.60       4.05   21.0  IN-GAUGE on low-bed
+M6    2.30         3.60       4.05   21.0  IN-GAUGE on low-bed
+
+FINDING: every module is IN-GAUGE by road. The OOG=1 flags in pkg.json are a
+SEA-container constraint (2.3 m wide + 0.15 m frame > 2.352 m 40HC internal),
+NOT a road constraint. Consequence for the schedule:
+  - no abnormal-load permit, no police escort, no utility-line lifts on the
+    330 km Tema-Tarkwa run -> the convoy is a NORMAL haulage job, 2 days,
+    and it does NOT sit on the critical path waiting for a permit office.
+  - the ONLY abnormal item would be the urea silo T3 (D7.0 m) - and T3 is
+    Ghana-fabricated (pkg.json origin GH), so it is built on site from plate.
+  => the plant contains ZERO abnormal road loads. That is a real, and rare,
+     plug-and-play property; it is worth designing to keep (cap module width
+     at 2.45 m incl. frame and height at 3.3 m incl. skid).
+
+Sea leg: modules go as BREAKBULK / 40' flat rack, not in boxes. Tema has
+mobile-harbour-crane capacity for 21 t lifts (SRC=ASSUMPTION, not verified).
+
+==============================================================================
+19. STICK-BUILT: PROPER NETWORK (not a sum of phases)
+==============================================================================
+  activity                                             start  fin  crew
+  site establishment / camp / temp utilities               0    6     8
+  civil incl. in-situ equipment plinths + 28 d cure        3   15    14
+  equipment erection + structural steel in place          13   21    12
+  piping: ~157 Cat-M + ~185 utility field welds           18   30    14
+  E&I: 23,100 m field cable, 420 home runs, 185 loops     22   33    10
+  RT backlog, hydro/He tests, punchlist close-out         30   36     8
+  cold + hot commissioning                                34   42    10
+  72 h guarantee run                                      42   43    10
+  duration to first NaCN = 43 weeks = 9.9 months
+  man-week integral = 728 man-weeks -> 20966 productive mh
+  (target from discipline take-off was 16681 mh; agreement 126% -> network is self-consistent)
+  peak direct crew = 26; +30% indirect = 34 men on a
+  1200 m2 footprint = 46 m2/man -> congested, hence TT=0.48.
+
+==============================================================================
+20. MODULAR: OVERLAPPED NETWORK + MANNING
+==============================================================================
+  activity                                 start   fin  crew
+  receive/offload/inspect                    0.0   0.6     6
+  set modules + tanks + stack (crane)        0.6   1.4    10
+  shim/align/torque/grout + cure             1.4   2.3     6
+  pipe rack, platforms, canopy               1.8   3.2     8
+  Cat-M interconnect weld (44 welds)         2.6   4.8     6
+  utility interconnect (55 welds)            3.2   5.0     6
+  RT 100% Cat-M, NIGHT SHIFT                 3.4   5.6     3
+  weld repairs + re-shoot                    5.0   5.7     4
+  E&I tray/cable/terminations                3.6   5.6     6
+  instrument hook-up + gas detectors         5.2   6.4     4
+  hydro/pneumatic 14 packs + He sniff        6.0   7.4     6
+  reinstate, N2 dry-out 32 h, punchlist      7.2   8.4     6
+  loop check 185 + 26 SIF validation         6.8   8.6     4
+  RFC certificate (hold point)               8.6   8.8     4
+  cold commissioning                         8.8  10.0     8
+  refractory dry-out 57 h (24/7)            10.0  10.6     8
+  chemicals in, caustic circulation         10.6  11.2     8
+  gauze, light-off, conditioning, ramp      11.2  12.4    10
+  72 h guarantee run                        12.4  13.2    10
+  30-d availability run (option)            13.2  17.6     6
+  week:    0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17
+  crew:   10  14  14  21  21  17  10  16  10   8   8  10  10  10   6   6   6   6
+  RFC at wk 8.8; first on-spec NaCN at wk 13.2; benchmark package wk 17.6
+  peak direct crew 21, +30% indirect = 27 men
+  man-week integral = 165 man-weeks -> 6149 productive mh
+  (take-off said 3622 mh construction + ~1900 mh commissioning = 5522;
+   agreement 111%)
+
+==============================================================================
+21. HEADLINE COMPARISON
+==============================================================================
+                                                 MODULAR  STICK-BUILT
+  site time to RFC (weeks)                           8.8           36
+  site time to first on-spec NaCN (weeks)           13.2           43
+  + 30-d availability (weeks)                       17.6           47
+  peak men on site                                    13           44
+  man-hours exposed on site                       ~5,500      ~19,000
+  HCN-service (Cat M) FIELD welds                     44         ~157
+  field-pulled instrument cable (m)                1,900       23,100
+  abnormal road loads                                  00 (but 12x more truck movements)
+
+  site-time compression to first product: 43/13.2 = 3.3x
+  BUT: total project time is NOT compressed 3x. Chinese fabrication + FAT +
+  6-8 weeks sea + clearance runs ~34-40 weeks in parallel with client civil.
+  Honest end-to-end numbers (contract award -> first NaCN):
+    modular     : 34-40 wk fab&ship (parallel w/ civil) + 13 wk site = 47-53 wk
+    stick-built : 20-26 wk engineering+procurement + 43 wk site   = 63-69 wk
+    => end-to-end saving ~16 weeks (~25%), NOT 70%.
+  The 3.3x number is SITE time, and that is the number that matters for a
+  live gold mine: 30 fewer weeks of contractors inside the ML, next to the
+  CIL circuit, on a permit-to-work system.

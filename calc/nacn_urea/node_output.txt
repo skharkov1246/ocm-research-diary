@@ -1,0 +1,526 @@
+
+==============================================================================
+0. cp fit check (J/mol/K) vs handbook anchor points
+==============================================================================
+  N2   300K  29.10  700K  31.25  1373K  34.30
+  O2   300K  29.40  700K  32.99  1373K  36.34
+  H2O  300K  33.60  700K  37.88  1373K  45.80
+  CO2  300K  37.20  700K  48.59  1373K  58.00
+  CO   300K  29.10  700K  31.63  1373K  34.77
+  H2   300K  28.80  700K  29.38  1373K  31.68
+  CH4  300K  35.70  700K  58.53  1373K  83.71
+  NH3  300K  35.60  700K  48.63  1373K  64.02
+  HCN  300K  35.90  700K  46.13  1373K  55.75
+
+==============================================================================
+1. BASIS - NH3 and urea demand (from project balance.py)
+==============================================================================
+  NaCN              6.377 kmol/h (312.5 kg/h)
+  NH3 to burner     9.377 kmol/h = 159.7 kg/h = 1278 t/y
+  urea NORMAL       4.689 kmol/h = 281.6 kg/h = 2253 t/y
+  CO2 co-produced   4.689 kmol/h = 206.3 kg/h  (STOICHIOMETRIC, unavoidable)
+  [brief quotes 275 kg/h urea -> implies Y_NH3 = 0.696; we use project Y=0.68]
+  DESIGN (+10%)   309.8 kg/h urea, NH3 175.7 kg/h
+  contained-N breakeven vs anhydrous NH3:
+    urea is 46.6% N, NH3 is 82.2% N
+    -> urea is cheaper per N only if P_urea < 0.567 x P_NH3
+       (at NH3 650 $/t delivered -> urea must beat 369 $/t; PRICES NOT VERIFIED - web budget spent)
+
+==============================================================================
+2. HYDROLYSER OPERATING POINT - the water balance fixes T, P and feed conc.
+==============================================================================
+  Physics: the vapour leaving a boiling aqueous hydrolyser is
+    NH3 + CO2 (generated, fixed at 2:1) + H2O (set by p_H2O(T)/(P-p_H2O)).
+    n_H2O,vap = (nNH3+nCO2) * p_H2O/(P - p_H2O)
+    Feed water = vapour water + reaction water (nCO2*18) + blowdown
+    -> the FEED CONCENTRATION IS NOT FREE. Pick T and P, conc follows.
+    psat(150 C) =   4.76 bar (steam table, exact)
+    psat(180 C) =  10.03 bar (steam table, exact)
+    psat(200 C) =  15.55 bar (steam table, exact)
+    psat(220 C) =  23.20 bar (steam table, exact)
+
+  non-condensables generated: 14.066 kmol/h (NH3 9.377 + CO2 4.689)
+  reaction water consumed: 84.5 kg/h
+
+    T,C  P,bara   pH2O   yH2O H2Ovap kmol/h    kg/h  feedH2O  sol kg/h  urea wt%  Tsat_cryst
+    180      16   9.53  0.595         20.70     373      457       739      38.1        0.0C
+    180      20   9.53  0.476         12.79     230      315       597      47.2       11.9C
+    180      25   9.53  0.381          8.66     156      240       522      53.9       24.0C
+    180      30   9.53  0.318          6.54     118      202       484      58.2       31.4C
+    180      36   9.53  0.265          5.06      91      176       457      61.6       38.4C
+    180      45   9.53  0.212          3.78      68      153       434      64.9       44.6C
+    190      16  11.92  0.745         41.15     741      826      1107      25.4        0.0C
+    190      20  11.92  0.596         20.77     374      459       740      38.0        0.0C
+    190      25  11.92  0.477         12.83     231      316       597      47.2       11.8C
+    190      30  11.92  0.397          9.28     167      252       533      52.8       22.3C
+    190      36  11.92  0.331          6.97     126      210       492      57.3       29.7C
+    190      45  11.92  0.265          5.07      91      176       457      61.6       38.4C
+    200      20  14.77  0.739         39.74     716      800      1082      26.0        0.0C
+    200      25  14.77  0.591         20.31     366      450       732      38.5        0.0C
+    200      30  14.77  0.492         13.64     246      330       612      46.0        9.7C
+    200      36  14.77  0.410          9.79     176      261       542      51.9       21.0C
+    200      45  14.77  0.328          6.87     124      208       490      57.5       30.1C
+    210      25  18.12  0.725         37.07     668      752      1034      27.2        0.0C
+    210      30  18.12  0.604         21.46     387      471       753      37.4        0.0C
+    210      36  18.12  0.503         14.26     257      341       623      45.2        8.2C
+    210      45  18.12  0.403          9.48     171      255       537      52.4       21.8C
+
+==============================================================================
+3. HYDROLYSER ENERGY BALANCE (full enthalpy balance, not just dHr)
+==============================================================================
+  Envelope: 45-57 wt% urea solution at 40 C IN  ->  vapour (NH3+CO2+H2O) at T,P OUT
+  Reference 298.15 K, elements. Includes: (a) heat of reaction from AQUEOUS urea,
+  (b) sensible heat of the feed to T, (c) latent+sensible heat of the water that
+  leaves as vapour.  The brief's 235 kW = 185 kJ/mol x 4.579 kmol/h counts ONLY (a)
+  for the dry thermolysis step and ignores (b) and (c).
+
+      T,C P,bara   wt%  Tcryst H2Ov kmol/h |   Qrxn  Qfeed   Qvap  TOTAL kW  +10% kW
+  A   190     25  47.2   11.8C       12.83 |    156     77    127       325      357
+  B   200     30  46.0    9.7C       13.64 |    156     84    132       339      373
+  C   200     45  57.5   30.1C        6.87 |    156     67     67       247      271
+  D   210     36  45.2    8.2C       14.26 |    156     91    136       351      386
+
+  (Qrxn/Qfeed/Qvap are indicative splits; TOTAL is the rigorous enthalpy balance.)
+  dHr(urea_aq + H2O_l -> 2NH3_g + CO2_g) = 119.6 kJ/mol  [computed from Hf]
+  dHr(urea_s  + H2O_g -> 2NH3_g + CO2_g) = 89.5 kJ/mol  (the '89.6' literature value)
+  brief's basis: 185 kJ/mol x 4.689 kmol/h = 241 kW  <-- UNDERSTATED
+
+==============================================================================
+4. DISSOLVER - heat of solution is NOT optional
+==============================================================================
+  dH_solution(urea) = Hf(aq)-Hf(s) = +13.9 kJ/mol  [lit. +14 to +15.4 kJ/mol -> consistent]
+  at NORMAL rate (282 kg/h urea -> 612 kg/h solution):
+    Q_dissolution = 4.689 kmol/h x 13.9 kJ/mol = 18.1 kW
+    ADIABATIC temperature drop = 65173 kJ/h / (612 kg/h x 3.1 kJ/kg/K) = 34.4 K
+    -> water at 28 C would fall to -6.4 C and CRYSTALLISE (46 wt% saturates at 10 C). Dissolver MUST be heated.
+    campaign mode 8 h every 3 d: 5507 kg/h sol -> Q_diss 163 kW + Q_sens(28->48C) 95 kW = 258 kW installed
+    campaign mode 24 h every 1 d: 612 kg/h sol -> Q_diss 18 kW + Q_sens(28->48C) 11 kW = 29 kW installed
+    continuous mode: 18.1 + 10.5 = 28.6 kW  <-- RECOMMENDED (smallest heater)
+
+==============================================================================
+5. HYDROLYSIS REACTOR - why a stirred pot fails and a stripping column works
+==============================================================================
+  Urea hydrolysis is REVERSIBLE:  (NH2)2CO + H2O <-> 2NH3 + CO2  (via carbamate).
+  In a single CSTR at conversion X:  X = k.tau/(1+k.tau)  ->  X=0.995 needs k.tau = 199.
+  Industrial urea-plant hydrolysers run 195-235 C with 30-60 min holdup, which is
+  only consistent with COUNTERCURRENT STEAM STRIPPING (plug-flow-like, product
+  removed as it forms). Design accordingly: a tray/packed column, NOT a tank.
+    single CSTR, X=0.995       needs k.tau =  199.0
+    PFR, X=0.995               needs k.tau =    5.3
+    CSTR, X=0.50               needs k.tau =    1.0
+  [k(T) for urea hydrolysis: NOT FOUND in this session (web budget spent).
+   MUST be taken from licensor data or a bench run before fixing height.]
+
+  CASE B (200 C, 30 bara, 46 wt% feed):
+    vapour 27.71 kmol/h, MW 22.1, rho_v 16.8 kg/m3, Qv 10.1 L/s
+    Souders-Brown u_max 0.37 m/s -> A 271 cm2 -> D_hydraulic 186 mm
+    -> vapour load is NOT limiting; D set by mechanical minimum. Take D = 600 mm.
+      tau=0.5 h -> liquid holdup 322 L -> 1.14 m of liquid in D600
+      tau=1.0 h -> liquid holdup 644 L -> 2.28 m of liquid in D600
+      tau=2.0 h -> liquid holdup 1288 L -> 4.56 m of liquid in D600
+    design P 38 bara -> t_shell = P.R/(S.E-0.6P) = 10.7 mm + 1.5 CA -> use 14 mm SS316L
+    D600 x 6.0 m T/T shell mass ~ 1223 kg; with heads/trays/skirt/insulation ~ 2.2 t
+    reboiler: steam sat 250 C (40 bara), dT=50 K, U=800 W/m2K -> A = 9.3 m2
+    reboiler: steam sat 224 C (25 bara), dT=24 K, U=800 W/m2K -> A = 19.4 m2
+    steam consumption 373 kW / hfg(250C)=1716 kJ/kg -> 783 kg/h at 40 bara
+
+  CASE C (200 C, 45 bara, 57 wt% feed):
+    vapour 20.94 kmol/h, MW 23.4, rho_v 26.8 kg/m3, Qv 5.1 L/s
+    Souders-Brown u_max 0.29 m/s -> A 173 cm2 -> D_hydraulic 148 mm
+    -> vapour load is NOT limiting; D set by mechanical minimum. Take D = 600 mm.
+      tau=0.5 h -> liquid holdup 258 L -> 0.91 m of liquid in D600
+      tau=1.0 h -> liquid holdup 516 L -> 1.82 m of liquid in D600
+      tau=2.0 h -> liquid holdup 1031 L -> 3.65 m of liquid in D600
+    design P 57 bara -> t_shell = P.R/(S.E-0.6P) = 16.1 mm + 1.5 CA -> use 19 mm SS316L
+    D600 x 6.0 m T/T shell mass ~ 1737 kg; with heads/trays/skirt/insulation ~ 3.1 t
+    reboiler: steam sat 250 C (40 bara), dT=50 K, U=800 W/m2K -> A = 6.8 m2
+    reboiler: steam sat 224 C (25 bara), dT=24 K, U=800 W/m2K -> A = 14.1 m2
+    steam consumption 271 kW / hfg(250C)=1716 kJ/kg -> 569 kg/h at 40 bara
+
+==============================================================================
+6. SOLIDS DEPOSITION IN THE NH3 LINE - where the plugging risk really is
+==============================================================================
+  2 NH3(g) + CO2(g) <-> NH2COONH4(s).  Kp = p_NH3^2 . p_CO2 [atm^3].
+  Anchor [H]: ammonium carbamate total dissociation pressure = 1 atm at 60 C
+  (stoichiometric 2:1 -> Kp = (2/3)^2(1/3) = 0.148 atm^3 at 333 K).
+  dH_dissoc = +159 kJ/mol [H]. van't Hoff -> deposition temperature at our p's.
+
+  offgas composition (case B): NH3 33.8%  CO2 16.9%  H2O 49.2%  (dry: NH3 67% / CO2 33%)
+    HP side, upstream of let-down      P= 30.0 bar -> carbamate deposition at  115.0 C ; p_H2O=14.77 bar
+    LP side, downstream of let-down    P=  1.5 bar -> carbamate deposition at   55.1 C ; p_H2O=0.74 bar
+    LP alt                             P=  2.5 bar -> carbamate deposition at   64.0 C ; p_H2O=1.23 bar
+
+  CONSEQUENCE (this is the single most actionable result of the node):
+    - the HP line between column top and the let-down valve must stay ABOVE ~115 C
+      -> keep it SHORT, jacketed with the same 40 bar steam, no dead legs, no
+         instrument tappings without purge.
+    - downstream of the let-down valve the deposition temperature collapses to
+      ~55 C. So: PUT THE LET-DOWN VALVE AT THE COLUMN, and run the
+      long transfer line to the burner mixer at 1.5-2 bar, electrically traced
+      at 130-150 C (above the 0... above the water dew point, see below).
+    water dew point at 1.5 bar (p_H2O=0.74 bar) = 92 C -> trace the LP line at >=130 C
+    (condensed water would absorb NH3/CO2 -> ammonium carbonate liquor: corrosive to CS, plugging)
+
+==============================================================================
+7. DOWNSTREAM IMPACT ON THE ANDRUSSOW BURNER (the hidden cost of the urea route)
+==============================================================================
+  burner feed (project basis): CH4 10.285  NH3 9.377  O2 10.799  N2 40.748 kmol/h
+  extents: e1(HCN)=6.377  e2(POx)=2.468  e3(reform)=1.240  e4(NH3 crack)=0.750
+  off-gas 82.08 kmol/h: HCN 7.8%  H2O 21.8%  CO 4.5%  H2 13.3%  N2 50.6%  NH3 1.8%  CH4 0.2%
+  [sanity vs literature Andrussow gas: HCN 6-8, H2 10-13, N2 50-60, H2O 18-22, CO 3-5, NH3 1.5-3 vol% -> matches]
+
+  BASELINE (anhydrous NH3, air preheat 200 C): adiabatic gauze T = 1085 C
+  [literature Andrussow gauze 1050-1200 C -> model is calibrated well enough for DELTAS]
+
+  --- adding the urea ballast (CO2 + H2O travel with the NH3 at 180 C) ---
+  case     CO2    H2O  tot feed  T_gauze     dT  air preheat to restore
+  B       4.69  13.64     89.54     917C   -168                 615 C (from 200 C)
+  C       4.69   6.87     82.77     971C   -115                 467 C (from 200 C)
+  baseline total feed 71.21 kmol/h
+
+  READ THIS: the ballast costs 100-190 K of gauze temperature. Andrussow HCN yield
+  falls steeply below ~1050 C. It MUST be paid back, and there are only 3 currencies:
+    (i)  hotter AIR preheat (air alone is safe to preheat - it is not a fuel mixture),
+    (ii) burning more CH4 (extra O2 + CH4, lowers HCN selectivity),
+    (iii)dry the NH3 gas (higher hydrolyser pressure = case C).
+  Note (i) has a limit: hotter feed WIDENS the flammability envelope (Zabetakis:
+  UFL rises ~0.72%/K relative), which fights the mixing-station safety case.
+
+==============================================================================
+7b. Does the CO2 survive the gauze? Reverse water-gas shift at 1100 C
+==============================================================================
+    CO2 + H2 <-> CO + H2O   T=900 C  dG=   -8.1 kJ/mol  K=  2.30
+    CO2 + H2 <-> CO + H2O   T=1000 C  dG=  -12.3 kJ/mol  K=  3.20
+    CO2 + H2 <-> CO + H2O   T=1100 C  dG=  -16.5 kJ/mol  K=  4.25
+    CO2 + H2 <-> CO + H2O   T=1200 C  dG=  -20.7 kJ/mol  K=  5.43
+
+  case B: CO2 in 4.689 kmol/h, H2 10.908 -> RWGS extent 1.023
+    CO2 leaving the gauze = 3.666 kmol/h (78% of the CO2 fed survives)
+    H2 consumed 1.023 kmol/h (was 10.908) - lost tail-gas fuel value
+    extra endothermic load 42 MJ/h = 12 kW (already inside the adiabatic T above? NO -
+    the adiabatic calc above assumed CO2 inert -> real gauze T is LOWER still by roughly 10 K)
+
+==============================================================================
+7c. How dry must the NH3 gas be? (air-preheat is capped by methane autoignition)
+==============================================================================
+  HARD CONSTRAINT [H]: autoignition temperature CH4 = 537 C, NH3 = 651 C (NFPA 497 /
+  Zabetakis). Any air preheat above ~480 C (537 minus a 60 K margin) means the fuel
+  autoignites the instant it contacts the air in the mixer, whatever the flammability
+  limits say. So air preheat is CAPPED at ~450-480 C. That caps how much ballast the
+  burner can absorb.
+
+   nH2O ballast   nCO2  T_gauze  air preheat needed to hold 1085 C
+          13.64   4.69     917C                    615 C   IMPOSSIBLE (>480 C cap)
+          10.00   4.69     945C                    536 C   IMPOSSIBLE (>480 C cap)
+           6.87   4.69     971C                    467 C   OK
+           4.00   4.69     996C                    402 C   OK
+           2.00   4.69    1015C                    357 C   OK
+           0.00   4.69    1034C                    312 C   OK
+  0 (NO CO2 either)   0.00    1099C        200 (unchanged)
+
+  -> Even with a PERFECTLY DRY hydrolyser gas, the 4.69 kmol/h of stoichiometric CO2
+     alone still needs ~330 C air preheat. That is achievable. But the water is not
+     forgiving: above ~7 kmol/h of H2O ballast the required air preheat crosses the
+     methane autoignition cap and the burner CANNOT be rebalanced by preheat at all.
+
+==============================================================================
+8. CAUSTIC CONSUMPTION AND CARBONATE IN THE PRODUCT - the other hidden cost
+==============================================================================
+  NaOH for NaCN itself: 6.377 kmol/h = 255.0 kg/h
+  30% product solution: 1042 kg/h
+  CO2 reaching the caustic absorber (after RWGS): 3.666 kmol/h
+  2 NaOH + CO2 -> Na2CO3 + H2O
+
+   CO2 co-absorbed  extra NaOH kg/h  % over base  Na2CO3 kg/h  wt% in product  extra NaOH t/y
+              10%             29.3          11%         38.9            3.6%             235
+              20%             58.6          23%         77.7            6.9%             469
+              35%            102.6          40%        136.0           11.5%             821
+              60%            175.9          69%        233.1           18.3%            1408
+             100%            293.2         115%        388.5           27.2%            2346
+
+  Interpretation: HCN absorption into NaOH is an instantaneous acid-base reaction;
+  CO2 absorption is kinetically limited (CO2 + OH- , k_OH ~ 8500 L/mol/s at 25 C [H]),
+  so a short-contact absorber can be made selective. But even 20% CO2 slip doubles
+  ...adds ~46% to caustic and puts ~7 wt% Na2CO3 in a 30% NaCN product. Mine cyanide
+  specs care about free NaOH and carbonate: THIS IS A PRODUCT-QUALITY ISSUE, not just
+  a cost issue. NOT VERIFIED: the mine's actual NaCN solution acceptance spec.
+
+==============================================================================
+9. FLAMMABILITY / MIXING STATION - what the ballast actually does
+==============================================================================
+  BASELINE feed: CH4 14.44%  NH3 13.17%  O2 15.17%  N2 57.22%
+    CH4 vs its UFL in air (15.0 vol% [H]): 14.44% -> -0.56 pp   <-- the brief's '0.6-1.4 pp' margin, reproduced
+    Le Chatelier UFL of the CH4/NH3 fuel blend (UFL NH3 = 28% [H]): 19.27%; total fuel = 27.61% -> +8.35 pp above
+
+  CASE B: CH4 11.49%  NH3 10.47%  O2 12.06%  CO2 5.24%  H2O 15.24%
+    O2 concentration: 15.17% -> 12.06%  (LOC for CH4 = 12% with N2, 14.5% with CO2 [H, NFPA 69, 25 C])
+    N2-equivalent inert: 40.7 -> 66.9 kmol/h (+64%)
+
+  CASE C: CH4 12.43%  NH3 11.33%  O2 13.05%  CO2 5.66%  H2O 8.30%
+    O2 concentration: 15.17% -> 13.05%  (LOC for CH4 = 12% with N2, 14.5% with CO2 [H, NFPA 69, 25 C])
+    N2-equivalent inert: 40.7 -> 57.4 kmol/h (+41%)
+
+  Two-sided result, state it honestly:
+  + the ballast drops O2 from 15.2% to 12.1-13.0%, at or below the CH4 limiting oxygen
+    concentration -> on the LOC criterion the mixture becomes ROBUSTLY non-flammable,
+    and CO2 is ~1.5x N2 as an inertant. This is a genuine safety dividend at the mixer.
+  - but LOC falls with temperature (roughly -1 pp per 100 K), and any air preheat above
+    ~330 C erodes it. The safety gain and the thermal fix pull in opposite directions.
+  - and on the naive 'CH4 vs UFL' metric the ballast moves CH4 from 14.4% to 11.5%,
+    i.e. INTO the 5-15% window. That metric is wrong when 20%+ inert is present, but it
+    is the metric a regulator or an insurer will reach for first. Be ready for it.
+  ACTION: this must be settled by MEASUREMENT, not correlation - EN 1839 / ASTM E918
+  limits on the actual CH4/NH3/CO2/H2O/air composition at the real preheat temperature.
+  For a plant whose selling point is 'safety benchmark', that test is not optional.
+
+==============================================================================
+10. LOSS-OF-NH3 SCENARIO - the interlock that the urea route makes critical
+==============================================================================
+  If NH3 stops and CH4+air keep flowing: CH4 = 16.63% in air -> UFL 15% -> ABOVE UFL by 1.63 pp (too rich, safe by 1.63 pp only)
+  With the urea route NH3, CO2 and H2O all stop together (one stream) - so the
+  post-trip mixture is the same 16.63% CH4. Margin is 1.63 pp: NOT a barrier.
+  LP transfer-line NH3 inventory (50 m of DN80 at 1.5 bar, 150 C):
+    V=238 L -> 0.0102 kmol gas, NH3 0.06 kg = 0.0 s of feed
+  -> the NH3 stream dies within ~15-30 s of a hydrolyser trip. CH4 and air must be
+     tripped FASTER than that. SIL-rated: 'low NH3 flow / low hydrolyser pressure ->
+     close CH4 XV within 1 s'. This is the same interlock as the anhydrous plant but
+     the urea route makes it harder, because a hydrolyser has NO liquid-NH3 buffer to
+     ride through an upset. Compensate with: 2 x 100% hydrolysers on hot standby,
+     pressure-controlled let-down, and a small (< 5 kg NH3) gas receiver.
+
+==============================================================================
+11. DESIGN SELECTION - feed concentration is the master variable
+==============================================================================
+  Steady-state water balance closes the argument:
+     water OUT (overhead) = water IN (feed solution) - reaction water - blowdown
+  A reflux/rectifier CANNOT change this - it only moves water around inside the column.
+  So the overhead water ballast, and therefore the whole burner problem, is fixed by
+  ONE number: the urea concentration of the solution you feed. Everything else follows.
+
+    wt%  Tcryst  sol kg/h  H2O ovhd  P@180C  P@200C  Q@180C  T_gauze air preheat    verdict
+     40    0.0C       704     18.43    16.8    26.0     424     884C        718C    NO(AIT)
+     45    7.9C       626     14.08    19.0    29.5     365     914C        625C    NO(AIT)
+     50   17.4C       563     10.61    22.2    34.4     319     940C        549C    NO(AIT)
+     55   25.7C       512      7.77    26.8    41.5     280     963C        486C    NO(AIT)
+     60   35.0C       469      5.40    34.3    53.3     248     984C        434C         OK
+     62   39.4C       454      4.56    38.9    60.3     237     991C        415C         OK
+     65   44.9C       433      3.40    49.0    76.0     221    1002C        389C         OK
+     68   51.2C       414      2.33    66.9   103.8     207    1011C        365C OK P>60bar
+
+  RECOMMENDED OPERATING POINT:  62 wt% urea solution, column 180 C / 38 bar(a).
+    - overhead ballast H2O 4.7 kmol/h + CO2 4.7 kmol/h (down from 13.6 + 4.7)
+    - reboiler duty 237 kW (261 kW design) instead of 373 kW at 46 wt%
+    - gauze 991 C (-94 K); required air preheat 415 C: below the 480 C methane-
+      autoignition cap, but with only ~65 K of margin - that margin is the design's
+      tightest single number
+    - cost: the solution system must be trace-heated to 50-55 C (62 wt% saturates at
+      ~40 C). In Tarkwa (ambient 22-32 C) that is ~25 K of tracing, ~5 kW, and a
+      tracing failure crystallises slowly over hours - recoverable, not a safety event.
+
+==============================================================================
+12. SOLID UREA RECEPTION AND STORAGE IN 95% RH
+==============================================================================
+  [H] Urea critical relative humidity (CRH): ~81% at 10 C, ~76% at 20 C, ~72-73% at 30 C.
+  Tarkwa ambient RH reaches 95%. AMBIENT RH IS ~22 pp ABOVE THE CRH ALL YEAR.
+  Above CRH urea does not merely cake - it DELIQUESCES (absorbs water and dissolves).
+  This single fact should kill the 280 m3 bulk silo currently in the project inventory
+  (T3: 16.5 t, 7.2 x 7.2 x 8.2 m, $74k FOB) unless it is fed dehumidified air.
+     7 d buffer =   47.3 t =   63.1 m3 bulk = 47 x 1 t FIBC
+    14 d buffer =   94.6 t =  126.2 m3 bulk = 95 x 1 t FIBC
+    30 d buffer =  202.8 t =  270.3 m3 bulk = 203 x 1 t FIBC
+    45 d buffer =  304.1 t =  405.5 m3 bulk = 304 x 1 t FIBC
+
+  RECOMMENDATION - three-tier, and only the smallest tier is exposed to the air:
+   (1) 30 d strategic buffer = 203 t as 1 t FIBC with sealed 150 um PE liner,
+       in a closed shed. The BAG is the moisture barrier - no silo, no dehumidifier.
+       Stack 2 high on 1.2 x 1.2 m pitch -> 146 m2 of racking + aisles ~ 200 m2 shed.
+   (2) 3 d day-bin 20.3 t / 27 m3 (D 2.5 x H 6 m), 70 deg cone, vibrating
+       discharger, rotary valve, blanketed with dehumidified air (dew point < 5 C,
+       ~2 kW desiccant dryer). Filled from FIBC in one ~3 h campaign every 3 days.
+   (3) 48 h solution buffer 2 x 12 m3 - this is the tier that actually decouples the
+       plant from solids handling and lets it run unattended.
+  Operator intervention: ONE bag-handling campaign per 3 days. Nothing daily.
+  DELIBERATELY REJECTED: a 30 d bulk silo. In 95% RH it bridges and rat-holes, and a
+  blocked urea silo stops NaCN production, which stops the leach circuit.
+
+==============================================================================
+13. UREA SPECIFICATION - the non-obvious one: DO NOT buy fertiliser-grade
+==============================================================================
+  Fertiliser granular urea is the wrong feedstock for two independent reasons:
+   (a) ANTI-CAKING COATING. Granular fertiliser urea is surface-treated with
+       urea-formaldehyde resin (UF-85), typically 0.3-0.6 wt%. At 282 kg/h that is
+       1.4 kg/h = 11.3 t/y of formaldehyde resin fed to a 180 C hydrolyser.
+       It polymerises to insoluble methylene-urea sludge -> reboiler fouling.
+       Ghana's humidity makes an uncoated product tempting to refuse - but the FIBC
+       liner, not the coating, is the moisture barrier here. SPECIFY UNCOATED.
+   (b) BIURET. Fertiliser grade allows 1.0-1.2 wt% biuret; technical/AdBlue grade
+       (ISO 22241 / DIN 70070 feedstock) allows <=0.3 wt%.
+  Target specification (write it into the purchase order):
+       urea            >= 99.5 wt%      biuret         <= 0.3 wt%
+       water           <= 0.5 wt%       aldehydes      <= 5 mg/kg
+       insolubles      <= 20 mg/kg      alkali (Na+K)  <= 1 mg/kg
+       Fe, Cu, Zn, Ni, Cr, Al, Ca, Mg   <= 0.5 mg/kg each     phosphate <= 0.5 mg/kg
+       NO anti-caking / NO UF coating; supplied in 1 t FIBC with sealed PE liner
+  WHY THE METALS LIMITS MATTER, and this is the good news of the whole node:
+    the Pt/Rh gauze is poisoned by alkali, iron and phosphorus. In the ANHYDROUS route
+    any such contaminant in the NH3 goes straight to the gauze. In the UREA route only
+    NH3, CO2 and H2O are volatile - EVERY non-volatile contaminant stays in the column
+    liquor and leaves in the blowdown. THE HYDROLYSER IS ALSO A PURIFICATION STEP.
+    The only carry-over path is entrainment -> demister + one water-wash tray at the
+    column top brings it to < 1 mg/kg. Net: the urea route delivers a CLEANER feed to
+    the gauze than tanker ammonia does.
+
+==============================================================================
+14. BIURET, HNCO AND THE BLOWDOWN BALANCE
+==============================================================================
+  HNCO: in the DRY thermolysis route (NH2)2CO -> NH3 + HNCO is unavoidable and HNCO
+  then needs a TiO2/Al2O3 hydrolysis bed, which fouls. In the AQUEOUS route at 180 C
+  with a large excess of liquid water, HNCO hydrolyses in situ (HNCO + H2O -> NH3 +
+  CO2) far faster than it can escape. Residual HNCO in the overhead should be ppm-level.
+  -> DESIGN DECISION: aqueous hydrolysis, not melt thermolysis. In Ghana this also
+     turns urea's hygroscopicity from a liability into a non-issue: we are adding
+     water on purpose, so a slightly damp bag is a dosing correction, not a reject.
+     [HNCO slip is NOT quantified here - no kinetic data in this session. Measure it.]
+  biuret 0.3 wt% in feed = 0.84 kg/h; 80% hydrolysed at 180 C -> 0.17 kg/h to blowdown = 1.35 t/y
+  biuret 0.3 wt% in feed = 0.84 kg/h; 50% hydrolysed at 180 C -> 0.42 kg/h to blowdown = 3.38 t/y
+  biuret 1.0 wt% in feed = 2.82 kg/h; 80% hydrolysed at 180 C -> 0.56 kg/h to blowdown = 4.51 t/y
+  biuret 1.0 wt% in feed = 2.82 kg/h; 50% hydrolysed at 180 C -> 1.41 kg/h to blowdown = 11.26 t/y
+
+  non-volatile load (biuret residue + insolubles), tech-grade urea: 0.175 kg/h = 1397 kg/y
+    holding 2 wt% non-volatiles in the liquor -> blowdown 8.7 kg/h (210 kg/d, 69.8 t/y)
+    holding 5 wt% non-volatiles in the liquor -> blowdown 3.5 kg/h (84 kg/d, 27.9 t/y)
+    holding 10 wt% non-volatiles in the liquor -> blowdown 1.7 kg/h (42 kg/d, 14.0 t/y)
+
+  ROUTE THE BLOWDOWN BACK, DO NOT DISCHARGE IT: cool it and use it as dissolver
+  make-up water. It carries dissolved NH3 and urea; discharging it would put ammonia
+  into a gold-mine water circuit, which is exactly the kind of thing the ICMI Cyanide
+  Code auditors and the Ghana EPA look at. Closed loop + a ~200 kg batch drain roughly
+  monthly to a drum, neutralised, is the plug-and-play answer.
+  [Ghana regulatory citations - EPA Act 490 (1994), LI 1652 (1999), Factories Offices
+   and Shops Act 1970 (Act 328) for pressure vessels - RECALLED, NOT VERIFIED this
+   session (web search budget exhausted). Must be confirmed before use.]
+
+==============================================================================
+15. UTILITIES - can the Andrussow waste-heat boiler carry this node?
+==============================================================================
+  design point: 62 wt%, 180 C, 38.9 bara -> reboiler 237 kW (normal), 261 kW (design)
+  dissolver 30 kW ; solution tank tracing ~5 kW ; LP line tracing ~8 kW
+  NODE TOTAL heat demand = 304 kW
+
+  Andrussow off-gas 91.3 kmol/h cooled 1100 -> 200 C in the WHB:
+    recoverable heat = 3018 MJ/h = 838 kW  (vs node demand 304 kW)
+    -> covered 2.8x over. The hydrolyser runs on waste heat: NO fuel cost.
+    BUT the WHB must make steam hot enough to drive a 180 C reboiler:
+      needs >= 230 C saturated = 28 bar(a); at 250 C / 40 bar(a) the reboiler is
+      A = 4.7 m2 (U=800 W/m2K, dT=70 K). Steam rate 547 kg/h.
+      >>> ACTION FOR THE M1 (reaction module) NODE: specify the steam drum at 40 bar(a),
+          not the 10-20 bar that a small Andrussow WHB would default to. <<<
+
+  START-UP and BACK-UP: at cold start there is no waste heat and the burner cannot be
+  lit without NH3. Fit a 300 kW ELECTRIC immersion reboiler in parallel with the
+  steam reboiler. This also avoids an auxiliary fired boiler and its statutory boiler
+  inspection/licensing - a real plug-and-play win. Ghana grid/mine power.
+  Electric-only running cost, if it ever came to that: 261 kW x 8000 h = 2086 MWh/y;
+  at 0.13 $/kWh (INDICATIVE, NOT VERIFIED) = $271,148/y = $108/t NaCN.
+  Start-up only (300 kW x ~4 h x ~12 starts/y) = negligible.
+
+==============================================================================
+16. EQUIPMENT LIST, DIMENSIONS, WEIGHTS, MODULE FIT (40ft HC = 12.03 x 2.35 x 2.69 m)
+==============================================================================
+  tag     item                                                           envelope                   t  fit
+  V-101   FIBC discharge station with hoist, bag-breaker, dust filter    2.5 x 2.5 x 5.5 m        1.8  skid, field-erected
+  V-102   Urea day-bin 27 m3 (3 d), SS304, 70 deg cone, vibrating discha D 2.5 x H 6.0 m          4.5  OOG - ships as shell + cone
+  PK-103  Desiccant air dryer for bin blanket, dew point < 5 C, 2 kW     0.8 x 0.6 x 1.6 m        0.3  in 40ft HC
+  W-104   Loss-in-weight screw feeder, 0-600 kg/h urea                   1.8 x 0.5 x 0.8 m        0.4  in 40ft HC
+  V-105   Dissolver, agitated, 1.0 m3, SS304, 30 kW electric/hot-water c D 1.0 x H 1.4 m          0.9  in 40ft HC
+  T-106   Urea solution tanks 2 x 12 m3, SS304, insulated + traced 50-55 D 2.2 x H 3.6 m ea       2.6  local fab (GH)
+  P-107   Solution metering pumps 2x100%, 0-600 kg/h, 45 bar, triplex    1.2 x 0.8 x 1.0 m ea     0.7  in 40ft HC
+  F-108   Duplex feed filter 100 um + 5 um                               0.3 x 0.3 x 1.0 m        0.1  in 40ft HC
+  C-201   HYDROLYSIS COLUMN 2 x 100%, D 600 x 6.0 m T/T, SS316L, 14 mm,  D 0.75 x L 7.5 m ea      2.4  lies flat in 40ft HC
+  E-202   Thermosiphon reboiler 2 x 100%, 6 m2, SS316L, steam 40 bar(a)  D 0.35 x L 3.0 m ea      0.6  in 40ft HC
+  E-203   Feed/effluent + blowdown cooler                                D 0.25 x L 2.0 m         0.3  in 40ft HC
+  PCV-204 Let-down station, jacketed, at the column; 38 -> 1.8 bar       -                        0.2  on C-201 skid
+  H-205   LP NH3/CO2/H2O transfer line, DN80 SS316L, electrically traced ~50 m                    0.6  loose
+  V-206   NH3 gas receiver 0.5 m3 at 1.8 bar (surge only, < 1 kg NH3)    D 0.6 x L 1.8 m          0.2  in 40ft HC
+  E-207   HIGH-TEMPERATURE AIR PREHEATER to ~400 C (NEW - see section 7c D 0.8 x L 3.5 m          2.2  alloy 800H/321H
+          NODE TOTAL                                                                             17.8 t
+
+  Everything except the day-bin (V-102, D 2.5 m) and the air preheater fits inside the
+  existing 40ft HC envelope. The hydrolysis columns ship LYING DOWN (7.5 m < 12.03 m).
+  Two new transport modules: M7 'urea dissolution + dosing' and M8 'hydrolysis'.
+  ~18 t added; against the 113 t already in the shipment that is ~16%.
+  DELETED from the shipment by this node: 2 x 25 t anhydrous NH3 bullets (D 3.0 m,
+  out-of-gauge on both) and the NH3 vaporiser/superheater package.
+  CHANGED: T3 in the current inventory (280 m3 urea silo, 16.5 t, $74k) is REPLACED by
+  V-102 (27 m3 bin) + a 200 m2 bagged-goods shed. Net FOB is probably lower; the shed
+  is a pure Ghana civil scope.
+
+==============================================================================
+17. SAFETY LEDGER - what the swap actually buys, in kg
+==============================================================================
+  ANHYDROUS ROUTE   NH3 inventory on site: 60 000 kg  (toxic cloud to 1.9 km, per brief)
+  UREA ROUTE        hazardous-NH3 inventory:
+    hydrolysis column liquor  618 kg at 180 C, of which free/loosely bound NH3 ~5 wt% = 31 kg
+    x2 columns                                                        = 62 kg
+    HP + LP gas lines + receiver                                      ~ 1 kg
+    TOTAL                                                             ~ 63 kg
+    -> reduction factor 956x
+  Urea solution 24 m3 x 1.18 t/m3 x 62% = 17.6 t urea = 10.0 t of NH3 'potential',
+    but chemically bound, non-volatile, non-toxic by inhalation, and it cannot
+    form a cloud: a full-bore rupture makes a puddle, not a plume.
+
+  ROAD TRANSPORT THROUGH GHANA (Tema -> Tarkwa, ~300 km):
+    anhydrous: 1278 t/y NH3 / 20 t tanker = 64 loads/y of UN 1005 Class 2.3 TOXIC GAS
+    urea:      2253 t/y / 28 t truck = 80 loads/y of NON-DANGEROUS goods
+    -> 1.3x more truck movements, but ZERO toxic-gas movements.
+       Consequence per accident collapses; exposure frequency rises. Say both.
+
+==============================================================================
+18. COST DELTA vs THE ANHYDROUS ROUTE (per t NaCN; prices INDICATIVE, NOT VERIFIED)
+==============================================================================
+  feedstock, anhydrous NH3    1278 t/y x 650 $/t = $   332/t NaCN
+  feedstock, urea             2253 t/y x 400 $/t = $   360/t NaCN   delta +28 $/t
+  breakeven urea price = 369 $/t at NH3 650 $/t (contained-N parity)
+  extra NaOH from CO2 slip at 10% co-absorption: 235 t/y x 500 $/t = $47/t NaCN
+  extra NaOH from CO2 slip at 20% co-absorption: 469 t/y x 500 $/t = $94/t NaCN
+  extra CH4 / thermal: covered by waste heat and by air preheat -> ~$0/t operating,
+    but CAPEX: high-temperature air preheater E-207 (alloy) ~ $120-200k (ESTIMATE)
+  deleted: NH3 bullets, vaporiser, NH3 gas detection ring, NH3 emergency scrubber duty
+
+  BOTTOM LINE ON MONEY: at parity urea prices the feedstock delta is roughly
+  +28 $/t NaCN against a cash cost of 1228 $/t, i.e. 2%. The CO2-driven
+  caustic and carbonate penalty is the one that can actually hurt, and it is
+  controlled by absorber design, not by the urea decision itself.
+
+==============================================================================
+19. RESIDUAL RISKS AND WHAT IS NOT KNOWN
+==============================================================================
+  QUANTIFIED HERE:
+   - water ballast -> gauze temperature: 168 K at 46 wt% feed, 94 K at 62 wt%
+   - air preheat cap 480 C from methane autoignition (537 C)
+   - carbamate deposition 115 C at 38 bar, 55 C at 1.5 bar
+   - dissolver adiabatic temperature drop 34 K -> mandatory heating
+   - reboiler 237 kW normal (NOT the 235 kW in the brief - that figure omits feed
+     sensible heat and water vaporisation and happens to land in the same place
+     for the wrong reasons; at 46 wt% feed the true duty is 373 kW)
+
+  NOT KNOWN / MUST BE CLOSED BEFORE DETAIL DESIGN:
+   1. k(T) for urea hydrolysis and the NH3-CO2-H2O VLE at 180 C / 38 bar. Everything
+      about column height and the true overhead composition rests on these. Get the
+      licensor's data or run a 2 L autoclave series. This is the #1 open item.
+   2. HNCO and biuret slip into the overhead - assumed negligible, NOT measured.
+   3. Real flammability envelope of CH4/NH3/CO2/H2O/air at 200-400 C preheat (EN 1839).
+   4. The mine's NaCN solution acceptance spec, especially carbonate and free NaOH.
+   5. Ghana statutory basis: pressure-vessel registration for a 48 bar(g) column,
+      fertiliser/urea import licensing, EPA permitting. All RECALLED, NOT VERIFIED.
+   6. Urea and ammonia delivered prices into Tarkwa. The whole economic comparison
+      is a single ratio (0.567) away from flipping.
+
+  RISKS THE DESIGN DELIBERATELY ACCEPTS:
+   - a 48 bar(g) pressure vessel appears on a site whose selling point is 'no pressure
+     hazard'. It is small (620 L) and contains ~30 kg of NH3, but it IS a new
+     pressure boundary and needs its own registration and PSV/relief study.
+   - crystallisation of 62 wt% urea solution on loss of tracing. Slow, recoverable.
+   - the hydrolyser has no ride-through inventory: any trip stops NH3 in ~20 s.
+   - fouling of the reboiler by biuret/insolubles: mitigated by spec + 2 x 100% +
+     online switchover, but it is the most likely cause of an unplanned outage.

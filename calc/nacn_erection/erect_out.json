@@ -1,0 +1,14 @@
+{
+ "MH_CONSTR": 3622.25,
+ "MH_PIPE": 1002.0,
+ "mh_ei_tot": 911.5,
+ "mh_oth": 1708.75,
+ "h_crane": 47.5,
+ "cable_stick": 23100.0,
+ "cable_mod": 1900.0,
+ "n_io": 420,
+ "n_loops": 185,
+ "n_sif": 26,
+ "V_tot": 228.4285714285714,
+ "d_cure": 7
+}
