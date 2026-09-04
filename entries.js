@@ -1006,6 +1006,8 @@ const ENTRIES = [
     ]
   },
   {
+    id: "anti-bep-embedded",
+    date: "2026-07-06",
     stage: { ru: "Этап 16", en: "Stage 16" },
     title: { ru: "Анти-BEP в окружении: знак выжил, величина ослабла",
              en: "Anti-BEP in the environment: the sign survives, the magnitude fades" },
@@ -1036,6 +1038,8 @@ const ENTRIES = [
     ]
   },
   {
+    id: "dopant-amplification",
+    date: "2026-07-07",
     stage: { ru: "Этап 17", en: "Stage 17" },
     title: { ru: "Допант-амплификация: Cr вытягивает знак в плюс, Fe — в минус, DFT выбрал бы не тот",
              en: "Dopant amplification: Cr pulls the sign positive, Fe negative — DFT would pick the wrong one" },
@@ -1066,6 +1070,8 @@ const ENTRIES = [
     ]
   },
   {
+    id: "volcano-3d",
+    date: "2026-07-09",
     stage: { ru: "Этап 17b", en: "Stage 17b" },
     title: { ru: "Вулкан 3d-ряда: Ti — предварительный лидер, которого DFT ставит последним",
              en: "The 3d-series volcano: Ti provisionally leads — and DFT ranks it last" },
@@ -1096,6 +1102,8 @@ const ENTRIES = [
     ]
   },
   {
+    id: "volcano-stress",
+    date: "2026-07-10",
     stage: { ru: "Этап 18", en: "Stage 18" },
     title: { ru: "Стресс-тест вулкана: Cr подтверждён до сотых, Ti-«сенсация» снята",
              en: "Stress-testing the volcano: Cr confirmed to the hundredth, the Ti 'sensation' retracted" },
@@ -1126,6 +1134,8 @@ const ENTRIES = [
     ]
   },
   {
+    id: "volcano-4d",
+    date: "2026-07-10",
     stage: { ru: "Этап 19", en: "Stage 19" },
     title: { ru: "4d-ряд закрывает вулкан: периодическая таблица не спасает, Cr уникален",
              en: "The 4d row closes the volcano: the periodic table offers no rescue — Cr is unique" },
@@ -1156,6 +1166,8 @@ const ENTRIES = [
     ]
   },
   {
+    id: "triple-basis",
+    date: "2026-07-11",
     stage: { ru: "Этап 20", en: "Stage 20" },
     title: { ru: "Тройной базис: знак Cr выжил, а «монстр CASSCF» оказался артефактом базиса",
              en: "Triple-zeta check: Cr's sign survives — and the 'CASSCF monster' turns out to be a basis artifact" },
@@ -1182,6 +1194,8 @@ const ENTRIES = [
     figures: []
   },
   {
+    id: "field-volatility",
+    date: "2026-07-12",
     stage: { ru: "Этап 21", en: "Stage 21" },
     title: { ru: "Два риска флагмана за сутки: поле не разрушает селективность, Cr не улетает — и оба вердикта DFT даёт с обратным знаком",
              en: "Two flagship risks in one day: the field does not destroy selectivity, Cr does not fly away — and DFT gets both verdicts with the opposite sign" },

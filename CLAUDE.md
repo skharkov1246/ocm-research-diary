@@ -45,10 +45,33 @@ Live: https://skharkov1246.github.io/ocm-research-diary/
 1. OCM-дневник: дописать объект в `ENTRIES` (`entries.js`); FeMoco: в `femoco_entries.js`;
    продукт-вкладка: дописать запись в `updates` соответствующего таба в
    `matterforge_tabs_content.json`.
-2. Картинки — в `assets/…`. При правке `matterforge.js`/`matterforge.css`
+2. **Обязательные поля записи:** `id`, `date` и двуязычные `stage`, `title`, `simple`, `tech`.
+   Без `id` якорь записи становится `#undefined`, и запись выпадает из оглавления
+   (так уже случилось с семью записями Этапов 16–21).
+3. Картинки — в `assets/…`. При правке `matterforge.js`/`matterforge.css`
    обновить cache-bust штамп `?v=YYYYMMDD…` в `index.html`.
-3. Проверить: `python3 -m json.tool assets/matterforge/matterforge_tabs_content.json`
-   и `node --check` для изменённых `.js`.
+4. Сослаться на файл результата в `routes/` или `calc/`. Если запускавшегося скрипта
+   в репозитории нет — внести запись в `data/known_gaps.json`, а не умолчать.
+5. Пересобрать каталог: `node tools/build_catalog.mjs`.
+
+## Проверки перед PR (обязательные)
+
+```bash
+node tools/validate.mjs               # схема записей, билингвальность, картинки, ссылки на расчёты
+node tools/build_catalog.mjs --check  # каталог данных актуален
+node tools/smoke.mjs                  # index/femoco/matterforge рендерятся, консоль чистая
+```
+
+Ровно это выполняет `.github/workflows/gate.yml` на каждый PR и `pages.yml` перед
+публикацией. Непрошедший контент на сайт не попадёт: там останется предыдущая версия.
+
+## Начало сессии
+
+1. `.agent/manifest.json` — машинное описание репозитория: контент, схема записи,
+   команды, деплой, правила.
+2. `data/catalog.json` — что посчитано, каким скриптом, попало ли в дневник.
+3. Хвосты: `git ls-remote --heads origin` — если висят старые `claude/*`-ветки
+   с работой, сказать об этом владельцу.
 
 ## Git-процесс (обязательный — работа уже терялась в незамерженных ветках)
 

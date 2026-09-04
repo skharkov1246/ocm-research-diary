@@ -1,0 +1,63 @@
+{
+  "schema": "agent.repo-manifest/1",
+  "repo": "skharkov1246/ocm-research-diary",
+  "visibility": "public",
+  "purpose": "Открытый билингвальный дневник квантово-химических расчётов MatterForge: дизайн катализаторов по десяти продуктовым трекам. Сайт статический, собирается GitHub Pages из main. Принцип проекта — достоверность: каждое опубликованное число происходит из реального расчёта, лежащего в репозитории.",
+  "live": "https://skharkov1246.github.io/ocm-research-diary/",
+  "peers": [
+    {
+      "repo": "skharkov1246/kvant-sourcing-dashboard",
+      "relation": "второй репозиторий владельца: внутренние инструменты КВАНТ и дашборд сорсеров",
+      "manifest": ".agent/manifest.json",
+      "catalog": "data/catalog.json"
+    }
+  ],
+  "start_here": ["CLAUDE.md", ".agent/README.md", "data/catalog.json", "data/known_gaps.json"],
+  "commands": {
+    "validate": "node tools/validate.mjs",
+    "smoke": "node tools/smoke.mjs",
+    "refresh_catalog": "node tools/build_catalog.mjs",
+    "check_catalog": "node tools/build_catalog.mjs --check",
+    "serve": "python3 -m http.server 8000   # затем http://127.0.0.1:8000/"
+  },
+  "content": [
+    {"id": "ocm-diary", "file": "entries.js", "var": "ENTRIES", "page": "index.html", "what": "основной дневник OCM, вкладка 0"},
+    {"id": "femoco-diary", "file": "femoco_entries.js", "var": "ENTRIES", "page": "femoco.html", "what": "дневник FeMoco и аммиака"},
+    {"id": "product-tabs", "file": "assets/matterforge/matterforge_tabs_content.json", "page": "index.html", "what": "единый источник контента всех продуктовых вкладок: tabs[].updates, validated_track, flagship"}
+  ],
+  "entry_schema": {
+    "required": ["id", "date", "stage", "title", "simple", "tech"],
+    "bilingual": ["stage", "title", "simple", "tech"],
+    "note": "id — якорь записи в адресе страницы, date — YYYY-MM-DD. Запись без id ломает оглавление: якорь становится #undefined."
+  },
+  "calculations": {
+    "scripts": ["routes/", "calc/"],
+    "launchers": ["payloads/", "calc/aws_run*.sh"],
+    "results": "файлы *_results.json рядом со скриптами",
+    "catalog": "data/catalog.json",
+    "gaps": "data/known_gaps.json"
+  },
+  "deploy": {
+    "workflow": ".github/workflows/pages.yml",
+    "source": "GitHub Pages из main",
+    "gate_before_publish": ["tools/validate.mjs", "tools/build_catalog.mjs --check", "tools/smoke.mjs"],
+    "note": "что не в main — того нет на сайте"
+  },
+  "guardrails": {
+    "gate_workflow": ".github/workflows/gate.yml",
+    "checks": ["схема записей и билингвальность", "существование картинок и файлов расчётов", "синтаксис JS", "рендер трёх страниц в браузере", "актуальность каталога", "поиск секретов"]
+  },
+  "conventions": [
+    "В main напрямую не коммитить: ветка → PR → мерж в тот же день.",
+    "Ветку пушить перед завершением сессии: контейнеры эфемерны.",
+    "Не оставлять ветки незамерженными — сайт собирается только из main.",
+    "Каждый продуктовый трек имеет issue «Track: …»; PR ссылается на issue своего трека.",
+    "Числа берутся из results-JSON, а не придумываются. Нет ссылки на расчёт — запись считается непроверенной.",
+    "Ссылка на файл расчёта, которого нет в репозитории, вносится в data/known_gaps.json, а не замалчивается."
+  ],
+  "known_risks": [
+    "Из 151 файла результатов только 32 имеют порождающий скрипт в репозитории и лишь 3 несут метаданные расчёта (метод, базис, версия ПО). Воспроизводимость большей части результатов не обеспечена.",
+    "Только 22 из 151 результата упомянуты в контенте сайта: связь «запись → расчёт» существует как свободный текст, а не как поле данных.",
+    "Незамерженные ветки и висящие PR: работа, которой нет в main, отсутствует и на сайте."
+  ]
+}

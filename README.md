@@ -1,10 +1,72 @@
-# OCM Lab — research diary
+# MatterForge — дневник расчётов
 
-An verified, bilingual (RU/EN), two-level (simple/technical) diary of quantum-chemistry experiments on turning methane into ethylene in one step.
+Открытый билингвальный (RU/EN, уровни simple/tech) дневник квантово-химических
+экспериментов: дизайн катализаторов по десяти продуктовым трекам — от
+окислительной конденсации метана до катодных материалов.
 
-Live site: https://skharkov1246.github.io/ocm-research-diary/
+**Живой сайт:** https://skharkov1246.github.io/ocm-research-diary/
 
-## Update a stage
-1. Append one entry object to `entries.js`
-2. Drop figures into `assets/`
-3. `git add -A && git commit && git push` — GitHub Pages rebuilds automatically.
+Принцип проекта — достоверность. Каждое опубликованное число происходит из
+реального расчёта, лежащего в этом репозитории. Что проверить нельзя — помечено
+явно в `data/known_gaps.json`.
+
+## Быстрый старт
+
+`.agent/README.md` — что где лежит и как проверять.
+`.agent/manifest.json` — то же машинно.
+`data/catalog.json` — каталог всех расчётов и данных.
+
+```bash
+python3 -m http.server 8000     # открыть http://127.0.0.1:8000/
+```
+
+## Как добавить этап
+
+1. Дописать объект в `ENTRIES` (`entries.js` — дневник OCM, `femoco_entries.js` —
+   FeMoco) либо запись в `updates` нужного таба в
+   `assets/matterforge/matterforge_tabs_content.json`.
+2. Обязательные поля записи: `id`, `date` и двуязычные `stage`, `title`,
+   `simple`, `tech`. Без `id` якорь записи станет `#undefined`.
+3. Картинки — в `assets/…`; при правке `matterforge.js` или `matterforge.css`
+   обновить штамп `?v=YYYYMMDD` в `index.html`.
+4. Сослаться на файл результата в `routes/` или `calc/`.
+5. Прогнать проверки и открыть PR — **в `main` напрямую не коммитить**.
+
+## Проверки
+
+```bash
+node tools/validate.mjs               # схема записей, картинки, ссылки на расчёты
+node tools/build_catalog.mjs --check  # каталог данных актуален
+node tools/smoke.mjs                  # три страницы рендерятся, консоль чистая
+```
+
+Те же проверки стоят в `.github/workflows/gate.yml` (на каждый PR) и в
+`.github/workflows/pages.yml` перед публикацией: непрошедший контент на сайт
+не попадёт, там останется предыдущая рабочая версия.
+
+## Структура
+
+| Путь | Что это |
+|---|---|
+| `index.html` + `entries.js` + `app.js` | дневник OCM (вкладка 0) |
+| `femoco.html` + `femoco_entries.js` | дневник FeMoco и аммиака |
+| `matterforge.js` + `matterforge.css` | рендер продуктовых вкладок |
+| `assets/matterforge/matterforge_tabs_content.json` | единый источник контента вкладок |
+| `routes/`, `calc/` | скрипты расчётов и результаты |
+| `payloads/`, `calc/aws_run*.sh` | запуск на AWS |
+| `tools/` | валидатор, smoke-тест, сборка каталога |
+| `data/catalog.json`, `data/known_gaps.json` | каталог данных и реестр пробелов |
+
+## Состояние воспроизводимости
+
+Из `data/catalog.json` на 04.09.2026:
+
+| Показатель | Значение |
+|---|---|
+| Наборов данных | 322 (2,3 МБ) |
+| Файлов результатов | 151 |
+| Из них с порождающим скриптом в репозитории | 32 |
+| Из них упомянуты в контенте сайта | 22 |
+| Из них с метаданными расчёта (метод, базис, ПО) | 3 |
+
+Рост этих чисел и есть работа над достоверностью.
