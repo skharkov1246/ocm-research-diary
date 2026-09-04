@@ -47,7 +47,11 @@ process.on("exit", () => server.kill());
 await wait(900);
 
 let failed = 0;
+// Если браузер не отдаёт DOM, он не отдаст его и на следующих страницах:
+// перебирать режимы для каждой — терять минуты прогона впустую.
+let browserUsable = true;
 for (const [page, expects] of Object.entries(PAGES)) {
+  if (!browserUsable) { console.log(`⚠ ${page}: пропущено, браузер в этой среде не отвечает`); continue; }
   const url = `http://127.0.0.1:${port}/${page}`;
   let dom = "", log = "", hung = false;
   const flags = [
@@ -81,6 +85,7 @@ for (const [page, expects] of Object.entries(PAGES)) {
     // пустой ответ браузера — отсутствие данных, а не доказательство поломки:
     // структурные проверки (tools/validate.mjs) отрабатывают независимо
     console.log(`⚠ ${page}: Chromium не отдал DOM — проверка рендера не выполнена`);
+    browserUsable = false;
     continue;
   }
   const errs = (log || "").split("\n").filter((l) =>
