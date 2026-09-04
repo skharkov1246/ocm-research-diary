@@ -1,0 +1,90 @@
+name: Публикация сайта
+
+# Раньше сайт публиковала встроенная сборка Pages: без проверок, без повтора и без
+# уведомления. 03.07.2026 четыре деплоя подряд упали на стороне платформы, сайт
+# полдня оставался старым, и об этом никто не узнал.
+#
+# Здесь публикация разбита на два шага: сначала контент проверяется (tools/validate.mjs
+# и smoke-тест в браузере), и только потом выкладывается. Если проверка не прошла —
+# публикации не будет, а на сайте останется предыдущая рабочая версия.
+#
+# Разовая настройка: Settings → Pages → Source = GitHub Actions. Шаг configure-pages
+# ниже переключает это сам (enablement: true), если у токена хватает прав.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Проверка содержимого
+        run: node tools/validate.mjs
+
+      - name: Каталог данных актуален
+        run: node tools/build_catalog.mjs --check
+
+      - name: Smoke-тест страниц в браузере
+        run: node tools/smoke.mjs
+
+      - name: Подготовка артефакта
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          # публикуем дерево как есть — так же, как это делала встроенная сборка
+          rsync -a --exclude '.git' --exclude 'node_modules' --exclude '_site' ./ _site/
+          touch _site/.nojekyll        # без обработки Jekyll: каталоги с _ остаются на месте
+          echo "размер сайта: $(du -sh _site | cut -f1), файлов: $(find _site -type f | wc -l)"
+
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.d1.outputs.page_url || steps.d2.outputs.page_url }}
+    steps:
+      # платформа изредка отвечает «Deployment failed, try again later» —
+      # одна повторная попытка вместо тихого простоя сайта
+      - id: d1
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      - id: d2
+        if: steps.d1.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+
+      - name: Итог
+        if: always()
+        run: |
+          if [ "${{ steps.d1.outcome }}" = "success" ] || [ "${{ steps.d2.outcome }}" = "success" ]; then
+            echo "✓ сайт опубликован"
+          else
+            echo "::error::публикация не удалась дважды — на сайте осталась предыдущая версия"
+            exit 1
+          fi

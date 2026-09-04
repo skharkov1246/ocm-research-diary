@@ -1,0 +1,24 @@
+{
+  "schema": "matterforge.known-gaps/1",
+  "purpose": "Явный реестр мест, где опубликованный текст ссылается на расчёт, которого нет в репозитории. Держим список открытым, а не прячем: принцип проекта — достоверность. Валидатор пропускает только то, что перечислено здесь, всё новое ломает сборку.",
+  "gaps": [
+    {
+      "id": "ocm-stage17b-script",
+      "reference": "routes/ocm_aws_stage17b.py",
+      "cited_in": "entries.js → запись volcano-3d («Этап 17b», 2026-07-09)",
+      "what_happened": "Оркестратор прогона 3d-вулкана (OCM_METAL=Ti,V на r7i.12xlarge) не был закоммичен. В репозитории есть routes/ocm_aws_stage17.py — он считает Cr/Fe для Этапа 17 и запуск 17b не воспроизводит.",
+      "impact": "Числа Этапа 17b нельзя воспроизвести из репозитория. Результаты прогона при этом на месте (routes/ocm_mnw_7metal_map.py и связанные results-JSON).",
+      "resolution": "Закоммитить фактически запускавшийся скрипт либо пометить запись как невоспроизводимую в тексте.",
+      "noted": "2026-09-04"
+    },
+    {
+      "id": "tabs-missing-illustrations",
+      "reference": "assets/matterforge/09_oer_scaling_*.png, assets/matterforge/10_ch4_to_methanol_*.png",
+      "cited_in": "matterforge_tabs_content.json → вкладки oer-scaling и ch4-to-methanol (группа «К тестированию»)",
+      "what_happened": "Четыре иллюстрации не нарисованы. Рендер это предусматривает: matterforge.js подставляет заглушку «иллюстрация готовится» с именем ожидаемого файла.",
+      "impact": "Косметика. Страница работает, вкладки открываются, текст и цифры на месте.",
+      "resolution": "Нарисовать иллюстрации либо убрать поля molecules_png и descriptor_png у этих вкладок.",
+      "noted": "2026-09-04"
+    }
+  ]
+}
