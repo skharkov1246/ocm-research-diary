@@ -46,7 +46,9 @@ jobs:
             files="$(git diff --name-only HEAD~1...HEAD --diff-filter=ACM 2>/dev/null || git ls-files)"
           fi
           [ -z "$files" ] && { echo "нет изменённых файлов"; exit 0; }
-          pattern='sk-ant-[A-Za-z0-9_-]{20,}|ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|AKIA[0-9A-Z]{16}|aws_secret_access_key|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY'
+          # Ключ AWS записан как aws_secret[_]access_key: иначе шаблон находит сам
+          # себя в этом файле и гейт падает на собственном определении.
+          pattern='sk-ant-[A-Za-z0-9_-]{20,}|ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|AKIA[0-9A-Z]{16}|aws_secret[_]access_key|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY'
           hits=""
           for f in $files; do
             [ -f "$f" ] || continue
