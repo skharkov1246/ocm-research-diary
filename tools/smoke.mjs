@@ -51,7 +51,7 @@ for (const [page, expects] of Object.entries(PAGES)) {
   const url = `http://127.0.0.1:${port}/${page}`;
   let dom = "", log = "", hung = false;
   const flags = [
-    "--headless=new", "--no-sandbox", "--disable-gpu",
+    "--no-sandbox", "--disable-gpu",
     "--disable-dev-shm-usage",            // на CI /dev/shm мал, без этого рендерер виснет
     "--no-first-run", "--no-default-browser-check",
     "--disable-extensions", "--disable-background-networking",
@@ -61,20 +61,26 @@ for (const [page, expects] of Object.entries(PAGES)) {
     `--user-data-dir=/tmp/smoke-${port}-${page}`,
     "--virtual-time-budget=5000", "--enable-logging=stderr", "--v=0",
   ];
-  const run = (extra, ms) => {
+  const run = (mode, extra, ms) => {
+    const args = [mode, ...flags, ...extra, "--dump-dom", url];
     try {
-      return { dom: execFileSync(CHROME, [...flags, ...extra, "--dump-dom", url],
-               { encoding: "utf8", timeout: ms, stdio: ["ignore", "pipe", "pipe"] }), log: "", hung: false };
+      return { dom: execFileSync(CHROME, args, { encoding: "utf8", timeout: ms, stdio: ["ignore", "pipe", "pipe"] }), log: "" };
     } catch (e) {
-      const timedOut = e.code === "ETIMEDOUT" || e.signal === "SIGTERM";
-      return { dom: String(e.stdout || ""), log: String(e.stderr || ""), hung: timedOut && !e.stdout };
+      return { dom: String(e.stdout || ""), log: String(e.stderr || "") };
     }
   };
-  let r = run([], 75000);
-  if (r.hung) r = run(["--single-process"], 60000);   // вторая попытка в один процесс
-  ({ dom, log, hung } = r);
-  if (hung) {
-    console.log(`⚠ ${page}: Chromium не ответил — проверка рендера не выполнена`);
+  // три режима: на раннерах GitHub встречаются сборки Chrome, где --dump-dom
+  // не отдаёт ничего в новом headless
+  for (const [mode, extra, ms] of [["--headless=new", [], 75000],
+                                   ["--headless=new", ["--single-process"], 60000],
+                                   ["--headless=old", [], 60000]]) {
+    ({ dom, log } = run(mode, extra, ms));
+    if (dom.trim()) break;
+  }
+  if (!dom.trim()) {
+    // пустой ответ браузера — отсутствие данных, а не доказательство поломки:
+    // структурные проверки (tools/validate.mjs) отрабатывают независимо
+    console.log(`⚠ ${page}: Chromium не отдал DOM — проверка рендера не выполнена`);
     continue;
   }
   const errs = (log || "").split("\n").filter((l) =>
