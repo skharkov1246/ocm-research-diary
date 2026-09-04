@@ -1,0 +1,157 @@
+{
+ "status": "ok",
+ "meta": {
+  "cluster": "[Fe2Ni2S4(SH)4]2- cubane (pentlandite motif)",
+  "purpose": "открытие трека N6: спиновая структура Fe-Ni-S мотива — дескриптор для флотореагентов/выщелачивания сульфидных руд (пентландит (Fe,Ni)9S8, Норникель)",
+  "basis": "def2-svp",
+  "charge": -2,
+  "metal_layout": {
+   "Fe": [
+    0,
+    1
+   ],
+   "Ni": [
+    2,
+    3
+   ]
+  },
+  "formal_state": "2 Fe(3+) d5 (S=5/2) + 2 Ni(2+) d8 (S=1); metals sum +10",
+  "hs_seed_2S": 14,
+  "geometry_source": "femoco_4fe4s_cubane.xyz (Fe4S4 framework), Fe->Ni at atoms [2, 3]",
+  "geometry_note": "SINGLE POINT on the FROZEN Fe4S4 framework geometry (no relaxation; energies comparable to the [Fe4S4] run)",
+  "ladder": [
+   10,
+   12
+  ],
+  "macro_max": 60,
+  "spin_gap_functionals": "both",
+  "only": "casscf",
+  "stage_timeout_s": 5400,
+  "total_budget_s": 33600,
+  "note": "BS-UNO start for the CASSCF ladder (the [Fe4S4] recipe). CASSCF only, no dynamic correlation. DF-accelerated. Spin gap on PBE and PBE0; the functional spread is the DFT-lies descriptor. Resume-aware: a re-launched box continues from the JSON + npz checkpoints.",
+  "resumed": false,
+  "nao": 288,
+  "nelec_total": 242,
+  "total_seconds": 4030.4
+ },
+ "scf": {
+  "hs": {
+   "e": -8728.428694294122,
+   "converged": true,
+   "seconds": 334.3
+  },
+  "bs_attempts": [
+   {
+    "pattern": "A: Fe0 up, Fe1 up | Ni2 dn, Ni3 dn (metal-segregated)",
+    "flip_atoms": [
+     2,
+     3
+    ],
+    "expected_signs": [
+     1,
+     1,
+     -1,
+     -1
+    ],
+    "e": -8728.398710208674,
+    "converged": true,
+    "s_squared": 5.007,
+    "metal_mulliken_spin": [
+     2.034,
+     2.034,
+     -1.263,
+     -1.265
+    ],
+    "seconds": 230.4,
+    "pattern_ok": true
+   }
+  ],
+  "reference_pattern": "A: Fe0 up, Fe1 up | Ni2 dn, Ni3 dn (metal-segregated)",
+  "reference_used": "BS"
+ },
+ "uno": {
+  "n_fractional_0.02_1.98": 14,
+  "fractional_occs": [
+   1.924,
+   1.667,
+   1.648,
+   1.513,
+   1.157,
+   1.033,
+   1.0,
+   1.0,
+   0.967,
+   0.843,
+   0.487,
+   0.352,
+   0.333,
+   0.076
+  ],
+  "from_reference": "BS"
+ },
+ "casscf_ladder": [
+  {
+   "ncas": 10,
+   "nelec": 10,
+   "nelecas": [
+    5,
+    5
+   ],
+   "qubits_jw": 20,
+   "converged": false,
+   "e_casscf_df": -8719.394108115757,
+   "noon": [
+    1.984,
+    1.693,
+    1.001,
+    1.001,
+    1.0,
+    1.0,
+    1.0,
+    0.999,
+    0.309,
+    0.013
+   ],
+   "n_u": 7.099,
+   "cas_s_squared": 11.964,
+   "active_metal3d_bridgeS3p_mean": 0.696,
+   "seconds": 3465.5,
+   "selection": {
+    "active_uno_occ": [
+     1.648,
+     1.513,
+     1.157,
+     1.033,
+     1.0,
+     1.0,
+     0.967,
+     0.843,
+     0.487,
+     0.352
+    ],
+    "occ_sum": 10.0,
+    "nelec": 10,
+    "ncore": 116,
+    "metal3d_bridgeS3p_frac": [
+     0.61,
+     0.601,
+     0.617,
+     0.697,
+     0.631,
+     0.631,
+     0.642,
+     0.649,
+     0.619,
+     0.623
+    ],
+    "min_core_occ": 1.667,
+    "max_virt_occ": 0.333
+   },
+   "based_on_reference": "BS"
+  }
+ ],
+ "verdict": {
+  "n_u_by_window": [],
+  "verdict": "inconclusive: fewer than 2 converged rungs"
+ }
+}

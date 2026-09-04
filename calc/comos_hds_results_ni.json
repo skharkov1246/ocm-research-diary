@@ -1,0 +1,279 @@
+{
+ "status": "ok",
+ "meta": {
+  "cluster": "[M3S9]2- MoS2 edge-motif trimer (M1 = Mo | Co | Ni)",
+  "purpose": "L6: паспорта активной фазы катализаторов гидроочистки (CoMoS/NiMoS) — санкционное импортозамещение катализаторов гидропроцессов НПЗ; ранжир промоторов по дескриптору HDS (энергия серной вакансии) и проверка, переживает ли ранжир смену функционала",
+  "basis": "def2-svp",
+  "charge": -2,
+  "functional_base": "pbe",
+  "bond_lengths_A": {
+   "M-M": 3.16,
+   "M-S": 2.41,
+   "S-S(disulfide)": 2.05
+  },
+  "atom_order": "0-2 metals (1 = promoted site), 3-6 mu2-S bridges, 7-10 eta2-S2 disulfides, 11 terminal edge S (vacancy site)",
+  "geometry_note": "SINGLE POINTS on the idealized generated framework — no relaxation; numbers are comparable to each other, not to experimental vacancy energies",
+  "only": "ni",
+  "spin_gap_functionals": "both",
+  "stage_timeout_s": 5400,
+  "total_budget_s": 33600,
+  "resumed": false,
+  "total_seconds": 5696.8
+ },
+ "compositions": {
+  "ni": {
+   "title": "Mo2NiS9(2-) — Ni-promoted edge (NiMoS phase proxy)",
+   "promoter": "Ni",
+   "charge": -2,
+   "geometry": {
+    "n_atoms": 12,
+    "formula": "MoNiS",
+    "min_pair_dist": 2.05,
+    "min_pair": [
+     7,
+     8
+    ],
+    "metal_S_coordination": [
+     4,
+     5,
+     4
+    ],
+    "overlap_ok": true
+   },
+   "geometry_vacancy": {
+    "n_atoms": 11,
+    "formula": "MoNiS",
+    "min_pair_dist": 2.05,
+    "min_pair": [
+     7,
+     8
+    ],
+    "metal_S_coordination": [
+     4,
+     4,
+     4
+    ],
+    "overlap_ok": true
+   },
+   "removed_atom_index": 11,
+   "spin_candidates": [
+    0,
+    2,
+    4
+   ],
+   "assumption": "promoter swap changes ONLY the nuclear charge at the central metal site; framework geometry frozen, total charge held at -2 for all compositions",
+   "spins": {
+    "ladder": [
+     {
+      "spin_2S": 0,
+      "e_h": -5225.84778386461,
+      "converged": true,
+      "spin_square": 2.589,
+      "seconds": 557.6
+     },
+     {
+      "spin_2S": 2,
+      "e_h": -5225.834960781777,
+      "converged": true,
+      "spin_square": 3.789,
+      "seconds": 394.7
+     },
+     {
+      "spin_2S": 4,
+      "e_h": -5225.8429567910935,
+      "converged": true,
+      "spin_square": 6.177,
+      "seconds": 279.7
+     }
+    ],
+    "rel_kcal": {
+     "0": 0.0,
+     "2": 8.05,
+     "4": 3.03
+    },
+    "ground_2S": 0,
+    "e_ground_h": -5225.84778386461
+   },
+   "e_parent_h": -5225.84778386461,
+   "parent_2S": 0,
+   "bs": {
+    "flip_atoms": [
+     0,
+     2
+    ],
+    "ms_2S": 0,
+    "e_h": -5225.847783791216,
+    "converged": true,
+    "spin_square": 2.593,
+    "metal_mulliken_spin": [
+     1.409,
+     -1.158,
+     1.409
+    ],
+    "seconds": 279.5,
+    "pattern_ok": true
+   },
+   "parent_state_used": "UKS 2S=0 (BS not accepted or higher)",
+   "uno": {
+    "from_reference": "BS",
+    "n_fractional_0.02_1.98": 8,
+    "fractional_occs": [
+     1.979,
+     1.667,
+     1.278,
+     1.0,
+     1.0,
+     0.722,
+     0.333,
+     0.021
+    ],
+    "n_u_head_gordon": 5.186,
+    "note": "n_u = sum n(2-n) over UNO occupations of the reference density; sulfide edge states are the target — a large n_u means a single-determinant promoter screen is on thin ice"
+   },
+   "vacancy": {
+    "spins": {
+     "ladder": [
+      {
+       "spin_2S": 0,
+       "e_h": -4827.977371698762,
+       "converged": true,
+       "spin_square": 1.905,
+       "seconds": 479.8
+      },
+      {
+       "spin_2S": 2,
+       "e_h": -4827.97474997429,
+       "converged": true,
+       "spin_square": 2.092,
+       "seconds": 235.3
+      },
+      {
+       "spin_2S": 4,
+       "e_h": -4827.958979685865,
+       "converged": true,
+       "spin_square": 6.526,
+       "seconds": 467.2
+      }
+     ],
+     "rel_kcal": {
+      "0": 0.0,
+      "2": 1.65,
+      "4": 11.54
+     },
+     "ground_2S": 0,
+     "e_ground_h": -4827.977371698762
+    },
+    "e_h": -4827.977371698762,
+    "2S": 0
+   },
+   "hds_descriptor_pbe": {
+    "dE_vac_kcal": -32.98,
+    "dE_vac_half_coeff_kcal": 124817.24,
+    "reaction": "cluster + H2 -> cluster(-S) + H2S (balanced; the descriptor of record)",
+    "half_coeff_note": "dE = E(vac) + 1/2 E(H2S) - E(cluster) - 1/2 E(H2) as written in the track brief — reported for traceability, but it is NOT mass balanced"
+   },
+   "done": true
+  }
+ },
+ "honesty": [
+  "кластер-прокси (12 атомов, газовая фаза) != реальная нанолента MoS2 на Al2O3: нет носителя, нет периодического края, нет H2/H2S-среды и равновесного покрытия серой",
+  "геометрия идеализированная и замороженная (без релаксации), без ZPE и температурных поправок; газовые реперы H2/H2S — при фиксированных литературных геометриях",
+  "промотор посажен подменой заряда ядра при фиксированном полном заряде -2: степень окисления Co/Ni НЕ навязана, её выбирает SCF",
+  "def2-SVP, DF-ускорение, динамическая корреляция только на уровне функционала (CASSCF здесь не считается — только UNO-диагностика n_u)",
+  "BS-решение спин-контаминировано; спин-щель здесь — метрика самонесогласия DFT, а не спин-проецированное число",
+  "числа сравнимы МЕЖДУ СОБОЙ (одна геометрия, один заряд, один базис) — абсолютные значения дескриптора не переносятся на эксперимент"
+ ],
+ "gas_refs": {
+  "pbe": {
+   "h2": {
+    "e_h": -1.160100495780145,
+    "converged": true
+   },
+   "h2s": {
+    "e_h": -399.0830709662744,
+    "converged": true
+   },
+   "geometry_note": "fixed literature geometries: H2 r=0.741 A; H2S r=1.336 A, angle=92.1 deg; no relaxation, no ZPE / thermal corrections"
+  },
+  "pbe0": {
+   "h2": {
+    "e_h": -1.1635293560327318,
+    "converged": true
+   },
+   "h2s": {
+    "e_h": -399.12016421208324,
+    "converged": true
+   },
+   "geometry_note": "fixed literature geometries: H2 r=0.741 A; H2S r=1.336 A, angle=92.1 deg; no relaxation, no ZPE / thermal corrections"
+  }
+ },
+ "where_dft_lies": {
+  "composition": "ni",
+  "functionals": [
+   "pbe",
+   "pbe0"
+  ],
+  "gaps": {
+   "pbe": {
+    "e_high_spin": -5225.842956788244,
+    "high_spin_2S": 4,
+    "high_spin_converged": true,
+    "e_low_spin_bs": -5225.847783838769,
+    "low_spin_ms_2S": 0,
+    "low_spin_converged": true,
+    "low_spin_s_squared": 2.589,
+    "gap_high_minus_low_kcal": 3.03,
+    "gap_high_minus_low_cm": 1059.4,
+    "seconds": 612.8,
+    "note": "the BS low-spin sector is spin-contaminated; this is the DFT self-disagreement metric, not a spin-projected gap"
+   },
+   "pbe0": {
+    "e_high_spin": -5225.9486490131285,
+    "high_spin_2S": 4,
+    "high_spin_converged": true,
+    "e_low_spin_bs": -5225.9346768214455,
+    "low_spin_ms_2S": 0,
+    "low_spin_converged": true,
+    "low_spin_s_squared": 2.741,
+    "gap_high_minus_low_kcal": -8.77,
+    "gap_high_minus_low_cm": -3066.5,
+    "seconds": 748.8,
+    "note": "the BS low-spin sector is spin-contaminated; this is the DFT self-disagreement metric, not a spin-projected gap"
+   }
+  },
+  "dE_vac": {
+   "pbe": {
+    "dE_vac_kcal": -32.98,
+    "dE_vac_half_coeff_kcal": 124817.24,
+    "reaction": "cluster + H2 -> cluster(-S) + H2S (balanced; the descriptor of record)",
+    "half_coeff_note": "dE = E(vac) + 1/2 E(H2S) - E(cluster) - 1/2 E(H2) as written in the track brief — reported for traceability, but it is NOT mass balanced",
+    "parent_e_h": -5225.847783838769,
+    "vacancy_e_h": -4827.977371698191
+   },
+   "pbe0": {
+    "dE_vac_kcal": -48.54,
+    "dE_vac_half_coeff_kcal": 124812.24,
+    "reaction": "cluster + H2 -> cluster(-S) + H2S (balanced; the descriptor of record)",
+    "half_coeff_note": "dE = E(vac) + 1/2 E(H2S) - E(cluster) - 1/2 E(H2) as written in the track brief — reported for traceability, but it is NOT mass balanced",
+    "parent_e_h": -5225.9486490131285,
+    "vacancy_e_h": -4828.069369759072
+   }
+  },
+  "spin_gap_functional_spread_kcal": -11.8,
+  "dE_vac_pbe0_minus_pbe_kcal": -15.56,
+  "pbe_to_pbe0_sign": "PBE0 makes the vacancy EASIER (-)",
+  "descriptor": "PBE-vs-PBE0 spread on BOTH the spin gap and dE_vac = 'where DFT lies' for the CoMoS edge; the Fe-Ni-S argument (~12 kcal/mol spin-gap spread on the pentlandite motif) transplanted to the hydrotreating active phase"
+ },
+ "verdict": {
+  "ranking_by_dE_vac_pbe_kcal": [
+   {
+    "composition": "ni",
+    "dE_vac_kcal": -32.98,
+    "n_u": 5.186
+   }
+  ],
+  "convention": "lower dE_vac = an easier sulfur vacancy = the more active HDS catalyst (left flank of the vacancy volcano)",
+  "pbe_to_pbe0_shift_kcal": -15.56,
+  "pbe_to_pbe0_sign": "PBE0 makes the vacancy EASIER (-)"
+ }
+}
