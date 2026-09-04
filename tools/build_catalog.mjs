@@ -148,7 +148,11 @@ const catalog = {
 const text = JSON.stringify(catalog, null, 2) + "\n";
 if (check) {
   if (!existsSync(OUT)) { console.error("✗ нет data/catalog.json — выполните: node tools/build_catalog.mjs"); process.exit(1); }
-  const strip = (c) => c.datasets.map(({ last_change, last_author, last_commit, ...rest }) => rest);
+  // Проверяем СОСТАВ и ФОРМУ каталога: не появился ли набор мимо каталога и не
+  // исчез ли описанный. Всё, что меняется само по себе, из сравнения исключаем —
+  // поля из git и объём файла: на событии pull_request проверяется merge-коммит
+  // с актуальным main, где данные могли уже обновиться.
+  const strip = (c) => c.datasets.map(({ last_change, last_author, last_commit, bytes, records, ...rest }) => rest);
   const old = JSON.parse(readFileSync(OUT, "utf8"));
   if (JSON.stringify(strip(old)) !== JSON.stringify(strip(catalog))) {
     console.error("✗ каталог устарел — выполните: node tools/build_catalog.mjs");
