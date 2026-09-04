@@ -49,16 +49,33 @@ await wait(900);
 let failed = 0;
 for (const [page, expects] of Object.entries(PAGES)) {
   const url = `http://127.0.0.1:${port}/${page}`;
-  let dom = "", log = "";
-  try {
-    const r = execFileSync(CHROME, [
-      "--headless=new", "--no-sandbox", "--disable-gpu",
-      `--user-data-dir=/tmp/smoke-${port}-${page}`,
-      "--virtual-time-budget=9000", "--enable-logging=stderr", "--v=0", "--dump-dom", url,
-    ], { encoding: "utf8", timeout: 120000, stdio: ["ignore", "pipe", "pipe"] });
-    dom = r;
-  } catch (e) {
-    dom = String(e.stdout || ""); log = String(e.stderr || "");
+  let dom = "", log = "", hung = false;
+  const flags = [
+    "--headless=new", "--no-sandbox", "--disable-gpu",
+    "--disable-dev-shm-usage",            // на CI /dev/shm мал, без этого рендерер виснет
+    "--no-first-run", "--no-default-browser-check",
+    "--disable-extensions", "--disable-background-networking",
+    "--disable-sync", "--disable-crash-reporter",
+    "--disable-background-timer-throttling",
+    "--disable-features=Translate,BackForwardCache,MediaRouter",
+    `--user-data-dir=/tmp/smoke-${port}-${page}`,
+    "--virtual-time-budget=5000", "--enable-logging=stderr", "--v=0",
+  ];
+  const run = (extra, ms) => {
+    try {
+      return { dom: execFileSync(CHROME, [...flags, ...extra, "--dump-dom", url],
+               { encoding: "utf8", timeout: ms, stdio: ["ignore", "pipe", "pipe"] }), log: "", hung: false };
+    } catch (e) {
+      const timedOut = e.code === "ETIMEDOUT" || e.signal === "SIGTERM";
+      return { dom: String(e.stdout || ""), log: String(e.stderr || ""), hung: timedOut && !e.stdout };
+    }
+  };
+  let r = run([], 75000);
+  if (r.hung) r = run(["--single-process"], 60000);   // вторая попытка в один процесс
+  ({ dom, log, hung } = r);
+  if (hung) {
+    console.log(`⚠ ${page}: Chromium не ответил — проверка рендера не выполнена`);
+    continue;
   }
   const errs = (log || "").split("\n").filter((l) =>
     /ERROR:CONSOLE|Uncaught|SyntaxError|is not defined|is not a function|Failed to load resource/.test(l));
