@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8">
+<title>Производство цианида натрия на руднике — инвестиционный меморандум</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&family=PT+Sans:wght@400;700&family=PT+Mono&display=swap">
+<style>
+@page{size:297mm 210mm;margin:0}
+:root{
+  --paper:#FFFFFF;--panel:#F7F5F0;--ink:#1E2530;--muted:#5A6472;
+  --gold:#A87B0F;--steel:#425264;--line:#D8D2C6;--flag:#8F4A10;--flag-bg:#F8EFE3;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:"PT Serif",Georgia,serif;color:var(--ink);background:var(--paper);
+  font-size:12.3pt;line-height:1.5}
+.slide{width:297mm;height:210mm;page-break-after:always;position:relative;
+  padding:16mm 20mm 14mm;overflow:hidden;background:var(--paper)}
+.slide:last-child{page-break-after:auto}
+h1,h2,h3,.sans{font-family:"PT Sans",Arial,sans-serif}
+.mono{font-family:"PT Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.eyebrow{font-family:"PT Mono",monospace;font-size:8.5pt;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--steel);margin:0 0 3mm}
+.eyebrow b{color:var(--gold);font-weight:400}
+h2{font-size:23pt;font-weight:700;margin:0 0 5mm;line-height:1.05}
+p{margin:0 0 3mm;max-width:175mm}
+.lead{font-size:13.5pt}
+.foot{position:absolute;left:20mm;right:20mm;bottom:8mm;display:flex;justify-content:space-between;
+  font-family:"PT Mono",monospace;font-size:7.5pt;color:var(--muted);
+  border-top:.4mm solid var(--line);padding-top:2mm}
+
+/* Cover */
+.cover{display:flex;flex-direction:column;justify-content:center;background:var(--ink);color:#EDE9DF}
+.cover .eyebrow{color:#C9B675}
+.cover h1{font-size:34pt;font-weight:700;line-height:1.05;margin:0 0 6mm;max-width:230mm}
+.cover .sub{font-size:14pt;color:#B9C0CC;max-width:200mm;margin-bottom:12mm}
+.kpis{display:flex;border:.5mm solid #EDE9DF}
+.kpi{flex:1;padding:5mm 6mm;border-right:.5mm solid #EDE9DF}
+.kpi:last-child{border-right:none}
+.kpi b{display:block;font-family:"PT Sans",sans-serif;font-size:17pt;line-height:1.1;color:#fff}
+.kpi span{font-size:8.5pt;color:#B9C0CC}
+.cover .date{position:absolute;bottom:10mm;left:20mm;font-family:"PT Mono",monospace;
+  font-size:8pt;color:#8792A2;letter-spacing:.1em}
+
+/* Tables */
+table{border-collapse:collapse;width:100%;margin:4mm 0;font-size:10.5pt}
+th{font-family:"PT Sans",sans-serif;font-size:10pt;text-align:left;
+  border-bottom:.6mm solid var(--ink);padding:2mm 3mm;font-weight:700}
+td{border-bottom:.25mm solid var(--line);padding:2mm 3mm;vertical-align:top}
+td.num,th.num{text-align:right;font-family:"PT Mono",monospace;font-size:9.5pt;white-space:nowrap}
+tr.total td{border-top:.6mm solid var(--ink);border-bottom:none;font-weight:700;background:var(--panel)}
+tr.hl td{background:#F5EFDD}
+.small{font-size:8.6pt;color:var(--muted)}
+
+/* Flow */
+.flow{display:flex;margin:6mm 0}
+.fstep{flex:1;border:.4mm solid var(--ink);padding:3.5mm 4mm;position:relative;background:var(--panel)}
+.fstep+.fstep{margin-left:8mm}
+.fstep+.fstep::before{content:"";position:absolute;left:-8mm;top:50%;width:8mm;height:.4mm;background:var(--ink)}
+.fstep+.fstep::after{content:"";position:absolute;left:-3mm;top:50%;transform:translateY(-50%);
+  border:1.6mm solid transparent;border-left-color:var(--ink)}
+.fstep.gold{border-color:var(--gold);box-shadow:inset 0 0 0 .4mm var(--gold);background:#FAF5E8}
+.fstep .t{font-family:"PT Sans",sans-serif;font-weight:700;font-size:11pt}
+.fstep .d{font-size:8.7pt;color:var(--muted);margin-top:1.5mm;line-height:1.35}
+.rxn{font-family:"PT Mono",monospace;font-size:10.5pt;background:var(--panel);
+  border-left:1.2mm solid var(--gold);padding:3mm 5mm;margin:4mm 0}
+
+/* Cards */
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:5mm;margin:5mm 0}
+.cards.c3{grid-template-columns:1fr 1fr 1fr}
+.card{border:.35mm solid var(--line);padding:4mm 5mm;background:var(--paper)}
+.card h3{font-size:12.5pt;font-weight:700;margin:0 0 2mm}
+.card .big{font-family:"PT Mono",monospace;font-size:10.5pt;color:var(--gold);display:block;margin-bottom:2mm}
+.card p{font-size:9.6pt;color:var(--muted);margin:0;max-width:none}
+.note{background:var(--flag-bg);border-left:1.2mm solid var(--flag);padding:3mm 5mm;
+  font-size:9.6pt;margin:4mm 0;max-width:none}
+.note b{color:var(--flag)}
+ul{margin:2mm 0;padding-left:6mm;max-width:180mm}
+li{margin-bottom:1.6mm}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:8mm}
+.dense table{font-size:9.3pt;margin:3mm 0}
+.dense td,.dense th{padding:1.35mm 2.5mm}
+.dense td.num,.dense th.num{font-size:8.7pt}
+.dense .lead{font-size:11.4pt}
+.dense .note{font-size:8.7pt;padding:2.5mm 4mm;margin:3mm 0}
+.dense p{margin:0 0 2.4mm}
+.dense .card{padding:3mm 4mm}
+.dense .card p{font-size:9.1pt}
+.dense .cards{gap:4mm;margin:4mm 0}
+.dense h2{margin:0 0 4mm}
+.dense .small{font-size:8.1pt}
+</style></head><body>
+
+<section class="slide cover">
+  <div class="eyebrow">Материалы к решению совета директоров</div>
+  <h1>Производство цианида на площадке рудника в Гане:<br>входить или нет</h1>
+  <p class="sub">Итог исследования: экономика в исходном виде не сходится, но проект не закрыт. Он становится инвестируемым при трёх условиях, каждое из которых проверяется дешевле одного миллиона долларов и быстрее девяти месяцев. Предлагаем не решение «строить», а решение «проверить по заранее согласованным критериям остановки».</p>
+  <div class="kpis">
+    <div class="kpi"><b>$11.2 млн</b><span>капитал полной установки — сейчас не просим</span></div>
+    <div class="kpi"><b>$0.6–1.0 млн</b><span>программа проверки на 9 месяцев — просим</span></div>
+    <div class="kpi"><b>3 условия</b><span>газ по термшиту, известковый маршрут, две нормы права</span></div>
+    <div class="kpi"><b>6.1 года</b><span>окупаемость в реалистичном сценарии при выполнении условий</span></div>
+  </div>
+  <div class="date">MATTERFORGE · СЕНТЯБРЬ 2026 · КОНФИДЕНЦИАЛЬНО</div>
+</section>
+
+<section class="slide dense">
+  <p class="eyebrow"><b>01</b> · Что установлено достоверно</p>
+  <h2>Как есть — не инвестируется. И почему мы в этом уверены</h2>
+  <div class="cols">
+    <div>
+      <table>
+        <tr><th>Показатель</th><th class="num">Значение</th><th>Источник</th></tr>
+        <tr><td>Денежная себестоимость</td><td class="num">$1 661–2 372 / т</td><td>расчёт по таможенной статистике и тарифам Ганы 2026</td></tr>
+        <tr><td>Цена ввоза, 2025</td><td class="num">$2 036 / т</td><td>статистика ввоза, 32 327 т</td></tr>
+        <tr><td>Цена у ворот рудника</td><td class="num">$2 161–2 253 / т</td><td>ввоз + порт + доставка</td></tr>
+        <tr class="hl"><td><b>Маржа в исходном виде</b></td><td class="num"><b>от −$165 до +$546 / т</b></td><td>окупаемость от 7.5 лет до «никогда»</td></tr>
+        <tr><td>Капитал</td><td class="num">$10.2–11.6 млн</td><td>три независимые оценки сошлись в 1%</td></tr>
+        <tr><td>Внутренний рынок Ганы</td><td class="num">18–20 тыс. т / г</td><td>за вычетом реэкспорта 37–44%</td></tr>
+        <tr><td>Якорный рудник (Tarkwa)</td><td class="num">3 010 т / г</td><td>план отработки</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3 class="sans">Почему цифрам можно верить</h3>
+      <p>Исследование трижды опровергало собственные результаты. Первая оценка капитала $4.2 млн оказалась котировкой шести модулей без обвязки, приборов и катализатора. Газ считался по цене факельного, а рудники получают его по трубе за $7.87 за MMBtu. Верх ценового коридора $2 600 ни разу не был средней ценой рынка.</p>
+      <p>Каждая правка ухудшала картину. Мы их не сглаживали. Числа на этом слайде — то, что осталось после трёх раундов проверки, включая 46 независимых расчётов по безопасности и 76 адверсариальных проверок экономических рычагов, в которых 89% предложений были опровергнуты.</p>
+      <div class="note"><b>Структурная причина.</b> Два привозных реагента — мочевина и едкий натр — дают 52–65% себестоимости. Мы производим цианид из привозного сырья и конкурируем с цианидом из местного сырья Китая и Кореи. Локально берём только газ. Именно поэтому государственный проект на $700 млн ставит цианид вместе с хлор-щёлочью.</div>
+    </div>
+  </div>
+  <div class="foot"><span>Решение по проекту NaCN · Гана</span><span class="mono">02 / 05</span></div>
+</section>
+
+<section class="slide dense">
+  <p class="eyebrow"><b>02</b> · За счёт чего окупаемость возможна</p>
+  <h2>Три условия. Все проверяемы, все дешевле $1 млн</h2>
+  <div class="cards c3">
+    <div class="card"><h3>1. Газ по регулируемой цене</h3><span class="big">$198 / т разницы</span>
+      <p>Между регулируемой цепочкой Jubilee ($3.8 за MMBtu у потребителя) и частным поставщиком у ворот рудника ($11) лежит $198 на тонну продукта. Это больше трети всего, что можно выторговать у покупателя. Газозавод в кластере Tarkwa выходит на полную мощность в 2026 году. Условие: обязывающий термшит.</p></div>
+    <div class="card"><h3>2. Известь вместо едкого натра</h3><span class="big">$163–304 / т</span>
+      <p>Известь местная, входит в перечень обязательных локальных закупок, рудник уже завозит её тоннами. Цианид кальция промышленно выпускался и применялся в золотодобыче. Требование к концентрации раствора снимается подачей по трубе. Условие: лабораторное испытание на руде якорного рудника.</p></div>
+    <div class="card"><h3>3. Две нормы права</h3><span class="big">закрепляют рынок и валюту</span>
+      <p>Расширить L.I. 2174 с «производства цианида натрия» до цианидов в любой форме — иначе известковый маршрут лишает нас права на валютную выручку. Внести цианид в перечень обязательных локальных закупок L.I. 2431 — единственная норма, снимающая риск сбыта. Обе — подзаконные акты с ежегодным пересмотром.</p></div>
+  </div>
+  <table>
+    <tr><th>Сценарий при выполнении условий</th><th class="num">Цена</th><th class="num">Себестоимость</th><th class="num">Прибыль до амортизации</th><th class="num">Окупаемость</th></tr>
+    <tr><td>Пессимистичный: паритет с импортом, верх себестоимости</td><td class="num">$2 207</td><td class="num">$2 121</td><td class="num">$0.22 млн</td><td class="num">не окупается</td></tr>
+    <tr class="hl"><td><b>Реалистичный: паритет плюс расчёт по цианид-иону</b></td><td class="num"><b>$2 388</b></td><td class="num"><b>$1 649</b></td><td class="num"><b>$1.85 млн</b></td><td class="num"><b>6.1 года</b></td></tr>
+    <tr><td>Оптимистичный: удалённый рудник без растворного узла</td><td class="num">$3 119</td><td class="num">$1 177</td><td class="num">$4.85 млн</td><td class="num">2.3 года</td></tr>
+  </table>
+  <p class="small">Из 150 просчитанных способов улучшить экономику выжили только те, что не требуют ни нового капитала, ни нового объёма. Масштабирование, хаб, альтернативная химия и вторые производства опровергнуты: под них нет рынка в радиусе трубы, либо капитал не возвращается за срок жизни проекта.</p>
+  <div class="foot"><span>Решение по проекту NaCN · Гана</span><span class="mono">03 / 05</span></div>
+</section>
+
+<section class="slide dense">
+  <p class="eyebrow"><b>03</b> · Что может убить проект</p>
+  <h2>Четыре риска и заранее согласованные критерии остановки</h2>
+  <table>
+    <tr><th>Риск</th><th>Существо</th><th>Критерий остановки</th></tr>
+    <tr><td><b>Газ</b></td><td>Поставщик частный, цен не публикует. При $11 за MMBtu проект не окупается ни при какой цене, достижимой в переговорах.</td><td class="num">термшит выше $6 за MMBtu</td></tr>
+    <tr><td><b>Известковый маршрут</b></td><td>Растворимость цианида кальция, гипсование в контуре, консерватизм металлургов. Без него себестоимость возвращается к $1 661–2 372.</td><td class="num">извлечение на руде ниже натриевого более чем на 1 п.п.</td></tr>
+    <tr><td><b>Государственный проект $700 млн</b></td><td>Меморандум на комплекс «цианид + хлор-щёлочь», ранняя стадия. Если построится — внутренний конкурент с местной щёлочью. Наша ниша остаётся: подача трубой там, куда дорожная доставка опасного груза дорога.</td><td class="num">окончательное инвестрешение до нашего</td></tr>
+    <tr><td><b>Разброс себестоимости</b></td><td>После всех рычагов разброс не сузился, а вырос — с $711 до $943 на тонну. Каждый рычаг приносит свою неопределённость.</td><td class="num">после трёх измерений разброс не сжался вдвое</td></tr>
+  </table>
+  <div class="cols">
+    <div class="note"><b>Безопасность посчитана в деньгах.</b> Полный пакет «эталон безопасности» стоил бы +$9.5 млн и убивал проект. Адверсариальная проверка сняла 21% его капитала и 36% операционных затрат — именно те меры, что создавали новые риски. Устраняющие решения выжили, накладные защиты нет. Остаточная цена безопасности $2.31 млн капитала. Выбора между безопасностью и окупаемостью не возникло.</div>
+    <div class="note"><b>Что мы отклонили сами.</b> Собственная щёлочь из местной соли: точка безубыточности по цене тока $0.157 за кВт·ч при тарифе Ганы $0.148–0.191, плюс 1 900 т хлора в год, который девать некуда. Собственный аммиак: агрегат на 4 т/сут, сотая доля минимального промышленного размера. Свободная зона недоступна. Углеродное финансирование: проект даёт +2 714 т CO₂ в год — обязательство, а не актив.</div>
+  </div>
+  <div class="foot"><span>Решение по проекту NaCN · Гана</span><span class="mono">04 / 05</span></div>
+</section>
+
+<section class="slide dense">
+  <p class="eyebrow"><b>04</b> · Польза и рекомендация</p>
+  <h2>Что получает страна — и что мы предлагаем совету утвердить</h2>
+  <div class="cols">
+    <div>
+      <h3 class="sans">Польза стране и индустрии, измеримая</h3>
+      <ul>
+        <li><b>С дорог общего пользования уходит 2 500 т цианида в год</b> — груз класса 6.1 группы упаковки I, 416 операций налива. Приходят мочевина и щёлочь класса 8: тоннаж растёт в 3.7 раза, но исчезает сценарий массового поражения.</li>
+        <li><b>Первый сертифицированный производитель цианида в Западной Африке.</b> Сегодня ни одного нет; рудники-подписанты Кодекса обязаны покупать у сертифицированного источника.</li>
+        <li><b>Легальный канал против нелегального.</b> Чёрный рынок цианида для артельной добычи — $9 300–17 500 за тонну. Норма о поставке только сертифицированным источником с регистрируемой цепочкой — прямой инструмент против галамси и вытеснения ртути.</li>
+        <li><b>Местная добавленная стоимость</b> в отрасли, где из $3 млрд закупок лишь половина идёт ганским компаниям при $11 млрд золотых поступлений. Производство цианида уже названо в законе услугой поддержки горнодобычи.</li>
+      </ul>
+      <p class="small">Против: выбросы +2 714 т CO₂ в год; рост тоннажа опасных грузов на дорогах; новый опасный объект внутри горной лицензии.</p>
+    </div>
+    <div>
+      <h3 class="sans">Рекомендация</h3>
+      <p><b>Не утверждать капитал $11.2 млн.</b> На текущих данных проект не проходит порог инвестируемости, и ни один рычаг сам по себе этого не меняет.</p>
+      <p><b>Утвердить программу проверки $0.6–1.0 млн на 9 месяцев</b> с тремя воротами и согласованными критериями остановки:</p>
+      <table>
+        <tr><th>Ворота</th><th>Что делаем</th><th class="num">Бюджет</th></tr>
+        <tr><td>1 — до 3 мес.</td><td>Термшит на газ; письмо в PURC о тарифной категории; заявка на регистрацию по L.I. 2174</td><td class="num">$50–100 тыс.</td></tr>
+        <tr><td>2 — до 6 мес.</td><td>Лабораторное и колонное испытание известкового маршрута на руде якорного рудника; годовой профиль потребления цианида</td><td class="num">$150–300 тыс.</td></tr>
+        <tr><td>3 — до 9 мес.</td><td>FEED класса AACE 2 с твёрдыми котировками; две поправки в подзаконные акты; финансирование на балансе рудника или DFI</td><td class="num">$400–600 тыс.</td></tr>
+      </table>
+      <p class="small">Проект возвращается к совету за инвестиционным решением только если пройдены все три ворот. Ресурс влияния на законодательство — то, что отличает нас и от импортёра, и от государственного мегапроекта; он направлен на две подзаконные нормы, а не на закон.</p>
+    </div>
+  </div>
+  <div class="foot"><span>Решение по проекту NaCN · Гана</span><span class="mono">05 / 05</span></div>
+</section>
+
+</body></html>
