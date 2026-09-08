@@ -1,0 +1,125 @@
+{
+ "status": "ok",
+ "meta": {
+  "cluster": "[Fe2Ni2S4(SH)4]2- cubane (pentlandite motif)",
+  "purpose": "открытие трека N6: спиновая структура Fe-Ni-S мотива — дескриптор для флотореагентов/выщелачивания сульфидных руд (пентландит (Fe,Ni)9S8, Норникель)",
+  "basis": "def2-svp",
+  "charge": -2,
+  "metal_layout": {
+   "Fe": [
+    0,
+    1
+   ],
+   "Ni": [
+    2,
+    3
+   ]
+  },
+  "formal_state": "2 Fe(3+) d5 (S=5/2) + 2 Ni(2+) d8 (S=1); metals sum +10",
+  "hs_seed_2S": 14,
+  "geometry_source": "femoco_4fe4s_cubane.xyz (Fe4S4 framework), Fe->Ni at atoms [2, 3]",
+  "geometry_note": "SINGLE POINT on the FROZEN Fe4S4 framework geometry (no relaxation; energies comparable to the [Fe4S4] run)",
+  "ladder": [
+   10,
+   12
+  ],
+  "macro_max": 60,
+  "spin_gap_functionals": "both",
+  "only": "gap",
+  "stage_timeout_s": 5400,
+  "total_budget_s": 33600,
+  "note": "BS-UNO start for the CASSCF ladder (the [Fe4S4] recipe). CASSCF only, no dynamic correlation. DF-accelerated. Spin gap on PBE and PBE0; the functional spread is the DFT-lies descriptor. Resume-aware: a re-launched box continues from the JSON + npz checkpoints.",
+  "resumed": false,
+  "nao": 288,
+  "nelec_total": 242,
+  "total_seconds": 2955.9
+ },
+ "scf": {
+  "hs": {
+   "e": -8728.42869428644,
+   "converged": true,
+   "seconds": 304.9
+  },
+  "bs_attempts": [
+   {
+    "pattern": "A: Fe0 up, Fe1 up | Ni2 dn, Ni3 dn (metal-segregated)",
+    "flip_atoms": [
+     2,
+     3
+    ],
+    "expected_signs": [
+     1,
+     1,
+     -1,
+     -1
+    ],
+    "e": -8728.398710188334,
+    "converged": true,
+    "s_squared": 5.007,
+    "metal_mulliken_spin": [
+     2.034,
+     2.034,
+     -1.266,
+     -1.263
+    ],
+    "seconds": 243.7,
+    "pattern_ok": true
+   }
+  ],
+  "reference_pattern": "A: Fe0 up, Fe1 up | Ni2 dn, Ni3 dn (metal-segregated)",
+  "reference_used": "BS"
+ },
+ "uno": {
+  "n_fractional_0.02_1.98": 14,
+  "fractional_occs": [
+   1.924,
+   1.667,
+   1.648,
+   1.513,
+   1.157,
+   1.033,
+   1.0,
+   1.0,
+   0.967,
+   0.843,
+   0.487,
+   0.352,
+   0.333,
+   0.076
+  ],
+  "from_reference": "BS"
+ },
+ "spin_gap": {
+  "low_S_flip_atoms": [
+   2,
+   3
+  ],
+  "pbe": {
+   "e_high_spin": -8728.42869429129,
+   "high_spin_2S": 14,
+   "high_spin_converged": true,
+   "e_low_spin_bs": -8728.398710086603,
+   "low_spin_converged": true,
+   "low_spin_s_squared": 5.008,
+   "gap_high_minus_low_kcal": -18.82,
+   "gap_high_minus_low_cm": -6580.8,
+   "seconds": 545.1,
+   "note": "BS low-S is spin-contaminated; this is the DFT self-disagreement metric, not a spin-projected gap"
+  },
+  "pbe0": {
+   "e_high_spin": -8728.650255830764,
+   "high_spin_2S": 14,
+   "high_spin_converged": true,
+   "e_low_spin_bs": -8728.601332015065,
+   "low_spin_converged": true,
+   "low_spin_s_squared": 6.223,
+   "gap_high_minus_low_kcal": -30.7,
+   "gap_high_minus_low_cm": -10737.5,
+   "seconds": 1862.0,
+   "note": "BS low-S is spin-contaminated; this is the DFT self-disagreement metric, not a spin-projected gap"
+  },
+  "functional_spread_kcal": -11.88,
+  "functional_spread_cm": -4156.8,
+  "descriptor": "PBE-vs-PBE0 spin-gap spread = 'where DFT lies' for the Fe-Ni-S motif (Fe-Ni-S analog of the 885 cm-1 functional-spread argument); large spread => the flotation/leaching redox descriptor cannot be trusted from a single functional, motivating the CASSCF track"
+ }
+}

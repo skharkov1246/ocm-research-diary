@@ -1,0 +1,248 @@
+{
+ "purpose": "L7: +1% выхода акрилонитрила на ДЕЙСТВУЮЩЕМ производстве (Саратоворгсинтез, Sohio-процесс на Mo-Bi-оксидах) — перенос нашего OCM-дескриптора селективности 1:1 на аммоксидирование пропилена",
+ "cluster": "(HO)(O=)Mo(mu-O)2Bi(OH)2 — нейтральный Bi-O-Mo мостик, минимальный прокси активного центра Sohio; заряд 0, Mo(VI) d0 + Bi(III)",
+ "bond_lengths_A": {
+  "Mo=O(oxo)": 1.7,
+  "Mo-OH": 1.9,
+  "Mo-(mu-O)": 1.95,
+  "Bi-(mu-O)": 2.2,
+  "Bi-OH": 2.15
+ },
+ "atom_order": "0 Mo, 1 O(oxo), 2 H(transferring), 3 C, ... substrate, last 9 = frozen Bi-O frame",
+ "spin_2S": 0,
+ "basis": "def2-svp",
+ "xc_geometry": "pbe0",
+ "cas": [
+  10,
+  10
+ ],
+ "avas_labels": [
+  "Mo 4d",
+  "O 2p",
+  "2 H 1s"
+ ],
+ "avas_note": "«Mo 3d» в постановке трека = ВАЛЕНТНАЯ d-оболочка металла; для Mo это 4d (3d сидит внутри ECP-28 базиса def2-SVP)",
+ "descriptor": "ddE# = barrier(доокисление: C-H акролеина) - barrier(целевой аллильный H-отрыв от пропилена); > 0 — центр ЩАДИТ целевой путь => селективность к НАК; < 0 — доокисляет интермедиат быстрее сырья (стена BEP)",
+ "gates": {
+  "outlier_mask_kcal": 25.0,
+  "ts_must_be_interior": "rel[ts] >= max(rel[0], rel[-1])",
+  "barrier_sanity_window_kcal": [
+   0.0,
+   150.0
+  ],
+  "no_verdict_is_legal": true
+ },
+ "honesty": [
+  "газофазный кластер из 19-20 атомов — НЕ периодический Mo-Bi-O катализатор: нет резервуара решёточного кислорода и стадии его восполнения (Марс–ван Кревелен), нет активации NH3, нет фазы alpha-Bi2Mo3O12, нет покрытия и температуры",
+  "distinguished-coordinate релакс-скан даёт ВЕРХНЮЮ оценку барьера (истинное седло не выше максимума скана); частот и ZPE нет",
+  "def2-SVP + ECP на Mo и Bi; активное пространство фиксировано конструкцией (не подбором порога) — размер одинаков во всех точках",
+  "переносится ЗНАК и величина ddE#, а не абсолютные барьеры",
+  "первая координационная оболочка Bi-O заморожена (embedded-приближение): каркас идеализированный, не кристаллографический"
+ ],
+ "substrates": {
+  "c3h6": {
+   "geometry": {
+    "substrate": "c3h6",
+    "n_atoms": 20,
+    "elements": "MoOHCCCHHHHHOHOOBiOHOH",
+    "n_frame_frozen": 9,
+    "min_pair_dist": 0.97,
+    "min_pair": [
+     16,
+     17
+    ],
+    "overlap_ok": true,
+    "Mo_Bi_dist": 3.171
+   },
+   "spin_2S": 0,
+   "n_points": 3,
+   "wall_s_per_point": [
+    1140.1,
+    718.7,
+    5326.4
+   ],
+   "spin_square_profile": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "dft": {
+    "barrier_kcal": null,
+    "rel_kcal": [
+     0.0,
+     6.58,
+     12.08
+    ],
+    "dropped_points": [],
+    "r_index": null,
+    "ts_index": null,
+    "gates": {
+     "profile_has_points": false,
+     "ts_interior": false,
+     "barrier_in_sanity_window": false,
+     "not_zigzag": true
+    },
+    "passed": false
+   },
+   "casscf": {
+    "barrier_kcal": null,
+    "rel_kcal": [
+     0.0,
+     10.77,
+     21.61
+    ],
+    "dropped_points": [],
+    "r_index": null,
+    "ts_index": null,
+    "gates": {
+     "profile_has_points": false,
+     "ts_interior": false,
+     "barrier_in_sanity_window": false,
+     "not_zigzag": true
+    },
+    "passed": false
+   },
+   "nevpt2": {
+    "barrier_kcal": null,
+    "rel_kcal": [
+     0.0,
+     7.82,
+     15.12
+    ],
+    "dropped_points": [],
+    "r_index": null,
+    "ts_index": null,
+    "gates": {
+     "profile_has_points": false,
+     "ts_interior": false,
+     "barrier_in_sanity_window": false,
+     "not_zigzag": true
+    },
+    "passed": false
+   },
+   "all_casscf_converged": true,
+   "geom_truncated_at": 3,
+   "geom_truncation_reason": "point 3 exceeded 5400s"
+  },
+  "acrolein": {
+   "geometry": {
+    "substrate": "acrolein",
+    "n_atoms": 19,
+    "elements": "MoOHCOCCHHHOHOOBiOHOH",
+    "n_frame_frozen": 9,
+    "min_pair_dist": 0.97,
+    "min_pair": [
+     15,
+     16
+    ],
+    "overlap_ok": true,
+    "Mo_Bi_dist": 3.171
+   },
+   "spin_2S": 0,
+   "n_points": 1,
+   "wall_s_per_point": [
+    2752.7
+   ],
+   "spin_square_profile": [
+    0.0
+   ],
+   "dft": {
+    "barrier_kcal": null,
+    "rel_kcal": [],
+    "dropped_points": [],
+    "r_index": null,
+    "ts_index": null,
+    "gates": {
+     "profile_has_points": false,
+     "ts_interior": false,
+     "barrier_in_sanity_window": false,
+     "not_zigzag": true
+    },
+    "passed": false
+   },
+   "casscf": {
+    "barrier_kcal": null,
+    "rel_kcal": [],
+    "dropped_points": [],
+    "r_index": null,
+    "ts_index": null,
+    "gates": {
+     "profile_has_points": false,
+     "ts_interior": false,
+     "barrier_in_sanity_window": false,
+     "not_zigzag": true
+    },
+    "passed": false
+   },
+   "nevpt2": {
+    "barrier_kcal": null,
+    "rel_kcal": [],
+    "dropped_points": [],
+    "r_index": null,
+    "ts_index": null,
+    "gates": {
+     "profile_has_points": false,
+     "ts_interior": false,
+     "barrier_in_sanity_window": false,
+     "not_zigzag": true
+    },
+    "passed": false
+   },
+   "all_casscf_converged": true,
+   "geom_truncated_at": 1,
+   "geom_truncation_reason": "point 1 exceeded 5400s"
+  }
+ },
+ "ddE_kcal": {
+  "dft": null,
+  "casscf": null,
+  "nevpt2": null
+ },
+ "verdict": {
+  "level": "nevpt2",
+  "ddE_kcal": null,
+  "reading": "NO VERDICT: гейты мираж-детектора не пройдены (край-TS / зигзаг / барьер вне диапазона / профиль оборван) — дескриптор НЕ публикуется",
+  "gate_detail": {
+   "c3h6": {
+    "dft": {
+     "profile_has_points": false,
+     "ts_interior": false,
+     "barrier_in_sanity_window": false,
+     "not_zigzag": true
+    },
+    "casscf": {
+     "profile_has_points": false,
+     "ts_interior": false,
+     "barrier_in_sanity_window": false,
+     "not_zigzag": true
+    },
+    "nevpt2": {
+     "profile_has_points": false,
+     "ts_interior": false,
+     "barrier_in_sanity_window": false,
+     "not_zigzag": true
+    }
+   },
+   "acrolein": {
+    "dft": {
+     "profile_has_points": false,
+     "ts_interior": false,
+     "barrier_in_sanity_window": false,
+     "not_zigzag": true
+    },
+    "casscf": {
+     "profile_has_points": false,
+     "ts_interior": false,
+     "barrier_in_sanity_window": false,
+     "not_zigzag": true
+    },
+    "nevpt2": {
+     "profile_has_points": false,
+     "ts_interior": false,
+     "barrier_in_sanity_window": false,
+     "not_zigzag": true
+    }
+   }
+  }
+ }
+}

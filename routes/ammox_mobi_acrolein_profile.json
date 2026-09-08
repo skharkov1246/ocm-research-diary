@@ -1,0 +1,60 @@
+{
+ "substrate": "acrolein",
+ "spin_2S": 0,
+ "points": [
+  {
+   "tag": "acrolein_p0",
+   "cas": [
+    10,
+    10
+   ],
+   "avas_sel_weights": [
+    0.998,
+    0.997,
+    0.992,
+    0.991,
+    0.99,
+    0.998,
+    0.981,
+    0.877,
+    0.837,
+    0.789
+   ],
+   "avas_reference_basis": "minao",
+   "avas_n_reference_aos": 27,
+   "e_rohf_h": -922.0971264820774,
+   "rohf_converged": true,
+   "e_casci_h": -922.1387607430324,
+   "e_casscf_h": -922.3151030640066,
+   "casscf_converged": true,
+   "noon": [
+    1.956,
+    1.953,
+    1.948,
+    1.943,
+    1.942,
+    0.066,
+    0.062,
+    0.053,
+    0.043,
+    0.034
+   ],
+   "n_unpaired_beyond_spin": 0.515,
+   "nevpt2_corr_h": -2.038154470881305,
+   "e_nevpt2_h": -924.3532575348879,
+   "wall_s": 487.3
+  }
+ ],
+ "cas": [
+  10,
+  10
+ ],
+ "avas_labels": [
+  "Mo 4d",
+  "O 2p",
+  "2 H 1s"
+ ],
+ "casscf_readable": false,
+ "nevpt2_readable": false,
+ "all_casscf_converged": true
+}

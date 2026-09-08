@@ -1,0 +1,164 @@
+{
+ "substrate": "c3h6",
+ "spin_2S": 0,
+ "points": [
+  {
+   "tag": "c3h6_p0",
+   "cas": [
+    10,
+    10
+   ],
+   "avas_sel_weights": [
+    0.998,
+    0.997,
+    0.992,
+    0.991,
+    0.99,
+    0.998,
+    0.981,
+    0.878,
+    0.837,
+    0.789
+   ],
+   "avas_reference_basis": "minao",
+   "avas_n_reference_aos": 24,
+   "e_rohf_h": -848.543308652323,
+   "rohf_converged": true,
+   "e_casci_h": -848.5847730377537,
+   "e_casscf_h": -848.7636873656073,
+   "casscf_converged": true,
+   "noon": [
+    1.956,
+    1.952,
+    1.947,
+    1.943,
+    1.941,
+    0.066,
+    0.063,
+    0.054,
+    0.044,
+    0.034
+   ],
+   "n_unpaired_beyond_spin": 0.521,
+   "nevpt2_corr_h": -1.8926283145568923,
+   "e_nevpt2_h": -850.6563156801642,
+   "wall_s": 489.0
+  },
+  {
+   "tag": "c3h6_p1",
+   "cas": [
+    10,
+    10
+   ],
+   "avas_sel_weights": [
+    0.998,
+    0.997,
+    0.992,
+    0.991,
+    0.99,
+    0.998,
+    0.98,
+    0.877,
+    0.838,
+    0.805
+   ],
+   "avas_reference_basis": "minao",
+   "avas_n_reference_aos": 24,
+   "e_rohf_h": -848.5270319467826,
+   "rohf_converged": true,
+   "e_casci_h": -848.5692165319632,
+   "e_casscf_h": -848.7465301015982,
+   "casscf_converged": true,
+   "noon": [
+    1.956,
+    1.952,
+    1.948,
+    1.943,
+    1.942,
+    0.066,
+    0.062,
+    0.054,
+    0.044,
+    0.034
+   ],
+   "n_unpaired_beyond_spin": 0.521,
+   "nevpt2_corr_h": -1.8973239018212973,
+   "e_nevpt2_h": -850.6438540034195,
+   "wall_s": 379.1
+  },
+  {
+   "tag": "c3h6_p2",
+   "cas": [
+    10,
+    10
+   ],
+   "avas_sel_weights": [
+    0.998,
+    0.997,
+    0.992,
+    0.991,
+    0.99,
+    0.996,
+    0.98,
+    0.877,
+    0.838,
+    0.811
+   ],
+   "avas_reference_basis": "minao",
+   "avas_n_reference_aos": 24,
+   "e_rohf_h": -848.5116669731242,
+   "rohf_converged": true,
+   "e_casci_h": -848.5521062059249,
+   "e_casscf_h": -848.7292505250012,
+   "casscf_converged": true,
+   "noon": [
+    1.956,
+    1.952,
+    1.949,
+    1.943,
+    1.942,
+    0.066,
+    0.061,
+    0.053,
+    0.044,
+    0.033
+   ],
+   "n_unpaired_beyond_spin": 0.514,
+   "nevpt2_corr_h": -1.9029745235976663,
+   "e_nevpt2_h": -850.6322250485989,
+   "wall_s": 305.1
+  }
+ ],
+ "cas": [
+  10,
+  10
+ ],
+ "avas_labels": [
+  "Mo 4d",
+  "O 2p",
+  "2 H 1s"
+ ],
+ "casscf_rel_kcal": [
+  0.0,
+  10.77,
+  21.61
+ ],
+ "casscf_r_index": null,
+ "casscf_ts_index": null,
+ "casscf_ts_interior": false,
+ "casscf_dropped_points": [],
+ "casscf_barrier_kcal": null,
+ "casscf_readable": false,
+ "nevpt2_rel_kcal": [
+  0.0,
+  7.82,
+  15.12
+ ],
+ "nevpt2_r_index": null,
+ "nevpt2_ts_index": null,
+ "nevpt2_ts_interior": false,
+ "nevpt2_dropped_points": [],
+ "nevpt2_barrier_kcal": null,
+ "nevpt2_readable": false,
+ "all_casscf_converged": true
+}

@@ -1,0 +1,49 @@
+{
+ "candidates_2S": [
+  0,
+  2,
+  4
+ ],
+ "geometry": {
+  "substrate": "c3h6",
+  "n_atoms": 20,
+  "elements": "MoOHCCCHHHHHOHOOBiOHOH",
+  "n_frame_frozen": 9,
+  "min_pair_dist": 0.97,
+  "min_pair": [
+   16,
+   17
+  ],
+  "overlap_ok": true,
+  "Mo_Bi_dist": 3.171
+ },
+ "ladder": [
+  {
+   "spin_2S": 0,
+   "e_h": -852.8652663031598,
+   "converged": true,
+   "spin_square": 0.0,
+   "wall_s": 440.6
+  },
+  {
+   "spin_2S": 2,
+   "e_h": -852.7859761541094,
+   "converged": true,
+   "spin_square": 2.016,
+   "wall_s": 448.0
+  },
+  {
+   "spin_2S": 4,
+   "e_h": -852.701568495909,
+   "converged": true,
+   "spin_square": 6.028,
+   "wall_s": 506.1
+  }
+ ],
+ "ground_2S": 0,
+ "rel_kcal": {
+  "0": 0.0,
+  "2": 49.76,
+  "4": 102.72
+ }
+}

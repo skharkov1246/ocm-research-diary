@@ -1,0 +1,1156 @@
+{
+ "status": "ok",
+ "meta": {
+  "job": "flotation reagent adsorption: pentlandite vs pyrrhotite motif",
+  "purpose": "ГЕЙТ КЕЙСА N9 (APPLIED_WIDE_SCAN.md): селективный депрессор пирротина. Разделение пентландита (Fe,Ni)9S8 и пирротина Fe7S8 убирает серу ДО трубы — до Серной программы и дешевле любого улавливания SO2. Вопрос гейта: предпочитает ли реагент один мотив другому и в какую сторону.",
+  "chain": "calc/fe_ni_s_pentlandite.py (N6 gate: BS pattern A, Fe +2.03/+2.03, Ni -1.27/-1.26; spin gap PBE -18.8 / PBE0 -30.7 kcal/mol) -> this job",
+  "level": "UKS-PBE/def2-SVP + density fitting, broken-symmetry reference; PBE0//PBE sign check on the best pair",
+  "basis": "def2-svp",
+  "mode": "scan",
+  "scan_points": 3,
+  "scan_half_range_A": 0.2,
+  "mf_mode": "pbe",
+  "pbe0_set": "collector",
+  "only": [
+   "xanthate",
+   "oh"
+  ],
+  "pairs_selected": [
+   "xanthate@pent_fe",
+   "xanthate@pent_ni",
+   "xanthate@pyrr_fe",
+   "oh@pent_fe",
+   "oh@pent_ni",
+   "oh@pyrr_fe"
+  ],
+  "geometry_source": "femoco_4fe4s_cubane.xyz; Fe->Ni swaps for the pentlandite motif; one terminal SH- removed at the site metal to create the open surface site",
+  "descriptor": "dd_E = double difference of dE_ads between the two motifs; the free-adsorbate energy cancels EXACTLY in it",
+  "stage_timeout_s": 5400,
+  "total_budget_s": 33600,
+  "resumed": false,
+  "total_seconds": 21535.8
+ },
+ "adsorbates": {
+  "oh": {
+   "label": "hydroxide OH- (simplest depressant / alkaline-pulp proxy)",
+   "role": "baseline",
+   "charge": -1,
+   "note": "baseline for how much selectivity alkalinity alone can buy",
+   "donor_atom": 0,
+   "geometry": [
+    [
+     "O",
+     [
+      -0.013387,
+      -0.0,
+      -0.0
+     ]
+    ],
+    [
+     "H",
+     [
+      0.983479,
+      0.0,
+      0.0
+     ]
+    ]
+   ],
+   "pbe": {
+    "xc": "pbe",
+    "relaxed": true,
+    "e": -75.57522211482804,
+    "converged": true
+   }
+  },
+  "xanthate": {
+   "label": "ethyl xanthate EtOCS2- (collector)",
+   "role": "collector",
+   "charge": -1,
+   "note": "monodentate through one thiolate S; real xanthate can chelate bidentate — absolute binding here is a lower bound",
+   "donor_atom": 0,
+   "geometry": [
+    [
+     "S",
+     [
+      -1.560759,
+      -0.6564,
+      0.238818
+     ]
+    ],
+    [
+     "C",
+     [
+      0.007179,
+      -0.044056,
+      0.061492
+     ]
+    ],
+    [
+     "S",
+     [
+      1.469924,
+      -0.897442,
+      -0.138083
+     ]
+    ],
+    [
+     "O",
+     [
+      0.047755,
+      1.356884,
+      0.090313
+     ]
+    ],
+    [
+     "C",
+     [
+      1.292111,
+      2.023163,
+      -0.046876
+     ]
+    ],
+    [
+     "C",
+     [
+      1.014872,
+      3.520072,
+      0.011306
+     ]
+    ],
+    [
+     "H",
+     [
+      1.998565,
+      1.698513,
+      0.753306
+     ]
+    ],
+    [
+     "H",
+     [
+      1.789523,
+      1.7271,
+      -1.000518
+     ]
+    ],
+    [
+     "H",
+     [
+      0.53624,
+      3.796948,
+      0.973673
+     ]
+    ],
+    [
+     "H",
+     [
+      1.956619,
+      4.100328,
+      -0.090606
+     ]
+    ],
+    [
+     "H",
+     [
+      0.325738,
+      3.826646,
+      -0.802932
+     ]
+    ]
+   ],
+   "pbe": {
+    "xc": "pbe",
+    "relaxed": true,
+    "e": -988.0173089278238,
+    "converged": true
+   }
+  }
+ },
+ "substrates": {
+  "pent_fe": {
+   "label": "pentlandite motif [Fe2Ni2S4(SH)3]1-, vacancy on Fe0",
+   "motif": "pentlandite",
+   "site_element": "Fe",
+   "site_atom": 0,
+   "charge": -1,
+   "formal_state": "2 Fe(3+) d5 + 2 Ni(2+) d8; metals sum +10",
+   "hs_seed_2S": 14,
+   "bs_flip_atoms": [
+    2,
+    3
+   ],
+   "n_atoms": 14,
+   "pbe": {
+    "xc": "pbe",
+    "hs": {
+     "e": -8329.93293891714,
+     "2S": 14,
+     "converged": true,
+     "seconds": 276.7
+    },
+    "e": -8329.95258287022,
+    "converged": true,
+    "s_squared": 5.39,
+    "metal_mulliken_spin": [
+     -3.599,
+     3.407,
+     -0.073,
+     -0.073
+    ],
+    "expected_signs": [
+     1,
+     1,
+     -1,
+     -1
+    ],
+    "bs_pattern_ok": false,
+    "seconds": 897.0
+   }
+  },
+  "pent_ni": {
+   "label": "pentlandite motif [Fe2Ni2S4(SH)3]1-, vacancy on Ni2",
+   "motif": "pentlandite",
+   "site_element": "Ni",
+   "site_atom": 2,
+   "charge": -1,
+   "formal_state": "2 Fe(3+) d5 + 2 Ni(2+) d8; metals sum +10",
+   "hs_seed_2S": 14,
+   "bs_flip_atoms": [
+    2,
+    3
+   ],
+   "n_atoms": 14,
+   "pbe": {
+    "xc": "pbe",
+    "hs": {
+     "e": -8329.943808966766,
+     "2S": 14,
+     "converged": true,
+     "seconds": 317.4
+    },
+    "e": -8329.977484213432,
+    "converged": true,
+    "s_squared": 5.69,
+    "metal_mulliken_spin": [
+     3.428,
+     -3.488,
+     -1.206,
+     1.009
+    ],
+    "expected_signs": [
+     1,
+     1,
+     -1,
+     -1
+    ],
+    "bs_pattern_ok": false,
+    "seconds": 1217.9
+   }
+  },
+  "pyrr_fe": {
+   "label": "pyrrhotite motif [Fe4S4(SH)3]1-, vacancy on Fe0",
+   "motif": "pyrrhotite",
+   "site_element": "Fe",
+   "site_atom": 0,
+   "charge": -1,
+   "formal_state": "2 Fe(3+) d5 + 2 Fe(2+) d6; metals sum +10",
+   "hs_seed_2S": 18,
+   "bs_flip_atoms": [
+    2,
+    3
+   ],
+   "n_atoms": 14,
+   "pbe": {
+    "xc": "pbe",
+    "hs": {
+     "e": -7840.826901098122,
+     "2S": 18,
+     "converged": true,
+     "seconds": 262.4
+    },
+    "e": -7840.881092993111,
+    "converged": true,
+    "s_squared": 7.429,
+    "metal_mulliken_spin": [
+     -3.489,
+     3.309,
+     3.309,
+     -3.384
+    ],
+    "expected_signs": [
+     1,
+     1,
+     -1,
+     -1
+    ],
+    "bs_pattern_ok": false,
+    "seconds": 1091.2
+   }
+  }
+ },
+ "pairs": {
+  "xanthate@pent_fe": {
+   "adsorbate": "ethyl xanthate EtOCS2- (collector)",
+   "substrate": "pentlandite motif [Fe2Ni2S4(SH)3]1-, vacancy on Fe0",
+   "site_element": "Fe",
+   "site_atom": 0,
+   "motif": "pentlandite",
+   "role": "collector",
+   "charge": -2,
+   "hs_seed_2S": 14,
+   "bs_flip_atoms": [
+    2,
+    3
+   ],
+   "r0_guess_A": 2.3,
+   "mode": "scan",
+   "n_substrate_atoms": 14,
+   "scan": [
+    {
+     "xc": "pbe",
+     "hs": {
+      "e": -9317.941728949554,
+      "2S": 14,
+      "converged": true,
+      "seconds": 777.0
+     },
+     "e": -9317.976333484352,
+     "converged": true,
+     "s_squared": 5.656,
+     "metal_mulliken_spin": [
+      -3.396,
+      3.406,
+      1.087,
+      -1.132
+     ],
+     "expected_signs": [
+      1,
+      1,
+      -1,
+      -1
+     ],
+     "bs_pattern_ok": false,
+     "seconds": 1624.2,
+     "r_M_donor": 2.1,
+     "azimuth_deg": 150.0,
+     "min_nondonor_contact_A": 3.067
+    },
+    {
+     "xc": "pbe",
+     "e": -9317.986642975935,
+     "converged": true,
+     "s_squared": 5.749,
+     "metal_mulliken_spin": [
+      -3.526,
+      3.435,
+      1.097,
+      -1.129
+     ],
+     "expected_signs": [
+      1,
+      1,
+      -1,
+      -1
+     ],
+     "bs_pattern_ok": false,
+     "seconds": 151.1,
+     "r_M_donor": 2.3,
+     "azimuth_deg": 150.0,
+     "min_nondonor_contact_A": 3.183
+    },
+    {
+     "xc": "pbe",
+     "e": -9317.985490734096,
+     "converged": true,
+     "s_squared": 5.796,
+     "metal_mulliken_spin": [
+      -3.59,
+      3.45,
+      1.099,
+      -1.128
+     ],
+     "expected_signs": [
+      1,
+      1,
+      -1,
+      -1
+     ],
+     "bs_pattern_ok": false,
+     "seconds": 159.0,
+     "r_M_donor": 2.5,
+     "azimuth_deg": 150.0,
+     "min_nondonor_contact_A": 3.306
+    }
+   ],
+   "pbe": {
+    "e_complex": -9317.986642975935,
+    "r_best_A": 2.3,
+    "bs_pattern_ok": false,
+    "s_squared": 5.749,
+    "metal_mulliken_spin": [
+     -3.526,
+     3.435,
+     1.097,
+     -1.129
+    ],
+    "from": "lowest computed scan point",
+    "parabola": {
+     "r_min_A": 2.38,
+     "inside_scan_range": true,
+     "note": "interpolation only; dE_ads uses the computed point"
+    }
+   },
+   "relaxation_note": "rigid scan of the M-donor bond on a frozen cluster framework and a frozen adsorbate geometry: dE_ads is essentially an interaction energy (no substrate or adsorbate reorganisation)",
+   "status": "ok"
+  },
+  "xanthate@pent_ni": {
+   "adsorbate": "ethyl xanthate EtOCS2- (collector)",
+   "substrate": "pentlandite motif [Fe2Ni2S4(SH)3]1-, vacancy on Ni2",
+   "site_element": "Ni",
+   "site_atom": 2,
+   "motif": "pentlandite",
+   "role": "collector",
+   "charge": -2,
+   "hs_seed_2S": 14,
+   "bs_flip_atoms": [
+    2,
+    3
+   ],
+   "r0_guess_A": 2.25,
+   "mode": "scan",
+   "n_substrate_atoms": 14,
+   "scan": [
+    {
+     "xc": "pbe",
+     "hs": {
+      "e": -9317.94992788794,
+      "2S": 14,
+      "converged": true,
+      "seconds": 1227.1
+     },
+     "e": -9317.983889941712,
+     "converged": true,
+     "s_squared": 5.232,
+     "metal_mulliken_spin": [
+      -3.371,
+      3.373,
+      0.002,
+      -0.006
+     ],
+     "expected_signs": [
+      1,
+      1,
+      -1,
+      -1
+     ],
+     "bs_pattern_ok": false,
+     "seconds": 2225.8,
+     "r_M_donor": 2.05,
+     "azimuth_deg": 210.0,
+     "min_nondonor_contact_A": 3.04
+    },
+    {
+     "xc": "pbe",
+     "e": -9317.989199337047,
+     "converged": true,
+     "s_squared": 5.275,
+     "metal_mulliken_spin": [
+      -3.378,
+      3.38,
+      0.0,
+      -0.004
+     ],
+     "expected_signs": [
+      1,
+      1,
+      -1,
+      -1
+     ],
+     "bs_pattern_ok": false,
+     "seconds": 279.8,
+     "r_M_donor": 2.25,
+     "azimuth_deg": 210.0,
+     "min_nondonor_contact_A": 3.153
+    },
+    {
+     "xc": "pbe",
+     "e": -9317.984476151538,
+     "converged": true,
+     "s_squared": 5.312,
+     "metal_mulliken_spin": [
+      -3.388,
+      3.389,
+      -0.001,
+      -0.002
+     ],
+     "expected_signs": [
+      1,
+      1,
+      -1,
+      -1
+     ],
+     "bs_pattern_ok": false,
+     "seconds": 305.0,
+     "r_M_donor": 2.45,
+     "azimuth_deg": 210.0,
+     "min_nondonor_contact_A": 3.275
+    }
+   ],
+   "pbe": {
+    "e_complex": -9317.989199337047,
+    "r_best_A": 2.25,
+    "bs_pattern_ok": false,
+    "s_squared": 5.275,
+    "metal_mulliken_spin": [
+     -3.378,
+     3.38,
+     0.0,
+     -0.004
+    ],
+    "from": "lowest computed scan point",
+    "parabola": {
+     "r_min_A": 2.256,
+     "inside_scan_range": true,
+     "note": "interpolation only; dE_ads uses the computed point"
+    }
+   },
+   "relaxation_note": "rigid scan of the M-donor bond on a frozen cluster framework and a frozen adsorbate geometry: dE_ads is essentially an interaction energy (no substrate or adsorbate reorganisation)",
+   "status": "ok"
+  },
+  "xanthate@pyrr_fe": {
+   "adsorbate": "ethyl xanthate EtOCS2- (collector)",
+   "substrate": "pyrrhotite motif [Fe4S4(SH)3]1-, vacancy on Fe0",
+   "site_element": "Fe",
+   "site_atom": 0,
+   "motif": "pyrrhotite",
+   "role": "collector",
+   "charge": -2,
+   "hs_seed_2S": 18,
+   "bs_flip_atoms": [
+    2,
+    3
+   ],
+   "r0_guess_A": 2.3,
+   "mode": "scan",
+   "n_substrate_atoms": 14,
+   "scan": [
+    {
+     "xc": "pbe",
+     "hs": {
+      "e": -8828.831628808795,
+      "2S": 18,
+      "converged": true,
+      "seconds": 736.3
+     },
+     "e": -8828.89797026197,
+     "converged": true,
+     "s_squared": 7.217,
+     "metal_mulliken_spin": [
+      3.242,
+      -3.281,
+      -3.293,
+      3.383
+     ],
+     "expected_signs": [
+      1,
+      1,
+      -1,
+      -1
+     ],
+     "bs_pattern_ok": false,
+     "seconds": 1427.2,
+     "r_M_donor": 2.1,
+     "azimuth_deg": 150.0,
+     "min_nondonor_contact_A": 3.067
+    },
+    {
+     "xc": "pbe",
+     "e": -8828.907442994525,
+     "converged": true,
+     "s_squared": 7.299,
+     "metal_mulliken_spin": [
+      3.381,
+      -3.303,
+      -3.311,
+      3.372
+     ],
+     "expected_signs": [
+      1,
+      1,
+      -1,
+      -1
+     ],
+     "bs_pattern_ok": false,
+     "seconds": 182.3,
+     "r_M_donor": 2.3,
+     "azimuth_deg": 150.0,
+     "min_nondonor_contact_A": 3.183
+    },
+    {
+     "xc": "pbe",
+     "e": -8828.905943688056,
+     "converged": true,
+     "s_squared": 7.349,
+     "metal_mulliken_spin": [
+      3.452,
+      -3.316,
+      -3.321,
+      3.368
+     ],
+     "expected_signs": [
+      1,
+      1,
+      -1,
+      -1
+     ],
+     "bs_pattern_ok": false,
+     "seconds": 158.9,
+     "r_M_donor": 2.5,
+     "azimuth_deg": 150.0,
+     "min_nondonor_contact_A": 3.306
+    }
+   ],
+   "pbe": {
+    "e_complex": -8828.907442994525,
+    "r_best_A": 2.3,
+    "bs_pattern_ok": false,
+    "s_squared": 7.299,
+    "metal_mulliken_spin": [
+     3.381,
+     -3.303,
+     -3.311,
+     3.372
+    ],
+    "from": "lowest computed scan point",
+    "parabola": {
+     "r_min_A": 2.373,
+     "inside_scan_range": true,
+     "note": "interpolation only; dE_ads uses the computed point"
+    }
+   },
+   "relaxation_note": "rigid scan of the M-donor bond on a frozen cluster framework and a frozen adsorbate geometry: dE_ads is essentially an interaction energy (no substrate or adsorbate reorganisation)",
+   "status": "ok"
+  },
+  "oh@pent_fe": {
+   "adsorbate": "hydroxide OH- (simplest depressant / alkaline-pulp proxy)",
+   "substrate": "pentlandite motif [Fe2Ni2S4(SH)3]1-, vacancy on Fe0",
+   "site_element": "Fe",
+   "site_atom": 0,
+   "motif": "pentlandite",
+   "role": "baseline",
+   "charge": -2,
+   "hs_seed_2S": 14,
+   "bs_flip_atoms": [
+    2,
+    3
+   ],
+   "r0_guess_A": 1.9,
+   "mode": "scan",
+   "n_substrate_atoms": 14,
+   "scan": [
+    {
+     "xc": "pbe",
+     "hs": {
+      "e": -8405.618406177535,
+      "2S": 14,
+      "converged": true,
+      "seconds": 390.1
+     },
+     "e": -8405.65077912307,
+     "converged": true,
+     "s_squared": 5.809,
+     "metal_mulliken_spin": [
+      3.493,
+      -3.464,
+      -1.151,
+      1.14
+     ],
+     "expected_signs": [
+      1,
+      1,
+      -1,
+      -1
+     ],
+     "bs_pattern_ok": false,
+     "seconds": 701.8,
+     "r_M_donor": 1.7,
+     "azimuth_deg": 30.0,
+     "min_nondonor_contact_A": 2.246
+    },
+    {
+     "xc": "pbe",
+     "e": -8405.659427550843,
+     "converged": true,
+     "s_squared": 5.862,
+     "metal_mulliken_spin": [
+      3.591,
+      -3.483,
+      -1.146,
+      1.133
+     ],
+     "expected_signs": [
+      1,
+      1,
+      -1,
+      -1
+     ],
+     "bs_pattern_ok": false,
+     "seconds": 220.8,
+     "r_M_donor": 1.9,
+     "azimuth_deg": 120.0,
+     "min_nondonor_contact_A": 2.429
+    },
+    {
+     "xc": "pbe",
+     "e": -8405.647179420348,
+     "converged": true,
+     "s_squared": 5.875,
+     "metal_mulliken_spin": [
+      -3.624,
+      3.48,
+      -1.128,
+      1.145
+     ],
+     "expected_signs": [
+      1,
+      1,
+      -1,
+      -1
+     ],
+     "bs_pattern_ok": false,
+     "seconds": 1013.5,
+     "r_M_donor": 2.1,
+     "azimuth_deg": 0.0,
+     "min_nondonor_contact_A": 2.614
+    }
+   ],
+   "pbe": {
+    "e_complex": -8405.659427550843,
+    "r_best_A": 1.9,
+    "bs_pattern_ok": false,
+    "s_squared": 5.862,
+    "metal_mulliken_spin": [
+     3.591,
+     -3.483,
+     -1.146,
+     1.133
+    ],
+    "from": "lowest computed scan point",
+    "parabola": {
+     "r_min_A": 1.883,
+     "inside_scan_range": true,
+     "note": "interpolation only; dE_ads uses the computed point"
+    }
+   },
+   "relaxation_note": "rigid scan of the M-donor bond on a frozen cluster framework and a frozen adsorbate geometry: dE_ads is essentially an interaction energy (no substrate or adsorbate reorganisation)",
+   "status": "ok"
+  },
+  "oh@pent_ni": {
+   "adsorbate": "hydroxide OH- (simplest depressant / alkaline-pulp proxy)",
+   "substrate": "pentlandite motif [Fe2Ni2S4(SH)3]1-, vacancy on Ni2",
+   "site_element": "Ni",
+   "site_atom": 2,
+   "motif": "pentlandite",
+   "role": "baseline",
+   "charge": -2,
+   "hs_seed_2S": 14,
+   "bs_flip_atoms": [
+    2,
+    3
+   ],
+   "r0_guess_A": 1.95,
+   "mode": "scan",
+   "n_substrate_atoms": 14,
+   "scan": [
+    {
+     "xc": "pbe",
+     "hs": {
+      "e": -8405.618429981387,
+      "2S": 14,
+      "converged": true,
+      "seconds": 298.2
+     },
+     "e": -8405.641494132886,
+     "converged": true,
+     "s_squared": 5.349,
+     "metal_mulliken_spin": [
+      -3.392,
+      3.393,
+      -0.01,
+      0.02
+     ],
+     "expected_signs": [
+      1,
+      1,
+      -1,
+      -1
+     ],
+     "bs_pattern_ok": false,
+     "seconds": 1111.0,
+     "r_M_donor": 1.75,
+     "azimuth_deg": 150.0,
+     "min_nondonor_contact_A": 2.291
+    },
+    {
+     "xc": "pbe",
+     "e": -8405.636626487392,
+     "converged": true,
+     "s_squared": 5.366,
+     "metal_mulliken_spin": [
+      3.38,
+      -3.388,
+      -0.019,
+      -0.052
+     ],
+     "expected_signs": [
+      1,
+      1,
+      -1,
+      -1
+     ],
+     "bs_pattern_ok": false,
+     "seconds": 918.3,
+     "r_M_donor": 1.95,
+     "azimuth_deg": 0.0,
+     "min_nondonor_contact_A": 2.475
+    },
+    {
+     "xc": "pbe",
+     "e": -8405.624119346525,
+     "converged": true,
+     "s_squared": 5.398,
+     "metal_mulliken_spin": [
+      3.396,
+      -3.414,
+      0.009,
+      0.037
+     ],
+     "expected_signs": [
+      1,
+      1,
+      -1,
+      -1
+     ],
+     "bs_pattern_ok": false,
+     "seconds": 1263.6,
+     "r_M_donor": 2.15,
+     "azimuth_deg": 60.0,
+     "min_nondonor_contact_A": 2.661
+    }
+   ],
+   "pbe": {
+    "e_complex": -8405.641494132886,
+    "r_best_A": 1.75,
+    "bs_pattern_ok": false,
+    "s_squared": 5.349,
+    "metal_mulliken_spin": [
+     -3.392,
+     3.393,
+     -0.01,
+     0.02
+    ],
+    "from": "lowest computed scan point",
+    "parabola": {
+     "r_min_A": 1.723,
+     "inside_scan_range": false,
+     "note": "interpolation only; dE_ads uses the computed point"
+    }
+   },
+   "relaxation_note": "rigid scan of the M-donor bond on a frozen cluster framework and a frozen adsorbate geometry: dE_ads is essentially an interaction energy (no substrate or adsorbate reorganisation)",
+   "status": "ok"
+  },
+  "oh@pyrr_fe": {
+   "adsorbate": "hydroxide OH- (simplest depressant / alkaline-pulp proxy)",
+   "substrate": "pyrrhotite motif [Fe4S4(SH)3]1-, vacancy on Fe0",
+   "site_element": "Fe",
+   "site_atom": 0,
+   "motif": "pyrrhotite",
+   "role": "baseline",
+   "charge": -2,
+   "hs_seed_2S": 18,
+   "bs_flip_atoms": [
+    2,
+    3
+   ],
+   "r0_guess_A": 1.9,
+   "mode": "scan",
+   "n_substrate_atoms": 14,
+   "scan": [
+    {
+     "xc": "pbe",
+     "hs": {
+      "e": -7916.507760809274,
+      "2S": 18,
+      "converged": true,
+      "seconds": 235.1
+     },
+     "e": -7916.569521889873,
+     "converged": true,
+     "s_squared": 7.33,
+     "metal_mulliken_spin": [
+      -3.331,
+      3.336,
+      -3.359,
+      3.334
+     ],
+     "expected_signs": [
+      1,
+      1,
+      -1,
+      -1
+     ],
+     "bs_pattern_ok": false,
+     "seconds": 693.8,
+     "r_M_donor": 1.7,
+     "azimuth_deg": 30.0,
+     "min_nondonor_contact_A": 2.246
+    },
+    {
+     "xc": "pbe",
+     "e": -7916.576510547166,
+     "converged": true,
+     "s_squared": 7.418,
+     "metal_mulliken_spin": [
+      -3.457,
+      3.356,
+      -3.345,
+      3.352
+     ],
+     "expected_signs": [
+      1,
+      1,
+      -1,
+      -1
+     ],
+     "bs_pattern_ok": false,
+     "seconds": 219.4,
+     "r_M_donor": 1.9,
+     "azimuth_deg": 120.0,
+     "min_nondonor_contact_A": 2.429
+    },
+    {
+     "xc": "pbe",
+     "e": -7916.565263583521,
+     "converged": true,
+     "s_squared": 7.422,
+     "metal_mulliken_spin": [
+      -3.484,
+      3.348,
+      -3.35,
+      3.353
+     ],
+     "expected_signs": [
+      1,
+      1,
+      -1,
+      -1
+     ],
+     "bs_pattern_ok": false,
+     "seconds": 179.4,
+     "r_M_donor": 2.1,
+     "azimuth_deg": 0.0,
+     "min_nondonor_contact_A": 2.614
+    }
+   ],
+   "pbe": {
+    "e_complex": -7916.576510547166,
+    "r_best_A": 1.9,
+    "bs_pattern_ok": false,
+    "s_squared": 7.418,
+    "metal_mulliken_spin": [
+     -3.457,
+     3.356,
+     -3.345,
+     3.352
+    ],
+    "from": "lowest computed scan point",
+    "parabola": {
+     "r_min_A": 1.877,
+     "inside_scan_range": true,
+     "note": "interpolation only; dE_ads uses the computed point"
+    }
+   },
+   "relaxation_note": "rigid scan of the M-donor bond on a frozen cluster framework and a frozen adsorbate geometry: dE_ads is essentially an interaction energy (no substrate or adsorbate reorganisation)",
+   "status": "ok"
+  }
+ },
+ "honesty": [
+  "Кластер [M4S4(SH)3]- НЕ решётка минерала: нет маделунговского поля, нет реконструкции поверхности, нет разупорядочения Fe/Ni и вакансий серы реального пирротина Fe7S8.",
+  "Газовая фаза: нет воды, нет двойного электрического слоя, нет pH, нет потенциала пульпы, нет конкурирующей активации Cu2+/Ca2+ — всё это в реальной флотации первого порядка.",
+  "Только электронные энергии: без ZPE, без температуры и энтропии, без сольватации. Это НЕ изотерма адсорбции и НЕ свободная энергия.",
+  "Монодентатное связывание (одна вакансия на кластер). Ксантогенат бывает бидентатным, DETA — тридентатный хелат, а en только его двухазотный прокси: абсолютные числа ЗАНИЖАЮТ амин.",
+  "BS-решения спин-контаминированы, спиновая проекция не применялась.",
+  "BSSE (counterpoise) не считался; в dd_E он в основном сокращается, а энергия свободного аниона сокращается ТОЧНО — поэтому дескриптор и взят как двойная разность, а не как энергия связывания.",
+  "Каркас кластера заморожен; в режиме scan заморожен и адсорбат, поэтому dE_ads по смыслу ближе к энергии взаимодействия, чем к энергии адсорбции с реорганизацией.",
+  "PBE завышает магнитуды на Fe-S (урок N6-гейта: разброс PBE/PBE0 по спиновой щели ~12 ккал/моль) — поэтому смотрим ЗНАК, и знак лучшей пары перепроверяем на гибриде PBE0//PBE.",
+  "ЭТО ЗНАКОВЫЙ СКРИН ДЕСКРИПТОРА. Он может сказать «этот класс реагентов предпочитает этот мотив и вот на каком сайте» — и не может сказать «подавать X г/т при pH 9»."
+ ],
+ "descriptors": {
+  "pbe": {
+   "level": "pbe",
+   "dE_ads_kcal": {
+    "xanthate@pent_fe": -10.51,
+    "xanthate@pent_ni": 3.51,
+    "xanthate@pyrr_fe": -5.67,
+    "oh@pent_fe": -82.59,
+    "oh@pent_ni": -55.72,
+    "oh@pyrr_fe": -75.42
+   },
+   "dd_E_kcal": {
+    "collector_xanthate": {
+     "value_kcal": -4.84,
+     "pentlandite_site_used": "pent_fe",
+     "per_site": {
+      "pent_fe": -4.84,
+      "pent_ni": 9.18
+     },
+     "negative_means": "collector prefers PENTLANDITE (selectivity works)"
+    },
+    "baseline_oh": {
+     "value_kcal": 7.17,
+     "pentlandite_site_used": "pent_fe",
+     "per_site": {
+      "pent_fe": 7.17,
+      "pent_ni": -19.7
+     },
+     "negative_means": "depressant prefers PYRRHOTITE (depression works)"
+    }
+   },
+   "pentlandite_site_contrast_kcal": {
+    "xanthate": 14.02,
+    "oh": 26.87
+   }
+  },
+  "pbe0": {
+   "level": "pbe0",
+   "dE_ads_kcal": {
+    "xanthate@pent_fe": -33.96,
+    "xanthate@pyrr_fe": -2.54
+   },
+   "dd_E_kcal": {
+    "collector_xanthate": {
+     "value_kcal": -31.42,
+     "pentlandite_site_used": "pent_fe",
+     "per_site": {
+      "pent_fe": -31.42
+     },
+     "negative_means": "collector prefers PENTLANDITE (selectivity works)"
+    }
+   }
+  }
+ },
+ "pbe0_push": {
+  "set": "collector",
+  "pairs": {
+   "xanthate@pent_fe": {
+    "xc": "pbe0",
+    "e": -9318.231365735857,
+    "converged": true,
+    "s_squared": 6.691,
+    "metal_mulliken_spin": [
+     -3.984,
+     3.901,
+     1.526,
+     -1.543
+    ],
+    "expected_signs": [
+     1,
+     1,
+     -1,
+     -1
+    ],
+    "bs_pattern_ok": false,
+    "seconds": 260.2
+   },
+   "xanthate@pyrr_fe": {
+    "xc": "pbe0",
+    "e": -8829.171688403145,
+    "converged": true,
+    "s_squared": 8.572,
+    "metal_mulliken_spin": [
+     3.838,
+     -3.763,
+     -3.761,
+     3.793
+    ],
+    "expected_signs": [
+     1,
+     1,
+     -1,
+     -1
+    ],
+    "bs_pattern_ok": false,
+    "seconds": 194.4
+   }
+  },
+  "substrates": {
+   "pent_fe": {
+    "xc": "pbe0",
+    "e": -8330.08481591037,
+    "converged": true,
+    "s_squared": 6.475,
+    "metal_mulliken_spin": [
+     -3.991,
+     3.882,
+     0.029,
+     0.029
+    ],
+    "expected_signs": [
+     1,
+     1,
+     -1,
+     -1
+    ],
+    "bs_pattern_ok": false,
+    "seconds": 219.3
+   },
+   "pyrr_fe": {
+    "xc": "pbe0",
+    "e": -7841.0752216032015,
+    "converged": true,
+    "s_squared": 8.605,
+    "metal_mulliken_spin": [
+     -3.741,
+     3.752,
+     3.752,
+     -3.889
+    ],
+    "expected_signs": [
+     1,
+     1,
+     -1,
+     -1
+    ],
+    "bs_pattern_ok": false,
+    "seconds": 152.8
+   }
+  },
+  "adsorbates": {
+   "xanthate": {
+    "xc": "pbe0",
+    "relaxed": false,
+    "e": -988.0924232143304,
+    "converged": true
+   }
+  }
+ },
+ "verdict": {
+  "rule": "both dd_E must be NEGATIVE for the separation to work: collector binds pentlandite harder AND depressant binds pyrrhotite harder",
+  "signs": {
+   "collector_xanthate": {
+    "pbe_kcal": -4.84,
+    "pbe0_kcal": -31.42,
+    "sign_agrees": true,
+    "read": "PBE and PBE0 AGREE on the sign — the direction of the descriptor survives the functional change (magnitudes from PBE remain unreliable, cf. the 12 kcal/mol spin-gap spread of the N6 gate)",
+    "direction": "favourable (negative)"
+   },
+   "baseline_oh": {
+    "pbe_kcal": 7.17,
+    "read": "PBE only; the sign has NOT been checked on a hybrid",
+    "direction": "UNFAVOURABLE (positive) — this reagent class does not separate the two motifs in the expected direction on this model"
+   }
+  },
+  "gate": "incomplete: not enough converged pairs to call the gate",
+  "site_note": "pentlandite_site_contrast = dE_ads(Ni site) - dE_ads(Fe site): negative means the Ni site binds the reagent harder, i.e. the selectivity is Ni-BORNE and a reagent should be designed for Ni; positive means the difference is carried by the Fe site environment instead"
+ }
+}
