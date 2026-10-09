@@ -1,0 +1,69 @@
+{
+ "pure_CH4": {
+  "t_CO2_per_MMscf": 52.7,
+  "t_CH4_per_MMscf": 19.21,
+  "Btu_scf": 1010,
+  "CH4_t_y": 7011,
+  "CO2_full_t_y": 19238,
+  "BE_AR5_DRE0.98": 22779,
+  "BE_AR5_DRE0.95": 28092,
+  "BE_AR5_DRE0.911": 34998,
+  "BE_AR5_DRE0.0": 196318,
+  "BE_AR6_DRE0.98": 23032,
+  "BE_AR6_DRE0.95": 28723,
+  "BE_AR6_DRE0.911": 36121,
+  "BE_AR6_DRE0.0": 208939
+ },
+ "wet_APG": {
+  "t_CO2_per_MMscf": 68.0,
+  "t_CH4_per_MMscf": 15.37,
+  "Btu_scf": 1209,
+  "CH4_t_y": 5609,
+  "CO2_full_t_y": 24816,
+  "BE_AR5_DRE0.98": 27461,
+  "BE_AR5_DRE0.95": 31428,
+  "BE_AR5_DRE0.911": 36586,
+  "BE_AR5_DRE0.0": 157055,
+  "BE_AR6_DRE0.98": 27663,
+  "BE_AR6_DRE0.95": 31933,
+  "BE_AR6_DRE0.911": 37484,
+  "BE_AR6_DRE0.0": 167151
+ },
+ "routes_t_y": {
+  "AM0009_pure": [
+   17699,
+   18661
+  ],
+  "AM0009_wet": [
+   22831,
+   24072
+  ],
+  "fuelswitch_conservative_19.8GWh": [
+   1980,
+   5940
+  ],
+  "fuelswitch_consequential_19.8GWh": [
+   13860,
+   15840
+  ],
+  "fuelswitch_conservative_25.1GWh": [
+   2510,
+   7530
+  ],
+  "fuelswitch_consequential_25.1GWh": [
+   17570,
+   20080
+  ],
+  "fuelswitch_conservative_30.4GWh": [
+   3040,
+   9120
+  ],
+  "fuelswitch_consequential_30.4GWh": [
+   21280,
+   24320
+  ],
+  "mining_slip_DRE0.98": 2356,
+  "mining_slip_DRE0.95": 7067,
+  "mining_slip_DRE0.911": 13192
+ }
+}

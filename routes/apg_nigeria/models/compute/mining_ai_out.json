@@ -1,0 +1,1719 @@
+{
+ "mining": {
+  "hp27.7_A_13.5JTH_pess": {
+   "q": 1,
+   "mw_it": 3.93,
+   "ph": 290.9,
+   "capex": 20.88,
+   "capex_asic": 6.18,
+   "bop": 14.69,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 1.87,
+     "opex": 2.75,
+     "ebitda": -0.88
+    },
+    {
+     "y": 2,
+     "rev": 0.7,
+     "opex": 2.68,
+     "ebitda": -1.98
+    },
+    {
+     "y": 3,
+     "rev": 0.49,
+     "opex": 2.67,
+     "ebitda": -2.18
+    },
+    {
+     "y": 4,
+     "rev": 0.34,
+     "opex": 2.66,
+     "ebitda": -2.32
+    }
+   ],
+   "ebitda_y1": -0.88,
+   "ebitda_avg": -1.84,
+   "npv15": -23.38,
+   "npv20": -23.24,
+   "irr": -57.0,
+   "payback": null,
+   "rev_per_mwh_y1": 67.9,
+   "fixed_site_cost_per_mwh": 81.5,
+   "bop_capital_per_mwh_15": 106.2
+  },
+  "hp27.7_A_13.5JTH_base": {
+   "q": 1,
+   "mw_it": 4.14,
+   "ph": 306.9,
+   "capex": 17.18,
+   "capex_asic": 4.79,
+   "bop": 12.39,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 2.3,
+     "opex": 1.88,
+     "ebitda": 0.42
+    },
+    {
+     "y": 2,
+     "rev": 1.09,
+     "opex": 1.84,
+     "ebitda": -0.75
+    },
+    {
+     "y": 3,
+     "rev": 0.87,
+     "opex": 1.83,
+     "ebitda": -0.96
+    },
+    {
+     "y": 4,
+     "rev": 0.7,
+     "opex": 1.82,
+     "ebitda": -1.12
+    }
+   ],
+   "ebitda_y1": 0.42,
+   "ebitda_avg": -0.6,
+   "npv15": -15.82,
+   "npv20": -16.05,
+   "irr": -35.3,
+   "payback": null,
+   "rev_per_mwh_y1": 72.0,
+   "fixed_site_cost_per_mwh": 48.3,
+   "bop_capital_per_mwh_15": 77.2
+  },
+  "hp27.7_A_13.5JTH_opt": {
+   "q": 1,
+   "mw_it": 4.32,
+   "ph": 320.1,
+   "capex": 13.92,
+   "capex_asic": 3.31,
+   "bop": 10.61,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 2.71,
+     "opex": 1.36,
+     "ebitda": 1.35
+    },
+    {
+     "y": 2,
+     "rev": 1.68,
+     "opex": 1.34,
+     "ebitda": 0.34
+    },
+    {
+     "y": 3,
+     "rev": 1.51,
+     "opex": 1.33,
+     "ebitda": 0.18
+    },
+    {
+     "y": 4,
+     "rev": 1.36,
+     "opex": 1.33,
+     "ebitda": 0.03
+    }
+   ],
+   "ebitda_y1": 1.35,
+   "ebitda_avg": 0.48,
+   "npv15": -9.33,
+   "npv20": -9.89,
+   "irr": -17.4,
+   "payback": null,
+   "rev_per_mwh_y1": 77.0,
+   "fixed_site_cost_per_mwh": 32.6,
+   "bop_capital_per_mwh_15": 60.0
+  },
+  "hp27.7_B_8.9JTH_pess": {
+   "q": 1,
+   "mw_it": 3.93,
+   "ph": 441.3,
+   "capex": 28.48,
+   "capex_asic": 13.79,
+   "bop": 14.69,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 2.83,
+     "opex": 3.29,
+     "ebitda": -0.46
+    },
+    {
+     "y": 2,
+     "rev": 1.07,
+     "opex": 3.2,
+     "ebitda": -2.13
+    },
+    {
+     "y": 3,
+     "rev": 0.75,
+     "opex": 3.18,
+     "ebitda": -2.43
+    },
+    {
+     "y": 4,
+     "rev": 0.52,
+     "opex": 3.17,
+     "ebitda": -2.64
+    }
+   ],
+   "ebitda_y1": -0.46,
+   "ebitda_avg": -1.92,
+   "npv15": -31.09,
+   "npv20": -30.91,
+   "irr": -62.8,
+   "payback": null,
+   "rev_per_mwh_y1": 102.8,
+   "fixed_site_cost_per_mwh": 81.5,
+   "bop_capital_per_mwh_15": 106.2
+  },
+  "hp27.7_B_8.9JTH_base": {
+   "q": 1,
+   "mw_it": 4.14,
+   "ph": 465.6,
+   "capex": 23.56,
+   "capex_asic": 11.17,
+   "bop": 12.39,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 3.49,
+     "opex": 2.26,
+     "ebitda": 1.23
+    },
+    {
+     "y": 2,
+     "rev": 1.65,
+     "opex": 2.19,
+     "ebitda": -0.54
+    },
+    {
+     "y": 3,
+     "rev": 1.32,
+     "opex": 2.18,
+     "ebitda": -0.86
+    },
+    {
+     "y": 4,
+     "rev": 1.06,
+     "opex": 2.17,
+     "ebitda": -1.11
+    }
+   ],
+   "ebitda_y1": 1.23,
+   "ebitda_avg": -0.32,
+   "npv15": -21.27,
+   "npv20": -21.56,
+   "irr": -38.4,
+   "payback": null,
+   "rev_per_mwh_y1": 109.3,
+   "fixed_site_cost_per_mwh": 48.3,
+   "bop_capital_per_mwh_15": 77.2
+  },
+  "hp27.7_B_8.9JTH_opt": {
+   "q": 1,
+   "mw_it": 4.32,
+   "ph": 485.5,
+   "capex": 18.98,
+   "capex_asic": 8.37,
+   "bop": 10.61,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 4.11,
+     "opex": 1.63,
+     "ebitda": 2.48
+    },
+    {
+     "y": 2,
+     "rev": 2.55,
+     "opex": 1.59,
+     "ebitda": 0.96
+    },
+    {
+     "y": 3,
+     "rev": 2.29,
+     "opex": 1.58,
+     "ebitda": 0.71
+    },
+    {
+     "y": 4,
+     "rev": 2.06,
+     "opex": 1.57,
+     "ebitda": 0.49
+    }
+   ],
+   "ebitda_y1": 2.48,
+   "ebitda_avg": 1.16,
+   "npv15": -12.32,
+   "npv20": -13.04,
+   "irr": -18.6,
+   "payback": null,
+   "rev_per_mwh_y1": 116.8,
+   "fixed_site_cost_per_mwh": 32.6,
+   "bop_capital_per_mwh_15": 60.0
+  },
+  "hp39.87_A_13.5JTH_pess": {
+   "q": 1,
+   "mw_it": 3.93,
+   "ph": 290.9,
+   "capex": 20.88,
+   "capex_asic": 6.18,
+   "bop": 14.69,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 2.68,
+     "opex": 2.79,
+     "ebitda": -0.11
+    },
+    {
+     "y": 2,
+     "rev": 1.01,
+     "opex": 2.7,
+     "ebitda": -1.69
+    },
+    {
+     "y": 3,
+     "rev": 0.71,
+     "opex": 2.68,
+     "ebitda": -1.97
+    },
+    {
+     "y": 4,
+     "rev": 0.5,
+     "opex": 2.67,
+     "ebitda": -2.17
+    }
+   ],
+   "ebitda_y1": -0.11,
+   "ebitda_avg": -1.48,
+   "npv15": -22.27,
+   "npv20": -22.2,
+   "irr": -53.8,
+   "payback": null,
+   "rev_per_mwh_y1": 97.4,
+   "fixed_site_cost_per_mwh": 81.5,
+   "bop_capital_per_mwh_15": 106.2
+  },
+  "hp39.87_A_13.5JTH_base": {
+   "q": 1,
+   "mw_it": 4.14,
+   "ph": 306.9,
+   "capex": 17.18,
+   "capex_asic": 4.79,
+   "bop": 12.39,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 3.31,
+     "opex": 1.92,
+     "ebitda": 1.39
+    },
+    {
+     "y": 2,
+     "rev": 1.56,
+     "opex": 1.85,
+     "ebitda": -0.29
+    },
+    {
+     "y": 3,
+     "rev": 1.25,
+     "opex": 1.84,
+     "ebitda": -0.59
+    },
+    {
+     "y": 4,
+     "rev": 1.0,
+     "opex": 1.83,
+     "ebitda": -0.83
+    }
+   ],
+   "ebitda_y1": 1.39,
+   "ebitda_avg": -0.08,
+   "npv15": -14.22,
+   "npv20": -14.57,
+   "irr": -30.3,
+   "payback": null,
+   "rev_per_mwh_y1": 103.6,
+   "fixed_site_cost_per_mwh": 48.3,
+   "bop_capital_per_mwh_15": 77.2
+  },
+  "hp39.87_A_13.5JTH_opt": {
+   "q": 1,
+   "mw_it": 4.32,
+   "ph": 320.1,
+   "capex": 13.92,
+   "capex_asic": 3.31,
+   "bop": 10.61,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 3.9,
+     "opex": 1.39,
+     "ebitda": 2.51
+    },
+    {
+     "y": 2,
+     "rev": 2.42,
+     "opex": 1.36,
+     "ebitda": 1.06
+    },
+    {
+     "y": 3,
+     "rev": 2.17,
+     "opex": 1.35,
+     "ebitda": 0.82
+    },
+    {
+     "y": 4,
+     "rev": 1.96,
+     "opex": 1.34,
+     "ebitda": 0.61
+    }
+   ],
+   "ebitda_y1": 2.51,
+   "ebitda_avg": 1.25,
+   "npv15": -7.2,
+   "npv20": -7.94,
+   "irr": -9.8,
+   "payback": null,
+   "rev_per_mwh_y1": 110.8,
+   "fixed_site_cost_per_mwh": 32.6,
+   "bop_capital_per_mwh_15": 60.0
+  },
+  "hp39.87_B_8.9JTH_pess": {
+   "q": 1,
+   "mw_it": 3.93,
+   "ph": 441.3,
+   "capex": 28.48,
+   "capex_asic": 13.79,
+   "bop": 14.69,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 4.07,
+     "opex": 3.36,
+     "ebitda": 0.71
+    },
+    {
+     "y": 2,
+     "rev": 1.54,
+     "opex": 3.22,
+     "ebitda": -1.69
+    },
+    {
+     "y": 3,
+     "rev": 1.07,
+     "opex": 3.2,
+     "ebitda": -2.12
+    },
+    {
+     "y": 4,
+     "rev": 0.75,
+     "opex": 3.18,
+     "ebitda": -2.43
+    }
+   ],
+   "ebitda_y1": 0.71,
+   "ebitda_avg": -1.38,
+   "npv15": -29.41,
+   "npv20": -29.34,
+   "irr": -58.4,
+   "payback": null,
+   "rev_per_mwh_y1": 147.9,
+   "fixed_site_cost_per_mwh": 81.5,
+   "bop_capital_per_mwh_15": 106.2
+  },
+  "hp39.87_B_8.9JTH_base": {
+   "q": 1,
+   "mw_it": 4.14,
+   "ph": 465.6,
+   "capex": 23.56,
+   "capex_asic": 11.17,
+   "bop": 12.39,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 5.03,
+     "opex": 2.32,
+     "ebitda": 2.7
+    },
+    {
+     "y": 2,
+     "rev": 2.37,
+     "opex": 2.22,
+     "ebitda": 0.15
+    },
+    {
+     "y": 3,
+     "rev": 1.9,
+     "opex": 2.2,
+     "ebitda": -0.3
+    },
+    {
+     "y": 4,
+     "rev": 1.52,
+     "opex": 2.18,
+     "ebitda": -0.67
+    }
+   ],
+   "ebitda_y1": 2.7,
+   "ebitda_avg": 0.47,
+   "npv15": -18.84,
+   "npv20": -19.31,
+   "irr": -32.1,
+   "payback": null,
+   "rev_per_mwh_y1": 157.5,
+   "fixed_site_cost_per_mwh": 48.3,
+   "bop_capital_per_mwh_15": 77.2
+  },
+  "hp39.87_B_8.9JTH_opt": {
+   "q": 1,
+   "mw_it": 4.32,
+   "ph": 485.5,
+   "capex": 18.98,
+   "capex_asic": 8.37,
+   "bop": 10.61,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 5.91,
+     "opex": 1.67,
+     "ebitda": 4.24
+    },
+    {
+     "y": 2,
+     "rev": 3.66,
+     "opex": 1.62,
+     "ebitda": 2.05
+    },
+    {
+     "y": 3,
+     "rev": 3.3,
+     "opex": 1.61,
+     "ebitda": 1.69
+    },
+    {
+     "y": 4,
+     "rev": 2.97,
+     "opex": 1.6,
+     "ebitda": 1.37
+    }
+   ],
+   "ebitda_y1": 4.24,
+   "ebitda_avg": 2.34,
+   "npv15": -9.14,
+   "npv20": -10.13,
+   "irr": -9.4,
+   "payback": null,
+   "rev_per_mwh_y1": 167.9,
+   "fixed_site_cost_per_mwh": 32.6,
+   "bop_capital_per_mwh_15": 60.0
+  },
+  "hp50.0_A_13.5JTH_pess": {
+   "q": 1,
+   "mw_it": 3.93,
+   "ph": 290.9,
+   "capex": 20.88,
+   "capex_asic": 6.18,
+   "bop": 14.69,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 3.37,
+     "opex": 2.83,
+     "ebitda": 0.54
+    },
+    {
+     "y": 2,
+     "rev": 1.27,
+     "opex": 2.71,
+     "ebitda": -1.44
+    },
+    {
+     "y": 3,
+     "rev": 0.89,
+     "opex": 2.69,
+     "ebitda": -1.8
+    },
+    {
+     "y": 4,
+     "rev": 0.62,
+     "opex": 2.68,
+     "ebitda": -2.06
+    }
+   ],
+   "ebitda_y1": 0.54,
+   "ebitda_avg": -1.19,
+   "npv15": -21.34,
+   "npv20": -21.34,
+   "irr": -51.1,
+   "payback": null,
+   "rev_per_mwh_y1": 122.4,
+   "fixed_site_cost_per_mwh": 81.5,
+   "bop_capital_per_mwh_15": 106.2
+  },
+  "hp50.0_A_13.5JTH_base": {
+   "q": 1,
+   "mw_it": 4.14,
+   "ph": 306.9,
+   "capex": 17.18,
+   "capex_asic": 4.79,
+   "bop": 12.39,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 4.16,
+     "opex": 1.96,
+     "ebitda": 2.2
+    },
+    {
+     "y": 2,
+     "rev": 1.96,
+     "opex": 1.87,
+     "ebitda": 0.09
+    },
+    {
+     "y": 3,
+     "rev": 1.57,
+     "opex": 1.85,
+     "ebitda": -0.28
+    },
+    {
+     "y": 4,
+     "rev": 1.26,
+     "opex": 1.84,
+     "ebitda": -0.59
+    }
+   ],
+   "ebitda_y1": 2.2,
+   "ebitda_avg": 0.35,
+   "npv15": -12.88,
+   "npv20": -13.34,
+   "irr": -26.2,
+   "payback": null,
+   "rev_per_mwh_y1": 130.2,
+   "fixed_site_cost_per_mwh": 48.3,
+   "bop_capital_per_mwh_15": 77.2
+  },
+  "hp50.0_A_13.5JTH_opt": {
+   "q": 1,
+   "mw_it": 4.32,
+   "ph": 320.1,
+   "capex": 13.92,
+   "capex_asic": 3.31,
+   "bop": 10.61,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 4.89,
+     "opex": 1.42,
+     "ebitda": 3.47
+    },
+    {
+     "y": 2,
+     "rev": 3.03,
+     "opex": 1.37,
+     "ebitda": 1.66
+    },
+    {
+     "y": 3,
+     "rev": 2.73,
+     "opex": 1.36,
+     "ebitda": 1.36
+    },
+    {
+     "y": 4,
+     "rev": 2.45,
+     "opex": 1.36,
+     "ebitda": 1.1
+    }
+   ],
+   "ebitda_y1": 3.47,
+   "ebitda_avg": 1.9,
+   "npv15": -5.56,
+   "npv20": -6.45,
+   "irr": -4.0,
+   "payback": null,
+   "rev_per_mwh_y1": 138.9,
+   "fixed_site_cost_per_mwh": 32.6,
+   "bop_capital_per_mwh_15": 60.0
+  },
+  "hp50.0_B_8.9JTH_pess": {
+   "q": 1,
+   "mw_it": 3.93,
+   "ph": 441.3,
+   "capex": 28.48,
+   "capex_asic": 13.79,
+   "bop": 14.69,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 5.11,
+     "opex": 3.42,
+     "ebitda": 1.69
+    },
+    {
+     "y": 2,
+     "rev": 1.93,
+     "opex": 3.24,
+     "ebitda": -1.32
+    },
+    {
+     "y": 3,
+     "rev": 1.35,
+     "opex": 3.21,
+     "ebitda": -1.86
+    },
+    {
+     "y": 4,
+     "rev": 0.94,
+     "opex": 3.19,
+     "ebitda": -2.25
+    }
+   ],
+   "ebitda_y1": 1.69,
+   "ebitda_avg": -0.94,
+   "npv15": -28.0,
+   "npv20": -28.03,
+   "irr": -54.7,
+   "payback": null,
+   "rev_per_mwh_y1": 185.7,
+   "fixed_site_cost_per_mwh": 81.5,
+   "bop_capital_per_mwh_15": 106.2
+  },
+  "hp50.0_B_8.9JTH_base": {
+   "q": 1,
+   "mw_it": 4.14,
+   "ph": 465.6,
+   "capex": 23.56,
+   "capex_asic": 11.17,
+   "bop": 12.39,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 6.3,
+     "opex": 2.38,
+     "ebitda": 3.93
+    },
+    {
+     "y": 2,
+     "rev": 2.98,
+     "opex": 2.24,
+     "ebitda": 0.73
+    },
+    {
+     "y": 3,
+     "rev": 2.38,
+     "opex": 2.22,
+     "ebitda": 0.16
+    },
+    {
+     "y": 4,
+     "rev": 1.9,
+     "opex": 2.2,
+     "ebitda": -0.3
+    }
+   ],
+   "ebitda_y1": 3.93,
+   "ebitda_avg": 1.13,
+   "npv15": -16.82,
+   "npv20": -17.44,
+   "irr": -27.0,
+   "payback": null,
+   "rev_per_mwh_y1": 197.2,
+   "fixed_site_cost_per_mwh": 48.3,
+   "bop_capital_per_mwh_15": 77.2
+  },
+  "hp50.0_B_8.9JTH_opt": {
+   "q": 1,
+   "mw_it": 4.32,
+   "ph": 485.5,
+   "capex": 18.98,
+   "capex_asic": 8.37,
+   "bop": 10.61,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 7.42,
+     "opex": 1.71,
+     "ebitda": 5.71
+    },
+    {
+     "y": 2,
+     "rev": 4.6,
+     "opex": 1.64,
+     "ebitda": 2.96
+    },
+    {
+     "y": 3,
+     "rev": 4.14,
+     "opex": 1.63,
+     "ebitda": 2.51
+    },
+    {
+     "y": 4,
+     "rev": 3.72,
+     "opex": 1.62,
+     "ebitda": 2.11
+    }
+   ],
+   "ebitda_y1": 5.71,
+   "ebitda_avg": 3.32,
+   "npv15": -6.65,
+   "npv20": -7.87,
+   "irr": -2.5,
+   "payback": null,
+   "rev_per_mwh_y1": 210.8,
+   "fixed_site_cost_per_mwh": 32.6,
+   "bop_capital_per_mwh_15": 60.0
+  },
+  "q5_hp27.7_B_8.9JTH_pess": {
+   "q": 5,
+   "mw_it": 19.64,
+   "ph": 2206.3,
+   "capex": 126.57,
+   "capex_asic": 68.95,
+   "bop": 57.62,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 14.15,
+     "opex": 12.13,
+     "ebitda": 2.02
+    },
+    {
+     "y": 2,
+     "rev": 5.33,
+     "opex": 11.64,
+     "ebitda": -6.31
+    },
+    {
+     "y": 3,
+     "rev": 3.73,
+     "opex": 11.56,
+     "ebitda": -7.82
+    },
+    {
+     "y": 4,
+     "rev": 2.61,
+     "opex": 11.49,
+     "ebitda": -8.88
+    }
+   ],
+   "ebitda_y1": 2.02,
+   "ebitda_avg": -5.25,
+   "npv15": -129.93,
+   "npv20": -129.75,
+   "irr": -57.6,
+   "payback": null,
+   "rev_per_mwh_y1": 102.8,
+   "fixed_site_cost_per_mwh": 49.9,
+   "bop_capital_per_mwh_15": 83.3
+  },
+  "q5_hp27.7_B_8.9JTH_base": {
+   "q": 5,
+   "mw_it": 20.72,
+   "ph": 2327.8,
+   "capex": 106.11,
+   "capex_asic": 55.87,
+   "bop": 50.25,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 17.46,
+     "opex": 8.24,
+     "ebitda": 9.22
+    },
+    {
+     "y": 2,
+     "rev": 8.24,
+     "opex": 7.88,
+     "ebitda": 0.37
+    },
+    {
+     "y": 3,
+     "rev": 6.6,
+     "opex": 7.81,
+     "ebitda": -1.21
+    },
+    {
+     "y": 4,
+     "rev": 5.28,
+     "opex": 7.76,
+     "ebitda": -2.48
+    }
+   ],
+   "ebitda_y1": 9.22,
+   "ebitda_avg": 1.47,
+   "npv15": -88.55,
+   "npv20": -90.38,
+   "irr": -34.5,
+   "payback": null,
+   "rev_per_mwh_y1": 109.3,
+   "fixed_site_cost_per_mwh": 29.1,
+   "bop_capital_per_mwh_15": 62.6
+  },
+  "q5_hp27.7_B_8.9JTH_opt": {
+   "q": 5,
+   "mw_it": 21.6,
+   "ph": 2427.4,
+   "capex": 86.29,
+   "capex_asic": 41.87,
+   "bop": 44.42,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 20.55,
+     "opex": 5.79,
+     "ebitda": 14.76
+    },
+    {
+     "y": 2,
+     "rev": 12.73,
+     "opex": 5.59,
+     "ebitda": 7.14
+    },
+    {
+     "y": 3,
+     "rev": 11.46,
+     "opex": 5.56,
+     "ebitda": 5.9
+    },
+    {
+     "y": 4,
+     "rev": 10.31,
+     "opex": 5.53,
+     "ebitda": 4.78
+    }
+   ],
+   "ebitda_y1": 14.76,
+   "ebitda_avg": 8.14,
+   "npv15": -48.75,
+   "npv20": -52.61,
+   "irr": -14.3,
+   "payback": null,
+   "rev_per_mwh_y1": 116.8,
+   "fixed_site_cost_per_mwh": 19.3,
+   "bop_capital_per_mwh_15": 50.2
+  },
+  "q5_hp39.87_B_8.9JTH_pess": {
+   "q": 5,
+   "mw_it": 19.64,
+   "ph": 2206.3,
+   "capex": 126.57,
+   "capex_asic": 68.95,
+   "bop": 57.62,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 20.36,
+     "opex": 12.47,
+     "ebitda": 7.89
+    },
+    {
+     "y": 2,
+     "rev": 7.68,
+     "opex": 11.77,
+     "ebitda": -4.1
+    },
+    {
+     "y": 3,
+     "rev": 5.37,
+     "opex": 11.65,
+     "ebitda": -6.27
+    },
+    {
+     "y": 4,
+     "rev": 3.76,
+     "opex": 11.56,
+     "ebitda": -7.8
+    }
+   ],
+   "ebitda_y1": 7.89,
+   "ebitda_avg": -2.57,
+   "npv15": -121.51,
+   "npv20": -121.89,
+   "irr": -52.5,
+   "payback": null,
+   "rev_per_mwh_y1": 148.0,
+   "fixed_site_cost_per_mwh": 49.9,
+   "bop_capital_per_mwh_15": 83.3
+  },
+  "q5_hp39.87_B_8.9JTH_base": {
+   "q": 5,
+   "mw_it": 20.72,
+   "ph": 2327.8,
+   "capex": 106.11,
+   "capex_asic": 55.87,
+   "bop": 50.25,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 25.13,
+     "opex": 8.55,
+     "ebitda": 16.58
+    },
+    {
+     "y": 2,
+     "rev": 11.87,
+     "opex": 8.02,
+     "ebitda": 3.85
+    },
+    {
+     "y": 3,
+     "rev": 9.49,
+     "opex": 7.93,
+     "ebitda": 1.57
+    },
+    {
+     "y": 4,
+     "rev": 7.6,
+     "opex": 7.85,
+     "ebitda": -0.25
+    }
+   ],
+   "ebitda_y1": 16.58,
+   "ebitda_avg": 5.44,
+   "npv15": -76.41,
+   "npv20": -79.15,
+   "irr": -27.5,
+   "payback": null,
+   "rev_per_mwh_y1": 157.3,
+   "fixed_site_cost_per_mwh": 29.1,
+   "bop_capital_per_mwh_15": 62.6
+  },
+  "q5_hp39.87_B_8.9JTH_opt": {
+   "q": 5,
+   "mw_it": 21.6,
+   "ph": 2427.4,
+   "capex": 86.29,
+   "capex_asic": 41.87,
+   "bop": 44.42,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 29.57,
+     "opex": 6.01,
+     "ebitda": 23.56
+    },
+    {
+     "y": 2,
+     "rev": 18.32,
+     "opex": 5.73,
+     "ebitda": 12.59
+    },
+    {
+     "y": 3,
+     "rev": 16.49,
+     "opex": 5.69,
+     "ebitda": 10.8
+    },
+    {
+     "y": 4,
+     "rev": 14.84,
+     "opex": 5.64,
+     "ebitda": 9.2
+    }
+   ],
+   "ebitda_y1": 23.56,
+   "ebitda_avg": 14.04,
+   "npv15": -33.78,
+   "npv20": -38.97,
+   "irr": -4.8,
+   "payback": null,
+   "rev_per_mwh_y1": 168.0,
+   "fixed_site_cost_per_mwh": 19.3,
+   "bop_capital_per_mwh_15": 50.2
+  },
+  "q5_hp50.0_B_8.9JTH_pess": {
+   "q": 5,
+   "mw_it": 19.64,
+   "ph": 2206.3,
+   "capex": 126.57,
+   "capex_asic": 68.95,
+   "bop": 57.62,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 25.54,
+     "opex": 12.75,
+     "ebitda": 12.78
+    },
+    {
+     "y": 2,
+     "rev": 9.63,
+     "opex": 11.88,
+     "ebitda": -2.25
+    },
+    {
+     "y": 3,
+     "rev": 6.74,
+     "opex": 11.72,
+     "ebitda": -4.98
+    },
+    {
+     "y": 4,
+     "rev": 4.72,
+     "opex": 11.61,
+     "ebitda": -6.89
+    }
+   ],
+   "ebitda_y1": 12.78,
+   "ebitda_avg": -0.34,
+   "npv15": -114.5,
+   "npv20": -115.36,
+   "irr": -48.4,
+   "payback": null,
+   "rev_per_mwh_y1": 185.6,
+   "fixed_site_cost_per_mwh": 49.9,
+   "bop_capital_per_mwh_15": 83.3
+  },
+  "q5_hp50.0_B_8.9JTH_base": {
+   "q": 5,
+   "mw_it": 20.72,
+   "ph": 2327.8,
+   "capex": 106.11,
+   "capex_asic": 55.87,
+   "bop": 50.25,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 31.52,
+     "opex": 8.81,
+     "ebitda": 22.71
+    },
+    {
+     "y": 2,
+     "rev": 14.88,
+     "opex": 8.14,
+     "ebitda": 6.74
+    },
+    {
+     "y": 3,
+     "rev": 11.91,
+     "opex": 8.02,
+     "ebitda": 3.88
+    },
+    {
+     "y": 4,
+     "rev": 9.52,
+     "opex": 7.93,
+     "ebitda": 1.6
+    }
+   ],
+   "ebitda_y1": 22.71,
+   "ebitda_avg": 8.73,
+   "npv15": -67.41,
+   "npv20": -70.85,
+   "irr": -22.2,
+   "payback": null,
+   "rev_per_mwh_y1": 197.4,
+   "fixed_site_cost_per_mwh": 29.1,
+   "bop_capital_per_mwh_15": 62.6
+  },
+  "q5_hp50.0_B_8.9JTH_opt": {
+   "q": 5,
+   "mw_it": 21.6,
+   "ph": 2427.4,
+   "capex": 86.29,
+   "capex_asic": 41.87,
+   "bop": 44.42,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 37.09,
+     "opex": 6.2,
+     "ebitda": 30.89
+    },
+    {
+     "y": 2,
+     "rev": 22.98,
+     "opex": 5.85,
+     "ebitda": 17.13
+    },
+    {
+     "y": 3,
+     "rev": 20.68,
+     "opex": 5.79,
+     "ebitda": 14.89
+    },
+    {
+     "y": 4,
+     "rev": 18.61,
+     "opex": 5.74,
+     "ebitda": 12.87
+    }
+   ],
+   "ebitda_y1": 30.89,
+   "ebitda_avg": 18.95,
+   "npv15": -21.93,
+   "npv20": -28.17,
+   "irr": 2.4,
+   "payback": 3.8,
+   "rev_per_mwh_y1": 210.7,
+   "fixed_site_cost_per_mwh": 19.3,
+   "bop_capital_per_mwh_15": 50.2
+  },
+  "q15_hp27.7_B_8.9JTH_pess": {
+   "q": 15,
+   "mw_it": 58.91,
+   "ph": 6619.0,
+   "capex": 356.18,
+   "capex_asic": 206.84,
+   "bop": 149.33,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 42.44,
+     "opex": 32.24,
+     "ebitda": 10.2
+    },
+    {
+     "y": 2,
+     "rev": 16.0,
+     "opex": 30.79,
+     "ebitda": -14.79
+    },
+    {
+     "y": 3,
+     "rev": 11.2,
+     "opex": 30.52,
+     "ebitda": -19.32
+    },
+    {
+     "y": 4,
+     "rev": 7.84,
+     "opex": 30.34,
+     "ebitda": -22.5
+    }
+   ],
+   "ebitda_y1": 10.2,
+   "ebitda_avg": -11.6,
+   "npv15": -358.44,
+   "npv20": -358.37,
+   "irr": -57.1,
+   "payback": null,
+   "rev_per_mwh_y1": 102.8,
+   "fixed_site_cost_per_mwh": 39.9,
+   "bop_capital_per_mwh_15": 72.0
+  },
+  "q15_hp27.7_B_8.9JTH_base": {
+   "q": 15,
+   "mw_it": 62.15,
+   "ph": 6983.5,
+   "capex": 298.86,
+   "capex_asic": 167.6,
+   "bop": 131.26,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 52.38,
+     "opex": 21.77,
+     "ebitda": 30.61
+    },
+    {
+     "y": 2,
+     "rev": 24.73,
+     "opex": 20.66,
+     "ebitda": 4.07
+    },
+    {
+     "y": 3,
+     "rev": 19.79,
+     "opex": 20.47,
+     "ebitda": -0.68
+    },
+    {
+     "y": 4,
+     "rev": 15.83,
+     "opex": 20.31,
+     "ebitda": -4.48
+    }
+   ],
+   "ebitda_y1": 30.61,
+   "ebitda_avg": 7.38,
+   "npv15": -242.15,
+   "npv20": -247.76,
+   "irr": -33.5,
+   "payback": null,
+   "rev_per_mwh_y1": 109.3,
+   "fixed_site_cost_per_mwh": 22.9,
+   "bop_capital_per_mwh_15": 54.5
+  },
+  "q15_hp27.7_B_8.9JTH_opt": {
+   "q": 15,
+   "mw_it": 64.81,
+   "ph": 7282.2,
+   "capex": 242.49,
+   "capex_asic": 125.62,
+   "bop": 116.87,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 61.64,
+     "opex": 15.07,
+     "ebitda": 46.57
+    },
+    {
+     "y": 2,
+     "rev": 38.19,
+     "opex": 14.48,
+     "ebitda": 23.71
+    },
+    {
+     "y": 3,
+     "rev": 34.37,
+     "opex": 14.39,
+     "ebitda": 19.98
+    },
+    {
+     "y": 4,
+     "rev": 30.93,
+     "opex": 14.3,
+     "ebitda": 16.63
+    }
+   ],
+   "ebitda_y1": 46.57,
+   "ebitda_avg": 26.72,
+   "npv15": -129.04,
+   "npv20": -140.44,
+   "irr": -12.7,
+   "payback": null,
+   "rev_per_mwh_y1": 116.7,
+   "fixed_site_cost_per_mwh": 14.9,
+   "bop_capital_per_mwh_15": 44.0
+  },
+  "q15_hp39.87_B_8.9JTH_pess": {
+   "q": 15,
+   "mw_it": 58.91,
+   "ph": 6619.0,
+   "capex": 356.18,
+   "capex_asic": 206.84,
+   "bop": 149.33,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 61.09,
+     "opex": 33.27,
+     "ebitda": 27.82
+    },
+    {
+     "y": 2,
+     "rev": 23.03,
+     "opex": 31.17,
+     "ebitda": -8.15
+    },
+    {
+     "y": 3,
+     "rev": 16.12,
+     "opex": 30.79,
+     "ebitda": -14.67
+    },
+    {
+     "y": 4,
+     "rev": 11.28,
+     "opex": 30.53,
+     "ebitda": -19.24
+    }
+   ],
+   "ebitda_y1": 27.82,
+   "ebitda_avg": -3.56,
+   "npv15": -333.18,
+   "npv20": -334.82,
+   "irr": -51.5,
+   "payback": null,
+   "rev_per_mwh_y1": 148.0,
+   "fixed_site_cost_per_mwh": 39.9,
+   "bop_capital_per_mwh_15": 72.0
+  },
+  "q15_hp39.87_B_8.9JTH_base": {
+   "q": 15,
+   "mw_it": 62.15,
+   "ph": 6983.5,
+   "capex": 298.86,
+   "capex_asic": 167.6,
+   "bop": 131.26,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 75.39,
+     "opex": 22.69,
+     "ebitda": 52.7
+    },
+    {
+     "y": 2,
+     "rev": 35.6,
+     "opex": 21.1,
+     "ebitda": 14.5
+    },
+    {
+     "y": 3,
+     "rev": 28.48,
+     "opex": 20.81,
+     "ebitda": 7.67
+    },
+    {
+     "y": 4,
+     "rev": 22.79,
+     "opex": 20.59,
+     "ebitda": 2.2
+    }
+   ],
+   "ebitda_y1": 52.7,
+   "ebitda_avg": 19.27,
+   "npv15": -205.75,
+   "npv20": -214.05,
+   "irr": -26.0,
+   "payback": null,
+   "rev_per_mwh_y1": 157.3,
+   "fixed_site_cost_per_mwh": 22.9,
+   "bop_capital_per_mwh_15": 54.5
+  },
+  "q15_hp39.87_B_8.9JTH_opt": {
+   "q": 15,
+   "mw_it": 64.81,
+   "ph": 7282.2,
+   "capex": 242.49,
+   "capex_asic": 125.62,
+   "bop": 116.87,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 88.72,
+     "opex": 15.75,
+     "ebitda": 72.97
+    },
+    {
+     "y": 2,
+     "rev": 54.97,
+     "opex": 14.9,
+     "ebitda": 40.07
+    },
+    {
+     "y": 3,
+     "rev": 49.47,
+     "opex": 14.77,
+     "ebitda": 34.71
+    },
+    {
+     "y": 4,
+     "rev": 44.52,
+     "opex": 14.64,
+     "ebitda": 29.88
+    }
+   ],
+   "ebitda_y1": 72.97,
+   "ebitda_avg": 44.41,
+   "npv15": -84.26,
+   "npv20": -99.64,
+   "irr": -2.6,
+   "payback": null,
+   "rev_per_mwh_y1": 168.0,
+   "fixed_site_cost_per_mwh": 14.9,
+   "bop_capital_per_mwh_15": 44.0
+  },
+  "q15_hp50.0_B_8.9JTH_pess": {
+   "q": 15,
+   "mw_it": 58.91,
+   "ph": 6619.0,
+   "capex": 356.18,
+   "capex_asic": 206.84,
+   "bop": 149.33,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 76.61,
+     "opex": 34.12,
+     "ebitda": 42.49
+    },
+    {
+     "y": 2,
+     "rev": 28.88,
+     "opex": 31.49,
+     "ebitda": -2.62
+    },
+    {
+     "y": 3,
+     "rev": 20.21,
+     "opex": 31.02,
+     "ebitda": -10.8
+    },
+    {
+     "y": 4,
+     "rev": 14.15,
+     "opex": 30.68,
+     "ebitda": -16.53
+    }
+   ],
+   "ebitda_y1": 42.49,
+   "ebitda_avg": 3.14,
+   "npv15": -312.15,
+   "npv20": -315.21,
+   "irr": -47.0,
+   "payback": null,
+   "rev_per_mwh_y1": 185.6,
+   "fixed_site_cost_per_mwh": 39.9,
+   "bop_capital_per_mwh_15": 72.0
+  },
+  "q15_hp50.0_B_8.9JTH_base": {
+   "q": 15,
+   "mw_it": 62.15,
+   "ph": 6983.5,
+   "capex": 298.86,
+   "capex_asic": 167.6,
+   "bop": 131.26,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 94.55,
+     "opex": 23.46,
+     "ebitda": 71.09
+    },
+    {
+     "y": 2,
+     "rev": 44.65,
+     "opex": 21.46,
+     "ebitda": 23.19
+    },
+    {
+     "y": 3,
+     "rev": 35.72,
+     "opex": 21.1,
+     "ebitda": 14.61
+    },
+    {
+     "y": 4,
+     "rev": 28.57,
+     "opex": 20.82,
+     "ebitda": 7.76
+    }
+   ],
+   "ebitda_y1": 71.09,
+   "ebitda_avg": 29.16,
+   "npv15": -180.2,
+   "npv20": -190.55,
+   "irr": -20.5,
+   "payback": null,
+   "rev_per_mwh_y1": 197.3,
+   "fixed_site_cost_per_mwh": 22.9,
+   "bop_capital_per_mwh_15": 54.5
+  },
+  "q15_hp50.0_B_8.9JTH_opt": {
+   "q": 15,
+   "mw_it": 64.81,
+   "ph": 7282.2,
+   "capex": 242.49,
+   "capex_asic": 125.62,
+   "bop": 116.87,
+   "rows": [
+    {
+     "y": 1,
+     "rev": 111.26,
+     "opex": 16.31,
+     "ebitda": 94.95
+    },
+    {
+     "y": 2,
+     "rev": 68.93,
+     "opex": 15.25,
+     "ebitda": 53.68
+    },
+    {
+     "y": 3,
+     "rev": 62.04,
+     "opex": 15.08,
+     "ebitda": 46.96
+    },
+    {
+     "y": 4,
+     "rev": 55.84,
+     "opex": 14.92,
+     "ebitda": 40.91
+    }
+   ],
+   "ebitda_y1": 94.95,
+   "ebitda_avg": 59.12,
+   "npv15": -50.57,
+   "npv20": -68.95,
+   "irr": 4.6,
+   "payback": 3.7,
+   "rev_per_mwh_y1": 210.7,
+   "fixed_site_cost_per_mwh": 14.9,
+   "bop_capital_per_mwh_15": 44.0
+  }
+ },
+ "corpus_screen": {
+  "capex": 9.02,
+  "asic": 4.772571428571429,
+  "gen": 3.248,
+  "infra": 1.0,
+  "audit_literal": [
+   35.49,
+   40.53
+  ],
+  "audit_justified": [
+   15.68,
+   17.86
+  ],
+  "net_ebitda_hp50": [
+   0.78,
+   3.5
+  ],
+  "net_ebitda_hp27.7": [
+   -0.77,
+   1.94
+  ],
+  "net_ebitda_hp50_om_x1.7_2.4": [
+   [
+    0.35,
+    3.06
+   ],
+   [
+    -0.08,
+    2.63
+   ]
+  ],
+  "net_ebitda_hp27.7_om_x2.4_capex_x2.4": [
+   -5.05,
+   1.46
+  ],
+  "net_ebitda_hp50_om_x2.4_capex_x2.4": [
+   -3.87,
+   2.63
+  ]
+ },
+ "hosting": {
+  "0.05_pess": {
+   "price": 0.05,
+   "bop": 14.69,
+   "rev": 1.38,
+   "opex": 2.24,
+   "ebitda": -0.86,
+   "npv15": -19.03,
+   "irr": null
+  },
+  "0.05_base": {
+   "price": 0.05,
+   "bop": 12.39,
+   "rev": 1.6,
+   "opex": 1.54,
+   "ebitda": 0.05,
+   "npv15": -12.12,
+   "irr": -35.9
+  },
+  "0.05_opt": {
+   "price": 0.05,
+   "bop": 10.61,
+   "rev": 1.76,
+   "opex": 1.15,
+   "ebitda": 0.61,
+   "npv15": -7.53,
+   "irr": -8.9
+  },
+  "0.07_pess": {
+   "price": 0.07,
+   "bop": 14.69,
+   "rev": 1.93,
+   "opex": 2.24,
+   "ebitda": -0.31,
+   "npv15": -16.26,
+   "irr": null
+  },
+  "0.07_base": {
+   "price": 0.07,
+   "bop": 12.39,
+   "rev": 2.23,
+   "opex": 1.54,
+   "ebitda": 0.69,
+   "npv15": -8.92,
+   "irr": -9.4
+  },
+  "0.07_opt": {
+   "price": 0.07,
+   "bop": 10.61,
+   "rev": 2.46,
+   "opex": 1.15,
+   "ebitda": 1.32,
+   "npv15": -4.44,
+   "irr": 2.8
+  },
+  "0.1_pess": {
+   "price": 0.1,
+   "bop": 14.69,
+   "rev": 2.75,
+   "opex": 2.24,
+   "ebitda": 0.51,
+   "npv15": -12.12,
+   "irr": -15.6
+  },
+  "0.1_base": {
+   "price": 0.1,
+   "bop": 12.39,
+   "rev": 3.19,
+   "opex": 1.54,
+   "ebitda": 1.65,
+   "npv15": -4.82,
+   "irr": 3.8
+  },
+  "0.1_opt": {
+   "price": 0.1,
+   "bop": 10.61,
+   "rev": 3.52,
+   "opex": 1.15,
+   "ebitda": 2.37,
+   "npv15": -0.94,
+   "irr": 12.6
+  }
+ },
+ "ai": {
+  "pess": {
+   "mw_it": 2.92,
+   "gpus": 1459,
+   "capex": 144.9,
+   "gpu_capex": 112.4,
+   "rev": 19.2,
+   "opex": 11.3,
+   "ebitda": 7.8,
+   "energy_share_of_cost": 0.016,
+   "npv15": -109.5,
+   "npv20": -113.6,
+   "irr": -25.8,
+   "payback": 18.5
+  },
+  "base": {
+   "mw_it": 3.13,
+   "gpus": 1567,
+   "capex": 133.8,
+   "gpu_capex": 106.9,
+   "rev": 28.8,
+   "opex": 8.8,
+   "ebitda": 20.1,
+   "energy_share_of_cost": 0.02,
+   "npv15": -53.7,
+   "npv20": -63.4,
+   "irr": -1.7,
+   "payback": 6.7
+  },
+  "opt": {
+   "mw_it": 3.39,
+   "gpus": 1692,
+   "capex": 123.2,
+   "gpu_capex": 102.4,
+   "rev": 50.4,
+   "opex": 6.4,
+   "ebitda": 44.0,
+   "energy_share_of_cost": 0.02,
+   "npv15": 16.1,
+   "npv20": -0.1,
+   "irr": 20.0,
+   "payback": 2.8
+  }
+ }
+}

@@ -1,0 +1,728 @@
+{
+ "1MMscfd_low": {
+  "sc": "low",
+  "q": 1,
+  "power": true,
+  "capex": 44.1,
+  "capex_parts": {
+   "pyro": 24.0,
+   "melt": 3.52,
+   "purif": 1.0,
+   "gen": 6.78,
+   "cond": 1.7,
+   "line": 5.6,
+   "dev": 1.5
+  },
+  "balance": {
+   "fuel_to_gen_kj": 373.3,
+   "share_of_direct": 0.441,
+   "mw_gross": 2.05,
+   "mw_net": 1.8,
+   "c_t_y_full": 3614,
+   "h2_t_y": 1369,
+   "h2_burn_share_for_heat": 0.52
+  },
+  "price_usd_kwh": 0.188,
+  "y2": {
+   "t": 2,
+   "c_t": 2439,
+   "gwh": 6.1,
+   "rev_c": 0.24,
+   "rev_e": 1.04,
+   "rev_cr": 0.0,
+   "co2e_kt": 2.8,
+   "opex": 4.99,
+   "ebitda": -3.71
+  },
+  "ebitda_y2": -3.71,
+  "simple_payback": null,
+  "dcf_payback_yr": null,
+  "npv15": -63.66,
+  "npv20": -60.4,
+  "irr": null
+ },
+ "5MMscfd_low": {
+  "sc": "low",
+  "q": 5,
+  "power": true,
+  "capex": 149.07,
+  "capex_parts": {
+   "pyro": 86.97,
+   "melt": 12.76,
+   "purif": 3.62,
+   "gen": 30.51,
+   "cond": 2.5,
+   "line": 11.2,
+   "dev": 1.5
+  },
+  "balance": {
+   "fuel_to_gen_kj": 373.3,
+   "share_of_direct": 0.441,
+   "mw_gross": 2.05,
+   "mw_net": 1.8,
+   "c_t_y_full": 3614,
+   "h2_t_y": 1369,
+   "h2_burn_share_for_heat": 0.52
+  },
+  "price_usd_kwh": 0.109,
+  "y2": {
+   "t": 2,
+   "c_t": 12197,
+   "gwh": 41.4,
+   "rev_c": 1.22,
+   "rev_e": 3.95,
+   "rev_cr": 0.0,
+   "co2e_kt": 13.8,
+   "opex": 15.33,
+   "ebitda": -10.16
+  },
+  "ebitda_y2": -10.16,
+  "simple_payback": null,
+  "dcf_payback_yr": null,
+  "npv15": -203.18,
+  "npv20": -194.15,
+  "irr": null
+ },
+ "15MMscfd_low": {
+  "sc": "low",
+  "q": 15,
+  "power": true,
+  "capex": 358.66,
+  "capex_parts": {
+   "pyro": 209.45,
+   "melt": 30.72,
+   "purif": 8.73,
+   "gen": 81.36,
+   "cond": 4.5,
+   "line": 22.4,
+   "dev": 1.5
+  },
+  "balance": {
+   "fuel_to_gen_kj": 373.3,
+   "share_of_direct": 0.441,
+   "mw_gross": 2.05,
+   "mw_net": 1.8,
+   "c_t_y_full": 3614,
+   "h2_t_y": 1369,
+   "h2_burn_share_for_heat": 0.52
+  },
+  "price_usd_kwh": 0.086,
+  "y2": {
+   "t": 2,
+   "c_t": 36592,
+   "gwh": 133.3,
+   "rev_c": 3.66,
+   "rev_e": 9.93,
+   "rev_cr": 0.0,
+   "co2e_kt": 41.4,
+   "opex": 35.75,
+   "ebitda": -22.17
+  },
+  "ebitda_y2": -22.17,
+  "simple_payback": null,
+  "dcf_payback_yr": null,
+  "npv15": -476.66,
+  "npv20": -456.96,
+  "irr": null
+ },
+ "1MMscfd_low_carbon_only": {
+  "sc": "low",
+  "q": 1,
+  "power": false,
+  "capex": 33.19,
+  "capex_parts": {
+   "pyro": 24.0,
+   "melt": 3.52,
+   "purif": 1.0,
+   "gen": 1.47,
+   "cond": 1.7,
+   "line": 0.0,
+   "dev": 1.5
+  },
+  "balance": {
+   "fuel_to_gen_kj": 373.3,
+   "share_of_direct": 0.441,
+   "mw_gross": 2.05,
+   "mw_net": 1.8,
+   "c_t_y_full": 3614,
+   "h2_t_y": 1369,
+   "h2_burn_share_for_heat": 0.52
+  },
+  "price_usd_kwh": 0.188,
+  "y2": {
+   "t": 2,
+   "c_t": 2439,
+   "gwh": 0.0,
+   "rev_c": 0.24,
+   "rev_e": 0.0,
+   "rev_cr": 0.0,
+   "co2e_kt": 2.8,
+   "opex": 4.28,
+   "ebitda": -4.03
+  },
+  "ebitda_y2": -4.03,
+  "simple_payback": null,
+  "dcf_payback_yr": null,
+  "npv15": -53.0,
+  "npv20": -49.75,
+  "irr": null
+ },
+ "1MMscfd_base": {
+  "sc": "base",
+  "q": 1,
+  "power": true,
+  "capex": 23.97,
+  "capex_parts": {
+   "pyro": 11.2,
+   "melt": 1.52,
+   "purif": 0.6,
+   "gen": 5.6,
+   "cond": 1.2,
+   "line": 2.85,
+   "dev": 1.0
+  },
+  "balance": {
+   "fuel_to_gen_kj": 365.0,
+   "share_of_direct": 0.455,
+   "mw_gross": 2.11,
+   "mw_net": 1.9,
+   "c_t_y_full": 4430,
+   "h2_t_y": 1588,
+   "h2_burn_share_for_heat": 0.38
+  },
+  "price_usd_kwh": 0.241,
+  "y2": {
+   "t": 2,
+   "c_t": 3577,
+   "gwh": 9.4,
+   "rev_c": 0.87,
+   "rev_e": 2.15,
+   "rev_cr": 0.07,
+   "co2e_kt": 13.2,
+   "opex": 2.79,
+   "ebitda": 0.29
+  },
+  "ebitda_y2": 0.29,
+  "simple_payback": 82.7,
+  "dcf_payback_yr": null,
+  "npv15": -23.97,
+  "npv20": -24.1,
+  "irr": -21.5
+ },
+ "5MMscfd_base": {
+  "sc": "base",
+  "q": 5,
+  "power": true,
+  "capex": 82.19,
+  "capex_parts": {
+   "pyro": 40.59,
+   "melt": 5.51,
+   "purif": 2.17,
+   "gen": 25.22,
+   "cond": 2.0,
+   "line": 5.7,
+   "dev": 1.0
+  },
+  "balance": {
+   "fuel_to_gen_kj": 365.0,
+   "share_of_direct": 0.455,
+   "mw_gross": 2.11,
+   "mw_net": 1.9,
+   "c_t_y_full": 4430,
+   "h2_t_y": 1588,
+   "h2_burn_share_for_heat": 0.38
+  },
+  "price_usd_kwh": 0.165,
+  "y2": {
+   "t": 2,
+   "c_t": 17886,
+   "gwh": 52.8,
+   "rev_c": 3.73,
+   "rev_e": 8.06,
+   "rev_cr": 0.33,
+   "co2e_kt": 65.8,
+   "opex": 8.05,
+   "ebitda": 4.06
+  },
+  "ebitda_y2": 4.06,
+  "simple_payback": 20.2,
+  "dcf_payback_yr": null,
+  "npv15": -68.05,
+  "npv20": -70.81,
+  "irr": -11.9
+ },
+ "15MMscfd_base": {
+  "sc": "base",
+  "q": 15,
+  "power": true,
+  "capex": 199.9,
+  "capex_parts": {
+   "pyro": 97.74,
+   "melt": 13.27,
+   "purif": 5.24,
+   "gen": 67.26,
+   "cond": 4.0,
+   "line": 11.4,
+   "dev": 1.0
+  },
+  "balance": {
+   "fuel_to_gen_kj": 365.0,
+   "share_of_direct": 0.455,
+   "mw_gross": 2.11,
+   "mw_net": 1.9,
+   "c_t_y_full": 4430,
+   "h2_t_y": 1588,
+   "h2_burn_share_for_heat": 0.38
+  },
+  "price_usd_kwh": 0.12,
+  "y2": {
+   "t": 2,
+   "c_t": 53658,
+   "gwh": 169.0,
+   "rev_c": 10.88,
+   "rev_e": 18.09,
+   "rev_cr": 0.99,
+   "co2e_kt": 197.4,
+   "opex": 18.28,
+   "ebitda": 11.68
+  },
+  "ebitda_y2": 11.68,
+  "simple_payback": 17.1,
+  "dcf_payback_yr": null,
+  "npv15": -156.27,
+  "npv20": -164.49,
+  "irr": -9.8
+ },
+ "1MMscfd_base_carbon_only": {
+  "sc": "base",
+  "q": 1,
+  "power": false,
+  "capex": 16.79,
+  "capex_parts": {
+   "pyro": 11.2,
+   "melt": 1.52,
+   "purif": 0.6,
+   "gen": 1.27,
+   "cond": 1.2,
+   "line": 0.0,
+   "dev": 1.0
+  },
+  "balance": {
+   "fuel_to_gen_kj": 365.0,
+   "share_of_direct": 0.455,
+   "mw_gross": 2.11,
+   "mw_net": 1.9,
+   "c_t_y_full": 4430,
+   "h2_t_y": 1588,
+   "h2_burn_share_for_heat": 0.38
+  },
+  "price_usd_kwh": 0.241,
+  "y2": {
+   "t": 2,
+   "c_t": 3577,
+   "gwh": 0.0,
+   "rev_c": 0.87,
+   "rev_e": 0.0,
+   "rev_cr": 0.07,
+   "co2e_kt": 13.2,
+   "opex": 2.41,
+   "ebitda": -1.48
+  },
+  "ebitda_y2": -1.48,
+  "simple_payback": null,
+  "dcf_payback_yr": null,
+  "npv15": -24.02,
+  "npv20": -22.94,
+  "irr": -64.5
+ },
+ "1MMscfd_high": {
+  "sc": "high",
+  "q": 1,
+  "power": true,
+  "capex": 18.03,
+  "capex_parts": {
+   "pyro": 9.6,
+   "melt": 0.4,
+   "purif": 0.3,
+   "gen": 4.89,
+   "cond": 0.8,
+   "line": 1.34,
+   "dev": 0.7
+  },
+  "balance": {
+   "fuel_to_gen_kj": 387.9,
+   "share_of_direct": 0.509,
+   "mw_gross": 2.36,
+   "mw_net": 2.17,
+   "c_t_y_full": 5550,
+   "h2_t_y": 1734,
+   "h2_burn_share_for_heat": 0.27
+  },
+  "price_usd_kwh": 0.301,
+  "y2": {
+   "t": 2,
+   "c_t": 5106,
+   "gwh": 14.5,
+   "rev_c": 2.46,
+   "rev_e": 4.23,
+   "rev_cr": 0.36,
+   "co2e_kt": 30.0,
+   "opex": 1.92,
+   "ebitda": 5.13
+  },
+  "ebitda_y2": 5.13,
+  "simple_payback": 3.5,
+  "dcf_payback_yr": 5,
+  "npv15": 1.74,
+  "npv20": -1.9,
+  "irr": 17.2
+ },
+ "5MMscfd_high": {
+  "sc": "high",
+  "q": 5,
+  "power": true,
+  "capex": 64.29,
+  "capex_parts": {
+   "pyro": 34.79,
+   "melt": 1.45,
+   "purif": 1.09,
+   "gen": 21.98,
+   "cond": 1.6,
+   "line": 2.68,
+   "dev": 0.7
+  },
+  "balance": {
+   "fuel_to_gen_kj": 387.9,
+   "share_of_direct": 0.509,
+   "mw_gross": 2.36,
+   "mw_net": 2.17,
+   "c_t_y_full": 5550,
+   "h2_t_y": 1734,
+   "h2_burn_share_for_heat": 0.27
+  },
+  "price_usd_kwh": 0.244,
+  "y2": {
+   "t": 2,
+   "c_t": 25530,
+   "gwh": 73.7,
+   "rev_c": 9.61,
+   "rev_e": 17.18,
+   "rev_cr": 1.8,
+   "co2e_kt": 150.0,
+   "opex": 5.49,
+   "ebitda": 23.11
+  },
+  "ebitda_y2": 23.11,
+  "simple_payback": 2.8,
+  "dcf_payback_yr": 5,
+  "npv15": 21.01,
+  "npv20": 5.48,
+  "irr": 22.2
+ },
+ "15MMscfd_high": {
+  "sc": "high",
+  "q": 15,
+  "power": true,
+  "capex": 158.17,
+  "capex_parts": {
+   "pyro": 83.78,
+   "melt": 3.49,
+   "purif": 2.62,
+   "gen": 58.62,
+   "cond": 3.6,
+   "line": 5.36,
+   "dev": 0.7
+  },
+  "balance": {
+   "fuel_to_gen_kj": 387.9,
+   "share_of_direct": 0.509,
+   "mw_gross": 2.36,
+   "mw_net": 2.17,
+   "c_t_y_full": 5550,
+   "h2_t_y": 1734,
+   "h2_burn_share_for_heat": 0.27
+  },
+  "price_usd_kwh": 0.179,
+  "y2": {
+   "t": 2,
+   "c_t": 76590,
+   "gwh": 225.7,
+   "rev_c": 27.48,
+   "rev_e": 37.11,
+   "rev_cr": 5.4,
+   "co2e_kt": 450.1,
+   "opex": 12.31,
+   "ebitda": 57.68
+  },
+  "ebitda_y2": 57.68,
+  "simple_payback": 2.7,
+  "dcf_payback_yr": 5,
+  "npv15": 54.44,
+  "npv20": 15.79,
+  "irr": 22.6
+ },
+ "1MMscfd_high_carbon_only": {
+  "sc": "high",
+  "q": 1,
+  "power": false,
+  "capex": 12.88,
+  "capex_parts": {
+   "pyro": 9.6,
+   "melt": 0.4,
+   "purif": 0.3,
+   "gen": 1.08,
+   "cond": 0.8,
+   "line": 0.0,
+   "dev": 0.7
+  },
+  "balance": {
+   "fuel_to_gen_kj": 387.9,
+   "share_of_direct": 0.509,
+   "mw_gross": 2.36,
+   "mw_net": 2.17,
+   "c_t_y_full": 5550,
+   "h2_t_y": 1734,
+   "h2_burn_share_for_heat": 0.27
+  },
+  "price_usd_kwh": 0.301,
+  "y2": {
+   "t": 2,
+   "c_t": 5106,
+   "gwh": 0.0,
+   "rev_c": 2.46,
+   "rev_e": 0.0,
+   "rev_cr": 0.36,
+   "co2e_kt": 30.0,
+   "opex": 1.69,
+   "ebitda": 1.13
+  },
+  "ebitda_y2": 1.13,
+  "simple_payback": 11.4,
+  "dcf_payback_yr": 10,
+  "npv15": -7.08,
+  "npv20": -8.26,
+  "irr": 1.0
+ },
+ "sens_1MMscfd_base": {
+  "c_net_0": {
+   "capex": 23.97,
+   "ebitda_y2": -0.58,
+   "simple_payback": null,
+   "npv15": -27.67,
+   "npv20": -27.2,
+   "irr": -33.5
+  },
+  "c_net_100": {
+   "capex": 23.97,
+   "ebitda_y2": -0.02,
+   "simple_payback": null,
+   "npv15": -25.19,
+   "npv20": -25.12,
+   "irr": -24.8
+  },
+  "c_net_400_corpus": {
+   "capex": 23.97,
+   "ebitda_y2": 0.91,
+   "simple_payback": 26.3,
+   "npv15": -21.52,
+   "npv20": -22.05,
+   "irr": -15.7
+  },
+  "c_net_1000_quality": {
+   "capex": 23.97,
+   "ebitda_y2": 2.75,
+   "simple_payback": 8.7,
+   "npv15": -14.3,
+   "npv20": -16.0,
+   "irr": -2.8
+  },
+  "c_net_1500_quality": {
+   "capex": 23.97,
+   "ebitda_y2": 4.29,
+   "simple_payback": 5.6,
+   "npv15": -9.4,
+   "npv20": -11.92,
+   "irr": 4.1
+  },
+  "X_0.75": {
+   "capex": 24.56,
+   "ebitda_y2": 0.41,
+   "simple_payback": 59.9,
+   "npv15": -24.08,
+   "npv20": -24.29,
+   "irr": -20.2
+  },
+  "X_0.95": {
+   "capex": 23.58,
+   "ebitda_y2": 0.22,
+   "simple_payback": 107.2,
+   "npv15": -23.87,
+   "npv20": -23.95,
+   "irr": -22.3
+  },
+  "heat_130": {
+   "capex": 24.43,
+   "ebitda_y2": 0.45,
+   "simple_payback": 54.3,
+   "npv15": -23.78,
+   "npv20": -24.01,
+   "irr": -19.8
+  },
+  "heat_190": {
+   "capex": 23.52,
+   "ebitda_y2": 0.13,
+   "simple_payback": 180.9,
+   "npv15": -24.16,
+   "npv20": -24.18,
+   "irr": -23.3
+  },
+  "capex_pyro_24_monolith": {
+   "capex": 36.77,
+   "ebitda_y2": -0.38,
+   "simple_payback": null,
+   "npv15": -39.63,
+   "npv20": -39.38,
+   "irr": -26.2
+  },
+  "capex_pyro_9.6": {
+   "capex": 22.37,
+   "ebitda_y2": 0.37,
+   "simple_payback": 60.5,
+   "npv15": -22.01,
+   "npv20": -22.19,
+   "irr": -20.5
+  },
+  "price_210_BandA": {
+   "capex": 23.97,
+   "ebitda_y2": -0.45,
+   "simple_payback": null,
+   "npv15": -27.01,
+   "npv20": -26.65,
+   "irr": -30.7
+  },
+  "price_450": {
+   "capex": 23.97,
+   "ebitda_y2": 1.16,
+   "simple_payback": 20.7,
+   "npv15": -20.38,
+   "npv20": -21.09,
+   "irr": -13.2
+  },
+  "cred_12_full": {
+   "capex": 23.97,
+   "ebitda_y2": 0.46,
+   "simple_payback": 52.1,
+   "npv15": -23.27,
+   "npv20": -23.51,
+   "irr": -19.7
+  },
+  "cred_30_full": {
+   "capex": 23.97,
+   "ebitda_y2": 0.82,
+   "simple_payback": 29.2,
+   "npv15": -21.8,
+   "npv20": -22.28,
+   "irr": -16.2
+  },
+  "cred_0": {
+   "capex": 23.97,
+   "ebitda_y2": 0.28,
+   "simple_payback": 85.6,
+   "npv15": -23.94,
+   "npv20": -24.08,
+   "irr": -21.3
+  },
+  "bi_loss_5kg_t": {
+   "capex": 23.97,
+   "ebitda_y2": -0.32,
+   "simple_payback": null,
+   "npv15": -26.49,
+   "npv20": -26.21,
+   "irr": -28.9
+  },
+  "NO_AUDIT_pyro4.0": {
+   "capex": 14.02,
+   "ebitda_y2": 1.88,
+   "simple_payback": 7.5,
+   "npv15": -7.32,
+   "npv20": -8.49,
+   "irr": -0.1
+  },
+  "NO_AUDIT_pyro4.0_carbonX087": {
+   "capex": 14.65,
+   "ebitda_y2": 1.79,
+   "simple_payback": 8.2,
+   "npv15": -8.23,
+   "npv20": -9.35,
+   "irr": -1.5
+  },
+  "avail_0.7": {
+   "capex": 23.97,
+   "ebitda_y2": -0.17,
+   "simple_payback": null,
+   "npv15": -25.86,
+   "npv20": -25.68,
+   "irr": -26.9
+  },
+  "gas_DBP_2.18": {
+   "capex": 23.97,
+   "ebitda_y2": -0.23,
+   "simple_payback": null,
+   "npv15": -26.11,
+   "npv20": -25.89,
+   "irr": -27.7
+  }
+ },
+ "breakeven_carbon_usd_t": {
+  "low_1": 6000,
+  "low_5": 5486,
+  "low_15": 4329,
+  "base_1": 2264,
+  "base_5": 1399,
+  "base_15": 1125,
+  "high_1": 381,
+  "high_5": 111,
+  "high_15": 129
+ },
+ "breakeven_carbon_usd_t_carbon_only": {
+  "low": 6000,
+  "base": 2152,
+  "high": 910
+ },
+ "delta_vs_captive_npv15": {
+  "1MMscfd_low": -47.6,
+  "1MMscfd_base": -25.7,
+  "1MMscfd_high": -15.4,
+  "5MMscfd_low": -158.4,
+  "15MMscfd_low": -360.6,
+  "5MMscfd_base": -83.9,
+  "15MMscfd_base": -176.4,
+  "5MMscfd_high": -59.5,
+  "15MMscfd_high": -113.6
+ },
+ "carbon_only_cash_cost_usd_t": {
+  "low": 1755,
+  "base": 674,
+  "high": 331
+ },
+ "breakeven_carbon_usd_t_npv20": {
+  "low_1": 6000,
+  "base_1": 2758,
+  "high_1": 639
+ },
+ "corpus_screen": {
+  "gross_HC": 5.84,
+  "ebitda_HC": 5.34,
+  "capex": 4.0,
+  "carbon_only_rev": 2.19,
+  "carbon_only_ebitda": 1.69,
+  "audit_capex": [
+   9.6,
+   11.2
+  ],
+  "audit_opex": [
+   0.85,
+   1.2
+  ]
+ }
+}

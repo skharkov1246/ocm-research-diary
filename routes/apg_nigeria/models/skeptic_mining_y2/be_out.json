@@ -1,0 +1,112 @@
+{
+ "hyb_BE|flat|decl0.0|halv_m10": 57.9,
+ "hyb_BE|flat|decl0.0|halv_m0": 68.9,
+ "hyb_BE|flat|decl0.05|halv_m10": 66.2,
+ "hyb_BE|flat|decl0.05|halv_m0": 80.5,
+ "hyb_BE|two_shift|decl0.0|halv_m10": 100.2,
+ "hyb_BE|two_shift|decl0.0|halv_m0": 119.7,
+ "hyb_BE|two_shift|decl0.05|halv_m10": 119.6,
+ "hyb_BE|two_shift|decl0.05|halv_m0": 145.9,
+ "hyb_BE|one_shift_plus_base|decl0.0|halv_m10": 96.3,
+ "hyb_BE|one_shift_plus_base|decl0.0|halv_m0": 114.9,
+ "hyb_BE|one_shift_plus_base|decl0.05|halv_m10": 99.7,
+ "hyb_BE|one_shift_plus_base|decl0.05|halv_m0": 119.8,
+ "hyb_opt|flat|hp39.87": 0.32,
+ "hyb_opt|flat|hp50": 0.75,
+ "hyb_opt|two_shift|hp39.87": -0.36,
+ "hyb_opt|two_shift|hp50": -0.11,
+ "solo4y_base_halv_m10": {
+  "27.7": [
+   0.42,
+   -0.75,
+   -15.82
+  ],
+  "39.87": [
+   1.39,
+   -0.29,
+   -14.22
+  ],
+  "50.0": [
+   2.2,
+   0.09,
+   -12.88
+  ]
+ },
+ "solo4y_base_BE15_halv_m10": 176.9,
+ "solo4y_opt_halv_m10": {
+  "27.7": [
+   1.35,
+   0.34,
+   -9.33
+  ],
+  "39.87": [
+   2.51,
+   1.06,
+   -7.2
+  ],
+  "50.0": [
+   3.47,
+   1.66,
+   -5.56
+  ]
+ },
+ "solo4y_opt_BE15_halv_m10": 91.7,
+ "solo4y_base_halv_m0": {
+  "27.7": [
+   -0.49,
+   -0.75,
+   -16.6
+  ],
+  "39.87": [
+   0.09,
+   -0.29,
+   -15.35
+  ],
+  "50.0": [
+   0.56,
+   0.09,
+   -14.31
+  ]
+ },
+ "solo4y_base_BE15_halv_m0": 225.7,
+ "solo4y_opt_halv_m0": {
+  "27.7": [
+   0.52,
+   0.34,
+   -10.04
+  ],
+  "39.87": [
+   1.32,
+   1.06,
+   -8.05
+  ],
+  "50.0": [
+   1.99,
+   1.66,
+   -6.41
+  ]
+ },
+ "solo4y_opt_BE15_halv_m0": 106.1,
+ "dscr_base_39.87": [
+  0.56,
+  -0.12,
+  -0.24,
+  -0.33
+ ],
+ "debt_service": 2.5,
+ "role2_marg_hp27.7": {
+  "capex": 4.78,
+  "ebitda_y": 0.66,
+  "simple_pb": 7.2
+ },
+ "role2_marg_hp39.87": {
+  "capex": 4.78,
+  "ebitda_y": 1.35,
+  "simple_pb": 3.5
+ },
+ "role2_marg_hp50": {
+  "capex": 4.78,
+  "ebitda_y": 1.93,
+  "simple_pb": 2.5
+ }
+}

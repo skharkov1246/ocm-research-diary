@@ -1,0 +1,621 @@
+{
+ "pess_A_13.5JTH_hp27.7": {
+  "npv15": -18.22,
+  "npv20": -18.47,
+  "irr": -55.9,
+  "ebitda": [
+   -0.78
+  ],
+  "capex0": 20.88,
+  "bop": 14.69,
+  "exit_year": 1,
+  "payback": null
+ },
+ "pess_A_13.5JTH_hp39.87": {
+  "npv15": -17.51,
+  "npv20": -17.79,
+  "irr": -54.0,
+  "ebitda": [
+   0.03
+  ],
+  "capex0": 20.88,
+  "bop": 14.69,
+  "exit_year": 1,
+  "payback": null
+ },
+ "pess_A_13.5JTH_hp50.0": {
+  "npv15": -16.92,
+  "npv20": -17.22,
+  "irr": -52.3,
+  "ebitda": [
+   0.71
+  ],
+  "capex0": 20.88,
+  "bop": 14.69,
+  "exit_year": 1,
+  "payback": null
+ },
+ "pess_A_13.5JTH_BE15": 330.2,
+ "pess_A_13.5JTH_BE20": 356.5,
+ "pess_B_8.9JTH_hp27.7": {
+  "npv15": -25.43,
+  "npv20": -25.69,
+  "irr": -61.2,
+  "ebitda": [
+   -0.32
+  ],
+  "capex0": 28.48,
+  "bop": 14.69,
+  "exit_year": 1,
+  "payback": null
+ },
+ "pess_B_8.9JTH_hp39.87": {
+  "npv15": -24.35,
+  "npv20": -24.65,
+  "irr": -59.0,
+  "ebitda": [
+   0.92
+  ],
+  "capex0": 28.48,
+  "bop": 14.69,
+  "exit_year": 1,
+  "payback": null
+ },
+ "pess_B_8.9JTH_hp50.0": {
+  "npv15": -23.45,
+  "npv20": -23.8,
+  "irr": -57.1,
+  "ebitda": [
+   1.95
+  ],
+  "capex0": 28.48,
+  "bop": 14.69,
+  "exit_year": 1,
+  "payback": null
+ },
+ "pess_B_8.9JTH_BE15": 314.3,
+ "pess_B_8.9JTH_BE20": 334.3,
+ "base_A_13.5JTH_hp27.7": {
+  "npv15": -12.95,
+  "npv20": -13.28,
+  "irr": -44.7,
+  "ebitda": [
+   0.55
+  ],
+  "capex0": 17.18,
+  "bop": 12.39,
+  "exit_year": 1,
+  "payback": null
+ },
+ "base_A_13.5JTH_hp39.87": {
+  "npv15": -12.43,
+  "npv20": -12.89,
+  "irr": -30.3,
+  "ebitda": [
+   1.58,
+   0.15
+  ],
+  "capex0": 17.18,
+  "bop": 12.39,
+  "exit_year": 2,
+  "payback": null
+ },
+ "base_A_13.5JTH_hp50.0": {
+  "npv15": -14.78,
+  "npv20": -15.02,
+  "irr": -23.6,
+  "ebitda": [
+   2.43,
+   0.64,
+   0.4,
+   0.18,
+   0.41
+  ],
+  "capex0": 17.18,
+  "bop": 12.39,
+  "exit_year": 5,
+  "payback": null
+ },
+ "base_A_13.5JTH_BE15": 158.8,
+ "base_A_13.5JTH_BE20": 171.9,
+ "base_B_8.9JTH_hp27.7": {
+  "npv15": -18.58,
+  "npv20": -18.93,
+  "irr": -51.0,
+  "ebitda": [
+   1.43
+  ],
+  "capex0": 23.56,
+  "bop": 12.39,
+  "exit_year": 1,
+  "payback": null
+ },
+ "base_B_8.9JTH_hp39.87": {
+  "npv15": -24.26,
+  "npv20": -23.95,
+  "irr": -38.1,
+  "ebitda": [
+   2.99,
+   0.82,
+   0.53,
+   0.26,
+   0.52
+  ],
+  "capex0": 23.56,
+  "bop": 12.39,
+  "exit_year": 5,
+  "payback": null
+ },
+ "base_B_8.9JTH_hp50.0": {
+  "npv15": -21.51,
+  "npv20": -21.46,
+  "irr": -33.4,
+  "ebitda": [
+   4.28,
+   1.57,
+   1.2,
+   0.87,
+   1.2
+  ],
+  "capex0": 23.56,
+  "bop": 12.39,
+  "exit_year": 5,
+  "payback": null
+ },
+ "base_B_8.9JTH_BE15": 154.7,
+ "base_B_8.9JTH_BE20": 164.9,
+ "opt_A_13.5JTH_hp27.7": {
+  "npv15": -11.72,
+  "npv20": -12.02,
+  "irr": -12.3,
+  "ebitda": [
+   1.49,
+   0.76,
+   0.76,
+   0.76,
+   1.3,
+   0.61,
+   0.61,
+   0.61,
+   1.24,
+   1.24
+  ],
+  "capex0": 13.92,
+  "bop": 10.61,
+  "exit_year": null,
+  "payback": null
+ },
+ "opt_A_13.5JTH_hp39.87": {
+  "npv15": -7.13,
+  "npv20": -8.19,
+  "irr": -0.0,
+  "ebitda": [
+   2.72,
+   1.66,
+   1.66,
+   1.66,
+   2.44,
+   1.45,
+   1.45,
+   1.45,
+   2.36,
+   2.36
+  ],
+  "capex0": 13.92,
+  "bop": 10.61,
+  "exit_year": null,
+  "payback": null
+ },
+ "opt_A_13.5JTH_hp50.0": {
+  "npv15": -4.05,
+  "npv20": -5.62,
+  "irr": 6.8,
+  "ebitda": [
+   3.74,
+   2.41,
+   2.41,
+   2.41,
+   3.39,
+   2.16,
+   2.16,
+   2.16,
+   3.3,
+   3.3
+  ],
+  "capex0": 13.92,
+  "bop": 10.61,
+  "exit_year": null,
+  "payback": 8.8
+ },
+ "opt_A_13.5JTH_BE15": 65.0,
+ "opt_A_13.5JTH_BE20": 74.8,
+ "opt_B_8.9JTH_hp27.7": {
+  "npv15": -17.08,
+  "npv20": -17.1,
+  "irr": -18.2,
+  "ebitda": [
+   2.71,
+   1.59,
+   1.59,
+   1.59,
+   2.4,
+   1.36,
+   1.36,
+   1.36,
+   2.3,
+   2.3
+  ],
+  "capex0": 18.98,
+  "bop": 10.61,
+  "exit_year": null,
+  "payback": null
+ },
+ "opt_B_8.9JTH_hp39.87": {
+  "npv15": -10.19,
+  "npv20": -11.34,
+  "irr": -2.4,
+  "ebitda": [
+   4.56,
+   2.96,
+   2.96,
+   2.96,
+   4.13,
+   2.64,
+   2.64,
+   2.64,
+   4.01,
+   4.01
+  ],
+  "capex0": 18.98,
+  "bop": 10.61,
+  "exit_year": null,
+  "payback": null
+ },
+ "opt_B_8.9JTH_hp50.0": {
+  "npv15": -5.65,
+  "npv20": -7.56,
+  "irr": 5.9,
+  "ebitda": [
+   6.11,
+   4.1,
+   4.1,
+   4.1,
+   5.58,
+   3.7,
+   3.7,
+   3.7,
+   5.42,
+   5.42
+  ],
+  "capex0": 18.98,
+  "bop": 10.61,
+  "exit_year": null,
+  "payback": 6.9
+ },
+ "opt_B_8.9JTH_BE15": 63.8,
+ "opt_B_8.9JTH_BE20": 72.0,
+ "lean_noaudit_A_13.5JTH_hp27.7": {
+  "npv15": -6.79,
+  "npv20": -6.87,
+  "irr": -25.9,
+  "ebitda": [
+   1.54,
+   0.54,
+   0.4,
+   0.28,
+   0.4
+  ],
+  "capex0": 8.09,
+  "bop": 5.05,
+  "exit_year": 5,
+  "payback": null
+ },
+ "lean_noaudit_A_13.5JTH_hp39.87": {
+  "npv15": -4.93,
+  "npv20": -5.24,
+  "irr": -9.9,
+  "ebitda": [
+   2.57,
+   1.13,
+   0.94,
+   0.76,
+   0.95,
+   0.19,
+   0.09
+  ],
+  "capex0": 8.09,
+  "bop": 5.05,
+  "exit_year": 7,
+  "payback": null
+ },
+ "lean_noaudit_A_13.5JTH_hp50.0": {
+  "npv15": -4.52,
+  "npv20": -4.68,
+  "irr": -23.1,
+  "ebitda": [
+   3.44,
+   1.63,
+   1.39,
+   1.17,
+   1.4,
+   0.45,
+   0.33,
+   0.21,
+   0.41,
+   0.28
+  ],
+  "capex0": 8.09,
+  "bop": 5.05,
+  "exit_year": null,
+  "payback": null
+ },
+ "lean_noaudit_A_13.5JTH_BE15": 77.8,
+ "lean_noaudit_A_13.5JTH_BE20": 83.4,
+ "lean_noaudit_B_8.9JTH_hp27.7": {
+  "npv15": -12.37,
+  "npv20": -12.19,
+  "irr": -33.8,
+  "ebitda": [
+   2.55,
+   1.03,
+   0.82,
+   0.64,
+   0.82,
+   0.03
+  ],
+  "capex0": 12.73,
+  "bop": 5.05,
+  "exit_year": 6,
+  "payback": null
+ },
+ "lean_noaudit_B_8.9JTH_hp39.87": {
+  "npv15": -12.18,
+  "npv20": -11.53,
+  "irr": -58.0,
+  "ebitda": [
+   4.12,
+   1.94,
+   1.64,
+   1.37,
+   1.65,
+   0.5,
+   0.35,
+   0.21,
+   0.43,
+   0.28
+  ],
+  "capex0": 12.73,
+  "bop": 5.05,
+  "exit_year": null,
+  "payback": null
+ },
+ "lean_noaudit_B_8.9JTH_hp50.0": {
+  "npv15": -9.18,
+  "npv20": -8.94,
+  "irr": -47.9,
+  "ebitda": [
+   5.44,
+   2.7,
+   2.32,
+   1.99,
+   2.34,
+   0.9,
+   0.7,
+   0.53,
+   0.82,
+   0.63
+  ],
+  "capex0": 12.73,
+  "bop": 5.05,
+  "exit_year": null,
+  "payback": null
+ },
+ "lean_noaudit_B_8.9JTH_BE15": 86.7,
+ "lean_noaudit_B_8.9JTH_BE20": 91.6,
+ "q5_pess_A_BE15": 274.0,
+ "q5_pess_A_hp27.7": {
+  "npv15": -75.1,
+  "npv20": -76.18,
+  "irr": -55.6,
+  "ebitda": [
+   0.42
+  ],
+  "capex0": 88.53,
+  "bop": 57.62,
+  "exit_year": 1,
+  "payback": null
+ },
+ "q5_pess_A_hp50.0": {
+  "npv15": -68.59,
+  "npv20": -69.94,
+  "irr": -51.1,
+  "ebitda": [
+   7.9
+  ],
+  "capex0": 88.53,
+  "bop": 57.62,
+  "exit_year": 1,
+  "payback": null
+ },
+ "q5_base_A_BE15": 131.8,
+ "q5_base_A_hp27.7": {
+  "npv15": -56.86,
+  "npv20": -58.94,
+  "irr": -25.3,
+  "ebitda": [
+   5.81,
+   0.86,
+   0.19
+  ],
+  "capex0": 74.19,
+  "bop": 50.25,
+  "exit_year": 3,
+  "payback": null
+ },
+ "q5_base_A_hp50.0": {
+  "npv15": -56.13,
+  "npv20": -57.97,
+  "irr": -16.4,
+  "ebitda": [
+   15.23,
+   6.3,
+   5.08,
+   3.98,
+   5.12,
+   0.42
+  ],
+  "capex0": 74.19,
+  "bop": 50.25,
+  "exit_year": 6,
+  "payback": null
+ },
+ "q5_opt_A_BE15": 54.4,
+ "q5_opt_A_hp27.7": {
+  "npv15": -39.09,
+  "npv20": -42.34,
+  "irr": -4.7,
+  "ebitda": [
+   9.8,
+   6.14,
+   6.14,
+   6.14,
+   8.83,
+   5.4,
+   5.4,
+   5.4,
+   8.54,
+   8.54
+  ],
+  "capex0": 60.98,
+  "bop": 44.42,
+  "exit_year": null,
+  "payback": null
+ },
+ "q5_opt_A_hp50.0": {
+  "npv15": -5.89,
+  "npv20": -14.55,
+  "irr": 12.3,
+  "ebitda": [
+   21.03,
+   14.4,
+   14.4,
+   14.4,
+   19.3,
+   13.12,
+   13.12,
+   13.12,
+   18.83,
+   18.83
+  ],
+  "capex0": 60.98,
+  "bop": 44.42,
+  "exit_year": null,
+  "payback": 5.8
+ },
+ "q15_pess_A_BE15": 251.1,
+ "q15_pess_A_hp27.7": {
+  "npv15": -203.49,
+  "npv20": -206.45,
+  "irr": -55.8,
+  "ebitda": [
+   5.4
+  ],
+  "capex0": 242.06,
+  "bop": 149.33,
+  "exit_year": 1,
+  "payback": null
+ },
+ "q15_pess_A_hp50.0": {
+  "npv15": -183.96,
+  "npv20": -187.74,
+  "irr": -50.8,
+  "ebitda": [
+   27.85
+  ],
+  "capex0": 242.06,
+  "bop": 149.33,
+  "exit_year": 1,
+  "payback": null
+ },
+ "q15_base_A_BE15": 120.2,
+ "q15_base_A_hp27.7": {
+  "npv15": -197.22,
+  "npv20": -197.32,
+  "irr": -29.9,
+  "ebitda": [
+   20.41,
+   5.55,
+   3.53,
+   1.7,
+   3.48
+  ],
+  "capex0": 203.08,
+  "bop": 131.26,
+  "exit_year": 5,
+  "payback": null
+ },
+ "q15_base_A_hp50.0": {
+  "npv15": -179.61,
+  "npv20": -175.84,
+  "irr": -39.7,
+  "ebitda": [
+   48.66,
+   21.85,
+   18.19,
+   14.91,
+   18.31,
+   4.24,
+   2.32,
+   0.59,
+   3.43,
+   1.57
+  ],
+  "capex0": 203.08,
+  "bop": 131.26,
+  "exit_year": null,
+  "payback": null
+ },
+ "q15_opt_A_BE15": 49.4,
+ "q15_opt_A_hp27.7": {
+  "npv15": -92.59,
+  "npv20": -103.58,
+  "irr": -1.9,
+  "ebitda": [
+   31.7,
+   20.7,
+   20.7,
+   20.7,
+   28.77,
+   18.5,
+   18.5,
+   18.5,
+   27.92,
+   27.92
+  ],
+  "capex0": 166.56,
+  "bop": 116.87,
+  "exit_year": null,
+  "payback": null
+ },
+ "q15_opt_A_hp50.0": {
+  "npv15": 2.51,
+  "npv20": -23.93,
+  "irr": 15.4,
+  "ebitda": [
+   65.37,
+   45.51,
+   45.51,
+   45.51,
+   60.19,
+   41.65,
+   41.65,
+   41.65,
+   58.79,
+   58.79
+  ],
+  "capex0": 166.56,
+  "bop": 116.87,
+  "exit_year": null,
+  "payback": 5.1
+ }
+}

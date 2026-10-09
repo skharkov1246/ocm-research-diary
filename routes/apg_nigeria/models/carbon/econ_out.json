@@ -1,0 +1,851 @@
+{
+ "A_q1_low_VCM_lo_3y_pre": {
+  "rev": 0.035,
+  "mrv": 0.04,
+  "ebitda": -0.005,
+  "dev_capex": 0.15,
+  "npv15": -0.16,
+  "npv20": -0.159,
+  "ev_npv15": -0.16
+ },
+ "A_q1_low_VCM_lo_3y_aud": {
+  "rev": 0.027,
+  "mrv": 0.136,
+  "ebitda": -0.109,
+  "dev_capex": 0.72,
+  "npv15": -0.937,
+  "npv20": -0.912,
+  "ev_npv15": -0.562
+ },
+ "A_q1_low_VCM_lo_8y_pre": {
+  "rev": 0.035,
+  "mrv": 0.04,
+  "ebitda": -0.005,
+  "dev_capex": 0.15,
+  "npv15": -0.17,
+  "npv20": -0.166,
+  "ev_npv15": -0.17
+ },
+ "A_q1_low_VCM_lo_8y_aud": {
+  "rev": 0.027,
+  "mrv": 0.136,
+  "ebitda": -0.109,
+  "dev_capex": 0.72,
+  "npv15": -1.146,
+  "npv20": -1.069,
+  "ev_npv15": -0.688
+ },
+ "A_q1_low_VCM_hi_3y_pre": {
+  "rev": 0.053,
+  "mrv": 0.04,
+  "ebitda": 0.013,
+  "dev_capex": 0.15,
+  "npv15": -0.124,
+  "npv20": -0.127,
+  "ev_npv15": -0.124
+ },
+ "A_q1_low_VCM_hi_3y_aud": {
+  "rev": 0.041,
+  "mrv": 0.136,
+  "ebitda": -0.095,
+  "dev_capex": 0.72,
+  "npv15": -0.909,
+  "npv20": -0.887,
+  "ev_npv15": -0.545
+ },
+ "A_q1_low_VCM_hi_8y_pre": {
+  "rev": 0.053,
+  "mrv": 0.04,
+  "ebitda": 0.013,
+  "dev_capex": 0.15,
+  "npv15": -0.099,
+  "npv20": -0.108,
+  "ev_npv15": -0.099
+ },
+ "A_q1_low_VCM_hi_8y_aud": {
+  "rev": 0.041,
+  "mrv": 0.136,
+  "ebitda": -0.095,
+  "dev_capex": 0.72,
+  "npv15": -1.091,
+  "npv20": -1.024,
+  "ev_npv15": -0.655
+ },
+ "A_q1_mid_CORSIA_lo_3y_pre": {
+  "rev": 0.075,
+  "mrv": 0.04,
+  "ebitda": 0.035,
+  "dev_capex": 0.15,
+  "npv15": -0.08,
+  "npv20": -0.088,
+  "ev_npv15": -0.08
+ },
+ "A_q1_mid_CORSIA_lo_3y_aud": {
+  "rev": 0.058,
+  "mrv": 0.136,
+  "ebitda": -0.078,
+  "dev_capex": 0.72,
+  "npv15": -0.875,
+  "npv20": -0.857,
+  "ev_npv15": -0.525
+ },
+ "A_q1_mid_CORSIA_lo_8y_pre": {
+  "rev": 0.075,
+  "mrv": 0.04,
+  "ebitda": 0.035,
+  "dev_capex": 0.15,
+  "npv15": -0.013,
+  "npv20": -0.037,
+  "ev_npv15": -0.013
+ },
+ "A_q1_mid_CORSIA_lo_8y_aud": {
+  "rev": 0.058,
+  "mrv": 0.136,
+  "ebitda": -0.078,
+  "dev_capex": 0.72,
+  "npv15": -1.025,
+  "npv20": -0.97,
+  "ev_npv15": -0.615
+ },
+ "A_q1_mid_CORSIA_hi_3y_pre": {
+  "rev": 0.114,
+  "mrv": 0.04,
+  "ebitda": 0.074,
+  "dev_capex": 0.15,
+  "npv15": -0.002,
+  "npv20": -0.02,
+  "ev_npv15": -0.002
+ },
+ "A_q1_mid_CORSIA_hi_3y_aud": {
+  "rev": 0.088,
+  "mrv": 0.136,
+  "ebitda": -0.048,
+  "dev_capex": 0.72,
+  "npv15": -0.815,
+  "npv20": -0.804,
+  "ev_npv15": -0.489
+ },
+ "A_q1_mid_CORSIA_hi_8y_pre": {
+  "rev": 0.114,
+  "mrv": 0.04,
+  "ebitda": 0.074,
+  "dev_capex": 0.15,
+  "npv15": 0.14,
+  "npv20": 0.088,
+  "ev_npv15": 0.14
+ },
+ "A_q1_mid_CORSIA_hi_8y_aud": {
+  "rev": 0.088,
+  "mrv": 0.136,
+  "ebitda": -0.048,
+  "dev_capex": 0.72,
+  "npv15": -0.907,
+  "npv20": -0.874,
+  "ev_npv15": -0.544
+ },
+ "A_q1_high_ITMO_lo_3y_pre": {
+  "rev": 0.205,
+  "mrv": 0.04,
+  "ebitda": 0.165,
+  "dev_capex": 0.15,
+  "npv15": 0.177,
+  "npv20": 0.139,
+  "ev_npv15": 0.177
+ },
+ "A_q1_high_ITMO_lo_3y_aud": {
+  "rev": 0.157,
+  "mrv": 0.136,
+  "ebitda": 0.021,
+  "dev_capex": 0.72,
+  "npv15": -0.678,
+  "npv20": -0.682,
+  "ev_npv15": -0.407
+ },
+ "A_q1_high_ITMO_lo_8y_pre": {
+  "rev": 0.205,
+  "mrv": 0.04,
+  "ebitda": 0.165,
+  "dev_capex": 0.15,
+  "npv15": 0.492,
+  "npv20": 0.376,
+  "ev_npv15": 0.492
+ },
+ "A_q1_high_ITMO_lo_8y_aud": {
+  "rev": 0.157,
+  "mrv": 0.136,
+  "ebitda": 0.021,
+  "dev_capex": 0.72,
+  "npv15": -0.637,
+  "npv20": -0.652,
+  "ev_npv15": -0.382
+ },
+ "A_q1_high_ITMO_hi_3y_pre": {
+  "rev": 0.311,
+  "mrv": 0.04,
+  "ebitda": 0.271,
+  "dev_capex": 0.15,
+  "npv15": 0.388,
+  "npv20": 0.326,
+  "ev_npv15": 0.388
+ },
+ "A_q1_high_ITMO_hi_3y_aud": {
+  "rev": 0.239,
+  "mrv": 0.136,
+  "ebitda": 0.103,
+  "dev_capex": 0.72,
+  "npv15": -0.515,
+  "npv20": -0.539,
+  "ev_npv15": -0.309
+ },
+ "A_q1_high_ITMO_hi_8y_pre": {
+  "rev": 0.311,
+  "mrv": 0.04,
+  "ebitda": 0.271,
+  "dev_capex": 0.15,
+  "npv15": 0.907,
+  "npv20": 0.717,
+  "ev_npv15": 0.907
+ },
+ "A_q1_high_ITMO_hi_8y_aud": {
+  "rev": 0.239,
+  "mrv": 0.136,
+  "ebitda": 0.103,
+  "dev_capex": 0.72,
+  "npv15": -0.317,
+  "npv20": -0.39,
+  "ev_npv15": -0.19
+ },
+ "A_q5_low_VCM_lo_3y_pre": {
+  "rev": 0.175,
+  "mrv": 0.052,
+  "ebitda": 0.123,
+  "dev_capex": 0.225,
+  "npv15": 0.018,
+  "npv20": -0.01,
+  "ev_npv15": 0.018
+ },
+ "A_q5_low_VCM_lo_3y_aud": {
+  "rev": 0.134,
+  "mrv": 0.177,
+  "ebitda": -0.043,
+  "dev_capex": 1.08,
+  "npv15": -1.164,
+  "npv20": -1.155,
+  "ev_npv15": -0.699
+ },
+ "A_q5_low_VCM_lo_8y_pre": {
+  "rev": 0.175,
+  "mrv": 0.052,
+  "ebitda": 0.123,
+  "dev_capex": 0.225,
+  "npv15": 0.253,
+  "npv20": 0.167,
+  "ev_npv15": 0.253
+ },
+ "A_q5_low_VCM_lo_8y_aud": {
+  "rev": 0.134,
+  "mrv": 0.177,
+  "ebitda": -0.043,
+  "dev_capex": 1.08,
+  "npv15": -1.246,
+  "npv20": -1.216,
+  "ev_npv15": -0.748
+ },
+ "A_q5_low_VCM_hi_3y_pre": {
+  "rev": 0.265,
+  "mrv": 0.052,
+  "ebitda": 0.213,
+  "dev_capex": 0.225,
+  "npv15": 0.198,
+  "npv20": 0.149,
+  "ev_npv15": 0.198
+ },
+ "A_q5_low_VCM_hi_3y_aud": {
+  "rev": 0.204,
+  "mrv": 0.177,
+  "ebitda": 0.027,
+  "dev_capex": 1.08,
+  "npv15": -1.026,
+  "npv20": -1.032,
+  "ev_npv15": -0.616
+ },
+ "A_q5_low_VCM_hi_8y_pre": {
+  "rev": 0.265,
+  "mrv": 0.052,
+  "ebitda": 0.213,
+  "dev_capex": 0.225,
+  "npv15": 0.607,
+  "npv20": 0.457,
+  "ev_npv15": 0.607
+ },
+ "A_q5_low_VCM_hi_8y_aud": {
+  "rev": 0.204,
+  "mrv": 0.177,
+  "ebitda": 0.027,
+  "dev_capex": 1.08,
+  "npv15": -0.974,
+  "npv20": -0.993,
+  "ev_npv15": -0.584
+ },
+ "A_q5_mid_CORSIA_lo_3y_pre": {
+  "rev": 0.376,
+  "mrv": 0.052,
+  "ebitda": 0.324,
+  "dev_capex": 0.225,
+  "npv15": 0.419,
+  "npv20": 0.344,
+  "ev_npv15": 0.419
+ },
+ "A_q5_mid_CORSIA_lo_3y_aud": {
+  "rev": 0.289,
+  "mrv": 0.177,
+  "ebitda": 0.113,
+  "dev_capex": 1.08,
+  "npv15": -0.857,
+  "npv20": -0.882,
+  "ev_npv15": -0.514
+ },
+ "A_q5_mid_CORSIA_lo_8y_pre": {
+  "rev": 0.376,
+  "mrv": 0.052,
+  "ebitda": 0.324,
+  "dev_capex": 0.225,
+  "npv15": 1.04,
+  "npv20": 0.811,
+  "ev_npv15": 1.04
+ },
+ "A_q5_mid_CORSIA_lo_8y_aud": {
+  "rev": 0.289,
+  "mrv": 0.177,
+  "ebitda": 0.113,
+  "dev_capex": 1.08,
+  "npv15": -0.641,
+  "npv20": -0.72,
+  "ev_npv15": -0.385
+ },
+ "A_q5_mid_CORSIA_hi_3y_pre": {
+  "rev": 0.572,
+  "mrv": 0.052,
+  "ebitda": 0.52,
+  "dev_capex": 0.225,
+  "npv15": 0.807,
+  "npv20": 0.687,
+  "ev_npv15": 0.807
+ },
+ "A_q5_mid_CORSIA_hi_3y_aud": {
+  "rev": 0.44,
+  "mrv": 0.177,
+  "ebitda": 0.263,
+  "dev_capex": 1.08,
+  "npv15": -0.558,
+  "npv20": -0.618,
+  "ev_npv15": -0.335
+ },
+ "A_q5_mid_CORSIA_hi_8y_pre": {
+  "rev": 0.572,
+  "mrv": 0.052,
+  "ebitda": 0.52,
+  "dev_capex": 0.225,
+  "npv15": 1.803,
+  "npv20": 1.437,
+  "ev_npv15": 1.803
+ },
+ "A_q5_mid_CORSIA_hi_8y_aud": {
+  "rev": 0.44,
+  "mrv": 0.177,
+  "ebitda": 0.263,
+  "dev_capex": 1.08,
+  "npv15": -0.054,
+  "npv20": -0.239,
+  "ev_npv15": -0.032
+ },
+ "A_q5_high_ITMO_lo_3y_pre": {
+  "rev": 1.023,
+  "mrv": 0.052,
+  "ebitda": 0.971,
+  "dev_capex": 0.225,
+  "npv15": 1.703,
+  "npv20": 1.48,
+  "ev_npv15": 1.703
+ },
+ "A_q5_high_ITMO_lo_3y_aud": {
+  "rev": 0.787,
+  "mrv": 0.177,
+  "ebitda": 0.61,
+  "dev_capex": 1.08,
+  "npv15": 0.131,
+  "npv20": -0.009,
+  "ev_npv15": 0.079
+ },
+ "A_q5_high_ITMO_lo_8y_pre": {
+  "rev": 1.023,
+  "mrv": 0.052,
+  "ebitda": 0.971,
+  "dev_capex": 0.225,
+  "npv15": 3.564,
+  "npv20": 2.88,
+  "ev_npv15": 3.564
+ },
+ "A_q5_high_ITMO_lo_8y_aud": {
+  "rev": 0.787,
+  "mrv": 0.177,
+  "ebitda": 0.61,
+  "dev_capex": 1.08,
+  "npv15": 1.301,
+  "npv20": 0.871,
+  "ev_npv15": 0.781
+ },
+ "A_q5_high_ITMO_hi_3y_pre": {
+  "rev": 1.555,
+  "mrv": 0.052,
+  "ebitda": 1.503,
+  "dev_capex": 0.225,
+  "npv15": 2.759,
+  "npv20": 2.413,
+  "ev_npv15": 2.759
+ },
+ "A_q5_high_ITMO_hi_3y_aud": {
+  "rev": 1.196,
+  "mrv": 0.177,
+  "ebitda": 1.019,
+  "dev_capex": 1.08,
+  "npv15": 0.944,
+  "npv20": 0.709,
+  "ev_npv15": 0.566
+ },
+ "A_q5_high_ITMO_hi_8y_pre": {
+  "rev": 1.555,
+  "mrv": 0.052,
+  "ebitda": 1.503,
+  "dev_capex": 0.225,
+  "npv15": 5.639,
+  "npv20": 4.581,
+  "ev_npv15": 5.639
+ },
+ "A_q5_high_ITMO_hi_8y_aud": {
+  "rev": 1.196,
+  "mrv": 0.177,
+  "ebitda": 1.019,
+  "dev_capex": 1.08,
+  "npv15": 2.897,
+  "npv20": 2.179,
+  "ev_npv15": 1.738
+ },
+ "A_q15_low_VCM_lo_3y_pre": {
+  "rev": 0.524,
+  "mrv": 0.052,
+  "ebitda": 0.472,
+  "dev_capex": 0.225,
+  "npv15": 0.711,
+  "npv20": 0.603,
+  "ev_npv15": 0.711
+ },
+ "A_q15_low_VCM_lo_3y_aud": {
+  "rev": 0.403,
+  "mrv": 0.177,
+  "ebitda": 0.226,
+  "dev_capex": 1.08,
+  "npv15": -0.631,
+  "npv20": -0.683,
+  "ev_npv15": -0.379
+ },
+ "A_q15_low_VCM_lo_8y_pre": {
+  "rev": 0.524,
+  "mrv": 0.052,
+  "ebitda": 0.472,
+  "dev_capex": 0.225,
+  "npv15": 1.615,
+  "npv20": 1.283,
+  "ev_npv15": 1.615
+ },
+ "A_q15_low_VCM_lo_8y_aud": {
+  "rev": 0.403,
+  "mrv": 0.177,
+  "ebitda": 0.226,
+  "dev_capex": 1.08,
+  "npv15": -0.198,
+  "npv20": -0.358,
+  "ev_npv15": -0.119
+ },
+ "A_q15_low_VCM_hi_3y_pre": {
+  "rev": 0.796,
+  "mrv": 0.052,
+  "ebitda": 0.744,
+  "dev_capex": 0.225,
+  "npv15": 1.252,
+  "npv20": 1.081,
+  "ev_npv15": 1.252
+ },
+ "A_q15_low_VCM_hi_3y_aud": {
+  "rev": 0.612,
+  "mrv": 0.177,
+  "ebitda": 0.435,
+  "dev_capex": 1.08,
+  "npv15": -0.216,
+  "npv20": -0.316,
+  "ev_npv15": -0.129
+ },
+ "A_q15_low_VCM_hi_8y_pre": {
+  "rev": 0.796,
+  "mrv": 0.052,
+  "ebitda": 0.744,
+  "dev_capex": 0.225,
+  "npv15": 2.677,
+  "npv20": 2.153,
+  "ev_npv15": 2.677
+ },
+ "A_q15_low_VCM_hi_8y_aud": {
+  "rev": 0.612,
+  "mrv": 0.177,
+  "ebitda": 0.435,
+  "dev_capex": 1.08,
+  "npv15": 0.619,
+  "npv20": 0.312,
+  "ev_npv15": 0.371
+ },
+ "A_q15_mid_CORSIA_lo_3y_pre": {
+  "rev": 1.128,
+  "mrv": 0.052,
+  "ebitda": 1.076,
+  "dev_capex": 0.225,
+  "npv15": 1.912,
+  "npv20": 1.664,
+  "ev_npv15": 1.912
+ },
+ "A_q15_mid_CORSIA_lo_3y_aud": {
+  "rev": 0.868,
+  "mrv": 0.177,
+  "ebitda": 0.691,
+  "dev_capex": 1.08,
+  "npv15": 0.292,
+  "npv20": 0.133,
+  "ev_npv15": 0.175
+ },
+ "A_q15_mid_CORSIA_lo_8y_pre": {
+  "rev": 1.128,
+  "mrv": 0.052,
+  "ebitda": 1.076,
+  "dev_capex": 0.225,
+  "npv15": 3.975,
+  "npv20": 3.217,
+  "ev_npv15": 3.975
+ },
+ "A_q15_mid_CORSIA_lo_8y_aud": {
+  "rev": 0.868,
+  "mrv": 0.177,
+  "ebitda": 0.691,
+  "dev_capex": 1.08,
+  "npv15": 1.617,
+  "npv20": 1.13,
+  "ev_npv15": 0.97
+ },
+ "A_q15_mid_CORSIA_hi_3y_pre": {
+  "rev": 1.715,
+  "mrv": 0.052,
+  "ebitda": 1.663,
+  "dev_capex": 0.225,
+  "npv15": 3.077,
+  "npv20": 2.694,
+  "ev_npv15": 3.077
+ },
+ "A_q15_mid_CORSIA_hi_3y_aud": {
+  "rev": 1.319,
+  "mrv": 0.177,
+  "ebitda": 1.142,
+  "dev_capex": 1.08,
+  "npv15": 1.188,
+  "npv20": 0.925,
+  "ev_npv15": 0.713
+ },
+ "A_q15_mid_CORSIA_hi_8y_pre": {
+  "rev": 1.715,
+  "mrv": 0.052,
+  "ebitda": 1.663,
+  "dev_capex": 0.225,
+  "npv15": 6.264,
+  "npv20": 5.093,
+  "ev_npv15": 6.264
+ },
+ "A_q15_mid_CORSIA_hi_8y_aud": {
+  "rev": 1.319,
+  "mrv": 0.177,
+  "ebitda": 1.142,
+  "dev_capex": 1.08,
+  "npv15": 3.378,
+  "npv20": 2.573,
+  "ev_npv15": 2.027
+ },
+ "A_q15_high_ITMO_lo_3y_pre": {
+  "rev": 3.069,
+  "mrv": 0.052,
+  "ebitda": 3.017,
+  "dev_capex": 0.225,
+  "npv15": 5.765,
+  "npv20": 5.071,
+  "ev_npv15": 5.765
+ },
+ "A_q15_high_ITMO_lo_3y_aud": {
+  "rev": 2.361,
+  "mrv": 0.177,
+  "ebitda": 2.184,
+  "dev_capex": 1.08,
+  "npv15": 3.256,
+  "npv20": 2.754,
+  "ev_npv15": 1.954
+ },
+ "A_q15_high_ITMO_lo_8y_pre": {
+  "rev": 3.069,
+  "mrv": 0.052,
+  "ebitda": 3.017,
+  "dev_capex": 0.225,
+  "npv15": 11.548,
+  "npv20": 9.423,
+  "ev_npv15": 11.548
+ },
+ "A_q15_high_ITMO_lo_8y_aud": {
+  "rev": 2.361,
+  "mrv": 0.177,
+  "ebitda": 2.184,
+  "dev_capex": 1.08,
+  "npv15": 7.442,
+  "npv20": 5.904,
+  "ev_npv15": 4.465
+ },
+ "A_q15_high_ITMO_hi_3y_pre": {
+  "rev": 4.665,
+  "mrv": 0.052,
+  "ebitda": 4.613,
+  "dev_capex": 0.225,
+  "npv15": 8.933,
+  "npv20": 7.872,
+  "ev_npv15": 8.933
+ },
+ "A_q15_high_ITMO_hi_3y_aud": {
+  "rev": 3.588,
+  "mrv": 0.177,
+  "ebitda": 3.411,
+  "dev_capex": 1.08,
+  "npv15": 5.693,
+  "npv20": 4.909,
+  "ev_npv15": 3.416
+ },
+ "A_q15_high_ITMO_hi_8y_pre": {
+  "rev": 4.665,
+  "mrv": 0.052,
+  "ebitda": 4.613,
+  "dev_capex": 0.225,
+  "npv15": 17.774,
+  "npv20": 14.525,
+  "ev_npv15": 17.774
+ },
+ "A_q15_high_ITMO_hi_8y_aud": {
+  "rev": 3.588,
+  "mrv": 0.177,
+  "ebitda": 3.411,
+  "dev_capex": 1.08,
+  "npv15": 12.232,
+  "npv20": 9.829,
+  "ev_npv15": 7.339
+ },
+ "corpus_kicker": {
+  "vol_kt": 20,
+  "P": [
+   30,
+   80
+  ],
+  "M$": [
+   0.6,
+   1.6
+  ]
+ },
+ "B_q1_low_VCM_ef0.1": {
+  "GWh": 25.1,
+  "kt": 2.5,
+  "add_ebitda": -0.132,
+  "base_ebitda": 4.14,
+  "capex": 14.61,
+  "payback0": 3.53,
+  "payback1": 3.64,
+  "share_of_ebitda_pct": -3.2
+ },
+ "B_q1_low_VCM_ef0.3": {
+  "GWh": 25.1,
+  "kt": 7.5,
+  "add_ebitda": -0.123,
+  "base_ebitda": 4.14,
+  "capex": 14.61,
+  "payback0": 3.53,
+  "payback1": 3.64,
+  "share_of_ebitda_pct": -3.0
+ },
+ "B_q1_mid_CORSIA_ef0.1": {
+  "GWh": 25.1,
+  "kt": 2.5,
+  "add_ebitda": -0.126,
+  "base_ebitda": 4.14,
+  "capex": 14.61,
+  "payback0": 3.53,
+  "payback1": 3.64,
+  "share_of_ebitda_pct": -3.1
+ },
+ "B_q1_mid_CORSIA_ef0.3": {
+  "GWh": 25.1,
+  "kt": 7.5,
+  "add_ebitda": -0.107,
+  "base_ebitda": 4.14,
+  "capex": 14.61,
+  "payback0": 3.53,
+  "payback1": 3.62,
+  "share_of_ebitda_pct": -2.6
+ },
+ "B_q1_high_ITMO_ef0.1": {
+  "GWh": 25.1,
+  "kt": 2.5,
+  "add_ebitda": -0.11,
+  "base_ebitda": 4.14,
+  "capex": 14.61,
+  "payback0": 3.53,
+  "payback1": 3.63,
+  "share_of_ebitda_pct": -2.7
+ },
+ "B_q1_high_ITMO_ef0.3": {
+  "GWh": 25.1,
+  "kt": 7.5,
+  "add_ebitda": -0.057,
+  "base_ebitda": 4.14,
+  "capex": 14.61,
+  "payback0": 3.53,
+  "payback1": 3.58,
+  "share_of_ebitda_pct": -1.4
+ },
+ "B_q5_low_VCM_ef0.1": {
+  "GWh": 141.0,
+  "kt": 14.1,
+  "add_ebitda": -0.152,
+  "base_ebitda": 17.08,
+  "capex": 47.45,
+  "payback0": 2.78,
+  "payback1": 2.8,
+  "share_of_ebitda_pct": -0.9
+ },
+ "B_q5_low_VCM_ef0.3": {
+  "GWh": 141.0,
+  "kt": 42.3,
+  "add_ebitda": -0.101,
+  "base_ebitda": 17.08,
+  "capex": 47.45,
+  "payback0": 2.78,
+  "payback1": 2.79,
+  "share_of_ebitda_pct": -0.6
+ },
+ "B_q5_mid_CORSIA_ef0.1": {
+  "GWh": 141.0,
+  "kt": 14.1,
+  "add_ebitda": -0.123,
+  "base_ebitda": 17.08,
+  "capex": 47.45,
+  "payback0": 2.78,
+  "payback1": 2.8,
+  "share_of_ebitda_pct": -0.7
+ },
+ "B_q5_mid_CORSIA_ef0.3": {
+  "GWh": 141.0,
+  "kt": 42.3,
+  "add_ebitda": -0.014,
+  "base_ebitda": 17.08,
+  "capex": 47.45,
+  "payback0": 2.78,
+  "payback1": 2.78,
+  "share_of_ebitda_pct": -0.1
+ },
+ "B_q5_high_ITMO_ef0.1": {
+  "GWh": 141.0,
+  "kt": 14.1,
+  "add_ebitda": -0.029,
+  "base_ebitda": 17.08,
+  "capex": 47.45,
+  "payback0": 2.78,
+  "payback1": 2.78,
+  "share_of_ebitda_pct": -0.2
+ },
+ "B_q5_high_ITMO_ef0.3": {
+  "GWh": 141.0,
+  "kt": 42.3,
+  "add_ebitda": 0.266,
+  "base_ebitda": 17.08,
+  "capex": 47.45,
+  "payback0": 2.78,
+  "payback1": 2.74,
+  "share_of_ebitda_pct": 1.6
+ },
+ "B_q15_low_VCM_ef0.1": {
+  "GWh": 451.3,
+  "kt": 45.1,
+  "add_ebitda": -0.096,
+  "base_ebitda": 38.03,
+  "capex": 120.22,
+  "payback0": 3.16,
+  "payback1": 3.17,
+  "share_of_ebitda_pct": -0.3
+ },
+ "B_q15_low_VCM_ef0.3": {
+  "GWh": 451.3,
+  "kt": 135.4,
+  "add_ebitda": 0.065,
+  "base_ebitda": 38.03,
+  "capex": 120.22,
+  "payback0": 3.16,
+  "payback1": 3.16,
+  "share_of_ebitda_pct": 0.2
+ },
+ "B_q15_mid_CORSIA_ef0.1": {
+  "GWh": 451.3,
+  "kt": 45.1,
+  "add_ebitda": -0.003,
+  "base_ebitda": 38.03,
+  "capex": 120.22,
+  "payback0": 3.16,
+  "payback1": 3.16,
+  "share_of_ebitda_pct": -0.0
+ },
+ "B_q15_mid_CORSIA_ef0.3": {
+  "GWh": 451.3,
+  "kt": 135.4,
+  "add_ebitda": 0.344,
+  "base_ebitda": 38.03,
+  "capex": 120.22,
+  "payback0": 3.16,
+  "payback1": 3.13,
+  "share_of_ebitda_pct": 0.9
+ },
+ "B_q15_high_ITMO_ef0.1": {
+  "GWh": 451.3,
+  "kt": 45.1,
+  "add_ebitda": 0.295,
+  "base_ebitda": 38.03,
+  "capex": 120.22,
+  "payback0": 3.16,
+  "payback1": 3.14,
+  "share_of_ebitda_pct": 0.8
+ },
+ "B_q15_high_ITMO_ef0.3": {
+  "GWh": 451.3,
+  "kt": 135.4,
+  "add_ebitda": 1.24,
+  "base_ebitda": 38.03,
+  "capex": 120.22,
+  "payback0": 3.16,
+  "payback1": 3.06,
+  "share_of_ebitda_pct": 3.3
+ },
+ "penalty_per_MMscfd_M$": 1.278,
+ "penalty_per_tCO2": [
+  51.5,
+  66.4
+ ],
+ "nuprc_collect_rate": {
+  "collected_M": 392.0,
+  "theor_WB": 816.0,
+  "theor_NUPRC": 714.0
+ }
+}

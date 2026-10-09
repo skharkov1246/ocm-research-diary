@@ -1,0 +1,80 @@
+{
+ "1": {
+  "capex_lng": [
+   15.6,
+   23.7
+  ],
+  "capex_cng": [
+   3.8,
+   5.0
+  ],
+  "lng_plant_usd_mmbtu": [
+   19.76,
+   27.12
+  ],
+  "cng_station_usd_mmbtu": [
+   6.45,
+   7.31
+  ],
+  "D*_c1.5_P496_lowcapex": 5295,
+  "D*_c1.5_P496_highcapex": 7710,
+  "D*_c1.5_P677_lowcapex": 13256,
+  "D*_c1.5_P677_highcapex": 19301,
+  "D*_c2.5_P496_lowcapex": 3177,
+  "D*_c2.5_P496_highcapex": 4626,
+  "D*_c2.5_P677_lowcapex": 7953,
+  "D*_c2.5_P677_highcapex": 11581
+ },
+ "5": {
+  "capex_lng": [
+   36.4,
+   57.1
+  ],
+  "capex_cng": [
+   9.6,
+   11.7
+  ],
+  "lng_plant_usd_mmbtu": [
+   8.66,
+   12.44
+  ],
+  "cng_station_usd_mmbtu": [
+   2.91,
+   3.23
+  ],
+  "D*_c1.5_P496_lowcapex": 2488,
+  "D*_c1.5_P496_highcapex": 3774,
+  "D*_c1.5_P677_lowcapex": 6229,
+  "D*_c1.5_P677_highcapex": 9449,
+  "D*_c2.5_P496_lowcapex": 1493,
+  "D*_c2.5_P496_highcapex": 2265,
+  "D*_c2.5_P677_lowcapex": 3737,
+  "D*_c2.5_P677_highcapex": 5669
+ },
+ "15": {
+  "capex_lng": [
+   88.4,
+   130.6
+  ],
+  "capex_cng": [
+   24.0,
+   28.5
+  ],
+  "lng_plant_usd_mmbtu": [
+   6.81,
+   9.38
+  ],
+  "cng_station_usd_mmbtu": [
+   2.32,
+   2.55
+  ],
+  "D*_c1.5_P496_lowcapex": 2020,
+  "D*_c1.5_P496_highcapex": 2890,
+  "D*_c1.5_P677_lowcapex": 5058,
+  "D*_c1.5_P677_highcapex": 7236,
+  "D*_c2.5_P496_lowcapex": 1212,
+  "D*_c2.5_P496_highcapex": 1734,
+  "D*_c2.5_P677_lowcapex": 3035,
+  "D*_c2.5_P677_highcapex": 4341
+ }
+}
