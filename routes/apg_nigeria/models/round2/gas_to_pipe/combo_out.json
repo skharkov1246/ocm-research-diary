@@ -1,0 +1,110 @@
+{
+ "Ughelli East|opt": {
+  "rem_nameplate": 3.64,
+  "capex": 7.65,
+  "fixed": 0.64,
+  "ebitda_y2": 1.84,
+  "npv15": -1.44,
+  "npv20": -2.47,
+  "irr": 9.9
+ },
+ "Ughelli East|base": {
+  "rem_nameplate": 3.36,
+  "capex": 11.39,
+  "fixed": 0.95,
+  "ebitda_y2": -0.24,
+  "npv15": -13.99,
+  "npv20": -13.54,
+  "irr": null
+ },
+ "Ughelli East|pess": {
+  "rem_nameplate": 2.36,
+  "capex": 16.4,
+  "fixed": 1.45,
+  "ebitda_y2": -1.63,
+  "npv15": -22.87,
+  "npv20": -21.04,
+  "irr": null
+ },
+ "Oredo (qmin 8.5)|opt": {
+  "rem_nameplate": 5.44,
+  "capex": 17.59,
+  "fixed": 1.24,
+  "ebitda_y2": 2.46,
+  "npv15": -8.39,
+  "npv20": -9.89,
+  "irr": 0.5
+ },
+ "Oredo (qmin 8.5)|base": {
+  "rem_nameplate": 5.16,
+  "capex": 28.25,
+  "fixed": 2.09,
+  "ebitda_y2": -1.01,
+  "npv15": -35.71,
+  "npv20": -34.42,
+  "irr": null
+ },
+ "Oredo (qmin 8.5)|pess": {
+  "rem_nameplate": 4.16,
+  "capex": 46.98,
+  "fixed": 3.79,
+  "ebitda_y2": -4.13,
+  "npv15": -63.11,
+  "npv20": -58.34,
+  "irr": null
+ },
+ "Oredo (2025 15.5)|opt": {
+  "rem_nameplate": 12.44,
+  "capex": 25.72,
+  "fixed": 1.66,
+  "ebitda_y2": 6.84,
+  "npv15": -2.62,
+  "npv20": -6.46,
+  "irr": 12.3
+ },
+ "Oredo (2025 15.5)|base": {
+  "rem_nameplate": 12.16,
+  "capex": 41.08,
+  "fixed": 2.88,
+  "ebitda_y2": -0.27,
+  "npv15": -47.29,
+  "npv20": -46.21,
+  "irr": null
+ },
+ "Oredo (2025 15.5)|pess": {
+  "rem_nameplate": 11.16,
+  "capex": 68.57,
+  "fixed": 5.35,
+  "ebitda_y2": -6.13,
+  "npv15": -92.32,
+  "npv20": -85.37,
+  "irr": null
+ },
+ "generic 5|opt": {
+  "rem_nameplate": 1.94,
+  "capex": 6.06,
+  "fixed": 0.57,
+  "ebitda_y2": 0.74,
+  "npv15": -3.4,
+  "npv20": -3.82,
+  "irr": -3.1
+ },
+ "generic 5|base": {
+  "rem_nameplate": 1.66,
+  "capex": 9.0,
+  "fixed": 0.82,
+  "ebitda_y2": -0.48,
+  "npv15": -12.23,
+  "npv20": -11.67,
+  "irr": null
+ },
+ "generic 5|pess": {
+  "rem_nameplate": 0.66,
+  "capex": 12.37,
+  "fixed": 1.13,
+  "ebitda_y2": -1.2,
+  "npv15": -17.15,
+  "npv20": -15.78,
+  "irr": null
+ }
+}

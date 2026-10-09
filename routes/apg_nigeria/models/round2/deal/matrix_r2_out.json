@@ -1,0 +1,2942 @@
+{
+ "cascade": {
+  "R1 судья (4.64; доступно 0.85, падение 6%)": {
+   "dopmargin|EDTI": [
+    291,
+    333
+   ],
+   "dopmargin|noEDTI": [
+    317,
+    378
+   ],
+   "dopgas|EDTI": [
+    316,
+    361
+   ],
+   "dopgas|noEDTI": [
+    344,
+    411
+   ],
+   "esc|EDTI": [
+    317,
+    363
+   ],
+   "esc|noEDTI": [
+    346,
+    412
+   ],
+   "none|EDTI": [
+    331,
+    381
+   ],
+   "none|noEDTI": [
+    363,
+    434
+   ]
+  },
+  "+ 4.40 МВт на MMscf/д": {
+   "dopmargin|EDTI": [
+    292,
+    334
+   ],
+   "dopmargin|noEDTI": [
+    319,
+    380
+   ],
+   "dopgas|EDTI": [
+    317,
+    363
+   ],
+   "dopgas|noEDTI": [
+    346,
+    413
+   ],
+   "esc|EDTI": [
+    319,
+    365
+   ],
+   "esc|noEDTI": [
+    348,
+    414
+   ],
+   "none|EDTI": [
+    333,
+    383
+   ],
+   "none|noEDTI": [
+    365,
+    436
+   ]
+  },
+  "+ газ VIIRS: доступно 0.78, падение 8%/г": {
+   "dopmargin|EDTI": [
+    302,
+    345
+   ],
+   "dopmargin|noEDTI": [
+    333,
+    394
+   ],
+   "dopgas|EDTI": [
+    327,
+    375
+   ],
+   "dopgas|noEDTI": [
+    362,
+    428
+   ],
+   "esc|EDTI": [
+    329,
+    377
+   ],
+   "esc|noEDTI": [
+    363,
+    430
+   ],
+   "none|EDTI": [
+    344,
+    396
+   ],
+   "none|noEDTI": [
+    381,
+    452
+   ]
+  },
+  "+ курсовой лаг: квартальный пересчёт + дебиторка": {
+   "dopmargin|EDTI": [
+    308,
+    353
+   ],
+   "dopmargin|noEDTI": [
+    340,
+    402
+   ],
+   "dopgas|EDTI": [
+    334,
+    383
+   ],
+   "dopgas|noEDTI": [
+    369,
+    437
+   ],
+   "esc|EDTI": [
+    336,
+    385
+   ],
+   "esc|noEDTI": [
+    371,
+    439
+   ],
+   "none|EDTI": [
+    354,
+    408
+   ],
+   "none|noEDTI": [
+    392,
+    466
+   ]
+  }
+ },
+ "gas_volumes": {
+  "DCQ_old": 2.469,
+  "DCQ_new": 2.604,
+  "burned_new_y2": 1.581,
+  "kwh_per_mscf": 98.3,
+  "capex": 29.15,
+  "capex_parts": {
+   "common": 2.8,
+   "power": 20.65,
+   "line": 5.7
+  }
+ },
+ "matrix": {
+  "25km|1y|11.0MW|dopgas|EDTI": [
+   334,
+   383
+  ],
+  "25km|1y|11.0MW|dopgas|noEDTI": [
+   369,
+   437
+  ],
+  "25km|1y|11.0MW|esc|EDTI": [
+   336,
+   385
+  ],
+  "25km|1y|11.0MW|esc|noEDTI": [
+   371,
+   439
+  ],
+  "25km|1y|11.0MW|none|EDTI": [
+   354,
+   408
+  ],
+  "25km|1y|11.0MW|none|noEDTI": [
+   392,
+   466
+  ],
+  "25km|1y|11.0MW|dopmargin|EDTI": [
+   308,
+   353
+  ],
+  "25km|1y|11.0MW|dopmargin|noEDTI": [
+   340,
+   402
+  ],
+  "25km|1y|8.5MW|dopgas|EDTI": [
+   363,
+   414
+  ],
+  "25km|1y|8.5MW|dopgas|noEDTI": [
+   395,
+   469
+  ],
+  "25km|1y|8.5MW|esc|EDTI": [
+   365,
+   416
+  ],
+  "25km|1y|8.5MW|esc|noEDTI": [
+   397,
+   471
+  ],
+  "25km|1y|8.5MW|none|EDTI": [
+   384,
+   441
+  ],
+  "25km|1y|8.5MW|none|noEDTI": [
+   420,
+   500
+  ],
+  "25km|1y|8.5MW|dopmargin|EDTI": [
+   334,
+   381
+  ],
+  "25km|1y|8.5MW|dopmargin|noEDTI": [
+   364,
+   431
+  ],
+  "25km|2y|11.0MW|dopgas|EDTI": [
+   368,
+   450
+  ],
+  "25km|2y|11.0MW|dopgas|noEDTI": [
+   414,
+   509
+  ],
+  "25km|2y|11.0MW|esc|EDTI": [
+   370,
+   451
+  ],
+  "25km|2y|11.0MW|esc|noEDTI": [
+   416,
+   511
+  ],
+  "25km|2y|11.0MW|none|EDTI": [
+   390,
+   479
+  ],
+  "25km|2y|11.0MW|none|noEDTI": [
+   440,
+   543
+  ],
+  "25km|2y|11.0MW|dopmargin|EDTI": [
+   339,
+   414
+  ],
+  "25km|2y|11.0MW|dopmargin|noEDTI": [
+   381,
+   468
+  ],
+  "25km|2y|8.5MW|dopgas|EDTI": [
+   399,
+   484
+  ],
+  "25km|2y|8.5MW|dopgas|noEDTI": [
+   442,
+   545
+  ],
+  "25km|2y|8.5MW|esc|EDTI": [
+   401,
+   486
+  ],
+  "25km|2y|8.5MW|esc|noEDTI": [
+   444,
+   547
+  ],
+  "25km|2y|8.5MW|none|EDTI": [
+   422,
+   515
+  ],
+  "25km|2y|8.5MW|none|noEDTI": [
+   469,
+   580
+  ],
+  "25km|2y|8.5MW|dopmargin|EDTI": [
+   367,
+   445
+  ],
+  "25km|2y|8.5MW|dopmargin|noEDTI": [
+   407,
+   501
+  ],
+  "oredo30|1y|11.0MW|dopgas|EDTI": [
+   333,
+   381
+  ],
+  "oredo30|1y|11.0MW|dopgas|noEDTI": [
+   363,
+   433
+  ],
+  "oredo30|1y|11.0MW|esc|EDTI": [
+   334,
+   383
+  ],
+  "oredo30|1y|11.0MW|esc|noEDTI": [
+   365,
+   435
+  ],
+  "oredo30|1y|11.0MW|none|EDTI": [
+   352,
+   406
+  ],
+  "oredo30|1y|11.0MW|none|noEDTI": [
+   386,
+   462
+  ],
+  "oredo30|1y|11.0MW|dopmargin|EDTI": [
+   307,
+   351
+  ],
+  "oredo30|1y|11.0MW|dopmargin|noEDTI": [
+   334,
+   399
+  ],
+  "oredo30|1y|8.5MW|dopgas|EDTI": [
+   374,
+   427
+  ],
+  "oredo30|1y|8.5MW|dopgas|noEDTI": [
+   407,
+   484
+  ],
+  "oredo30|1y|8.5MW|esc|EDTI": [
+   375,
+   429
+  ],
+  "oredo30|1y|8.5MW|esc|noEDTI": [
+   409,
+   486
+  ],
+  "oredo30|1y|8.5MW|none|EDTI": [
+   395,
+   454
+  ],
+  "oredo30|1y|8.5MW|none|noEDTI": [
+   432,
+   516
+  ],
+  "oredo30|1y|8.5MW|dopmargin|EDTI": [
+   344,
+   393
+  ],
+  "oredo30|1y|8.5MW|dopmargin|noEDTI": [
+   375,
+   445
+  ],
+  "oredo30|2y|11.0MW|dopgas|EDTI": [
+   367,
+   447
+  ],
+  "oredo30|2y|11.0MW|dopgas|noEDTI": [
+   407,
+   505
+  ],
+  "oredo30|2y|11.0MW|esc|EDTI": [
+   368,
+   449
+  ],
+  "oredo30|2y|11.0MW|esc|noEDTI": [
+   409,
+   507
+  ],
+  "oredo30|2y|11.0MW|none|EDTI": [
+   388,
+   476
+  ],
+  "oredo30|2y|11.0MW|none|noEDTI": [
+   432,
+   538
+  ],
+  "oredo30|2y|11.0MW|dopmargin|EDTI": [
+   338,
+   412
+  ],
+  "oredo30|2y|11.0MW|dopmargin|noEDTI": [
+   375,
+   465
+  ],
+  "oredo30|2y|8.5MW|dopgas|EDTI": [
+   411,
+   500
+  ],
+  "oredo30|2y|8.5MW|dopgas|noEDTI": [
+   456,
+   563
+  ],
+  "oredo30|2y|8.5MW|esc|EDTI": [
+   413,
+   501
+  ],
+  "oredo30|2y|8.5MW|esc|noEDTI": [
+   458,
+   564
+  ],
+  "oredo30|2y|8.5MW|none|EDTI": [
+   435,
+   531
+  ],
+  "oredo30|2y|8.5MW|none|noEDTI": [
+   484,
+   599
+  ],
+  "oredo30|2y|8.5MW|dopmargin|EDTI": [
+   378,
+   460
+  ],
+  "oredo30|2y|8.5MW|dopmargin|noEDTI": [
+   419,
+   517
+  ]
+ },
+ "capex": {
+  "25km|11.0MW": 29.15,
+  "25km|8.5MW": 24.45,
+  "oredo30|11.0MW": 30.05,
+  "oredo30|8.5MW": 25.35
+ },
+ "npv_table_base": {
+  "316|EDTI": {
+   "npv15": -2.67,
+   "npv20": -7.53,
+   "irr": 12.8,
+   "min_dscr": 1.03,
+   "y1": 5.73,
+   "y2": 8.18
+  },
+  "316|noEDTI": {
+   "npv15": -5.69,
+   "npv20": -10.32,
+   "irr": 10.5,
+   "min_dscr": 1.17,
+   "y1": 5.73,
+   "y2": 8.18
+  },
+  "350|EDTI": {
+   "npv15": 2.27,
+   "npv20": -3.52,
+   "irr": 16.8,
+   "min_dscr": 1.23,
+   "y1": 6.84,
+   "y2": 9.58
+  },
+  "350|noEDTI": {
+   "npv15": -2.06,
+   "npv20": -7.42,
+   "irr": 13.4,
+   "min_dscr": 1.35,
+   "y1": 6.84,
+   "y2": 9.58
+  },
+  "377|EDTI": {
+   "npv15": 5.91,
+   "npv20": -0.57,
+   "irr": 19.5,
+   "min_dscr": 1.39,
+   "y1": 7.72,
+   "y2": 10.68
+  },
+  "377|noEDTI": {
+   "npv15": 0.82,
+   "npv20": -5.11,
+   "irr": 15.6,
+   "min_dscr": 1.49,
+   "y1": 7.72,
+   "y2": 10.68
+  },
+  "411|EDTI": {
+   "npv15": 9.82,
+   "npv20": 2.59,
+   "irr": 22.2,
+   "min_dscr": 1.6,
+   "y1": 8.84,
+   "y2": 12.07
+  },
+  "411|noEDTI": {
+   "npv15": 4.45,
+   "npv20": -2.21,
+   "irr": 18.2,
+   "min_dscr": 1.67,
+   "y1": 8.84,
+   "y2": 12.07
+  },
+  "450|EDTI": {
+   "npv15": 14.31,
+   "npv20": 6.22,
+   "irr": 25.1,
+   "min_dscr": 1.83,
+   "y1": 10.12,
+   "y2": 13.67
+  },
+  "450|noEDTI": {
+   "npv15": 8.61,
+   "npv20": 1.11,
+   "irr": 20.9,
+   "min_dscr": 1.88,
+   "y1": 10.12,
+   "y2": 13.67
+  },
+  "500|EDTI": {
+   "npv15": 19.65,
+   "npv20": 10.49,
+   "irr": 28.3,
+   "min_dscr": 2.13,
+   "y1": 11.75,
+   "y2": 15.72
+  },
+  "500|noEDTI": {
+   "npv15": 13.95,
+   "npv20": 5.38,
+   "irr": 24.2,
+   "min_dscr": 2.15,
+   "y1": 11.75,
+   "y2": 15.72
+  }
+ },
+ "be20_vs_gas": {
+  "dopgas|EDTI|1y|0.74": 383,
+  "dopgas|EDTI|1y|1.00": 390,
+  "dopgas|EDTI|1y|1.50": 403,
+  "dopgas|EDTI|1y|2.32": 424,
+  "dopgas|EDTI|2y|0.74": 450,
+  "dopgas|EDTI|2y|1.00": 456,
+  "dopgas|EDTI|2y|1.50": 470,
+  "dopgas|EDTI|2y|2.32": 491,
+  "dopgas|noEDTI|1y|0.74": 437,
+  "dopgas|noEDTI|1y|1.00": 444,
+  "dopgas|noEDTI|1y|1.50": 456,
+  "dopgas|noEDTI|1y|2.32": 478,
+  "dopgas|noEDTI|2y|0.74": 509,
+  "dopgas|noEDTI|2y|1.00": 516,
+  "dopgas|noEDTI|2y|1.50": 529,
+  "dopgas|noEDTI|2y|2.32": 551,
+  "esc|EDTI|1y|0.74": 385,
+  "esc|EDTI|1y|1.00": 392,
+  "esc|EDTI|1y|1.50": 406,
+  "esc|EDTI|1y|2.32": 430,
+  "esc|EDTI|2y|0.74": 451,
+  "esc|EDTI|2y|1.00": 459,
+  "esc|EDTI|2y|1.50": 473,
+  "esc|EDTI|2y|2.32": 497,
+  "esc|noEDTI|1y|0.74": 439,
+  "esc|noEDTI|1y|1.00": 446,
+  "esc|noEDTI|1y|1.50": 460,
+  "esc|noEDTI|1y|2.32": 483,
+  "esc|noEDTI|2y|0.74": 511,
+  "esc|noEDTI|2y|1.00": 518,
+  "esc|noEDTI|2y|1.50": 533,
+  "esc|noEDTI|2y|2.32": 556,
+  "none|EDTI|1y|0.74": 408,
+  "none|EDTI|1y|1.00": 416,
+  "none|EDTI|1y|1.50": 431,
+  "none|EDTI|1y|2.32": 455,
+  "none|EDTI|2y|0.74": 479,
+  "none|EDTI|2y|1.00": 487,
+  "none|EDTI|2y|1.50": 502,
+  "none|EDTI|2y|2.32": 527,
+  "none|noEDTI|1y|0.74": 466,
+  "none|noEDTI|1y|1.00": 474,
+  "none|noEDTI|1y|1.50": 488,
+  "none|noEDTI|1y|2.32": 513,
+  "none|noEDTI|2y|0.74": 543,
+  "none|noEDTI|2y|1.00": 550,
+  "none|noEDTI|2y|1.50": 566,
+  "none|noEDTI|2y|2.32": 591
+ },
+ "rules": {
+  "25km|11.0MW|1y|dopgas|EDTI": {
+   "T_LOI": 405,
+   "T_LOI_usd": 0.305,
+   "gas_point_npv20": 1.59,
+   "diesel_floor": 402,
+   "floor_usd": 0.302,
+   "min_dscr": 1.45,
+   "npv15": 6.88,
+   "irr": 20.2
+  },
+  "25km|11.0MW|1y|dopgas|noEDTI": {
+   "T_LOI": 460,
+   "T_LOI_usd": 0.346,
+   "gas_point_npv20": 1.64,
+   "diesel_floor": 456,
+   "floor_usd": 0.343,
+   "min_dscr": 1.82,
+   "npv15": 7.61,
+   "irr": 20.2
+  },
+  "25km|11.0MW|1y|esc|EDTI": {
+   "T_LOI": 410,
+   "T_LOI_usd": 0.308,
+   "gas_point_npv20": 1.63,
+   "diesel_floor": 405,
+   "floor_usd": 0.305,
+   "min_dscr": 1.45,
+   "npv15": 7.05,
+   "irr": 20.3
+  },
+  "25km|11.0MW|1y|esc|noEDTI": {
+   "T_LOI": 460,
+   "T_LOI_usd": 0.346,
+   "gas_point_npv20": 1.5,
+   "diesel_floor": 460,
+   "floor_usd": 0.346,
+   "min_dscr": 1.8,
+   "npv15": 7.23,
+   "irr": 20.0
+  },
+  "25km|11.0MW|1y|none|EDTI": {
+   "T_LOI": 435,
+   "T_LOI_usd": 0.327,
+   "gas_point_npv20": 1.64,
+   "diesel_floor": 429,
+   "floor_usd": 0.323,
+   "min_dscr": 1.5,
+   "npv15": 7.28,
+   "irr": 20.3
+  },
+  "25km|11.0MW|1y|none|noEDTI": {
+   "T_LOI": 490,
+   "T_LOI_usd": 0.368,
+   "gas_point_npv20": 1.55,
+   "diesel_floor": 488,
+   "floor_usd": 0.367,
+   "min_dscr": 1.86,
+   "npv15": 7.61,
+   "irr": 20.1
+  },
+  "25km|11.0MW|1y|dopmargin|EDTI": {
+   "T_LOI": 375,
+   "T_LOI_usd": 0.282,
+   "gas_point_npv20": 1.6,
+   "diesel_floor": 372,
+   "floor_usd": 0.279,
+   "min_dscr": 1.45,
+   "npv15": 6.94,
+   "irr": 20.2
+  },
+  "25km|11.0MW|1y|dopmargin|noEDTI": {
+   "T_LOI": 425,
+   "T_LOI_usd": 0.32,
+   "gas_point_npv20": 1.63,
+   "diesel_floor": 421,
+   "floor_usd": 0.316,
+   "min_dscr": 1.82,
+   "npv15": 7.62,
+   "irr": 20.3
+  },
+  "25km|11.0MW|2y|dopgas|EDTI": {
+   "T_LOI": 470,
+   "T_LOI_usd": 0.353,
+   "gas_point_npv20": 1.51,
+   "diesel_floor": 470,
+   "floor_usd": 0.353,
+   "min_dscr": 1.81,
+   "npv15": 8.26,
+   "irr": 20.0
+  },
+  "25km|11.0MW|2y|dopgas|noEDTI": {
+   "T_LOI": 530,
+   "T_LOI_usd": 0.398,
+   "gas_point_npv20": 1.54,
+   "diesel_floor": 529,
+   "floor_usd": 0.398,
+   "min_dscr": 2.17,
+   "npv15": 8.91,
+   "irr": 20.0
+  },
+  "25km|11.0MW|2y|esc|EDTI": {
+   "T_LOI": 475,
+   "T_LOI_usd": 0.357,
+   "gas_point_npv20": 1.56,
+   "diesel_floor": 473,
+   "floor_usd": 0.355,
+   "min_dscr": 1.82,
+   "npv15": 8.4,
+   "irr": 20.1
+  },
+  "25km|11.0MW|2y|esc|noEDTI": {
+   "T_LOI": 535,
+   "T_LOI_usd": 0.402,
+   "gas_point_npv20": 1.59,
+   "diesel_floor": 532,
+   "floor_usd": 0.4,
+   "min_dscr": 2.17,
+   "npv15": 9.04,
+   "irr": 20.1
+  },
+  "25km|11.0MW|2y|none|EDTI": {
+   "T_LOI": 505,
+   "T_LOI_usd": 0.38,
+   "gas_point_npv20": 1.6,
+   "diesel_floor": 501,
+   "floor_usd": 0.377,
+   "min_dscr": 1.88,
+   "npv15": 8.69,
+   "irr": 20.1
+  },
+  "25km|11.0MW|2y|none|noEDTI": {
+   "T_LOI": 570,
+   "T_LOI_usd": 0.429,
+   "gas_point_npv20": 1.64,
+   "diesel_floor": 565,
+   "floor_usd": 0.425,
+   "min_dscr": 2.24,
+   "npv15": 9.44,
+   "irr": 20.2
+  },
+  "25km|11.0MW|2y|dopmargin|EDTI": {
+   "T_LOI": 435,
+   "T_LOI_usd": 0.327,
+   "gas_point_npv20": 1.54,
+   "diesel_floor": 433,
+   "floor_usd": 0.326,
+   "min_dscr": 1.82,
+   "npv15": 8.35,
+   "irr": 20.1
+  },
+  "25km|11.0MW|2y|dopmargin|noEDTI": {
+   "T_LOI": 490,
+   "T_LOI_usd": 0.368,
+   "gas_point_npv20": 1.57,
+   "diesel_floor": 488,
+   "floor_usd": 0.367,
+   "min_dscr": 2.17,
+   "npv15": 9.0,
+   "irr": 20.1
+  },
+  "25km|8.5MW|1y|dopgas|EDTI": {
+   "T_LOI": 435,
+   "T_LOI_usd": 0.327,
+   "gas_point_npv20": 1.56,
+   "diesel_floor": 433,
+   "floor_usd": 0.326,
+   "min_dscr": 1.58,
+   "npv15": 5.94,
+   "irr": 20.1
+  },
+  "25km|8.5MW|1y|dopgas|noEDTI": {
+   "T_LOI": 490,
+   "T_LOI_usd": 0.368,
+   "gas_point_npv20": 1.56,
+   "diesel_floor": 488,
+   "floor_usd": 0.367,
+   "min_dscr": 1.72,
+   "npv15": 6.47,
+   "irr": 20.1
+  },
+  "25km|8.5MW|1y|esc|EDTI": {
+   "T_LOI": 440,
+   "T_LOI_usd": 0.331,
+   "gas_point_npv20": 1.6,
+   "diesel_floor": 436,
+   "floor_usd": 0.328,
+   "min_dscr": 1.59,
+   "npv15": 6.08,
+   "irr": 20.2
+  },
+  "25km|8.5MW|1y|esc|noEDTI": {
+   "T_LOI": 495,
+   "T_LOI_usd": 0.372,
+   "gas_point_npv20": 1.61,
+   "diesel_floor": 491,
+   "floor_usd": 0.369,
+   "min_dscr": 1.73,
+   "npv15": 6.6,
+   "irr": 20.2
+  },
+  "25km|8.5MW|1y|none|EDTI": {
+   "T_LOI": 465,
+   "T_LOI_usd": 0.35,
+   "gas_point_npv20": 1.55,
+   "diesel_floor": 463,
+   "floor_usd": 0.348,
+   "min_dscr": 1.63,
+   "npv15": 6.12,
+   "irr": 20.1
+  },
+  "25km|8.5MW|1y|none|noEDTI": {
+   "T_LOI": 525,
+   "T_LOI_usd": 0.395,
+   "gas_point_npv20": 1.59,
+   "diesel_floor": 522,
+   "floor_usd": 0.392,
+   "min_dscr": 1.78,
+   "npv15": 6.75,
+   "irr": 20.1
+  },
+  "25km|8.5MW|1y|dopmargin|EDTI": {
+   "T_LOI": 405,
+   "T_LOI_usd": 0.305,
+   "gas_point_npv20": 1.67,
+   "diesel_floor": 399,
+   "floor_usd": 0.3,
+   "min_dscr": 1.6,
+   "npv15": 6.25,
+   "irr": 20.4
+  },
+  "25km|8.5MW|1y|dopmargin|noEDTI": {
+   "T_LOI": 455,
+   "T_LOI_usd": 0.342,
+   "gas_point_npv20": 1.66,
+   "diesel_floor": 450,
+   "floor_usd": 0.338,
+   "min_dscr": 1.74,
+   "npv15": 6.72,
+   "irr": 20.3
+  },
+  "25km|8.5MW|2y|dopgas|EDTI": {
+   "T_LOI": 505,
+   "T_LOI_usd": 0.38,
+   "gas_point_npv20": 1.54,
+   "diesel_floor": 504,
+   "floor_usd": 0.379,
+   "min_dscr": 1.98,
+   "npv15": 7.23,
+   "irr": 20.0
+  },
+  "25km|8.5MW|2y|dopgas|noEDTI": {
+   "T_LOI": 565,
+   "T_LOI_usd": 0.425,
+   "gas_point_npv20": 1.51,
+   "diesel_floor": 565,
+   "floor_usd": 0.425,
+   "min_dscr": 2.07,
+   "npv15": 7.7,
+   "irr": 20.0
+  },
+  "25km|8.5MW|2y|esc|EDTI": {
+   "T_LOI": 510,
+   "T_LOI_usd": 0.383,
+   "gas_point_npv20": 1.58,
+   "diesel_floor": 507,
+   "floor_usd": 0.381,
+   "min_dscr": 1.99,
+   "npv15": 7.35,
+   "irr": 20.1
+  },
+  "25km|8.5MW|2y|esc|noEDTI": {
+   "T_LOI": 570,
+   "T_LOI_usd": 0.429,
+   "gas_point_npv20": 1.56,
+   "diesel_floor": 568,
+   "floor_usd": 0.427,
+   "min_dscr": 2.07,
+   "npv15": 7.81,
+   "irr": 20.1
+  },
+  "25km|8.5MW|2y|none|EDTI": {
+   "T_LOI": 540,
+   "T_LOI_usd": 0.406,
+   "gas_point_npv20": 1.56,
+   "diesel_floor": 538,
+   "floor_usd": 0.404,
+   "min_dscr": 2.04,
+   "npv15": 7.47,
+   "irr": 20.1
+  },
+  "25km|8.5MW|2y|none|noEDTI": {
+   "T_LOI": 605,
+   "T_LOI_usd": 0.455,
+   "gas_point_npv20": 1.55,
+   "diesel_floor": 603,
+   "floor_usd": 0.454,
+   "min_dscr": 2.13,
+   "npv15": 7.99,
+   "irr": 20.1
+  },
+  "25km|8.5MW|2y|dopmargin|EDTI": {
+   "T_LOI": 470,
+   "T_LOI_usd": 0.353,
+   "gas_point_npv20": 1.67,
+   "diesel_floor": 464,
+   "floor_usd": 0.349,
+   "min_dscr": 2.0,
+   "npv15": 7.57,
+   "irr": 20.3
+  },
+  "25km|8.5MW|2y|dopmargin|noEDTI": {
+   "T_LOI": 525,
+   "T_LOI_usd": 0.395,
+   "gas_point_npv20": 1.65,
+   "diesel_floor": 520,
+   "floor_usd": 0.391,
+   "min_dscr": 2.08,
+   "npv15": 8.01,
+   "irr": 20.2
+  },
+  "oredo30|11.0MW|1y|dopgas|EDTI": {
+   "T_LOI": 405,
+   "T_LOI_usd": 0.305,
+   "gas_point_npv20": 1.66,
+   "diesel_floor": 400,
+   "floor_usd": 0.301,
+   "min_dscr": 1.59,
+   "npv15": 7.68,
+   "irr": 20.3
+  },
+  "oredo30|11.0MW|1y|dopgas|noEDTI": {
+   "T_LOI": 455,
+   "T_LOI_usd": 0.342,
+   "gas_point_npv20": 1.58,
+   "diesel_floor": 453,
+   "floor_usd": 0.34,
+   "min_dscr": 1.72,
+   "npv15": 8.05,
+   "irr": 20.1
+  },
+  "oredo30|11.0MW|1y|esc|EDTI": {
+   "T_LOI": 405,
+   "T_LOI_usd": 0.305,
+   "gas_point_npv20": 1.52,
+   "diesel_floor": 404,
+   "floor_usd": 0.304,
+   "min_dscr": 1.57,
+   "npv15": 7.24,
+   "irr": 20.0
+  },
+  "oredo30|11.0MW|1y|esc|noEDTI": {
+   "T_LOI": 460,
+   "T_LOI_usd": 0.346,
+   "gas_point_npv20": 1.62,
+   "diesel_floor": 456,
+   "floor_usd": 0.343,
+   "min_dscr": 1.73,
+   "npv15": 8.22,
+   "irr": 20.2
+  },
+  "oredo30|11.0MW|1y|none|EDTI": {
+   "T_LOI": 430,
+   "T_LOI_usd": 0.323,
+   "gas_point_npv20": 1.54,
+   "diesel_floor": 428,
+   "floor_usd": 0.322,
+   "min_dscr": 1.62,
+   "npv15": 7.53,
+   "irr": 20.1
+  },
+  "oredo30|11.0MW|1y|none|noEDTI": {
+   "T_LOI": 485,
+   "T_LOI_usd": 0.365,
+   "gas_point_npv20": 1.51,
+   "diesel_floor": 485,
+   "floor_usd": 0.364,
+   "min_dscr": 1.76,
+   "npv15": 8.09,
+   "irr": 20.0
+  },
+  "oredo30|11.0MW|1y|dopmargin|EDTI": {
+   "T_LOI": 375,
+   "T_LOI_usd": 0.282,
+   "gas_point_npv20": 1.66,
+   "diesel_floor": 370,
+   "floor_usd": 0.278,
+   "min_dscr": 1.6,
+   "npv15": 7.75,
+   "irr": 20.4
+  },
+  "oredo30|11.0MW|1y|dopmargin|noEDTI": {
+   "T_LOI": 420,
+   "T_LOI_usd": 0.316,
+   "gas_point_npv20": 1.56,
+   "diesel_floor": 418,
+   "floor_usd": 0.314,
+   "min_dscr": 1.72,
+   "npv15": 8.01,
+   "irr": 20.1
+  },
+  "oredo30|11.0MW|2y|dopgas|EDTI": {
+   "T_LOI": 470,
+   "T_LOI_usd": 0.353,
+   "gas_point_npv20": 1.59,
+   "diesel_floor": 467,
+   "floor_usd": 0.351,
+   "min_dscr": 1.98,
+   "npv15": 9.09,
+   "irr": 20.1
+  },
+  "oredo30|11.0MW|2y|dopgas|noEDTI": {
+   "T_LOI": 530,
+   "T_LOI_usd": 0.398,
+   "gas_point_npv20": 1.68,
+   "diesel_floor": 524,
+   "floor_usd": 0.394,
+   "min_dscr": 2.08,
+   "npv15": 9.94,
+   "irr": 20.2
+  },
+  "oredo30|11.0MW|2y|esc|EDTI": {
+   "T_LOI": 475,
+   "T_LOI_usd": 0.357,
+   "gas_point_npv20": 1.63,
+   "diesel_floor": 470,
+   "floor_usd": 0.353,
+   "min_dscr": 1.99,
+   "npv15": 9.23,
+   "irr": 20.2
+  },
+  "oredo30|11.0MW|2y|esc|noEDTI": {
+   "T_LOI": 530,
+   "T_LOI_usd": 0.398,
+   "gas_point_npv20": 1.54,
+   "diesel_floor": 529,
+   "floor_usd": 0.397,
+   "min_dscr": 2.06,
+   "npv15": 9.59,
+   "irr": 20.0
+  },
+  "oredo30|11.0MW|2y|none|EDTI": {
+   "T_LOI": 500,
+   "T_LOI_usd": 0.376,
+   "gas_point_npv20": 1.51,
+   "diesel_floor": 499,
+   "floor_usd": 0.376,
+   "min_dscr": 2.03,
+   "npv15": 9.09,
+   "irr": 20.0
+  },
+  "oredo30|11.0MW|2y|none|noEDTI": {
+   "T_LOI": 565,
+   "T_LOI_usd": 0.425,
+   "gas_point_npv20": 1.61,
+   "diesel_floor": 561,
+   "floor_usd": 0.422,
+   "min_dscr": 2.13,
+   "npv15": 10.04,
+   "irr": 20.1
+  },
+  "oredo30|11.0MW|2y|dopmargin|EDTI": {
+   "T_LOI": 435,
+   "T_LOI_usd": 0.327,
+   "gas_point_npv20": 1.61,
+   "diesel_floor": 431,
+   "floor_usd": 0.324,
+   "min_dscr": 1.99,
+   "npv15": 9.19,
+   "irr": 20.2
+  },
+  "oredo30|11.0MW|2y|dopmargin|noEDTI": {
+   "T_LOI": 485,
+   "T_LOI_usd": 0.365,
+   "gas_point_npv20": 1.51,
+   "diesel_floor": 485,
+   "floor_usd": 0.364,
+   "min_dscr": 2.06,
+   "npv15": 9.51,
+   "irr": 20.0
+  },
+  "oredo30|8.5MW|1y|dopgas|EDTI": {
+   "T_LOI": 450,
+   "T_LOI_usd": 0.338,
+   "gas_point_npv20": 1.63,
+   "diesel_floor": 446,
+   "floor_usd": 0.335,
+   "min_dscr": 1.58,
+   "npv15": 6.38,
+   "irr": 20.2
+  },
+  "oredo30|8.5MW|1y|dopgas|noEDTI": {
+   "T_LOI": 505,
+   "T_LOI_usd": 0.38,
+   "gas_point_npv20": 1.56,
+   "diesel_floor": 503,
+   "floor_usd": 0.378,
+   "min_dscr": 1.72,
+   "npv15": 6.74,
+   "irr": 20.1
+  },
+  "oredo30|8.5MW|1y|esc|EDTI": {
+   "T_LOI": 455,
+   "T_LOI_usd": 0.342,
+   "gas_point_npv20": 1.67,
+   "diesel_floor": 449,
+   "floor_usd": 0.337,
+   "min_dscr": 1.59,
+   "npv15": 6.51,
+   "irr": 20.3
+  },
+  "oredo30|8.5MW|1y|esc|noEDTI": {
+   "T_LOI": 510,
+   "T_LOI_usd": 0.383,
+   "gas_point_npv20": 1.61,
+   "diesel_floor": 506,
+   "floor_usd": 0.381,
+   "min_dscr": 1.72,
+   "npv15": 6.87,
+   "irr": 20.2
+  },
+  "oredo30|8.5MW|1y|none|EDTI": {
+   "T_LOI": 480,
+   "T_LOI_usd": 0.361,
+   "gas_point_npv20": 1.6,
+   "diesel_floor": 476,
+   "floor_usd": 0.358,
+   "min_dscr": 1.63,
+   "npv15": 6.49,
+   "irr": 20.2
+  },
+  "oredo30|8.5MW|1y|none|noEDTI": {
+   "T_LOI": 540,
+   "T_LOI_usd": 0.406,
+   "gas_point_npv20": 1.55,
+   "diesel_floor": 538,
+   "floor_usd": 0.405,
+   "min_dscr": 1.77,
+   "npv15": 6.95,
+   "irr": 20.1
+  },
+  "oredo30|8.5MW|1y|dopmargin|EDTI": {
+   "T_LOI": 415,
+   "T_LOI_usd": 0.312,
+   "gas_point_npv20": 1.59,
+   "diesel_floor": 412,
+   "floor_usd": 0.31,
+   "min_dscr": 1.58,
+   "npv15": 6.3,
+   "irr": 20.2
+  },
+  "oredo30|8.5MW|1y|dopmargin|noEDTI": {
+   "T_LOI": 465,
+   "T_LOI_usd": 0.35,
+   "gas_point_npv20": 1.51,
+   "diesel_floor": 465,
+   "floor_usd": 0.349,
+   "min_dscr": 1.71,
+   "npv15": 6.63,
+   "irr": 20.0
+  },
+  "oredo30|8.5MW|2y|dopgas|EDTI": {
+   "T_LOI": 520,
+   "T_LOI_usd": 0.391,
+   "gas_point_npv20": 1.51,
+   "diesel_floor": 520,
+   "floor_usd": 0.391,
+   "min_dscr": 1.97,
+   "npv15": 7.48,
+   "irr": 20.0
+  },
+  "oredo30|8.5MW|2y|dopgas|noEDTI": {
+   "T_LOI": 585,
+   "T_LOI_usd": 0.44,
+   "gas_point_npv20": 1.59,
+   "diesel_floor": 582,
+   "floor_usd": 0.438,
+   "min_dscr": 2.07,
+   "npv15": 8.18,
+   "irr": 20.1
+  },
+  "oredo30|8.5MW|2y|esc|EDTI": {
+   "T_LOI": 525,
+   "T_LOI_usd": 0.395,
+   "gas_point_npv20": 1.56,
+   "diesel_floor": 523,
+   "floor_usd": 0.393,
+   "min_dscr": 1.97,
+   "npv15": 7.59,
+   "irr": 20.1
+  },
+  "oredo30|8.5MW|2y|esc|noEDTI": {
+   "T_LOI": 590,
+   "T_LOI_usd": 0.444,
+   "gas_point_npv20": 1.63,
+   "diesel_floor": 586,
+   "floor_usd": 0.44,
+   "min_dscr": 2.07,
+   "npv15": 8.28,
+   "irr": 20.2
+  },
+  "oredo30|8.5MW|2y|none|EDTI": {
+   "T_LOI": 555,
+   "T_LOI_usd": 0.417,
+   "gas_point_npv20": 1.51,
+   "diesel_floor": 555,
+   "floor_usd": 0.417,
+   "min_dscr": 2.02,
+   "npv15": 7.65,
+   "irr": 20.0
+  },
+  "oredo30|8.5MW|2y|none|noEDTI": {
+   "T_LOI": 625,
+   "T_LOI_usd": 0.47,
+   "gas_point_npv20": 1.58,
+   "diesel_floor": 622,
+   "floor_usd": 0.468,
+   "min_dscr": 2.12,
+   "npv15": 8.38,
+   "irr": 20.1
+  },
+  "oredo30|8.5MW|2y|dopmargin|EDTI": {
+   "T_LOI": 480,
+   "T_LOI_usd": 0.361,
+   "gas_point_npv20": 1.51,
+   "diesel_floor": 480,
+   "floor_usd": 0.361,
+   "min_dscr": 1.97,
+   "npv15": 7.48,
+   "irr": 20.0
+  },
+  "oredo30|8.5MW|2y|dopmargin|noEDTI": {
+   "T_LOI": 540,
+   "T_LOI_usd": 0.406,
+   "gas_point_npv20": 1.6,
+   "diesel_floor": 537,
+   "floor_usd": 0.404,
+   "min_dscr": 2.07,
+   "npv15": 8.21,
+   "irr": 20.1
+  }
+ },
+ "earnout": {
+  "dopgas|EDTI": {
+   "T": 405,
+   "burned_mmscfd_y2": 1.581,
+   "eo_musd_by_year": [
+    0.0,
+    0.173,
+    0.173,
+    0.173,
+    0.173,
+    0.171,
+    0.157,
+    0.145,
+    0.133,
+    0.122
+   ],
+   "d_npv15": -0.39,
+   "d_npv20": -0.3,
+   "d_npv15_old_basis": -0.85,
+   "be20_shift": 3.3,
+   "cap_usd_per_mscf_at_T_plus": {
+    "0": 2.01,
+    "25": 4.28,
+    "50": 6.46
+   }
+  },
+  "dopgas|noEDTI": {
+   "T": 460,
+   "burned_mmscfd_y2": 1.581,
+   "eo_musd_by_year": [
+    0.0,
+    0.173,
+    0.173,
+    0.173,
+    0.173,
+    0.171,
+    0.157,
+    0.145,
+    0.133,
+    0.122
+   ],
+   "d_npv15": -0.39,
+   "d_npv20": -0.31,
+   "d_npv15_old_basis": -0.78,
+   "be20_shift": 3.6,
+   "cap_usd_per_mscf_at_T_plus": {
+    "0": 1.94,
+    "25": 4.04,
+    "50": 6.14
+   }
+  }
+ },
+ "gas_measure_min": {
+  "EDTI|T=405|gas0.74|decl0.08": 3.24,
+  "EDTI|T=405|gas0.74|decl0.12": 4.11,
+  "EDTI|T=405|gas1.50|decl0.08": 3.8,
+  "EDTI|T=405|gas1.50|decl0.12": 5.13,
+  "EDTI|T=430|gas0.74|decl0.08": 2.87,
+  "EDTI|T=430|gas0.74|decl0.12": 3.48,
+  "EDTI|T=430|gas1.50|decl0.08": 3.14,
+  "EDTI|T=430|gas1.50|decl0.12": 3.92,
+  "EDTI|T=455|gas0.74|decl0.08": 2.65,
+  "EDTI|T=455|gas0.74|decl0.12": 3.1,
+  "EDTI|T=455|gas1.50|decl0.08": 2.81,
+  "EDTI|T=455|gas1.50|decl0.12": 3.37,
+  "noEDTI|T=460|gas0.74|decl0.08": 3.3,
+  "noEDTI|T=460|gas0.74|decl0.12": 4.23,
+  "noEDTI|T=460|gas1.50|decl0.08": 3.78,
+  "noEDTI|T=460|gas1.50|decl0.12": 5.08,
+  "noEDTI|T=485|gas0.74|decl0.08": 2.97,
+  "noEDTI|T=485|gas0.74|decl0.12": 3.64,
+  "noEDTI|T=485|gas1.50|decl0.08": 3.22,
+  "noEDTI|T=485|gas1.50|decl0.12": 4.08,
+  "noEDTI|T=510|gas0.74|decl0.08": 2.75,
+  "noEDTI|T=510|gas0.74|decl0.12": 3.26,
+  "noEDTI|T=510|gas1.50|decl0.08": 2.91,
+  "noEDTI|T=510|gas1.50|decl0.12": 3.54
+ },
+ "be20_vs_line_km": {
+  "10|EDTI|1y": 337,
+  "10|EDTI|2y": 394,
+  "10|noEDTI|1y": 382,
+  "10|noEDTI|2y": 444,
+  "15|EDTI|1y": 348,
+  "15|EDTI|2y": 407,
+  "15|noEDTI|1y": 394,
+  "15|noEDTI|2y": 459,
+  "20|EDTI|1y": 359,
+  "20|EDTI|2y": 420,
+  "20|noEDTI|1y": 407,
+  "20|noEDTI|2y": 474,
+  "25|EDTI|1y": 370,
+  "25|EDTI|2y": 434,
+  "25|noEDTI|1y": 420,
+  "25|noEDTI|2y": 490,
+  "30|EDTI|1y": 381,
+  "30|EDTI|2y": 447,
+  "30|noEDTI|1y": 433,
+  "30|noEDTI|2y": 505,
+  "33|EDTI|1y": 388,
+  "33|EDTI|2y": 456,
+  "33|noEDTI|1y": 441,
+  "33|noEDTI|2y": 515,
+  "35|EDTI|1y": 393,
+  "35|EDTI|2y": 461,
+  "35|noEDTI|1y": 447,
+  "35|noEDTI|2y": 521,
+  "40|EDTI|1y": 404,
+  "40|EDTI|2y": 475,
+  "40|noEDTI|1y": 460,
+  "40|noEDTI|2y": 537
+ },
+ "be20_vs_anchor_gasstop": {
+  "25km|dopgas|EDTI|1y|5.0": 564,
+  "25km|dopgas|EDTI|1y|6.0": 511,
+  "25km|dopgas|EDTI|1y|7.0": 473,
+  "25km|dopgas|EDTI|1y|8.0": 444,
+  "25km|dopgas|EDTI|1y|8.5": 434,
+  "25km|dopgas|EDTI|1y|9.0": 425,
+  "25km|dopgas|EDTI|1y|10.0": 411,
+  "25km|dopgas|EDTI|1y|11.0": 403,
+  "25km|dopgas|EDTI|1y|12.0": 398,
+  "25km|dopgas|EDTI|1y|13.0": 397,
+  "25km|dopgas|EDTI|2y|5.0": 652,
+  "25km|dopgas|EDTI|2y|6.0": 592,
+  "25km|dopgas|EDTI|2y|7.0": 548,
+  "25km|dopgas|EDTI|2y|8.0": 516,
+  "25km|dopgas|EDTI|2y|8.5": 504,
+  "25km|dopgas|EDTI|2y|9.0": 494,
+  "25km|dopgas|EDTI|2y|10.0": 479,
+  "25km|dopgas|EDTI|2y|11.0": 470,
+  "25km|dopgas|EDTI|2y|12.0": 465,
+  "25km|dopgas|EDTI|2y|13.0": 465,
+  "25km|dopgas|noEDTI|1y|5.0": 632,
+  "25km|dopgas|noEDTI|1y|6.0": 573,
+  "25km|dopgas|noEDTI|1y|7.0": 531,
+  "25km|dopgas|noEDTI|1y|8.0": 500,
+  "25km|dopgas|noEDTI|1y|8.5": 488,
+  "25km|dopgas|noEDTI|1y|9.0": 479,
+  "25km|dopgas|noEDTI|1y|10.0": 465,
+  "25km|dopgas|noEDTI|1y|11.0": 456,
+  "25km|dopgas|noEDTI|1y|12.0": 452,
+  "25km|dopgas|noEDTI|1y|13.0": 453,
+  "25km|dopgas|noEDTI|2y|5.0": 727,
+  "25km|dopgas|noEDTI|2y|6.0": 661,
+  "25km|dopgas|noEDTI|2y|7.0": 613,
+  "25km|dopgas|noEDTI|2y|8.0": 578,
+  "25km|dopgas|noEDTI|2y|8.5": 565,
+  "25km|dopgas|noEDTI|2y|9.0": 554,
+  "25km|dopgas|noEDTI|2y|10.0": 538,
+  "25km|dopgas|noEDTI|2y|11.0": 529,
+  "25km|dopgas|noEDTI|2y|12.0": 525,
+  "25km|dopgas|noEDTI|2y|13.0": 526,
+  "25km|esc|EDTI|1y|5.0": 568,
+  "25km|esc|EDTI|1y|6.0": 514,
+  "25km|esc|EDTI|1y|7.0": 476,
+  "25km|esc|EDTI|1y|8.0": 448,
+  "25km|esc|EDTI|1y|8.5": 437,
+  "25km|esc|EDTI|1y|9.0": 428,
+  "25km|esc|EDTI|1y|10.0": 415,
+  "25km|esc|EDTI|1y|11.0": 406,
+  "25km|esc|EDTI|1y|12.0": 402,
+  "25km|esc|EDTI|1y|13.0": 401,
+  "25km|esc|EDTI|2y|5.0": 656,
+  "25km|esc|EDTI|2y|6.0": 595,
+  "25km|esc|EDTI|2y|7.0": 552,
+  "25km|esc|EDTI|2y|8.0": 520,
+  "25km|esc|EDTI|2y|8.5": 508,
+  "25km|esc|EDTI|2y|9.0": 498,
+  "25km|esc|EDTI|2y|10.0": 483,
+  "25km|esc|EDTI|2y|11.0": 473,
+  "25km|esc|EDTI|2y|12.0": 469,
+  "25km|esc|EDTI|2y|13.0": 469,
+  "25km|esc|noEDTI|1y|5.0": 635,
+  "25km|esc|noEDTI|1y|6.0": 577,
+  "25km|esc|noEDTI|1y|7.0": 535,
+  "25km|esc|noEDTI|1y|8.0": 504,
+  "25km|esc|noEDTI|1y|8.5": 492,
+  "25km|esc|noEDTI|1y|9.0": 482,
+  "25km|esc|noEDTI|1y|10.0": 468,
+  "25km|esc|noEDTI|1y|11.0": 460,
+  "25km|esc|noEDTI|1y|12.0": 456,
+  "25km|esc|noEDTI|1y|13.0": 456,
+  "25km|esc|noEDTI|2y|5.0": 731,
+  "25km|esc|noEDTI|2y|6.0": 664,
+  "25km|esc|noEDTI|2y|7.0": 617,
+  "25km|esc|noEDTI|2y|8.0": 582,
+  "25km|esc|noEDTI|2y|8.5": 568,
+  "25km|esc|noEDTI|2y|9.0": 558,
+  "25km|esc|noEDTI|2y|10.0": 542,
+  "25km|esc|noEDTI|2y|11.0": 533,
+  "25km|esc|noEDTI|2y|12.0": 529,
+  "25km|esc|noEDTI|2y|13.0": 529,
+  "25km|none|EDTI|1y|5.0": 602,
+  "25km|none|EDTI|1y|6.0": 545,
+  "25km|none|EDTI|1y|7.0": 505,
+  "25km|none|EDTI|1y|8.0": 475,
+  "25km|none|EDTI|1y|8.5": 463,
+  "25km|none|EDTI|1y|9.0": 454,
+  "25km|none|EDTI|1y|10.0": 440,
+  "25km|none|EDTI|1y|11.0": 431,
+  "25km|none|EDTI|1y|12.0": 426,
+  "25km|none|EDTI|1y|13.0": 424,
+  "25km|none|EDTI|2y|5.0": 695,
+  "25km|none|EDTI|2y|6.0": 631,
+  "25km|none|EDTI|2y|7.0": 585,
+  "25km|none|EDTI|2y|8.0": 551,
+  "25km|none|EDTI|2y|8.5": 538,
+  "25km|none|EDTI|2y|9.0": 528,
+  "25km|none|EDTI|2y|10.0": 512,
+  "25km|none|EDTI|2y|11.0": 502,
+  "25km|none|EDTI|2y|12.0": 498,
+  "25km|none|EDTI|2y|13.0": 498,
+  "25km|none|noEDTI|1y|5.0": 675,
+  "25km|none|noEDTI|1y|6.0": 612,
+  "25km|none|noEDTI|1y|7.0": 568,
+  "25km|none|noEDTI|1y|8.0": 535,
+  "25km|none|noEDTI|1y|8.5": 522,
+  "25km|none|noEDTI|1y|9.0": 512,
+  "25km|none|noEDTI|1y|10.0": 497,
+  "25km|none|noEDTI|1y|11.0": 488,
+  "25km|none|noEDTI|1y|12.0": 484,
+  "25km|none|noEDTI|1y|13.0": 484,
+  "25km|none|noEDTI|2y|5.0": 776,
+  "25km|none|noEDTI|2y|6.0": 705,
+  "25km|none|noEDTI|2y|7.0": 655,
+  "25km|none|noEDTI|2y|8.0": 618,
+  "25km|none|noEDTI|2y|8.5": 604,
+  "25km|none|noEDTI|2y|9.0": 592,
+  "25km|none|noEDTI|2y|10.0": 575,
+  "25km|none|noEDTI|2y|11.0": 566,
+  "25km|none|noEDTI|2y|12.0": 561,
+  "25km|none|noEDTI|2y|13.0": 562,
+  "25km|dopmargin|EDTI|1y|5.0": 520,
+  "25km|dopmargin|EDTI|1y|6.0": 471,
+  "25km|dopmargin|EDTI|1y|7.0": 436,
+  "25km|dopmargin|EDTI|1y|8.0": 411,
+  "25km|dopmargin|EDTI|1y|8.5": 401,
+  "25km|dopmargin|EDTI|1y|9.0": 393,
+  "25km|dopmargin|EDTI|1y|10.0": 380,
+  "25km|dopmargin|EDTI|1y|11.0": 372,
+  "25km|dopmargin|EDTI|1y|12.0": 368,
+  "25km|dopmargin|EDTI|1y|13.0": 367,
+  "25km|dopmargin|EDTI|2y|5.0": 601,
+  "25km|dopmargin|EDTI|2y|6.0": 546,
+  "25km|dopmargin|EDTI|2y|7.0": 506,
+  "25km|dopmargin|EDTI|2y|8.0": 477,
+  "25km|dopmargin|EDTI|2y|8.5": 465,
+  "25km|dopmargin|EDTI|2y|9.0": 456,
+  "25km|dopmargin|EDTI|2y|10.0": 442,
+  "25km|dopmargin|EDTI|2y|11.0": 434,
+  "25km|dopmargin|EDTI|2y|12.0": 430,
+  "25km|dopmargin|EDTI|2y|13.0": 430,
+  "25km|dopmargin|noEDTI|1y|5.0": 582,
+  "25km|dopmargin|noEDTI|1y|6.0": 528,
+  "25km|dopmargin|noEDTI|1y|7.0": 490,
+  "25km|dopmargin|noEDTI|1y|8.0": 462,
+  "25km|dopmargin|noEDTI|1y|8.5": 451,
+  "25km|dopmargin|noEDTI|1y|9.0": 442,
+  "25km|dopmargin|noEDTI|1y|10.0": 429,
+  "25km|dopmargin|noEDTI|1y|11.0": 422,
+  "25km|dopmargin|noEDTI|1y|12.0": 418,
+  "25km|dopmargin|noEDTI|1y|13.0": 418,
+  "25km|dopmargin|noEDTI|2y|5.0": 670,
+  "25km|dopmargin|noEDTI|2y|6.0": 609,
+  "25km|dopmargin|noEDTI|2y|7.0": 565,
+  "25km|dopmargin|noEDTI|2y|8.0": 533,
+  "25km|dopmargin|noEDTI|2y|8.5": 521,
+  "25km|dopmargin|noEDTI|2y|9.0": 511,
+  "25km|dopmargin|noEDTI|2y|10.0": 497,
+  "25km|dopmargin|noEDTI|2y|11.0": 488,
+  "25km|dopmargin|noEDTI|2y|12.0": 484,
+  "25km|dopmargin|noEDTI|2y|13.0": 485,
+  "oredo30|dopgas|EDTI|1y|5.0": 587,
+  "oredo30|dopgas|EDTI|1y|6.0": 530,
+  "oredo30|dopgas|EDTI|1y|7.0": 490,
+  "oredo30|dopgas|EDTI|1y|8.0": 459,
+  "oredo30|dopgas|EDTI|1y|8.5": 447,
+  "oredo30|dopgas|EDTI|1y|9.0": 435,
+  "oredo30|dopgas|EDTI|1y|10.0": 416,
+  "oredo30|dopgas|EDTI|1y|11.0": 401,
+  "oredo30|dopgas|EDTI|1y|12.0": 388,
+  "oredo30|dopgas|EDTI|1y|13.0": 377,
+  "oredo30|dopgas|EDTI|2y|5.0": 680,
+  "oredo30|dopgas|EDTI|2y|6.0": 615,
+  "oredo30|dopgas|EDTI|2y|7.0": 569,
+  "oredo30|dopgas|EDTI|2y|8.0": 534,
+  "oredo30|dopgas|EDTI|2y|8.5": 520,
+  "oredo30|dopgas|EDTI|2y|9.0": 507,
+  "oredo30|dopgas|EDTI|2y|10.0": 485,
+  "oredo30|dopgas|EDTI|2y|11.0": 468,
+  "oredo30|dopgas|EDTI|2y|12.0": 453,
+  "oredo30|dopgas|EDTI|2y|13.0": 440,
+  "oredo30|dopgas|noEDTI|1y|5.0": 659,
+  "oredo30|dopgas|noEDTI|1y|6.0": 596,
+  "oredo30|dopgas|noEDTI|1y|7.0": 551,
+  "oredo30|dopgas|noEDTI|1y|8.0": 517,
+  "oredo30|dopgas|noEDTI|1y|8.5": 503,
+  "oredo30|dopgas|noEDTI|1y|9.0": 491,
+  "oredo30|dopgas|noEDTI|1y|10.0": 470,
+  "oredo30|dopgas|noEDTI|1y|11.0": 453,
+  "oredo30|dopgas|noEDTI|1y|12.0": 439,
+  "oredo30|dopgas|noEDTI|1y|13.0": 427,
+  "oredo30|dopgas|noEDTI|2y|5.0": 759,
+  "oredo30|dopgas|noEDTI|2y|6.0": 688,
+  "oredo30|dopgas|noEDTI|2y|7.0": 637,
+  "oredo30|dopgas|noEDTI|2y|8.0": 598,
+  "oredo30|dopgas|noEDTI|2y|8.5": 583,
+  "oredo30|dopgas|noEDTI|2y|9.0": 569,
+  "oredo30|dopgas|noEDTI|2y|10.0": 545,
+  "oredo30|dopgas|noEDTI|2y|11.0": 525,
+  "oredo30|dopgas|noEDTI|2y|12.0": 509,
+  "oredo30|dopgas|noEDTI|2y|13.0": 495,
+  "oredo30|esc|EDTI|1y|5.0": 591,
+  "oredo30|esc|EDTI|1y|6.0": 534,
+  "oredo30|esc|EDTI|1y|7.0": 493,
+  "oredo30|esc|EDTI|1y|8.0": 463,
+  "oredo30|esc|EDTI|1y|8.5": 450,
+  "oredo30|esc|EDTI|1y|9.0": 439,
+  "oredo30|esc|EDTI|1y|10.0": 420,
+  "oredo30|esc|EDTI|1y|11.0": 404,
+  "oredo30|esc|EDTI|1y|12.0": 392,
+  "oredo30|esc|EDTI|1y|13.0": 381,
+  "oredo30|esc|EDTI|2y|5.0": 684,
+  "oredo30|esc|EDTI|2y|6.0": 619,
+  "oredo30|esc|EDTI|2y|7.0": 573,
+  "oredo30|esc|EDTI|2y|8.0": 538,
+  "oredo30|esc|EDTI|2y|8.5": 523,
+  "oredo30|esc|EDTI|2y|9.0": 511,
+  "oredo30|esc|EDTI|2y|10.0": 489,
+  "oredo30|esc|EDTI|2y|11.0": 471,
+  "oredo30|esc|EDTI|2y|12.0": 456,
+  "oredo30|esc|EDTI|2y|13.0": 444,
+  "oredo30|esc|noEDTI|1y|5.0": 662,
+  "oredo30|esc|noEDTI|1y|6.0": 600,
+  "oredo30|esc|noEDTI|1y|7.0": 555,
+  "oredo30|esc|noEDTI|1y|8.0": 521,
+  "oredo30|esc|noEDTI|1y|8.5": 507,
+  "oredo30|esc|noEDTI|1y|9.0": 495,
+  "oredo30|esc|noEDTI|1y|10.0": 474,
+  "oredo30|esc|noEDTI|1y|11.0": 457,
+  "oredo30|esc|noEDTI|1y|12.0": 442,
+  "oredo30|esc|noEDTI|1y|13.0": 430,
+  "oredo30|esc|noEDTI|2y|5.0": 763,
+  "oredo30|esc|noEDTI|2y|6.0": 691,
+  "oredo30|esc|noEDTI|2y|7.0": 640,
+  "oredo30|esc|noEDTI|2y|8.0": 602,
+  "oredo30|esc|noEDTI|2y|8.5": 586,
+  "oredo30|esc|noEDTI|2y|9.0": 572,
+  "oredo30|esc|noEDTI|2y|10.0": 548,
+  "oredo30|esc|noEDTI|2y|11.0": 529,
+  "oredo30|esc|noEDTI|2y|12.0": 513,
+  "oredo30|esc|noEDTI|2y|13.0": 499,
+  "oredo30|none|EDTI|1y|5.0": 626,
+  "oredo30|none|EDTI|1y|6.0": 566,
+  "oredo30|none|EDTI|1y|7.0": 523,
+  "oredo30|none|EDTI|1y|8.0": 490,
+  "oredo30|none|EDTI|1y|8.5": 477,
+  "oredo30|none|EDTI|1y|9.0": 465,
+  "oredo30|none|EDTI|1y|10.0": 445,
+  "oredo30|none|EDTI|1y|11.0": 429,
+  "oredo30|none|EDTI|1y|12.0": 415,
+  "oredo30|none|EDTI|1y|13.0": 403,
+  "oredo30|none|EDTI|2y|5.0": 725,
+  "oredo30|none|EDTI|2y|6.0": 656,
+  "oredo30|none|EDTI|2y|7.0": 607,
+  "oredo30|none|EDTI|2y|8.0": 570,
+  "oredo30|none|EDTI|2y|8.5": 555,
+  "oredo30|none|EDTI|2y|9.0": 541,
+  "oredo30|none|EDTI|2y|10.0": 518,
+  "oredo30|none|EDTI|2y|11.0": 500,
+  "oredo30|none|EDTI|2y|12.0": 484,
+  "oredo30|none|EDTI|2y|13.0": 471,
+  "oredo30|none|noEDTI|1y|5.0": 703,
+  "oredo30|none|noEDTI|1y|6.0": 637,
+  "oredo30|none|noEDTI|1y|7.0": 589,
+  "oredo30|none|noEDTI|1y|8.0": 553,
+  "oredo30|none|noEDTI|1y|8.5": 538,
+  "oredo30|none|noEDTI|1y|9.0": 525,
+  "oredo30|none|noEDTI|1y|10.0": 503,
+  "oredo30|none|noEDTI|1y|11.0": 485,
+  "oredo30|none|noEDTI|1y|12.0": 470,
+  "oredo30|none|noEDTI|1y|13.0": 457,
+  "oredo30|none|noEDTI|2y|5.0": 810,
+  "oredo30|none|noEDTI|2y|6.0": 734,
+  "oredo30|none|noEDTI|2y|7.0": 680,
+  "oredo30|none|noEDTI|2y|8.0": 639,
+  "oredo30|none|noEDTI|2y|8.5": 623,
+  "oredo30|none|noEDTI|2y|9.0": 608,
+  "oredo30|none|noEDTI|2y|10.0": 582,
+  "oredo30|none|noEDTI|2y|11.0": 562,
+  "oredo30|none|noEDTI|2y|12.0": 544,
+  "oredo30|none|noEDTI|2y|13.0": 530,
+  "oredo30|dopmargin|EDTI|1y|5.0": 542,
+  "oredo30|dopmargin|EDTI|1y|6.0": 489,
+  "oredo30|dopmargin|EDTI|1y|7.0": 452,
+  "oredo30|dopmargin|EDTI|1y|8.0": 424,
+  "oredo30|dopmargin|EDTI|1y|8.5": 413,
+  "oredo30|dopmargin|EDTI|1y|9.0": 402,
+  "oredo30|dopmargin|EDTI|1y|10.0": 385,
+  "oredo30|dopmargin|EDTI|1y|11.0": 371,
+  "oredo30|dopmargin|EDTI|1y|12.0": 359,
+  "oredo30|dopmargin|EDTI|1y|13.0": 349,
+  "oredo30|dopmargin|EDTI|2y|5.0": 627,
+  "oredo30|dopmargin|EDTI|2y|6.0": 567,
+  "oredo30|dopmargin|EDTI|2y|7.0": 525,
+  "oredo30|dopmargin|EDTI|2y|8.0": 493,
+  "oredo30|dopmargin|EDTI|2y|8.5": 480,
+  "oredo30|dopmargin|EDTI|2y|9.0": 468,
+  "oredo30|dopmargin|EDTI|2y|10.0": 448,
+  "oredo30|dopmargin|EDTI|2y|11.0": 432,
+  "oredo30|dopmargin|EDTI|2y|12.0": 418,
+  "oredo30|dopmargin|EDTI|2y|13.0": 407,
+  "oredo30|dopmargin|noEDTI|1y|5.0": 607,
+  "oredo30|dopmargin|noEDTI|1y|6.0": 550,
+  "oredo30|dopmargin|noEDTI|1y|7.0": 508,
+  "oredo30|dopmargin|noEDTI|1y|8.0": 477,
+  "oredo30|dopmargin|noEDTI|1y|8.5": 465,
+  "oredo30|dopmargin|noEDTI|1y|9.0": 453,
+  "oredo30|dopmargin|noEDTI|1y|10.0": 434,
+  "oredo30|dopmargin|noEDTI|1y|11.0": 419,
+  "oredo30|dopmargin|noEDTI|1y|12.0": 405,
+  "oredo30|dopmargin|noEDTI|1y|13.0": 394,
+  "oredo30|dopmargin|noEDTI|2y|5.0": 699,
+  "oredo30|dopmargin|noEDTI|2y|6.0": 634,
+  "oredo30|dopmargin|noEDTI|2y|7.0": 587,
+  "oredo30|dopmargin|noEDTI|2y|8.0": 552,
+  "oredo30|dopmargin|noEDTI|2y|8.5": 537,
+  "oredo30|dopmargin|noEDTI|2y|9.0": 525,
+  "oredo30|dopmargin|noEDTI|2y|10.0": 503,
+  "oredo30|dopmargin|noEDTI|2y|11.0": 485,
+  "oredo30|dopmargin|noEDTI|2y|12.0": 470,
+  "oredo30|dopmargin|noEDTI|2y|13.0": 457
+ },
+ "anchor_threshold": {
+  "25km|dopgas|EDTI|1y": {
+   "Pd530": 8.3,
+   "Pd530_econ": 7.8,
+   "Pd650": 8.3,
+   "Pd650_econ": 5.2,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.0
+  },
+  "25km|dopgas|EDTI|2y": {
+   "Pd530": null,
+   "Pd530_econ": null,
+   "Pd650": 8.3,
+   "Pd650_econ": 6.9,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.0
+  },
+  "25km|dopgas|noEDTI|1y": {
+   "Pd530": null,
+   "Pd530_econ": null,
+   "Pd650": 8.3,
+   "Pd650_econ": 6.5,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.0
+  },
+  "25km|dopgas|noEDTI|2y": {
+   "Pd530": null,
+   "Pd530_econ": null,
+   "Pd650": 9.1,
+   "Pd650_econ": 9.1,
+   "Pd770": 8.3,
+   "Pd770_econ": 6.1
+  },
+  "25km|esc|EDTI|1y": {
+   "Pd530": 8.3,
+   "Pd530_econ": 7.9,
+   "Pd650": 8.3,
+   "Pd650_econ": 5.3,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.0
+  },
+  "25km|esc|EDTI|2y": {
+   "Pd530": null,
+   "Pd530_econ": null,
+   "Pd650": 8.3,
+   "Pd650_econ": 7.0,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.0
+  },
+  "25km|esc|noEDTI|1y": {
+   "Pd530": null,
+   "Pd530_econ": null,
+   "Pd650": 8.3,
+   "Pd650_econ": 6.6,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.0
+  },
+  "25km|esc|noEDTI|2y": {
+   "Pd530": null,
+   "Pd530_econ": null,
+   "Pd650": 9.3,
+   "Pd650_econ": 9.3,
+   "Pd770": 8.3,
+   "Pd770_econ": 6.2
+  },
+  "25km|none|EDTI|1y": {
+   "Pd530": 9.2,
+   "Pd530_econ": 9.2,
+   "Pd650": 8.3,
+   "Pd650_econ": 5.9,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.0
+  },
+  "25km|none|EDTI|2y": {
+   "Pd530": null,
+   "Pd530_econ": null,
+   "Pd650": 8.3,
+   "Pd650_econ": 8.0,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.6
+  },
+  "25km|none|noEDTI|1y": {
+   "Pd530": null,
+   "Pd530_econ": null,
+   "Pd650": 8.3,
+   "Pd650_econ": 7.5,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.3
+  },
+  "25km|none|noEDTI|2y": {
+   "Pd530": null,
+   "Pd530_econ": null,
+   "Pd650": null,
+   "Pd650_econ": null,
+   "Pd770": 8.3,
+   "Pd770_econ": 7.0
+  },
+  "25km|dopmargin|EDTI|1y": {
+   "Pd530": 8.3,
+   "Pd530_econ": 6.6,
+   "Pd650": 8.3,
+   "Pd650_econ": 5.0,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.0
+  },
+  "25km|dopmargin|EDTI|2y": {
+   "Pd530": 9.4,
+   "Pd530_econ": 9.4,
+   "Pd650": 8.3,
+   "Pd650_econ": 5.9,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.0
+  },
+  "25km|dopmargin|noEDTI|1y": {
+   "Pd530": 8.5,
+   "Pd530_econ": 8.5,
+   "Pd650": 8.3,
+   "Pd650_econ": 5.5,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.0
+  },
+  "25km|dopmargin|noEDTI|2y": {
+   "Pd530": null,
+   "Pd530_econ": null,
+   "Pd650": 8.3,
+   "Pd650_econ": 7.4,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.3
+  },
+  "oredo30|dopgas|EDTI|1y": {
+   "Pd530": 8.4,
+   "Pd530_econ": 8.4,
+   "Pd650": 8.3,
+   "Pd650_econ": 5.6,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.0
+  },
+  "oredo30|dopgas|EDTI|2y": {
+   "Pd530": 12.2,
+   "Pd530_econ": 12.2,
+   "Pd650": 8.3,
+   "Pd650_econ": 7.5,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.4
+  },
+  "oredo30|dopgas|noEDTI|1y": {
+   "Pd530": 11.2,
+   "Pd530_econ": 11.2,
+   "Pd650": 8.3,
+   "Pd650_econ": 7.0,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.1
+  },
+  "oredo30|dopgas|noEDTI|2y": {
+   "Pd530": null,
+   "Pd530_econ": null,
+   "Pd650": 9.7,
+   "Pd650_econ": 9.7,
+   "Pd770": 8.3,
+   "Pd770_econ": 6.7
+  },
+  "oredo30|esc|EDTI|1y": {
+   "Pd530": 8.5,
+   "Pd530_econ": 8.5,
+   "Pd650": 8.3,
+   "Pd650_econ": 5.7,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.0
+  },
+  "oredo30|esc|EDTI|2y": {
+   "Pd530": 12.5,
+   "Pd530_econ": 12.5,
+   "Pd650": 8.3,
+   "Pd650_econ": 7.6,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.5
+  },
+  "oredo30|esc|noEDTI|1y": {
+   "Pd530": 11.4,
+   "Pd530_econ": 11.4,
+   "Pd650": 8.3,
+   "Pd650_econ": 7.1,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.1
+  },
+  "oredo30|esc|noEDTI|2y": {
+   "Pd530": null,
+   "Pd530_econ": null,
+   "Pd650": 9.8,
+   "Pd650_econ": 9.8,
+   "Pd770": 8.3,
+   "Pd770_econ": 6.7
+  },
+  "oredo30|none|EDTI|1y": {
+   "Pd530": 9.7,
+   "Pd530_econ": 9.7,
+   "Pd650": 8.3,
+   "Pd650_econ": 6.3,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.0
+  },
+  "oredo30|none|EDTI|2y": {
+   "Pd530": null,
+   "Pd530_econ": null,
+   "Pd650": 8.6,
+   "Pd650_econ": 8.6,
+   "Pd770": 8.3,
+   "Pd770_econ": 6.0
+  },
+  "oredo30|none|noEDTI|1y": {
+   "Pd530": null,
+   "Pd530_econ": null,
+   "Pd650": 8.3,
+   "Pd650_econ": 8.0,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.7
+  },
+  "oredo30|none|noEDTI|2y": {
+   "Pd530": null,
+   "Pd530_econ": null,
+   "Pd650": 11.5,
+   "Pd650_econ": 11.5,
+   "Pd770": 8.3,
+   "Pd770_econ": 7.6
+  },
+  "oredo30|dopmargin|EDTI|1y": {
+   "Pd530": 8.3,
+   "Pd530_econ": 7.1,
+   "Pd650": 8.3,
+   "Pd650_econ": 5.0,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.0
+  },
+  "oredo30|dopmargin|EDTI|2y": {
+   "Pd530": 9.9,
+   "Pd530_econ": 9.9,
+   "Pd650": 8.3,
+   "Pd650_econ": 6.3,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.0
+  },
+  "oredo30|dopmargin|noEDTI|1y": {
+   "Pd530": 9.1,
+   "Pd530_econ": 9.1,
+   "Pd650": 8.3,
+   "Pd650_econ": 6.0,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.0
+  },
+  "oredo30|dopmargin|noEDTI|2y": {
+   "Pd530": null,
+   "Pd530_econ": null,
+   "Pd650": 8.3,
+   "Pd650_econ": 8.0,
+   "Pd770": 8.3,
+   "Pd770_econ": 5.7
+  }
+ },
+ "legal_floor_MW": 8.33,
+ "grid_hours": {
+  "25km|11.0MW|1y|dopgas|EDTI": {
+   "T": 405,
+   "h": {
+    "Pd530|s0|Pg209.5": 9.4,
+    "Pd530|s0|Pg225.0": 9.8,
+    "Pd530|s15|Pg209.5": 4.0,
+    "Pd530|s15|Pg225.0": 4.2,
+    "Pd650|s0|Pg209.5": 13.3,
+    "Pd650|s0|Pg225.0": 13.8,
+    "Pd650|s15|Pg209.5": 9.5,
+    "Pd650|s15|Pg225.0": 9.8,
+    "Pd770|s0|Pg209.5": 15.6,
+    "Pd770|s0|Pg225.0": 16.1,
+    "Pd770|s15|Pg209.5": 12.6,
+    "Pd770|s15|Pg225.0": 12.9
+   }
+  },
+  "25km|11.0MW|1y|dopgas|noEDTI": {
+   "T": 460,
+   "h": {
+    "Pd530|s0|Pg209.5": 5.2,
+    "Pd530|s0|Pg225.0": 5.5,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 10.4,
+    "Pd650|s0|Pg225.0": 10.7,
+    "Pd650|s15|Pg209.5": 5.9,
+    "Pd650|s15|Pg225.0": 6.1,
+    "Pd770|s0|Pg209.5": 13.3,
+    "Pd770|s0|Pg225.0": 13.7,
+    "Pd770|s15|Pg209.5": 9.8,
+    "Pd770|s15|Pg225.0": 10.1
+   }
+  },
+  "25km|11.0MW|1y|esc|EDTI": {
+   "T": 410,
+   "h": {
+    "Pd530|s0|Pg209.5": 9.0,
+    "Pd530|s0|Pg225.0": 9.4,
+    "Pd530|s15|Pg209.5": 3.6,
+    "Pd530|s15|Pg225.0": 3.7,
+    "Pd650|s0|Pg209.5": 13.1,
+    "Pd650|s0|Pg225.0": 13.6,
+    "Pd650|s15|Pg209.5": 9.1,
+    "Pd650|s15|Pg225.0": 9.5,
+    "Pd770|s0|Pg209.5": 15.4,
+    "Pd770|s0|Pg225.0": 15.9,
+    "Pd770|s15|Pg209.5": 12.3,
+    "Pd770|s15|Pg225.0": 12.7
+   }
+  },
+  "25km|11.0MW|1y|esc|noEDTI": {
+   "T": 460,
+   "h": {
+    "Pd530|s0|Pg209.5": 5.2,
+    "Pd530|s0|Pg225.0": 5.5,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 10.4,
+    "Pd650|s0|Pg225.0": 10.7,
+    "Pd650|s15|Pg209.5": 5.9,
+    "Pd650|s15|Pg225.0": 6.1,
+    "Pd770|s0|Pg209.5": 13.3,
+    "Pd770|s0|Pg225.0": 13.7,
+    "Pd770|s15|Pg209.5": 9.8,
+    "Pd770|s15|Pg225.0": 10.1
+   }
+  },
+  "25km|11.0MW|1y|none|EDTI": {
+   "T": 435,
+   "h": {
+    "Pd530|s0|Pg209.5": 7.1,
+    "Pd530|s0|Pg225.0": 7.5,
+    "Pd530|s15|Pg209.5": 1.4,
+    "Pd530|s15|Pg225.0": 1.4,
+    "Pd650|s0|Pg209.5": 11.7,
+    "Pd650|s0|Pg225.0": 12.1,
+    "Pd650|s15|Pg209.5": 7.5,
+    "Pd650|s15|Pg225.0": 7.8,
+    "Pd770|s0|Pg209.5": 14.3,
+    "Pd770|s0|Pg225.0": 14.8,
+    "Pd770|s15|Pg209.5": 11.1,
+    "Pd770|s15|Pg225.0": 11.4
+   }
+  },
+  "25km|11.0MW|1y|none|noEDTI": {
+   "T": 490,
+   "h": {
+    "Pd530|s0|Pg209.5": 3.0,
+    "Pd530|s0|Pg225.0": 3.1,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 8.7,
+    "Pd650|s0|Pg225.0": 9.0,
+    "Pd650|s15|Pg209.5": 4.0,
+    "Pd650|s15|Pg225.0": 4.2,
+    "Pd770|s0|Pg209.5": 12.0,
+    "Pd770|s0|Pg225.0": 12.3,
+    "Pd770|s15|Pg209.5": 8.3,
+    "Pd770|s15|Pg225.0": 8.5
+   }
+  },
+  "25km|11.0MW|2y|dopgas|EDTI": {
+   "T": 470,
+   "h": {
+    "Pd530|s0|Pg209.5": 4.5,
+    "Pd530|s0|Pg225.0": 4.7,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 9.8,
+    "Pd650|s0|Pg225.0": 10.2,
+    "Pd650|s15|Pg209.5": 5.3,
+    "Pd650|s15|Pg225.0": 5.5,
+    "Pd770|s0|Pg209.5": 12.8,
+    "Pd770|s0|Pg225.0": 13.2,
+    "Pd770|s15|Pg209.5": 9.3,
+    "Pd770|s15|Pg225.0": 9.6
+   }
+  },
+  "25km|11.0MW|2y|dopgas|noEDTI": {
+   "T": 530,
+   "h": {
+    "Pd530|s0|Pg209.5": 0.0,
+    "Pd530|s0|Pg225.0": 0.0,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 6.5,
+    "Pd650|s0|Pg225.0": 6.8,
+    "Pd650|s15|Pg209.5": 1.4,
+    "Pd650|s15|Pg225.0": 1.5,
+    "Pd770|s0|Pg209.5": 10.3,
+    "Pd770|s0|Pg225.0": 10.6,
+    "Pd770|s15|Pg209.5": 6.3,
+    "Pd770|s15|Pg225.0": 6.5
+   }
+  },
+  "25km|11.0MW|2y|esc|EDTI": {
+   "T": 475,
+   "h": {
+    "Pd530|s0|Pg209.5": 4.1,
+    "Pd530|s0|Pg225.0": 4.3,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 9.5,
+    "Pd650|s0|Pg225.0": 9.9,
+    "Pd650|s15|Pg209.5": 5.0,
+    "Pd650|s15|Pg225.0": 5.1,
+    "Pd770|s0|Pg209.5": 12.6,
+    "Pd770|s0|Pg225.0": 13.0,
+    "Pd770|s15|Pg209.5": 9.0,
+    "Pd770|s15|Pg225.0": 9.3
+   }
+  },
+  "25km|11.0MW|2y|esc|noEDTI": {
+   "T": 535,
+   "h": {
+    "Pd530|s0|Pg209.5": 0.0,
+    "Pd530|s0|Pg225.0": 0.0,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 6.3,
+    "Pd650|s0|Pg225.0": 6.5,
+    "Pd650|s15|Pg209.5": 1.1,
+    "Pd650|s15|Pg225.0": 1.2,
+    "Pd770|s0|Pg209.5": 10.1,
+    "Pd770|s0|Pg225.0": 10.3,
+    "Pd770|s15|Pg209.5": 6.0,
+    "Pd770|s15|Pg225.0": 6.2
+   }
+  },
+  "25km|11.0MW|2y|none|EDTI": {
+   "T": 505,
+   "h": {
+    "Pd530|s0|Pg209.5": 1.9,
+    "Pd530|s0|Pg225.0": 2.0,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 7.9,
+    "Pd650|s0|Pg225.0": 8.2,
+    "Pd650|s15|Pg209.5": 3.0,
+    "Pd650|s15|Pg225.0": 3.2,
+    "Pd770|s0|Pg209.5": 11.3,
+    "Pd770|s0|Pg225.0": 11.7,
+    "Pd770|s15|Pg209.5": 7.5,
+    "Pd770|s15|Pg225.0": 7.7
+   }
+  },
+  "25km|11.0MW|2y|none|noEDTI": {
+   "T": 570,
+   "h": {
+    "Pd530|s0|Pg209.5": 0.0,
+    "Pd530|s0|Pg225.0": 0.0,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 4.4,
+    "Pd650|s0|Pg225.0": 4.5,
+    "Pd650|s15|Pg209.5": 0.0,
+    "Pd650|s15|Pg225.0": 0.0,
+    "Pd770|s0|Pg209.5": 8.6,
+    "Pd770|s0|Pg225.0": 8.8,
+    "Pd770|s15|Pg209.5": 4.3,
+    "Pd770|s15|Pg225.0": 4.4
+   }
+  },
+  "oredo30|11.0MW|1y|dopgas|EDTI": {
+   "T": 405,
+   "h": {
+    "Pd530|s0|Pg209.5": 9.4,
+    "Pd530|s0|Pg225.0": 9.8,
+    "Pd530|s15|Pg209.5": 4.0,
+    "Pd530|s15|Pg225.0": 4.2,
+    "Pd650|s0|Pg209.5": 13.3,
+    "Pd650|s0|Pg225.0": 13.8,
+    "Pd650|s15|Pg209.5": 9.5,
+    "Pd650|s15|Pg225.0": 9.8,
+    "Pd770|s0|Pg209.5": 15.6,
+    "Pd770|s0|Pg225.0": 16.1,
+    "Pd770|s15|Pg209.5": 12.6,
+    "Pd770|s15|Pg225.0": 12.9
+   }
+  },
+  "oredo30|11.0MW|1y|dopgas|noEDTI": {
+   "T": 455,
+   "h": {
+    "Pd530|s0|Pg209.5": 5.6,
+    "Pd530|s0|Pg225.0": 5.9,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 10.6,
+    "Pd650|s0|Pg225.0": 11.0,
+    "Pd650|s15|Pg209.5": 6.2,
+    "Pd650|s15|Pg225.0": 6.5,
+    "Pd770|s0|Pg209.5": 13.5,
+    "Pd770|s0|Pg225.0": 13.9,
+    "Pd770|s15|Pg209.5": 10.0,
+    "Pd770|s15|Pg225.0": 10.3
+   }
+  },
+  "oredo30|11.0MW|1y|esc|EDTI": {
+   "T": 405,
+   "h": {
+    "Pd530|s0|Pg209.5": 9.4,
+    "Pd530|s0|Pg225.0": 9.8,
+    "Pd530|s15|Pg209.5": 4.0,
+    "Pd530|s15|Pg225.0": 4.2,
+    "Pd650|s0|Pg209.5": 13.3,
+    "Pd650|s0|Pg225.0": 13.8,
+    "Pd650|s15|Pg209.5": 9.5,
+    "Pd650|s15|Pg225.0": 9.8,
+    "Pd770|s0|Pg209.5": 15.6,
+    "Pd770|s0|Pg225.0": 16.1,
+    "Pd770|s15|Pg209.5": 12.6,
+    "Pd770|s15|Pg225.0": 12.9
+   }
+  },
+  "oredo30|11.0MW|1y|esc|noEDTI": {
+   "T": 460,
+   "h": {
+    "Pd530|s0|Pg209.5": 5.2,
+    "Pd530|s0|Pg225.0": 5.5,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 10.4,
+    "Pd650|s0|Pg225.0": 10.7,
+    "Pd650|s15|Pg209.5": 5.9,
+    "Pd650|s15|Pg225.0": 6.1,
+    "Pd770|s0|Pg209.5": 13.3,
+    "Pd770|s0|Pg225.0": 13.7,
+    "Pd770|s15|Pg209.5": 9.8,
+    "Pd770|s15|Pg225.0": 10.1
+   }
+  },
+  "oredo30|11.0MW|1y|none|EDTI": {
+   "T": 430,
+   "h": {
+    "Pd530|s0|Pg209.5": 7.5,
+    "Pd530|s0|Pg225.0": 7.9,
+    "Pd530|s15|Pg209.5": 1.8,
+    "Pd530|s15|Pg225.0": 1.9,
+    "Pd650|s0|Pg209.5": 12.0,
+    "Pd650|s0|Pg225.0": 12.4,
+    "Pd650|s15|Pg209.5": 7.9,
+    "Pd650|s15|Pg225.0": 8.1,
+    "Pd770|s0|Pg209.5": 14.6,
+    "Pd770|s0|Pg225.0": 15.0,
+    "Pd770|s15|Pg209.5": 11.3,
+    "Pd770|s15|Pg225.0": 11.6
+   }
+  },
+  "oredo30|11.0MW|1y|none|noEDTI": {
+   "T": 485,
+   "h": {
+    "Pd530|s0|Pg209.5": 3.4,
+    "Pd530|s0|Pg225.0": 3.5,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 9.0,
+    "Pd650|s0|Pg225.0": 9.3,
+    "Pd650|s15|Pg209.5": 4.3,
+    "Pd650|s15|Pg225.0": 4.5,
+    "Pd770|s0|Pg209.5": 12.2,
+    "Pd770|s0|Pg225.0": 12.6,
+    "Pd770|s15|Pg209.5": 8.5,
+    "Pd770|s15|Pg225.0": 8.8
+   }
+  },
+  "oredo30|11.0MW|2y|dopgas|EDTI": {
+   "T": 470,
+   "h": {
+    "Pd530|s0|Pg209.5": 4.5,
+    "Pd530|s0|Pg225.0": 4.7,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 9.8,
+    "Pd650|s0|Pg225.0": 10.2,
+    "Pd650|s15|Pg209.5": 5.3,
+    "Pd650|s15|Pg225.0": 5.5,
+    "Pd770|s0|Pg209.5": 12.8,
+    "Pd770|s0|Pg225.0": 13.2,
+    "Pd770|s15|Pg209.5": 9.3,
+    "Pd770|s15|Pg225.0": 9.6
+   }
+  },
+  "oredo30|11.0MW|2y|dopgas|noEDTI": {
+   "T": 530,
+   "h": {
+    "Pd530|s0|Pg209.5": 0.0,
+    "Pd530|s0|Pg225.0": 0.0,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 6.5,
+    "Pd650|s0|Pg225.0": 6.8,
+    "Pd650|s15|Pg209.5": 1.4,
+    "Pd650|s15|Pg225.0": 1.5,
+    "Pd770|s0|Pg209.5": 10.3,
+    "Pd770|s0|Pg225.0": 10.6,
+    "Pd770|s15|Pg209.5": 6.3,
+    "Pd770|s15|Pg225.0": 6.5
+   }
+  },
+  "oredo30|11.0MW|2y|esc|EDTI": {
+   "T": 475,
+   "h": {
+    "Pd530|s0|Pg209.5": 4.1,
+    "Pd530|s0|Pg225.0": 4.3,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 9.5,
+    "Pd650|s0|Pg225.0": 9.9,
+    "Pd650|s15|Pg209.5": 5.0,
+    "Pd650|s15|Pg225.0": 5.1,
+    "Pd770|s0|Pg209.5": 12.6,
+    "Pd770|s0|Pg225.0": 13.0,
+    "Pd770|s15|Pg209.5": 9.0,
+    "Pd770|s15|Pg225.0": 9.3
+   }
+  },
+  "oredo30|11.0MW|2y|esc|noEDTI": {
+   "T": 530,
+   "h": {
+    "Pd530|s0|Pg209.5": 0.0,
+    "Pd530|s0|Pg225.0": 0.0,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 6.5,
+    "Pd650|s0|Pg225.0": 6.8,
+    "Pd650|s15|Pg209.5": 1.4,
+    "Pd650|s15|Pg225.0": 1.5,
+    "Pd770|s0|Pg209.5": 10.3,
+    "Pd770|s0|Pg225.0": 10.6,
+    "Pd770|s15|Pg209.5": 6.3,
+    "Pd770|s15|Pg225.0": 6.5
+   }
+  },
+  "oredo30|11.0MW|2y|none|EDTI": {
+   "T": 500,
+   "h": {
+    "Pd530|s0|Pg209.5": 2.2,
+    "Pd530|s0|Pg225.0": 2.4,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 8.2,
+    "Pd650|s0|Pg225.0": 8.5,
+    "Pd650|s15|Pg209.5": 3.4,
+    "Pd650|s15|Pg225.0": 3.5,
+    "Pd770|s0|Pg209.5": 11.6,
+    "Pd770|s0|Pg225.0": 11.9,
+    "Pd770|s15|Pg209.5": 7.8,
+    "Pd770|s15|Pg225.0": 8.0
+   }
+  },
+  "oredo30|11.0MW|2y|none|noEDTI": {
+   "T": 565,
+   "h": {
+    "Pd530|s0|Pg209.5": 0.0,
+    "Pd530|s0|Pg225.0": 0.0,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 4.6,
+    "Pd650|s0|Pg225.0": 4.8,
+    "Pd650|s15|Pg209.5": 0.0,
+    "Pd650|s15|Pg225.0": 0.0,
+    "Pd770|s0|Pg209.5": 8.8,
+    "Pd770|s0|Pg225.0": 9.0,
+    "Pd770|s15|Pg209.5": 4.5,
+    "Pd770|s15|Pg225.0": 4.6
+   }
+  },
+  "25km|8.5MW|1y|dopgas|EDTI": {
+   "T": 435,
+   "h": {
+    "Pd530|s0|Pg209.5": 7.1,
+    "Pd530|s0|Pg225.0": 7.5,
+    "Pd530|s15|Pg209.5": 1.4,
+    "Pd530|s15|Pg225.0": 1.4,
+    "Pd650|s0|Pg209.5": 11.7,
+    "Pd650|s0|Pg225.0": 12.1,
+    "Pd650|s15|Pg209.5": 7.5,
+    "Pd650|s15|Pg225.0": 7.8,
+    "Pd770|s0|Pg209.5": 14.3,
+    "Pd770|s0|Pg225.0": 14.8,
+    "Pd770|s15|Pg209.5": 11.1,
+    "Pd770|s15|Pg225.0": 11.4
+   }
+  },
+  "25km|8.5MW|1y|dopgas|noEDTI": {
+   "T": 490,
+   "h": {
+    "Pd530|s0|Pg209.5": 3.0,
+    "Pd530|s0|Pg225.0": 3.1,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 8.7,
+    "Pd650|s0|Pg225.0": 9.0,
+    "Pd650|s15|Pg209.5": 4.0,
+    "Pd650|s15|Pg225.0": 4.2,
+    "Pd770|s0|Pg209.5": 12.0,
+    "Pd770|s0|Pg225.0": 12.3,
+    "Pd770|s15|Pg209.5": 8.3,
+    "Pd770|s15|Pg225.0": 8.5
+   }
+  },
+  "25km|8.5MW|1y|esc|EDTI": {
+   "T": 440,
+   "h": {
+    "Pd530|s0|Pg209.5": 6.7,
+    "Pd530|s0|Pg225.0": 7.1,
+    "Pd530|s15|Pg209.5": 0.9,
+    "Pd530|s15|Pg225.0": 1.0,
+    "Pd650|s0|Pg209.5": 11.4,
+    "Pd650|s0|Pg225.0": 11.9,
+    "Pd650|s15|Pg209.5": 7.2,
+    "Pd650|s15|Pg225.0": 7.5,
+    "Pd770|s0|Pg209.5": 14.1,
+    "Pd770|s0|Pg225.0": 14.5,
+    "Pd770|s15|Pg209.5": 10.8,
+    "Pd770|s15|Pg225.0": 11.1
+   }
+  },
+  "25km|8.5MW|1y|esc|noEDTI": {
+   "T": 495,
+   "h": {
+    "Pd530|s0|Pg209.5": 2.6,
+    "Pd530|s0|Pg225.0": 2.8,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 8.4,
+    "Pd650|s0|Pg225.0": 8.8,
+    "Pd650|s15|Pg209.5": 3.7,
+    "Pd650|s15|Pg225.0": 3.8,
+    "Pd770|s0|Pg209.5": 11.8,
+    "Pd770|s0|Pg225.0": 12.1,
+    "Pd770|s15|Pg209.5": 8.0,
+    "Pd770|s15|Pg225.0": 8.3
+   }
+  },
+  "25km|8.5MW|1y|none|EDTI": {
+   "T": 465,
+   "h": {
+    "Pd530|s0|Pg209.5": 4.9,
+    "Pd530|s0|Pg225.0": 5.1,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 10.1,
+    "Pd650|s0|Pg225.0": 10.4,
+    "Pd650|s15|Pg209.5": 5.6,
+    "Pd650|s15|Pg225.0": 5.8,
+    "Pd770|s0|Pg209.5": 13.1,
+    "Pd770|s0|Pg225.0": 13.4,
+    "Pd770|s15|Pg209.5": 9.5,
+    "Pd770|s15|Pg225.0": 9.8
+   }
+  },
+  "25km|8.5MW|1y|none|noEDTI": {
+   "T": 525,
+   "h": {
+    "Pd530|s0|Pg209.5": 0.4,
+    "Pd530|s0|Pg225.0": 0.4,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 6.8,
+    "Pd650|s0|Pg225.0": 7.1,
+    "Pd650|s15|Pg209.5": 1.8,
+    "Pd650|s15|Pg225.0": 1.8,
+    "Pd770|s0|Pg209.5": 10.5,
+    "Pd770|s0|Pg225.0": 10.8,
+    "Pd770|s15|Pg209.5": 6.5,
+    "Pd770|s15|Pg225.0": 6.7
+   }
+  },
+  "oredo30|8.5MW|1y|dopgas|EDTI": {
+   "T": 450,
+   "h": {
+    "Pd530|s0|Pg209.5": 6.0,
+    "Pd530|s0|Pg225.0": 6.3,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 10.9,
+    "Pd650|s0|Pg225.0": 11.3,
+    "Pd650|s15|Pg209.5": 6.6,
+    "Pd650|s15|Pg225.0": 6.8,
+    "Pd770|s0|Pg209.5": 13.7,
+    "Pd770|s0|Pg225.0": 14.1,
+    "Pd770|s15|Pg209.5": 10.3,
+    "Pd770|s15|Pg225.0": 10.6
+   }
+  },
+  "oredo30|8.5MW|1y|dopgas|noEDTI": {
+   "T": 505,
+   "h": {
+    "Pd530|s0|Pg209.5": 1.9,
+    "Pd530|s0|Pg225.0": 2.0,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 7.9,
+    "Pd650|s0|Pg225.0": 8.2,
+    "Pd650|s15|Pg209.5": 3.0,
+    "Pd650|s15|Pg225.0": 3.2,
+    "Pd770|s0|Pg209.5": 11.3,
+    "Pd770|s0|Pg225.0": 11.7,
+    "Pd770|s15|Pg209.5": 7.5,
+    "Pd770|s15|Pg225.0": 7.7
+   }
+  },
+  "oredo30|8.5MW|1y|esc|EDTI": {
+   "T": 455,
+   "h": {
+    "Pd530|s0|Pg209.5": 5.6,
+    "Pd530|s0|Pg225.0": 5.9,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 10.6,
+    "Pd650|s0|Pg225.0": 11.0,
+    "Pd650|s15|Pg209.5": 6.2,
+    "Pd650|s15|Pg225.0": 6.5,
+    "Pd770|s0|Pg209.5": 13.5,
+    "Pd770|s0|Pg225.0": 13.9,
+    "Pd770|s15|Pg209.5": 10.0,
+    "Pd770|s15|Pg225.0": 10.3
+   }
+  },
+  "oredo30|8.5MW|1y|esc|noEDTI": {
+   "T": 510,
+   "h": {
+    "Pd530|s0|Pg209.5": 1.5,
+    "Pd530|s0|Pg225.0": 1.6,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 7.6,
+    "Pd650|s0|Pg225.0": 7.9,
+    "Pd650|s15|Pg209.5": 2.7,
+    "Pd650|s15|Pg225.0": 2.8,
+    "Pd770|s0|Pg209.5": 11.1,
+    "Pd770|s0|Pg225.0": 11.4,
+    "Pd770|s15|Pg209.5": 7.3,
+    "Pd770|s15|Pg225.0": 7.5
+   }
+  },
+  "oredo30|8.5MW|1y|none|EDTI": {
+   "T": 480,
+   "h": {
+    "Pd530|s0|Pg209.5": 3.7,
+    "Pd530|s0|Pg225.0": 3.9,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 9.3,
+    "Pd650|s0|Pg225.0": 9.6,
+    "Pd650|s15|Pg209.5": 4.6,
+    "Pd650|s15|Pg225.0": 4.8,
+    "Pd770|s0|Pg209.5": 12.4,
+    "Pd770|s0|Pg225.0": 12.8,
+    "Pd770|s15|Pg209.5": 8.8,
+    "Pd770|s15|Pg225.0": 9.0
+   }
+  },
+  "oredo30|8.5MW|1y|none|noEDTI": {
+   "T": 540,
+   "h": {
+    "Pd530|s0|Pg209.5": 0.0,
+    "Pd530|s0|Pg225.0": 0.0,
+    "Pd530|s15|Pg209.5": 0.0,
+    "Pd530|s15|Pg225.0": 0.0,
+    "Pd650|s0|Pg209.5": 6.0,
+    "Pd650|s0|Pg225.0": 6.2,
+    "Pd650|s15|Pg209.5": 0.8,
+    "Pd650|s15|Pg225.0": 0.8,
+    "Pd770|s0|Pg209.5": 9.8,
+    "Pd770|s0|Pg225.0": 10.1,
+    "Pd770|s15|Pg209.5": 5.8,
+    "Pd770|s15|Pg225.0": 5.9
+   }
+  }
+ },
+ "blend_bandA20": {
+  "530": 263,
+  "650": 283,
+  "770": 303
+ },
+ "stress_at_T_LOI": {
+  "EDTI|база (=0 по построению)": {
+   "npv15": 6.88,
+   "npv20": 0.21,
+   "irr": 20.2
+  },
+  "EDTI|спрос /1.3 до контракта (нет ToP 70%)": {
+   "npv15": -6.11,
+   "npv20": -10.34,
+   "irr": 9.7
+  },
+  "EDTI|спрос /2.7 до контракта": {
+   "npv15": -30.01,
+   "npv20": -29.7,
+   "irr": null
+  },
+  "EDTI|LF 0.60": {
+   "npv15": -2.34,
+   "npv20": -7.28,
+   "irr": 13.1
+  },
+  "EDTI|капитал x2.8": {
+   "npv15": 5.17,
+   "npv20": -1.49,
+   "irr": 18.7
+  },
+  "EDTI|капитал x2.4 (внешние $1 500-1 667/кВт)": {
+   "npv15": 8.55,
+   "npv20": 1.88,
+   "irr": 21.7
+  },
+  "EDTI|падение дебита 12%/г": {
+   "npv15": 3.24,
+   "npv20": -2.34,
+   "irr": 17.7
+  },
+  "EDTI|VIIRS p25: доступно 0.6": {
+   "npv15": 2.24,
+   "npv20": -3.18,
+   "irr": 16.9
+  },
+  "EDTI|блокада 3 мес во 2-й год": {
+   "npv15": 4.4,
+   "npv20": -1.96,
+   "irr": 18.3
+  },
+  "EDTI|дизельная оговорка -20% со 2-го года": {
+   "npv15": -2.32,
+   "npv20": -7.05,
+   "irr": 13.0
+  },
+  "EDTI|девальвация 16%/г (курсовой лаг)": {
+   "npv15": 6.29,
+   "npv20": -0.27,
+   "irr": 19.8
+  },
+  "EDTI|стройка 2 г, капитал 50/50 по годам": {
+   "npv15": 3.65,
+   "npv20": -2.59,
+   "irr": 17.7
+  },
+  "EDTI|стройка 2 г, весь капитал в t0 (срыв графика)": {
+   "npv15": 1.75,
+   "npv20": -5.02,
+   "irr": 16.1
+  },
+  "EDTI|тариф в найре без индексации, девальвация 8%": {
+   "npv15": -9.6,
+   "npv20": -12.57,
+   "irr": null
+  },
+  "EDTI|тариф в найре без индексации, девальвация 12%": {
+   "npv15": -16.16,
+   "npv20": -17.72,
+   "irr": null
+  },
+  "EDTI|тариф в найре без индексации, девальвация 16%": {
+   "npv15": -21.58,
+   "npv20": -22.0,
+   "irr": null
+  },
+  "EDTI|earn-out $0.30/Mscf сожжённого газа со 2-го года": {
+   "npv15": 6.49,
+   "npv20": -0.1,
+   "irr": 19.9
+  },
+  "noEDTI|база (=0 по построению)": {
+   "npv15": 7.61,
+   "npv20": 0.3,
+   "irr": 20.2
+  },
+  "noEDTI|спрос /1.3 до контракта (нет ToP 70%)": {
+   "npv15": -3.72,
+   "npv20": -8.75,
+   "irr": 12.1
+  },
+  "noEDTI|спрос /2.7 до контракта": {
+   "npv15": -26.7,
+   "npv20": -27.05,
+   "irr": null
+  },
+  "noEDTI|LF 0.60": {
+   "npv15": -0.57,
+   "npv20": -6.24,
+   "irr": 14.6
+  },
+  "noEDTI|капитал x2.8": {
+   "npv15": 5.78,
+   "npv20": -1.5,
+   "irr": 18.8
+  },
+  "noEDTI|капитал x2.4 (внешние $1 500-1 667/кВт)": {
+   "npv15": 9.43,
+   "npv20": 2.11,
+   "irr": 21.8
+  },
+  "noEDTI|падение дебита 12%/г": {
+   "npv15": 3.59,
+   "npv20": -2.49,
+   "irr": 17.8
+  },
+  "noEDTI|VIIRS p25: доступно 0.6": {
+   "npv15": 2.8,
+   "npv20": -3.18,
+   "irr": 17.2
+  },
+  "noEDTI|блокада 3 мес во 2-й год": {
+   "npv15": 5.6,
+   "npv20": -1.46,
+   "irr": 18.8
+  },
+  "noEDTI|дизельная оговорка -20% со 2-го года": {
+   "npv15": -0.73,
+   "npv20": -6.19,
+   "irr": 14.4
+  },
+  "noEDTI|девальвация 16%/г (курсовой лаг)": {
+   "npv15": 6.98,
+   "npv20": -0.19,
+   "irr": 19.8
+  },
+  "noEDTI|стройка 2 г, капитал 50/50 по годам": {
+   "npv15": 4.32,
+   "npv20": -2.48,
+   "irr": 18.0
+  },
+  "noEDTI|стройка 2 г, весь капитал в t0 (срыв графика)": {
+   "npv15": 2.41,
+   "npv20": -4.91,
+   "irr": 16.5
+  },
+  "noEDTI|тариф в найре без индексации, девальвация 8%": {
+   "npv15": -8.03,
+   "npv20": -11.57,
+   "irr": 7.1
+  },
+  "noEDTI|тариф в найре без индексации, девальвация 12%": {
+   "npv15": -14.19,
+   "npv20": -16.27,
+   "irr": null
+  },
+  "noEDTI|тариф в найре без индексации, девальвация 16%": {
+   "npv15": -19.31,
+   "npv20": -20.23,
+   "irr": null
+  },
+  "noEDTI|earn-out $0.30/Mscf сожжённого газа со 2-го года": {
+   "npv15": 7.22,
+   "npv20": -0.0,
+   "irr": 20.0
+  }
+ },
+ "be20_naira_unindexed": {
+  "dep0.08|EDTI": 564,
+  "dep0.08|noEDTI": 647,
+  "dep0.12|EDTI": 666,
+  "dep0.12|noEDTI": 764,
+  "dep0.16|EDTI": 778,
+  "dep0.16|noEDTI": 892
+ },
+ "audit_check": {
+  "capex_screen": 11.07,
+  "capex_base": 29.15,
+  "capex_ratio": 2.63,
+  "power_usd_per_kw_base": 1802,
+  "fixed_cash_screen": 1.52,
+  "fixed_cash_base": 3.82,
+  "fixed_ratio": 2.51,
+  "cash_cost_ratio_incl_gas": 2.01
+ },
+ "matrix_2y_split": {
+  "25km|11.0MW|dopgas|EDTI": [
+   353,
+   418,
+   440
+  ],
+  "25km|11.0MW|dopgas|noEDTI": [
+   394,
+   475,
+   495
+  ],
+  "25km|11.0MW|esc|EDTI": [
+   355,
+   420,
+   445
+  ],
+  "25km|11.0MW|esc|noEDTI": [
+   395,
+   477,
+   500
+  ],
+  "25km|11.0MW|none|EDTI": [
+   374,
+   445,
+   470
+  ],
+  "25km|11.0MW|none|noEDTI": [
+   418,
+   506,
+   530
+  ],
+  "25km|8.5MW|dopgas|EDTI": [
+   383,
+   451,
+   475
+  ],
+  "25km|8.5MW|dopgas|noEDTI": [
+   421,
+   509,
+   530
+  ],
+  "25km|8.5MW|esc|EDTI": [
+   385,
+   453,
+   475
+  ],
+  "25km|8.5MW|esc|noEDTI": [
+   423,
+   511,
+   535
+  ],
+  "25km|8.5MW|none|EDTI": [
+   405,
+   480,
+   505
+  ],
+  "25km|8.5MW|none|noEDTI": [
+   447,
+   543,
+   570
+  ],
+  "oredo30|11.0MW|dopgas|EDTI": [
+   352,
+   416,
+   440
+  ],
+  "oredo30|11.0MW|dopgas|noEDTI": [
+   387,
+   471,
+   495
+  ],
+  "oredo30|11.0MW|esc|EDTI": [
+   353,
+   418,
+   440
+  ],
+  "oredo30|11.0MW|esc|noEDTI": [
+   389,
+   473,
+   495
+  ],
+  "oredo30|11.0MW|none|EDTI": [
+   372,
+   443,
+   470
+  ],
+  "oredo30|11.0MW|none|noEDTI": [
+   411,
+   502,
+   530
+  ],
+  "oredo30|8.5MW|dopgas|EDTI": [
+   395,
+   465,
+   490
+  ],
+  "oredo30|8.5MW|dopgas|noEDTI": [
+   434,
+   525,
+   550
+  ],
+  "oredo30|8.5MW|esc|EDTI": [
+   396,
+   467,
+   490
+  ],
+  "oredo30|8.5MW|esc|noEDTI": [
+   435,
+   527,
+   550
+  ],
+  "oredo30|8.5MW|none|EDTI": [
+   417,
+   495,
+   520
+  ],
+  "oredo30|8.5MW|none|noEDTI": [
+   460,
+   560,
+   585
+  ]
+ },
+ "T_LOI_pathA": {
+  "25km|11.0MW|1y|dopgas|EDTI": 410,
+  "25km|11.0MW|1y|dopgas|noEDTI": 460,
+  "25km|11.0MW|2y|dopgas|EDTI": 475,
+  "25km|11.0MW|2y|dopgas|noEDTI": 535,
+  "25km|8.5MW|1y|dopgas|EDTI": 440,
+  "25km|8.5MW|1y|dopgas|noEDTI": 495,
+  "25km|8.5MW|2y|dopgas|EDTI": 510,
+  "25km|8.5MW|2y|dopgas|noEDTI": 570,
+  "oredo30|11.0MW|1y|dopgas|EDTI": 405,
+  "oredo30|11.0MW|1y|dopgas|noEDTI": 460,
+  "oredo30|11.0MW|2y|dopgas|EDTI": 475,
+  "oredo30|11.0MW|2y|dopgas|noEDTI": 530,
+  "oredo30|8.5MW|1y|dopgas|EDTI": 450,
+  "oredo30|8.5MW|1y|dopgas|noEDTI": 510,
+  "oredo30|8.5MW|2y|dopgas|EDTI": 525,
+  "oredo30|8.5MW|2y|dopgas|noEDTI": 590
+ },
+ "earnout_cap": {
+  "EDTI|T=405|gas0.74": 2.01,
+  "EDTI|T=405|gas1.00": 1.4,
+  "EDTI|T=405|gas1.50": 0.21,
+  "EDTI|T=430|gas0.74": 4.28,
+  "EDTI|T=430|gas1.00": 3.68,
+  "EDTI|T=430|gas1.50": 2.5,
+  "EDTI|T=455|gas0.74": 6.46,
+  "EDTI|T=455|gas1.00": 5.91,
+  "EDTI|T=455|gas1.50": 4.77,
+  "noEDTI|T=460|gas0.74": 1.94,
+  "noEDTI|T=460|gas1.00": 1.39,
+  "noEDTI|T=460|gas1.50": 0.3,
+  "noEDTI|T=485|gas0.74": 4.04,
+  "noEDTI|T=485|gas1.00": 3.49,
+  "noEDTI|T=485|gas1.50": 2.41,
+  "noEDTI|T=510|gas0.74": 6.14,
+  "noEDTI|T=510|gas1.00": 5.59,
+  "noEDTI|T=510|gas1.50": 4.51
+ },
+ "top_share": {
+  "EDTI|gas0.74": [
+   383,
+   377
+  ],
+  "EDTI|gas1.50": [
+   403,
+   391
+  ],
+  "noEDTI|gas0.74": [
+   437,
+   431
+  ],
+  "noEDTI|gas1.50": [
+   456,
+   445
+  ]
+ },
+ "buyer_saving": {
+  "EDTI|T=405|дизель 530": {
+   "alt": 530,
+   "saving_ngn_kwh": 125,
+   "saving_musd": 5.33
+  },
+  "EDTI|T=405|дизель 650": {
+   "alt": 650,
+   "saving_ngn_kwh": 245,
+   "saving_musd": 10.45
+  },
+  "EDTI|T=405|дизель 770": {
+   "alt": 770,
+   "saving_ngn_kwh": 365,
+   "saving_musd": 15.58
+  },
+  "EDTI|T=405|сеть 12 ч + дизель 650": {
+   "alt": 430,
+   "saving_ngn_kwh": 25,
+   "saving_musd": 1.06
+  },
+  "EDTI|T=405|Band A 20 ч + дизель 650": {
+   "alt": 283,
+   "saving_ngn_kwh": -122,
+   "saving_musd": -5.21
+  },
+  "noEDTI|T=460|дизель 530": {
+   "alt": 530,
+   "saving_ngn_kwh": 70,
+   "saving_musd": 2.99
+  },
+  "noEDTI|T=460|дизель 650": {
+   "alt": 650,
+   "saving_ngn_kwh": 190,
+   "saving_musd": 8.11
+  },
+  "noEDTI|T=460|дизель 770": {
+   "alt": 770,
+   "saving_ngn_kwh": 310,
+   "saving_musd": 13.23
+  },
+  "noEDTI|T=460|сеть 12 ч + дизель 650": {
+   "alt": 430,
+   "saving_ngn_kwh": -30,
+   "saving_musd": -1.29
+  },
+  "noEDTI|T=460|Band A 20 ч + дизель 650": {
+   "alt": 283,
+   "saving_ngn_kwh": -177,
+   "saving_musd": -7.56
+  }
+ },
+ "gwh": {
+  "full": 61.9,
+  "with_outage": 56.8
+ }
+}

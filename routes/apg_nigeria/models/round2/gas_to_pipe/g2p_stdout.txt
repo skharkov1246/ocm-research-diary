@@ -1,0 +1,190 @@
+== generic
+Q1_1km_opt_pre                                             cap    3.6 (pkg 0.89 pipe 0.6 hp 258) F 1.12(x3.29) E1  -0.69 E2  -0.63 NPV15   -7.5 NPV20   -6.8 IRR None PB None
+Q1_1km_opt_GSA                                             cap    3.6 (pkg 0.89 pipe 0.6 hp 258) F 1.12(x3.29) E1  -0.56 E2  -0.47 NPV15   -6.8 NPV20   -6.2 IRR None PB None
+Q1_1km_base_pre                                            cap    5.3 (pkg 1.18 pipe 1.0 hp 318) F 1.57(x4.48) E1  -1.48 E2  -1.50 NPV15  -13.6 NPV20  -12.2 IRR None PB None
+Q1_1km_base_GSA                                            cap    5.3 (pkg 1.18 pipe 1.0 hp 318) F 1.57(x4.48) E1  -1.40 E2  -1.39 NPV15  -13.2 NPV20  -11.8 IRR None PB None
+Q1_1km_pess_pre                                            cap    8.2 (pkg 1.57 pipe 1.8 hp 392) F 2.34(x6.47) E1  -2.42 E2  -2.56 NPV15  -19.5 NPV20  -16.9 IRR None PB None
+Q1_1km_pess_GSA                                            cap    8.2 (pkg 1.57 pipe 1.8 hp 392) F 2.34(x6.47) E1  -2.37 E2  -2.47 NPV15  -19.2 NPV20  -16.7 IRR None PB None
+Q1_4km_opt_pre                                             cap    5.5 (pkg 0.89 pipe 2.4 hp 258) F 1.25(x3.3) E1  -0.81 E2  -0.76 NPV15  -10.1 NPV20   -9.3 IRR None PB None
+Q1_4km_opt_GSA                                             cap    5.5 (pkg 0.89 pipe 2.4 hp 258) F 1.25(x3.3) E1  -0.68 E2  -0.60 NPV15   -9.4 NPV20   -8.7 IRR None PB None
+Q1_4km_base_pre                                            cap    8.6 (pkg 1.18 pipe 4.2 hp 318) F 1.80(x4.62) E1  -1.71 E2  -1.74 NPV15  -18.2 NPV20  -16.6 IRR None PB None
+Q1_4km_base_GSA                                            cap    8.6 (pkg 1.18 pipe 4.2 hp 318) F 1.80(x4.62) E1  -1.63 E2  -1.63 NPV15  -17.8 NPV20  -16.2 IRR None PB None
+Q1_4km_pess_pre                                            cap   14.4 (pkg 1.57 pipe 7.2 hp 392) F 2.82(x6.93) E1  -2.90 E2  -3.05 NPV15  -27.5 NPV20  -24.4 IRR None PB None
+Q1_4km_pess_GSA                                            cap   14.4 (pkg 1.57 pipe 7.2 hp 392) F 2.82(x6.93) E1  -2.85 E2  -2.96 NPV15  -27.3 NPV20  -24.2 IRR None PB None
+Q1_8km_opt_pre                                             cap    8.1 (pkg 0.89 pipe 4.8 hp 258) F 1.41(x3.31) E1  -0.97 E2  -0.92 NPV15  -13.6 NPV20  -12.6 IRR None PB None
+Q1_8km_opt_GSA                                             cap    8.1 (pkg 0.89 pipe 4.8 hp 258) F 1.41(x3.31) E1  -0.84 E2  -0.77 NPV15  -12.9 NPV20  -12.0 IRR None PB None
+Q1_8km_base_pre                                            cap   13.1 (pkg 1.18 pipe 8.3 hp 318) F 2.11(x4.77) E1  -2.02 E2  -2.06 NPV15  -24.4 NPV20  -22.4 IRR None PB None
+Q1_8km_base_GSA                                            cap   13.1 (pkg 1.18 pipe 8.3 hp 318) F 2.11(x4.77) E1  -1.94 E2  -1.95 NPV15  -24.0 NPV20  -22.1 IRR None PB None
+Q1_8km_pess_pre                                            cap   22.6 (pkg 1.57 pipe 14.4 hp 392) F 3.45(x7.4) E1  -3.53 E2  -3.70 NPV15  -38.3 NPV20  -34.3 IRR None PB None
+Q1_8km_pess_GSA                                            cap   22.6 (pkg 1.57 pipe 14.4 hp 392) F 3.45(x7.4) E1  -3.48 E2  -3.61 NPV15  -38.0 NPV20  -34.1 IRR None PB None
+Q5_1km_opt_pre                                             cap    7.8 (pkg 2.53 pipe 0.6 hp 1291) F 1.49(x3.37) E1   0.68 E2   1.10 NPV15   -4.5 NPV20   -5.0 IRR -5.0 PB None
+Q5_1km_opt_GSA                                             cap    7.8 (pkg 2.53 pipe 0.6 hp 1291) F 1.49(x3.37) E1   1.34 E2   1.90 NPV15   -2.0 NPV20   -2.9 IRR 7.8 PB 6.4
+Q5_1km_base_pre                                            cap   11.6 (pkg 3.46 pipe 1.0 hp 1592) F 2.16(x4.62) E1  -1.74 E2  -1.67 NPV15  -21.6 NPV20  -19.9 IRR None PB None
+Q5_1km_base_GSA                                            cap   11.6 (pkg 3.46 pipe 1.0 hp 1592) F 2.16(x4.62) E1  -1.31 E2  -1.11 NPV15  -19.6 NPV20  -18.2 IRR None PB None
+Q5_1km_pess_pre                                            cap   18.5 (pkg 4.77 pipe 1.8 hp 1960) F 3.34(x6.66) E1  -3.75 E2  -4.17 NPV15  -35.7 NPV20  -31.6 IRR None PB None
+Q5_1km_pess_GSA                                            cap   18.5 (pkg 4.77 pipe 1.8 hp 1960) F 3.34(x6.66) E1  -3.50 E2  -3.72 NPV15  -34.5 NPV20  -30.6 IRR None PB None
+Q5_4km_opt_pre                                             cap    9.7 (pkg 2.53 pipe 2.4 hp 1291) F 1.62(x3.38) E1   0.56 E2   0.98 NPV15   -7.0 NPV20   -7.4 IRR -13.3 PB None
+Q5_4km_opt_GSA                                             cap    9.7 (pkg 2.53 pipe 2.4 hp 1291) F 1.62(x3.38) E1   1.21 E2   1.77 NPV15   -4.1 NPV20   -5.0 IRR 2.2 PB 8.8
+Q5_4km_base_pre                                            cap   15.0 (pkg 3.46 pipe 4.2 hp 1592) F 2.39(x4.72) E1  -1.97 E2  -1.91 NPV15  -26.2 NPV20  -24.3 IRR None PB None
+Q5_4km_base_GSA                                            cap   15.0 (pkg 3.46 pipe 4.2 hp 1592) F 2.39(x4.72) E1  -1.54 E2  -1.35 NPV15  -24.2 NPV20  -22.6 IRR None PB None
+Q5_4km_pess_pre                                            cap   24.6 (pkg 4.77 pipe 7.2 hp 1960) F 3.82(x6.98) E1  -4.23 E2  -4.66 NPV15  -43.8 NPV20  -39.1 IRR None PB None
+Q5_4km_pess_GSA                                            cap   24.6 (pkg 4.77 pipe 7.2 hp 1960) F 3.82(x6.98) E1  -3.97 E2  -4.21 NPV15  -42.5 NPV20  -38.1 IRR None PB None
+Q5_8km_opt_pre                                             cap   12.3 (pkg 2.53 pipe 4.8 hp 1291) F 1.78(x3.38) E1   0.40 E2   0.81 NPV15  -10.5 NPV20  -10.7 IRR -29.2 PB None
+Q5_8km_opt_GSA                                             cap   12.3 (pkg 2.53 pipe 4.8 hp 1291) F 1.78(x3.38) E1   1.05 E2   1.60 NPV15   -7.1 NPV20   -7.9 IRR -4.4 PB None
+Q5_8km_base_pre                                            cap   19.4 (pkg 3.46 pipe 8.3 hp 1592) F 2.70(x4.83) E1  -2.27 E2  -2.22 NPV15  -32.4 NPV20  -30.1 IRR None PB None
+Q5_8km_base_GSA                                            cap   19.4 (pkg 3.46 pipe 8.3 hp 1592) F 2.70(x4.83) E1  -1.85 E2  -1.67 NPV15  -30.4 NPV20  -28.5 IRR None PB None
+Q5_8km_pess_pre                                            cap   32.8 (pkg 4.77 pipe 14.4 hp 1960) F 4.45(x7.34) E1  -4.86 E2  -5.32 NPV15  -54.5 NPV20  -49.0 IRR None PB None
+Q5_8km_pess_GSA                                            cap   32.8 (pkg 4.77 pipe 14.4 hp 1960) F 4.45(x7.34) E1  -4.61 E2  -4.86 NPV15  -53.3 NPV20  -48.1 IRR None PB None
+Q15_1km_opt_pre                                            cap   17.2 (pkg 6.15 pipe 0.7 hp 3873) F 2.10(x3.53) E1   4.43 E2   5.77 NPV15    1.0 NPV20   -2.0 IRR 16.6 PB 4.5
+Q15_1km_opt_GSA                                            cap   17.2 (pkg 6.15 pipe 0.7 hp 3873) F 2.10(x3.53) E1   6.39 E2   8.15 NPV15    7.9 NPV20    3.8 IRR 26.1 PB 3.4
+Q15_1km_base_pre                                           cap   26.1 (pkg 8.60 pipe 1.2 hp 4776) F 3.21(x4.9) E1  -1.95 E2  -1.65 NPV15  -37.9 NPV20  -35.9 IRR None PB None
+Q15_1km_base_GSA                                           cap   26.1 (pkg 8.60 pipe 1.2 hp 4776) F 3.21(x4.9) E1  -0.69 E2   0.01 NPV15  -31.9 NPV20  -30.9 IRR None PB None
+Q15_1km_pess_pre                                           cap   42.0 (pkg 12.06 pipe 2.1 hp 5881) F 5.28(x7.09) E1  -6.51 E2  -7.62 NPV15  -71.6 NPV20  -64.3 IRR None PB None
+Q15_1km_pess_GSA                                           cap   42.0 (pkg 12.06 pipe 2.1 hp 5881) F 5.28(x7.09) E1  -5.74 E2  -6.27 NPV15  -68.0 NPV20  -61.5 IRR None PB None
+Q15_4km_opt_pre                                            cap   19.4 (pkg 6.15 pipe 2.8 hp 3873) F 2.23(x3.55) E1   4.30 E2   5.63 NPV15   -1.3 NPV20   -4.3 IRR 13.2 PB 5.2
+Q15_4km_opt_GSA                                            cap   19.4 (pkg 6.15 pipe 2.8 hp 3873) F 2.23(x3.55) E1   6.26 E2   8.01 NPV15    5.6 NPV20    1.4 IRR 22.1 PB 3.8
+Q15_4km_base_pre                                           cap   29.9 (pkg 8.60 pipe 4.8 hp 4776) F 3.47(x5.0) E1  -2.21 E2  -1.92 NPV15  -43.2 NPV20  -40.9 IRR None PB None
+Q15_4km_base_GSA                                           cap   29.9 (pkg 8.60 pipe 4.8 hp 4776) F 3.47(x5.0) E1  -0.95 E2  -0.26 NPV15  -37.2 NPV20  -35.9 IRR None PB None
+Q15_4km_pess_pre                                           cap   49.1 (pkg 12.06 pipe 8.3 hp 5881) F 5.82(x7.37) E1  -7.05 E2  -8.18 NPV15  -80.8 NPV20  -72.9 IRR None PB None
+Q15_4km_pess_GSA                                           cap   49.1 (pkg 12.06 pipe 8.3 hp 5881) F 5.82(x7.37) E1  -6.28 E2  -6.82 NPV15  -77.2 NPV20  -70.0 IRR None PB None
+Q15_8km_opt_pre                                            cap   22.4 (pkg 6.15 pipe 5.5 hp 3873) F 2.41(x3.56) E1   4.12 E2   5.44 NPV15   -4.4 NPV20   -7.4 IRR 9.6 PB 6.0
+Q15_8km_opt_GSA                                            cap   22.4 (pkg 6.15 pipe 5.5 hp 3873) F 2.41(x3.56) E1   6.08 E2   7.82 NPV15    2.5 NPV20   -1.6 IRR 17.8 PB 4.4
+Q15_8km_base_pre                                           cap   35.0 (pkg 8.60 pipe 9.6 hp 4776) F 3.82(x5.12) E1  -2.56 E2  -2.27 NPV15  -50.2 NPV20  -47.6 IRR None PB None
+Q15_8km_base_GSA                                           cap   35.0 (pkg 8.60 pipe 9.6 hp 4776) F 3.82(x5.12) E1  -1.29 E2  -0.61 NPV15  -44.2 NPV20  -42.6 IRR None PB None
+Q15_8km_pess_pre                                           cap   58.5 (pkg 12.06 pipe 16.6 hp 5881) F 6.54(x7.7) E1  -7.78 E2  -8.92 NPV15  -93.1 NPV20  -84.3 IRR None PB None
+Q15_8km_pess_GSA                                           cap   58.5 (pkg 12.06 pipe 16.6 hp 5881) F 6.54(x7.7) E1  -7.00 E2  -7.57 NPV15  -89.5 NPV20  -81.4 IRR None PB None
+== named
+Ughelli East (NEPL) -> Transcorp Ughelli|q2025|opt|pre     cap   11.2 (pkg 3.17 pipe 2.2 hp 1730) F 1.68(x3.41) E1   1.24 E2   1.81 NPV15   -5.3 NPV20   -6.2 IRR 0.3 PB 9.8
+Ughelli East (NEPL) -> Transcorp Ughelli|q2025|opt|GSA     cap   11.2 (pkg 3.17 pipe 2.2 hp 1730) F 1.68(x3.41) E1   2.11 E2   2.87 NPV15   -2.1 NPV20   -3.6 IRR 9.9 PB 5.9
+Ughelli East (NEPL) -> Transcorp Ughelli|q2025|base|pre    cap   17.1 (pkg 4.36 pipe 3.9 hp 2133) F 2.51(x4.78) E1  -1.94 E2  -1.84 NPV15  -28.4 NPV20  -26.5 IRR None PB None
+Ughelli East (NEPL) -> Transcorp Ughelli|q2025|base|GSA    cap   17.1 (pkg 4.36 pipe 3.9 hp 2133) F 2.51(x4.78) E1  -1.38 E2  -1.10 NPV15  -25.7 NPV20  -24.2 IRR None PB None
+Ughelli East (NEPL) -> Transcorp Ughelli|q2025|pess|pre    cap   28.1 (pkg 6.05 pipe 6.7 hp 2627) F 4.06(x7.06) E1  -4.61 E2  -5.16 NPV15  -48.9 NPV20  -43.8 IRR None PB None
+Ughelli East (NEPL) -> Transcorp Ughelli|q2025|pess|GSA    cap   28.1 (pkg 6.05 pipe 6.7 hp 2627) F 4.06(x7.06) E1  -4.26 E2  -4.55 NPV15  -47.3 NPV20  -42.5 IRR None PB None
+Ughelli East (NEPL) -> Transcorp Ughelli|qmin|opt|pre      cap   10.8 (pkg 3.02 pipe 2.2 hp 1627) F 1.66(x3.41) E1   1.08 E2   1.62 NPV15   -5.6 NPV20   -6.4 IRR -1.6 PB None
+Ughelli East (NEPL) -> Transcorp Ughelli|qmin|opt|GSA      cap   10.8 (pkg 3.02 pipe 2.2 hp 1627) F 1.66(x3.41) E1   1.91 E2   2.62 NPV15   -2.5 NPV20   -3.9 IRR 8.5 PB 6.2
+Ughelli East (NEPL) -> Transcorp Ughelli|qmin|base|pre     cap   16.6 (pkg 4.15 pipe 3.9 hp 2006) F 2.48(x4.76) E1  -1.94 E2  -1.85 NPV15  -27.8 NPV20  -25.9 IRR None PB None
+Ughelli East (NEPL) -> Transcorp Ughelli|qmin|base|GSA     cap   16.6 (pkg 4.15 pipe 3.9 hp 2006) F 2.48(x4.76) E1  -1.41 E2  -1.15 NPV15  -25.3 NPV20  -23.8 IRR None PB None
+Ughelli East (NEPL) -> Transcorp Ughelli|qmin|pess|pre     cap   27.1 (pkg 5.75 pipe 6.7 hp 2470) F 3.99(x7.04) E1  -4.51 E2  -5.03 NPV15  -47.5 NPV20  -42.5 IRR None PB None
+Ughelli East (NEPL) -> Transcorp Ughelli|qmin|pess|GSA     cap   27.1 (pkg 5.75 pipe 6.7 hp 2470) F 3.99(x7.04) E1  -4.18 E2  -4.46 NPV15  -46.0 NPV20  -41.3 IRR None PB None
+Oredo (NEPL) -> Sapele PS|q2025|opt|pre                    cap   29.0 (pkg 6.32 pipe 11.3 hp 4003) F 2.81(x3.6) E1   3.94 E2   5.29 NPV15  -10.6 NPV20  -13.7 IRR 4.4 PB 7.8
+Oredo (NEPL) -> Sapele PS|q2025|opt|GSA                    cap   29.0 (pkg 6.32 pipe 11.3 hp 4003) F 2.81(x3.6) E1   5.96 E2   7.75 NPV15   -3.5 NPV20   -7.7 IRR 11.8 PB 5.5
+Oredo (NEPL) -> Sapele PS|q2025|base|pre                   cap   46.5 (pkg 8.85 pipe 19.6 hp 4936) F 4.59(x5.32) E1  -3.28 E2  -3.01 NPV15  -65.8 NPV20  -62.4 IRR None PB None
+Oredo (NEPL) -> Sapele PS|q2025|base|GSA                   cap   46.5 (pkg 8.85 pipe 19.6 hp 4936) F 4.59(x5.32) E1  -1.97 E2  -1.29 NPV15  -59.5 NPV20  -57.3 IRR None PB None
+Oredo (NEPL) -> Sapele PS|q2025|pess|pre                   cap   79.5 (pkg 12.41 pipe 34.0 hp 6077) F 8.13(x8.26) E1  -9.41 E2 -10.63 NPV15 -120.6 NPV20 -109.8 IRR None PB None
+Oredo (NEPL) -> Sapele PS|q2025|pess|GSA                   cap   79.5 (pkg 12.41 pipe 34.0 hp 6077) F 8.13(x8.26) E1  -8.60 E2  -9.24 NPV15 -116.9 NPV20 -106.8 IRR None PB None
+Oredo (NEPL) -> Sapele PS|qmin|opt|pre                     cap   22.6 (pkg 3.83 pipe 11.3 hp 2195) F 2.53(x3.51) E1   1.18 E2   1.89 NPV15  -16.8 NPV20  -17.6 IRR -13.2 PB None
+Oredo (NEPL) -> Sapele PS|qmin|opt|GSA                     cap   22.6 (pkg 3.83 pipe 11.3 hp 2195) F 2.53(x3.51) E1   2.29 E2   3.24 NPV15  -11.3 NPV20  -13.1 IRR -0.7 PB None
+Oredo (NEPL) -> Sapele PS|qmin|base|pre                    cap   36.6 (pkg 5.30 pipe 19.6 hp 2707) F 4.02(x5.2) E1  -3.30 E2  -3.20 NPV15  -55.6 NPV20  -52.3 IRR None PB None
+Oredo (NEPL) -> Sapele PS|qmin|base|GSA                    cap   36.6 (pkg 5.30 pipe 19.6 hp 2707) F 4.02(x5.2) E1  -2.59 E2  -2.26 NPV15  -52.1 NPV20  -49.5 IRR None PB None
+Oredo (NEPL) -> Sapele PS|qmin|pess|pre                    cap   63.4 (pkg 7.38 pipe 34.0 hp 3333) F 7.01(x8.17) E1  -7.71 E2  -8.46 NPV15  -97.0 NPV20  -88.2 IRR None PB None
+Oredo (NEPL) -> Sapele PS|qmin|pess|GSA                    cap   63.4 (pkg 7.38 pipe 34.0 hp 3333) F 7.01(x8.17) E1  -7.27 E2  -7.69 NPV15  -95.0 NPV20  -86.5 IRR None PB None
+Afam Umuosi (NEPL) -> Afam VI/IV-V|q2025|opt|pre           cap    8.3 (pkg 2.76 pipe 0.5 hp 1446) F 1.52(x3.39) E1   0.92 E2   1.40 NPV15   -4.0 NPV20   -4.7 IRR -0.2 PB None
+Afam Umuosi (NEPL) -> Afam VI/IV-V|q2025|opt|GSA           cap    8.3 (pkg 2.76 pipe 0.5 hp 1446) F 1.52(x3.39) E1   1.65 E2   2.29 NPV15   -1.3 NPV20   -2.5 IRR 10.7 PB 5.6
+Afam Umuosi (NEPL) -> Afam VI/IV-V|q2025|base|pre          cap   12.4 (pkg 3.78 pipe 0.9 hp 1783) F 2.20(x4.65) E1  -1.73 E2  -1.65 NPV15  -22.4 NPV20  -20.7 IRR None PB None
+Afam Umuosi (NEPL) -> Afam VI/IV-V|q2025|base|GSA          cap   12.4 (pkg 3.78 pipe 0.9 hp 1783) F 2.20(x4.65) E1  -1.26 E2  -1.03 NPV15  -20.1 NPV20  -18.8 IRR None PB None
+Afam Umuosi (NEPL) -> Afam VI/IV-V|q2025|pess|pre          cap   19.7 (pkg 5.23 pipe 1.6 hp 2196) F 3.43(x6.7) E1  -3.89 E2  -4.35 NPV15  -37.5 NPV20  -33.3 IRR None PB None
+Afam Umuosi (NEPL) -> Afam VI/IV-V|q2025|pess|GSA          cap   19.7 (pkg 5.23 pipe 1.6 hp 2196) F 3.43(x6.7) E1  -3.60 E2  -3.84 NPV15  -36.2 NPV20  -32.2 IRR None PB None
+Afam Umuosi (NEPL) -> Afam VI/IV-V|qmin|opt|pre            cap    5.6 (pkg 1.70 pipe 0.5 hp 749) F 1.39(x3.31) E1  -0.13 E2   0.10 NPV15   -6.6 NPV20   -6.4 IRR None PB None
+Afam Umuosi (NEPL) -> Afam VI/IV-V|qmin|opt|GSA            cap    5.6 (pkg 1.70 pipe 0.5 hp 749) F 1.39(x3.31) E1   0.25 E2   0.56 NPV15   -4.5 NPV20   -4.7 IRR None PB None
+Afam Umuosi (NEPL) -> Afam VI/IV-V|qmin|base|pre           cap    8.3 (pkg 2.30 pipe 0.9 hp 923) F 1.96(x4.5) E1  -1.72 E2  -1.70 NPV15  -18.1 NPV20  -16.4 IRR None PB None
+Afam Umuosi (NEPL) -> Afam VI/IV-V|qmin|base|GSA           cap    8.3 (pkg 2.30 pipe 0.9 hp 923) F 1.96(x4.5) E1  -1.48 E2  -1.38 NPV15  -16.9 NPV20  -15.4 IRR None PB None
+Afam Umuosi (NEPL) -> Afam VI/IV-V|qmin|pess|pre           cap   13.1 (pkg 3.14 pipe 1.6 hp 1137) F 2.96(x6.45) E1  -3.20 E2  -3.47 NPV15  -27.9 NPV20  -24.4 IRR None PB None
+Afam Umuosi (NEPL) -> Afam VI/IV-V|qmin|pess|GSA           cap   13.1 (pkg 3.14 pipe 1.6 hp 1137) F 2.96(x6.45) E1  -3.05 E2  -3.21 NPV15  -27.2 NPV20  -23.9 IRR None PB None
+Sapele (Seplat) -> Sapele PS|q2025|opt|pre                 cap   12.9 (pkg 2.91 pipe 4.4 hp 1549) F 1.80(x3.4) E1   0.81 E2   1.32 NPV15   -8.8 NPV20   -9.4 IRR -10.3 PB None
+Sapele (Seplat) -> Sapele PS|q2025|opt|GSA                 cap   12.9 (pkg 2.91 pipe 4.4 hp 1549) F 1.80(x3.4) E1   1.60 E2   2.27 NPV15   -5.4 NPV20   -6.6 IRR 2.4 PB 8.7
+Sapele (Seplat) -> Sapele PS|q2025|base|pre                cap   20.2 (pkg 3.99 pipe 7.7 hp 1911) F 2.73(x4.85) E1  -2.23 E2  -2.15 NPV15  -33.0 NPV20  -30.8 IRR None PB None
+Sapele (Seplat) -> Sapele PS|q2025|base|GSA                cap   20.2 (pkg 3.99 pipe 7.7 hp 1911) F 2.73(x4.85) E1  -1.72 E2  -1.49 NPV15  -30.6 NPV20  -28.8 IRR None PB None
+Sapele (Seplat) -> Sapele PS|q2025|pess|pre                cap   34.0 (pkg 5.53 pipe 13.3 hp 2352) F 4.53(x7.34) E1  -5.02 E2  -5.54 NPV15  -56.4 NPV20  -50.8 IRR None PB None
+Sapele (Seplat) -> Sapele PS|q2025|pess|GSA                cap   34.0 (pkg 5.53 pipe 13.3 hp 2352) F 4.53(x7.34) E1  -4.71 E2  -5.00 NPV15  -54.9 NPV20  -49.6 IRR None PB None
+Sapele (Seplat) -> Sapele PS|qmin|opt|pre                  cap   12.9 (pkg 2.91 pipe 4.4 hp 1549) F 1.80(x3.4) E1   0.81 E2   1.32 NPV15   -8.8 NPV20   -9.4 IRR -10.3 PB None
+Sapele (Seplat) -> Sapele PS|qmin|opt|GSA                  cap   12.9 (pkg 2.91 pipe 4.4 hp 1549) F 1.80(x3.4) E1   1.60 E2   2.27 NPV15   -5.4 NPV20   -6.6 IRR 2.4 PB 8.7
+Sapele (Seplat) -> Sapele PS|qmin|base|pre                 cap   20.2 (pkg 3.99 pipe 7.7 hp 1911) F 2.73(x4.85) E1  -2.23 E2  -2.15 NPV15  -33.0 NPV20  -30.8 IRR None PB None
+Sapele (Seplat) -> Sapele PS|qmin|base|GSA                 cap   20.2 (pkg 3.99 pipe 7.7 hp 1911) F 2.73(x4.85) E1  -1.72 E2  -1.49 NPV15  -30.6 NPV20  -28.8 IRR None PB None
+Sapele (Seplat) -> Sapele PS|qmin|pess|pre                 cap   34.0 (pkg 5.53 pipe 13.3 hp 2352) F 4.53(x7.34) E1  -5.02 E2  -5.54 NPV15  -56.4 NPV20  -50.8 IRR None PB None
+Sapele (Seplat) -> Sapele PS|qmin|pess|GSA                 cap   34.0 (pkg 5.53 pipe 13.3 hp 2352) F 4.53(x7.34) E1  -4.71 E2  -5.00 NPV15  -54.9 NPV20  -49.6 IRR None PB None
+Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|q2025|opt|pre       cap   12.2 (pkg 3.91 pipe 1.4 hp 2247) F 1.88(x3.43) E1   1.91 E2   2.66 NPV15   -3.7 NPV20   -5.1 IRR 6.4 PB 6.9
+Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|q2025|opt|GSA       cap   12.2 (pkg 3.91 pipe 1.4 hp 2247) F 1.88(x3.43) E1   3.04 E2   4.04 NPV15    0.3 NPV20   -1.7 IRR 15.7 PB 4.7
+Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|q2025|base|pre      cap   18.5 (pkg 5.41 pipe 2.4 hp 2770) F 2.79(x4.74) E1  -2.06 E2  -1.91 NPV15  -30.5 NPV20  -28.4 IRR None PB None
+Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|q2025|base|GSA      cap   18.5 (pkg 5.41 pipe 2.4 hp 2770) F 2.79(x4.74) E1  -1.32 E2  -0.95 NPV15  -27.0 NPV20  -25.5 IRR None PB None
+Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|q2025|pess|pre      cap   29.9 (pkg 7.53 pipe 4.1 hp 3411) F 4.44(x6.88) E1  -5.16 E2  -5.85 NPV15  -53.4 NPV20  -47.7 IRR None PB None
+Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|q2025|pess|GSA      cap   29.9 (pkg 7.53 pipe 4.1 hp 3411) F 4.44(x6.88) E1  -4.71 E2  -5.06 NPV15  -51.3 NPV20  -46.0 IRR None PB None
+Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|qmin|opt|pre        cap   12.2 (pkg 3.91 pipe 1.4 hp 2247) F 1.88(x3.43) E1   1.91 E2   2.66 NPV15   -3.7 NPV20   -5.1 IRR 6.4 PB 6.9
+Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|qmin|opt|GSA        cap   12.2 (pkg 3.91 pipe 1.4 hp 2247) F 1.88(x3.43) E1   3.04 E2   4.04 NPV15    0.3 NPV20   -1.7 IRR 15.7 PB 4.7
+Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|qmin|base|pre       cap   18.5 (pkg 5.41 pipe 2.4 hp 2770) F 2.79(x4.74) E1  -2.06 E2  -1.91 NPV15  -30.5 NPV20  -28.4 IRR None PB None
+Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|qmin|base|GSA       cap   18.5 (pkg 5.41 pipe 2.4 hp 2770) F 2.79(x4.74) E1  -1.32 E2  -0.95 NPV15  -27.0 NPV20  -25.5 IRR None PB None
+Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|qmin|pess|pre       cap   29.9 (pkg 7.53 pipe 4.1 hp 3411) F 4.44(x6.88) E1  -5.16 E2  -5.85 NPV15  -53.4 NPV20  -47.7 IRR None PB None
+Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|qmin|pess|GSA       cap   29.9 (pkg 7.53 pipe 4.1 hp 3411) F 4.44(x6.88) E1  -4.71 E2  -5.06 NPV15  -51.3 NPV20  -46.0 IRR None PB None
+Utorogu (NEPL) -> Transcorp Ughelli|q2025|opt|pre          cap   13.5 (pkg 2.26 pipe 6.5 hp 1110) F 1.87(x3.37) E1   0.01 E2   0.35 NPV15  -13.8 NPV20  -13.7 IRR None PB None
+Utorogu (NEPL) -> Transcorp Ughelli|q2025|opt|GSA          cap   13.5 (pkg 2.26 pipe 6.5 hp 1110) F 1.87(x3.37) E1   0.57 E2   1.03 NPV15  -10.8 NPV20  -11.1 IRR -19.3 PB None
+Utorogu (NEPL) -> Transcorp Ughelli|q2025|base|pre         cap   21.6 (pkg 3.08 pipe 11.3 hp 1369) F 2.86(x4.88) E1  -2.50 E2  -2.47 NPV15  -35.8 NPV20  -33.3 IRR None PB None
+Utorogu (NEPL) -> Transcorp Ughelli|q2025|base|GSA         cap   21.6 (pkg 3.08 pipe 11.3 hp 1369) F 2.86(x4.88) E1  -2.13 E2  -1.99 NPV15  -34.0 NPV20  -31.9 IRR None PB None
+Utorogu (NEPL) -> Transcorp Ughelli|q2025|pess|pre         cap   37.1 (pkg 4.24 pipe 19.6 hp 1686) F 4.79(x7.53) E1  -5.15 E2  -5.56 NPV15  -59.8 NPV20  -54.0 IRR None PB None
+Utorogu (NEPL) -> Transcorp Ughelli|q2025|pess|GSA         cap   37.1 (pkg 4.24 pipe 19.6 hp 1686) F 4.79(x7.53) E1  -4.93 E2  -5.18 NPV15  -58.8 NPV20  -53.1 IRR None PB None
+Utorogu (NEPL) -> Transcorp Ughelli|qmin|opt|pre           cap   13.5 (pkg 2.26 pipe 6.5 hp 1110) F 1.87(x3.37) E1   0.01 E2   0.35 NPV15  -13.8 NPV20  -13.7 IRR None PB None
+Utorogu (NEPL) -> Transcorp Ughelli|qmin|opt|GSA           cap   13.5 (pkg 2.26 pipe 6.5 hp 1110) F 1.87(x3.37) E1   0.57 E2   1.03 NPV15  -10.8 NPV20  -11.1 IRR -19.3 PB None
+Utorogu (NEPL) -> Transcorp Ughelli|qmin|base|pre          cap   21.6 (pkg 3.08 pipe 11.3 hp 1369) F 2.86(x4.88) E1  -2.50 E2  -2.47 NPV15  -35.8 NPV20  -33.3 IRR None PB None
+Utorogu (NEPL) -> Transcorp Ughelli|qmin|base|GSA          cap   21.6 (pkg 3.08 pipe 11.3 hp 1369) F 2.86(x4.88) E1  -2.13 E2  -1.99 NPV15  -34.0 NPV20  -31.9 IRR None PB None
+Utorogu (NEPL) -> Transcorp Ughelli|qmin|pess|pre          cap   37.1 (pkg 4.24 pipe 19.6 hp 1686) F 4.79(x7.53) E1  -5.15 E2  -5.56 NPV15  -59.8 NPV20  -54.0 IRR None PB None
+Utorogu (NEPL) -> Transcorp Ughelli|qmin|pess|GSA          cap   37.1 (pkg 4.24 pipe 19.6 hp 1686) F 4.79(x7.53) E1  -4.93 E2  -5.18 NPV15  -58.8 NPV20  -53.1 IRR None PB None
+== operator
+Ughelli East (NEPL) -> Transcorp Ughelli|pen0.0            cap   10.4 (pkg 4.36 pipe 3.9 hp 2133) F 0.81(x1.55) E1   1.23 E2   1.84 NPV15   -5.3 NPV20   -6.1 IRR -1.4 PB None
+Ughelli East (NEPL) -> Transcorp Ughelli|pen1.75           cap   10.4 (pkg 4.36 pipe 3.9 hp 2133) F 0.81(x1.55) E1   4.32 E2   5.91 NPV15    5.5 NPV20    3.0 IRR 28.5 PB 3.0
+Ughelli East (NEPL) -> Transcorp Ughelli|pen3.5            cap   10.4 (pkg 4.36 pipe 3.9 hp 2133) F 0.81(x1.55) E1   7.42 E2   9.98 NPV15   16.0 NPV20   11.9 IRR 52.0 PB 1.9
+Oredo (NEPL) -> Sapele PS|pen0.0                           cap   33.5 (pkg 8.85 pipe 19.6 hp 4936) F 2.06(x2.39) E1   2.66 E2   4.08 NPV15  -21.9 NPV20  -23.6 IRR -8.1 PB None
+Oredo (NEPL) -> Sapele PS|pen1.75                          cap   33.5 (pkg 8.85 pipe 19.6 hp 4936) F 2.06(x2.39) E1   9.81 E2  13.48 NPV15    4.1 NPV20   -1.8 IRR 18.4 PB 4.0
+Oredo (NEPL) -> Sapele PS|pen3.5                           cap   33.5 (pkg 8.85 pipe 19.6 hp 4936) F 2.06(x2.39) E1  16.97 E2  22.89 NPV15   28.6 NPV20   19.0 IRR 36.6 PB 2.5
+Afam Umuosi (NEPL) -> Afam VI/IV-V|pen0.0                  cap    6.5 (pkg 3.78 pipe 0.9 hp 1783) F 0.60(x1.27) E1   1.10 E2   1.62 NPV15   -2.2 NPV20   -2.9 IRR 5.2 PB 7.1
+Afam Umuosi (NEPL) -> Afam VI/IV-V|pen1.75                 cap    6.5 (pkg 3.78 pipe 0.9 hp 1783) F 0.60(x1.27) E1   3.69 E2   5.02 NPV15    6.7 NPV20    4.6 IRR 40.2 PB 2.3
+Afam Umuosi (NEPL) -> Afam VI/IV-V|pen3.5                  cap    6.5 (pkg 3.78 pipe 0.9 hp 1783) F 0.60(x1.27) E1   6.28 E2   8.42 NPV15   15.5 NPV20   12.1 IRR 70.1 PB 1.5
+Sapele (Seplat) -> Sapele PS|pen0.0                        cap   14.0 (pkg 3.99 pipe 7.7 hp 1911) F 1.02(x1.82) E1   0.80 E2   1.35 NPV15  -10.7 NPV20  -11.2 IRR -16.0 PB None
+Sapele (Seplat) -> Sapele PS|pen1.75                       cap   14.0 (pkg 3.99 pipe 7.7 hp 1911) F 1.02(x1.82) E1   3.57 E2   4.99 NPV15   -0.1 NPV20   -2.3 IRR 14.8 PB 4.5
+Sapele (Seplat) -> Sapele PS|pen3.5                        cap   14.0 (pkg 3.99 pipe 7.7 hp 1911) F 1.02(x1.82) E1   6.35 E2   8.63 NPV15    9.4 NPV20    5.8 IRR 32.3 PB 2.7
+Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|pen0.0              cap   10.3 (pkg 5.41 pipe 2.4 hp 2770) F 0.83(x1.41) E1   1.82 E2   2.62 NPV15   -3.2 NPV20   -4.3 IRR 6.1 PB 6.8
+Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|pen1.75             cap   10.3 (pkg 5.41 pipe 2.4 hp 2770) F 0.83(x1.41) E1   5.84 E2   7.91 NPV15   10.6 NPV20    7.3 IRR 40.1 PB 2.3
+Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|pen3.5              cap   10.3 (pkg 5.41 pipe 2.4 hp 2770) F 0.83(x1.41) E1   9.85 E2  13.19 NPV15   24.3 NPV20   18.9 IRR 69.4 PB 1.5
+Utorogu (NEPL) -> Transcorp Ughelli|pen0.0                 cap   16.7 (pkg 3.08 pipe 11.3 hp 1369) F 1.19(x2.02) E1   0.12 E2   0.50 NPV15  -16.8 NPV20  -16.7 IRR None PB None
+Utorogu (NEPL) -> Transcorp Ughelli|pen1.75                cap   16.7 (pkg 3.08 pipe 11.3 hp 1369) F 1.19(x2.02) E1   2.11 E2   3.11 NPV15   -7.5 NPV20   -8.8 IRR 0.3 PB 9.8
+Utorogu (NEPL) -> Transcorp Ughelli|pen3.5                 cap   16.7 (pkg 3.08 pipe 11.3 hp 1369) F 1.19(x2.02) E1   4.09 E2   5.72 NPV15   -0.4 NPV20   -2.9 IRR 14.3 PB 4.6
+== thresholds
+Q1_4km_base_GSA {'price_usd_mmbtu': 35.68, 'fee_from_operator_usd_mscf': None, 'Q_mmscfd': None, 'collection': None}
+Q1_4km_base_pre {'price_usd_mmbtu': None, 'fee_from_operator_usd_mscf': None, 'Q_mmscfd': None, 'collection': None}
+Q1_4km_opt_GSA {'price_usd_mmbtu': 12.77, 'fee_from_operator_usd_mscf': 10.09, 'Q_mmscfd': 13.1, 'collection': None}
+Q1_4km_opt_pre {'price_usd_mmbtu': 16.53, 'fee_from_operator_usd_mscf': 13.95, 'Q_mmscfd': 25.7, 'collection': None}
+Q5_4km_base_GSA {'price_usd_mmbtu': 11.87, 'fee_from_operator_usd_mscf': 6.36, 'Q_mmscfd': None, 'collection': None}
+Q5_4km_base_pre {'price_usd_mmbtu': 22.69, 'fee_from_operator_usd_mscf': 14.33, 'Q_mmscfd': None, 'collection': None}
+Q5_4km_opt_GSA {'price_usd_mmbtu': 4.14, 'fee_from_operator_usd_mscf': 1.25, 'Q_mmscfd': 13.1, 'collection': None}
+Q5_4km_opt_pre {'price_usd_mmbtu': 5.31, 'fee_from_operator_usd_mscf': 2.45, 'Q_mmscfd': 25.7, 'collection': None}
+Q5_8km_base_GSA {'price_usd_mmbtu': 14.43, 'fee_from_operator_usd_mscf': 8.25, 'Q_mmscfd': None, 'collection': None}
+Q5_8km_base_pre {'price_usd_mmbtu': 27.8, 'fee_from_operator_usd_mscf': None, 'Q_mmscfd': None, 'collection': None}
+Q5_8km_opt_GSA {'price_usd_mmbtu': 4.93, 'fee_from_operator_usd_mscf': 2.06, 'Q_mmscfd': 17.12, 'collection': None}
+Q5_8km_opt_pre {'price_usd_mmbtu': 6.34, 'fee_from_operator_usd_mscf': 3.5, 'Q_mmscfd': 33.03, 'collection': None}
+Q15_8km_base_GSA {'price_usd_mmbtu': 8.53, 'fee_from_operator_usd_mscf': 3.9, 'Q_mmscfd': None, 'collection': None}
+Q15_8km_base_pre {'price_usd_mmbtu': 16.01, 'fee_from_operator_usd_mscf': 9.41, 'Q_mmscfd': None, 'collection': None}
+Q15_8km_opt_GSA {'price_usd_mmbtu': 2.84, 'fee_from_operator_usd_mscf': -0.09, 'Q_mmscfd': 17.12, 'collection': None}
+Q15_8km_opt_pre {'price_usd_mmbtu': 3.62, 'fee_from_operator_usd_mscf': 0.71, 'Q_mmscfd': 33.03, 'collection': None}
+UghelliEast_base_GSA {'price_usd_mmbtu': 10.03, 'fee_from_operator_usd_mscf': 5.0, 'Q_mmscfd': None, 'collection': None}
+UghelliEast_base_pre {'price_usd_mmbtu': 19.0, 'fee_from_operator_usd_mscf': 11.61, 'Q_mmscfd': None, 'collection': None}
+UghelliEast_opt_GSA {'price_usd_mmbtu': 3.47, 'fee_from_operator_usd_mscf': 0.56, 'Q_mmscfd': 12.8, 'collection': None}
+UghelliEast_opt_pre {'price_usd_mmbtu': 4.43, 'fee_from_operator_usd_mscf': 1.55, 'Q_mmscfd': 25.15, 'collection': None}
+AfamUmuosi_base_GSA {'price_usd_mmbtu': 9.39, 'fee_from_operator_usd_mscf': 4.53, 'Q_mmscfd': None, 'collection': None}
+AfamUmuosi_base_pre {'price_usd_mmbtu': 17.72, 'fee_from_operator_usd_mscf': 10.67, 'Q_mmscfd': None, 'collection': None}
+AfamUmuosi_opt_GSA {'price_usd_mmbtu': 3.33, 'fee_from_operator_usd_mscf': 0.41, 'Q_mmscfd': 9.92, 'collection': None}
+AfamUmuosi_opt_pre {'price_usd_mmbtu': 4.25, 'fee_from_operator_usd_mscf': 1.36, 'Q_mmscfd': 19.84, 'collection': None}
+Oredo_qmin_base_GSA {'price_usd_mmbtu': 14.88, 'fee_from_operator_usd_mscf': 8.57, 'Q_mmscfd': None, 'collection': None}
+Oredo_qmin_base_pre {'price_usd_mmbtu': 28.69, 'fee_from_operator_usd_mscf': None, 'Q_mmscfd': None, 'collection': None}
+Oredo_qmin_opt_GSA {'price_usd_mmbtu': 4.92, 'fee_from_operator_usd_mscf': 2.05, 'Q_mmscfd': 25.35, 'collection': None}
+Oredo_qmin_opt_pre {'price_usd_mmbtu': 6.33, 'fee_from_operator_usd_mscf': 3.49, 'Q_mmscfd': 47.9, 'collection': None}
+== critic {'DBP': 11.1, 'comm': 15.0}
+== sens Q5 4km base GSA
+base {'capex': 14.96, 'fixed': 2.39, 'ebitda_y2': -1.35, 'npv15': -24.21, 'npv20': -22.62, 'irr': None}
+EDTI {'capex': 14.96, 'fixed': 2.39, 'ebitda_y2': -1.35, 'npv15': -24.21, 'npv20': -22.62, 'irr': None}
+coll_0.6 {'capex': 14.96, 'fixed': 2.39, 'ebitda_y2': -1.94, 'npv15': -26.43, 'npv20': -24.47, 'irr': None}
+escrow_coll1_dso45_nofx {'capex': 14.96, 'fixed': 2.39, 'ebitda_y2': -0.9, 'npv15': -22.27, 'npv20': -20.92, 'irr': None}
+price_2.68 {'capex': 14.96, 'fixed': 2.39, 'ebitda_y2': -0.89, 'npv15': -22.48, 'npv20': -21.17, 'irr': None}
+pipe_x2 {'capex': 19.41, 'fixed': 2.64, 'ebitda_y2': -1.62, 'npv15': -30.09, 'npv20': -28.24, 'irr': None}
+cm_1.0 {'capex': 9.04, 'fixed': 2.05, 'ebitda_y2': -1.0, 'npv15': -16.4, 'npv20': -15.13, 'irr': None}
+build_2y {'capex': 15.94, 'fixed': 2.44, 'ebitda_y2': -1.41, 'npv15': -23.39, 'npv20': -21.36, 'irr': None}
+decl_15 {'capex': 14.96, 'fixed': 2.39, 'ebitda_y2': -1.44, 'npv15': -25.01, 'npv20': -23.22, 'irr': None}
+opex_screen_x1.7_only {'capex': 14.96, 'fixed': 1.2, 'ebitda_y2': -0.13, 'npv15': -17.61, 'npv20': -17.15, 'irr': None}
+fee_from_operator_1.0 {'capex': 14.96, 'fixed': 2.39, 'ebitda_y2': 0.69, 'npv15': -16.2, 'npv20': -15.81, 'irr': None}
+fee_from_operator_1.75 {'capex': 14.96, 'fixed': 2.39, 'ebitda_y2': 1.54, 'npv15': -12.83, 'npv20': -12.96, 'irr': None}

@@ -1,0 +1,331 @@
+=== 1. Каскад исправлений (площадка 5 MMscf/д, 25 км, якорь 11 МВт, стройка 1 г), BE ₦/кВт·ч NPV15=0 / NPV20=0
+R1 судья (4.64; доступно 0.85, падение 6%)           dopmargin|EDTI:291/333 dopmargin|noEDTI:317/378 dopgas|EDTI:316/361 dopgas|noEDTI:344/411 esc|EDTI:317/363 esc|noEDTI:346/412 none|EDTI:331/381 none|noEDTI:363/434
++ 4.40 МВт на MMscf/д                                dopmargin|EDTI:292/334 dopmargin|noEDTI:319/380 dopgas|EDTI:317/363 dopgas|noEDTI:346/413 esc|EDTI:319/365 esc|noEDTI:348/414 none|EDTI:333/383 none|noEDTI:365/436
++ газ VIIRS: доступно 0.78, падение 8%/г             dopmargin|EDTI:302/345 dopmargin|noEDTI:333/394 dopgas|EDTI:327/375 dopgas|noEDTI:362/428 esc|EDTI:329/377 esc|noEDTI:363/430 none|EDTI:344/396 none|noEDTI:381/452
++ курсовой лаг: квартальный пересчёт + дебиторка     dopmargin|EDTI:308/353 dopmargin|noEDTI:340/402 dopgas|EDTI:334/383 dopgas|noEDTI:369/437 esc|EDTI:336/385 esc|noEDTI:371/439 none|EDTI:354/408 none|noEDTI:392/466
+газ: DCQ 11 МВт {'DCQ_old': 2.469, 'DCQ_new': 2.604, 'burned_new_y2': 1.581, 'kwh_per_mscf': 98.3, 'capex': 29.15, 'capex_parts': {'common': 2.8, 'power': 20.65, 'line': 5.7}}
+
+=== 2. Матрица BE ₦/кВт·ч NPV15=0 / NPV20=0 (газ база $0.74/MMBtu всё включено)
+-- 25km, якорь 11.0 МВт: структура | EDTI 1г | EDTI 2г | без EDTI 1г | без EDTI 2г
+   DoP возвращает оплату газа + эскроу (БАЗА р.2)   334/383 ($0.251/$0.288) | 368/450 ($0.277/$0.338) | 369/437 ($0.277/$0.329) | 414/509 ($0.311/$0.383)
+   Только эскроу (DoP нет)                          336/385 ($0.253/$0.289) | 370/451 ($0.278/$0.339) | 371/439 ($0.279/$0.330) | 416/511 ($0.313/$0.384)
+   Ни DoP, ни эскроу                                354/408 ($0.266/$0.307) | 390/479 ($0.293/$0.360) | 392/466 ($0.295/$0.350) | 440/543 ($0.331/$0.408)
+   DoP компенсирует маржу + эскроу (база судьи)     308/353 ($0.232/$0.265) | 339/414 ($0.255/$0.311) | 340/402 ($0.256/$0.302) | 381/468 ($0.286/$0.352)
+-- 25km, якорь 8.5 МВт: структура | EDTI 1г | EDTI 2г | без EDTI 1г | без EDTI 2г
+   DoP возвращает оплату газа + эскроу (БАЗА р.2)   363/414 ($0.273/$0.311) | 399/484 ($0.300/$0.364) | 395/469 ($0.297/$0.353) | 442/545 ($0.332/$0.410)
+   Только эскроу (DoP нет)                          365/416 ($0.274/$0.313) | 401/486 ($0.302/$0.365) | 397/471 ($0.298/$0.354) | 444/547 ($0.334/$0.411)
+   Ни DoP, ни эскроу                                384/441 ($0.289/$0.332) | 422/515 ($0.317/$0.387) | 420/500 ($0.316/$0.376) | 469/580 ($0.353/$0.436)
+   DoP компенсирует маржу + эскроу (база судьи)     334/381 ($0.251/$0.286) | 367/445 ($0.276/$0.335) | 364/431 ($0.274/$0.324) | 407/501 ($0.306/$0.377)
+-- oredo30, якорь 11.0 МВт: структура | EDTI 1г | EDTI 2г | без EDTI 1г | без EDTI 2г
+   DoP возвращает оплату газа + эскроу (БАЗА р.2)   333/381 ($0.250/$0.286) | 367/447 ($0.276/$0.336) | 363/433 ($0.273/$0.326) | 407/505 ($0.306/$0.380)
+   Только эскроу (DoP нет)                          334/383 ($0.251/$0.288) | 368/449 ($0.277/$0.338) | 365/435 ($0.274/$0.327) | 409/507 ($0.308/$0.381)
+   Ни DoP, ни эскроу                                352/406 ($0.265/$0.305) | 388/476 ($0.292/$0.358) | 386/462 ($0.290/$0.347) | 432/538 ($0.325/$0.405)
+   DoP компенсирует маржу + эскроу (база судьи)     307/351 ($0.231/$0.264) | 338/412 ($0.254/$0.310) | 334/399 ($0.251/$0.300) | 375/465 ($0.282/$0.350)
+-- oredo30, якорь 8.5 МВт: структура | EDTI 1г | EDTI 2г | без EDTI 1г | без EDTI 2г
+   DoP возвращает оплату газа + эскроу (БАЗА р.2)   374/427 ($0.281/$0.321) | 411/500 ($0.309/$0.376) | 407/484 ($0.306/$0.364) | 456/563 ($0.343/$0.423)
+   Только эскроу (DoP нет)                          375/429 ($0.282/$0.323) | 413/501 ($0.311/$0.377) | 409/486 ($0.308/$0.365) | 458/564 ($0.344/$0.424)
+   Ни DoP, ни эскроу                                395/454 ($0.297/$0.341) | 435/531 ($0.327/$0.399) | 432/516 ($0.325/$0.388) | 484/599 ($0.364/$0.450)
+   DoP компенсирует маржу + эскроу (база судьи)     344/393 ($0.259/$0.295) | 378/460 ($0.284/$0.346) | 375/445 ($0.282/$0.335) | 419/517 ($0.315/$0.389)
+капитал $ млн: {'25km|11.0MW': 29.15, '25km|8.5MW': 24.45, 'oredo30|11.0MW': 30.05, 'oredo30|8.5MW': 25.35}
+
+=== 3. База р.2 (DoP-газ + эскроу), 25 км, 11 МВт, стройка 1 г: NPV15; NPV20; IRR; мин. DSCR (60%/14%/7 лет)
+₦316 ($0.238) {'npv15': -2.67, 'npv20': -7.53, 'irr': 12.8, 'min_dscr': 1.03, 'y1': 5.73, 'y2': 8.18} | без EDTI {'npv15': -5.69, 'npv20': -10.32, 'irr': 10.5, 'min_dscr': 1.17, 'y1': 5.73, 'y2': 8.18}
+₦350 ($0.263) {'npv15': 2.27, 'npv20': -3.52, 'irr': 16.8, 'min_dscr': 1.23, 'y1': 6.84, 'y2': 9.58} | без EDTI {'npv15': -2.06, 'npv20': -7.42, 'irr': 13.4, 'min_dscr': 1.35, 'y1': 6.84, 'y2': 9.58}
+₦377 ($0.283) {'npv15': 5.91, 'npv20': -0.57, 'irr': 19.5, 'min_dscr': 1.39, 'y1': 7.72, 'y2': 10.68} | без EDTI {'npv15': 0.82, 'npv20': -5.11, 'irr': 15.6, 'min_dscr': 1.49, 'y1': 7.72, 'y2': 10.68}
+₦411 ($0.309) {'npv15': 9.82, 'npv20': 2.59, 'irr': 22.2, 'min_dscr': 1.6, 'y1': 8.84, 'y2': 12.07} | без EDTI {'npv15': 4.45, 'npv20': -2.21, 'irr': 18.2, 'min_dscr': 1.67, 'y1': 8.84, 'y2': 12.07}
+₦450 ($0.338) {'npv15': 14.31, 'npv20': 6.22, 'irr': 25.1, 'min_dscr': 1.83, 'y1': 10.12, 'y2': 13.67} | без EDTI {'npv15': 8.61, 'npv20': 1.11, 'irr': 20.9, 'min_dscr': 1.88, 'y1': 10.12, 'y2': 13.67}
+₦500 ($0.376) {'npv15': 19.65, 'npv20': 10.49, 'irr': 28.3, 'min_dscr': 2.13, 'y1': 11.75, 'y2': 15.72} | без EDTI {'npv15': 13.95, 'npv20': 5.38, 'irr': 24.2, 'min_dscr': 2.15, 'y1': 11.75, 'y2': 15.72}
+
+=== 4. Газ. BE NPV20 (₦) при цене газа «всё включено» $/MMBtu; база р.2, 25 км, 11 МВт, 1 г
+   dopgas|EDTI|1y|0.74 383
+   dopgas|EDTI|1y|1.00 390
+   dopgas|EDTI|1y|1.50 403
+   dopgas|EDTI|1y|2.32 424
+   dopgas|noEDTI|1y|0.74 437
+   dopgas|noEDTI|1y|1.00 444
+   dopgas|noEDTI|1y|1.50 456
+   dopgas|noEDTI|1y|2.32 478
+   esc|EDTI|1y|0.74 385
+   esc|EDTI|1y|1.00 392
+   esc|EDTI|1y|1.50 406
+   esc|EDTI|1y|2.32 430
+   esc|noEDTI|1y|0.74 439
+   esc|noEDTI|1y|1.00 446
+   esc|noEDTI|1y|1.50 460
+   esc|noEDTI|1y|2.32 483
+   none|EDTI|1y|0.74 408
+   none|EDTI|1y|1.00 416
+   none|EDTI|1y|1.50 431
+   none|EDTI|1y|2.32 455
+   none|noEDTI|1y|0.74 466
+   none|noEDTI|1y|1.00 474
+   none|noEDTI|1y|1.50 488
+   none|noEDTI|1y|2.32 513
+
+=== 5. Правила по структурам: порог LOI = NPV20=0 при газе-стопе $1.5 всё включено (округл. вверх до ₦5)
+   25km|11.0MW|1y|dopgas|EDTI {'T_LOI': 405, 'T_LOI_usd': 0.305, 'gas_point_npv20': 1.59, 'diesel_floor': 402, 'floor_usd': 0.302, 'min_dscr': 1.45, 'npv15': 6.88, 'irr': 20.2}
+   25km|11.0MW|1y|dopgas|noEDTI {'T_LOI': 460, 'T_LOI_usd': 0.346, 'gas_point_npv20': 1.64, 'diesel_floor': 456, 'floor_usd': 0.343, 'min_dscr': 1.82, 'npv15': 7.61, 'irr': 20.2}
+   25km|11.0MW|1y|esc|EDTI {'T_LOI': 410, 'T_LOI_usd': 0.308, 'gas_point_npv20': 1.63, 'diesel_floor': 405, 'floor_usd': 0.305, 'min_dscr': 1.45, 'npv15': 7.05, 'irr': 20.3}
+   25km|11.0MW|1y|esc|noEDTI {'T_LOI': 460, 'T_LOI_usd': 0.346, 'gas_point_npv20': 1.5, 'diesel_floor': 460, 'floor_usd': 0.346, 'min_dscr': 1.8, 'npv15': 7.23, 'irr': 20.0}
+   25km|11.0MW|1y|none|EDTI {'T_LOI': 435, 'T_LOI_usd': 0.327, 'gas_point_npv20': 1.64, 'diesel_floor': 429, 'floor_usd': 0.323, 'min_dscr': 1.5, 'npv15': 7.28, 'irr': 20.3}
+   25km|11.0MW|1y|none|noEDTI {'T_LOI': 490, 'T_LOI_usd': 0.368, 'gas_point_npv20': 1.55, 'diesel_floor': 488, 'floor_usd': 0.367, 'min_dscr': 1.86, 'npv15': 7.61, 'irr': 20.1}
+   25km|11.0MW|1y|dopmargin|EDTI {'T_LOI': 375, 'T_LOI_usd': 0.282, 'gas_point_npv20': 1.6, 'diesel_floor': 372, 'floor_usd': 0.279, 'min_dscr': 1.45, 'npv15': 6.94, 'irr': 20.2}
+   25km|11.0MW|1y|dopmargin|noEDTI {'T_LOI': 425, 'T_LOI_usd': 0.32, 'gas_point_npv20': 1.63, 'diesel_floor': 421, 'floor_usd': 0.316, 'min_dscr': 1.82, 'npv15': 7.62, 'irr': 20.3}
+   25km|11.0MW|2y|dopgas|EDTI {'T_LOI': 470, 'T_LOI_usd': 0.353, 'gas_point_npv20': 1.51, 'diesel_floor': 470, 'floor_usd': 0.353, 'min_dscr': 1.81, 'npv15': 8.26, 'irr': 20.0}
+   25km|11.0MW|2y|dopgas|noEDTI {'T_LOI': 530, 'T_LOI_usd': 0.398, 'gas_point_npv20': 1.54, 'diesel_floor': 529, 'floor_usd': 0.398, 'min_dscr': 2.17, 'npv15': 8.91, 'irr': 20.0}
+   25km|11.0MW|2y|esc|EDTI {'T_LOI': 475, 'T_LOI_usd': 0.357, 'gas_point_npv20': 1.56, 'diesel_floor': 473, 'floor_usd': 0.355, 'min_dscr': 1.82, 'npv15': 8.4, 'irr': 20.1}
+   25km|11.0MW|2y|esc|noEDTI {'T_LOI': 535, 'T_LOI_usd': 0.402, 'gas_point_npv20': 1.59, 'diesel_floor': 532, 'floor_usd': 0.4, 'min_dscr': 2.17, 'npv15': 9.04, 'irr': 20.1}
+   25km|11.0MW|2y|none|EDTI {'T_LOI': 505, 'T_LOI_usd': 0.38, 'gas_point_npv20': 1.6, 'diesel_floor': 501, 'floor_usd': 0.377, 'min_dscr': 1.88, 'npv15': 8.69, 'irr': 20.1}
+   25km|11.0MW|2y|none|noEDTI {'T_LOI': 570, 'T_LOI_usd': 0.429, 'gas_point_npv20': 1.64, 'diesel_floor': 565, 'floor_usd': 0.425, 'min_dscr': 2.24, 'npv15': 9.44, 'irr': 20.2}
+   25km|11.0MW|2y|dopmargin|EDTI {'T_LOI': 435, 'T_LOI_usd': 0.327, 'gas_point_npv20': 1.54, 'diesel_floor': 433, 'floor_usd': 0.326, 'min_dscr': 1.82, 'npv15': 8.35, 'irr': 20.1}
+   25km|11.0MW|2y|dopmargin|noEDTI {'T_LOI': 490, 'T_LOI_usd': 0.368, 'gas_point_npv20': 1.57, 'diesel_floor': 488, 'floor_usd': 0.367, 'min_dscr': 2.17, 'npv15': 9.0, 'irr': 20.1}
+   oredo30|11.0MW|1y|dopgas|EDTI {'T_LOI': 405, 'T_LOI_usd': 0.305, 'gas_point_npv20': 1.66, 'diesel_floor': 400, 'floor_usd': 0.301, 'min_dscr': 1.59, 'npv15': 7.68, 'irr': 20.3}
+   oredo30|11.0MW|1y|dopgas|noEDTI {'T_LOI': 455, 'T_LOI_usd': 0.342, 'gas_point_npv20': 1.58, 'diesel_floor': 453, 'floor_usd': 0.34, 'min_dscr': 1.72, 'npv15': 8.05, 'irr': 20.1}
+   oredo30|11.0MW|1y|esc|EDTI {'T_LOI': 405, 'T_LOI_usd': 0.305, 'gas_point_npv20': 1.52, 'diesel_floor': 404, 'floor_usd': 0.304, 'min_dscr': 1.57, 'npv15': 7.24, 'irr': 20.0}
+   oredo30|11.0MW|1y|esc|noEDTI {'T_LOI': 460, 'T_LOI_usd': 0.346, 'gas_point_npv20': 1.62, 'diesel_floor': 456, 'floor_usd': 0.343, 'min_dscr': 1.73, 'npv15': 8.22, 'irr': 20.2}
+   oredo30|11.0MW|1y|none|EDTI {'T_LOI': 430, 'T_LOI_usd': 0.323, 'gas_point_npv20': 1.54, 'diesel_floor': 428, 'floor_usd': 0.322, 'min_dscr': 1.62, 'npv15': 7.53, 'irr': 20.1}
+   oredo30|11.0MW|1y|none|noEDTI {'T_LOI': 485, 'T_LOI_usd': 0.365, 'gas_point_npv20': 1.51, 'diesel_floor': 485, 'floor_usd': 0.364, 'min_dscr': 1.76, 'npv15': 8.09, 'irr': 20.0}
+   oredo30|11.0MW|1y|dopmargin|EDTI {'T_LOI': 375, 'T_LOI_usd': 0.282, 'gas_point_npv20': 1.66, 'diesel_floor': 370, 'floor_usd': 0.278, 'min_dscr': 1.6, 'npv15': 7.75, 'irr': 20.4}
+   oredo30|11.0MW|1y|dopmargin|noEDTI {'T_LOI': 420, 'T_LOI_usd': 0.316, 'gas_point_npv20': 1.56, 'diesel_floor': 418, 'floor_usd': 0.314, 'min_dscr': 1.72, 'npv15': 8.01, 'irr': 20.1}
+   oredo30|11.0MW|2y|dopgas|EDTI {'T_LOI': 470, 'T_LOI_usd': 0.353, 'gas_point_npv20': 1.59, 'diesel_floor': 467, 'floor_usd': 0.351, 'min_dscr': 1.98, 'npv15': 9.09, 'irr': 20.1}
+   oredo30|11.0MW|2y|dopgas|noEDTI {'T_LOI': 530, 'T_LOI_usd': 0.398, 'gas_point_npv20': 1.68, 'diesel_floor': 524, 'floor_usd': 0.394, 'min_dscr': 2.08, 'npv15': 9.94, 'irr': 20.2}
+   oredo30|11.0MW|2y|esc|EDTI {'T_LOI': 475, 'T_LOI_usd': 0.357, 'gas_point_npv20': 1.63, 'diesel_floor': 470, 'floor_usd': 0.353, 'min_dscr': 1.99, 'npv15': 9.23, 'irr': 20.2}
+   oredo30|11.0MW|2y|esc|noEDTI {'T_LOI': 530, 'T_LOI_usd': 0.398, 'gas_point_npv20': 1.54, 'diesel_floor': 529, 'floor_usd': 0.397, 'min_dscr': 2.06, 'npv15': 9.59, 'irr': 20.0}
+   oredo30|11.0MW|2y|none|EDTI {'T_LOI': 500, 'T_LOI_usd': 0.376, 'gas_point_npv20': 1.51, 'diesel_floor': 499, 'floor_usd': 0.376, 'min_dscr': 2.03, 'npv15': 9.09, 'irr': 20.0}
+   oredo30|11.0MW|2y|none|noEDTI {'T_LOI': 565, 'T_LOI_usd': 0.425, 'gas_point_npv20': 1.61, 'diesel_floor': 561, 'floor_usd': 0.422, 'min_dscr': 2.13, 'npv15': 10.04, 'irr': 20.1}
+   oredo30|11.0MW|2y|dopmargin|EDTI {'T_LOI': 435, 'T_LOI_usd': 0.327, 'gas_point_npv20': 1.61, 'diesel_floor': 431, 'floor_usd': 0.324, 'min_dscr': 1.99, 'npv15': 9.19, 'irr': 20.2}
+   oredo30|11.0MW|2y|dopmargin|noEDTI {'T_LOI': 485, 'T_LOI_usd': 0.365, 'gas_point_npv20': 1.51, 'diesel_floor': 485, 'floor_usd': 0.364, 'min_dscr': 2.06, 'npv15': 9.51, 'irr': 20.0}
+
+=== 6. Earn-out $0.30/Mscf реально сожжённого газа со 2-го года (путь А)
+   dopgas EDTI {'T': 405, 'burned_mmscfd_y2': 1.581, 'eo_musd_by_year': [0.0, 0.173, 0.173, 0.173, 0.173, 0.171, 0.157, 0.145, 0.133, 0.122], 'd_npv15': -0.39, 'd_npv20': -0.3, 'd_npv15_old_basis': -0.85, 'be20_shift': 3.3, 'cap_usd_per_mscf_at_T_plus': {0: 2.01, 25: 4.28, 50: 6.46}}
+   dopgas noEDTI {'T': 460, 'burned_mmscfd_y2': 1.581, 'eo_musd_by_year': [0.0, 0.173, 0.173, 0.173, 0.173, 0.171, 0.157, 0.145, 0.133, 0.122], 'd_npv15': -0.39, 'd_npv20': -0.31, 'd_npv15_old_basis': -0.78, 'be20_shift': 3.6, 'cap_usd_per_mscf_at_T_plus': {0: 1.94, 25: 4.04, 50: 6.14}}
+
+=== 7. Минимальный доступный газ года 1 (MMscf/д) для NPV20>=0; 25 км, 11 МВт, 1 г, DoP-газ
+   EDTI|T=405|gas0.74|decl0.08 3.24
+   EDTI|T=405|gas0.74|decl0.12 4.11
+   EDTI|T=405|gas1.50|decl0.08 3.8
+   EDTI|T=405|gas1.50|decl0.12 5.13
+   EDTI|T=430|gas0.74|decl0.08 2.87
+   EDTI|T=430|gas0.74|decl0.12 3.48
+   EDTI|T=430|gas1.50|decl0.08 3.14
+   EDTI|T=430|gas1.50|decl0.12 3.92
+   EDTI|T=455|gas0.74|decl0.08 2.65
+   EDTI|T=455|gas0.74|decl0.12 3.1
+   EDTI|T=455|gas1.50|decl0.08 2.81
+   EDTI|T=455|gas1.50|decl0.12 3.37
+   noEDTI|T=460|gas0.74|decl0.08 3.3
+   noEDTI|T=460|gas0.74|decl0.12 4.23
+   noEDTI|T=460|gas1.50|decl0.08 3.78
+   noEDTI|T=460|gas1.50|decl0.12 5.08
+   noEDTI|T=485|gas0.74|decl0.08 2.97
+   noEDTI|T=485|gas0.74|decl0.12 3.64
+   noEDTI|T=485|gas1.50|decl0.08 3.22
+   noEDTI|T=485|gas1.50|decl0.12 4.08
+   noEDTI|T=510|gas0.74|decl0.08 2.75
+   noEDTI|T=510|gas0.74|decl0.12 3.26
+   noEDTI|T=510|gas1.50|decl0.08 2.91
+   noEDTI|T=510|gas1.50|decl0.12 3.54
+
+=== 8. BE NPV20 (₦) от длины трассы ЛЭП; DoP-газ, 11 МВт, газ не ограничивает (Oredo-подобный факел)
+  10 км: {'EDTI|1y': 337, 'EDTI|2y': 394, 'noEDTI|1y': 382, 'noEDTI|2y': 444}
+  15 км: {'EDTI|1y': 348, 'EDTI|2y': 407, 'noEDTI|1y': 394, 'noEDTI|2y': 459}
+  20 км: {'EDTI|1y': 359, 'EDTI|2y': 420, 'noEDTI|1y': 407, 'noEDTI|2y': 474}
+  25 км: {'EDTI|1y': 370, 'EDTI|2y': 434, 'noEDTI|1y': 420, 'noEDTI|2y': 490}
+  30 км: {'EDTI|1y': 381, 'EDTI|2y': 447, 'noEDTI|1y': 433, 'noEDTI|2y': 505}
+  33 км: {'EDTI|1y': 388, 'EDTI|2y': 456, 'noEDTI|1y': 441, 'noEDTI|2y': 515}
+  35 км: {'EDTI|1y': 393, 'EDTI|2y': 461, 'noEDTI|1y': 447, 'noEDTI|2y': 521}
+  40 км: {'EDTI|1y': 404, 'EDTI|2y': 475, 'noEDTI|1y': 460, 'noEDTI|2y': 537}
+
+=== 9. BE NPV20 (₦) от размера якоря, МВт нетто; 25 км и Oredo 30 км, стройка 1 и 2 г
+   25km|dopgas|EDTI|1y {'Pd530': 8.3, 'Pd530_econ': 7.8, 'Pd650': 8.3, 'Pd650_econ': 5.2, 'Pd770': 8.3, 'Pd770_econ': 5.0}
+   25km|dopgas|EDTI|2y {'Pd530': None, 'Pd530_econ': None, 'Pd650': 8.3, 'Pd650_econ': 6.9, 'Pd770': 8.3, 'Pd770_econ': 5.0}
+   25km|dopgas|noEDTI|1y {'Pd530': None, 'Pd530_econ': None, 'Pd650': 8.3, 'Pd650_econ': 6.5, 'Pd770': 8.3, 'Pd770_econ': 5.0}
+   25km|dopgas|noEDTI|2y {'Pd530': None, 'Pd530_econ': None, 'Pd650': 9.1, 'Pd650_econ': 9.1, 'Pd770': 8.3, 'Pd770_econ': 6.1}
+   25km|esc|EDTI|1y {'Pd530': 8.3, 'Pd530_econ': 7.9, 'Pd650': 8.3, 'Pd650_econ': 5.3, 'Pd770': 8.3, 'Pd770_econ': 5.0}
+   25km|esc|EDTI|2y {'Pd530': None, 'Pd530_econ': None, 'Pd650': 8.3, 'Pd650_econ': 7.0, 'Pd770': 8.3, 'Pd770_econ': 5.0}
+   25km|esc|noEDTI|1y {'Pd530': None, 'Pd530_econ': None, 'Pd650': 8.3, 'Pd650_econ': 6.6, 'Pd770': 8.3, 'Pd770_econ': 5.0}
+   25km|esc|noEDTI|2y {'Pd530': None, 'Pd530_econ': None, 'Pd650': 9.3, 'Pd650_econ': 9.3, 'Pd770': 8.3, 'Pd770_econ': 6.2}
+   25km|none|EDTI|1y {'Pd530': 9.2, 'Pd530_econ': 9.2, 'Pd650': 8.3, 'Pd650_econ': 5.9, 'Pd770': 8.3, 'Pd770_econ': 5.0}
+   25km|none|EDTI|2y {'Pd530': None, 'Pd530_econ': None, 'Pd650': 8.3, 'Pd650_econ': 8.0, 'Pd770': 8.3, 'Pd770_econ': 5.6}
+   25km|none|noEDTI|1y {'Pd530': None, 'Pd530_econ': None, 'Pd650': 8.3, 'Pd650_econ': 7.5, 'Pd770': 8.3, 'Pd770_econ': 5.3}
+   25km|none|noEDTI|2y {'Pd530': None, 'Pd530_econ': None, 'Pd650': None, 'Pd650_econ': None, 'Pd770': 8.3, 'Pd770_econ': 7.0}
+   25km|dopmargin|EDTI|1y {'Pd530': 8.3, 'Pd530_econ': 6.6, 'Pd650': 8.3, 'Pd650_econ': 5.0, 'Pd770': 8.3, 'Pd770_econ': 5.0}
+   25km|dopmargin|EDTI|2y {'Pd530': 9.4, 'Pd530_econ': 9.4, 'Pd650': 8.3, 'Pd650_econ': 5.9, 'Pd770': 8.3, 'Pd770_econ': 5.0}
+   25km|dopmargin|noEDTI|1y {'Pd530': 8.5, 'Pd530_econ': 8.5, 'Pd650': 8.3, 'Pd650_econ': 5.5, 'Pd770': 8.3, 'Pd770_econ': 5.0}
+   25km|dopmargin|noEDTI|2y {'Pd530': None, 'Pd530_econ': None, 'Pd650': 8.3, 'Pd650_econ': 7.4, 'Pd770': 8.3, 'Pd770_econ': 5.3}
+   oredo30|dopgas|EDTI|1y {'Pd530': 8.4, 'Pd530_econ': 8.4, 'Pd650': 8.3, 'Pd650_econ': 5.6, 'Pd770': 8.3, 'Pd770_econ': 5.0}
+   oredo30|dopgas|EDTI|2y {'Pd530': 12.2, 'Pd530_econ': 12.2, 'Pd650': 8.3, 'Pd650_econ': 7.5, 'Pd770': 8.3, 'Pd770_econ': 5.4}
+   oredo30|dopgas|noEDTI|1y {'Pd530': 11.2, 'Pd530_econ': 11.2, 'Pd650': 8.3, 'Pd650_econ': 7.0, 'Pd770': 8.3, 'Pd770_econ': 5.1}
+   oredo30|dopgas|noEDTI|2y {'Pd530': None, 'Pd530_econ': None, 'Pd650': 9.7, 'Pd650_econ': 9.7, 'Pd770': 8.3, 'Pd770_econ': 6.7}
+  юридический пол якоря (6 МВт·ч/ч / LF 0.72): 8.33 МВт
+  кривая 25km dopgas EDTI 1г: [(5.0, 564), (6.0, 511), (7.0, 473), (8.0, 444), (8.5, 434), (9.0, 425), (10.0, 411), (11.0, 403), (12.0, 398), (13.0, 397)]
+  кривая 25km dopgas EDTI 2г: [(5.0, 652), (6.0, 592), (7.0, 548), (8.0, 516), (8.5, 504), (9.0, 494), (10.0, 479), (11.0, 470), (12.0, 465), (13.0, 465)]
+  кривая 25km dopgas noEDTI 1г: [(5.0, 632), (6.0, 573), (7.0, 531), (8.0, 500), (8.5, 488), (9.0, 479), (10.0, 465), (11.0, 456), (12.0, 452), (13.0, 453)]
+  кривая 25km dopgas noEDTI 2г: [(5.0, 727), (6.0, 661), (7.0, 613), (8.0, 578), (8.5, 565), (9.0, 554), (10.0, 538), (11.0, 529), (12.0, 525), (13.0, 526)]
+
+=== 10. Максимум часов сети в сутки h, при котором покупатель проходит: T <= (1-s)*[(h*Pg+(24-h)*Pd)/24]
+  25km|11.0MW|1y|dopgas|EDTI       T=₦405: h_max (s=0) Pd530/650/770 = 9.4 13.3 15.6 | s=15%: 4.0 9.5 12.6
+  25km|11.0MW|1y|dopgas|noEDTI     T=₦460: h_max (s=0) Pd530/650/770 = 5.2 10.4 13.3 | s=15%: 0.0 5.9 9.8
+  25km|11.0MW|1y|esc|EDTI          T=₦410: h_max (s=0) Pd530/650/770 = 9.0 13.1 15.4 | s=15%: 3.6 9.1 12.3
+  25km|11.0MW|1y|esc|noEDTI        T=₦460: h_max (s=0) Pd530/650/770 = 5.2 10.4 13.3 | s=15%: 0.0 5.9 9.8
+  25km|11.0MW|1y|none|EDTI         T=₦435: h_max (s=0) Pd530/650/770 = 7.1 11.7 14.3 | s=15%: 1.4 7.5 11.1
+  25km|11.0MW|1y|none|noEDTI       T=₦490: h_max (s=0) Pd530/650/770 = 3.0 8.7 12.0 | s=15%: 0.0 4.0 8.3
+  25km|11.0MW|2y|dopgas|EDTI       T=₦470: h_max (s=0) Pd530/650/770 = 4.5 9.8 12.8 | s=15%: 0.0 5.3 9.3
+  25km|11.0MW|2y|dopgas|noEDTI     T=₦530: h_max (s=0) Pd530/650/770 = 0.0 6.5 10.3 | s=15%: 0.0 1.4 6.3
+  25km|11.0MW|2y|esc|EDTI          T=₦475: h_max (s=0) Pd530/650/770 = 4.1 9.5 12.6 | s=15%: 0.0 5.0 9.0
+  25km|11.0MW|2y|esc|noEDTI        T=₦535: h_max (s=0) Pd530/650/770 = 0.0 6.3 10.1 | s=15%: 0.0 1.1 6.0
+  25km|11.0MW|2y|none|EDTI         T=₦505: h_max (s=0) Pd530/650/770 = 1.9 7.9 11.3 | s=15%: 0.0 3.0 7.5
+  25km|11.0MW|2y|none|noEDTI       T=₦570: h_max (s=0) Pd530/650/770 = 0.0 4.4 8.6 | s=15%: 0.0 0.0 4.3
+  oredo30|11.0MW|1y|dopgas|EDTI    T=₦405: h_max (s=0) Pd530/650/770 = 9.4 13.3 15.6 | s=15%: 4.0 9.5 12.6
+  oredo30|11.0MW|1y|dopgas|noEDTI  T=₦455: h_max (s=0) Pd530/650/770 = 5.6 10.6 13.5 | s=15%: 0.0 6.2 10.0
+  oredo30|11.0MW|1y|esc|EDTI       T=₦405: h_max (s=0) Pd530/650/770 = 9.4 13.3 15.6 | s=15%: 4.0 9.5 12.6
+  oredo30|11.0MW|1y|esc|noEDTI     T=₦460: h_max (s=0) Pd530/650/770 = 5.2 10.4 13.3 | s=15%: 0.0 5.9 9.8
+  oredo30|11.0MW|1y|none|EDTI      T=₦430: h_max (s=0) Pd530/650/770 = 7.5 12.0 14.6 | s=15%: 1.8 7.9 11.3
+  oredo30|11.0MW|1y|none|noEDTI    T=₦485: h_max (s=0) Pd530/650/770 = 3.4 9.0 12.2 | s=15%: 0.0 4.3 8.5
+  oredo30|11.0MW|2y|dopgas|EDTI    T=₦470: h_max (s=0) Pd530/650/770 = 4.5 9.8 12.8 | s=15%: 0.0 5.3 9.3
+  oredo30|11.0MW|2y|dopgas|noEDTI  T=₦530: h_max (s=0) Pd530/650/770 = 0.0 6.5 10.3 | s=15%: 0.0 1.4 6.3
+  oredo30|11.0MW|2y|esc|EDTI       T=₦475: h_max (s=0) Pd530/650/770 = 4.1 9.5 12.6 | s=15%: 0.0 5.0 9.0
+  oredo30|11.0MW|2y|esc|noEDTI     T=₦530: h_max (s=0) Pd530/650/770 = 0.0 6.5 10.3 | s=15%: 0.0 1.4 6.3
+  oredo30|11.0MW|2y|none|EDTI      T=₦500: h_max (s=0) Pd530/650/770 = 2.2 8.2 11.6 | s=15%: 0.0 3.4 7.8
+  oredo30|11.0MW|2y|none|noEDTI    T=₦565: h_max (s=0) Pd530/650/770 = 0.0 4.6 8.8 | s=15%: 0.0 0.0 4.5
+  Band A 20 ч + 4 ч дизеля, ₦/кВт·ч: {530: 263, 650: 283, 770: 303}
+
+=== 11. Стрессы при T_LOI (DoP-газ, 25 км, 11 МВт, 1 г, газ на стопе $1.5): NPV20, $ млн
+  EDTI   T=₦405 база (=0 по построению)                              NPV15 +6.9  NPV20 +0.2  IRR 20.2
+  EDTI   T=₦405 спрос /1.3 до контракта (нет ToP 70%)                NPV15 -6.1  NPV20 -10.3  IRR 9.7
+  EDTI   T=₦405 спрос /2.7 до контракта                              NPV15 -30.0  NPV20 -29.7  IRR None
+  EDTI   T=₦405 LF 0.60                                              NPV15 -2.3  NPV20 -7.3  IRR 13.1
+  EDTI   T=₦405 капитал x2.8                                         NPV15 +5.2  NPV20 -1.5  IRR 18.7
+  EDTI   T=₦405 капитал x2.4 (внешние $1 500-1 667/кВт)              NPV15 +8.6  NPV20 +1.9  IRR 21.7
+  EDTI   T=₦405 падение дебита 12%/г                                 NPV15 +3.2  NPV20 -2.3  IRR 17.7
+  EDTI   T=₦405 VIIRS p25: доступно 0.6                              NPV15 +2.2  NPV20 -3.2  IRR 16.9
+  EDTI   T=₦405 блокада 3 мес во 2-й год                             NPV15 +4.4  NPV20 -2.0  IRR 18.3
+  EDTI   T=₦405 дизельная оговорка -20% со 2-го года                 NPV15 -2.3  NPV20 -7.0  IRR 13.0
+  EDTI   T=₦405 девальвация 16%/г (курсовой лаг)                     NPV15 +6.3  NPV20 -0.3  IRR 19.8
+  EDTI   T=₦405 стройка 2 г, капитал 50/50 по годам                  NPV15 +3.6  NPV20 -2.6  IRR 17.7
+  EDTI   T=₦405 стройка 2 г, весь капитал в t0 (срыв графика)        NPV15 +1.8  NPV20 -5.0  IRR 16.1
+  EDTI   T=₦405 тариф в найре без индексации, девальвация 8%         NPV15 -9.6  NPV20 -12.6  IRR None
+  EDTI   T=₦405 тариф в найре без индексации, девальвация 12%        NPV15 -16.2  NPV20 -17.7  IRR None
+  EDTI   T=₦405 тариф в найре без индексации, девальвация 16%        NPV15 -21.6  NPV20 -22.0  IRR None
+  EDTI   T=₦405 earn-out $0.30/Mscf сожжённого газа со 2-го года     NPV15 +6.5  NPV20 -0.1  IRR 19.9
+  noEDTI T=₦460 база (=0 по построению)                              NPV15 +7.6  NPV20 +0.3  IRR 20.2
+  noEDTI T=₦460 спрос /1.3 до контракта (нет ToP 70%)                NPV15 -3.7  NPV20 -8.8  IRR 12.1
+  noEDTI T=₦460 спрос /2.7 до контракта                              NPV15 -26.7  NPV20 -27.1  IRR None
+  noEDTI T=₦460 LF 0.60                                              NPV15 -0.6  NPV20 -6.2  IRR 14.6
+  noEDTI T=₦460 капитал x2.8                                         NPV15 +5.8  NPV20 -1.5  IRR 18.8
+  noEDTI T=₦460 капитал x2.4 (внешние $1 500-1 667/кВт)              NPV15 +9.4  NPV20 +2.1  IRR 21.8
+  noEDTI T=₦460 падение дебита 12%/г                                 NPV15 +3.6  NPV20 -2.5  IRR 17.8
+  noEDTI T=₦460 VIIRS p25: доступно 0.6                              NPV15 +2.8  NPV20 -3.2  IRR 17.2
+  noEDTI T=₦460 блокада 3 мес во 2-й год                             NPV15 +5.6  NPV20 -1.5  IRR 18.8
+  noEDTI T=₦460 дизельная оговорка -20% со 2-го года                 NPV15 -0.7  NPV20 -6.2  IRR 14.4
+  noEDTI T=₦460 девальвация 16%/г (курсовой лаг)                     NPV15 +7.0  NPV20 -0.2  IRR 19.8
+  noEDTI T=₦460 стройка 2 г, капитал 50/50 по годам                  NPV15 +4.3  NPV20 -2.5  IRR 18.0
+  noEDTI T=₦460 стройка 2 г, весь капитал в t0 (срыв графика)        NPV15 +2.4  NPV20 -4.9  IRR 16.5
+  noEDTI T=₦460 тариф в найре без индексации, девальвация 8%         NPV15 -8.0  NPV20 -11.6  IRR 7.1
+  noEDTI T=₦460 тариф в найре без индексации, девальвация 12%        NPV15 -14.2  NPV20 -16.3  IRR None
+  noEDTI T=₦460 тариф в найре без индексации, девальвация 16%        NPV15 -19.3  NPV20 -20.2  IRR None
+  noEDTI T=₦460 earn-out $0.30/Mscf сожжённого газа со 2-го года     NPV15 +7.2  NPV20 -0.0  IRR 20.0
+  BE NPV20 при тарифе в найре без индексации, ₦/кВт·ч года 1: {'dep0.08|EDTI': 564, 'dep0.08|noEDTI': 647, 'dep0.12|EDTI': 666, 'dep0.12|noEDTI': 764, 'dep0.16|EDTI': 778, 'dep0.16|noEDTI': 892}
+
+=== 12. Проверка поправок аудита: {'capex_screen': 11.07, 'capex_base': 29.15, 'capex_ratio': 2.63, 'power_usd_per_kw_base': 1802, 'fixed_cash_screen': 1.52, 'fixed_cash_base': 3.82, 'fixed_ratio': 2.51, 'cash_cost_ratio_incl_gas': 2.01}
+
+записано /home/user/ocm-research-diary/routes/apg_nigeria/models/round2/deal/matrix_r2_out.json
+
+=== 13а. Стройка 2 г при капитале 50/50 по годам (плановая стройка, не срыв): BE NPV15/NPV20
+   25km|11.0MW|dopgas|EDTI BE15/BE20/T_LOI (353, 418, 440)
+   25km|11.0MW|dopgas|noEDTI BE15/BE20/T_LOI (394, 475, 495)
+   25km|11.0MW|esc|EDTI BE15/BE20/T_LOI (355, 420, 445)
+   25km|11.0MW|esc|noEDTI BE15/BE20/T_LOI (395, 477, 500)
+   25km|11.0MW|none|EDTI BE15/BE20/T_LOI (374, 445, 470)
+   25km|11.0MW|none|noEDTI BE15/BE20/T_LOI (418, 506, 530)
+   25km|8.5MW|dopgas|EDTI BE15/BE20/T_LOI (383, 451, 475)
+   25km|8.5MW|dopgas|noEDTI BE15/BE20/T_LOI (421, 509, 530)
+   25km|8.5MW|esc|EDTI BE15/BE20/T_LOI (385, 453, 475)
+   25km|8.5MW|esc|noEDTI BE15/BE20/T_LOI (423, 511, 535)
+   25km|8.5MW|none|EDTI BE15/BE20/T_LOI (405, 480, 505)
+   25km|8.5MW|none|noEDTI BE15/BE20/T_LOI (447, 543, 570)
+   oredo30|11.0MW|dopgas|EDTI BE15/BE20/T_LOI (352, 416, 440)
+   oredo30|11.0MW|dopgas|noEDTI BE15/BE20/T_LOI (387, 471, 495)
+   oredo30|11.0MW|esc|EDTI BE15/BE20/T_LOI (353, 418, 440)
+   oredo30|11.0MW|esc|noEDTI BE15/BE20/T_LOI (389, 473, 495)
+   oredo30|11.0MW|none|EDTI BE15/BE20/T_LOI (372, 443, 470)
+   oredo30|11.0MW|none|noEDTI BE15/BE20/T_LOI (411, 502, 530)
+   oredo30|8.5MW|dopgas|EDTI BE15/BE20/T_LOI (395, 465, 490)
+   oredo30|8.5MW|dopgas|noEDTI BE15/BE20/T_LOI (434, 525, 550)
+   oredo30|8.5MW|esc|EDTI BE15/BE20/T_LOI (396, 467, 490)
+   oredo30|8.5MW|esc|noEDTI BE15/BE20/T_LOI (435, 527, 550)
+   oredo30|8.5MW|none|EDTI BE15/BE20/T_LOI (417, 495, 520)
+   oredo30|8.5MW|none|noEDTI BE15/BE20/T_LOI (460, 560, 585)
+
+=== 13б. Порог пути А (СП с держателем NGFCP, earn-out $0.30/Mscf сожжённого газа со 2-го года), газ на стопе
+   25km|11.0MW|1y|dopgas|EDTI T_LOI путь А = 410 ($0.308) | путь Б = 405
+   25km|11.0MW|1y|dopgas|noEDTI T_LOI путь А = 460 ($0.346) | путь Б = 460
+   25km|11.0MW|2y|dopgas|EDTI T_LOI путь А = 475 ($0.357) | путь Б = 470
+   25km|11.0MW|2y|dopgas|noEDTI T_LOI путь А = 535 ($0.402) | путь Б = 530
+   25km|8.5MW|1y|dopgas|EDTI T_LOI путь А = 440 ($0.331) | путь Б = 435
+   25km|8.5MW|1y|dopgas|noEDTI T_LOI путь А = 495 ($0.372) | путь Б = 490
+   25km|8.5MW|2y|dopgas|EDTI T_LOI путь А = 510 ($0.383) | путь Б = 505
+   25km|8.5MW|2y|dopgas|noEDTI T_LOI путь А = 570 ($0.429) | путь Б = 565
+   oredo30|11.0MW|1y|dopgas|EDTI T_LOI путь А = 405 ($0.305) | путь Б = 405
+   oredo30|11.0MW|1y|dopgas|noEDTI T_LOI путь А = 460 ($0.346) | путь Б = 455
+   oredo30|11.0MW|2y|dopgas|EDTI T_LOI путь А = 475 ($0.357) | путь Б = 470
+   oredo30|11.0MW|2y|dopgas|noEDTI T_LOI путь А = 530 ($0.398) | путь Б = 530
+   oredo30|8.5MW|1y|dopgas|EDTI T_LOI путь А = 450 ($0.338) | путь Б = 450
+   oredo30|8.5MW|1y|dopgas|noEDTI T_LOI путь А = 510 ($0.383) | путь Б = 505
+   oredo30|8.5MW|2y|dopgas|EDTI T_LOI путь А = 525 ($0.395) | путь Б = 520
+   oredo30|8.5MW|2y|dopgas|noEDTI T_LOI путь А = 590 ($0.444) | путь Б = 585
+
+=== 13в. Потолок earn-out $/Mscf сожжённого газа (NPV20=0) при тарифе T_LOI+dT и цене газа «всё включено»
+   EDTI|T=405|gas0.74 2.01
+   EDTI|T=405|gas1.00 1.4
+   EDTI|T=405|gas1.50 0.21
+   EDTI|T=430|gas0.74 4.28
+   EDTI|T=430|gas1.00 3.68
+   EDTI|T=430|gas1.50 2.5
+   EDTI|T=455|gas0.74 6.46
+   EDTI|T=455|gas1.00 5.91
+   EDTI|T=455|gas1.50 4.77
+   noEDTI|T=460|gas0.74 1.94
+   noEDTI|T=460|gas1.00 1.39
+   noEDTI|T=460|gas1.50 0.3
+   noEDTI|T=485|gas0.74 4.04
+   noEDTI|T=485|gas1.00 3.49
+   noEDTI|T=485|gas1.50 2.41
+   noEDTI|T=510|gas0.74 6.14
+   noEDTI|T=510|gas1.00 5.59
+   noEDTI|T=510|gas1.50 4.51
+
+=== 13г. ToP газа: 100% DCQ (база) против 70% DCQ (back-to-back с ToP 70% PPA): BE NPV20
+   {'EDTI|gas0.74': (383, 377), 'EDTI|gas1.50': (403, 391), 'noEDTI|gas0.74': (437, 431), 'noEDTI|gas1.50': (456, 445)}
+
+=== 13д. Экономия покупателя при T_LOI (11 МВт, 56.7 ГВт·ч/г с простоем 1 мес; 61.9 без простоя), $ млн/г
+   EDTI|T=405|дизель 530 {'alt': 530, 'saving_ngn_kwh': 125, 'saving_musd': 5.33}
+   EDTI|T=405|дизель 650 {'alt': 650, 'saving_ngn_kwh': 245, 'saving_musd': 10.45}
+   EDTI|T=405|дизель 770 {'alt': 770, 'saving_ngn_kwh': 365, 'saving_musd': 15.58}
+   EDTI|T=405|сеть 12 ч + дизель 650 {'alt': 430, 'saving_ngn_kwh': 25, 'saving_musd': 1.06}
+   EDTI|T=405|Band A 20 ч + дизель 650 {'alt': 283, 'saving_ngn_kwh': -122, 'saving_musd': -5.21}
+   noEDTI|T=460|дизель 530 {'alt': 530, 'saving_ngn_kwh': 70, 'saving_musd': 2.99}
+   noEDTI|T=460|дизель 650 {'alt': 650, 'saving_ngn_kwh': 190, 'saving_musd': 8.11}
+   noEDTI|T=460|дизель 770 {'alt': 770, 'saving_ngn_kwh': 310, 'saving_musd': 13.23}
+   noEDTI|T=460|сеть 12 ч + дизель 650 {'alt': 430, 'saving_ngn_kwh': -30, 'saving_musd': -1.29}
+   noEDTI|T=460|Band A 20 ч + дизель 650 {'alt': 283, 'saving_ngn_kwh': -177, 'saving_musd': -7.56}
+
+=== 13е. Правила для якоря 8.5 МВт
+   25km|8.5MW|1y|dopgas|EDTI {'T_LOI': 435, 'T_LOI_usd': 0.327, 'gas_point_npv20': 1.56, 'diesel_floor': 433, 'floor_usd': 0.326, 'min_dscr': 1.58, 'npv15': 5.94, 'irr': 20.1}
+   25km|8.5MW|1y|dopgas|noEDTI {'T_LOI': 490, 'T_LOI_usd': 0.368, 'gas_point_npv20': 1.56, 'diesel_floor': 488, 'floor_usd': 0.367, 'min_dscr': 1.72, 'npv15': 6.47, 'irr': 20.1}
+   25km|8.5MW|1y|esc|EDTI {'T_LOI': 440, 'T_LOI_usd': 0.331, 'gas_point_npv20': 1.6, 'diesel_floor': 436, 'floor_usd': 0.328, 'min_dscr': 1.59, 'npv15': 6.08, 'irr': 20.2}
+   25km|8.5MW|1y|esc|noEDTI {'T_LOI': 495, 'T_LOI_usd': 0.372, 'gas_point_npv20': 1.61, 'diesel_floor': 491, 'floor_usd': 0.369, 'min_dscr': 1.73, 'npv15': 6.6, 'irr': 20.2}
+   25km|8.5MW|2y|dopgas|EDTI {'T_LOI': 505, 'T_LOI_usd': 0.38, 'gas_point_npv20': 1.54, 'diesel_floor': 504, 'floor_usd': 0.379, 'min_dscr': 1.98, 'npv15': 7.23, 'irr': 20.0}
+   25km|8.5MW|2y|dopgas|noEDTI {'T_LOI': 565, 'T_LOI_usd': 0.425, 'gas_point_npv20': 1.51, 'diesel_floor': 565, 'floor_usd': 0.425, 'min_dscr': 2.07, 'npv15': 7.7, 'irr': 20.0}
+   25km|8.5MW|2y|esc|EDTI {'T_LOI': 510, 'T_LOI_usd': 0.383, 'gas_point_npv20': 1.58, 'diesel_floor': 507, 'floor_usd': 0.381, 'min_dscr': 1.99, 'npv15': 7.35, 'irr': 20.1}
+   25km|8.5MW|2y|esc|noEDTI {'T_LOI': 570, 'T_LOI_usd': 0.429, 'gas_point_npv20': 1.56, 'diesel_floor': 568, 'floor_usd': 0.427, 'min_dscr': 2.07, 'npv15': 7.81, 'irr': 20.1}
+   oredo30|8.5MW|1y|dopgas|EDTI {'T_LOI': 450, 'T_LOI_usd': 0.338, 'gas_point_npv20': 1.63, 'diesel_floor': 446, 'floor_usd': 0.335, 'min_dscr': 1.58, 'npv15': 6.38, 'irr': 20.2}
+   oredo30|8.5MW|1y|dopgas|noEDTI {'T_LOI': 505, 'T_LOI_usd': 0.38, 'gas_point_npv20': 1.56, 'diesel_floor': 503, 'floor_usd': 0.378, 'min_dscr': 1.72, 'npv15': 6.74, 'irr': 20.1}
+   oredo30|8.5MW|1y|esc|EDTI {'T_LOI': 455, 'T_LOI_usd': 0.342, 'gas_point_npv20': 1.67, 'diesel_floor': 449, 'floor_usd': 0.337, 'min_dscr': 1.59, 'npv15': 6.51, 'irr': 20.3}
+   oredo30|8.5MW|1y|esc|noEDTI {'T_LOI': 510, 'T_LOI_usd': 0.383, 'gas_point_npv20': 1.61, 'diesel_floor': 506, 'floor_usd': 0.381, 'min_dscr': 1.72, 'npv15': 6.87, 'irr': 20.2}
+   oredo30|8.5MW|2y|dopgas|EDTI {'T_LOI': 520, 'T_LOI_usd': 0.391, 'gas_point_npv20': 1.51, 'diesel_floor': 520, 'floor_usd': 0.391, 'min_dscr': 1.97, 'npv15': 7.48, 'irr': 20.0}
+   oredo30|8.5MW|2y|dopgas|noEDTI {'T_LOI': 585, 'T_LOI_usd': 0.44, 'gas_point_npv20': 1.59, 'diesel_floor': 582, 'floor_usd': 0.438, 'min_dscr': 2.07, 'npv15': 8.18, 'irr': 20.1}
+   oredo30|8.5MW|2y|esc|EDTI {'T_LOI': 525, 'T_LOI_usd': 0.395, 'gas_point_npv20': 1.56, 'diesel_floor': 523, 'floor_usd': 0.393, 'min_dscr': 1.97, 'npv15': 7.59, 'irr': 20.1}
+   oredo30|8.5MW|2y|esc|noEDTI {'T_LOI': 590, 'T_LOI_usd': 0.444, 'gas_point_npv20': 1.63, 'diesel_floor': 586, 'floor_usd': 0.44, 'min_dscr': 2.07, 'npv15': 8.28, 'irr': 20.2}
+
+записано (с дополнениями) /home/user/ocm-research-diary/routes/apg_nigeria/models/round2/deal/matrix_r2_out.json

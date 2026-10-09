@@ -1,0 +1,7570 @@
+{
+ "generic": {
+  "Q1_1km_opt_pre": {
+   "Q": 1,
+   "km": 1,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 258,
+    "pkg": 0.89,
+    "pipe_len": 1.2,
+    "pipe": 0.6,
+    "total": 3.6,
+    "screen": 1.67
+   },
+   "fixed_opex": 1.12,
+   "opex_vs_screen": 3.29,
+   "y1": {
+    "t": 1,
+    "Gin": 0.64,
+    "sales": 0.46,
+    "rev": 0.48,
+    "opex": 1.17,
+    "ebitda": -0.69
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.76,
+    "sales": 0.55,
+    "rev": 0.58,
+    "opex": 1.21,
+    "ebitda": -0.63
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.65,
+    "sales": 0.47,
+    "rev": 0.53,
+    "opex": 1.31,
+    "ebitda": -0.78
+   },
+   "npv15": -7.51,
+   "npv20": -6.82,
+   "irr": null,
+   "payback": null
+  },
+  "Q1_1km_opt_GSA": {
+   "Q": 1,
+   "km": 1,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 258,
+    "pkg": 0.89,
+    "pipe_len": 1.2,
+    "pipe": 0.6,
+    "total": 3.6,
+    "screen": 1.67
+   },
+   "fixed_opex": 1.12,
+   "opex_vs_screen": 3.29,
+   "y1": {
+    "t": 1,
+    "Gin": 0.64,
+    "sales": 0.6,
+    "rev": 0.62,
+    "opex": 1.18,
+    "ebitda": -0.56
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.76,
+    "sales": 0.71,
+    "rev": 0.76,
+    "opex": 1.23,
+    "ebitda": -0.47
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.65,
+    "sales": 0.61,
+    "rev": 0.69,
+    "opex": 1.32,
+    "ebitda": -0.64
+   },
+   "npv15": -6.81,
+   "npv20": -6.23,
+   "irr": null,
+   "payback": null
+  },
+  "Q1_1km_base_pre": {
+   "Q": 1,
+   "km": 1,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 318,
+    "pkg": 1.18,
+    "pipe_len": 1.3,
+    "pipe": 1.04,
+    "total": 5.28,
+    "screen": 2.0
+   },
+   "fixed_opex": 1.57,
+   "opex_vs_screen": 4.48,
+   "y1": {
+    "t": 1,
+    "Gin": 0.48,
+    "sales": 0.22,
+    "rev": 0.15,
+    "opex": 1.63,
+    "ebitda": -1.48
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.63,
+    "sales": 0.29,
+    "rev": 0.2,
+    "opex": 1.7,
+    "ebitda": -1.5
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.49,
+    "sales": 0.23,
+    "rev": 0.16,
+    "opex": 1.83,
+    "ebitda": -1.68
+   },
+   "npv15": -13.6,
+   "npv20": -12.16,
+   "irr": null,
+   "payback": null
+  },
+  "Q1_1km_base_GSA": {
+   "Q": 1,
+   "km": 1,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 318,
+    "pkg": 1.18,
+    "pipe_len": 1.3,
+    "pipe": 1.04,
+    "total": 5.28,
+    "screen": 2.0
+   },
+   "fixed_opex": 1.57,
+   "opex_vs_screen": 4.48,
+   "y1": {
+    "t": 1,
+    "Gin": 0.48,
+    "sales": 0.45,
+    "rev": 0.3,
+    "opex": 1.7,
+    "ebitda": -1.4
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.63,
+    "sales": 0.59,
+    "rev": 0.4,
+    "opex": 1.79,
+    "ebitda": -1.39
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.49,
+    "sales": 0.46,
+    "rev": 0.31,
+    "opex": 1.9,
+    "ebitda": -1.59
+   },
+   "npv15": -13.19,
+   "npv20": -11.83,
+   "irr": null,
+   "payback": null
+  },
+  "Q1_1km_pess_pre": {
+   "Q": 1,
+   "km": 1,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 392,
+    "pkg": 1.57,
+    "pipe_len": 1.5,
+    "pipe": 1.8,
+    "total": 8.23,
+    "screen": 2.47
+   },
+   "fixed_opex": 2.34,
+   "opex_vs_screen": 6.47,
+   "y1": {
+    "t": 1,
+    "Gin": 0.23,
+    "sales": 0.08,
+    "rev": 0.03,
+    "opex": 2.45,
+    "ebitda": -2.42
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.41,
+    "sales": 0.14,
+    "rev": 0.05,
+    "opex": 2.61,
+    "ebitda": -2.56
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.28,
+    "sales": 0.1,
+    "rev": 0.03,
+    "opex": 2.77,
+    "ebitda": -2.74
+   },
+   "npv15": -19.47,
+   "npv20": -16.9,
+   "irr": null,
+   "payback": null
+  },
+  "Q1_1km_pess_GSA": {
+   "Q": 1,
+   "km": 1,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 392,
+    "pkg": 1.57,
+    "pipe_len": 1.5,
+    "pipe": 1.8,
+    "total": 8.23,
+    "screen": 2.47
+   },
+   "fixed_opex": 2.34,
+   "opex_vs_screen": 6.47,
+   "y1": {
+    "t": 1,
+    "Gin": 0.23,
+    "sales": 0.22,
+    "rev": 0.08,
+    "opex": 2.45,
+    "ebitda": -2.37
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.41,
+    "sales": 0.39,
+    "rev": 0.14,
+    "opex": 2.61,
+    "ebitda": -2.47
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.28,
+    "sales": 0.26,
+    "rev": 0.09,
+    "opex": 2.77,
+    "ebitda": -2.68
+   },
+   "npv15": -19.23,
+   "npv20": -16.71,
+   "irr": null,
+   "payback": null
+  },
+  "Q1_4km_opt_pre": {
+   "Q": 1,
+   "km": 4,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 258,
+    "pkg": 0.89,
+    "pipe_len": 4.8,
+    "pipe": 2.4,
+    "total": 5.52,
+    "screen": 3.11
+   },
+   "fixed_opex": 1.25,
+   "opex_vs_screen": 3.3,
+   "y1": {
+    "t": 1,
+    "Gin": 0.64,
+    "sales": 0.46,
+    "rev": 0.48,
+    "opex": 1.29,
+    "ebitda": -0.81
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.76,
+    "sales": 0.55,
+    "rev": 0.58,
+    "opex": 1.34,
+    "ebitda": -0.76
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.65,
+    "sales": 0.47,
+    "rev": 0.53,
+    "opex": 1.45,
+    "ebitda": -0.92
+   },
+   "npv15": -10.11,
+   "npv20": -9.3,
+   "irr": null,
+   "payback": null
+  },
+  "Q1_4km_opt_GSA": {
+   "Q": 1,
+   "km": 4,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 258,
+    "pkg": 0.89,
+    "pipe_len": 4.8,
+    "pipe": 2.4,
+    "total": 5.52,
+    "screen": 3.11
+   },
+   "fixed_opex": 1.25,
+   "opex_vs_screen": 3.3,
+   "y1": {
+    "t": 1,
+    "Gin": 0.64,
+    "sales": 0.6,
+    "rev": 0.62,
+    "opex": 1.3,
+    "ebitda": -0.68
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.76,
+    "sales": 0.71,
+    "rev": 0.76,
+    "opex": 1.35,
+    "ebitda": -0.6
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.65,
+    "sales": 0.61,
+    "rev": 0.69,
+    "opex": 1.46,
+    "ebitda": -0.77
+   },
+   "npv15": -9.41,
+   "npv20": -8.72,
+   "irr": null,
+   "payback": null
+  },
+  "Q1_4km_base_pre": {
+   "Q": 1,
+   "km": 4,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 318,
+    "pkg": 1.18,
+    "pipe_len": 5.2,
+    "pipe": 4.16,
+    "total": 8.62,
+    "screen": 3.56
+   },
+   "fixed_opex": 1.8,
+   "opex_vs_screen": 4.62,
+   "y1": {
+    "t": 1,
+    "Gin": 0.48,
+    "sales": 0.22,
+    "rev": 0.15,
+    "opex": 1.87,
+    "ebitda": -1.71
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.63,
+    "sales": 0.29,
+    "rev": 0.2,
+    "opex": 1.94,
+    "ebitda": -1.74
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.49,
+    "sales": 0.23,
+    "rev": 0.16,
+    "opex": 2.09,
+    "ebitda": -1.94
+   },
+   "npv15": -18.22,
+   "npv20": -16.57,
+   "irr": null,
+   "payback": null
+  },
+  "Q1_4km_base_GSA": {
+   "Q": 1,
+   "km": 4,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 318,
+    "pkg": 1.18,
+    "pipe_len": 5.2,
+    "pipe": 4.16,
+    "total": 8.62,
+    "screen": 3.56
+   },
+   "fixed_opex": 1.8,
+   "opex_vs_screen": 4.62,
+   "y1": {
+    "t": 1,
+    "Gin": 0.48,
+    "sales": 0.45,
+    "rev": 0.3,
+    "opex": 1.93,
+    "ebitda": -1.63
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.63,
+    "sales": 0.59,
+    "rev": 0.4,
+    "opex": 2.03,
+    "ebitda": -1.63
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.49,
+    "sales": 0.46,
+    "rev": 0.31,
+    "opex": 2.16,
+    "ebitda": -1.85
+   },
+   "npv15": -17.82,
+   "npv20": -16.23,
+   "irr": null,
+   "payback": null
+  },
+  "Q1_4km_pess_pre": {
+   "Q": 1,
+   "km": 4,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 392,
+    "pkg": 1.57,
+    "pipe_len": 6.0,
+    "pipe": 7.2,
+    "total": 14.39,
+    "screen": 4.27
+   },
+   "fixed_opex": 2.82,
+   "opex_vs_screen": 6.93,
+   "y1": {
+    "t": 1,
+    "Gin": 0.23,
+    "sales": 0.08,
+    "rev": 0.03,
+    "opex": 2.93,
+    "ebitda": -2.9
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.41,
+    "sales": 0.14,
+    "rev": 0.05,
+    "opex": 3.1,
+    "ebitda": -3.05
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.28,
+    "sales": 0.1,
+    "rev": 0.03,
+    "opex": 3.31,
+    "ebitda": -3.27
+   },
+   "npv15": -27.54,
+   "npv20": -24.37,
+   "irr": null,
+   "payback": null
+  },
+  "Q1_4km_pess_GSA": {
+   "Q": 1,
+   "km": 4,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 392,
+    "pkg": 1.57,
+    "pipe_len": 6.0,
+    "pipe": 7.2,
+    "total": 14.39,
+    "screen": 4.27
+   },
+   "fixed_opex": 2.82,
+   "opex_vs_screen": 6.93,
+   "y1": {
+    "t": 1,
+    "Gin": 0.23,
+    "sales": 0.22,
+    "rev": 0.08,
+    "opex": 2.93,
+    "ebitda": -2.85
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.41,
+    "sales": 0.39,
+    "rev": 0.14,
+    "opex": 3.1,
+    "ebitda": -2.96
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.28,
+    "sales": 0.26,
+    "rev": 0.09,
+    "opex": 3.31,
+    "ebitda": -3.21
+   },
+   "npv15": -27.29,
+   "npv20": -24.18,
+   "irr": null,
+   "payback": null
+  },
+  "Q1_8km_opt_pre": {
+   "Q": 1,
+   "km": 8,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 258,
+    "pkg": 0.89,
+    "pipe_len": 9.6,
+    "pipe": 4.8,
+    "total": 8.09,
+    "screen": 5.03
+   },
+   "fixed_opex": 1.41,
+   "opex_vs_screen": 3.31,
+   "y1": {
+    "t": 1,
+    "Gin": 0.64,
+    "sales": 0.46,
+    "rev": 0.48,
+    "opex": 1.45,
+    "ebitda": -0.97
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.76,
+    "sales": 0.55,
+    "rev": 0.58,
+    "opex": 1.51,
+    "ebitda": -0.92
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.65,
+    "sales": 0.47,
+    "rev": 0.53,
+    "opex": 1.63,
+    "ebitda": -1.1
+   },
+   "npv15": -13.59,
+   "npv20": -12.63,
+   "irr": null,
+   "payback": null
+  },
+  "Q1_8km_opt_GSA": {
+   "Q": 1,
+   "km": 8,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 258,
+    "pkg": 0.89,
+    "pipe_len": 9.6,
+    "pipe": 4.8,
+    "total": 8.09,
+    "screen": 5.03
+   },
+   "fixed_opex": 1.41,
+   "opex_vs_screen": 3.31,
+   "y1": {
+    "t": 1,
+    "Gin": 0.64,
+    "sales": 0.6,
+    "rev": 0.62,
+    "opex": 1.47,
+    "ebitda": -0.84
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.76,
+    "sales": 0.71,
+    "rev": 0.76,
+    "opex": 1.52,
+    "ebitda": -0.77
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.65,
+    "sales": 0.61,
+    "rev": 0.69,
+    "opex": 1.65,
+    "ebitda": -0.96
+   },
+   "npv15": -12.89,
+   "npv20": -12.04,
+   "irr": null,
+   "payback": null
+  },
+  "Q1_8km_base_pre": {
+   "Q": 1,
+   "km": 8,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 318,
+    "pkg": 1.18,
+    "pipe_len": 10.4,
+    "pipe": 8.32,
+    "total": 13.07,
+    "screen": 5.64
+   },
+   "fixed_opex": 2.11,
+   "opex_vs_screen": 4.77,
+   "y1": {
+    "t": 1,
+    "Gin": 0.48,
+    "sales": 0.22,
+    "rev": 0.15,
+    "opex": 2.17,
+    "ebitda": -2.02
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.63,
+    "sales": 0.29,
+    "rev": 0.2,
+    "opex": 2.26,
+    "ebitda": -2.06
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.49,
+    "sales": 0.23,
+    "rev": 0.16,
+    "opex": 2.44,
+    "ebitda": -2.28
+   },
+   "npv15": -24.38,
+   "npv20": -22.43,
+   "irr": null,
+   "payback": null
+  },
+  "Q1_8km_base_GSA": {
+   "Q": 1,
+   "km": 8,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 318,
+    "pkg": 1.18,
+    "pipe_len": 10.4,
+    "pipe": 8.32,
+    "total": 13.07,
+    "screen": 5.64
+   },
+   "fixed_opex": 2.11,
+   "opex_vs_screen": 4.77,
+   "y1": {
+    "t": 1,
+    "Gin": 0.48,
+    "sales": 0.45,
+    "rev": 0.3,
+    "opex": 2.24,
+    "ebitda": -1.94
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.63,
+    "sales": 0.59,
+    "rev": 0.4,
+    "opex": 2.35,
+    "ebitda": -1.95
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.49,
+    "sales": 0.46,
+    "rev": 0.31,
+    "opex": 2.51,
+    "ebitda": -2.2
+   },
+   "npv15": -23.98,
+   "npv20": -22.1,
+   "irr": null,
+   "payback": null
+  },
+  "Q1_8km_pess_pre": {
+   "Q": 1,
+   "km": 8,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 392,
+    "pkg": 1.57,
+    "pipe_len": 12.0,
+    "pipe": 14.4,
+    "total": 22.6,
+    "screen": 6.67
+   },
+   "fixed_opex": 3.45,
+   "opex_vs_screen": 7.4,
+   "y1": {
+    "t": 1,
+    "Gin": 0.23,
+    "sales": 0.08,
+    "rev": 0.03,
+    "opex": 3.57,
+    "ebitda": -3.53
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.41,
+    "sales": 0.14,
+    "rev": 0.05,
+    "opex": 3.75,
+    "ebitda": -3.7
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.28,
+    "sales": 0.1,
+    "rev": 0.03,
+    "opex": 4.02,
+    "ebitda": -3.99
+   },
+   "npv15": -38.28,
+   "npv20": -34.34,
+   "irr": null,
+   "payback": null
+  },
+  "Q1_8km_pess_GSA": {
+   "Q": 1,
+   "km": 8,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 392,
+    "pkg": 1.57,
+    "pipe_len": 12.0,
+    "pipe": 14.4,
+    "total": 22.6,
+    "screen": 6.67
+   },
+   "fixed_opex": 3.45,
+   "opex_vs_screen": 7.4,
+   "y1": {
+    "t": 1,
+    "Gin": 0.23,
+    "sales": 0.22,
+    "rev": 0.08,
+    "opex": 3.57,
+    "ebitda": -3.48
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.41,
+    "sales": 0.39,
+    "rev": 0.14,
+    "opex": 3.75,
+    "ebitda": -3.61
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.28,
+    "sales": 0.26,
+    "rev": 0.09,
+    "opex": 4.02,
+    "ebitda": -3.93
+   },
+   "npv15": -38.04,
+   "npv20": -34.14,
+   "irr": null,
+   "payback": null
+  },
+  "Q1_16km_opt_pre": {
+   "Q": 1,
+   "km": 16,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 258,
+    "pkg": 0.89,
+    "pipe_len": 19.2,
+    "pipe": 9.6,
+    "total": 13.23,
+    "screen": 8.87
+   },
+   "fixed_opex": 1.74,
+   "opex_vs_screen": 3.33,
+   "y1": {
+    "t": 1,
+    "Gin": 0.64,
+    "sales": 0.46,
+    "rev": 0.48,
+    "opex": 1.78,
+    "ebitda": -1.3
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.76,
+    "sales": 0.55,
+    "rev": 0.58,
+    "opex": 1.84,
+    "ebitda": -1.26
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.65,
+    "sales": 0.47,
+    "rev": 0.53,
+    "opex": 2.0,
+    "ebitda": -1.47
+   },
+   "npv15": -20.55,
+   "npv20": -19.28,
+   "irr": null,
+   "payback": null
+  },
+  "Q1_16km_opt_GSA": {
+   "Q": 1,
+   "km": 16,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 258,
+    "pkg": 0.89,
+    "pipe_len": 19.2,
+    "pipe": 9.6,
+    "total": 13.23,
+    "screen": 8.87
+   },
+   "fixed_opex": 1.74,
+   "opex_vs_screen": 3.33,
+   "y1": {
+    "t": 1,
+    "Gin": 0.64,
+    "sales": 0.6,
+    "rev": 0.62,
+    "opex": 1.8,
+    "ebitda": -1.17
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.76,
+    "sales": 0.71,
+    "rev": 0.76,
+    "opex": 1.86,
+    "ebitda": -1.1
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.65,
+    "sales": 0.61,
+    "rev": 0.69,
+    "opex": 2.01,
+    "ebitda": -1.33
+   },
+   "npv15": -19.85,
+   "npv20": -18.69,
+   "irr": null,
+   "payback": null
+  },
+  "Q1_16km_base_pre": {
+   "Q": 1,
+   "km": 16,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 318,
+    "pkg": 1.18,
+    "pipe_len": 20.8,
+    "pipe": 16.64,
+    "total": 21.97,
+    "screen": 9.8
+   },
+   "fixed_opex": 2.72,
+   "opex_vs_screen": 4.99,
+   "y1": {
+    "t": 1,
+    "Gin": 0.48,
+    "sales": 0.22,
+    "rev": 0.15,
+    "opex": 2.79,
+    "ebitda": -2.64
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.63,
+    "sales": 0.29,
+    "rev": 0.2,
+    "opex": 2.89,
+    "ebitda": -2.69
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.49,
+    "sales": 0.23,
+    "rev": 0.16,
+    "opex": 3.13,
+    "ebitda": -2.98
+   },
+   "npv15": -36.71,
+   "npv20": -34.17,
+   "irr": null,
+   "payback": null
+  },
+  "Q1_16km_base_GSA": {
+   "Q": 1,
+   "km": 16,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 318,
+    "pkg": 1.18,
+    "pipe_len": 20.8,
+    "pipe": 16.64,
+    "total": 21.97,
+    "screen": 9.8
+   },
+   "fixed_opex": 2.72,
+   "opex_vs_screen": 4.99,
+   "y1": {
+    "t": 1,
+    "Gin": 0.48,
+    "sales": 0.45,
+    "rev": 0.3,
+    "opex": 2.86,
+    "ebitda": -2.55
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.63,
+    "sales": 0.59,
+    "rev": 0.4,
+    "opex": 2.98,
+    "ebitda": -2.58
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.49,
+    "sales": 0.46,
+    "rev": 0.31,
+    "opex": 3.2,
+    "ebitda": -2.89
+   },
+   "npv15": -36.31,
+   "npv20": -33.84,
+   "irr": null,
+   "payback": null
+  },
+  "Q1_16km_pess_pre": {
+   "Q": 1,
+   "km": 16,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 392,
+    "pkg": 1.57,
+    "pipe_len": 24.0,
+    "pipe": 28.8,
+    "total": 39.01,
+    "screen": 11.47
+   },
+   "fixed_opex": 4.72,
+   "opex_vs_screen": 8.05,
+   "y1": {
+    "t": 1,
+    "Gin": 0.23,
+    "sales": 0.08,
+    "rev": 0.03,
+    "opex": 4.83,
+    "ebitda": -4.8
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.41,
+    "sales": 0.14,
+    "rev": 0.05,
+    "opex": 5.06,
+    "ebitda": -5.01
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.28,
+    "sales": 0.1,
+    "rev": 0.03,
+    "opex": 5.45,
+    "ebitda": -5.41
+   },
+   "npv15": -59.76,
+   "npv20": -54.25,
+   "irr": null,
+   "payback": null
+  },
+  "Q1_16km_pess_GSA": {
+   "Q": 1,
+   "km": 16,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 392,
+    "pkg": 1.57,
+    "pipe_len": 24.0,
+    "pipe": 28.8,
+    "total": 39.01,
+    "screen": 11.47
+   },
+   "fixed_opex": 4.72,
+   "opex_vs_screen": 8.05,
+   "y1": {
+    "t": 1,
+    "Gin": 0.23,
+    "sales": 0.22,
+    "rev": 0.08,
+    "opex": 4.83,
+    "ebitda": -4.75
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 0.41,
+    "sales": 0.39,
+    "rev": 0.14,
+    "opex": 5.06,
+    "ebitda": -4.92
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.28,
+    "sales": 0.26,
+    "rev": 0.09,
+    "opex": 5.45,
+    "ebitda": -5.35
+   },
+   "npv15": -59.52,
+   "npv20": -54.06,
+   "irr": null,
+   "payback": null
+  },
+  "Q5_1km_opt_pre": {
+   "Q": 5,
+   "km": 1,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 1291,
+    "pkg": 2.53,
+    "pipe_len": 1.2,
+    "pipe": 0.6,
+    "total": 7.81,
+    "screen": 3.31
+   },
+   "fixed_opex": 1.49,
+   "opex_vs_screen": 3.37,
+   "y1": {
+    "t": 1,
+    "Gin": 3.2,
+    "sales": 2.3,
+    "rev": 2.4,
+    "opex": 1.72,
+    "ebitda": 0.68
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.8,
+    "sales": 2.73,
+    "rev": 2.91,
+    "opex": 1.8,
+    "ebitda": 1.1
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 3.26,
+    "sales": 2.34,
+    "rev": 2.65,
+    "opex": 1.91,
+    "ebitda": 0.74
+   },
+   "npv15": -4.54,
+   "npv20": -5.04,
+   "irr": -5.0,
+   "payback": null
+  },
+  "Q5_1km_opt_GSA": {
+   "Q": 5,
+   "km": 1,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 1291,
+    "pkg": 2.53,
+    "pipe_len": 1.2,
+    "pipe": 0.6,
+    "total": 7.81,
+    "screen": 3.31
+   },
+   "fixed_opex": 1.49,
+   "opex_vs_screen": 3.37,
+   "y1": {
+    "t": 1,
+    "Gin": 3.2,
+    "sales": 2.99,
+    "rev": 3.12,
+    "opex": 1.79,
+    "ebitda": 1.34
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.8,
+    "sales": 3.55,
+    "rev": 3.78,
+    "opex": 1.88,
+    "ebitda": 1.9
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 3.26,
+    "sales": 3.05,
+    "rev": 3.44,
+    "opex": 1.98,
+    "ebitda": 1.46
+   },
+   "npv15": -2.0,
+   "npv20": -2.94,
+   "irr": 7.8,
+   "payback": 6.4
+  },
+  "Q5_1km_base_pre": {
+   "Q": 5,
+   "km": 1,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1592,
+    "pkg": 3.46,
+    "pipe_len": 1.3,
+    "pipe": 1.04,
+    "total": 11.63,
+    "screen": 4.28
+   },
+   "fixed_opex": 2.16,
+   "opex_vs_screen": 4.62,
+   "y1": {
+    "t": 1,
+    "Gin": 2.39,
+    "sales": 1.12,
+    "rev": 0.76,
+    "opex": 2.5,
+    "ebitda": -1.74
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.14,
+    "sales": 1.47,
+    "rev": 1.0,
+    "opex": 2.67,
+    "ebitda": -1.67
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.44,
+    "sales": 1.14,
+    "rev": 0.78,
+    "opex": 2.78,
+    "ebitda": -2.0
+   },
+   "npv15": -21.62,
+   "npv20": -19.89,
+   "irr": null,
+   "payback": null
+  },
+  "Q5_1km_base_GSA": {
+   "Q": 5,
+   "km": 1,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1592,
+    "pkg": 3.46,
+    "pipe_len": 1.3,
+    "pipe": 1.04,
+    "total": 11.63,
+    "screen": 4.28
+   },
+   "fixed_opex": 2.16,
+   "opex_vs_screen": 4.62,
+   "y1": {
+    "t": 1,
+    "Gin": 2.39,
+    "sales": 2.23,
+    "rev": 1.52,
+    "opex": 2.84,
+    "ebitda": -1.31
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.14,
+    "sales": 2.93,
+    "rev": 2.0,
+    "opex": 3.11,
+    "ebitda": -1.11
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.44,
+    "sales": 2.28,
+    "rev": 1.56,
+    "opex": 3.12,
+    "ebitda": -1.57
+   },
+   "npv15": -19.6,
+   "npv20": -18.22,
+   "irr": null,
+   "payback": null
+  },
+  "Q5_1km_pess_pre": {
+   "Q": 5,
+   "km": 1,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 1960,
+    "pkg": 4.77,
+    "pipe_len": 1.5,
+    "pipe": 1.8,
+    "total": 18.46,
+    "screen": 5.67
+   },
+   "fixed_opex": 3.34,
+   "opex_vs_screen": 6.66,
+   "y1": {
+    "t": 1,
+    "Gin": 1.17,
+    "sales": 0.41,
+    "rev": 0.15,
+    "opex": 3.91,
+    "ebitda": -3.75
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.06,
+    "sales": 0.71,
+    "rev": 0.27,
+    "opex": 4.44,
+    "ebitda": -4.17
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.41,
+    "sales": 0.49,
+    "rev": 0.17,
+    "opex": 4.44,
+    "ebitda": -4.26
+   },
+   "npv15": -35.68,
+   "npv20": -31.6,
+   "irr": null,
+   "payback": null
+  },
+  "Q5_1km_pess_GSA": {
+   "Q": 5,
+   "km": 1,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 1960,
+    "pkg": 4.77,
+    "pipe_len": 1.5,
+    "pipe": 1.8,
+    "total": 18.46,
+    "screen": 5.67
+   },
+   "fixed_opex": 3.34,
+   "opex_vs_screen": 6.66,
+   "y1": {
+    "t": 1,
+    "Gin": 1.17,
+    "sales": 1.1,
+    "rev": 0.41,
+    "opex": 3.91,
+    "ebitda": -3.5
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.06,
+    "sales": 1.93,
+    "rev": 0.72,
+    "opex": 4.44,
+    "ebitda": -3.72
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.41,
+    "sales": 1.32,
+    "rev": 0.47,
+    "opex": 4.44,
+    "ebitda": -3.97
+   },
+   "npv15": -34.48,
+   "npv20": -30.64,
+   "irr": null,
+   "payback": null
+  },
+  "Q5_4km_opt_pre": {
+   "Q": 5,
+   "km": 4,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 1291,
+    "pkg": 2.53,
+    "pipe_len": 4.8,
+    "pipe": 2.4,
+    "total": 9.74,
+    "screen": 4.75
+   },
+   "fixed_opex": 1.62,
+   "opex_vs_screen": 3.38,
+   "y1": {
+    "t": 1,
+    "Gin": 3.2,
+    "sales": 2.3,
+    "rev": 2.4,
+    "opex": 1.84,
+    "ebitda": 0.56
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.8,
+    "sales": 2.73,
+    "rev": 2.91,
+    "opex": 1.93,
+    "ebitda": 0.98
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 3.26,
+    "sales": 2.34,
+    "rev": 2.65,
+    "opex": 2.05,
+    "ebitda": 0.6
+   },
+   "npv15": -7.01,
+   "npv20": -7.41,
+   "irr": -13.3,
+   "payback": null
+  },
+  "Q5_4km_opt_GSA": {
+   "Q": 5,
+   "km": 4,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 1291,
+    "pkg": 2.53,
+    "pipe_len": 4.8,
+    "pipe": 2.4,
+    "total": 9.74,
+    "screen": 4.75
+   },
+   "fixed_opex": 1.62,
+   "opex_vs_screen": 3.38,
+   "y1": {
+    "t": 1,
+    "Gin": 3.2,
+    "sales": 2.99,
+    "rev": 3.12,
+    "opex": 1.91,
+    "ebitda": 1.21
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.8,
+    "sales": 3.55,
+    "rev": 3.78,
+    "opex": 2.01,
+    "ebitda": 1.77
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 3.26,
+    "sales": 3.05,
+    "rev": 3.44,
+    "opex": 2.12,
+    "ebitda": 1.32
+   },
+   "npv15": -4.11,
+   "npv20": -5.01,
+   "irr": 2.2,
+   "payback": 8.8
+  },
+  "Q5_4km_base_pre": {
+   "Q": 5,
+   "km": 4,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1592,
+    "pkg": 3.46,
+    "pipe_len": 5.2,
+    "pipe": 4.16,
+    "total": 14.96,
+    "screen": 5.84
+   },
+   "fixed_opex": 2.39,
+   "opex_vs_screen": 4.72,
+   "y1": {
+    "t": 1,
+    "Gin": 2.39,
+    "sales": 1.12,
+    "rev": 0.76,
+    "opex": 2.73,
+    "ebitda": -1.97
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.14,
+    "sales": 1.47,
+    "rev": 1.0,
+    "opex": 2.91,
+    "ebitda": -1.91
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.44,
+    "sales": 1.14,
+    "rev": 0.78,
+    "opex": 3.03,
+    "ebitda": -2.26
+   },
+   "npv15": -26.23,
+   "npv20": -24.28,
+   "irr": null,
+   "payback": null
+  },
+  "Q5_4km_base_GSA": {
+   "Q": 5,
+   "km": 4,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1592,
+    "pkg": 3.46,
+    "pipe_len": 5.2,
+    "pipe": 4.16,
+    "total": 14.96,
+    "screen": 5.84
+   },
+   "fixed_opex": 2.39,
+   "opex_vs_screen": 4.72,
+   "y1": {
+    "t": 1,
+    "Gin": 2.39,
+    "sales": 2.23,
+    "rev": 1.52,
+    "opex": 3.07,
+    "ebitda": -1.54
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.14,
+    "sales": 2.93,
+    "rev": 2.0,
+    "opex": 3.35,
+    "ebitda": -1.35
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.44,
+    "sales": 2.28,
+    "rev": 1.56,
+    "opex": 3.38,
+    "ebitda": -1.82
+   },
+   "npv15": -24.21,
+   "npv20": -22.62,
+   "irr": null,
+   "payback": null
+  },
+  "Q5_4km_pess_pre": {
+   "Q": 5,
+   "km": 4,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 1960,
+    "pkg": 4.77,
+    "pipe_len": 6.0,
+    "pipe": 7.2,
+    "total": 24.62,
+    "screen": 7.47
+   },
+   "fixed_opex": 3.82,
+   "opex_vs_screen": 6.98,
+   "y1": {
+    "t": 1,
+    "Gin": 1.17,
+    "sales": 0.41,
+    "rev": 0.15,
+    "opex": 4.38,
+    "ebitda": -4.23
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.06,
+    "sales": 0.71,
+    "rev": 0.27,
+    "opex": 4.93,
+    "ebitda": -4.66
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.41,
+    "sales": 0.49,
+    "rev": 0.17,
+    "opex": 4.98,
+    "ebitda": -4.8
+   },
+   "npv15": -43.75,
+   "npv20": -39.08,
+   "irr": null,
+   "payback": null
+  },
+  "Q5_4km_pess_GSA": {
+   "Q": 5,
+   "km": 4,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 1960,
+    "pkg": 4.77,
+    "pipe_len": 6.0,
+    "pipe": 7.2,
+    "total": 24.62,
+    "screen": 7.47
+   },
+   "fixed_opex": 3.82,
+   "opex_vs_screen": 6.98,
+   "y1": {
+    "t": 1,
+    "Gin": 1.17,
+    "sales": 1.1,
+    "rev": 0.41,
+    "opex": 4.38,
+    "ebitda": -3.97
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.06,
+    "sales": 1.93,
+    "rev": 0.72,
+    "opex": 4.93,
+    "ebitda": -4.21
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.41,
+    "sales": 1.32,
+    "rev": 0.47,
+    "opex": 4.98,
+    "ebitda": -4.5
+   },
+   "npv15": -42.54,
+   "npv20": -38.12,
+   "irr": null,
+   "payback": null
+  },
+  "Q5_8km_opt_pre": {
+   "Q": 5,
+   "km": 8,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 1291,
+    "pkg": 2.53,
+    "pipe_len": 9.6,
+    "pipe": 4.8,
+    "total": 12.3,
+    "screen": 6.67
+   },
+   "fixed_opex": 1.78,
+   "opex_vs_screen": 3.38,
+   "y1": {
+    "t": 1,
+    "Gin": 3.2,
+    "sales": 2.3,
+    "rev": 2.4,
+    "opex": 2.0,
+    "ebitda": 0.4
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.8,
+    "sales": 2.73,
+    "rev": 2.91,
+    "opex": 2.1,
+    "ebitda": 0.81
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 3.26,
+    "sales": 2.34,
+    "rev": 2.65,
+    "opex": 2.23,
+    "ebitda": 0.42
+   },
+   "npv15": -10.48,
+   "npv20": -10.72,
+   "irr": -29.2,
+   "payback": null
+  },
+  "Q5_8km_opt_GSA": {
+   "Q": 5,
+   "km": 8,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 1291,
+    "pkg": 2.53,
+    "pipe_len": 9.6,
+    "pipe": 4.8,
+    "total": 12.3,
+    "screen": 6.67
+   },
+   "fixed_opex": 1.78,
+   "opex_vs_screen": 3.38,
+   "y1": {
+    "t": 1,
+    "Gin": 3.2,
+    "sales": 2.99,
+    "rev": 3.12,
+    "opex": 2.07,
+    "ebitda": 1.05
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.8,
+    "sales": 3.55,
+    "rev": 3.78,
+    "opex": 2.18,
+    "ebitda": 1.6
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 3.26,
+    "sales": 3.05,
+    "rev": 3.44,
+    "opex": 2.3,
+    "ebitda": 1.14
+   },
+   "npv15": -7.12,
+   "npv20": -7.93,
+   "irr": -4.4,
+   "payback": null
+  },
+  "Q5_8km_base_pre": {
+   "Q": 5,
+   "km": 8,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1592,
+    "pkg": 3.46,
+    "pipe_len": 10.4,
+    "pipe": 8.32,
+    "total": 19.41,
+    "screen": 7.92
+   },
+   "fixed_opex": 2.7,
+   "opex_vs_screen": 4.83,
+   "y1": {
+    "t": 1,
+    "Gin": 2.39,
+    "sales": 1.12,
+    "rev": 0.76,
+    "opex": 3.03,
+    "ebitda": -2.27
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.14,
+    "sales": 1.47,
+    "rev": 1.0,
+    "opex": 3.22,
+    "ebitda": -2.22
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.44,
+    "sales": 1.14,
+    "rev": 0.78,
+    "opex": 3.38,
+    "ebitda": -2.6
+   },
+   "npv15": -32.39,
+   "npv20": -30.15,
+   "irr": null,
+   "payback": null
+  },
+  "Q5_8km_base_GSA": {
+   "Q": 5,
+   "km": 8,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1592,
+    "pkg": 3.46,
+    "pipe_len": 10.4,
+    "pipe": 8.32,
+    "total": 19.41,
+    "screen": 7.92
+   },
+   "fixed_opex": 2.7,
+   "opex_vs_screen": 4.83,
+   "y1": {
+    "t": 1,
+    "Gin": 2.39,
+    "sales": 2.23,
+    "rev": 1.52,
+    "opex": 3.37,
+    "ebitda": -1.85
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.14,
+    "sales": 2.93,
+    "rev": 2.0,
+    "opex": 3.67,
+    "ebitda": -1.67
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.44,
+    "sales": 2.28,
+    "rev": 1.56,
+    "opex": 3.73,
+    "ebitda": -2.17
+   },
+   "npv15": -30.38,
+   "npv20": -28.48,
+   "irr": null,
+   "payback": null
+  },
+  "Q5_8km_pess_pre": {
+   "Q": 5,
+   "km": 8,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 1960,
+    "pkg": 4.77,
+    "pipe_len": 12.0,
+    "pipe": 14.4,
+    "total": 32.82,
+    "screen": 9.87
+   },
+   "fixed_opex": 4.45,
+   "opex_vs_screen": 7.34,
+   "y1": {
+    "t": 1,
+    "Gin": 1.17,
+    "sales": 0.41,
+    "rev": 0.15,
+    "opex": 5.02,
+    "ebitda": -4.86
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.06,
+    "sales": 0.71,
+    "rev": 0.27,
+    "opex": 5.58,
+    "ebitda": -5.32
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.41,
+    "sales": 0.49,
+    "rev": 0.17,
+    "opex": 5.69,
+    "ebitda": -5.51
+   },
+   "npv15": -54.48,
+   "npv20": -49.03,
+   "irr": null,
+   "payback": null
+  },
+  "Q5_8km_pess_GSA": {
+   "Q": 5,
+   "km": 8,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 1960,
+    "pkg": 4.77,
+    "pipe_len": 12.0,
+    "pipe": 14.4,
+    "total": 32.82,
+    "screen": 9.87
+   },
+   "fixed_opex": 4.45,
+   "opex_vs_screen": 7.34,
+   "y1": {
+    "t": 1,
+    "Gin": 1.17,
+    "sales": 1.1,
+    "rev": 0.41,
+    "opex": 5.02,
+    "ebitda": -4.61
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.06,
+    "sales": 1.93,
+    "rev": 0.72,
+    "opex": 5.58,
+    "ebitda": -4.86
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.41,
+    "sales": 1.32,
+    "rev": 0.47,
+    "opex": 5.69,
+    "ebitda": -5.22
+   },
+   "npv15": -53.27,
+   "npv20": -48.07,
+   "irr": null,
+   "payback": null
+  },
+  "Q5_16km_opt_pre": {
+   "Q": 5,
+   "km": 16,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 1291,
+    "pkg": 2.53,
+    "pipe_len": 19.2,
+    "pipe": 9.6,
+    "total": 17.44,
+    "screen": 10.51
+   },
+   "fixed_opex": 2.11,
+   "opex_vs_screen": 3.38,
+   "y1": {
+    "t": 1,
+    "Gin": 3.2,
+    "sales": 2.3,
+    "rev": 2.4,
+    "opex": 2.33,
+    "ebitda": 0.07
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.8,
+    "sales": 2.73,
+    "rev": 2.91,
+    "opex": 2.44,
+    "ebitda": 0.47
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 3.26,
+    "sales": 2.34,
+    "rev": 2.65,
+    "opex": 2.6,
+    "ebitda": 0.05
+   },
+   "npv15": -17.44,
+   "npv20": -17.37,
+   "irr": null,
+   "payback": null
+  },
+  "Q5_16km_opt_GSA": {
+   "Q": 5,
+   "km": 16,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 1291,
+    "pkg": 2.53,
+    "pipe_len": 19.2,
+    "pipe": 9.6,
+    "total": 17.44,
+    "screen": 10.51
+   },
+   "fixed_opex": 2.11,
+   "opex_vs_screen": 3.38,
+   "y1": {
+    "t": 1,
+    "Gin": 3.2,
+    "sales": 2.99,
+    "rev": 3.12,
+    "opex": 2.4,
+    "ebitda": 0.72
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.8,
+    "sales": 3.55,
+    "rev": 3.78,
+    "opex": 2.52,
+    "ebitda": 1.26
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 3.26,
+    "sales": 3.05,
+    "rev": 3.44,
+    "opex": 2.67,
+    "ebitda": 0.77
+   },
+   "npv15": -13.92,
+   "npv20": -14.43,
+   "irr": -18.4,
+   "payback": null
+  },
+  "Q5_16km_base_pre": {
+   "Q": 5,
+   "km": 16,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1592,
+    "pkg": 3.46,
+    "pipe_len": 20.8,
+    "pipe": 16.64,
+    "total": 28.32,
+    "screen": 12.08
+   },
+   "fixed_opex": 3.31,
+   "opex_vs_screen": 5.0,
+   "y1": {
+    "t": 1,
+    "Gin": 2.39,
+    "sales": 1.12,
+    "rev": 0.76,
+    "opex": 3.65,
+    "ebitda": -2.89
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.14,
+    "sales": 1.47,
+    "rev": 1.0,
+    "opex": 3.86,
+    "ebitda": -2.86
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.44,
+    "sales": 1.14,
+    "rev": 0.78,
+    "opex": 4.07,
+    "ebitda": -3.3
+   },
+   "npv15": -44.73,
+   "npv20": -41.9,
+   "irr": null,
+   "payback": null
+  },
+  "Q5_16km_base_GSA": {
+   "Q": 5,
+   "km": 16,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1592,
+    "pkg": 3.46,
+    "pipe_len": 20.8,
+    "pipe": 16.64,
+    "total": 28.32,
+    "screen": 12.08
+   },
+   "fixed_opex": 3.31,
+   "opex_vs_screen": 5.0,
+   "y1": {
+    "t": 1,
+    "Gin": 2.39,
+    "sales": 2.23,
+    "rev": 1.52,
+    "opex": 3.99,
+    "ebitda": -2.47
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.14,
+    "sales": 2.93,
+    "rev": 2.0,
+    "opex": 4.3,
+    "ebitda": -2.3
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.44,
+    "sales": 2.28,
+    "rev": 1.56,
+    "opex": 4.42,
+    "ebitda": -2.86
+   },
+   "npv15": -42.72,
+   "npv20": -40.23,
+   "irr": null,
+   "payback": null
+  },
+  "Q5_16km_pess_pre": {
+   "Q": 5,
+   "km": 16,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 1960,
+    "pkg": 4.77,
+    "pipe_len": 24.0,
+    "pipe": 28.8,
+    "total": 49.24,
+    "screen": 14.67
+   },
+   "fixed_opex": 5.72,
+   "opex_vs_screen": 7.87,
+   "y1": {
+    "t": 1,
+    "Gin": 1.17,
+    "sales": 0.41,
+    "rev": 0.15,
+    "opex": 6.29,
+    "ebitda": -6.13
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.06,
+    "sales": 0.71,
+    "rev": 0.27,
+    "opex": 6.89,
+    "ebitda": -6.62
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.41,
+    "sales": 0.49,
+    "rev": 0.17,
+    "opex": 7.12,
+    "ebitda": -6.94
+   },
+   "npv15": -75.97,
+   "npv20": -68.95,
+   "irr": null,
+   "payback": null
+  },
+  "Q5_16km_pess_GSA": {
+   "Q": 5,
+   "km": 16,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 1960,
+    "pkg": 4.77,
+    "pipe_len": 24.0,
+    "pipe": 28.8,
+    "total": 49.24,
+    "screen": 14.67
+   },
+   "fixed_opex": 5.72,
+   "opex_vs_screen": 7.87,
+   "y1": {
+    "t": 1,
+    "Gin": 1.17,
+    "sales": 1.1,
+    "rev": 0.41,
+    "opex": 6.29,
+    "ebitda": -5.87
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.06,
+    "sales": 1.93,
+    "rev": 0.72,
+    "opex": 6.89,
+    "ebitda": -6.17
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.41,
+    "sales": 1.32,
+    "rev": 0.47,
+    "opex": 7.12,
+    "ebitda": -6.65
+   },
+   "npv15": -74.77,
+   "npv20": -67.99,
+   "irr": null,
+   "payback": null
+  },
+  "Q15_1km_opt_pre": {
+   "Q": 15,
+   "km": 1,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 3873,
+    "pkg": 6.15,
+    "pipe_len": 1.2,
+    "pipe": 0.69,
+    "total": 17.2,
+    "screen": 6.93
+   },
+   "fixed_opex": 2.1,
+   "opex_vs_screen": 3.53,
+   "y1": {
+    "t": 1,
+    "Gin": 9.6,
+    "sales": 6.9,
+    "rev": 7.2,
+    "opex": 2.77,
+    "ebitda": 4.43
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 11.4,
+    "sales": 8.2,
+    "rev": 8.73,
+    "opex": 2.96,
+    "ebitda": 5.77
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 9.77,
+    "sales": 7.03,
+    "rev": 7.94,
+    "opex": 3.04,
+    "ebitda": 4.89
+   },
+   "npv15": 1.04,
+   "npv20": -1.98,
+   "irr": 16.6,
+   "payback": 4.5
+  },
+  "Q15_1km_opt_GSA": {
+   "Q": 15,
+   "km": 1,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 3873,
+    "pkg": 6.15,
+    "pipe_len": 1.2,
+    "pipe": 0.69,
+    "total": 17.2,
+    "screen": 6.93
+   },
+   "fixed_opex": 2.1,
+   "opex_vs_screen": 3.53,
+   "y1": {
+    "t": 1,
+    "Gin": 9.6,
+    "sales": 8.97,
+    "rev": 9.37,
+    "opex": 2.97,
+    "ebitda": 6.39
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 11.4,
+    "sales": 10.66,
+    "rev": 11.34,
+    "opex": 3.2,
+    "ebitda": 8.15
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 9.77,
+    "sales": 9.14,
+    "rev": 10.32,
+    "opex": 3.25,
+    "ebitda": 7.07
+   },
+   "npv15": 7.94,
+   "npv20": 3.76,
+   "irr": 26.1,
+   "payback": 3.4
+  },
+  "Q15_1km_base_pre": {
+   "Q": 15,
+   "km": 1,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 4776,
+    "pkg": 8.6,
+    "pipe_len": 1.3,
+    "pipe": 1.2,
+    "total": 26.09,
+    "screen": 9.42
+   },
+   "fixed_opex": 3.21,
+   "opex_vs_screen": 4.9,
+   "y1": {
+    "t": 1,
+    "Gin": 7.16,
+    "sales": 3.35,
+    "rev": 2.28,
+    "opex": 4.23,
+    "ebitda": -1.95
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 9.41,
+    "sales": 4.4,
+    "rev": 3.0,
+    "opex": 4.65,
+    "ebitda": -1.65
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 7.33,
+    "sales": 3.42,
+    "rev": 2.34,
+    "opex": 4.66,
+    "ebitda": -2.32
+   },
+   "npv15": -37.93,
+   "npv20": -35.88,
+   "irr": null,
+   "payback": null
+  },
+  "Q15_1km_base_GSA": {
+   "Q": 15,
+   "km": 1,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 4776,
+    "pkg": 8.6,
+    "pipe_len": 1.3,
+    "pipe": 1.2,
+    "total": 26.09,
+    "screen": 9.42
+   },
+   "fixed_opex": 3.21,
+   "opex_vs_screen": 4.9,
+   "y1": {
+    "t": 1,
+    "Gin": 7.16,
+    "sales": 6.69,
+    "rev": 4.57,
+    "opex": 5.25,
+    "ebitda": -0.69
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 9.41,
+    "sales": 8.8,
+    "rev": 6.0,
+    "opex": 5.99,
+    "ebitda": 0.01
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 7.33,
+    "sales": 6.85,
+    "rev": 4.67,
+    "opex": 5.7,
+    "ebitda": -1.03
+   },
+   "npv15": -31.88,
+   "npv20": -30.87,
+   "irr": null,
+   "payback": null
+  },
+  "Q15_1km_pess_pre": {
+   "Q": 15,
+   "km": 1,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 5881,
+    "pkg": 12.06,
+    "pipe_len": 1.5,
+    "pipe": 2.07,
+    "total": 42.02,
+    "screen": 12.96
+   },
+   "fixed_opex": 5.28,
+   "opex_vs_screen": 7.09,
+   "y1": {
+    "t": 1,
+    "Gin": 3.52,
+    "sales": 1.22,
+    "rev": 0.46,
+    "opex": 6.97,
+    "ebitda": -6.51
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 6.19,
+    "sales": 2.14,
+    "rev": 0.8,
+    "opex": 8.42,
+    "ebitda": -7.62
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 4.22,
+    "sales": 1.46,
+    "rev": 0.52,
+    "opex": 7.97,
+    "ebitda": -7.45
+   },
+   "npv15": -71.57,
+   "npv20": -64.33,
+   "irr": null,
+   "payback": null
+  },
+  "Q15_1km_pess_GSA": {
+   "Q": 15,
+   "km": 1,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 5881,
+    "pkg": 12.06,
+    "pipe_len": 1.5,
+    "pipe": 2.07,
+    "total": 42.02,
+    "screen": 12.96
+   },
+   "fixed_opex": 5.28,
+   "opex_vs_screen": 7.09,
+   "y1": {
+    "t": 1,
+    "Gin": 3.52,
+    "sales": 3.29,
+    "rev": 1.24,
+    "opex": 6.97,
+    "ebitda": -5.74
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 6.19,
+    "sales": 5.79,
+    "rev": 2.15,
+    "opex": 8.42,
+    "ebitda": -6.27
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 4.22,
+    "sales": 3.95,
+    "rev": 1.42,
+    "opex": 7.97,
+    "ebitda": -6.56
+   },
+   "npv15": -67.96,
+   "npv20": -61.45,
+   "irr": null,
+   "payback": null
+  },
+  "Q15_4km_opt_pre": {
+   "Q": 15,
+   "km": 4,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 3873,
+    "pkg": 6.15,
+    "pipe_len": 4.8,
+    "pipe": 2.76,
+    "total": 19.41,
+    "screen": 8.37
+   },
+   "fixed_opex": 2.23,
+   "opex_vs_screen": 3.55,
+   "y1": {
+    "t": 1,
+    "Gin": 9.6,
+    "sales": 6.9,
+    "rev": 7.2,
+    "opex": 2.91,
+    "ebitda": 4.3
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 11.4,
+    "sales": 8.2,
+    "rev": 8.73,
+    "opex": 3.1,
+    "ebitda": 5.63
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 9.77,
+    "sales": 7.03,
+    "rev": 7.94,
+    "opex": 3.2,
+    "ebitda": 4.74
+   },
+   "npv15": -1.29,
+   "npv20": -4.29,
+   "irr": 13.2,
+   "payback": 5.2
+  },
+  "Q15_4km_opt_GSA": {
+   "Q": 15,
+   "km": 4,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 3873,
+    "pkg": 6.15,
+    "pipe_len": 4.8,
+    "pipe": 2.76,
+    "total": 19.41,
+    "screen": 8.37
+   },
+   "fixed_opex": 2.23,
+   "opex_vs_screen": 3.55,
+   "y1": {
+    "t": 1,
+    "Gin": 9.6,
+    "sales": 8.97,
+    "rev": 9.37,
+    "opex": 3.11,
+    "ebitda": 6.26
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 11.4,
+    "sales": 10.66,
+    "rev": 11.34,
+    "opex": 3.34,
+    "ebitda": 8.01
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 9.77,
+    "sales": 9.14,
+    "rev": 10.32,
+    "opex": 3.4,
+    "ebitda": 6.92
+   },
+   "npv15": 5.61,
+   "npv20": 1.45,
+   "irr": 22.1,
+   "payback": 3.8
+  },
+  "Q15_4km_base_pre": {
+   "Q": 15,
+   "km": 4,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 4776,
+    "pkg": 8.6,
+    "pipe_len": 5.2,
+    "pipe": 4.78,
+    "total": 29.93,
+    "screen": 10.98
+   },
+   "fixed_opex": 3.47,
+   "opex_vs_screen": 5.0,
+   "y1": {
+    "t": 1,
+    "Gin": 7.16,
+    "sales": 3.35,
+    "rev": 2.28,
+    "opex": 4.49,
+    "ebitda": -2.21
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 9.41,
+    "sales": 4.4,
+    "rev": 3.0,
+    "opex": 4.92,
+    "ebitda": -1.92
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 7.33,
+    "sales": 3.42,
+    "rev": 2.34,
+    "opex": 4.95,
+    "ebitda": -2.62
+   },
+   "npv15": -43.21,
+   "npv20": -40.92,
+   "irr": null,
+   "payback": null
+  },
+  "Q15_4km_base_GSA": {
+   "Q": 15,
+   "km": 4,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 4776,
+    "pkg": 8.6,
+    "pipe_len": 5.2,
+    "pipe": 4.78,
+    "total": 29.93,
+    "screen": 10.98
+   },
+   "fixed_opex": 3.47,
+   "opex_vs_screen": 5.0,
+   "y1": {
+    "t": 1,
+    "Gin": 7.16,
+    "sales": 6.69,
+    "rev": 4.57,
+    "opex": 5.51,
+    "ebitda": -0.95
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 9.41,
+    "sales": 8.8,
+    "rev": 6.0,
+    "opex": 6.26,
+    "ebitda": -0.26
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 7.33,
+    "sales": 6.85,
+    "rev": 4.67,
+    "opex": 5.99,
+    "ebitda": -1.32
+   },
+   "npv15": -37.17,
+   "npv20": -35.91,
+   "irr": null,
+   "payback": null
+  },
+  "Q15_4km_pess_pre": {
+   "Q": 15,
+   "km": 4,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 5881,
+    "pkg": 12.06,
+    "pipe_len": 6.0,
+    "pipe": 8.28,
+    "total": 49.1,
+    "screen": 14.76
+   },
+   "fixed_opex": 5.82,
+   "opex_vs_screen": 7.37,
+   "y1": {
+    "t": 1,
+    "Gin": 3.52,
+    "sales": 1.22,
+    "rev": 0.46,
+    "opex": 7.51,
+    "ebitda": -7.05
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 6.19,
+    "sales": 2.14,
+    "rev": 0.8,
+    "opex": 8.98,
+    "ebitda": -8.18
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 4.22,
+    "sales": 1.46,
+    "rev": 0.52,
+    "opex": 8.58,
+    "ebitda": -8.06
+   },
+   "npv15": -80.81,
+   "npv20": -72.89,
+   "irr": null,
+   "payback": null
+  },
+  "Q15_4km_pess_GSA": {
+   "Q": 15,
+   "km": 4,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 5881,
+    "pkg": 12.06,
+    "pipe_len": 6.0,
+    "pipe": 8.28,
+    "total": 49.1,
+    "screen": 14.76
+   },
+   "fixed_opex": 5.82,
+   "opex_vs_screen": 7.37,
+   "y1": {
+    "t": 1,
+    "Gin": 3.52,
+    "sales": 3.29,
+    "rev": 1.24,
+    "opex": 7.51,
+    "ebitda": -6.28
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 6.19,
+    "sales": 5.79,
+    "rev": 2.15,
+    "opex": 8.98,
+    "ebitda": -6.82
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 4.22,
+    "sales": 3.95,
+    "rev": 1.42,
+    "opex": 8.58,
+    "ebitda": -7.17
+   },
+   "npv15": -77.19,
+   "npv20": -70.01,
+   "irr": null,
+   "payback": null
+  },
+  "Q15_8km_opt_pre": {
+   "Q": 15,
+   "km": 8,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 3873,
+    "pkg": 6.15,
+    "pipe_len": 9.6,
+    "pipe": 5.52,
+    "total": 22.37,
+    "screen": 10.29
+   },
+   "fixed_opex": 2.41,
+   "opex_vs_screen": 3.56,
+   "y1": {
+    "t": 1,
+    "Gin": 9.6,
+    "sales": 6.9,
+    "rev": 7.2,
+    "opex": 3.09,
+    "ebitda": 4.12
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 11.4,
+    "sales": 8.2,
+    "rev": 8.73,
+    "opex": 3.28,
+    "ebitda": 5.44
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 9.77,
+    "sales": 7.03,
+    "rev": 7.94,
+    "opex": 3.4,
+    "ebitda": 4.54
+   },
+   "npv15": -4.41,
+   "npv20": -7.38,
+   "irr": 9.6,
+   "payback": 6.0
+  },
+  "Q15_8km_opt_GSA": {
+   "Q": 15,
+   "km": 8,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 3873,
+    "pkg": 6.15,
+    "pipe_len": 9.6,
+    "pipe": 5.52,
+    "total": 22.37,
+    "screen": 10.29
+   },
+   "fixed_opex": 2.41,
+   "opex_vs_screen": 3.56,
+   "y1": {
+    "t": 1,
+    "Gin": 9.6,
+    "sales": 8.97,
+    "rev": 9.37,
+    "opex": 3.29,
+    "ebitda": 6.08
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 11.4,
+    "sales": 10.66,
+    "rev": 11.34,
+    "opex": 3.52,
+    "ebitda": 7.82
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 9.77,
+    "sales": 9.14,
+    "rev": 10.32,
+    "opex": 3.61,
+    "ebitda": 6.71
+   },
+   "npv15": 2.49,
+   "npv20": -1.64,
+   "irr": 17.8,
+   "payback": 4.4
+  },
+  "Q15_8km_base_pre": {
+   "Q": 15,
+   "km": 8,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 4776,
+    "pkg": 8.6,
+    "pipe_len": 10.4,
+    "pipe": 9.57,
+    "total": 35.04,
+    "screen": 13.06
+   },
+   "fixed_opex": 3.82,
+   "opex_vs_screen": 5.12,
+   "y1": {
+    "t": 1,
+    "Gin": 7.16,
+    "sales": 3.35,
+    "rev": 2.28,
+    "opex": 4.84,
+    "ebitda": -2.56
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 9.41,
+    "sales": 4.4,
+    "rev": 3.0,
+    "opex": 5.27,
+    "ebitda": -2.27
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 7.33,
+    "sales": 3.42,
+    "rev": 2.34,
+    "opex": 5.34,
+    "ebitda": -3.0
+   },
+   "npv15": -50.25,
+   "npv20": -47.62,
+   "irr": null,
+   "payback": null
+  },
+  "Q15_8km_base_GSA": {
+   "Q": 15,
+   "km": 8,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 4776,
+    "pkg": 8.6,
+    "pipe_len": 10.4,
+    "pipe": 9.57,
+    "total": 35.04,
+    "screen": 13.06
+   },
+   "fixed_opex": 3.82,
+   "opex_vs_screen": 5.12,
+   "y1": {
+    "t": 1,
+    "Gin": 7.16,
+    "sales": 6.69,
+    "rev": 4.57,
+    "opex": 5.86,
+    "ebitda": -1.29
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 9.41,
+    "sales": 8.8,
+    "rev": 6.0,
+    "opex": 6.61,
+    "ebitda": -0.61
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 7.33,
+    "sales": 6.85,
+    "rev": 4.67,
+    "opex": 6.38,
+    "ebitda": -1.71
+   },
+   "npv15": -44.2,
+   "npv20": -42.61,
+   "irr": null,
+   "payback": null
+  },
+  "Q15_8km_pess_pre": {
+   "Q": 15,
+   "km": 8,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 5881,
+    "pkg": 12.06,
+    "pipe_len": 12.0,
+    "pipe": 16.56,
+    "total": 58.54,
+    "screen": 17.16
+   },
+   "fixed_opex": 6.54,
+   "opex_vs_screen": 7.7,
+   "y1": {
+    "t": 1,
+    "Gin": 3.52,
+    "sales": 1.22,
+    "rev": 0.46,
+    "opex": 8.23,
+    "ebitda": -7.78
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 6.19,
+    "sales": 2.14,
+    "rev": 0.8,
+    "opex": 9.72,
+    "ebitda": -8.92
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 4.22,
+    "sales": 1.46,
+    "rev": 0.52,
+    "opex": 9.39,
+    "ebitda": -8.87
+   },
+   "npv15": -93.12,
+   "npv20": -84.31,
+   "irr": null,
+   "payback": null
+  },
+  "Q15_8km_pess_GSA": {
+   "Q": 15,
+   "km": 8,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 5881,
+    "pkg": 12.06,
+    "pipe_len": 12.0,
+    "pipe": 16.56,
+    "total": 58.54,
+    "screen": 17.16
+   },
+   "fixed_opex": 6.54,
+   "opex_vs_screen": 7.7,
+   "y1": {
+    "t": 1,
+    "Gin": 3.52,
+    "sales": 3.29,
+    "rev": 1.24,
+    "opex": 8.23,
+    "ebitda": -7.0
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 6.19,
+    "sales": 5.79,
+    "rev": 2.15,
+    "opex": 9.72,
+    "ebitda": -7.57
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 4.22,
+    "sales": 3.95,
+    "rev": 1.42,
+    "opex": 9.39,
+    "ebitda": -7.98
+   },
+   "npv15": -89.5,
+   "npv20": -81.43,
+   "irr": null,
+   "payback": null
+  },
+  "Q15_16km_opt_pre": {
+   "Q": 15,
+   "km": 16,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 3873,
+    "pkg": 6.15,
+    "pipe_len": 19.2,
+    "pipe": 11.04,
+    "total": 28.27,
+    "screen": 14.13
+   },
+   "fixed_opex": 2.77,
+   "opex_vs_screen": 3.59,
+   "y1": {
+    "t": 1,
+    "Gin": 9.6,
+    "sales": 6.9,
+    "rev": 7.2,
+    "opex": 3.45,
+    "ebitda": 3.76
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 11.4,
+    "sales": 8.2,
+    "rev": 8.73,
+    "opex": 3.66,
+    "ebitda": 5.07
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 9.77,
+    "sales": 7.03,
+    "rev": 7.94,
+    "opex": 3.81,
+    "ebitda": 4.13
+   },
+   "npv15": -10.65,
+   "npv20": -13.55,
+   "irr": 4.0,
+   "payback": 8.0
+  },
+  "Q15_16km_opt_GSA": {
+   "Q": 15,
+   "km": 16,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 3873,
+    "pkg": 6.15,
+    "pipe_len": 19.2,
+    "pipe": 11.04,
+    "total": 28.27,
+    "screen": 14.13
+   },
+   "fixed_opex": 2.77,
+   "opex_vs_screen": 3.59,
+   "y1": {
+    "t": 1,
+    "Gin": 9.6,
+    "sales": 8.97,
+    "rev": 9.37,
+    "opex": 3.65,
+    "ebitda": 5.72
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 11.4,
+    "sales": 10.66,
+    "rev": 11.34,
+    "opex": 3.9,
+    "ebitda": 7.45
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 9.77,
+    "sales": 9.14,
+    "rev": 10.32,
+    "opex": 4.01,
+    "ebitda": 6.31
+   },
+   "npv15": -3.73,
+   "npv20": -7.79,
+   "irr": 11.4,
+   "payback": 5.6
+  },
+  "Q15_16km_base_pre": {
+   "Q": 15,
+   "km": 16,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 4776,
+    "pkg": 8.6,
+    "pipe_len": 20.8,
+    "pipe": 19.14,
+    "total": 45.28,
+    "screen": 17.22
+   },
+   "fixed_opex": 4.51,
+   "opex_vs_screen": 5.3,
+   "y1": {
+    "t": 1,
+    "Gin": 7.16,
+    "sales": 3.35,
+    "rev": 2.28,
+    "opex": 5.53,
+    "ebitda": -3.25
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 9.41,
+    "sales": 4.4,
+    "rev": 3.0,
+    "opex": 5.99,
+    "ebitda": -2.99
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 7.33,
+    "sales": 3.42,
+    "rev": 2.34,
+    "opex": 6.12,
+    "ebitda": -3.78
+   },
+   "npv15": -64.34,
+   "npv20": -61.05,
+   "irr": null,
+   "payback": null
+  },
+  "Q15_16km_base_GSA": {
+   "Q": 15,
+   "km": 16,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 4776,
+    "pkg": 8.6,
+    "pipe_len": 20.8,
+    "pipe": 19.14,
+    "total": 45.28,
+    "screen": 17.22
+   },
+   "fixed_opex": 4.51,
+   "opex_vs_screen": 5.3,
+   "y1": {
+    "t": 1,
+    "Gin": 7.16,
+    "sales": 6.69,
+    "rev": 4.57,
+    "opex": 6.55,
+    "ebitda": -1.98
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 9.41,
+    "sales": 8.8,
+    "rev": 6.0,
+    "opex": 7.33,
+    "ebitda": -1.33
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 7.33,
+    "sales": 6.85,
+    "rev": 4.67,
+    "opex": 7.16,
+    "ebitda": -2.49
+   },
+   "npv15": -58.3,
+   "npv20": -56.04,
+   "irr": null,
+   "payback": null
+  },
+  "Q15_16km_pess_pre": {
+   "Q": 15,
+   "km": 16,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 5881,
+    "pkg": 12.06,
+    "pipe_len": 24.0,
+    "pipe": 33.12,
+    "total": 77.42,
+    "screen": 21.96
+   },
+   "fixed_opex": 7.98,
+   "opex_vs_screen": 8.23,
+   "y1": {
+    "t": 1,
+    "Gin": 3.52,
+    "sales": 1.22,
+    "rev": 0.46,
+    "opex": 9.67,
+    "ebitda": -9.22
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 6.19,
+    "sales": 2.14,
+    "rev": 0.8,
+    "opex": 11.2,
+    "ebitda": -10.41
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 4.22,
+    "sales": 1.46,
+    "rev": 0.52,
+    "opex": 11.01,
+    "ebitda": -10.49
+   },
+   "npv15": -117.74,
+   "npv20": -107.15,
+   "irr": null,
+   "payback": null
+  },
+  "Q15_16km_pess_GSA": {
+   "Q": 15,
+   "km": 16,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 5881,
+    "pkg": 12.06,
+    "pipe_len": 24.0,
+    "pipe": 33.12,
+    "total": 77.42,
+    "screen": 21.96
+   },
+   "fixed_opex": 7.98,
+   "opex_vs_screen": 8.23,
+   "y1": {
+    "t": 1,
+    "Gin": 3.52,
+    "sales": 3.29,
+    "rev": 1.24,
+    "opex": 9.67,
+    "ebitda": -8.44
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 6.19,
+    "sales": 5.79,
+    "rev": 2.15,
+    "opex": 11.2,
+    "ebitda": -9.05
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 4.22,
+    "sales": 3.95,
+    "rev": 1.42,
+    "opex": 11.01,
+    "ebitda": -9.6
+   },
+   "npv15": -114.13,
+   "npv20": -104.27,
+   "irr": null,
+   "payback": null
+  }
+ },
+ "named": {
+  "Ughelli East (NEPL) -> Transcorp Ughelli|q2025|opt|pre": {
+   "Q": 6.7,
+   "km": 3.7,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 1730,
+    "pkg": 3.17,
+    "pipe_len": 4.4,
+    "pipe": 2.22,
+    "total": 11.19,
+    "screen": 5.25
+   },
+   "fixed_opex": 1.68,
+   "opex_vs_screen": 3.41,
+   "y1": {
+    "t": 1,
+    "Gin": 4.29,
+    "sales": 3.08,
+    "rev": 3.22,
+    "opex": 1.98,
+    "ebitda": 1.24
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 5.09,
+    "sales": 3.66,
+    "rev": 3.9,
+    "opex": 2.09,
+    "ebitda": 1.81
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 4.36,
+    "sales": 3.14,
+    "rev": 3.55,
+    "opex": 2.19,
+    "ebitda": 1.35
+   },
+   "npv15": -5.28,
+   "npv20": -6.22,
+   "irr": 0.3,
+   "payback": 9.8
+  },
+  "Ughelli East (NEPL) -> Transcorp Ughelli|q2025|opt|GSA": {
+   "Q": 6.7,
+   "km": 3.7,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 1730,
+    "pkg": 3.17,
+    "pipe_len": 4.4,
+    "pipe": 2.22,
+    "total": 11.19,
+    "screen": 5.25
+   },
+   "fixed_opex": 1.68,
+   "opex_vs_screen": 3.41,
+   "y1": {
+    "t": 1,
+    "Gin": 4.29,
+    "sales": 4.01,
+    "rev": 4.18,
+    "opex": 2.07,
+    "ebitda": 2.11
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 5.09,
+    "sales": 4.76,
+    "rev": 5.07,
+    "opex": 2.19,
+    "ebitda": 2.87
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 4.36,
+    "sales": 4.08,
+    "rev": 4.61,
+    "opex": 2.29,
+    "ebitda": 2.32
+   },
+   "npv15": -2.08,
+   "npv20": -3.58,
+   "irr": 9.9,
+   "payback": 5.9
+  },
+  "Ughelli East (NEPL) -> Transcorp Ughelli|q2025|base|pre": {
+   "Q": 6.7,
+   "km": 3.7,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 2133,
+    "pkg": 4.36,
+    "pipe_len": 4.8,
+    "pipe": 3.85,
+    "total": 17.14,
+    "screen": 6.59
+   },
+   "fixed_opex": 2.51,
+   "opex_vs_screen": 4.78,
+   "y1": {
+    "t": 1,
+    "Gin": 3.2,
+    "sales": 1.49,
+    "rev": 1.02,
+    "opex": 2.96,
+    "ebitda": -1.94
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 4.2,
+    "sales": 1.96,
+    "rev": 1.34,
+    "opex": 3.18,
+    "ebitda": -1.84
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 3.27,
+    "sales": 1.53,
+    "rev": 1.04,
+    "opex": 3.29,
+    "ebitda": -2.25
+   },
+   "npv15": -28.4,
+   "npv20": -26.46,
+   "irr": null,
+   "payback": null
+  },
+  "Ughelli East (NEPL) -> Transcorp Ughelli|q2025|base|GSA": {
+   "Q": 6.7,
+   "km": 3.7,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 2133,
+    "pkg": 4.36,
+    "pipe_len": 4.8,
+    "pipe": 3.85,
+    "total": 17.14,
+    "screen": 6.59
+   },
+   "fixed_opex": 2.51,
+   "opex_vs_screen": 4.78,
+   "y1": {
+    "t": 1,
+    "Gin": 3.2,
+    "sales": 2.99,
+    "rev": 2.04,
+    "opex": 3.42,
+    "ebitda": -1.38
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 4.2,
+    "sales": 3.93,
+    "rev": 2.68,
+    "opex": 3.78,
+    "ebitda": -1.1
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 3.27,
+    "sales": 3.06,
+    "rev": 2.09,
+    "opex": 3.75,
+    "ebitda": -1.67
+   },
+   "npv15": -25.7,
+   "npv20": -24.22,
+   "irr": null,
+   "payback": null
+  },
+  "Ughelli East (NEPL) -> Transcorp Ughelli|q2025|pess|pre": {
+   "Q": 6.7,
+   "km": 3.7,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 2627,
+    "pkg": 6.05,
+    "pipe_len": 5.6,
+    "pipe": 6.66,
+    "total": 28.08,
+    "screen": 8.57
+   },
+   "fixed_opex": 4.06,
+   "opex_vs_screen": 7.06,
+   "y1": {
+    "t": 1,
+    "Gin": 1.57,
+    "sales": 0.54,
+    "rev": 0.2,
+    "opex": 4.81,
+    "ebitda": -4.61
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.77,
+    "sales": 0.96,
+    "rev": 0.36,
+    "opex": 5.51,
+    "ebitda": -5.16
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.89,
+    "sales": 0.65,
+    "rev": 0.23,
+    "opex": 5.47,
+    "ebitda": -5.24
+   },
+   "npv15": -48.9,
+   "npv20": -43.79,
+   "irr": null,
+   "payback": null
+  },
+  "Ughelli East (NEPL) -> Transcorp Ughelli|q2025|pess|GSA": {
+   "Q": 6.7,
+   "km": 3.7,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 2627,
+    "pkg": 6.05,
+    "pipe_len": 5.6,
+    "pipe": 6.66,
+    "total": 28.08,
+    "screen": 8.57
+   },
+   "fixed_opex": 4.06,
+   "opex_vs_screen": 7.06,
+   "y1": {
+    "t": 1,
+    "Gin": 1.57,
+    "sales": 1.47,
+    "rev": 0.55,
+    "opex": 4.81,
+    "ebitda": -4.26
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.77,
+    "sales": 2.59,
+    "rev": 0.96,
+    "opex": 5.51,
+    "ebitda": -4.55
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.89,
+    "sales": 1.76,
+    "rev": 0.63,
+    "opex": 5.47,
+    "ebitda": -4.84
+   },
+   "npv15": -47.28,
+   "npv20": -42.5,
+   "irr": null,
+   "payback": null
+  },
+  "Ughelli East (NEPL) -> Transcorp Ughelli|qmin|opt|pre": {
+   "Q": 6.3,
+   "km": 3.7,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 1627,
+    "pkg": 3.02,
+    "pipe_len": 4.4,
+    "pipe": 2.22,
+    "total": 10.81,
+    "screen": 5.1
+   },
+   "fixed_opex": 1.66,
+   "opex_vs_screen": 3.41,
+   "y1": {
+    "t": 1,
+    "Gin": 4.03,
+    "sales": 2.9,
+    "rev": 3.03,
+    "opex": 1.94,
+    "ebitda": 1.08
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 4.79,
+    "sales": 3.44,
+    "rev": 3.67,
+    "opex": 2.05,
+    "ebitda": 1.62
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 4.1,
+    "sales": 2.95,
+    "rev": 3.33,
+    "opex": 2.16,
+    "ebitda": 1.18
+   },
+   "npv15": -5.57,
+   "npv20": -6.39,
+   "irr": -1.6,
+   "payback": null
+  },
+  "Ughelli East (NEPL) -> Transcorp Ughelli|qmin|opt|GSA": {
+   "Q": 6.3,
+   "km": 3.7,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 1627,
+    "pkg": 3.02,
+    "pipe_len": 4.4,
+    "pipe": 2.22,
+    "total": 10.81,
+    "screen": 5.1
+   },
+   "fixed_opex": 1.66,
+   "opex_vs_screen": 3.41,
+   "y1": {
+    "t": 1,
+    "Gin": 4.03,
+    "sales": 3.77,
+    "rev": 3.93,
+    "opex": 2.03,
+    "ebitda": 1.91
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 4.79,
+    "sales": 4.48,
+    "rev": 4.76,
+    "opex": 2.15,
+    "ebitda": 2.62
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 4.1,
+    "sales": 3.84,
+    "rev": 4.34,
+    "opex": 2.24,
+    "ebitda": 2.09
+   },
+   "npv15": -2.5,
+   "npv20": -3.87,
+   "irr": 8.5,
+   "payback": 6.2
+  },
+  "Ughelli East (NEPL) -> Transcorp Ughelli|qmin|base|pre": {
+   "Q": 6.3,
+   "km": 3.7,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 2006,
+    "pkg": 4.15,
+    "pipe_len": 4.8,
+    "pipe": 3.85,
+    "total": 16.56,
+    "screen": 6.38
+   },
+   "fixed_opex": 2.48,
+   "opex_vs_screen": 4.76,
+   "y1": {
+    "t": 1,
+    "Gin": 3.01,
+    "sales": 1.41,
+    "rev": 0.96,
+    "opex": 2.9,
+    "ebitda": -1.94
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.95,
+    "sales": 1.85,
+    "rev": 1.26,
+    "opex": 3.11,
+    "ebitda": -1.85
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 3.08,
+    "sales": 1.44,
+    "rev": 0.98,
+    "opex": 3.22,
+    "ebitda": -2.24
+   },
+   "npv15": -27.8,
+   "npv20": -25.86,
+   "irr": null,
+   "payback": null
+  },
+  "Ughelli East (NEPL) -> Transcorp Ughelli|qmin|base|GSA": {
+   "Q": 6.3,
+   "km": 3.7,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 2006,
+    "pkg": 4.15,
+    "pipe_len": 4.8,
+    "pipe": 3.85,
+    "total": 16.56,
+    "screen": 6.38
+   },
+   "fixed_opex": 2.48,
+   "opex_vs_screen": 4.76,
+   "y1": {
+    "t": 1,
+    "Gin": 3.01,
+    "sales": 2.81,
+    "rev": 1.92,
+    "opex": 3.33,
+    "ebitda": -1.41
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.95,
+    "sales": 3.69,
+    "rev": 2.52,
+    "opex": 3.67,
+    "ebitda": -1.15
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 3.08,
+    "sales": 2.88,
+    "rev": 1.96,
+    "opex": 3.66,
+    "ebitda": -1.7
+   },
+   "npv15": -25.26,
+   "npv20": -23.75,
+   "irr": null,
+   "payback": null
+  },
+  "Ughelli East (NEPL) -> Transcorp Ughelli|qmin|pess|pre": {
+   "Q": 6.3,
+   "km": 3.7,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 2470,
+    "pkg": 5.75,
+    "pipe_len": 5.6,
+    "pipe": 6.66,
+    "total": 27.13,
+    "screen": 8.27
+   },
+   "fixed_opex": 3.99,
+   "opex_vs_screen": 7.04,
+   "y1": {
+    "t": 1,
+    "Gin": 1.48,
+    "sales": 0.51,
+    "rev": 0.19,
+    "opex": 4.7,
+    "ebitda": -4.51
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.6,
+    "sales": 0.9,
+    "rev": 0.33,
+    "opex": 5.36,
+    "ebitda": -5.03
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.77,
+    "sales": 0.61,
+    "rev": 0.22,
+    "opex": 5.34,
+    "ebitda": -5.12
+   },
+   "npv15": -47.51,
+   "npv20": -42.52,
+   "irr": null,
+   "payback": null
+  },
+  "Ughelli East (NEPL) -> Transcorp Ughelli|qmin|pess|GSA": {
+   "Q": 6.3,
+   "km": 3.7,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 2470,
+    "pkg": 5.75,
+    "pipe_len": 5.6,
+    "pipe": 6.66,
+    "total": 27.13,
+    "screen": 8.27
+   },
+   "fixed_opex": 3.99,
+   "opex_vs_screen": 7.04,
+   "y1": {
+    "t": 1,
+    "Gin": 1.48,
+    "sales": 1.38,
+    "rev": 0.52,
+    "opex": 4.7,
+    "ebitda": -4.18
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.6,
+    "sales": 2.43,
+    "rev": 0.9,
+    "opex": 5.36,
+    "ebitda": -4.46
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.77,
+    "sales": 1.66,
+    "rev": 0.59,
+    "opex": 5.34,
+    "ebitda": -4.75
+   },
+   "npv15": -45.99,
+   "npv20": -41.31,
+   "irr": null,
+   "payback": null
+  },
+  "Oredo (NEPL) -> Sapele PS|q2025|opt|pre": {
+   "Q": 15.5,
+   "km": 16.4,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 4003,
+    "pkg": 6.32,
+    "pipe_len": 19.7,
+    "pipe": 11.32,
+    "total": 29.01,
+    "screen": 14.49
+   },
+   "fixed_opex": 2.81,
+   "opex_vs_screen": 3.6,
+   "y1": {
+    "t": 1,
+    "Gin": 9.92,
+    "sales": 7.13,
+    "rev": 7.44,
+    "opex": 3.51,
+    "ebitda": 3.94
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 11.78,
+    "sales": 8.47,
+    "rev": 9.02,
+    "opex": 3.72,
+    "ebitda": 5.29
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 10.1,
+    "sales": 7.26,
+    "rev": 8.2,
+    "opex": 3.87,
+    "ebitda": 4.33
+   },
+   "npv15": -10.63,
+   "npv20": -13.65,
+   "irr": 4.4,
+   "payback": 7.8
+  },
+  "Oredo (NEPL) -> Sapele PS|q2025|opt|GSA": {
+   "Q": 15.5,
+   "km": 16.4,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 4003,
+    "pkg": 6.32,
+    "pipe_len": 19.7,
+    "pipe": 11.32,
+    "total": 29.01,
+    "screen": 14.49
+   },
+   "fixed_opex": 2.81,
+   "opex_vs_screen": 3.6,
+   "y1": {
+    "t": 1,
+    "Gin": 9.92,
+    "sales": 9.27,
+    "rev": 9.68,
+    "opex": 3.72,
+    "ebitda": 5.96
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 11.78,
+    "sales": 11.01,
+    "rev": 11.72,
+    "opex": 3.97,
+    "ebitda": 7.75
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 10.1,
+    "sales": 9.44,
+    "rev": 10.67,
+    "opex": 4.09,
+    "ebitda": 6.58
+   },
+   "npv15": -3.49,
+   "npv20": -7.72,
+   "irr": 11.8,
+   "payback": 5.5
+  },
+  "Oredo (NEPL) -> Sapele PS|q2025|base|pre": {
+   "Q": 15.5,
+   "km": 16.4,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 4936,
+    "pkg": 8.85,
+    "pipe_len": 21.3,
+    "pipe": 19.61,
+    "total": 46.49,
+    "screen": 17.67
+   },
+   "fixed_opex": 4.59,
+   "opex_vs_screen": 5.32,
+   "y1": {
+    "t": 1,
+    "Gin": 7.4,
+    "sales": 3.46,
+    "rev": 2.36,
+    "opex": 5.64,
+    "ebitda": -3.28
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 9.72,
+    "sales": 4.54,
+    "rev": 3.1,
+    "opex": 6.11,
+    "ebitda": -3.01
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 7.57,
+    "sales": 3.54,
+    "rev": 2.41,
+    "opex": 6.24,
+    "ebitda": -3.83
+   },
+   "npv15": -65.76,
+   "npv20": -62.44,
+   "irr": null,
+   "payback": null
+  },
+  "Oredo (NEPL) -> Sapele PS|q2025|base|GSA": {
+   "Q": 15.5,
+   "km": 16.4,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 4936,
+    "pkg": 8.85,
+    "pipe_len": 21.3,
+    "pipe": 19.61,
+    "total": 46.49,
+    "screen": 17.67
+   },
+   "fixed_opex": 4.59,
+   "opex_vs_screen": 5.32,
+   "y1": {
+    "t": 1,
+    "Gin": 7.4,
+    "sales": 6.92,
+    "rev": 4.72,
+    "opex": 6.69,
+    "ebitda": -1.97
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 9.72,
+    "sales": 9.09,
+    "rev": 6.2,
+    "opex": 7.49,
+    "ebitda": -1.29
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 7.57,
+    "sales": 7.08,
+    "rev": 4.83,
+    "opex": 7.32,
+    "ebitda": -2.49
+   },
+   "npv15": -59.52,
+   "npv20": -57.26,
+   "irr": null,
+   "payback": null
+  },
+  "Oredo (NEPL) -> Sapele PS|q2025|pess|pre": {
+   "Q": 15.5,
+   "km": 16.4,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 6077,
+    "pkg": 12.41,
+    "pipe_len": 24.6,
+    "pipe": 33.95,
+    "total": 79.49,
+    "screen": 22.55
+   },
+   "fixed_opex": 8.13,
+   "opex_vs_screen": 8.26,
+   "y1": {
+    "t": 1,
+    "Gin": 3.64,
+    "sales": 1.26,
+    "rev": 0.47,
+    "opex": 9.88,
+    "ebitda": -9.41
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 6.4,
+    "sales": 2.22,
+    "rev": 0.82,
+    "opex": 11.46,
+    "ebitda": -10.63
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 4.36,
+    "sales": 1.51,
+    "rev": 0.54,
+    "opex": 11.25,
+    "ebitda": -10.71
+   },
+   "npv15": -120.63,
+   "npv20": -109.81,
+   "irr": null,
+   "payback": null
+  },
+  "Oredo (NEPL) -> Sapele PS|q2025|pess|GSA": {
+   "Q": 15.5,
+   "km": 16.4,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 6077,
+    "pkg": 12.41,
+    "pipe_len": 24.6,
+    "pipe": 33.95,
+    "total": 79.49,
+    "screen": 22.55
+   },
+   "fixed_opex": 8.13,
+   "opex_vs_screen": 8.26,
+   "y1": {
+    "t": 1,
+    "Gin": 3.64,
+    "sales": 3.4,
+    "rev": 1.28,
+    "opex": 9.88,
+    "ebitda": -8.6
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 6.4,
+    "sales": 5.98,
+    "rev": 2.22,
+    "opex": 11.46,
+    "ebitda": -9.24
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 4.36,
+    "sales": 4.08,
+    "rev": 1.46,
+    "opex": 11.25,
+    "ebitda": -9.79
+   },
+   "npv15": -116.9,
+   "npv20": -106.84,
+   "irr": null,
+   "payback": null
+  },
+  "Oredo (NEPL) -> Sapele PS|qmin|opt|pre": {
+   "Q": 8.5,
+   "km": 16.4,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 2195,
+    "pkg": 3.83,
+    "pipe_len": 19.7,
+    "pipe": 11.32,
+    "total": 22.63,
+    "screen": 12.01
+   },
+   "fixed_opex": 2.53,
+   "opex_vs_screen": 3.51,
+   "y1": {
+    "t": 1,
+    "Gin": 5.44,
+    "sales": 3.91,
+    "rev": 4.08,
+    "opex": 2.91,
+    "ebitda": 1.18
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 6.46,
+    "sales": 4.64,
+    "rev": 4.94,
+    "opex": 3.05,
+    "ebitda": 1.89
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 5.54,
+    "sales": 3.98,
+    "rev": 4.5,
+    "opex": 3.23,
+    "ebitda": 1.27
+   },
+   "npv15": -16.76,
+   "npv20": -17.64,
+   "irr": -13.2,
+   "payback": null
+  },
+  "Oredo (NEPL) -> Sapele PS|qmin|opt|GSA": {
+   "Q": 8.5,
+   "km": 16.4,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 2195,
+    "pkg": 3.83,
+    "pipe_len": 19.7,
+    "pipe": 11.32,
+    "total": 22.63,
+    "screen": 12.01
+   },
+   "fixed_opex": 2.53,
+   "opex_vs_screen": 3.51,
+   "y1": {
+    "t": 1,
+    "Gin": 5.44,
+    "sales": 5.08,
+    "rev": 5.31,
+    "opex": 3.02,
+    "ebitda": 2.29
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 6.46,
+    "sales": 6.04,
+    "rev": 6.43,
+    "opex": 3.19,
+    "ebitda": 3.24
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 5.54,
+    "sales": 5.18,
+    "rev": 5.85,
+    "opex": 3.35,
+    "ebitda": 2.5
+   },
+   "npv15": -11.33,
+   "npv20": -13.14,
+   "irr": -0.7,
+   "payback": null
+  },
+  "Oredo (NEPL) -> Sapele PS|qmin|base|pre": {
+   "Q": 8.5,
+   "km": 16.4,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 2707,
+    "pkg": 5.3,
+    "pipe_len": 21.3,
+    "pipe": 19.61,
+    "total": 36.63,
+    "screen": 14.13
+   },
+   "fixed_opex": 4.02,
+   "opex_vs_screen": 5.2,
+   "y1": {
+    "t": 1,
+    "Gin": 4.06,
+    "sales": 1.9,
+    "rev": 1.29,
+    "opex": 4.6,
+    "ebitda": -3.3
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 5.33,
+    "sales": 2.49,
+    "rev": 1.7,
+    "opex": 4.9,
+    "ebitda": -3.2
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 4.15,
+    "sales": 1.94,
+    "rev": 1.32,
+    "opex": 5.11,
+    "ebitda": -3.79
+   },
+   "npv15": -55.57,
+   "npv20": -52.3,
+   "irr": null,
+   "payback": null
+  },
+  "Oredo (NEPL) -> Sapele PS|qmin|base|GSA": {
+   "Q": 8.5,
+   "km": 16.4,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 2707,
+    "pkg": 5.3,
+    "pipe_len": 21.3,
+    "pipe": 19.61,
+    "total": 36.63,
+    "screen": 14.13
+   },
+   "fixed_opex": 4.02,
+   "opex_vs_screen": 5.2,
+   "y1": {
+    "t": 1,
+    "Gin": 4.06,
+    "sales": 3.79,
+    "rev": 2.59,
+    "opex": 5.17,
+    "ebitda": -2.59
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 5.33,
+    "sales": 4.98,
+    "rev": 3.4,
+    "opex": 5.66,
+    "ebitda": -2.26
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 4.15,
+    "sales": 3.88,
+    "rev": 2.65,
+    "opex": 5.71,
+    "ebitda": -3.06
+   },
+   "npv15": -52.15,
+   "npv20": -49.46,
+   "irr": null,
+   "payback": null
+  },
+  "Oredo (NEPL) -> Sapele PS|qmin|pess|pre": {
+   "Q": 8.5,
+   "km": 16.4,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 3333,
+    "pkg": 7.38,
+    "pipe_len": 24.6,
+    "pipe": 33.95,
+    "total": 63.43,
+    "screen": 17.52
+   },
+   "fixed_opex": 7.01,
+   "opex_vs_screen": 8.17,
+   "y1": {
+    "t": 1,
+    "Gin": 1.99,
+    "sales": 0.69,
+    "rev": 0.26,
+    "opex": 7.97,
+    "ebitda": -7.71
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.51,
+    "sales": 1.22,
+    "rev": 0.45,
+    "opex": 8.91,
+    "ebitda": -8.46
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.39,
+    "sales": 0.83,
+    "rev": 0.3,
+    "opex": 9.04,
+    "ebitda": -8.74
+   },
+   "npv15": -97.03,
+   "npv20": -88.18,
+   "irr": null,
+   "payback": null
+  },
+  "Oredo (NEPL) -> Sapele PS|qmin|pess|GSA": {
+   "Q": 8.5,
+   "km": 16.4,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 3333,
+    "pkg": 7.38,
+    "pipe_len": 24.6,
+    "pipe": 33.95,
+    "total": 63.43,
+    "screen": 17.52
+   },
+   "fixed_opex": 7.01,
+   "opex_vs_screen": 8.17,
+   "y1": {
+    "t": 1,
+    "Gin": 1.99,
+    "sales": 1.86,
+    "rev": 0.7,
+    "opex": 7.97,
+    "ebitda": -7.27
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.51,
+    "sales": 3.28,
+    "rev": 1.22,
+    "opex": 8.91,
+    "ebitda": -7.69
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.39,
+    "sales": 2.24,
+    "rev": 0.8,
+    "opex": 9.04,
+    "ebitda": -8.24
+   },
+   "npv15": -94.98,
+   "npv20": -86.55,
+   "irr": null,
+   "payback": null
+  },
+  "Afam Umuosi (NEPL) -> Afam VI/IV-V|q2025|opt|pre": {
+   "Q": 5.6,
+   "km": 0.9,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 1446,
+    "pkg": 2.76,
+    "pipe_len": 1.1,
+    "pipe": 0.54,
+    "total": 8.33,
+    "screen": 3.49
+   },
+   "fixed_opex": 1.52,
+   "opex_vs_screen": 3.39,
+   "y1": {
+    "t": 1,
+    "Gin": 3.58,
+    "sales": 2.58,
+    "rev": 2.69,
+    "opex": 1.77,
+    "ebitda": 0.92
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 4.25,
+    "sales": 3.06,
+    "rev": 3.26,
+    "opex": 1.86,
+    "ebitda": 1.4
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 3.65,
+    "sales": 2.62,
+    "rev": 2.96,
+    "opex": 1.96,
+    "ebitda": 1.0
+   },
+   "npv15": -4.0,
+   "npv20": -4.68,
+   "irr": -0.2,
+   "payback": null
+  },
+  "Afam Umuosi (NEPL) -> Afam VI/IV-V|q2025|opt|GSA": {
+   "Q": 5.6,
+   "km": 0.9,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 1446,
+    "pkg": 2.76,
+    "pipe_len": 1.1,
+    "pipe": 0.54,
+    "total": 8.33,
+    "screen": 3.49
+   },
+   "fixed_opex": 1.52,
+   "opex_vs_screen": 3.39,
+   "y1": {
+    "t": 1,
+    "Gin": 3.58,
+    "sales": 3.35,
+    "rev": 3.5,
+    "opex": 1.84,
+    "ebitda": 1.65
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 4.25,
+    "sales": 3.98,
+    "rev": 4.24,
+    "opex": 1.95,
+    "ebitda": 2.29
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 3.65,
+    "sales": 3.41,
+    "rev": 3.85,
+    "opex": 2.04,
+    "ebitda": 1.81
+   },
+   "npv15": -1.31,
+   "npv20": -2.46,
+   "irr": 10.7,
+   "payback": 5.6
+  },
+  "Afam Umuosi (NEPL) -> Afam VI/IV-V|q2025|base|pre": {
+   "Q": 5.6,
+   "km": 0.9,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1783,
+    "pkg": 3.78,
+    "pipe_len": 1.2,
+    "pipe": 0.94,
+    "total": 12.41,
+    "screen": 4.55
+   },
+   "fixed_opex": 2.2,
+   "opex_vs_screen": 4.65,
+   "y1": {
+    "t": 1,
+    "Gin": 2.67,
+    "sales": 1.25,
+    "rev": 0.85,
+    "opex": 2.58,
+    "ebitda": -1.73
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.51,
+    "sales": 1.64,
+    "rev": 1.12,
+    "opex": 2.77,
+    "ebitda": -1.65
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.73,
+    "sales": 1.28,
+    "rev": 0.87,
+    "opex": 2.87,
+    "ebitda": -1.99
+   },
+   "npv15": -22.4,
+   "npv20": -20.67,
+   "irr": null,
+   "payback": null
+  },
+  "Afam Umuosi (NEPL) -> Afam VI/IV-V|q2025|base|GSA": {
+   "Q": 5.6,
+   "km": 0.9,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1783,
+    "pkg": 3.78,
+    "pipe_len": 1.2,
+    "pipe": 0.94,
+    "total": 12.41,
+    "screen": 4.55
+   },
+   "fixed_opex": 2.2,
+   "opex_vs_screen": 4.65,
+   "y1": {
+    "t": 1,
+    "Gin": 2.67,
+    "sales": 2.5,
+    "rev": 1.7,
+    "opex": 2.96,
+    "ebitda": -1.26
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.51,
+    "sales": 3.28,
+    "rev": 2.24,
+    "opex": 3.27,
+    "ebitda": -1.03
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.73,
+    "sales": 2.56,
+    "rev": 1.74,
+    "opex": 3.26,
+    "ebitda": -1.51
+   },
+   "npv15": -20.14,
+   "npv20": -18.8,
+   "irr": null,
+   "payback": null
+  },
+  "Afam Umuosi (NEPL) -> Afam VI/IV-V|q2025|pess|pre": {
+   "Q": 5.6,
+   "km": 0.9,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 2196,
+    "pkg": 5.23,
+    "pipe_len": 1.4,
+    "pipe": 1.62,
+    "total": 19.7,
+    "screen": 6.07
+   },
+   "fixed_opex": 3.43,
+   "opex_vs_screen": 6.7,
+   "y1": {
+    "t": 1,
+    "Gin": 1.31,
+    "sales": 0.45,
+    "rev": 0.17,
+    "opex": 4.06,
+    "ebitda": -3.89
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.31,
+    "sales": 0.8,
+    "rev": 0.3,
+    "opex": 4.64,
+    "ebitda": -4.35
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.58,
+    "sales": 0.55,
+    "rev": 0.2,
+    "opex": 4.62,
+    "ebitda": -4.42
+   },
+   "npv15": -37.53,
+   "npv20": -33.29,
+   "irr": null,
+   "payback": null
+  },
+  "Afam Umuosi (NEPL) -> Afam VI/IV-V|q2025|pess|GSA": {
+   "Q": 5.6,
+   "km": 0.9,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 2196,
+    "pkg": 5.23,
+    "pipe_len": 1.4,
+    "pipe": 1.62,
+    "total": 19.7,
+    "screen": 6.07
+   },
+   "fixed_opex": 3.43,
+   "opex_vs_screen": 6.7,
+   "y1": {
+    "t": 1,
+    "Gin": 1.31,
+    "sales": 1.23,
+    "rev": 0.46,
+    "opex": 4.06,
+    "ebitda": -3.6
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.31,
+    "sales": 2.16,
+    "rev": 0.8,
+    "opex": 4.64,
+    "ebitda": -3.84
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.58,
+    "sales": 1.47,
+    "rev": 0.53,
+    "opex": 4.62,
+    "ebitda": -4.09
+   },
+   "npv15": -36.18,
+   "npv20": -32.21,
+   "irr": null,
+   "payback": null
+  },
+  "Afam Umuosi (NEPL) -> Afam VI/IV-V|qmin|opt|pre": {
+   "Q": 2.9,
+   "km": 0.9,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 749,
+    "pkg": 1.7,
+    "pipe_len": 1.1,
+    "pipe": 0.54,
+    "total": 5.63,
+    "screen": 2.44
+   },
+   "fixed_opex": 1.39,
+   "opex_vs_screen": 3.31,
+   "y1": {
+    "t": 1,
+    "Gin": 1.86,
+    "sales": 1.33,
+    "rev": 1.39,
+    "opex": 1.52,
+    "ebitda": -0.13
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.2,
+    "sales": 1.58,
+    "rev": 1.69,
+    "opex": 1.59,
+    "ebitda": 0.1
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.89,
+    "sales": 1.36,
+    "rev": 1.54,
+    "opex": 1.7,
+    "ebitda": -0.17
+   },
+   "npv15": -6.59,
+   "npv20": -6.38,
+   "irr": null,
+   "payback": null
+  },
+  "Afam Umuosi (NEPL) -> Afam VI/IV-V|qmin|opt|GSA": {
+   "Q": 2.9,
+   "km": 0.9,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 749,
+    "pkg": 1.7,
+    "pipe_len": 1.1,
+    "pipe": 0.54,
+    "total": 5.63,
+    "screen": 2.44
+   },
+   "fixed_opex": 1.39,
+   "opex_vs_screen": 3.31,
+   "y1": {
+    "t": 1,
+    "Gin": 1.86,
+    "sales": 1.73,
+    "rev": 1.81,
+    "opex": 1.56,
+    "ebitda": 0.25
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.2,
+    "sales": 2.06,
+    "rev": 2.19,
+    "opex": 1.64,
+    "ebitda": 0.56
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.89,
+    "sales": 1.77,
+    "rev": 2.0,
+    "opex": 1.74,
+    "ebitda": 0.25
+   },
+   "npv15": -4.55,
+   "npv20": -4.68,
+   "irr": null,
+   "payback": null
+  },
+  "Afam Umuosi (NEPL) -> Afam VI/IV-V|qmin|base|pre": {
+   "Q": 2.9,
+   "km": 0.9,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 923,
+    "pkg": 2.3,
+    "pipe_len": 1.2,
+    "pipe": 0.94,
+    "total": 8.3,
+    "screen": 3.07
+   },
+   "fixed_opex": 1.96,
+   "opex_vs_screen": 4.5,
+   "y1": {
+    "t": 1,
+    "Gin": 1.38,
+    "sales": 0.65,
+    "rev": 0.44,
+    "opex": 2.16,
+    "ebitda": -1.72
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 1.82,
+    "sales": 0.85,
+    "rev": 0.58,
+    "opex": 2.28,
+    "ebitda": -1.7
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.42,
+    "sales": 0.66,
+    "rev": 0.45,
+    "opex": 2.41,
+    "ebitda": -1.96
+   },
+   "npv15": -18.06,
+   "npv20": -16.38,
+   "irr": null,
+   "payback": null
+  },
+  "Afam Umuosi (NEPL) -> Afam VI/IV-V|qmin|base|GSA": {
+   "Q": 2.9,
+   "km": 0.9,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 923,
+    "pkg": 2.3,
+    "pipe_len": 1.2,
+    "pipe": 0.94,
+    "total": 8.3,
+    "screen": 3.07
+   },
+   "fixed_opex": 1.96,
+   "opex_vs_screen": 4.5,
+   "y1": {
+    "t": 1,
+    "Gin": 1.38,
+    "sales": 1.29,
+    "rev": 0.88,
+    "opex": 2.36,
+    "ebitda": -1.48
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 1.82,
+    "sales": 1.7,
+    "rev": 1.16,
+    "opex": 2.54,
+    "ebitda": -1.38
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.42,
+    "sales": 1.32,
+    "rev": 0.9,
+    "opex": 2.61,
+    "ebitda": -1.71
+   },
+   "npv15": -16.89,
+   "npv20": -15.41,
+   "irr": null,
+   "payback": null
+  },
+  "Afam Umuosi (NEPL) -> Afam VI/IV-V|qmin|pess|pre": {
+   "Q": 2.9,
+   "km": 0.9,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 1137,
+    "pkg": 3.14,
+    "pipe_len": 1.4,
+    "pipe": 1.62,
+    "total": 13.06,
+    "screen": 3.98
+   },
+   "fixed_opex": 2.96,
+   "opex_vs_screen": 6.45,
+   "y1": {
+    "t": 1,
+    "Gin": 0.68,
+    "sales": 0.24,
+    "rev": 0.09,
+    "opex": 3.29,
+    "ebitda": -3.2
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 1.2,
+    "sales": 0.41,
+    "rev": 0.15,
+    "opex": 3.63,
+    "ebitda": -3.47
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.82,
+    "sales": 0.28,
+    "rev": 0.1,
+    "opex": 3.73,
+    "ebitda": -3.63
+   },
+   "npv15": -27.85,
+   "npv20": -24.42,
+   "irr": null,
+   "payback": null
+  },
+  "Afam Umuosi (NEPL) -> Afam VI/IV-V|qmin|pess|GSA": {
+   "Q": 2.9,
+   "km": 0.9,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 1137,
+    "pkg": 3.14,
+    "pipe_len": 1.4,
+    "pipe": 1.62,
+    "total": 13.06,
+    "screen": 3.98
+   },
+   "fixed_opex": 2.96,
+   "opex_vs_screen": 6.45,
+   "y1": {
+    "t": 1,
+    "Gin": 0.68,
+    "sales": 0.64,
+    "rev": 0.24,
+    "opex": 3.29,
+    "ebitda": -3.05
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 1.2,
+    "sales": 1.12,
+    "rev": 0.42,
+    "opex": 3.63,
+    "ebitda": -3.21
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 0.82,
+    "sales": 0.76,
+    "rev": 0.27,
+    "opex": 3.73,
+    "ebitda": -3.45
+   },
+   "npv15": -27.16,
+   "npv20": -23.86,
+   "irr": null,
+   "payback": null
+  },
+  "Sapele (Seplat) -> Sapele PS|q2025|opt|pre": {
+   "Q": 6.0,
+   "km": 7.4,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 1549,
+    "pkg": 2.91,
+    "pipe_len": 8.9,
+    "pipe": 4.44,
+    "total": 12.89,
+    "screen": 6.76
+   },
+   "fixed_opex": 1.8,
+   "opex_vs_screen": 3.4,
+   "y1": {
+    "t": 1,
+    "Gin": 3.84,
+    "sales": 2.76,
+    "rev": 2.88,
+    "opex": 2.07,
+    "ebitda": 0.81
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 4.56,
+    "sales": 3.28,
+    "rev": 3.49,
+    "opex": 2.17,
+    "ebitda": 1.32
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 3.91,
+    "sales": 2.81,
+    "rev": 3.18,
+    "opex": 2.3,
+    "ebitda": 0.88
+   },
+   "npv15": -8.84,
+   "npv20": -9.45,
+   "irr": -10.3,
+   "payback": null
+  },
+  "Sapele (Seplat) -> Sapele PS|q2025|opt|GSA": {
+   "Q": 6.0,
+   "km": 7.4,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 1549,
+    "pkg": 2.91,
+    "pipe_len": 8.9,
+    "pipe": 4.44,
+    "total": 12.89,
+    "screen": 6.76
+   },
+   "fixed_opex": 1.8,
+   "opex_vs_screen": 3.4,
+   "y1": {
+    "t": 1,
+    "Gin": 3.84,
+    "sales": 3.59,
+    "rev": 3.75,
+    "opex": 2.15,
+    "ebitda": 1.6
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 4.56,
+    "sales": 4.26,
+    "rev": 4.54,
+    "opex": 2.27,
+    "ebitda": 2.27
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 3.91,
+    "sales": 3.65,
+    "rev": 4.13,
+    "opex": 2.38,
+    "ebitda": 1.75
+   },
+   "npv15": -5.39,
+   "npv20": -6.61,
+   "irr": 2.4,
+   "payback": 8.7
+  },
+  "Sapele (Seplat) -> Sapele PS|q2025|base|pre": {
+   "Q": 6.0,
+   "km": 7.4,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1911,
+    "pkg": 3.99,
+    "pipe_len": 9.6,
+    "pipe": 7.7,
+    "total": 20.23,
+    "screen": 8.14
+   },
+   "fixed_opex": 2.73,
+   "opex_vs_screen": 4.85,
+   "y1": {
+    "t": 1,
+    "Gin": 2.86,
+    "sales": 1.34,
+    "rev": 0.91,
+    "opex": 3.14,
+    "ebitda": -2.23
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.76,
+    "sales": 1.76,
+    "rev": 1.2,
+    "opex": 3.35,
+    "ebitda": -2.15
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.93,
+    "sales": 1.37,
+    "rev": 0.93,
+    "opex": 3.49,
+    "ebitda": -2.56
+   },
+   "npv15": -33.03,
+   "npv20": -30.82,
+   "irr": null,
+   "payback": null
+  },
+  "Sapele (Seplat) -> Sapele PS|q2025|base|GSA": {
+   "Q": 6.0,
+   "km": 7.4,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1911,
+    "pkg": 3.99,
+    "pipe_len": 9.6,
+    "pipe": 7.7,
+    "total": 20.23,
+    "screen": 8.14
+   },
+   "fixed_opex": 2.73,
+   "opex_vs_screen": 4.85,
+   "y1": {
+    "t": 1,
+    "Gin": 2.86,
+    "sales": 2.68,
+    "rev": 1.83,
+    "opex": 3.55,
+    "ebitda": -1.72
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.76,
+    "sales": 3.52,
+    "rev": 2.4,
+    "opex": 3.89,
+    "ebitda": -1.49
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.93,
+    "sales": 2.74,
+    "rev": 1.87,
+    "opex": 3.91,
+    "ebitda": -2.04
+   },
+   "npv15": -30.61,
+   "npv20": -28.82,
+   "irr": null,
+   "payback": null
+  },
+  "Sapele (Seplat) -> Sapele PS|q2025|pess|pre": {
+   "Q": 6.0,
+   "km": 7.4,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 2352,
+    "pkg": 5.53,
+    "pipe_len": 11.1,
+    "pipe": 13.32,
+    "total": 34.0,
+    "screen": 10.27
+   },
+   "fixed_opex": 4.53,
+   "opex_vs_screen": 7.34,
+   "y1": {
+    "t": 1,
+    "Gin": 1.41,
+    "sales": 0.49,
+    "rev": 0.18,
+    "opex": 5.2,
+    "ebitda": -5.02
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.48,
+    "sales": 0.86,
+    "rev": 0.32,
+    "opex": 5.86,
+    "ebitda": -5.54
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.69,
+    "sales": 0.58,
+    "rev": 0.21,
+    "opex": 5.91,
+    "ebitda": -5.7
+   },
+   "npv15": -56.39,
+   "npv20": -50.76,
+   "irr": null,
+   "payback": null
+  },
+  "Sapele (Seplat) -> Sapele PS|q2025|pess|GSA": {
+   "Q": 6.0,
+   "km": 7.4,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 2352,
+    "pkg": 5.53,
+    "pipe_len": 11.1,
+    "pipe": 13.32,
+    "total": 34.0,
+    "screen": 10.27
+   },
+   "fixed_opex": 4.53,
+   "opex_vs_screen": 7.34,
+   "y1": {
+    "t": 1,
+    "Gin": 1.41,
+    "sales": 1.32,
+    "rev": 0.49,
+    "opex": 5.2,
+    "ebitda": -4.71
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.48,
+    "sales": 2.32,
+    "rev": 0.86,
+    "opex": 5.86,
+    "ebitda": -5.0
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.69,
+    "sales": 1.58,
+    "rev": 0.57,
+    "opex": 5.91,
+    "ebitda": -5.34
+   },
+   "npv15": -54.94,
+   "npv20": -49.61,
+   "irr": null,
+   "payback": null
+  },
+  "Sapele (Seplat) -> Sapele PS|qmin|opt|pre": {
+   "Q": 6.0,
+   "km": 7.4,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 1549,
+    "pkg": 2.91,
+    "pipe_len": 8.9,
+    "pipe": 4.44,
+    "total": 12.89,
+    "screen": 6.76
+   },
+   "fixed_opex": 1.8,
+   "opex_vs_screen": 3.4,
+   "y1": {
+    "t": 1,
+    "Gin": 3.84,
+    "sales": 2.76,
+    "rev": 2.88,
+    "opex": 2.07,
+    "ebitda": 0.81
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 4.56,
+    "sales": 3.28,
+    "rev": 3.49,
+    "opex": 2.17,
+    "ebitda": 1.32
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 3.91,
+    "sales": 2.81,
+    "rev": 3.18,
+    "opex": 2.3,
+    "ebitda": 0.88
+   },
+   "npv15": -8.84,
+   "npv20": -9.45,
+   "irr": -10.3,
+   "payback": null
+  },
+  "Sapele (Seplat) -> Sapele PS|qmin|opt|GSA": {
+   "Q": 6.0,
+   "km": 7.4,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 1549,
+    "pkg": 2.91,
+    "pipe_len": 8.9,
+    "pipe": 4.44,
+    "total": 12.89,
+    "screen": 6.76
+   },
+   "fixed_opex": 1.8,
+   "opex_vs_screen": 3.4,
+   "y1": {
+    "t": 1,
+    "Gin": 3.84,
+    "sales": 3.59,
+    "rev": 3.75,
+    "opex": 2.15,
+    "ebitda": 1.6
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 4.56,
+    "sales": 4.26,
+    "rev": 4.54,
+    "opex": 2.27,
+    "ebitda": 2.27
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 3.91,
+    "sales": 3.65,
+    "rev": 4.13,
+    "opex": 2.38,
+    "ebitda": 1.75
+   },
+   "npv15": -5.39,
+   "npv20": -6.61,
+   "irr": 2.4,
+   "payback": 8.7
+  },
+  "Sapele (Seplat) -> Sapele PS|qmin|base|pre": {
+   "Q": 6.0,
+   "km": 7.4,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1911,
+    "pkg": 3.99,
+    "pipe_len": 9.6,
+    "pipe": 7.7,
+    "total": 20.23,
+    "screen": 8.14
+   },
+   "fixed_opex": 2.73,
+   "opex_vs_screen": 4.85,
+   "y1": {
+    "t": 1,
+    "Gin": 2.86,
+    "sales": 1.34,
+    "rev": 0.91,
+    "opex": 3.14,
+    "ebitda": -2.23
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.76,
+    "sales": 1.76,
+    "rev": 1.2,
+    "opex": 3.35,
+    "ebitda": -2.15
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.93,
+    "sales": 1.37,
+    "rev": 0.93,
+    "opex": 3.49,
+    "ebitda": -2.56
+   },
+   "npv15": -33.03,
+   "npv20": -30.82,
+   "irr": null,
+   "payback": null
+  },
+  "Sapele (Seplat) -> Sapele PS|qmin|base|GSA": {
+   "Q": 6.0,
+   "km": 7.4,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1911,
+    "pkg": 3.99,
+    "pipe_len": 9.6,
+    "pipe": 7.7,
+    "total": 20.23,
+    "screen": 8.14
+   },
+   "fixed_opex": 2.73,
+   "opex_vs_screen": 4.85,
+   "y1": {
+    "t": 1,
+    "Gin": 2.86,
+    "sales": 2.68,
+    "rev": 1.83,
+    "opex": 3.55,
+    "ebitda": -1.72
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.76,
+    "sales": 3.52,
+    "rev": 2.4,
+    "opex": 3.89,
+    "ebitda": -1.49
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.93,
+    "sales": 2.74,
+    "rev": 1.87,
+    "opex": 3.91,
+    "ebitda": -2.04
+   },
+   "npv15": -30.61,
+   "npv20": -28.82,
+   "irr": null,
+   "payback": null
+  },
+  "Sapele (Seplat) -> Sapele PS|qmin|pess|pre": {
+   "Q": 6.0,
+   "km": 7.4,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 2352,
+    "pkg": 5.53,
+    "pipe_len": 11.1,
+    "pipe": 13.32,
+    "total": 34.0,
+    "screen": 10.27
+   },
+   "fixed_opex": 4.53,
+   "opex_vs_screen": 7.34,
+   "y1": {
+    "t": 1,
+    "Gin": 1.41,
+    "sales": 0.49,
+    "rev": 0.18,
+    "opex": 5.2,
+    "ebitda": -5.02
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.48,
+    "sales": 0.86,
+    "rev": 0.32,
+    "opex": 5.86,
+    "ebitda": -5.54
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.69,
+    "sales": 0.58,
+    "rev": 0.21,
+    "opex": 5.91,
+    "ebitda": -5.7
+   },
+   "npv15": -56.39,
+   "npv20": -50.76,
+   "irr": null,
+   "payback": null
+  },
+  "Sapele (Seplat) -> Sapele PS|qmin|pess|GSA": {
+   "Q": 6.0,
+   "km": 7.4,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 2352,
+    "pkg": 5.53,
+    "pipe_len": 11.1,
+    "pipe": 13.32,
+    "total": 34.0,
+    "screen": 10.27
+   },
+   "fixed_opex": 4.53,
+   "opex_vs_screen": 7.34,
+   "y1": {
+    "t": 1,
+    "Gin": 1.41,
+    "sales": 1.32,
+    "rev": 0.49,
+    "opex": 5.2,
+    "ebitda": -4.71
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.48,
+    "sales": 2.32,
+    "rev": 0.86,
+    "opex": 5.86,
+    "ebitda": -5.0
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.69,
+    "sales": 1.58,
+    "rev": 0.57,
+    "opex": 5.91,
+    "ebitda": -5.34
+   },
+   "npv15": -54.94,
+   "npv20": -49.61,
+   "irr": null,
+   "payback": null
+  },
+  "Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|q2025|opt|pre": {
+   "Q": 8.7,
+   "km": 2.0,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 2247,
+    "pkg": 3.91,
+    "pipe_len": 2.4,
+    "pipe": 1.38,
+    "total": 12.18,
+    "screen": 5.17
+   },
+   "fixed_opex": 1.88,
+   "opex_vs_screen": 3.43,
+   "y1": {
+    "t": 1,
+    "Gin": 5.57,
+    "sales": 4.0,
+    "rev": 4.18,
+    "opex": 2.27,
+    "ebitda": 1.91
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 6.61,
+    "sales": 4.75,
+    "rev": 5.06,
+    "opex": 2.4,
+    "ebitda": 2.66
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 5.67,
+    "sales": 4.08,
+    "rev": 4.61,
+    "opex": 2.52,
+    "ebitda": 2.09
+   },
+   "npv15": -3.68,
+   "npv20": -5.07,
+   "irr": 6.4,
+   "payback": 6.9
+  },
+  "Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|q2025|opt|GSA": {
+   "Q": 8.7,
+   "km": 2.0,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 2247,
+    "pkg": 3.91,
+    "pipe_len": 2.4,
+    "pipe": 1.38,
+    "total": 12.18,
+    "screen": 5.17
+   },
+   "fixed_opex": 1.88,
+   "opex_vs_screen": 3.43,
+   "y1": {
+    "t": 1,
+    "Gin": 5.57,
+    "sales": 5.2,
+    "rev": 5.43,
+    "opex": 2.39,
+    "ebitda": 3.04
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 6.61,
+    "sales": 6.18,
+    "rev": 6.58,
+    "opex": 2.54,
+    "ebitda": 4.04
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 5.67,
+    "sales": 5.3,
+    "rev": 5.99,
+    "opex": 2.64,
+    "ebitda": 3.35
+   },
+   "npv15": 0.33,
+   "npv20": -1.73,
+   "irr": 15.7,
+   "payback": 4.7
+  },
+  "Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|q2025|base|pre": {
+   "Q": 8.7,
+   "km": 2.0,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 2770,
+    "pkg": 5.41,
+    "pipe_len": 2.6,
+    "pipe": 2.39,
+    "total": 18.49,
+    "screen": 6.75
+   },
+   "fixed_opex": 2.79,
+   "opex_vs_screen": 4.74,
+   "y1": {
+    "t": 1,
+    "Gin": 4.15,
+    "sales": 1.94,
+    "rev": 1.32,
+    "opex": 3.38,
+    "ebitda": -2.06
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 5.46,
+    "sales": 2.55,
+    "rev": 1.74,
+    "opex": 3.65,
+    "ebitda": -1.91
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 4.25,
+    "sales": 1.99,
+    "rev": 1.35,
+    "opex": 3.74,
+    "ebitda": -2.39
+   },
+   "npv15": -30.51,
+   "npv20": -28.43,
+   "irr": null,
+   "payback": null
+  },
+  "Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|q2025|base|GSA": {
+   "Q": 8.7,
+   "km": 2.0,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 2770,
+    "pkg": 5.41,
+    "pipe_len": 2.6,
+    "pipe": 2.39,
+    "total": 18.49,
+    "screen": 6.75
+   },
+   "fixed_opex": 2.79,
+   "opex_vs_screen": 4.74,
+   "y1": {
+    "t": 1,
+    "Gin": 4.15,
+    "sales": 3.88,
+    "rev": 2.65,
+    "opex": 3.97,
+    "ebitda": -1.32
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 5.46,
+    "sales": 5.1,
+    "rev": 3.48,
+    "opex": 4.43,
+    "ebitda": -0.95
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 4.25,
+    "sales": 3.97,
+    "rev": 2.71,
+    "opex": 4.35,
+    "ebitda": -1.64
+   },
+   "npv15": -27.0,
+   "npv20": -25.53,
+   "irr": null,
+   "payback": null
+  },
+  "Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|q2025|pess|pre": {
+   "Q": 8.7,
+   "km": 2.0,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 3411,
+    "pkg": 7.53,
+    "pipe_len": 3.0,
+    "pipe": 4.14,
+    "total": 29.91,
+    "screen": 9.03
+   },
+   "fixed_opex": 4.44,
+   "opex_vs_screen": 6.88,
+   "y1": {
+    "t": 1,
+    "Gin": 2.04,
+    "sales": 0.71,
+    "rev": 0.27,
+    "opex": 5.43,
+    "ebitda": -5.16
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.59,
+    "sales": 1.24,
+    "rev": 0.46,
+    "opex": 6.31,
+    "ebitda": -5.85
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.45,
+    "sales": 0.85,
+    "rev": 0.3,
+    "opex": 6.18,
+    "ebitda": -5.88
+   },
+   "npv15": -53.38,
+   "npv20": -47.7,
+   "irr": null,
+   "payback": null
+  },
+  "Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|q2025|pess|GSA": {
+   "Q": 8.7,
+   "km": 2.0,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 3411,
+    "pkg": 7.53,
+    "pipe_len": 3.0,
+    "pipe": 4.14,
+    "total": 29.91,
+    "screen": 9.03
+   },
+   "fixed_opex": 4.44,
+   "opex_vs_screen": 6.88,
+   "y1": {
+    "t": 1,
+    "Gin": 2.04,
+    "sales": 1.91,
+    "rev": 0.72,
+    "opex": 5.43,
+    "ebitda": -4.71
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.59,
+    "sales": 3.36,
+    "rev": 1.25,
+    "opex": 6.31,
+    "ebitda": -5.06
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.45,
+    "sales": 2.29,
+    "rev": 0.82,
+    "opex": 6.18,
+    "ebitda": -5.36
+   },
+   "npv15": -51.29,
+   "npv20": -46.02,
+   "irr": null,
+   "payback": null
+  },
+  "Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|qmin|opt|pre": {
+   "Q": 8.7,
+   "km": 2.0,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 2247,
+    "pkg": 3.91,
+    "pipe_len": 2.4,
+    "pipe": 1.38,
+    "total": 12.18,
+    "screen": 5.17
+   },
+   "fixed_opex": 1.88,
+   "opex_vs_screen": 3.43,
+   "y1": {
+    "t": 1,
+    "Gin": 5.57,
+    "sales": 4.0,
+    "rev": 4.18,
+    "opex": 2.27,
+    "ebitda": 1.91
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 6.61,
+    "sales": 4.75,
+    "rev": 5.06,
+    "opex": 2.4,
+    "ebitda": 2.66
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 5.67,
+    "sales": 4.08,
+    "rev": 4.61,
+    "opex": 2.52,
+    "ebitda": 2.09
+   },
+   "npv15": -3.68,
+   "npv20": -5.07,
+   "irr": 6.4,
+   "payback": 6.9
+  },
+  "Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|qmin|opt|GSA": {
+   "Q": 8.7,
+   "km": 2.0,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 2247,
+    "pkg": 3.91,
+    "pipe_len": 2.4,
+    "pipe": 1.38,
+    "total": 12.18,
+    "screen": 5.17
+   },
+   "fixed_opex": 1.88,
+   "opex_vs_screen": 3.43,
+   "y1": {
+    "t": 1,
+    "Gin": 5.57,
+    "sales": 5.2,
+    "rev": 5.43,
+    "opex": 2.39,
+    "ebitda": 3.04
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 6.61,
+    "sales": 6.18,
+    "rev": 6.58,
+    "opex": 2.54,
+    "ebitda": 4.04
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 5.67,
+    "sales": 5.3,
+    "rev": 5.99,
+    "opex": 2.64,
+    "ebitda": 3.35
+   },
+   "npv15": 0.33,
+   "npv20": -1.73,
+   "irr": 15.7,
+   "payback": 4.7
+  },
+  "Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|qmin|base|pre": {
+   "Q": 8.7,
+   "km": 2.0,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 2770,
+    "pkg": 5.41,
+    "pipe_len": 2.6,
+    "pipe": 2.39,
+    "total": 18.49,
+    "screen": 6.75
+   },
+   "fixed_opex": 2.79,
+   "opex_vs_screen": 4.74,
+   "y1": {
+    "t": 1,
+    "Gin": 4.15,
+    "sales": 1.94,
+    "rev": 1.32,
+    "opex": 3.38,
+    "ebitda": -2.06
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 5.46,
+    "sales": 2.55,
+    "rev": 1.74,
+    "opex": 3.65,
+    "ebitda": -1.91
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 4.25,
+    "sales": 1.99,
+    "rev": 1.35,
+    "opex": 3.74,
+    "ebitda": -2.39
+   },
+   "npv15": -30.51,
+   "npv20": -28.43,
+   "irr": null,
+   "payback": null
+  },
+  "Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|qmin|base|GSA": {
+   "Q": 8.7,
+   "km": 2.0,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 2770,
+    "pkg": 5.41,
+    "pipe_len": 2.6,
+    "pipe": 2.39,
+    "total": 18.49,
+    "screen": 6.75
+   },
+   "fixed_opex": 2.79,
+   "opex_vs_screen": 4.74,
+   "y1": {
+    "t": 1,
+    "Gin": 4.15,
+    "sales": 3.88,
+    "rev": 2.65,
+    "opex": 3.97,
+    "ebitda": -1.32
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 5.46,
+    "sales": 5.1,
+    "rev": 3.48,
+    "opex": 4.43,
+    "ebitda": -0.95
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 4.25,
+    "sales": 3.97,
+    "rev": 2.71,
+    "opex": 4.35,
+    "ebitda": -1.64
+   },
+   "npv15": -27.0,
+   "npv20": -25.53,
+   "irr": null,
+   "payback": null
+  },
+  "Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|qmin|pess|pre": {
+   "Q": 8.7,
+   "km": 2.0,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 3411,
+    "pkg": 7.53,
+    "pipe_len": 3.0,
+    "pipe": 4.14,
+    "total": 29.91,
+    "screen": 9.03
+   },
+   "fixed_opex": 4.44,
+   "opex_vs_screen": 6.88,
+   "y1": {
+    "t": 1,
+    "Gin": 2.04,
+    "sales": 0.71,
+    "rev": 0.27,
+    "opex": 5.43,
+    "ebitda": -5.16
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.59,
+    "sales": 1.24,
+    "rev": 0.46,
+    "opex": 6.31,
+    "ebitda": -5.85
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.45,
+    "sales": 0.85,
+    "rev": 0.3,
+    "opex": 6.18,
+    "ebitda": -5.88
+   },
+   "npv15": -53.38,
+   "npv20": -47.7,
+   "irr": null,
+   "payback": null
+  },
+  "Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|qmin|pess|GSA": {
+   "Q": 8.7,
+   "km": 2.0,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 3411,
+    "pkg": 7.53,
+    "pipe_len": 3.0,
+    "pipe": 4.14,
+    "total": 29.91,
+    "screen": 9.03
+   },
+   "fixed_opex": 4.44,
+   "opex_vs_screen": 6.88,
+   "y1": {
+    "t": 1,
+    "Gin": 2.04,
+    "sales": 1.91,
+    "rev": 0.72,
+    "opex": 5.43,
+    "ebitda": -4.71
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.59,
+    "sales": 3.36,
+    "rev": 1.25,
+    "opex": 6.31,
+    "ebitda": -5.06
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.45,
+    "sales": 2.29,
+    "rev": 0.82,
+    "opex": 6.18,
+    "ebitda": -5.36
+   },
+   "npv15": -51.29,
+   "npv20": -46.02,
+   "irr": null,
+   "payback": null
+  },
+  "Utorogu (NEPL) -> Transcorp Ughelli|q2025|opt|pre": {
+   "Q": 4.3,
+   "km": 10.9,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 1110,
+    "pkg": 2.26,
+    "pipe_len": 13.1,
+    "pipe": 6.54,
+    "total": 13.47,
+    "screen": 7.79
+   },
+   "fixed_opex": 1.87,
+   "opex_vs_screen": 3.37,
+   "y1": {
+    "t": 1,
+    "Gin": 2.75,
+    "sales": 1.98,
+    "rev": 2.07,
+    "opex": 2.06,
+    "ebitda": 0.01
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.27,
+    "sales": 2.35,
+    "rev": 2.5,
+    "opex": 2.15,
+    "ebitda": 0.35
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.8,
+    "sales": 2.01,
+    "rev": 2.28,
+    "opex": 2.3,
+    "ebitda": -0.02
+   },
+   "npv15": -13.78,
+   "npv20": -13.66,
+   "irr": null,
+   "payback": null
+  },
+  "Utorogu (NEPL) -> Transcorp Ughelli|q2025|opt|GSA": {
+   "Q": 4.3,
+   "km": 10.9,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 1110,
+    "pkg": 2.26,
+    "pipe_len": 13.1,
+    "pipe": 6.54,
+    "total": 13.47,
+    "screen": 7.79
+   },
+   "fixed_opex": 1.87,
+   "opex_vs_screen": 3.37,
+   "y1": {
+    "t": 1,
+    "Gin": 2.75,
+    "sales": 2.57,
+    "rev": 2.68,
+    "opex": 2.12,
+    "ebitda": 0.57
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.27,
+    "sales": 3.05,
+    "rev": 3.25,
+    "opex": 2.22,
+    "ebitda": 1.03
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.8,
+    "sales": 2.62,
+    "rev": 2.96,
+    "opex": 2.36,
+    "ebitda": 0.6
+   },
+   "npv15": -10.75,
+   "npv20": -11.14,
+   "irr": -19.3,
+   "payback": null
+  },
+  "Utorogu (NEPL) -> Transcorp Ughelli|q2025|base|pre": {
+   "Q": 4.3,
+   "km": 10.9,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1369,
+    "pkg": 3.08,
+    "pipe_len": 14.2,
+    "pipe": 11.34,
+    "total": 21.59,
+    "screen": 9.05
+   },
+   "fixed_opex": 2.86,
+   "opex_vs_screen": 4.88,
+   "y1": {
+    "t": 1,
+    "Gin": 2.05,
+    "sales": 0.96,
+    "rev": 0.65,
+    "opex": 3.15,
+    "ebitda": -2.5
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.7,
+    "sales": 1.26,
+    "rev": 0.86,
+    "opex": 3.33,
+    "ebitda": -2.47
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.1,
+    "sales": 0.98,
+    "rev": 0.67,
+    "opex": 3.52,
+    "ebitda": -2.85
+   },
+   "npv15": -35.76,
+   "npv20": -33.32,
+   "irr": null,
+   "payback": null
+  },
+  "Utorogu (NEPL) -> Transcorp Ughelli|q2025|base|GSA": {
+   "Q": 4.3,
+   "km": 10.9,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1369,
+    "pkg": 3.08,
+    "pipe_len": 14.2,
+    "pipe": 11.34,
+    "total": 21.59,
+    "screen": 9.05
+   },
+   "fixed_opex": 2.86,
+   "opex_vs_screen": 4.88,
+   "y1": {
+    "t": 1,
+    "Gin": 2.05,
+    "sales": 1.92,
+    "rev": 1.31,
+    "opex": 3.44,
+    "ebitda": -2.13
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.7,
+    "sales": 2.52,
+    "rev": 1.72,
+    "opex": 3.71,
+    "ebitda": -1.99
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.1,
+    "sales": 1.96,
+    "rev": 1.34,
+    "opex": 3.82,
+    "ebitda": -2.48
+   },
+   "npv15": -34.03,
+   "npv20": -31.88,
+   "irr": null,
+   "payback": null
+  },
+  "Utorogu (NEPL) -> Transcorp Ughelli|q2025|pess|pre": {
+   "Q": 4.3,
+   "km": 10.9,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 1686,
+    "pkg": 4.24,
+    "pipe_len": 16.4,
+    "pipe": 19.62,
+    "total": 37.07,
+    "screen": 11.08
+   },
+   "fixed_opex": 4.79,
+   "opex_vs_screen": 7.53,
+   "y1": {
+    "t": 1,
+    "Gin": 1.01,
+    "sales": 0.35,
+    "rev": 0.13,
+    "opex": 5.28,
+    "ebitda": -5.15
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 1.78,
+    "sales": 0.61,
+    "rev": 0.23,
+    "opex": 5.79,
+    "ebitda": -5.56
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.21,
+    "sales": 0.42,
+    "rev": 0.15,
+    "opex": 5.98,
+    "ebitda": -5.83
+   },
+   "npv15": -59.79,
+   "npv20": -53.97,
+   "irr": null,
+   "payback": null
+  },
+  "Utorogu (NEPL) -> Transcorp Ughelli|q2025|pess|GSA": {
+   "Q": 4.3,
+   "km": 10.9,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 1686,
+    "pkg": 4.24,
+    "pipe_len": 16.4,
+    "pipe": 19.62,
+    "total": 37.07,
+    "screen": 11.08
+   },
+   "fixed_opex": 4.79,
+   "opex_vs_screen": 7.53,
+   "y1": {
+    "t": 1,
+    "Gin": 1.01,
+    "sales": 0.94,
+    "rev": 0.35,
+    "opex": 5.28,
+    "ebitda": -4.93
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 1.78,
+    "sales": 1.66,
+    "rev": 0.62,
+    "opex": 5.79,
+    "ebitda": -5.18
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.21,
+    "sales": 1.13,
+    "rev": 0.41,
+    "opex": 5.98,
+    "ebitda": -5.57
+   },
+   "npv15": -58.75,
+   "npv20": -53.15,
+   "irr": null,
+   "payback": null
+  },
+  "Utorogu (NEPL) -> Transcorp Ughelli|qmin|opt|pre": {
+   "Q": 4.3,
+   "km": 10.9,
+   "sc": "opt",
+   "contract": false,
+   "capex": {
+    "hp_per": 172,
+    "hp": 1110,
+    "pkg": 2.26,
+    "pipe_len": 13.1,
+    "pipe": 6.54,
+    "total": 13.47,
+    "screen": 7.79
+   },
+   "fixed_opex": 1.87,
+   "opex_vs_screen": 3.37,
+   "y1": {
+    "t": 1,
+    "Gin": 2.75,
+    "sales": 1.98,
+    "rev": 2.07,
+    "opex": 2.06,
+    "ebitda": 0.01
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.27,
+    "sales": 2.35,
+    "rev": 2.5,
+    "opex": 2.15,
+    "ebitda": 0.35
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.8,
+    "sales": 2.01,
+    "rev": 2.28,
+    "opex": 2.3,
+    "ebitda": -0.02
+   },
+   "npv15": -13.78,
+   "npv20": -13.66,
+   "irr": null,
+   "payback": null
+  },
+  "Utorogu (NEPL) -> Transcorp Ughelli|qmin|opt|GSA": {
+   "Q": 4.3,
+   "km": 10.9,
+   "sc": "opt",
+   "contract": true,
+   "capex": {
+    "hp_per": 172,
+    "hp": 1110,
+    "pkg": 2.26,
+    "pipe_len": 13.1,
+    "pipe": 6.54,
+    "total": 13.47,
+    "screen": 7.79
+   },
+   "fixed_opex": 1.87,
+   "opex_vs_screen": 3.37,
+   "y1": {
+    "t": 1,
+    "Gin": 2.75,
+    "sales": 2.57,
+    "rev": 2.68,
+    "opex": 2.12,
+    "ebitda": 0.57
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.27,
+    "sales": 3.05,
+    "rev": 3.25,
+    "opex": 2.22,
+    "ebitda": 1.03
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.8,
+    "sales": 2.62,
+    "rev": 2.96,
+    "opex": 2.36,
+    "ebitda": 0.6
+   },
+   "npv15": -10.75,
+   "npv20": -11.14,
+   "irr": -19.3,
+   "payback": null
+  },
+  "Utorogu (NEPL) -> Transcorp Ughelli|qmin|base|pre": {
+   "Q": 4.3,
+   "km": 10.9,
+   "sc": "base",
+   "contract": false,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1369,
+    "pkg": 3.08,
+    "pipe_len": 14.2,
+    "pipe": 11.34,
+    "total": 21.59,
+    "screen": 9.05
+   },
+   "fixed_opex": 2.86,
+   "opex_vs_screen": 4.88,
+   "y1": {
+    "t": 1,
+    "Gin": 2.05,
+    "sales": 0.96,
+    "rev": 0.65,
+    "opex": 3.15,
+    "ebitda": -2.5
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.7,
+    "sales": 1.26,
+    "rev": 0.86,
+    "opex": 3.33,
+    "ebitda": -2.47
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.1,
+    "sales": 0.98,
+    "rev": 0.67,
+    "opex": 3.52,
+    "ebitda": -2.85
+   },
+   "npv15": -35.76,
+   "npv20": -33.32,
+   "irr": null,
+   "payback": null
+  },
+  "Utorogu (NEPL) -> Transcorp Ughelli|qmin|base|GSA": {
+   "Q": 4.3,
+   "km": 10.9,
+   "sc": "base",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1369,
+    "pkg": 3.08,
+    "pipe_len": 14.2,
+    "pipe": 11.34,
+    "total": 21.59,
+    "screen": 9.05
+   },
+   "fixed_opex": 2.86,
+   "opex_vs_screen": 4.88,
+   "y1": {
+    "t": 1,
+    "Gin": 2.05,
+    "sales": 1.92,
+    "rev": 1.31,
+    "opex": 3.44,
+    "ebitda": -2.13
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.7,
+    "sales": 2.52,
+    "rev": 1.72,
+    "opex": 3.71,
+    "ebitda": -1.99
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.1,
+    "sales": 1.96,
+    "rev": 1.34,
+    "opex": 3.82,
+    "ebitda": -2.48
+   },
+   "npv15": -34.03,
+   "npv20": -31.88,
+   "irr": null,
+   "payback": null
+  },
+  "Utorogu (NEPL) -> Transcorp Ughelli|qmin|pess|pre": {
+   "Q": 4.3,
+   "km": 10.9,
+   "sc": "pess",
+   "contract": false,
+   "capex": {
+    "hp_per": 261,
+    "hp": 1686,
+    "pkg": 4.24,
+    "pipe_len": 16.4,
+    "pipe": 19.62,
+    "total": 37.07,
+    "screen": 11.08
+   },
+   "fixed_opex": 4.79,
+   "opex_vs_screen": 7.53,
+   "y1": {
+    "t": 1,
+    "Gin": 1.01,
+    "sales": 0.35,
+    "rev": 0.13,
+    "opex": 5.28,
+    "ebitda": -5.15
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 1.78,
+    "sales": 0.61,
+    "rev": 0.23,
+    "opex": 5.79,
+    "ebitda": -5.56
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.21,
+    "sales": 0.42,
+    "rev": 0.15,
+    "opex": 5.98,
+    "ebitda": -5.83
+   },
+   "npv15": -59.79,
+   "npv20": -53.97,
+   "irr": null,
+   "payback": null
+  },
+  "Utorogu (NEPL) -> Transcorp Ughelli|qmin|pess|GSA": {
+   "Q": 4.3,
+   "km": 10.9,
+   "sc": "pess",
+   "contract": true,
+   "capex": {
+    "hp_per": 261,
+    "hp": 1686,
+    "pkg": 4.24,
+    "pipe_len": 16.4,
+    "pipe": 19.62,
+    "total": 37.07,
+    "screen": 11.08
+   },
+   "fixed_opex": 4.79,
+   "opex_vs_screen": 7.53,
+   "y1": {
+    "t": 1,
+    "Gin": 1.01,
+    "sales": 0.94,
+    "rev": 0.35,
+    "opex": 5.28,
+    "ebitda": -4.93
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 1.78,
+    "sales": 1.66,
+    "rev": 0.62,
+    "opex": 5.79,
+    "ebitda": -5.18
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 1.21,
+    "sales": 1.13,
+    "rev": 0.41,
+    "opex": 5.98,
+    "ebitda": -5.57
+   },
+   "npv15": -58.75,
+   "npv20": -53.15,
+   "irr": null,
+   "payback": null
+  }
+ },
+ "thresholds": {
+  "Q1_4km_base_GSA": {
+   "price_usd_mmbtu": 35.68,
+   "fee_from_operator_usd_mscf": null,
+   "Q_mmscfd": null,
+   "collection": null
+  },
+  "Q1_4km_base_pre": {
+   "price_usd_mmbtu": null,
+   "fee_from_operator_usd_mscf": null,
+   "Q_mmscfd": null,
+   "collection": null
+  },
+  "Q1_4km_opt_GSA": {
+   "price_usd_mmbtu": 12.77,
+   "fee_from_operator_usd_mscf": 10.09,
+   "Q_mmscfd": 13.1,
+   "collection": null
+  },
+  "Q1_4km_opt_pre": {
+   "price_usd_mmbtu": 16.53,
+   "fee_from_operator_usd_mscf": 13.95,
+   "Q_mmscfd": 25.7,
+   "collection": null
+  },
+  "Q5_4km_base_GSA": {
+   "price_usd_mmbtu": 11.87,
+   "fee_from_operator_usd_mscf": 6.36,
+   "Q_mmscfd": null,
+   "collection": null
+  },
+  "Q5_4km_base_pre": {
+   "price_usd_mmbtu": 22.69,
+   "fee_from_operator_usd_mscf": 14.33,
+   "Q_mmscfd": null,
+   "collection": null
+  },
+  "Q5_4km_opt_GSA": {
+   "price_usd_mmbtu": 4.14,
+   "fee_from_operator_usd_mscf": 1.25,
+   "Q_mmscfd": 13.1,
+   "collection": null
+  },
+  "Q5_4km_opt_pre": {
+   "price_usd_mmbtu": 5.31,
+   "fee_from_operator_usd_mscf": 2.45,
+   "Q_mmscfd": 25.7,
+   "collection": null
+  },
+  "Q5_8km_base_GSA": {
+   "price_usd_mmbtu": 14.43,
+   "fee_from_operator_usd_mscf": 8.25,
+   "Q_mmscfd": null,
+   "collection": null
+  },
+  "Q5_8km_base_pre": {
+   "price_usd_mmbtu": 27.8,
+   "fee_from_operator_usd_mscf": null,
+   "Q_mmscfd": null,
+   "collection": null
+  },
+  "Q5_8km_opt_GSA": {
+   "price_usd_mmbtu": 4.93,
+   "fee_from_operator_usd_mscf": 2.06,
+   "Q_mmscfd": 17.12,
+   "collection": null
+  },
+  "Q5_8km_opt_pre": {
+   "price_usd_mmbtu": 6.34,
+   "fee_from_operator_usd_mscf": 3.5,
+   "Q_mmscfd": 33.03,
+   "collection": null
+  },
+  "Q15_8km_base_GSA": {
+   "price_usd_mmbtu": 8.53,
+   "fee_from_operator_usd_mscf": 3.9,
+   "Q_mmscfd": null,
+   "collection": null
+  },
+  "Q15_8km_base_pre": {
+   "price_usd_mmbtu": 16.01,
+   "fee_from_operator_usd_mscf": 9.41,
+   "Q_mmscfd": null,
+   "collection": null
+  },
+  "Q15_8km_opt_GSA": {
+   "price_usd_mmbtu": 2.84,
+   "fee_from_operator_usd_mscf": -0.09,
+   "Q_mmscfd": 17.12,
+   "collection": null
+  },
+  "Q15_8km_opt_pre": {
+   "price_usd_mmbtu": 3.62,
+   "fee_from_operator_usd_mscf": 0.71,
+   "Q_mmscfd": 33.03,
+   "collection": null
+  },
+  "UghelliEast_base_GSA": {
+   "price_usd_mmbtu": 10.03,
+   "fee_from_operator_usd_mscf": 5.0,
+   "Q_mmscfd": null,
+   "collection": null
+  },
+  "UghelliEast_base_pre": {
+   "price_usd_mmbtu": 19.0,
+   "fee_from_operator_usd_mscf": 11.61,
+   "Q_mmscfd": null,
+   "collection": null
+  },
+  "UghelliEast_opt_GSA": {
+   "price_usd_mmbtu": 3.47,
+   "fee_from_operator_usd_mscf": 0.56,
+   "Q_mmscfd": 12.8,
+   "collection": null
+  },
+  "UghelliEast_opt_pre": {
+   "price_usd_mmbtu": 4.43,
+   "fee_from_operator_usd_mscf": 1.55,
+   "Q_mmscfd": 25.15,
+   "collection": null
+  },
+  "AfamUmuosi_base_GSA": {
+   "price_usd_mmbtu": 9.39,
+   "fee_from_operator_usd_mscf": 4.53,
+   "Q_mmscfd": null,
+   "collection": null
+  },
+  "AfamUmuosi_base_pre": {
+   "price_usd_mmbtu": 17.72,
+   "fee_from_operator_usd_mscf": 10.67,
+   "Q_mmscfd": null,
+   "collection": null
+  },
+  "AfamUmuosi_opt_GSA": {
+   "price_usd_mmbtu": 3.33,
+   "fee_from_operator_usd_mscf": 0.41,
+   "Q_mmscfd": 9.92,
+   "collection": null
+  },
+  "AfamUmuosi_opt_pre": {
+   "price_usd_mmbtu": 4.25,
+   "fee_from_operator_usd_mscf": 1.36,
+   "Q_mmscfd": 19.84,
+   "collection": null
+  },
+  "Oredo_qmin_base_GSA": {
+   "price_usd_mmbtu": 14.88,
+   "fee_from_operator_usd_mscf": 8.57,
+   "Q_mmscfd": null,
+   "collection": null
+  },
+  "Oredo_qmin_base_pre": {
+   "price_usd_mmbtu": 28.69,
+   "fee_from_operator_usd_mscf": null,
+   "Q_mmscfd": null,
+   "collection": null
+  },
+  "Oredo_qmin_opt_GSA": {
+   "price_usd_mmbtu": 4.92,
+   "fee_from_operator_usd_mscf": 2.05,
+   "Q_mmscfd": 25.35,
+   "collection": null
+  },
+  "Oredo_qmin_opt_pre": {
+   "price_usd_mmbtu": 6.33,
+   "fee_from_operator_usd_mscf": 3.49,
+   "Q_mmscfd": 47.9,
+   "collection": null
+  }
+ },
+ "sens": {
+  "base": {
+   "capex": 14.96,
+   "fixed": 2.39,
+   "ebitda_y2": -1.35,
+   "npv15": -24.21,
+   "npv20": -22.62,
+   "irr": null
+  },
+  "EDTI": {
+   "capex": 14.96,
+   "fixed": 2.39,
+   "ebitda_y2": -1.35,
+   "npv15": -24.21,
+   "npv20": -22.62,
+   "irr": null
+  },
+  "coll_0.6": {
+   "capex": 14.96,
+   "fixed": 2.39,
+   "ebitda_y2": -1.94,
+   "npv15": -26.43,
+   "npv20": -24.47,
+   "irr": null
+  },
+  "escrow_coll1_dso45_nofx": {
+   "capex": 14.96,
+   "fixed": 2.39,
+   "ebitda_y2": -0.9,
+   "npv15": -22.27,
+   "npv20": -20.92,
+   "irr": null
+  },
+  "price_2.68": {
+   "capex": 14.96,
+   "fixed": 2.39,
+   "ebitda_y2": -0.89,
+   "npv15": -22.48,
+   "npv20": -21.17,
+   "irr": null
+  },
+  "pipe_x2": {
+   "capex": 19.41,
+   "fixed": 2.64,
+   "ebitda_y2": -1.62,
+   "npv15": -30.09,
+   "npv20": -28.24,
+   "irr": null
+  },
+  "cm_1.0": {
+   "capex": 9.04,
+   "fixed": 2.05,
+   "ebitda_y2": -1.0,
+   "npv15": -16.4,
+   "npv20": -15.13,
+   "irr": null
+  },
+  "build_2y": {
+   "capex": 15.94,
+   "fixed": 2.44,
+   "ebitda_y2": -1.41,
+   "npv15": -23.39,
+   "npv20": -21.36,
+   "irr": null
+  },
+  "decl_15": {
+   "capex": 14.96,
+   "fixed": 2.39,
+   "ebitda_y2": -1.44,
+   "npv15": -25.01,
+   "npv20": -23.22,
+   "irr": null
+  },
+  "opex_screen_x1.7_only": {
+   "capex": 14.96,
+   "fixed": 1.2,
+   "ebitda_y2": -0.13,
+   "npv15": -17.61,
+   "npv20": -17.15,
+   "irr": null
+  },
+  "fee_from_operator_1.0": {
+   "capex": 14.96,
+   "fixed": 2.39,
+   "ebitda_y2": 0.69,
+   "npv15": -16.2,
+   "npv20": -15.81,
+   "irr": null
+  },
+  "fee_from_operator_1.75": {
+   "capex": 14.96,
+   "fixed": 2.39,
+   "ebitda_y2": 1.54,
+   "npv15": -12.83,
+   "npv20": -12.96,
+   "irr": null
+  }
+ },
+ "operator": {
+  "Ughelli East (NEPL) -> Transcorp Ughelli|pen0.0": {
+   "Q": 6.7,
+   "km": 3.7,
+   "sc": "operator",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 2133,
+    "pkg": 4.36,
+    "pipe_len": 4.8,
+    "pipe": 3.85,
+    "total": 10.43,
+    "screen": 6.59
+   },
+   "fixed_opex": 0.81,
+   "opex_vs_screen": 1.55,
+   "y1": {
+    "t": 1,
+    "Gin": 3.2,
+    "sales": 2.99,
+    "rev": 2.04,
+    "opex": 0.81,
+    "ebitda": 1.23
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 4.2,
+    "sales": 3.93,
+    "rev": 2.68,
+    "opex": 0.84,
+    "ebitda": 1.84
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 3.27,
+    "sales": 3.06,
+    "rev": 2.09,
+    "opex": 0.91,
+    "ebitda": 1.17
+   },
+   "npv15": -5.32,
+   "npv20": -6.13,
+   "irr": -1.4,
+   "payback": null
+  },
+  "Ughelli East (NEPL) -> Transcorp Ughelli|pen1.75": {
+   "Q": 6.7,
+   "km": 3.7,
+   "sc": "operator",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 2133,
+    "pkg": 4.36,
+    "pipe_len": 4.8,
+    "pipe": 3.85,
+    "total": 10.43,
+    "screen": 6.59
+   },
+   "fixed_opex": 0.81,
+   "opex_vs_screen": 1.55,
+   "y1": {
+    "t": 1,
+    "Gin": 3.2,
+    "sales": 2.99,
+    "rev": 2.04,
+    "opex": -2.28,
+    "ebitda": 4.32
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 4.2,
+    "sales": 3.93,
+    "rev": 2.68,
+    "opex": -3.23,
+    "ebitda": 5.91
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 3.27,
+    "sales": 3.06,
+    "rev": 2.09,
+    "opex": -2.25,
+    "ebitda": 4.34
+   },
+   "npv15": 5.45,
+   "npv20": 2.97,
+   "irr": 28.5,
+   "payback": 3.0
+  },
+  "Ughelli East (NEPL) -> Transcorp Ughelli|pen3.5": {
+   "Q": 6.7,
+   "km": 3.7,
+   "sc": "operator",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 2133,
+    "pkg": 4.36,
+    "pipe_len": 4.8,
+    "pipe": 3.85,
+    "total": 10.43,
+    "screen": 6.59
+   },
+   "fixed_opex": 0.81,
+   "opex_vs_screen": 1.55,
+   "y1": {
+    "t": 1,
+    "Gin": 3.2,
+    "sales": 2.99,
+    "rev": 2.04,
+    "opex": -5.38,
+    "ebitda": 7.42
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 4.2,
+    "sales": 3.93,
+    "rev": 2.68,
+    "opex": -7.3,
+    "ebitda": 9.98
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 3.27,
+    "sales": 3.06,
+    "rev": 2.09,
+    "opex": -5.42,
+    "ebitda": 7.51
+   },
+   "npv15": 16.01,
+   "npv20": 11.93,
+   "irr": 52.0,
+   "payback": 1.9
+  },
+  "Oredo (NEPL) -> Sapele PS|pen0.0": {
+   "Q": 15.5,
+   "km": 16.4,
+   "sc": "operator",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 4936,
+    "pkg": 8.85,
+    "pipe_len": 21.3,
+    "pipe": 19.61,
+    "total": 33.54,
+    "screen": 17.67
+   },
+   "fixed_opex": 2.06,
+   "opex_vs_screen": 2.39,
+   "y1": {
+    "t": 1,
+    "Gin": 7.4,
+    "sales": 6.92,
+    "rev": 4.72,
+    "opex": 2.06,
+    "ebitda": 2.66
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 9.72,
+    "sales": 9.09,
+    "rev": 6.2,
+    "opex": 2.12,
+    "ebitda": 4.08
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 7.57,
+    "sales": 7.08,
+    "rev": 4.83,
+    "opex": 2.32,
+    "ebitda": 2.51
+   },
+   "npv15": -21.85,
+   "npv20": -23.65,
+   "irr": -8.1,
+   "payback": null
+  },
+  "Oredo (NEPL) -> Sapele PS|pen1.75": {
+   "Q": 15.5,
+   "km": 16.4,
+   "sc": "operator",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 4936,
+    "pkg": 8.85,
+    "pipe_len": 21.3,
+    "pipe": 19.61,
+    "total": 33.54,
+    "screen": 17.67
+   },
+   "fixed_opex": 2.06,
+   "opex_vs_screen": 2.39,
+   "y1": {
+    "t": 1,
+    "Gin": 7.4,
+    "sales": 6.92,
+    "rev": 4.72,
+    "opex": -5.1,
+    "ebitda": 9.81
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 9.72,
+    "sales": 9.09,
+    "rev": 6.2,
+    "opex": -7.28,
+    "ebitda": 13.48
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 7.57,
+    "sales": 7.08,
+    "rev": 4.83,
+    "opex": -5.01,
+    "ebitda": 9.83
+   },
+   "npv15": 4.13,
+   "npv20": -1.75,
+   "irr": 18.4,
+   "payback": 4.0
+  },
+  "Oredo (NEPL) -> Sapele PS|pen3.5": {
+   "Q": 15.5,
+   "km": 16.4,
+   "sc": "operator",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 4936,
+    "pkg": 8.85,
+    "pipe_len": 21.3,
+    "pipe": 19.61,
+    "total": 33.54,
+    "screen": 17.67
+   },
+   "fixed_opex": 2.06,
+   "opex_vs_screen": 2.39,
+   "y1": {
+    "t": 1,
+    "Gin": 7.4,
+    "sales": 6.92,
+    "rev": 4.72,
+    "opex": -12.25,
+    "ebitda": 16.97
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 9.72,
+    "sales": 9.09,
+    "rev": 6.2,
+    "opex": -16.69,
+    "ebitda": 22.89
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 7.57,
+    "sales": 7.08,
+    "rev": 4.83,
+    "opex": -12.33,
+    "ebitda": 17.16
+   },
+   "npv15": 28.57,
+   "npv20": 18.98,
+   "irr": 36.6,
+   "payback": 2.5
+  },
+  "Afam Umuosi (NEPL) -> Afam VI/IV-V|pen0.0": {
+   "Q": 5.6,
+   "km": 0.9,
+   "sc": "operator",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1783,
+    "pkg": 3.78,
+    "pipe_len": 1.2,
+    "pipe": 0.94,
+    "total": 6.51,
+    "screen": 4.55
+   },
+   "fixed_opex": 0.6,
+   "opex_vs_screen": 1.27,
+   "y1": {
+    "t": 1,
+    "Gin": 2.67,
+    "sales": 2.5,
+    "rev": 1.7,
+    "opex": 0.6,
+    "ebitda": 1.1
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.51,
+    "sales": 3.28,
+    "rev": 2.24,
+    "opex": 0.62,
+    "ebitda": 1.62
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.73,
+    "sales": 2.56,
+    "rev": 1.74,
+    "opex": 0.68,
+    "ebitda": 1.07
+   },
+   "npv15": -2.19,
+   "npv20": -2.9,
+   "irr": 5.2,
+   "payback": 7.1
+  },
+  "Afam Umuosi (NEPL) -> Afam VI/IV-V|pen1.75": {
+   "Q": 5.6,
+   "km": 0.9,
+   "sc": "operator",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1783,
+    "pkg": 3.78,
+    "pipe_len": 1.2,
+    "pipe": 0.94,
+    "total": 6.51,
+    "screen": 4.55
+   },
+   "fixed_opex": 0.6,
+   "opex_vs_screen": 1.27,
+   "y1": {
+    "t": 1,
+    "Gin": 2.67,
+    "sales": 2.5,
+    "rev": 1.7,
+    "opex": -1.99,
+    "ebitda": 3.69
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.51,
+    "sales": 3.28,
+    "rev": 2.24,
+    "opex": -2.78,
+    "ebitda": 5.02
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.73,
+    "sales": 2.56,
+    "rev": 1.74,
+    "opex": -1.97,
+    "ebitda": 3.72
+   },
+   "npv15": 6.68,
+   "npv20": 4.62,
+   "irr": 40.2,
+   "payback": 2.3
+  },
+  "Afam Umuosi (NEPL) -> Afam VI/IV-V|pen3.5": {
+   "Q": 5.6,
+   "km": 0.9,
+   "sc": "operator",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1783,
+    "pkg": 3.78,
+    "pipe_len": 1.2,
+    "pipe": 0.94,
+    "total": 6.51,
+    "screen": 4.55
+   },
+   "fixed_opex": 0.6,
+   "opex_vs_screen": 1.27,
+   "y1": {
+    "t": 1,
+    "Gin": 2.67,
+    "sales": 2.5,
+    "rev": 1.7,
+    "opex": -4.57,
+    "ebitda": 6.28
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.51,
+    "sales": 3.28,
+    "rev": 2.24,
+    "opex": -6.18,
+    "ebitda": 8.42
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.73,
+    "sales": 2.56,
+    "rev": 1.74,
+    "opex": -4.62,
+    "ebitda": 6.36
+   },
+   "npv15": 15.5,
+   "npv20": 12.11,
+   "irr": 70.1,
+   "payback": 1.5
+  },
+  "Sapele (Seplat) -> Sapele PS|pen0.0": {
+   "Q": 6.0,
+   "km": 7.4,
+   "sc": "operator",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1911,
+    "pkg": 3.99,
+    "pipe_len": 9.6,
+    "pipe": 7.7,
+    "total": 14.04,
+    "screen": 8.14
+   },
+   "fixed_opex": 1.02,
+   "opex_vs_screen": 1.82,
+   "y1": {
+    "t": 1,
+    "Gin": 2.86,
+    "sales": 2.68,
+    "rev": 1.83,
+    "opex": 1.02,
+    "ebitda": 0.8
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.76,
+    "sales": 3.52,
+    "rev": 2.4,
+    "opex": 1.05,
+    "ebitda": 1.35
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.93,
+    "sales": 2.74,
+    "rev": 1.87,
+    "opex": 1.15,
+    "ebitda": 0.72
+   },
+   "npv15": -10.68,
+   "npv20": -11.17,
+   "irr": -16.0,
+   "payback": null
+  },
+  "Sapele (Seplat) -> Sapele PS|pen1.75": {
+   "Q": 6.0,
+   "km": 7.4,
+   "sc": "operator",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1911,
+    "pkg": 3.99,
+    "pipe_len": 9.6,
+    "pipe": 7.7,
+    "total": 14.04,
+    "screen": 8.14
+   },
+   "fixed_opex": 1.02,
+   "opex_vs_screen": 1.82,
+   "y1": {
+    "t": 1,
+    "Gin": 2.86,
+    "sales": 2.68,
+    "rev": 1.83,
+    "opex": -1.75,
+    "ebitda": 3.57
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.76,
+    "sales": 3.52,
+    "rev": 2.4,
+    "opex": -2.59,
+    "ebitda": 4.99
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.93,
+    "sales": 2.74,
+    "rev": 1.87,
+    "opex": -1.68,
+    "ebitda": 3.55
+   },
+   "npv15": -0.1,
+   "npv20": -2.27,
+   "irr": 14.8,
+   "payback": 4.5
+  },
+  "Sapele (Seplat) -> Sapele PS|pen3.5": {
+   "Q": 6.0,
+   "km": 7.4,
+   "sc": "operator",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1911,
+    "pkg": 3.99,
+    "pipe_len": 9.6,
+    "pipe": 7.7,
+    "total": 14.04,
+    "screen": 8.14
+   },
+   "fixed_opex": 1.02,
+   "opex_vs_screen": 1.82,
+   "y1": {
+    "t": 1,
+    "Gin": 2.86,
+    "sales": 2.68,
+    "rev": 1.83,
+    "opex": -4.52,
+    "ebitda": 6.35
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 3.76,
+    "sales": 3.52,
+    "rev": 2.4,
+    "opex": -6.23,
+    "ebitda": 8.63
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.93,
+    "sales": 2.74,
+    "rev": 1.87,
+    "opex": -4.52,
+    "ebitda": 6.39
+   },
+   "npv15": 9.36,
+   "npv20": 5.76,
+   "irr": 32.3,
+   "payback": 2.7
+  },
+  "Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|pen0.0": {
+   "Q": 8.7,
+   "km": 2.0,
+   "sc": "operator",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 2770,
+    "pkg": 5.41,
+    "pipe_len": 2.6,
+    "pipe": 2.39,
+    "total": 10.32,
+    "screen": 6.75
+   },
+   "fixed_opex": 0.83,
+   "opex_vs_screen": 1.41,
+   "y1": {
+    "t": 1,
+    "Gin": 4.15,
+    "sales": 3.88,
+    "rev": 2.65,
+    "opex": 0.83,
+    "ebitda": 1.82
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 5.46,
+    "sales": 5.1,
+    "rev": 3.48,
+    "opex": 0.86,
+    "ebitda": 2.62
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 4.25,
+    "sales": 3.97,
+    "rev": 2.71,
+    "opex": 0.93,
+    "ebitda": 1.78
+   },
+   "npv15": -3.18,
+   "npv20": -4.35,
+   "irr": 6.1,
+   "payback": 6.8
+  },
+  "Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|pen1.75": {
+   "Q": 8.7,
+   "km": 2.0,
+   "sc": "operator",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 2770,
+    "pkg": 5.41,
+    "pipe_len": 2.6,
+    "pipe": 2.39,
+    "total": 10.32,
+    "screen": 6.75
+   },
+   "fixed_opex": 0.83,
+   "opex_vs_screen": 1.41,
+   "y1": {
+    "t": 1,
+    "Gin": 4.15,
+    "sales": 3.88,
+    "rev": 2.65,
+    "opex": -3.19,
+    "ebitda": 5.84
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 5.46,
+    "sales": 5.1,
+    "rev": 3.48,
+    "opex": -4.43,
+    "ebitda": 7.91
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 4.25,
+    "sales": 3.97,
+    "rev": 2.71,
+    "opex": -3.18,
+    "ebitda": 5.89
+   },
+   "npv15": 10.58,
+   "npv20": 7.31,
+   "irr": 40.1,
+   "payback": 2.3
+  },
+  "Oben (Seplat) -> Oben GP/ELPS [Д 2 км]|pen3.5": {
+   "Q": 8.7,
+   "km": 2.0,
+   "sc": "operator",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 2770,
+    "pkg": 5.41,
+    "pipe_len": 2.6,
+    "pipe": 2.39,
+    "total": 10.32,
+    "screen": 6.75
+   },
+   "fixed_opex": 0.83,
+   "opex_vs_screen": 1.41,
+   "y1": {
+    "t": 1,
+    "Gin": 4.15,
+    "sales": 3.88,
+    "rev": 2.65,
+    "opex": -7.21,
+    "ebitda": 9.85
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 5.46,
+    "sales": 5.1,
+    "rev": 3.48,
+    "opex": -9.71,
+    "ebitda": 13.19
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 4.25,
+    "sales": 3.97,
+    "rev": 2.71,
+    "opex": -7.29,
+    "ebitda": 10.0
+   },
+   "npv15": 24.29,
+   "npv20": 18.94,
+   "irr": 69.4,
+   "payback": 1.5
+  },
+  "Utorogu (NEPL) -> Transcorp Ughelli|pen0.0": {
+   "Q": 4.3,
+   "km": 10.9,
+   "sc": "operator",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1369,
+    "pkg": 3.08,
+    "pipe_len": 14.2,
+    "pipe": 11.34,
+    "total": 16.66,
+    "screen": 9.05
+   },
+   "fixed_opex": 1.19,
+   "opex_vs_screen": 2.02,
+   "y1": {
+    "t": 1,
+    "Gin": 2.05,
+    "sales": 1.92,
+    "rev": 1.31,
+    "opex": 1.19,
+    "ebitda": 0.12
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.7,
+    "sales": 2.52,
+    "rev": 1.72,
+    "opex": 1.22,
+    "ebitda": 0.5
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.1,
+    "sales": 1.96,
+    "rev": 1.34,
+    "opex": 1.34,
+    "ebitda": 0.0
+   },
+   "npv15": -16.78,
+   "npv20": -16.69,
+   "irr": null,
+   "payback": null
+  },
+  "Utorogu (NEPL) -> Transcorp Ughelli|pen1.75": {
+   "Q": 4.3,
+   "km": 10.9,
+   "sc": "operator",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1369,
+    "pkg": 3.08,
+    "pipe_len": 14.2,
+    "pipe": 11.34,
+    "total": 16.66,
+    "screen": 9.05
+   },
+   "fixed_opex": 1.19,
+   "opex_vs_screen": 2.02,
+   "y1": {
+    "t": 1,
+    "Gin": 2.05,
+    "sales": 1.92,
+    "rev": 1.31,
+    "opex": -0.8,
+    "ebitda": 2.11
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.7,
+    "sales": 2.52,
+    "rev": 1.72,
+    "opex": -1.39,
+    "ebitda": 3.11
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.1,
+    "sales": 1.96,
+    "rev": 1.34,
+    "opex": -0.7,
+    "ebitda": 2.04
+   },
+   "npv15": -7.45,
+   "npv20": -8.83,
+   "irr": 0.3,
+   "payback": 9.8
+  },
+  "Utorogu (NEPL) -> Transcorp Ughelli|pen3.5": {
+   "Q": 4.3,
+   "km": 10.9,
+   "sc": "operator",
+   "contract": true,
+   "capex": {
+    "hp_per": 212,
+    "hp": 1369,
+    "pkg": 3.08,
+    "pipe_len": 14.2,
+    "pipe": 11.34,
+    "total": 16.66,
+    "screen": 9.05
+   },
+   "fixed_opex": 1.19,
+   "opex_vs_screen": 2.02,
+   "y1": {
+    "t": 1,
+    "Gin": 2.05,
+    "sales": 1.92,
+    "rev": 1.31,
+    "opex": -2.79,
+    "ebitda": 4.09
+   },
+   "y2": {
+    "t": 2,
+    "Gin": 2.7,
+    "sales": 2.52,
+    "rev": 1.72,
+    "opex": -4.0,
+    "ebitda": 5.72
+   },
+   "y5": {
+    "t": 5,
+    "Gin": 2.1,
+    "sales": 1.96,
+    "rev": 1.34,
+    "opex": -2.73,
+    "ebitda": 4.07
+   },
+   "npv15": -0.43,
+   "npv20": -2.91,
+   "irr": 14.3,
+   "payback": 4.6
+  }
+ },
+ "critic_repro_PV15": {
+  "DBP": 11.1,
+  "comm": 15.0
+ }
+}

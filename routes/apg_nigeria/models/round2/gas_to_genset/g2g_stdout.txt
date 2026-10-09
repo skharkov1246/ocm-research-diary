@@ -1,0 +1,330 @@
+demand: {'engines': 1.67, 'dual': 1.0, 'dual_45': 0.82, 'dual_65': 1.18}
+== generic
+Q1|20km|anchor_eng|opt|GSA                           cap  10.3 (eq  3.2 pipe  5.8 3" $0.29M/км hp 225) F 1.38(x3.32) S2 0.68 R2 2.04 E1  0.09 E2  0.47 NPV15   -9.6 NPV20   -9.6 IRR None PB None
+Q1|20km|anchor_eng|opt|pre                           cap  10.3 (eq  3.2 pipe  5.8 3" $0.29M/км hp 225) F 1.38(x3.32) S2 0.52 R2 1.58 E1 -0.26 E2  0.03 NPV15  -10.7 NPV20  -10.6 IRR None PB None
+Q1|20km|anchor_eng|base|GSA                          cap  15.2 (eq  4.4 pipe  9.0 3" $0.45M/км hp 264) F 2.06(x4.84) S2 0.53 R2 1.14 E1 -1.40 E2 -1.22 NPV15  -23.1 NPV20  -21.7 IRR None PB None
+Q1|20km|anchor_eng|base|pre                          cap  15.2 (eq  4.4 pipe  9.0 3" $0.45M/км hp 264) F 2.06(x4.84) S2 0.34 R2 0.73 E1 -1.69 E2 -1.56 NPV15  -24.0 NPV20  -22.5 IRR None PB None
+Q1|20km|anchor_eng|pess|GSA                          cap  24.1 (eq  5.2 pipe 14.9 3" $0.75M/км hp 206) F 3.17(x7.41) S2 0.28 R2 0.39 E1 -3.31 E2 -3.24 NPV15  -38.3 NPV20  -34.6 IRR None PB None
+Q1|20km|anchor_eng|pess|pre                          cap  24.1 (eq  5.2 pipe 14.9 3" $0.75M/км hp 206) F 3.17(x7.41) S2 0.25 R2 0.35 E1 -3.32 E2 -3.27 NPV15  -38.3 NPV20  -34.6 IRR None PB None
+Q1|20km|anchor_dual|opt|GSA                          cap  10.3 (eq  3.2 pipe  5.8 3" $0.29M/км hp 225) F 1.38(x3.32) S2 0.68 R2 2.04 E1  0.09 E2  0.47 NPV15   -9.6 NPV20   -9.6 IRR None PB None
+Q1|20km|anchor_dual|opt|pre                          cap  10.3 (eq  3.2 pipe  5.8 3" $0.29M/км hp 225) F 1.38(x3.32) S2 0.52 R2 1.58 E1 -0.26 E2  0.03 NPV15  -10.7 NPV20  -10.6 IRR None PB None
+Q1|20km|anchor_dual|base|GSA                         cap  15.2 (eq  4.4 pipe  9.0 3" $0.45M/км hp 264) F 2.06(x4.84) S2 0.53 R2 1.14 E1 -1.40 E2 -1.22 NPV15  -23.1 NPV20  -21.7 IRR None PB None
+Q1|20km|anchor_dual|base|pre                         cap  15.2 (eq  4.4 pipe  9.0 3" $0.45M/км hp 264) F 2.06(x4.84) S2 0.34 R2 0.73 E1 -1.69 E2 -1.56 NPV15  -24.0 NPV20  -22.5 IRR None PB None
+Q1|20km|anchor_dual|pess|GSA                         cap  24.1 (eq  5.2 pipe 14.9 3" $0.75M/км hp 206) F 3.17(x7.41) S2 0.28 R2 0.39 E1 -3.31 E2 -3.24 NPV15  -38.3 NPV20  -34.6 IRR None PB None
+Q1|20km|anchor_dual|pess|pre                         cap  24.1 (eq  5.2 pipe 14.9 3" $0.75M/км hp 206) F 3.17(x7.41) S2 0.25 R2 0.35 E1 -3.32 E2 -3.27 NPV15  -38.3 NPV20  -34.6 IRR None PB None
+Q1|20km|cluster4|opt|GSA                             cap  11.9 (eq  4.6 pipe  5.8 3" $0.29M/км hp 225) F 1.50(x3.48) S2 0.68 R2 2.04 E1 -0.03 E2  0.34 NPV15  -11.9 NPV20  -11.8 IRR None PB None
+Q1|20km|cluster4|opt|pre                             cap  11.9 (eq  4.6 pipe  5.8 3" $0.29M/км hp 225) F 1.50(x3.48) S2 0.52 R2 1.58 E1 -0.38 E2 -0.10 NPV15  -13.0 NPV20  -12.8 IRR None PB None
+Q1|20km|cluster4|base|GSA                            cap  17.8 (eq  6.7 pipe  9.0 3" $0.45M/км hp 264) F 2.24(x5.02) S2 0.53 R2 1.14 E1 -1.59 E2 -1.42 NPV15  -26.8 NPV20  -25.2 IRR None PB None
+Q1|20km|cluster4|base|pre                            cap  17.8 (eq  6.7 pipe  9.0 3" $0.45M/км hp 264) F 2.24(x5.02) S2 0.34 R2 0.73 E1 -1.89 E2 -1.76 NPV15  -27.7 NPV20  -26.0 IRR None PB None
+Q1|20km|cluster4|pess|GSA                            cap  28.5 (eq  8.9 pipe 14.9 3" $0.75M/км hp 206) F 3.50(x7.58) S2 0.28 R2 0.39 E1 -3.66 E2 -3.60 NPV15  -44.1 NPV20  -40.0 IRR None PB None
+Q1|20km|cluster4|pess|pre                            cap  28.5 (eq  8.9 pipe 14.9 3" $0.75M/км hp 206) F 3.50(x7.58) S2 0.25 R2 0.35 E1 -3.67 E2 -3.63 NPV15  -44.1 NPV20  -40.0 IRR None PB None
+Q1|20km|cluster_big|opt|GSA                          cap  14.0 (eq  6.5 pipe  5.8 3" $0.29M/км hp 225) F 1.59(x3.52) S2 0.68 R2 2.04 E1 -0.12 E2  0.25 NPV15  -14.4 NPV20  -14.3 IRR None PB None
+Q1|20km|cluster_big|opt|pre                          cap  14.0 (eq  6.5 pipe  5.8 3" $0.29M/км hp 225) F 1.59(x3.52) S2 0.52 R2 1.58 E1 -0.47 E2 -0.19 NPV15  -15.6 NPV20  -15.3 IRR None PB None
+Q1|20km|cluster_big|base|GSA                         cap  21.2 (eq  9.8 pipe  9.0 3" $0.45M/км hp 264) F 2.43(x5.09) S2 0.53 R2 1.14 E1 -1.78 E2 -1.61 NPV15  -31.2 NPV20  -29.4 IRR None PB None
+Q1|20km|cluster_big|base|pre                         cap  21.2 (eq  9.8 pipe  9.0 3" $0.45M/км hp 264) F 2.43(x5.09) S2 0.34 R2 0.73 E1 -2.07 E2 -1.96 NPV15  -32.1 NPV20  -30.2 IRR None PB None
+Q1|20km|cluster_big|pess|GSA                         cap  34.3 (eq 14.0 pipe 14.9 3" $0.75M/км hp 206) F 3.87(x7.63) S2 0.28 R2 0.39 E1 -4.05 E2 -4.00 NPV15  -51.3 NPV20  -46.7 IRR None PB None
+Q1|20km|cluster_big|pess|pre                         cap  34.3 (eq 14.0 pipe 14.9 3" $0.75M/км hp 206) F 3.87(x7.63) S2 0.25 R2 0.35 E1 -4.06 E2 -4.03 NPV15  -51.4 NPV20  -46.8 IRR None PB None
+Q1|26km|anchor_eng|opt|GSA                           cap  11.9 (eq  3.2 pipe  7.3 3" $0.28M/км hp 225) F 1.46(x3.33) S2 0.68 R2 2.04 E1  0.01 E2  0.39 NPV15  -11.6 NPV20  -11.6 IRR None PB None
+Q1|26km|anchor_eng|opt|pre                           cap  11.9 (eq  3.2 pipe  7.3 3" $0.28M/км hp 225) F 1.46(x3.33) S2 0.52 R2 1.58 E1 -0.34 E2 -0.05 NPV15  -12.8 NPV20  -12.7 IRR None PB None
+Q1|26km|anchor_eng|base|GSA                          cap  17.8 (eq  4.4 pipe 11.4 3" $0.44M/км hp 264) F 2.20(x4.93) S2 0.53 R2 1.14 E1 -1.55 E2 -1.37 NPV15  -26.5 NPV20  -25.0 IRR None PB None
+Q1|26km|anchor_eng|base|pre                          cap  17.8 (eq  4.4 pipe 11.4 3" $0.44M/км hp 264) F 2.20(x4.93) S2 0.34 R2 0.73 E1 -1.84 E2 -1.72 NPV15  -27.4 NPV20  -25.8 IRR None PB None
+Q1|26km|anchor_eng|pess|GSA                          cap  28.7 (eq  5.2 pipe 18.9 3" $0.73M/км hp 206) F 3.46(x7.66) S2 0.28 R2 0.39 E1 -3.61 E2 -3.55 NPV15  -44.0 NPV20  -39.9 IRR None PB None
+Q1|26km|anchor_eng|pess|pre                          cap  28.7 (eq  5.2 pipe 18.9 3" $0.73M/км hp 206) F 3.46(x7.66) S2 0.25 R2 0.35 E1 -3.62 E2 -3.58 NPV15  -44.0 NPV20  -39.9 IRR None PB None
+Q1|26km|anchor_dual|opt|GSA                          cap  11.9 (eq  3.2 pipe  7.3 3" $0.28M/км hp 225) F 1.46(x3.33) S2 0.68 R2 2.04 E1  0.01 E2  0.39 NPV15  -11.6 NPV20  -11.6 IRR None PB None
+Q1|26km|anchor_dual|opt|pre                          cap  11.9 (eq  3.2 pipe  7.3 3" $0.28M/км hp 225) F 1.46(x3.33) S2 0.52 R2 1.58 E1 -0.34 E2 -0.05 NPV15  -12.8 NPV20  -12.7 IRR None PB None
+Q1|26km|anchor_dual|base|GSA                         cap  17.8 (eq  4.4 pipe 11.4 3" $0.44M/км hp 264) F 2.20(x4.93) S2 0.53 R2 1.14 E1 -1.55 E2 -1.37 NPV15  -26.5 NPV20  -25.0 IRR None PB None
+Q1|26km|anchor_dual|base|pre                         cap  17.8 (eq  4.4 pipe 11.4 3" $0.44M/км hp 264) F 2.20(x4.93) S2 0.34 R2 0.73 E1 -1.84 E2 -1.72 NPV15  -27.4 NPV20  -25.8 IRR None PB None
+Q1|26km|anchor_dual|pess|GSA                         cap  28.7 (eq  5.2 pipe 18.9 3" $0.73M/км hp 206) F 3.46(x7.66) S2 0.28 R2 0.39 E1 -3.61 E2 -3.55 NPV15  -44.0 NPV20  -39.9 IRR None PB None
+Q1|26km|anchor_dual|pess|pre                         cap  28.7 (eq  5.2 pipe 18.9 3" $0.73M/км hp 206) F 3.46(x7.66) S2 0.25 R2 0.35 E1 -3.62 E2 -3.58 NPV15  -44.0 NPV20  -39.9 IRR None PB None
+Q1|26km|cluster4|opt|GSA                             cap  13.6 (eq  4.6 pipe  7.3 3" $0.28M/км hp 225) F 1.57(x3.47) S2 0.68 R2 2.04 E1 -0.11 E2  0.26 NPV15  -14.0 NPV20  -13.8 IRR None PB None
+Q1|26km|cluster4|opt|pre                             cap  13.6 (eq  4.6 pipe  7.3 3" $0.28M/км hp 225) F 1.57(x3.47) S2 0.52 R2 1.58 E1 -0.46 E2 -0.18 NPV15  -15.1 NPV20  -14.9 IRR None PB None
+Q1|26km|cluster4|base|GSA                            cap  20.4 (eq  6.7 pipe 11.4 3" $0.44M/км hp 264) F 2.39(x5.09) S2 0.53 R2 1.14 E1 -1.74 E2 -1.57 NPV15  -30.2 NPV20  -28.5 IRR None PB None
+Q1|26km|cluster4|base|pre                            cap  20.4 (eq  6.7 pipe 11.4 3" $0.44M/км hp 264) F 2.39(x5.09) S2 0.34 R2 0.73 E1 -2.04 E2 -1.92 NPV15  -31.1 NPV20  -29.3 IRR None PB None
+Q1|26km|cluster4|pess|GSA                            cap  33.1 (eq  8.9 pipe 18.9 3" $0.73M/км hp 206) F 3.78(x7.81) S2 0.28 R2 0.39 E1 -3.95 E2 -3.91 NPV15  -49.8 NPV20  -45.3 IRR None PB None
+Q1|26km|cluster4|pess|pre                            cap  33.1 (eq  8.9 pipe 18.9 3" $0.73M/км hp 206) F 3.78(x7.81) S2 0.25 R2 0.35 E1 -3.97 E2 -3.93 NPV15  -49.8 NPV20  -45.3 IRR None PB None
+Q1|26km|cluster_big|opt|GSA                          cap  15.6 (eq  6.5 pipe  7.3 3" $0.28M/км hp 225) F 1.66(x3.51) S2 0.68 R2 2.04 E1 -0.20 E2  0.17 NPV15  -16.5 NPV20  -16.3 IRR None PB None
+Q1|26km|cluster_big|opt|pre                          cap  15.6 (eq  6.5 pipe  7.3 3" $0.28M/км hp 225) F 1.66(x3.51) S2 0.52 R2 1.58 E1 -0.55 E2 -0.27 NPV15  -17.7 NPV20  -17.3 IRR None PB None
+Q1|26km|cluster_big|base|GSA                         cap  23.8 (eq  9.8 pipe 11.4 3" $0.44M/км hp 264) F 2.57(x5.15) S2 0.53 R2 1.14 E1 -1.93 E2 -1.77 NPV15  -34.6 NPV20  -32.7 IRR None PB None
+Q1|26km|cluster_big|base|pre                         cap  23.8 (eq  9.8 pipe 11.4 3" $0.44M/км hp 264) F 2.57(x5.15) S2 0.34 R2 0.73 E1 -2.23 E2 -2.11 NPV15  -35.5 NPV20  -33.5 IRR None PB None
+Q1|26km|cluster_big|pess|GSA                         cap  38.9 (eq 14.0 pipe 18.9 3" $0.73M/км hp 206) F 4.15(x7.84) S2 0.28 R2 0.39 E1 -4.34 E2 -4.31 NPV15  -57.1 NPV20  -52.1 IRR None PB None
+Q1|26km|cluster_big|pess|pre                         cap  38.9 (eq 14.0 pipe 18.9 3" $0.73M/км hp 206) F 4.15(x7.84) S2 0.25 R2 0.35 E1 -4.36 E2 -4.34 NPV15  -57.1 NPV20  -52.1 IRR None PB None
+Q5|20km|anchor_eng|opt|GSA                           cap  12.4 (eq  4.9 pipe  6.1 4" $0.30M/км hp 554) F 1.59(x3.35) S2 1.67 R2 5.07 E1  2.10 E2  3.10 NPV15   -0.2 NPV20   -2.4 IRR 14.5 PB 5.3
+Q5|20km|anchor_eng|opt|pre                           cap  12.4 (eq  4.9 pipe  6.1 4" $0.30M/км hp 554) F 1.59(x3.35) S2 1.29 R2 3.90 E1  1.24 E2  2.00 NPV15   -4.0 NPV20   -5.5 IRR 6.7 PB 7.3
+Q5|20km|anchor_eng|base|GSA                          cap  18.4 (eq  6.9 pipe  9.5 4" $0.47M/км hp 651) F 2.37(x4.85) S2 1.67 R2 3.62 E1 -0.35 E2  0.54 NPV15  -17.3 NPV20  -17.6 IRR -25.8 PB None
+Q5|20km|anchor_eng|base|pre                          cap  18.4 (eq  6.9 pipe  9.5 4" $0.47M/км hp 651) F 2.37(x4.85) S2 0.84 R2 1.81 E1 -1.39 E2 -0.99 NPV15  -24.5 NPV20  -23.5 IRR None PB None
+Q5|20km|anchor_eng|pess|GSA                          cap  30.1 (eq  9.6 pipe 15.7 4" $0.79M/км hp 728) F 3.73(x7.33) S2 1.42 R2 1.96 E1 -3.66 E2 -2.94 NPV15  -44.4 NPV20  -40.5 IRR None PB None
+Q5|20km|anchor_eng|pess|pre                          cap  30.1 (eq  9.6 pipe 15.7 4" $0.79M/км hp 728) F 3.73(x7.33) S2 0.62 R2 0.85 E1 -3.84 E2 -3.58 NPV15  -45.6 NPV20  -41.4 IRR None PB None
+Q5|20km|anchor_dual|opt|GSA                          cap  10.9 (eq  3.8 pipe  5.8 3" $0.29M/км hp 332) F 1.41(x3.34) S2 1.00 R2 3.03 E1  0.78 E2  1.37 NPV15   -4.8 NPV20   -6.0 IRR 3.0 PB 8.8
+Q5|20km|anchor_dual|opt|pre                          cap  10.9 (eq  3.8 pipe  5.8 3" $0.29M/км hp 332) F 1.41(x3.34) S2 0.77 R2 2.33 E1  0.27 E2  0.71 NPV15   -7.7 NPV20   -8.3 IRR -6.6 PB None
+Q5|20km|anchor_dual|base|GSA                         cap  16.1 (eq  5.2 pipe  9.0 3" $0.45M/км hp 389) F 2.11(x4.87) S2 1.00 R2 2.16 E1 -0.92 E2 -0.41 NPV15  -19.2 NPV20  -18.8 IRR None PB None
+Q5|20km|anchor_dual|base|pre                         cap  16.1 (eq  5.2 pipe  9.0 3" $0.45M/км hp 389) F 2.11(x4.87) S2 0.50 R2 1.08 E1 -1.54 E2 -1.32 NPV15  -23.7 NPV20  -22.4 IRR None PB None
+Q5|20km|anchor_dual|pess|GSA                         cap  26.5 (eq  7.2 pipe 14.9 3" $0.75M/км hp 435) F 3.33(x7.44) S2 1.00 R2 1.38 E1 -3.34 E2 -2.84 NPV15  -39.4 NPV20  -35.9 IRR None PB None
+Q5|20km|anchor_dual|pess|pre                         cap  26.5 (eq  7.2 pipe 14.9 3" $0.75M/км hp 435) F 3.33(x7.44) S2 0.37 R2 0.51 E1 -3.46 E2 -3.34 NPV15  -40.8 NPV20  -37.0 IRR None PB None
+Q5|20km|cluster4|opt|GSA                             cap  16.5 (eq  8.6 pipe  6.1 4" $0.30M/км hp 1052) F 1.81(x3.53) S2 3.17 R2 9.61 E1  5.23 E2  7.17 NPV15    7.2 NPV20    3.2 IRR 25.4 PB 3.5
+Q5|20km|cluster4|opt|pre                             cap  16.5 (eq  8.6 pipe  6.1 4" $0.30M/км hp 1052) F 1.81(x3.53) S2 2.44 R2 7.39 E1  3.59 E2  5.07 NPV15    2.8 NPV20   -0.7 IRR 18.9 PB 4.5
+Q5|20km|cluster4|base|GSA                            cap  24.6 (eq 12.6 pipe  9.5 4" $0.47M/км hp 1234) F 2.76(x5.07) S2 2.64 R2 5.71 E1  0.76 E2  1.90 NPV15  -21.0 NPV20  -21.4 IRR None PB None
+Q5|20km|cluster4|base|pre                            cap  24.6 (eq 12.6 pipe  9.5 4" $0.47M/км hp 1234) F 2.76(x5.07) S2 1.59 R2 3.43 E1 -0.85 E2 -0.03 NPV15  -26.4 NPV20  -26.2 IRR None PB None
+Q5|20km|cluster4|pess|GSA                            cap  37.1 (eq 15.7 pipe 15.7 4" $0.79M/км hp 1032) F 4.22(x7.51) S2 1.42 R2 1.96 E1 -4.18 E2 -3.48 NPV15  -53.5 NPV20  -48.9 IRR None PB None
+Q5|20km|cluster4|pess|pre                            cap  37.1 (eq 15.7 pipe 15.7 4" $0.79M/км hp 1032) F 4.22(x7.51) S2 1.18 R2 1.62 E1 -4.26 E2 -3.67 NPV15  -53.7 NPV20  -49.1 IRR None PB None
+Q5|20km|cluster_big|opt|GSA                          cap  20.5 (eq 11.6 pipe  6.8 6" $0.34M/км hp 1305) F 1.96(x3.61) S2 3.38 R2 10.22 E1  5.92 E2  7.58 NPV15    4.1 NPV20    0.1 IRR 20.1 PB 4.0
+Q5|20km|cluster_big|opt|pre                          cap  20.5 (eq 11.6 pipe  6.8 6" $0.34M/км hp 1305) F 1.96(x3.61) S2 3.38 R2 10.22 E1  5.92 E2  7.58 NPV15    4.1 NPV20    0.1 IRR 20.1 PB 4.0
+Q5|20km|cluster_big|base|GSA                         cap  29.6 (eq 16.2 pipe 10.6 6" $0.53M/км hp 1319) F 3.01(x5.2) S2 2.64 R2 5.71 E1  0.50 E2  1.63 NPV15  -27.5 NPV20  -27.6 IRR None PB None
+Q5|20km|cluster_big|base|pre                         cap  29.6 (eq 16.2 pipe 10.6 6" $0.53M/км hp 1319) F 3.01(x5.2) S2 2.64 R2 5.71 E1  0.50 E2  1.63 NPV15  -27.5 NPV20  -27.6 IRR None PB None
+Q5|20km|cluster_big|pess|GSA                         cap  42.8 (eq 20.7 pipe 15.7 4" $0.79M/км hp 1032) F 4.59(x7.55) S2 1.42 R2 1.96 E1 -4.57 E2 -3.88 NPV15  -60.8 NPV20  -55.7 IRR None PB None
+Q5|20km|cluster_big|pess|pre                         cap  42.8 (eq 20.7 pipe 15.7 4" $0.79M/км hp 1032) F 4.59(x7.55) S2 1.42 R2 1.96 E1 -4.57 E2 -3.88 NPV15  -60.8 NPV20  -55.7 IRR None PB None
+Q5|26km|anchor_eng|opt|GSA                           cap  14.2 (eq  4.9 pipe  7.7 4" $0.30M/км hp 554) F 1.67(x3.36) S2 1.67 R2 5.07 E1  2.02 E2  3.02 NPV15   -2.0 NPV20   -4.2 IRR 11.5 PB 6.0
+Q5|26km|anchor_eng|opt|pre                           cap  14.2 (eq  4.9 pipe  7.7 4" $0.30M/км hp 554) F 1.67(x3.36) S2 1.29 R2 3.90 E1  1.16 E2  1.92 NPV15   -5.8 NPV20   -7.3 IRR 4.1 PB 8.3
+Q5|26km|anchor_eng|base|GSA                          cap  21.2 (eq  6.9 pipe 12.0 4" $0.46M/км hp 651) F 2.52(x4.93) S2 1.67 R2 3.62 E1 -0.50 E2  0.38 NPV15  -20.9 NPV20  -21.0 IRR None PB None
+Q5|26km|anchor_eng|base|pre                          cap  21.2 (eq  6.9 pipe 12.0 4" $0.46M/км hp 651) F 2.52(x4.93) S2 0.84 R2 1.81 E1 -1.55 E2 -1.15 NPV15  -28.1 NPV20  -27.0 IRR None PB None
+Q5|26km|anchor_eng|pess|GSA                          cap  34.9 (eq  9.6 pipe 20.0 4" $0.77M/км hp 728) F 4.02(x7.57) S2 1.42 R2 1.96 E1 -3.97 E2 -3.26 NPV15  -50.4 NPV20  -46.1 IRR None PB None
+Q5|26km|anchor_eng|pess|pre                          cap  34.9 (eq  9.6 pipe 20.0 4" $0.77M/км hp 728) F 4.02(x7.57) S2 0.62 R2 0.85 E1 -4.15 E2 -3.90 NPV15  -51.6 NPV20  -47.1 IRR None PB None
+Q5|26km|anchor_dual|opt|GSA                          cap  12.6 (eq  3.8 pipe  7.3 3" $0.28M/км hp 332) F 1.48(x3.34) S2 1.00 R2 3.03 E1  0.71 E2  1.29 NPV15   -6.6 NPV20   -7.7 IRR 0.4 PB 9.8
+Q5|26km|anchor_dual|opt|pre                          cap  12.6 (eq  3.8 pipe  7.3 3" $0.28M/км hp 332) F 1.48(x3.34) S2 0.77 R2 2.33 E1  0.19 E2  0.63 NPV15   -9.8 NPV20  -10.3 IRR -10.3 PB None
+Q5|26km|anchor_dual|base|GSA                         cap  18.7 (eq  5.2 pipe 11.4 3" $0.44M/км hp 389) F 2.25(x4.95) S2 1.00 R2 2.16 E1 -1.07 E2 -0.56 NPV15  -22.6 NPV20  -22.0 IRR None PB None
+Q5|26km|anchor_dual|base|pre                         cap  18.7 (eq  5.2 pipe 11.4 3" $0.44M/км hp 389) F 2.25(x4.95) S2 0.50 R2 1.08 E1 -1.69 E2 -1.48 NPV15  -27.1 NPV20  -25.7 IRR None PB None
+Q5|26km|anchor_dual|pess|GSA                         cap  31.0 (eq  7.2 pipe 18.9 3" $0.73M/км hp 435) F 3.61(x7.68) S2 1.00 R2 1.38 E1 -3.64 E2 -3.14 NPV15  -45.1 NPV20  -41.2 IRR None PB None
+Q5|26km|anchor_dual|pess|pre                         cap  31.0 (eq  7.2 pipe 18.9 3" $0.73M/км hp 435) F 3.61(x7.68) S2 0.37 R2 0.51 E1 -3.76 E2 -3.65 NPV15  -46.5 NPV20  -42.4 IRR None PB None
+Q5|26km|cluster4|opt|GSA                             cap  19.2 (eq  8.6 pipe  8.6 6" $0.33M/км hp 1052) F 1.91(x3.57) S2 3.17 R2 9.61 E1  5.12 E2  7.06 NPV15    4.6 NPV20    0.6 IRR 20.8 PB 4.0
+Q5|26km|cluster4|opt|pre                             cap  19.2 (eq  8.6 pipe  8.6 6" $0.33M/км hp 1052) F 1.91(x3.57) S2 2.44 R2 7.39 E1  3.49 E2  4.96 NPV15    0.1 NPV20   -3.3 IRR 15.2 PB 5.2
+Q5|26km|cluster4|base|GSA                            cap  28.9 (eq 12.6 pipe 13.4 6" $0.52M/км hp 1234) F 2.96(x5.23) S2 2.64 R2 5.71 E1  0.55 E2  1.68 NPV15  -26.4 NPV20  -26.6 IRR None PB None
+Q5|26km|cluster4|base|pre                            cap  28.9 (eq 12.6 pipe 13.4 6" $0.52M/км hp 1234) F 2.96(x5.23) S2 1.59 R2 3.43 E1 -1.06 E2 -0.24 NPV15  -31.8 NPV20  -31.4 IRR None PB None
+Q5|26km|cluster4|pess|GSA                            cap  41.9 (eq 15.7 pipe 20.0 4" $0.77M/км hp 1032) F 4.51(x7.72) S2 1.42 R2 1.96 E1 -4.49 E2 -3.80 NPV15  -59.5 NPV20  -54.6 IRR None PB None
+Q5|26km|cluster4|pess|pre                            cap  41.9 (eq 15.7 pipe 20.0 4" $0.77M/км hp 1032) F 4.51(x7.72) S2 1.18 R2 1.62 E1 -4.57 E2 -3.99 NPV15  -59.8 NPV20  -54.8 IRR None PB None
+Q5|26km|cluster_big|opt|GSA                          cap  22.4 (eq 11.6 pipe  8.6 6" $0.33M/км hp 1305) F 2.05(x3.62) S2 3.38 R2 10.22 E1  5.83 E2  7.49 NPV15    2.2 NPV20   -1.9 IRR 17.5 PB 4.4
+Q5|26km|cluster_big|opt|pre                          cap  22.4 (eq 11.6 pipe  8.6 6" $0.33M/км hp 1305) F 2.05(x3.62) S2 3.38 R2 10.22 E1  5.83 E2  7.49 NPV15    2.2 NPV20   -1.9 IRR 17.5 PB 4.4
+Q5|26km|cluster_big|base|GSA                         cap  32.7 (eq 16.2 pipe 13.4 6" $0.52M/км hp 1319) F 3.17(x5.28) S2 2.64 R2 5.71 E1  0.33 E2  1.46 NPV15  -31.5 NPV20  -31.5 IRR None PB None
+Q5|26km|cluster_big|base|pre                         cap  32.7 (eq 16.2 pipe 13.4 6" $0.52M/км hp 1319) F 3.17(x5.28) S2 2.64 R2 5.71 E1  0.33 E2  1.46 NPV15  -31.5 NPV20  -31.5 IRR None PB None
+Q5|26km|cluster_big|pess|GSA                         cap  47.7 (eq 20.7 pipe 20.0 4" $0.77M/км hp 1032) F 4.88(x7.75) S2 1.42 R2 1.96 E1 -4.88 E2 -4.20 NPV15  -66.8 NPV20  -61.3 IRR None PB None
+Q5|26km|cluster_big|pess|pre                         cap  47.7 (eq 20.7 pipe 20.0 4" $0.77M/км hp 1032) F 4.88(x7.75) S2 1.42 R2 1.96 E1 -4.88 E2 -4.20 NPV15  -66.8 NPV20  -61.3 IRR None PB None
+Q15|20km|anchor_eng|opt|GSA                          cap  12.4 (eq  4.9 pipe  6.1 4" $0.30M/км hp 554) F 1.59(x3.35) S2 1.67 R2 5.07 E1  2.10 E2  3.10 NPV15   -0.2 NPV20   -2.4 IRR 14.5 PB 5.3
+Q15|20km|anchor_eng|opt|pre                          cap  12.4 (eq  4.9 pipe  6.1 4" $0.30M/км hp 554) F 1.59(x3.35) S2 1.29 R2 3.90 E1  1.24 E2  2.00 NPV15   -4.0 NPV20   -5.5 IRR 6.7 PB 7.3
+Q15|20km|anchor_eng|base|GSA                         cap  18.4 (eq  6.9 pipe  9.5 4" $0.47M/км hp 651) F 2.37(x4.85) S2 1.67 R2 3.62 E1 -0.35 E2  0.54 NPV15  -17.0 NPV20  -17.4 IRR -18.4 PB None
+Q15|20km|anchor_eng|base|pre                         cap  18.4 (eq  6.9 pipe  9.5 4" $0.47M/км hp 651) F 2.37(x4.85) S2 0.84 R2 1.81 E1 -1.39 E2 -0.99 NPV15  -24.5 NPV20  -23.5 IRR None PB None
+Q15|20km|anchor_eng|pess|GSA                         cap  30.1 (eq  9.6 pipe 15.7 4" $0.79M/км hp 728) F 3.73(x7.33) S2 1.67 R2 2.31 E1 -3.64 E2 -2.74 NPV15  -42.7 NPV20  -39.2 IRR None PB None
+Q15|20km|anchor_eng|pess|pre                         cap  30.1 (eq  9.6 pipe 15.7 4" $0.79M/км hp 728) F 3.73(x7.33) S2 0.62 R2 0.85 E1 -3.84 E2 -3.58 NPV15  -45.5 NPV20  -41.4 IRR None PB None
+Q15|20km|anchor_dual|opt|GSA                         cap  10.9 (eq  3.8 pipe  5.8 3" $0.29M/км hp 332) F 1.41(x3.34) S2 1.00 R2 3.03 E1  0.78 E2  1.37 NPV15   -4.8 NPV20   -6.0 IRR 3.0 PB 8.8
+Q15|20km|anchor_dual|opt|pre                         cap  10.9 (eq  3.8 pipe  5.8 3" $0.29M/км hp 332) F 1.41(x3.34) S2 0.77 R2 2.33 E1  0.27 E2  0.71 NPV15   -7.7 NPV20   -8.3 IRR -6.6 PB None
+Q15|20km|anchor_dual|base|GSA                        cap  16.1 (eq  5.2 pipe  9.0 3" $0.45M/км hp 389) F 2.11(x4.87) S2 1.00 R2 2.16 E1 -0.92 E2 -0.41 NPV15  -19.2 NPV20  -18.8 IRR None PB None
+Q15|20km|anchor_dual|base|pre                        cap  16.1 (eq  5.2 pipe  9.0 3" $0.45M/км hp 389) F 2.11(x4.87) S2 0.50 R2 1.08 E1 -1.54 E2 -1.32 NPV15  -23.7 NPV20  -22.4 IRR None PB None
+Q15|20km|anchor_dual|pess|GSA                        cap  26.5 (eq  7.2 pipe 14.9 3" $0.75M/км hp 435) F 3.33(x7.44) S2 1.00 R2 1.38 E1 -3.34 E2 -2.84 NPV15  -39.1 NPV20  -35.7 IRR None PB None
+Q15|20km|anchor_dual|pess|pre                        cap  26.5 (eq  7.2 pipe 14.9 3" $0.75M/км hp 435) F 3.33(x7.44) S2 0.37 R2 0.51 E1 -3.46 E2 -3.34 NPV15  -40.8 NPV20  -37.0 IRR None PB None
+Q15|20km|cluster4|opt|GSA                            cap  16.5 (eq  8.6 pipe  6.1 4" $0.30M/км hp 1052) F 1.81(x3.53) S2 3.17 R2 9.61 E1  5.23 E2  7.17 NPV15   10.0 NPV20    5.2 IRR 28.0 PB 3.5
+Q15|20km|cluster4|opt|pre                            cap  16.5 (eq  8.6 pipe  6.1 4" $0.30M/км hp 1052) F 1.81(x3.53) S2 2.44 R2 7.39 E1  3.59 E2  5.07 NPV15    2.9 NPV20   -0.6 IRR 19.1 PB 4.5
+Q15|20km|cluster4|base|GSA                           cap  24.6 (eq 12.6 pipe  9.5 4" $0.47M/км hp 1234) F 2.76(x5.07) S2 3.17 R2 6.86 E1  1.14 E2  2.87 NPV15  -12.6 NPV20  -14.9 IRR 1.1 PB 9.5
+Q15|20km|cluster4|base|pre                           cap  24.6 (eq 12.6 pipe  9.5 4" $0.47M/км hp 1234) F 2.76(x5.07) S2 1.59 R2 3.43 E1 -0.85 E2 -0.03 NPV15  -26.2 NPV20  -26.0 IRR -58.8 PB None
+Q15|20km|cluster4|pess|GSA                           cap  39.9 (eq 18.1 pipe 15.7 4" $0.79M/км hp 1380) F 4.40(x7.53) S2 3.17 R2 4.37 E1 -4.09 E2 -2.28 NPV15  -52.5 NPV20  -48.7 IRR None PB None
+Q15|20km|cluster4|pess|pre                           cap  39.9 (eq 18.1 pipe 15.7 4" $0.79M/км hp 1380) F 4.40(x7.53) S2 1.18 R2 1.62 E1 -4.45 E2 -3.87 NPV15  -56.7 NPV20  -52.1 IRR None PB None
+Q15|20km|cluster_big|opt|GSA                         cap  23.6 (eq 14.4 pipe  6.8 6" $0.34M/км hp 1989) F 2.27(x3.6) S2 6.00 R2 18.17 E1 11.06 E2 14.77 NPV15   29.5 NPV20   20.0 IRR 40.0 PB 2.6
+Q15|20km|cluster_big|opt|pre                         cap  23.6 (eq 14.4 pipe  6.8 6" $0.34M/км hp 1989) F 2.27(x3.6) S2 4.62 R2 13.98 E1  7.97 E2 10.80 NPV15   16.2 NPV20    9.1 IRR 29.6 PB 3.3
+Q15|20km|cluster_big|base|GSA                        cap  35.5 (eq 21.5 pipe 10.6 6" $0.53M/км hp 2334) F 3.55(x5.14) S2 6.00 R2 12.97 E1  3.87 E2  7.20 NPV15   -9.9 NPV20  -14.3 IRR 7.4 PB 6.6
+Q15|20km|cluster_big|base|pre                        cap  35.5 (eq 21.5 pipe 10.6 6" $0.53M/км hp 2334) F 3.55(x5.14) S2 3.00 R2 6.49 E1  0.11 E2  1.72 NPV15  -28.8 NPV20  -30.2 IRR -11.6 PB None
+Q15|20km|cluster_big|pess|GSA                        cap  57.2 (eq 31.4 pipe 17.5 6" $0.88M/км hp 2610) F 5.74(x7.53) S2 4.27 R2 5.88 E1 -5.20 E2 -2.87 NPV15  -74.5 NPV20  -69.1 IRR None PB None
+Q15|20km|cluster_big|pess|pre                        cap  57.2 (eq 31.4 pipe 17.5 6" $0.88M/км hp 2610) F 5.74(x7.53) S2 2.22 R2 3.06 E1 -5.68 E2 -4.50 NPV15  -77.2 NPV20  -71.3 IRR None PB None
+Q15|26km|anchor_eng|opt|GSA                          cap  14.2 (eq  4.9 pipe  7.7 4" $0.30M/км hp 554) F 1.67(x3.36) S2 1.67 R2 5.07 E1  2.02 E2  3.02 NPV15   -2.0 NPV20   -4.2 IRR 11.5 PB 6.0
+Q15|26km|anchor_eng|opt|pre                          cap  14.2 (eq  4.9 pipe  7.7 4" $0.30M/км hp 554) F 1.67(x3.36) S2 1.29 R2 3.90 E1  1.16 E2  1.92 NPV15   -5.8 NPV20   -7.3 IRR 4.1 PB 8.3
+Q15|26km|anchor_eng|base|GSA                         cap  21.2 (eq  6.9 pipe 12.0 4" $0.46M/км hp 651) F 2.52(x4.93) S2 1.67 R2 3.62 E1 -0.50 E2  0.38 NPV15  -20.6 NPV20  -20.8 IRR -24.0 PB None
+Q15|26km|anchor_eng|base|pre                         cap  21.2 (eq  6.9 pipe 12.0 4" $0.46M/км hp 651) F 2.52(x4.93) S2 0.84 R2 1.81 E1 -1.55 E2 -1.15 NPV15  -28.1 NPV20  -27.0 IRR None PB None
+Q15|26km|anchor_eng|pess|GSA                         cap  34.9 (eq  9.6 pipe 20.0 4" $0.77M/км hp 728) F 4.02(x7.57) S2 1.67 R2 2.31 E1 -3.96 E2 -3.06 NPV15  -48.7 NPV20  -44.9 IRR None PB None
+Q15|26km|anchor_eng|pess|pre                         cap  34.9 (eq  9.6 pipe 20.0 4" $0.77M/км hp 728) F 4.02(x7.57) S2 0.62 R2 0.85 E1 -4.15 E2 -3.90 NPV15  -51.6 NPV20  -47.0 IRR None PB None
+Q15|26km|anchor_dual|opt|GSA                         cap  12.6 (eq  3.8 pipe  7.3 3" $0.28M/км hp 332) F 1.48(x3.34) S2 1.00 R2 3.03 E1  0.71 E2  1.29 NPV15   -6.6 NPV20   -7.7 IRR 0.4 PB 9.8
+Q15|26km|anchor_dual|opt|pre                         cap  12.6 (eq  3.8 pipe  7.3 3" $0.28M/км hp 332) F 1.48(x3.34) S2 0.77 R2 2.33 E1  0.19 E2  0.63 NPV15   -9.8 NPV20  -10.3 IRR -10.3 PB None
+Q15|26km|anchor_dual|base|GSA                        cap  18.7 (eq  5.2 pipe 11.4 3" $0.44M/км hp 389) F 2.25(x4.95) S2 1.00 R2 2.16 E1 -1.07 E2 -0.56 NPV15  -22.6 NPV20  -22.0 IRR None PB None
+Q15|26km|anchor_dual|base|pre                        cap  18.7 (eq  5.2 pipe 11.4 3" $0.44M/км hp 389) F 2.25(x4.95) S2 0.50 R2 1.08 E1 -1.69 E2 -1.48 NPV15  -27.1 NPV20  -25.7 IRR None PB None
+Q15|26km|anchor_dual|pess|GSA                        cap  31.0 (eq  7.2 pipe 18.9 3" $0.73M/км hp 435) F 3.61(x7.68) S2 1.00 R2 1.38 E1 -3.64 E2 -3.14 NPV15  -44.8 NPV20  -41.0 IRR None PB None
+Q15|26km|anchor_dual|pess|pre                        cap  31.0 (eq  7.2 pipe 18.9 3" $0.73M/км hp 435) F 3.61(x7.68) S2 0.37 R2 0.51 E1 -3.76 E2 -3.65 NPV15  -46.5 NPV20  -42.4 IRR None PB None
+Q15|26km|cluster4|opt|GSA                            cap  19.2 (eq  8.6 pipe  8.6 6" $0.33M/км hp 1052) F 1.91(x3.57) S2 3.17 R2 9.61 E1  5.12 E2  7.06 NPV15    7.3 NPV20    2.6 IRR 23.5 PB 4.0
+Q15|26km|cluster4|opt|pre                            cap  19.2 (eq  8.6 pipe  8.6 6" $0.33M/км hp 1052) F 1.91(x3.57) S2 2.44 R2 7.39 E1  3.49 E2  4.96 NPV15    0.3 NPV20   -3.2 IRR 15.4 PB 5.2
+Q15|26km|cluster4|base|GSA                           cap  28.9 (eq 12.6 pipe 13.4 6" $0.52M/км hp 1234) F 2.96(x5.23) S2 3.17 R2 6.86 E1  0.93 E2  2.65 NPV15  -17.3 NPV20  -19.6 IRR -1.9 PB None
+Q15|26km|cluster4|base|pre                           cap  28.9 (eq 12.6 pipe 13.4 6" $0.52M/км hp 1234) F 2.96(x5.23) S2 1.59 R2 3.43 E1 -1.06 E2 -0.24 NPV15  -31.6 NPV20  -31.2 IRR None PB None
+Q15|26km|cluster4|pess|GSA                           cap  47.4 (eq 18.1 pipe 22.3 6" $0.86M/км hp 1380) F 4.81(x7.92) S2 3.17 R2 4.37 E1 -4.51 E2 -2.72 NPV15  -61.5 NPV20  -57.2 IRR None PB None
+Q15|26km|cluster4|pess|pre                           cap  47.4 (eq 18.1 pipe 22.3 6" $0.86M/км hp 1380) F 4.81(x7.92) S2 1.18 R2 1.62 E1 -4.88 E2 -4.31 NPV15  -65.8 NPV20  -60.6 IRR None PB None
+Q15|26km|cluster_big|opt|GSA                         cap  25.6 (eq 14.4 pipe  8.6 6" $0.33M/км hp 1989) F 2.36(x3.6) S2 6.00 R2 18.17 E1 10.98 E2 14.68 NPV15   27.6 NPV20   18.0 IRR 36.9 PB 2.8
+Q15|26km|cluster_big|opt|pre                         cap  25.6 (eq 14.4 pipe  8.6 6" $0.33M/км hp 1989) F 2.36(x3.6) S2 4.62 R2 13.98 E1  7.88 E2 10.71 NPV15   14.2 NPV20    7.1 IRR 27.1 PB 3.6
+Q15|26km|cluster_big|base|GSA                        cap  38.6 (eq 21.5 pipe 13.4 6" $0.52M/км hp 2334) F 3.71(x5.21) S2 6.00 R2 12.97 E1  3.70 E2  7.02 NPV15  -13.2 NPV20  -17.6 IRR 5.6 PB 7.2
+Q15|26km|cluster_big|base|pre                        cap  38.6 (eq 21.5 pipe 13.4 6" $0.52M/км hp 2334) F 3.71(x5.21) S2 3.00 R2 6.49 E1 -0.06 E2  1.54 NPV15  -32.9 NPV20  -34.1 IRR -14.1 PB None
+Q15|26km|cluster_big|pess|GSA                        cap  62.7 (eq 31.4 pipe 22.3 6" $0.86M/км hp 2610) F 6.06(x7.72) S2 4.27 R2 5.88 E1 -5.54 E2 -3.22 NPV15  -81.2 NPV20  -75.4 IRR None PB None
+Q15|26km|cluster_big|pess|pre                        cap  62.7 (eq 31.4 pipe 22.3 6" $0.86M/км hp 2610) F 6.06(x7.72) S2 2.22 R2 3.06 E1 -6.02 E2 -4.85 NPV15  -83.9 NPV20  -77.6 IRR None PB None
+== named
+Ughelli East (NEPL) -> Warri|anchor_eng|opt          cap  13.9 (eq  4.9 pipe  7.4 4" $0.30M/км hp 554) F 1.65(x3.36) S2 1.67 R2 5.07 E1  2.03 E2  3.04 NPV15   -1.7 NPV20   -3.9 IRR 12.0 PB 5.9
+Ughelli East (NEPL) -> Warri|anchor_eng|base         cap  21.6 (eq  6.9 pipe 12.5 4" $0.46M/км hp 651) F 2.55(x4.95) S2 1.67 R2 3.62 E1 -0.53 E2  0.35 NPV15  -21.2 NPV20  -21.4 IRR -25.1 PB None
+Ughelli East (NEPL) -> Warri|anchor_eng|pess         cap  39.1 (eq  9.6 pipe 23.6 4" $0.76M/км hp 728) F 4.27(x7.76) S2 1.67 R2 2.31 E1 -4.23 E2 -3.33 NPV15  -55.0 NPV20  -50.5 IRR None PB None
+Ughelli East (NEPL) -> Warri|anchor_dual|opt         cap  12.3 (eq  3.8 pipe  7.0 3" $0.28M/км hp 332) F 1.47(x3.34) S2 1.00 R2 3.03 E1  0.72 E2  1.30 NPV15   -6.3 NPV20   -7.4 IRR 0.8 PB 9.7
+Ughelli East (NEPL) -> Warri|anchor_dual|base        cap  19.2 (eq  5.2 pipe 11.8 3" $0.44M/км hp 389) F 2.28(x4.96) S2 1.00 R2 2.16 E1 -1.09 E2 -0.59 NPV15  -23.2 NPV20  -22.6 IRR None PB None
+Ughelli East (NEPL) -> Warri|anchor_dual|pess        cap  35.0 (eq  7.2 pipe 22.4 3" $0.72M/км hp 435) F 3.85(x7.88) S2 1.00 R2 1.38 E1 -3.90 E2 -3.41 NPV15  -49.9 NPV20  -45.8 IRR None PB None
+Ughelli East (NEPL) -> Warri|cluster4|opt            cap  18.9 (eq  8.6 pipe  8.3 6" $0.33M/км hp 1052) F 1.90(x3.57) S2 3.17 R2 9.61 E1  5.14 E2  7.07 NPV15    7.3 NPV20    2.7 IRR 23.7 PB 3.9
+Ughelli East (NEPL) -> Warri|cluster4|base           cap  29.4 (eq 12.6 pipe 13.9 6" $0.52M/км hp 1234) F 2.99(x5.24) S2 3.17 R2 6.86 E1  0.90 E2  2.62 NPV15  -22.8 NPV20  -23.7 IRR -18.8 PB None
+Ughelli East (NEPL) -> Warri|cluster4|pess           cap  51.5 (eq 17.6 pipe 26.4 6" $0.85M/км hp 1300) F 5.04(x8.11) S2 1.79 R2 2.47 E1 -4.97 E2 -4.08 NPV15  -70.5 NPV20  -64.9 IRR None PB None
+Ughelli East (NEPL) -> Ughelli|anchor_eng|opt        cap   8.7 (eq  4.9 pipe  2.6 3" $0.34M/км hp 554) F 1.42(x3.32) S2 1.67 R2 5.07 E1  2.27 E2  3.28 NPV15    3.5 NPV20    1.3 IRR 23.7 PB 3.9
+Ughelli East (NEPL) -> Ughelli|anchor_eng|base       cap  12.9 (eq  6.9 pipe  4.3 3" $0.52M/км hp 651) F 2.06(x4.63) S2 1.67 R2 3.62 E1 -0.03 E2  0.86 NPV15   -9.7 NPV20  -10.4 IRR -7.7 PB None
+Ughelli East (NEPL) -> Ughelli|anchor_eng|pess       cap  21.4 (eq  9.6 pipe  8.1 3" $0.83M/км hp 728) F 3.20(x6.82) S2 1.67 R2 2.31 E1 -3.09 E2 -2.16 NPV15  -32.9 NPV20  -29.9 IRR None PB None
+Ughelli East (NEPL) -> Ughelli|anchor_dual|opt       cap   7.5 (eq  3.8 pipe  2.6 3" $0.34M/км hp 332) F 1.25(x3.32) S2 1.00 R2 3.03 E1  0.95 E2  1.54 NPV15   -1.4 NPV20   -2.5 IRR 10.5 PB 6.2
+Ughelli East (NEPL) -> Ughelli|anchor_dual|base      cap  11.2 (eq  5.2 pipe  4.3 3" $0.52M/км hp 389) F 1.82(x4.67) S2 1.00 R2 2.16 E1 -0.62 E2 -0.10 NPV15  -12.6 NPV20  -12.4 IRR -97.9 PB None
+Ughelli East (NEPL) -> Ughelli|anchor_dual|pess      cap  18.7 (eq  7.2 pipe  8.1 3" $0.83M/км hp 435) F 2.84(x6.95) S2 1.00 R2 1.38 E1 -2.83 E2 -2.31 NPV15  -29.4 NPV20  -26.7 IRR None PB None
+Ughelli East (NEPL) -> Ughelli|cluster4|opt          cap  12.9 (eq  8.6 pipe  2.7 4" $0.35M/км hp 1052) F 1.64(x3.53) S2 3.17 R2 9.61 E1  5.39 E2  7.34 NPV15   13.2 NPV20    8.5 IRR 36.1 PB 2.8
+Ughelli East (NEPL) -> Ughelli|cluster4|base         cap  19.4 (eq 12.6 pipe  4.5 4" $0.54M/км hp 1234) F 2.46(x4.91) S2 3.17 R2 6.86 E1  1.44 E2  3.19 NPV15  -10.4 NPV20  -11.8 IRR -3.1 PB None
+Ughelli East (NEPL) -> Ughelli|cluster4|pess         cap  31.0 (eq 17.6 pipe  8.5 4" $0.87M/км hp 1300) F 3.85(x7.12) S2 1.79 R2 2.47 E1 -3.71 E2 -2.78 NPV15  -45.2 NPV20  -41.3 IRR None PB None
+Afiesere (Shoreline) -> Ughelli|anchor_eng|opt       cap   8.1 (eq  4.1 pipe  2.8 3" $0.33M/км hp 391) F 1.27(x3.33) S2 1.01 R2 3.07 E1  1.07 E2  1.55 NPV15   -3.0 NPV20   -3.8 IRR 4.0 PB 7.8
+Afiesere (Shoreline) -> Ughelli|anchor_eng|base      cap  11.5 (eq  5.3 pipe  4.7 3" $0.51M/км hp 396) F 1.84(x4.68) S2 0.79 R2 1.71 E1 -0.82 E2 -0.50 NPV15  -16.3 NPV20  -15.4 IRR None PB None
+Afiesere (Shoreline) -> Ughelli|anchor_eng|pess      cap  18.1 (eq  6.1 pipe  8.7 3" $0.82M/км hp 309) F 2.80(x6.97) S2 0.43 R2 0.59 E1 -2.88 E2 -2.72 NPV15  -30.4 NPV20  -27.3 IRR None PB None
+Afiesere (Shoreline) -> Ughelli|anchor_dual|opt      cap   7.7 (eq  3.8 pipe  2.8 3" $0.33M/км hp 332) F 1.26(x3.32) S2 1.00 R2 3.03 E1  0.94 E2  1.53 NPV15   -2.7 NPV20   -3.5 IRR 4.7 PB 7.5
+Afiesere (Shoreline) -> Ughelli|anchor_dual|base     cap  11.5 (eq  5.2 pipe  4.7 3" $0.51M/км hp 389) F 1.84(x4.68) S2 0.79 R2 1.71 E1 -0.81 E2 -0.50 NPV15  -16.2 NPV20  -15.3 IRR None PB None
+Afiesere (Shoreline) -> Ughelli|anchor_dual|pess     cap  18.1 (eq  6.1 pipe  8.7 3" $0.82M/км hp 309) F 2.80(x6.97) S2 0.43 R2 0.59 E1 -2.88 E2 -2.72 NPV15  -30.4 NPV20  -27.3 IRR None PB None
+Afiesere (Shoreline) -> Ughelli|cluster4|opt         cap   9.7 (eq  5.5 pipe  2.8 3" $0.33M/км hp 391) F 1.39(x3.5) S2 1.01 R2 3.07 E1  0.95 E2  1.43 NPV15   -4.9 NPV20   -5.7 IRR -1.2 PB None
+Afiesere (Shoreline) -> Ughelli|cluster4|base        cap  14.2 (eq  7.6 pipe  4.7 3" $0.51M/км hp 396) F 2.03(x4.88) S2 0.79 R2 1.71 E1 -1.01 E2 -0.71 NPV15  -20.0 NPV20  -18.9 IRR None PB None
+Afiesere (Shoreline) -> Ughelli|cluster4|pess        cap  22.5 (eq  9.9 pipe  8.7 3" $0.82M/км hp 309) F 3.13(x7.18) S2 0.43 R2 0.59 E1 -3.23 E2 -3.08 NPV15  -36.3 NPV20  -32.7 IRR None PB None
+Eriemu (Shoreline) -> Ughelli|anchor_eng|opt         cap   7.9 (eq  3.5 pipe  3.2 3" $0.32M/км hp 287) F 1.27(x3.32) S2 0.74 R2 2.25 E1  0.44 E2  0.78 NPV15   -5.6 NPV20   -5.9 IRR -12.9 PB None
+Eriemu (Shoreline) -> Ughelli|anchor_eng|base        cap  11.5 (eq  4.6 pipe  5.3 3" $0.49M/км hp 290) F 1.84(x4.69) S2 0.58 R2 1.26 E1 -1.10 E2 -0.89 NPV15  -17.8 NPV20  -16.6 IRR None PB None
+Eriemu (Shoreline) -> Ughelli|anchor_eng|pess        cap  18.7 (eq  5.4 pipe 10.0 3" $0.79M/км hp 227) F 2.84(x7.05) S2 0.31 R2 0.43 E1 -2.95 E2 -2.85 NPV15  -31.4 NPV20  -28.2 IRR None PB None
+Eriemu (Shoreline) -> Ughelli|anchor_dual|opt        cap   7.9 (eq  3.5 pipe  3.2 3" $0.32M/км hp 287) F 1.27(x3.32) S2 0.74 R2 2.25 E1  0.44 E2  0.78 NPV15   -5.6 NPV20   -5.9 IRR -12.9 PB None
+Eriemu (Shoreline) -> Ughelli|anchor_dual|base       cap  11.5 (eq  4.6 pipe  5.3 3" $0.49M/км hp 290) F 1.84(x4.69) S2 0.58 R2 1.26 E1 -1.10 E2 -0.89 NPV15  -17.8 NPV20  -16.6 IRR None PB None
+Eriemu (Shoreline) -> Ughelli|anchor_dual|pess       cap  18.7 (eq  5.4 pipe 10.0 3" $0.79M/км hp 227) F 2.84(x7.05) S2 0.31 R2 0.43 E1 -2.95 E2 -2.85 NPV15  -31.4 NPV20  -28.2 IRR None PB None
+Eriemu (Shoreline) -> Ughelli|cluster4|opt           cap   9.6 (eq  5.0 pipe  3.2 3" $0.32M/км hp 287) F 1.38(x3.49) S2 0.74 R2 2.25 E1  0.32 E2  0.66 NPV15   -7.9 NPV20   -8.2 IRR -26.2 PB None
+Eriemu (Shoreline) -> Ughelli|cluster4|base          cap  14.1 (eq  6.9 pipe  5.3 3" $0.49M/км hp 290) F 2.03(x4.89) S2 0.58 R2 1.26 E1 -1.30 E2 -1.09 NPV15  -21.5 NPV20  -20.2 IRR None PB None
+Eriemu (Shoreline) -> Ughelli|cluster4|pess          cap  23.1 (eq  9.1 pipe 10.0 3" $0.79M/км hp 227) F 3.17(x7.25) S2 0.31 R2 0.43 E1 -3.29 E2 -3.21 NPV15  -37.2 NPV20  -33.6 IRR None PB None
+Utorogu (NEPL) -> Ughelli|anchor_eng|opt             cap  10.9 (eq  4.9 pipe  4.7 3" $0.30M/км hp 554) F 1.53(x3.33) S2 1.67 R2 5.07 E1  2.17 E2  3.17 NPV15    0.8 NPV20   -1.3 IRR 16.8 PB 4.8
+Utorogu (NEPL) -> Ughelli|anchor_eng|base            cap  16.7 (eq  6.9 pipe  7.8 3" $0.46M/км hp 651) F 2.28(x4.77) S2 1.64 R2 3.54 E1 -0.25 E2  0.57 NPV15  -17.9 NPV20  -17.5 IRR None PB None
+Utorogu (NEPL) -> Ughelli|anchor_eng|pess            cap  28.2 (eq  8.9 pipe 14.8 3" $0.75M/км hp 640) F 3.63(x7.24) S2 0.88 R2 1.22 E1 -3.66 E2 -3.26 NPV15  -43.2 NPV20  -39.2 IRR None PB None
+Utorogu (NEPL) -> Ughelli|anchor_dual|opt            cap   9.8 (eq  3.8 pipe  4.7 3" $0.30M/км hp 332) F 1.35(x3.33) S2 1.00 R2 3.03 E1  0.84 E2  1.43 NPV15   -3.6 NPV20   -4.8 IRR 5.2 PB 7.9
+Utorogu (NEPL) -> Ughelli|anchor_dual|base           cap  14.9 (eq  5.2 pipe  7.8 3" $0.46M/км hp 389) F 2.04(x4.82) S2 1.00 R2 2.16 E1 -0.84 E2 -0.33 NPV15  -17.7 NPV20  -17.3 IRR None PB None
+Utorogu (NEPL) -> Ughelli|anchor_dual|pess           cap  26.3 (eq  7.2 pipe 14.8 3" $0.75M/км hp 435) F 3.32(x7.43) S2 0.88 R2 1.22 E1 -3.33 E2 -2.92 NPV15  -39.9 NPV20  -36.2 IRR None PB None
+Utorogu (NEPL) -> Ughelli|cluster4|opt               cap  14.1 (eq  7.5 pipe  4.9 4" $0.31M/км hp 809) F 1.70(x3.51) S2 2.09 R2 6.34 E1  3.17 E2  4.18 NPV15   -0.5 NPV20   -2.7 IRR 14.1 PB 5.0
+Utorogu (NEPL) -> Ughelli|cluster4|base              cap  20.8 (eq 10.2 pipe  8.3 4" $0.48M/км hp 818) F 2.54(x4.99) S2 1.64 R2 3.54 E1 -0.39 E2  0.29 NPV15  -23.4 NPV20  -22.8 IRR None PB None
+Utorogu (NEPL) -> Ughelli|cluster4|pess              cap  32.6 (eq 12.7 pipe 14.8 3" $0.75M/км hp 640) F 3.96(x7.39) S2 0.88 R2 1.22 E1 -4.01 E2 -3.62 NPV15  -49.1 NPV20  -44.6 IRR None PB None
+Sapele (Seplat) -> Sapele|anchor_eng|opt             cap  10.2 (eq  4.9 pipe  3.9 3" $0.30M/км hp 554) F 1.49(x3.33) S2 1.67 R2 5.07 E1  2.20 E2  3.21 NPV15    2.0 NPV20   -0.2 IRR 19.6 PB 4.5
+Sapele (Seplat) -> Sapele|anchor_eng|base            cap  15.3 (eq  6.9 pipe  6.6 3" $0.47M/км hp 651) F 2.20(x4.73) S2 1.67 R2 3.62 E1 -0.17 E2  0.72 NPV15  -13.0 NPV20  -13.5 IRR -13.0 PB None
+Sapele (Seplat) -> Sapele|anchor_eng|pess            cap  26.3 (eq  9.6 pipe 12.4 3" $0.77M/км hp 728) F 3.51(x7.1) S2 1.67 R2 2.31 E1 -3.41 E2 -2.50 NPV15  -39.2 NPV20  -35.7 IRR None PB None
+Sapele (Seplat) -> Sapele|anchor_dual|opt            cap   8.9 (eq  3.8 pipe  3.9 3" $0.30M/км hp 332) F 1.32(x3.33) S2 1.00 R2 3.03 E1  0.88 E2  1.47 NPV15   -2.8 NPV20   -3.9 IRR 6.9 PB 7.3
+Sapele (Seplat) -> Sapele|anchor_dual|base           cap  13.6 (eq  5.2 pipe  6.6 3" $0.47M/км hp 389) F 1.96(x4.77) S2 1.00 R2 2.16 E1 -0.76 E2 -0.25 NPV15  -15.8 NPV20  -15.5 IRR None PB None
+Sapele (Seplat) -> Sapele|anchor_dual|pess           cap  23.6 (eq  7.2 pipe 12.4 3" $0.77M/км hp 435) F 3.15(x7.27) S2 1.00 R2 1.38 E1 -3.15 E2 -2.64 NPV15  -35.6 NPV20  -32.4 IRR None PB None
+Sapele (Seplat) -> Sapele|cluster4|opt               cap  14.4 (eq  8.6 pipe  4.1 4" $0.32M/км hp 1052) F 1.71(x3.53) S2 3.17 R2 9.61 E1  5.32 E2  7.27 NPV15   11.4 NPV20    6.8 IRR 31.9 PB 3.1
+Sapele (Seplat) -> Sapele|cluster4|base              cap  21.9 (eq 12.6 pipe  6.9 4" $0.49M/км hp 1234) F 2.60(x4.99) S2 3.17 R2 6.85 E1  1.30 E2  3.02 NPV15  -14.2 NPV20  -15.3 IRR -9.4 PB None
+Sapele (Seplat) -> Sapele|cluster4|pess              cap  35.7 (eq 17.1 pipe 13.0 4" $0.81M/км hp 1238) F 4.14(x7.38) S2 1.71 R2 2.35 E1 -4.04 E2 -3.16 NPV15  -51.2 NPV20  -46.9 IRR None PB None
+Oredo (NEPL) -> Sapele|anchor_eng|opt                cap  14.2 (eq  4.9 pipe  7.8 4" $0.30M/км hp 554) F 1.67(x3.36) S2 1.67 R2 5.07 E1  2.02 E2  3.02 NPV15   -2.0 NPV20   -4.2 IRR 11.5 PB 6.0
+Oredo (NEPL) -> Sapele|anchor_eng|base               cap  22.2 (eq  6.9 pipe 13.0 4" $0.46M/км hp 651) F 2.58(x4.96) S2 1.67 R2 3.62 E1 -0.56 E2  0.32 NPV15  -22.0 NPV20  -22.2 IRR -26.4 PB None
+Oredo (NEPL) -> Sapele|anchor_eng|pess               cap  40.3 (eq  9.6 pipe 24.7 4" $0.76M/км hp 728) F 4.35(x7.82) S2 1.67 R2 2.31 E1 -4.30 E2 -3.41 NPV15  -55.9 NPV20  -51.5 IRR None PB None
+Oredo (NEPL) -> Sapele|anchor_dual|opt               cap  12.6 (eq  3.8 pipe  7.3 3" $0.28M/км hp 332) F 1.49(x3.34) S2 1.00 R2 3.03 E1  0.70 E2  1.29 NPV15   -6.6 NPV20   -7.7 IRR 0.3 PB 9.9
+Oredo (NEPL) -> Sapele|anchor_dual|base              cap  19.7 (eq  5.2 pipe 12.3 3" $0.44M/км hp 389) F 2.31(x4.98) S2 1.00 R2 2.16 E1 -1.13 E2 -0.62 NPV15  -24.0 NPV20  -23.3 IRR None PB None
+Oredo (NEPL) -> Sapele|anchor_dual|pess              cap  36.1 (eq  7.2 pipe 23.4 3" $0.72M/км hp 435) F 3.92(x7.93) S2 1.00 R2 1.38 E1 -3.98 E2 -3.49 NPV15  -51.2 NPV20  -47.0 IRR None PB None
+Oredo (NEPL) -> Sapele|cluster4|opt                  cap  19.3 (eq  8.6 pipe  8.7 6" $0.33M/км hp 1052) F 1.91(x3.57) S2 3.17 R2 9.61 E1  5.12 E2  7.06 NPV15    7.3 NPV20    2.5 IRR 23.4 PB 4.0
+Oredo (NEPL) -> Sapele|cluster4|base                 cap  30.1 (eq 12.6 pipe 14.6 6" $0.51M/км hp 1234) F 3.02(x5.26) S2 3.17 R2 6.86 E1  0.86 E2  2.59 NPV15  -20.2 NPV20  -22.0 IRR -6.7 PB None
+Oredo (NEPL) -> Sapele|cluster4|pess                 cap  53.5 (eq 18.1 pipe 27.6 6" $0.84M/км hp 1380) F 5.16(x8.16) S2 2.42 R2 3.33 E1 -4.97 E2 -3.71 NPV15  -71.7 NPV20  -66.3 IRR None PB None
+Oben (Seplat) -> Sapele|anchor_eng|opt               cap  15.2 (eq  4.9 pipe  8.7 4" $0.29M/км hp 554) F 1.71(x3.36) S2 1.67 R2 5.07 E1  1.97 E2  2.97 NPV15   -3.0 NPV20   -5.2 IRR 10.0 PB 6.4
+Oben (Seplat) -> Sapele|anchor_eng|base              cap  24.0 (eq  6.9 pipe 14.6 4" $0.46M/км hp 651) F 2.68(x5.01) S2 1.67 R2 3.62 E1 -0.66 E2  0.21 NPV15  -24.3 NPV20  -24.3 IRR -31.0 PB None
+Oben (Seplat) -> Sapele|anchor_eng|pess              cap  43.8 (eq  9.6 pipe 27.8 4" $0.75M/км hp 728) F 4.56(x7.97) S2 1.67 R2 2.31 E1 -4.53 E2 -3.65 NPV15  -60.3 NPV20  -55.5 IRR None PB None
+Oben (Seplat) -> Sapele|anchor_dual|opt              cap  13.6 (eq  3.8 pipe  8.2 3" $0.28M/км hp 332) F 1.53(x3.34) S2 1.00 R2 3.03 E1  0.66 E2  1.24 NPV15   -7.7 NPV20   -8.8 IRR -1.1 PB None
+Oben (Seplat) -> Sapele|anchor_dual|base             cap  21.4 (eq  5.2 pipe 13.9 3" $0.43M/км hp 389) F 2.40(x5.02) S2 1.00 R2 2.16 E1 -1.22 E2 -0.72 NPV15  -26.1 NPV20  -25.4 IRR None PB None
+Oben (Seplat) -> Sapele|anchor_dual|pess             cap  39.4 (eq  7.2 pipe 26.3 3" $0.71M/км hp 435) F 4.13(x8.07) S2 1.00 R2 1.38 E1 -4.19 E2 -3.71 NPV15  -55.4 NPV20  -50.9 IRR None PB None
+Oben (Seplat) -> Sapele|cluster4|opt                 cap  20.4 (eq  8.6 pipe  9.7 6" $0.33M/км hp 1052) F 1.96(x3.58) S2 3.17 R2 9.61 E1  5.07 E2  7.00 NPV15    6.2 NPV20    1.4 IRR 21.8 PB 4.2
+Oben (Seplat) -> Sapele|cluster4|base                cap  32.0 (eq 12.6 pipe 16.4 6" $0.51M/км hp 1234) F 3.13(x5.31) S2 3.17 R2 6.86 E1  0.76 E2  2.48 NPV15  -22.6 NPV20  -24.3 IRR -8.1 PB None
+Oben (Seplat) -> Sapele|cluster4|pess                cap  57.5 (eq 18.1 pipe 31.1 6" $0.84M/км hp 1380) F 5.39(x8.31) S2 2.47 R2 3.41 E1 -5.20 E2 -3.92 NPV15  -76.5 NPV20  -70.7 IRR None PB None
+== thresholds (цена $/MMBtu NPV15=0 / NPV20=0; спрос MMscf/д для NPV20=0 при $6)
+Q5_20km_eng|opt|noEDTI                           {'p15': 8.11, 'p20': 9.41, 'dem20_at_6': 3.08}
+Q5_20km_eng|opt|EDTI                             {'p15': 7.41, 'p20': 8.46, 'dem20_at_6': 2.64}
+Q5_20km_eng|base|noEDTI                          {'p15': 13.73, 'p20': 15.86, 'dem20_at_6': 9.33}
+Q5_20km_eng|base|EDTI                            {'p15': 12.47, 'p20': 14.35, 'dem20_at_6': 7.57}
+Q5_20km_eng|pess|noEDTI                          {'p15': 47.11, 'p20': 54.43, 'dem20_at_6': None}
+Q5_20km_eng|pess|EDTI                            {'p15': 42.42, 'p20': 48.82, 'dem20_at_6': None}
+Q5_26km_eng|opt|noEDTI                           {'p15': 8.94, 'p20': 10.41, 'dem20_at_6': 3.69}
+Q5_26km_eng|opt|EDTI                             {'p15': 8.14, 'p20': 9.33, 'dem20_at_6': 3.15}
+Q5_26km_eng|base|noEDTI                          {'p15': 15.23, 'p20': 17.67, 'dem20_at_6': 11.27}
+Q5_26km_eng|base|EDTI                            {'p15': 13.79, 'p20': 15.94, 'dem20_at_6': 9.11}
+Q5_26km_eng|pess|noEDTI                          {'p15': 53.02, 'p20': 61.55, 'dem20_at_6': None}
+Q5_26km_eng|pess|EDTI                            {'p15': 47.55, 'p20': 55.0, 'dem20_at_6': None}
+Q5_26km_dual|opt|noEDTI                          {'p15': 13.07, 'p20': 15.25, 'dem20_at_6': 3.69}
+Q5_26km_dual|opt|EDTI                            {'p15': 11.88, 'p20': 13.64, 'dem20_at_6': 3.15}
+Q5_26km_dual|base|noEDTI                         {'p15': 21.68, 'p20': 25.31, 'dem20_at_6': 11.27}
+Q5_26km_dual|base|EDTI                           {'p15': 19.7, 'p20': 22.82, 'dem20_at_6': 9.11}
+Q5_26km_dual|pess|noEDTI                         {'p15': 56.4, 'p20': 66.59, 'dem20_at_6': None}
+Q5_26km_dual|pess|EDTI                           {'p15': 51.34, 'p20': 60.59, 'dem20_at_6': None}
+Q5_26km_cluster4|opt|noEDTI                      {'p15': 6.75, 'p20': 7.82, 'dem20_at_6': 4.11}
+Q5_26km_cluster4|opt|EDTI                        {'p15': 6.02, 'p20': 6.93, 'dem20_at_6': 3.5}
+Q5_26km_cluster4|base|noEDTI                     {'p15': 14.99, 'p20': 17.19, 'dem20_at_6': 12.4}
+Q5_26km_cluster4|base|EDTI                       {'p15': 13.3, 'p20': 15.14, 'dem20_at_6': 10.02}
+Q5_26km_cluster4|pess|noEDTI                     {'p15': 61.91, 'p20': 72.2, 'dem20_at_6': None}
+Q5_26km_cluster4|pess|EDTI                       {'p15': 55.3, 'p20': 64.29, 'dem20_at_6': None}
+Q15_26km_cluster_big|opt|noEDTI                  {'p15': 4.37, 'p20': 5.11, 'dem20_at_6': 4.61}
+Q15_26km_cluster_big|opt|EDTI                    {'p15': 3.97, 'p20': 4.56, 'dem20_at_6': 3.89}
+Q15_26km_cluster_big|base|noEDTI                 {'p15': 8.02, 'p20': 9.26, 'dem20_at_6': 13.75}
+Q15_26km_cluster_big|base|EDTI                   {'p15': 7.21, 'p20': 8.32, 'dem20_at_6': 11.1}
+Q15_26km_cluster_big|pess|noEDTI                 {'p15': 31.02, 'p20': 36.19, 'dem20_at_6': None}
+Q15_26km_cluster_big|pess|EDTI                   {'p15': 27.74, 'p20': 32.28, 'dem20_at_6': None}
+Q1_20km|opt|noEDTI                               {'p15': 18.85, 'p20': 21.57, 'dem20_at_6': 3.08}
+Q1_20km|opt|EDTI                                 {'p15': 16.9, 'p20': 19.19, 'dem20_at_6': 2.64}
+Q1_20km|base|noEDTI                              {'p15': 41.72, 'p20': 47.44, 'dem20_at_6': 9.33}
+Q1_20km|base|EDTI                                {'p15': 37.25, 'p20': 42.06, 'dem20_at_6': 7.57}
+Q1_20km|pess|noEDTI                              {'p15': None, 'p20': None, 'dem20_at_6': None}
+Q1_20km|pess|EDTI                                {'p15': None, 'p20': None, 'dem20_at_6': None}
+Q1_8km_Afiesere|opt|noEDTI                       {'p15': 10.6, 'p20': 12.0, 'dem20_at_6': 2.3}
+Q1_8km_Afiesere|opt|EDTI                         {'p15': 9.58, 'p20': 10.77, 'dem20_at_6': 2.0}
+Q1_8km_Afiesere|base|noEDTI                      {'p15': 22.97, 'p20': 25.85, 'dem20_at_6': 7.0}
+Q1_8km_Afiesere|base|EDTI                        {'p15': 20.71, 'p20': 23.12, 'dem20_at_6': 5.71}
+Q1_8km_Afiesere|pess|noEDTI                      {'p15': None, 'p20': None, 'dem20_at_6': None}
+Q1_8km_Afiesere|pess|EDTI                        {'p15': None, 'p20': None, 'dem20_at_6': None}
+UghelliE_Ughelli_8km_eng|opt|noEDTI              {'p15': 6.45, 'p20': 7.38, 'dem20_at_6': 2.25}
+UghelliE_Ughelli_8km_eng|opt|EDTI                {'p15': 5.94, 'p20': 6.71, 'dem20_at_6': 1.95}
+UghelliE_Ughelli_8km_eng|base|noEDTI             {'p15': 10.49, 'p20': 12.01, 'dem20_at_6': 6.83}
+UghelliE_Ughelli_8km_eng|base|EDTI               {'p15': 9.67, 'p20': 11.0, 'dem20_at_6': 5.58}
+UghelliE_Ughelli_8km_eng|pess|noEDTI             {'p15': 29.52, 'p20': 33.74, 'dem20_at_6': None}
+UghelliE_Ughelli_8km_eng|pess|EDTI               {'p15': 27.17, 'p20': 30.93, 'dem20_at_6': None}
+UghelliE_Warri_27km_eng|opt|noEDTI               {'p15': 9.09, 'p20': 10.59, 'dem20_at_6': 3.77}
+UghelliE_Warri_27km_eng|opt|EDTI                 {'p15': 8.26, 'p20': 9.48, 'dem20_at_6': 3.21}
+UghelliE_Warri_27km_eng|base|noEDTI              {'p15': 15.17, 'p20': 17.68, 'dem20_at_6': 11.51}
+UghelliE_Warri_27km_eng|base|EDTI                {'p15': 13.8, 'p20': 15.96, 'dem20_at_6': 9.3}
+UghelliE_Warri_27km_eng|pess|noEDTI              {'p15': 45.04, 'p20': 52.53, 'dem20_at_6': None}
+UghelliE_Warri_27km_eng|pess|EDTI                {'p15': 40.77, 'p20': 47.45, 'dem20_at_6': None}
+Oredo_Sapele_28km_eng|opt|noEDTI                 {'p15': 9.27, 'p20': 10.81, 'dem20_at_6': 3.87}
+Oredo_Sapele_28km_eng|opt|EDTI                   {'p15': 8.42, 'p20': 9.67, 'dem20_at_6': 3.3}
+Oredo_Sapele_28km_eng|base|noEDTI                {'p15': 15.49, 'p20': 18.06, 'dem20_at_6': 11.82}
+Oredo_Sapele_28km_eng|base|EDTI                  {'p15': 14.08, 'p20': 16.29, 'dem20_at_6': 9.55}
+Oredo_Sapele_28km_eng|pess|noEDTI                {'p15': 39.95, 'p20': 47.17, 'dem20_at_6': None}
+Oredo_Sapele_28km_eng|pess|EDTI                  {'p15': 36.4, 'p20': 42.96, 'dem20_at_6': None}
+Oredo_Sapele_28km_cluster4|opt|noEDTI            {'p15': 6.36, 'p20': 7.45, 'dem20_at_6': 4.28}
+Oredo_Sapele_28km_cluster4|opt|EDTI              {'p15': 5.77, 'p20': 6.64, 'dem20_at_6': 3.64}
+Oredo_Sapele_28km_cluster4|base|noEDTI           {'p15': 11.31, 'p20': 13.13, 'dem20_at_6': 12.94}
+Oredo_Sapele_28km_cluster4|base|EDTI             {'p15': 10.16, 'p20': 11.78, 'dem20_at_6': 10.45}
+Oredo_Sapele_28km_cluster4|pess|noEDTI           {'p15': 42.72, 'p20': 49.92, 'dem20_at_6': None}
+Oredo_Sapele_28km_cluster4|pess|EDTI             {'p15': 38.13, 'p20': 44.43, 'dem20_at_6': None}
+== sens (Q5, 26 км, якорь на двигателях, база, GSA)
+base                         {'capex': 21.17, 'fixed': 2.52, 'ebitda_y1': -0.5, 'ebitda_y2': 0.38, 'npv15': -20.92, 'npv20': -21.04, 'irr': None}
+EDTI                         {'capex': 21.17, 'fixed': 2.52, 'ebitda_y1': -0.5, 'ebitda_y2': 0.38, 'npv15': -20.92, 'npv20': -21.04, 'irr': None}
+price_8                      {'capex': 21.17, 'fixed': 2.52, 'ebitda_y1': 0.32, 'ebitda_y2': 1.58, 'npv15': -15.13, 'npv20': -16.27, 'irr': -7.8}
+price_10.75                  {'capex': 21.17, 'fixed': 2.52, 'ebitda_y1': 1.45, 'ebitda_y2': 3.23, 'npv15': -8.68, 'npv20': -10.96, 'irr': 3.9}
+price_4.7_greenville         {'capex': 21.17, 'fixed': 2.52, 'ebitda_y1': -1.04, 'ebitda_y2': -0.4, 'npv15': -24.68, 'npv20': -24.13, 'irr': None}
+naira_price_12pct            {'capex': 21.17, 'fixed': 2.52, 'ebitda_y1': -0.7, 'ebitda_y2': -0.32, 'npv15': -27.81, 'npv20': -26.4, 'irr': None}
+build_2y                     {'capex': 22.56, 'fixed': 2.54, 'ebitda_y1': -1.31, 'ebitda_y2': 0.26, 'npv15': -22.15, 'npv20': -21.62, 'irr': None}
+conv_lag_2y                  {'capex': 21.17, 'fixed': 2.52, 'ebitda_y1': -1.2, 'ebitda_y2': -1.25, 'npv15': -22.73, 'npv20': -22.72, 'irr': None}
+pipe_x0.6                    {'capex': 16.02, 'fixed': 2.35, 'ebitda_y1': -0.32, 'ebitda_y2': 0.56, 'npv15': -14.78, 'npv20': -15.06, 'irr': -23.2}
+pipe_x1.5                    {'capex': 27.61, 'fixed': 2.74, 'ebitda_y1': -0.73, 'ebitda_y2': 0.15, 'npv15': -28.6, 'npv20': -28.51, 'irr': None}
+cm_1.0                       {'capex': 16.63, 'fixed': 2.27, 'ebitda_y1': -0.25, 'ebitda_y2': 0.64, 'npv15': -14.95, 'npv20': -15.32, 'irr': -20.4}
+coll_0.75                    {'capex': 21.17, 'fixed': 2.52, 'ebitda_y1': -1.02, 'ebitda_y2': -0.38, 'npv15': -24.6, 'npv20': -24.06, 'irr': None}
+decl_15                      {'capex': 21.17, 'fixed': 2.52, 'ebitda_y1': -0.5, 'ebitda_y2': 0.38, 'npv15': -23.95, 'npv20': -23.25, 'irr': None}
+opex_light_local             {'capex': 21.17, 'fixed': 1.69, 'ebitda_y1': 0.35, 'ebitda_y2': 1.26, 'npv15': -16.16, 'npv20': -17.1, 'irr': -10.5}
+gas_in_1.5                   {'capex': 21.17, 'fixed': 2.52, 'ebitda_y1': -0.87, 'ebitda_y2': -0.16, 'npv15': -23.54, 'npv20': -23.2, 'irr': None}
+fee_from_operator_1.0        {'capex': 21.17, 'fixed': 2.52, 'ebitda_y1': 0.32, 'ebitda_y2': 1.57, 'npv15': -15.05, 'npv20': -16.18, 'irr': -8.0}
+== buyer
+engines_lcoe_at_4.7: {'usd_kwh': 0.1191, 'ngn_kwh': 158, 'hr_mmbtu_kwh': 0.00994}
+engines_lcoe_at_6.0: {'usd_kwh': 0.132, 'ngn_kwh': 176, 'hr_mmbtu_kwh': 0.00994}
+engines_lcoe_at_8.0: {'usd_kwh': 0.1519, 'ngn_kwh': 202, 'hr_mmbtu_kwh': 0.00994}
+engines_lcoe_at_10.75: {'usd_kwh': 0.1793, 'ngn_kwh': 238, 'hr_mmbtu_kwh': 0.00994}
+gas_parity_vs_power_350: 19.19
+gas_parity_vs_power_383: 21.68
+gas_parity_vs_power_411: 23.8
+diesel_usd_mmbtu: [36.7, 41.6]
+dual_s0.45_p6.0: {'gas_mmbtu': 313672, 'saving_musd': [9.28, 10.79], 'kit_musd': [0.52, 4.42], 'payback_months': [0.6, 5.7]}
+dual_s0.45_p8.0: {'gas_mmbtu': 313672, 'saving_musd': [8.66, 10.16], 'kit_musd': [0.52, 4.42], 'payback_months': [0.6, 6.1]}
+dual_s0.55_p6.0: {'gas_mmbtu': 383377, 'saving_musd': [11.35, 13.19], 'kit_musd': [0.52, 4.42], 'payback_months': [0.5, 4.7]}
+dual_s0.55_p8.0: {'gas_mmbtu': 383377, 'saving_musd': [10.58, 12.42], 'kit_musd': [0.52, 4.42], 'payback_months': [0.5, 5.0]}
+dual_s0.65_p6.0: {'gas_mmbtu': 453082, 'saving_musd': [13.41, 15.59], 'kit_musd': [0.52, 4.42], 'payback_months': [0.4, 4.0]}
+dual_s0.65_p8.0: {'gas_mmbtu': 453082, 'saving_musd': [12.5, 14.68], 'kit_musd': [0.52, 4.42], 'payback_months': [0.4, 4.2]}
+engines_capex_musd: [17.2, 19.2]
+== critic {'margin_musd': [3.05, 4.21]}
+== compare
+UghelliE->Ughelli 8km: {'p6.0': {'capex': 12.94, 'e2': 0.86, 'npv15': -9.73, 'npv20': -10.41, 'irr': -7.7}, 'p8.0': {'capex': 12.94, 'e2': 2.06, 'npv15': -4.98, 'npv20': -6.5, 'irr': 5.2}, 'p10.75': {'capex': 12.94, 'e2': 3.71, 'npv15': 0.5, 'npv20': -2.0, 'irr': 15.9}, 'p19.19': {'capex': 12.94, 'e2': 8.77, 'npv15': 16.86, 'npv20': 11.38, 'irr': 39.9}, 'p21.68': {'capex': 12.94, 'e2': 10.27, 'npv15': 21.68, 'npv20': 15.33, 'irr': 46.0}, 'lean_p8_EDTI': {'capex': 10.51, 'e2': 2.95, 'npv15': 1.83, 'npv20': -0.35, 'irr': 19.1}, 'lean_p20': 8.21}
+generic 26km: {'p6.0': {'capex': 21.17, 'e2': 0.38, 'npv15': -20.92, 'npv20': -21.04, 'irr': None}, 'p8.0': {'capex': 21.17, 'e2': 1.58, 'npv15': -15.13, 'npv20': -16.27, 'irr': -7.8}, 'p10.75': {'capex': 21.17, 'e2': 3.23, 'npv15': -8.68, 'npv20': -10.96, 'irr': 3.9}, 'p19.19': {'capex': 21.17, 'e2': 8.29, 'npv15': 7.51, 'npv20': 2.37, 'irr': 22.9}, 'p21.68': {'capex': 21.17, 'e2': 9.78, 'npv15': 12.23, 'npv20': 6.24, 'irr': 27.4}, 'lean_p8_EDTI': {'capex': 15.45, 'e2': 2.67, 'npv15': -4.09, 'npv20': -6.09, 'irr': 8.0}, 'lean_p20': 11.16}
+Oredo->Sapele 28km: {'p6.0': {'capex': 22.24, 'e2': 0.32, 'npv15': -22.0, 'npv20': -22.17, 'irr': -26.4}, 'p8.0': {'capex': 22.24, 'e2': 1.51, 'npv15': -16.08, 'npv20': -17.31, 'irr': -6.9}, 'p10.75': {'capex': 22.24, 'e2': 3.16, 'npv15': -9.42, 'npv20': -11.83, 'irr': 3.9}, 'p19.19': {'capex': 22.24, 'e2': 8.22, 'npv15': 7.18, 'npv20': 1.79, 'irr': 22.1}, 'p21.68': {'capex': 22.24, 'e2': 9.72, 'npv15': 12.01, 'npv20': 5.74, 'irr': 26.4}, 'lean_p8_EDTI': {'capex': 16.09, 'e2': 2.64, 'npv15': -4.55, 'npv20': -6.64, 'irr': 7.7}, 'lean_p20': 11.35}
+cluster_big Q15 26km: {'p6.0': {'capex': 38.57, 'e2': 7.02, 'npv15': -13.16, 'npv20': -17.55, 'irr': 5.6}, 'p8.0': {'capex': 38.57, 'e2': 11.32, 'npv15': -0.12, 'npv20': -6.77, 'irr': 14.9}, 'p10.75': {'capex': 38.57, 'e2': 17.24, 'npv15': 17.72, 'npv20': 7.98, 'irr': 25.5}, 'p19.19': {'capex': 38.57, 'e2': 35.39, 'npv15': 72.48, 'npv20': 53.26, 'irr': 52.0}, 'p21.68': {'capex': 38.57, 'e2': 40.74, 'npv15': 88.63, 'npv20': 66.61, 'irr': 59.0}, 'lean_p8_EDTI': {'capex': 31.05, 'e2': 12.64, 'npv15': 16.01, 'npv20': 8.21, 'irr': 27.3}, 'lean_p20': 6.57}
+buyer_ngn_kwh_at_BE20 UghelliE_Ughelli_8km_eng|base|noEDTI: 255
+buyer_ngn_kwh_at_BE20 Q5_26km_eng|base|noEDTI: 330
+buyer_ngn_kwh_at_BE20 Q15_26km_cluster_big|base|noEDTI: 219
+buyer_ngn_kwh_at_BE20 UghelliE_Ughelli_8km_eng|opt|noEDTI: 194
+buyer_ngn_kwh_at_BE20 Q5_26km_eng|opt|noEDTI: 234
