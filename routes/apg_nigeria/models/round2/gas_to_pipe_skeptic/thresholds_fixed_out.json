@@ -1,0 +1,27 @@
+{
+ "Ughelli East": {
+  "fee_from_operator": 3.47,
+  "Q_threshold_base": null,
+  "Q_threshold_floor_escrow": null
+ },
+ "Afam Umuosi": {
+  "fee_from_operator": 3.12,
+  "Q_threshold_base": null,
+  "Q_threshold_floor_escrow": null
+ },
+ "Q5_4km": {
+  "fee_from_operator": 4.6,
+  "Q_threshold_base": null,
+  "Q_threshold_floor_escrow": null
+ },
+ "Q15_8km": {
+  "fee_from_operator": 2.54,
+  "Q_threshold_base": null,
+  "Q_threshold_floor_escrow": null
+ },
+ "Oredo_qmin": {
+  "fee_from_operator": 6.29,
+  "Q_threshold_base": null,
+  "Q_threshold_floor_escrow": null
+ }
+}

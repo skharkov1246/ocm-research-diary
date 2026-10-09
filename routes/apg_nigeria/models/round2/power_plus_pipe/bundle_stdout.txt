@@ -1,0 +1,371 @@
+регрессия NPV15 deal_r2 vs bundle.py (power, base): {'350|True': {'deal_r2': 2.05, 'bundle_py': 2.05}, '411|False': {'deal_r2': 4.26, 'bundle_py': 4.26}}
+
+=== площадки (база р.2: DoP-газ + эскроу) ===
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|opt|EDTI|411
+     power     cap   27.4 (pow  27.4 pipe   0.0, Qd  0.00) E1   9.00 E2  12.26 (pipe  0.00) NPV15   13.8 NPV20    5.8 IRR 24.9 PB 3.8 газ исп. 0.38
+     pipe      cap    8.8 (pow   0.0 pipe   8.8, Qd  4.81) E1   0.99 E2   1.49 (pipe  1.49) NPV15   -4.8 NPV20   -5.6 IRR -1.3 PB None газ исп. 0.93
+     separate  cap   34.0 (pow  27.4 pipe   6.5, Qd  2.50) E1   8.90 E2  12.33 (pipe  0.08) NPV15    5.4 NPV20   -2.1 IRR 18.5 PB 4.4 газ исп. 0.78
+     bundle    cap   33.4 (pow  27.4 pipe   6.0, Qd  3.28) E1  10.57 E2  13.88 (pipe  1.63) NPV15   13.3 NPV20    4.3 IRR 23.1 PB 3.9 газ исп. 0.96
+     до GSA трубы: {'npv15': 11.97, 'npv20': 3.27, 'y2': 13.39} | приращение трубы NPV15 -0.55 NPV20 -1.49 | связка против раздельно NPV15 7.85
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|base|EDTI|377
+     power     cap   29.1 (pow  29.1 pipe   0.0, Qd  0.00) E1   7.67 E2  10.62 (pipe  0.00) NPV15    7.5 NPV20    0.5 IRR 20.4 PB 4.2 газ исп. 0.48
+     pipe      cap   12.5 (pow   0.0 pipe  12.5, Qd  4.19) E1  -1.31 E2  -1.09 (pipe -1.09) NPV15  -19.8 NPV20  -18.3 IRR None PB None газ исп. 0.86
+     separate  cap   38.3 (pow  29.1 pipe   9.2, Qd  1.92) E1   6.06 E2   9.03 (pipe -1.59) NPV15  -10.5 NPV20  -15.7 IRR 8.0 PB 6.0 газ исп. 0.73
+     bundle    cap   37.5 (pow  29.1 pipe   8.3, Qd  2.68) E1   7.78 E2  10.70 (pipe  0.08) NPV15   -1.5 NPV20   -8.3 IRR 14.1 PB 5.0 газ исп. 0.94
+     до GSA трубы: {'npv15': -2.62, 'npv20': -9.28, 'y2': 10.28} | приращение трубы NPV15 -8.99 NPV20 -8.82 | связка против раздельно NPV15 9.06
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|base|EDTI|411
+     power     cap   29.1 (pow  29.1 pipe   0.0, Qd  0.00) E1   8.78 E2  12.00 (pipe  0.00) NPV15   11.6 NPV20    3.7 IRR 23.0 PB 3.9 газ исп. 0.48
+     pipe      cap   12.5 (pow   0.0 pipe  12.5, Qd  4.19) E1  -1.31 E2  -1.09 (pipe -1.09) NPV15  -19.8 NPV20  -18.3 IRR None PB None газ исп. 0.86
+     separate  cap   38.3 (pow  29.1 pipe   9.2, Qd  1.92) E1   7.17 E2  10.41 (pipe -1.59) NPV15   -6.5 NPV20  -12.4 IRR 10.9 PB 5.5 газ исп. 0.73
+     bundle    cap   37.5 (pow  29.1 pipe   8.3, Qd  2.68) E1   8.89 E2  12.08 (pipe  0.08) NPV15    3.6 NPV20   -4.2 IRR 17.1 PB 4.6 газ исп. 0.94
+     до GSA трубы: {'npv15': 2.46, 'npv20': -5.17, 'y2': 11.67} | приращение трубы NPV15 -7.97 NPV20 -7.96 | связка против раздельно NPV15 10.08
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|base|noEDTI|377
+     power     cap   29.1 (pow  29.1 pipe   0.0, Qd  0.00) E1   7.67 E2  10.62 (pipe  0.00) NPV15    2.5 NPV20   -4.0 IRR 16.7 PB 5.1 газ исп. 0.48
+     pipe      cap   12.5 (pow   0.0 pipe  12.5, Qd  4.19) E1  -1.31 E2  -1.09 (pipe -1.09) NPV15  -19.8 NPV20  -18.3 IRR None PB None газ исп. 0.86
+     separate  cap   38.3 (pow  29.1 pipe   9.2, Qd  1.92) E1   6.06 E2   9.03 (pipe -1.59) NPV15  -15.6 NPV20  -20.2 IRR 5.1 PB 8.1 газ исп. 0.73
+     bundle    cap   37.5 (pow  29.1 pipe   8.3, Qd  2.68) E1   7.78 E2  10.70 (pipe  0.08) NPV15   -5.5 NPV20  -12.1 IRR 11.8 PB 6.1 газ исп. 0.94
+     до GSA трубы: {'npv15': -6.3, 'npv20': -12.69, 'y2': 10.28} | приращение трубы NPV15 -7.95 NPV20 -8.0 | связка против раздельно NPV15 10.1
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|pess|EDTI|411
+     power     cap   30.9 (pow  30.9 pipe   0.0, Qd  0.00) E1   8.43 E2  11.61 (pipe  0.00) NPV15   -0.8 NPV20   -7.0 IRR 14.5 PB 5.1 газ исп. 0.61
+     pipe      cap   16.7 (pow   0.0 pipe  16.7, Qd  2.98) E1  -4.01 E2  -3.68 (pipe -3.68) NPV15  -32.2 NPV20  -28.5 IRR None PB None газ исп. 0.69
+     separate  cap   42.4 (pow  30.9 pipe  11.5, Qd  0.79) E1   5.15 E2   8.41 (pipe -3.20) NPV15  -25.5 NPV20  -28.6 IRR None PB None газ исп. 0.69
+     bundle    cap   41.4 (pow  30.9 pipe  10.5, Qd  1.53) E1   7.13 E2  10.49 (pipe -1.12) NPV15  -15.2 NPV20  -20.6 IRR 6.0 PB 6.5 газ исп. 0.9
+     до GSA трубы: {'npv15': -15.72, 'npv20': -20.99, 'y2': 10.24} | приращение трубы NPV15 -14.45 NPV20 -13.57 | связка против раздельно NPV15 10.22
+  Ughelli East min23-25 (6.3)|opt|EDTI|411
+     power     cap   27.4 (pow  27.4 pipe   0.0, Qd  0.00) E1   9.00 E2  12.26 (pipe  0.00) NPV15   13.8 NPV20    5.8 IRR 24.9 PB 3.8 газ исп. 0.41
+     pipe      cap    8.5 (pow   0.0 pipe   8.5, Qd  4.52) E1   0.84 E2   1.31 (pipe  1.31) NPV15   -5.2 NPV20   -5.8 IRR -3.7 PB None газ исп. 0.93
+     separate  cap   33.7 (pow  27.4 pipe   6.3, Qd  2.21) E1   8.76 E2  12.16 (pipe -0.10) NPV15    5.0 NPV20   -2.3 IRR 18.3 PB 4.4 газ исп. 0.77
+     bundle    cap   33.1 (pow  27.4 pipe   5.7, Qd  2.99) E1  10.42 E2  13.71 (pipe  1.45) NPV15   13.0 NPV20    4.2 IRR 23.0 PB 3.9 газ исп. 0.96
+     до GSA трубы: {'npv15': 11.81, 'npv20': 3.19, 'y2': 13.26} | приращение трубы NPV15 -0.83 NPV20 -1.67 | связка против раздельно NPV15 7.94
+  Ughelli East min23-25 (6.3)|base|EDTI|377
+     power     cap   29.1 (pow  29.1 pipe   0.0, Qd  0.00) E1   7.67 E2  10.62 (pipe  0.00) NPV15    7.3 NPV20    0.4 IRR 20.3 PB 4.2 газ исп. 0.5
+     pipe      cap   12.2 (pow   0.0 pipe  12.2, Qd  3.94) E1  -1.35 E2  -1.15 (pipe -1.15) NPV15  -19.6 NPV20  -18.0 IRR None PB None газ исп. 0.86
+     separate  cap   38.0 (pow  29.1 pipe   8.8, Qd  1.67) E1   6.02 E2   8.98 (pipe -1.64) NPV15  -10.4 NPV20  -15.5 IRR 8.0 PB 6.0 газ исп. 0.72
+     bundle    cap   37.1 (pow  29.1 pipe   8.0, Qd  2.43) E1   7.74 E2  10.64 (pipe  0.03) NPV15   -1.4 NPV20   -8.2 IRR 14.1 PB 5.0 газ исп. 0.95
+     до GSA трубы: {'npv15': -2.54, 'npv20': -9.11, 'y2': 10.27} | приращение трубы NPV15 -8.77 NPV20 -8.58 | связка против раздельно NPV15 9.0
+  Ughelli East min23-25 (6.3)|base|EDTI|411
+     power     cap   29.1 (pow  29.1 pipe   0.0, Qd  0.00) E1   8.78 E2  12.00 (pipe  0.00) NPV15   11.4 NPV20    3.6 IRR 22.9 PB 3.9 газ исп. 0.5
+     pipe      cap   12.2 (pow   0.0 pipe  12.2, Qd  3.94) E1  -1.35 E2  -1.15 (pipe -1.15) NPV15  -19.6 NPV20  -18.0 IRR None PB None газ исп. 0.86
+     separate  cap   38.0 (pow  29.1 pipe   8.8, Qd  1.67) E1   7.13 E2  10.36 (pipe -1.64) NPV15   -6.4 NPV20  -12.3 IRR 10.9 PB 5.4 газ исп. 0.72
+     bundle    cap   37.1 (pow  29.1 pipe   8.0, Qd  2.43) E1   8.85 E2  12.03 (pipe  0.03) NPV15    3.6 NPV20   -4.1 IRR 17.2 PB 4.5 газ исп. 0.95
+     до GSA трубы: {'npv15': 2.53, 'npv20': -5.01, 'y2': 11.65} | приращение трубы NPV15 -7.75 NPV20 -7.73 | связка против раздельно NPV15 10.02
+  Ughelli East min23-25 (6.3)|base|noEDTI|377
+     power     cap   29.1 (pow  29.1 pipe   0.0, Qd  0.00) E1   7.67 E2  10.62 (pipe  0.00) NPV15    2.3 NPV20   -4.2 IRR 16.6 PB 5.1 газ исп. 0.5
+     pipe      cap   12.2 (pow   0.0 pipe  12.2, Qd  3.94) E1  -1.35 E2  -1.15 (pipe -1.15) NPV15  -19.6 NPV20  -18.0 IRR None PB None газ исп. 0.86
+     separate  cap   38.0 (pow  29.1 pipe   8.8, Qd  1.67) E1   6.02 E2   8.98 (pipe -1.64) NPV15  -15.5 NPV20  -20.1 IRR 5.0 PB 8.1 газ исп. 0.72
+     bundle    cap   37.1 (pow  29.1 pipe   8.0, Qd  2.43) E1   7.74 E2  10.64 (pipe  0.03) NPV15   -5.5 NPV20  -11.9 IRR 11.8 PB 6.0 газ исп. 0.95
+     до GSA трубы: {'npv15': -6.24, 'npv20': -12.54, 'y2': 10.27} | приращение трубы NPV15 -7.74 NPV20 -7.76 | связка против раздельно NPV15 10.03
+  Ughelli East min23-25 (6.3)|pess|EDTI|411
+     power     cap   30.9 (pow  30.9 pipe   0.0, Qd  0.00) E1   8.43 E2  11.61 (pipe  0.00) NPV15   -1.7 NPV20   -7.7 IRR 13.8 PB 5.1 газ исп. 0.63
+     pipe      cap   16.3 (pow   0.0 pipe  16.3, Qd  2.81) E1  -3.95 E2  -3.65 (pipe -3.65) NPV15  -31.6 NPV20  -28.0 IRR None PB None газ исп. 0.69
+     separate  cap   42.0 (pow  30.9 pipe  11.1, Qd  0.61) E1   5.22 E2   8.45 (pipe -3.16) NPV15  -25.7 NPV20  -28.6 IRR None PB None газ исп. 0.69
+     bundle    cap   41.0 (pow  30.9 pipe  10.1, Qd  1.35) E1   7.19 E2  10.52 (pipe -1.09) NPV15  -15.6 NPV20  -20.8 IRR 5.4 PB 6.6 газ исп. 0.91
+     до GSA трубы: {'npv15': -16.07, 'npv20': -21.1, 'y2': 10.3} | приращение трубы NPV15 -13.96 NPV20 -13.09 | связка против раздельно NPV15 10.07
+  Ughelli East 6.7, ЛЭП 10 км [Д]|opt|EDTI|411
+     power     cap   24.7 (pow  24.7 pipe   0.0, Qd  0.00) E1   9.42 E2  12.74 (pipe  0.00) NPV15   17.1 NPV20    8.9 IRR 28.0 PB 3.5 газ исп. 0.38
+     pipe      cap    8.8 (pow   0.0 pipe   8.8, Qd  4.81) E1   0.99 E2   1.49 (pipe  1.49) NPV15   -4.8 NPV20   -5.6 IRR -1.3 PB None газ исп. 0.93
+     separate  cap   31.2 (pow  24.7 pipe   6.5, Qd  2.50) E1   9.32 E2  12.82 (pipe  0.08) NPV15    8.7 NPV20    1.1 IRR 20.8 PB 4.1 газ исп. 0.78
+     bundle    cap   30.7 (pow  24.7 pipe   6.0, Qd  3.28) E1  10.98 E2  14.37 (pipe  1.63) NPV15   16.7 NPV20    7.6 IRR 25.7 PB 3.7 газ исп. 0.96
+     до GSA трубы: {'npv15': 15.48, 'npv20': 6.6, 'y2': 13.87} | приращение трубы NPV15 -0.41 NPV20 -1.37 | связка против раздельно NPV15 7.99
+  Ughelli East 6.7, ЛЭП 10 км [Д]|base|EDTI|377
+     power     cap   26.4 (pow  26.4 pipe   0.0, Qd  0.00) E1   8.07 E2  11.07 (pipe  0.00) NPV15   11.0 NPV20    3.7 IRR 23.3 PB 3.9 газ исп. 0.48
+     pipe      cap   12.5 (pow   0.0 pipe  12.5, Qd  4.19) E1  -1.31 E2  -1.09 (pipe -1.09) NPV15  -19.8 NPV20  -18.3 IRR None PB None газ исп. 0.86
+     separate  cap   35.6 (pow  26.4 pipe   9.2, Qd  1.92) E1   6.45 E2   9.49 (pipe -1.59) NPV15   -7.1 NPV20  -12.4 IRR 10.1 PB 5.6 газ исп. 0.73
+     bundle    cap   34.8 (pow  26.4 pipe   8.3, Qd  2.68) E1   8.17 E2  11.15 (pipe  0.08) NPV15    3.0 NPV20   -4.2 IRR 16.9 PB 4.6 газ исп. 0.94
+     до GSA трубы: {'npv15': 1.83, 'npv20': -5.16, 'y2': 10.74} | приращение трубы NPV15 -7.97 NPV20 -7.96 | связка против раздельно NPV15 10.08
+  Ughelli East 6.7, ЛЭП 10 км [Д]|base|EDTI|411
+     power     cap   26.4 (pow  26.4 pipe   0.0, Qd  0.00) E1   9.20 E2  12.48 (pipe  0.00) NPV15   15.1 NPV20    7.1 IRR 26.1 PB 3.6 газ исп. 0.48
+     pipe      cap   12.5 (pow   0.0 pipe  12.5, Qd  4.19) E1  -1.31 E2  -1.09 (pipe -1.09) NPV15  -19.8 NPV20  -18.3 IRR None PB None газ исп. 0.86
+     separate  cap   35.6 (pow  26.4 pipe   9.2, Qd  1.92) E1   7.58 E2  10.90 (pipe -1.59) NPV15   -3.0 NPV20   -9.1 IRR 13.1 PB 5.1 газ исп. 0.73
+     bundle    cap   34.8 (pow  26.4 pipe   8.3, Qd  2.68) E1   9.30 E2  12.57 (pipe  0.08) NPV15    8.0 NPV20   -0.2 IRR 19.9 PB 4.2 газ исп. 0.94
+     до GSA трубы: {'npv15': 6.99, 'npv20': -0.99, 'y2': 12.15} | приращение трубы NPV15 -7.08 NPV20 -7.23 | связка против раздельно NPV15 10.97
+  Ughelli East 6.7, ЛЭП 10 км [Д]|base|noEDTI|377
+     power     cap   26.4 (pow  26.4 pipe   0.0, Qd  0.00) E1   8.07 E2  11.07 (pipe  0.00) NPV15    6.1 NPV20   -0.6 IRR 19.5 PB 4.6 газ исп. 0.48
+     pipe      cap   12.5 (pow   0.0 pipe  12.5, Qd  4.19) E1  -1.31 E2  -1.09 (pipe -1.09) NPV15  -19.8 NPV20  -18.3 IRR None PB None газ исп. 0.86
+     separate  cap   35.6 (pow  26.4 pipe   9.2, Qd  1.92) E1   6.45 E2   9.49 (pipe -1.59) NPV15  -12.0 NPV20  -16.8 IRR 7.1 PB 7.4 газ исп. 0.73
+     bundle    cap   34.8 (pow  26.4 pipe   8.3, Qd  2.68) E1   8.17 E2  11.15 (pipe  0.08) NPV15   -1.9 NPV20   -8.6 IRR 13.9 PB 5.6 газ исп. 0.94
+     до GSA трубы: {'npv15': -2.69, 'npv20': -9.27, 'y2': 10.74} | приращение трубы NPV15 -7.94 NPV20 -8.0 | связка против раздельно NPV15 10.11
+  Ughelli East 6.7, ЛЭП 10 км [Д]|pess|EDTI|411
+     power     cap   28.2 (pow  28.2 pipe   0.0, Qd  0.00) E1   8.84 E2  12.09 (pipe  0.00) NPV15    2.6 NPV20   -3.8 IRR 16.8 PB 4.8 газ исп. 0.61
+     pipe      cap   16.7 (pow   0.0 pipe  16.7, Qd  2.98) E1  -4.01 E2  -3.68 (pipe -3.68) NPV15  -32.2 NPV20  -28.5 IRR None PB None газ исп. 0.69
+     separate  cap   39.7 (pow  28.2 pipe  11.5, Qd  0.79) E1   5.57 E2   8.89 (pipe -3.20) NPV15  -22.1 NPV20  -25.4 IRR None PB None газ исп. 0.69
+     bundle    cap   38.7 (pow  28.2 pipe  10.5, Qd  1.53) E1   7.54 E2  10.97 (pipe -1.12) NPV15  -11.0 NPV20  -16.7 IRR 8.4 PB 6.0 газ исп. 0.9
+     до GSA трубы: {'npv15': -11.5, 'npv20': -17.1, 'y2': 10.72} | приращение трубы NPV15 -13.63 NPV20 -12.92 | связка против раздельно NPV15 11.04
+  Oredo min23-25 (8.5) -> Sapele PS|opt|EDTI|411
+     power     cap   28.3 (pow  28.3 pipe   0.0, Qd  0.00) E1   8.86 E2  12.09 (pipe  0.00) NPV15   12.6 NPV20    4.7 IRR 23.9 PB 3.8 газ исп. 0.3
+     pipe      cap   17.5 (pow   0.0 pipe  17.5, Qd  6.10) E1   0.93 E2   1.56 (pipe  1.56) NPV15  -13.9 NPV20  -14.6 IRR -13.6 PB None газ исп. 0.93
+     separate  cap   43.7 (pow  28.3 pipe  15.4, Qd  3.79) E1   8.71 E2  12.24 (pipe  0.15) NPV15   -5.0 NPV20  -12.4 IRR 12.3 PB 5.3 газ исп. 0.81
+     bundle    cap   42.3 (pow  28.3 pipe  14.0, Qd  4.57) E1  10.60 E2  14.02 (pipe  1.93) NPV15    5.8 NPV20   -3.3 IRR 18.0 PB 4.4 газ исп. 0.95
+     до GSA трубы: {'npv15': 3.54, 'npv20': -5.2, 'y2': 13.33} | приращение трубы NPV15 -6.8 NPV20 -8.03 | связка против раздельно NPV15 10.88
+  Oredo min23-25 (8.5) -> Sapele PS|base|EDTI|377
+     power     cap   30.1 (pow  30.1 pipe   0.0, Qd  0.00) E1   7.54 E2  10.46 (pipe  0.00) NPV15    6.4 NPV20   -0.6 IRR 19.5 PB 4.3 газ исп. 0.38
+     pipe      cap   27.3 (pow   0.0 pipe  27.3, Qd  5.31) E1  -2.32 E2  -2.06 (pipe -2.06) NPV15  -39.7 NPV20  -37.1 IRR None PB None газ исп. 0.86
+     separate  cap   54.1 (pow  30.1 pipe  24.1, Qd  3.04) E1   4.91 E2   7.90 (pipe -2.56) NPV15  -31.7 NPV20  -35.8 IRR -2.7 PB None газ исп. 0.76
+     bundle    cap   51.8 (pow  30.1 pipe  21.7, Qd  3.81) E1   6.95 E2   9.90 (pipe -0.57) NPV15  -19.4 NPV20  -25.6 IRR 5.5 PB 7.6 газ исп. 0.92
+     до GSA трубы: {'npv15': -20.93, 'npv20': -26.84, 'y2': 9.31} | приращение трубы NPV15 -25.75 NPV20 -24.94 | связка против раздельно NPV15 12.36
+  Oredo min23-25 (8.5) -> Sapele PS|base|EDTI|411
+     power     cap   30.1 (pow  30.1 pipe   0.0, Qd  0.00) E1   8.64 E2  11.84 (pipe  0.00) NPV15   10.6 NPV20    2.7 IRR 22.2 PB 4.0 газ исп. 0.38
+     pipe      cap   27.3 (pow   0.0 pipe  27.3, Qd  5.31) E1  -2.32 E2  -2.06 (pipe -2.06) NPV15  -39.7 NPV20  -37.1 IRR None PB None газ исп. 0.86
+     separate  cap   54.1 (pow  30.1 pipe  24.1, Qd  3.04) E1   6.01 E2   9.28 (pipe -2.56) NPV15  -27.6 NPV20  -32.4 IRR 0.5 PB 10.6 газ исп. 0.76
+     bundle    cap   51.8 (pow  30.1 pipe  21.7, Qd  3.81) E1   8.05 E2  11.27 (pipe -0.57) NPV15  -14.3 NPV20  -21.5 IRR 8.2 PB 6.4 газ исп. 0.92
+     до GSA трубы: {'npv15': -15.86, 'npv20': -22.75, 'y2': 10.69} | приращение трубы NPV15 -24.85 NPV20 -24.19 | связка против раздельно NPV15 13.25
+  Oredo min23-25 (8.5) -> Sapele PS|base|noEDTI|377
+     power     cap   30.1 (pow  30.1 pipe   0.0, Qd  0.00) E1   7.54 E2  10.46 (pipe  0.00) NPV15    1.4 NPV20   -5.1 IRR 15.9 PB 5.2 газ исп. 0.38
+     pipe      cap   27.3 (pow   0.0 pipe  27.3, Qd  5.31) E1  -2.32 E2  -2.06 (pipe -2.06) NPV15  -39.7 NPV20  -37.1 IRR None PB None газ исп. 0.86
+     separate  cap   54.1 (pow  30.1 pipe  24.1, Qd  3.04) E1   4.91 E2   7.90 (pipe -2.56) NPV15  -36.7 NPV20  -40.3 IRR -4.5 PB None газ исп. 0.76
+     bundle    cap   51.8 (pow  30.1 pipe  21.7, Qd  3.81) E1   6.95 E2   9.90 (pipe -0.57) NPV15  -20.4 NPV20  -26.9 IRR 5.6 PB 8.1 газ исп. 0.92
+     до GSA трубы: {'npv15': -21.48, 'npv20': -27.7, 'y2': 9.31} | приращение трубы NPV15 -21.77 NPV20 -21.72 | связка против раздельно NPV15 16.33
+  Oredo min23-25 (8.5) -> Sapele PS|pess|EDTI|411
+     power     cap   31.8 (pow  31.8 pipe   0.0, Qd  0.00) E1   8.29 E2  11.45 (pipe  0.00) NPV15    0.7 NPV20   -6.4 IRR 15.4 PB 5.2 газ исп. 0.54
+     pipe      cap   41.3 (pow   0.0 pipe  41.3, Qd  3.78) E1  -6.50 E2  -6.12 (pipe -6.12) NPV15  -66.9 NPV20  -60.8 IRR None PB None газ исп. 0.69
+     separate  cap   68.2 (pow  31.8 pipe  36.4, Qd  1.59) E1   2.52 E2   5.80 (pipe -5.65) NPV15  -58.9 NPV20  -60.4 IRR None PB None газ исп. 0.68
+     bundle    cap   64.6 (pow  31.8 pipe  32.8, Qd  2.33) E1   4.98 E2   8.38 (pipe -3.07) NPV15  -43.3 NPV20  -47.9 IRR -4.0 PB None газ исп. 0.87
+     до GSA трубы: {'npv15': -44.05, 'npv20': -48.45, 'y2': 8.0} | приращение трубы NPV15 -43.99 NPV20 -41.5 | связка против раздельно NPV15 15.58
+  Oredo 2025 (15.5) -> Sapele PS|opt|EDTI|411
+     power     cap   28.3 (pow  28.3 pipe   0.0, Qd  0.00) E1   8.86 E2  12.09 (pipe  0.00) NPV15   12.6 NPV20    4.7 IRR 23.9 PB 3.8 газ исп. 0.16
+     pipe      cap   23.4 (pow   0.0 pipe  23.4, Qd 11.13) E1   3.38 E2   4.57 (pipe  4.57) NPV15   -9.8 NPV20  -12.3 IRR 3.8 PB 8.2 газ исп. 0.93
+     separate  cap   49.7 (pow  28.3 pipe  21.4, Qd  8.81) E1  11.15 E2  15.24 (pipe  3.15) NPV15   -0.5 NPV20   -9.8 IRR 14.8 PB 4.9 газ исп. 0.86
+     bundle    cap   47.8 (pow  28.3 pipe  19.5, Qd  9.60) E1  13.06 E2  17.05 (pipe  4.96) NPV15   10.3 NPV20   -0.7 IRR 19.6 PB 4.2 газ исп. 0.94
+     до GSA трубы: {'npv15': 5.59, 'npv20': -4.57, 'y2': 15.6} | приращение трубы NPV15 -2.29 NPV20 -5.41 | связка против раздельно NPV15 10.8
+  Oredo 2025 (15.5) -> Sapele PS|base|EDTI|377
+     power     cap   30.1 (pow  30.1 pipe   0.0, Qd  0.00) E1   7.54 E2  10.46 (pipe  0.00) NPV15    6.4 NPV20   -0.6 IRR 19.5 PB 4.3 газ исп. 0.21
+     pipe      cap   35.8 (pow   0.0 pipe  35.8, Qd  9.69) E1  -1.79 E2  -1.24 (pipe -1.24) NPV15  -46.6 NPV20  -44.3 IRR None PB None газ исп. 0.86
+     separate  cap   62.8 (pow  30.1 pipe  32.8, Qd  7.42) E1   5.44 E2   8.72 (pipe -1.75) NPV15  -38.8 NPV20  -43.2 IRR -4.0 PB None газ исп. 0.8
+     bundle    cap   59.8 (pow  30.1 pipe  29.7, Qd  8.18) E1   7.52 E2  10.75 (pipe  0.29) NPV15  -25.7 NPV20  -32.2 IRR 3.8 PB 8.5 газ исп. 0.9
+     до GSA трубы: {'npv15': -29.06, 'npv20': -34.95, 'y2': 9.5} | приращение трубы NPV15 -32.05 NPV20 -31.57 | связка против раздельно NPV15 13.15
+  Oredo 2025 (15.5) -> Sapele PS|base|EDTI|411
+     power     cap   30.1 (pow  30.1 pipe   0.0, Qd  0.00) E1   8.64 E2  11.84 (pipe  0.00) NPV15   10.6 NPV20    2.7 IRR 22.2 PB 4.0 газ исп. 0.21
+     pipe      cap   35.8 (pow   0.0 pipe  35.8, Qd  9.69) E1  -1.79 E2  -1.24 (pipe -1.24) NPV15  -46.6 NPV20  -44.3 IRR None PB None газ исп. 0.86
+     separate  cap   62.8 (pow  30.1 pipe  32.8, Qd  7.42) E1   6.54 E2  10.09 (pipe -1.75) NPV15  -34.6 NPV20  -39.9 IRR -1.0 PB None газ исп. 0.8
+     bundle    cap   59.8 (pow  30.1 pipe  29.7, Qd  8.18) E1   8.62 E2  12.13 (pipe  0.29) NPV15  -20.6 NPV20  -28.1 IRR 6.3 PB 7.2 газ исп. 0.9
+     до GSA трубы: {'npv15': -23.99, 'npv20': -30.86, 'y2': 10.87} | приращение трубы NPV15 -31.15 NPV20 -30.82 | связка против раздельно NPV15 14.04
+  Oredo 2025 (15.5) -> Sapele PS|base|noEDTI|377
+     power     cap   30.1 (pow  30.1 pipe   0.0, Qd  0.00) E1   7.54 E2  10.46 (pipe  0.00) NPV15    1.4 NPV20   -5.1 IRR 15.9 PB 5.2 газ исп. 0.21
+     pipe      cap   35.8 (pow   0.0 pipe  35.8, Qd  9.69) E1  -1.79 E2  -1.24 (pipe -1.24) NPV15  -46.6 NPV20  -44.3 IRR None PB None газ исп. 0.86
+     separate  cap   62.8 (pow  30.1 pipe  32.8, Qd  7.42) E1   5.44 E2   8.72 (pipe -1.75) NPV15  -43.8 NPV20  -47.7 IRR -5.4 PB None газ исп. 0.8
+     bundle    cap   59.8 (pow  30.1 pipe  29.7, Qd  8.18) E1   7.52 E2  10.75 (pipe  0.29) NPV15  -26.2 NPV20  -33.1 IRR 4.3 PB 8.6 газ исп. 0.9
+     до GSA трубы: {'npv15': -28.5, 'npv20': -34.93, 'y2': 9.5} | приращение трубы NPV15 -27.52 NPV20 -27.95 | связка против раздельно NPV15 17.67
+  Oredo 2025 (15.5) -> Sapele PS|pess|EDTI|411
+     power     cap   31.8 (pow  31.8 pipe   0.0, Qd  0.00) E1   8.29 E2  11.45 (pipe  0.00) NPV15    2.8 NPV20   -5.0 IRR 16.6 PB 5.2 газ исп. 0.33
+     pipe      cap   47.9 (pow   0.0 pipe  47.9, Qd  6.90) E1  -7.57 E2  -6.76 (pipe -6.76) NPV15  -76.5 NPV20  -69.8 IRR None PB None газ исп. 0.69
+     separate  cap   75.1 (pow  31.8 pipe  43.3, Qd  4.71) E1   1.42 E2   5.14 (pipe -6.31) NPV15  -66.8 NPV20  -68.4 IRR -23.9 PB None газ исп. 0.68
+     bundle    cap   71.0 (pow  31.8 pipe  39.2, Qd  5.45) E1   3.92 E2   7.76 (pipe -3.69) NPV15  -50.1 NPV20  -55.0 IRR -3.7 PB None газ исп. 0.8
+     до GSA трубы: {'npv15': -51.93, 'npv20': -56.39, 'y2': 6.87} | приращение трубы NPV15 -52.95 NPV20 -49.96 | связка против раздельно NPV15 16.64
+  типовой 5 MMscf/д, отвод 4 км|opt|EDTI|411
+     power     cap   27.4 (pow  27.4 pipe   0.0, Qd  0.00) E1   9.00 E2  12.26 (pipe  0.00) NPV15   13.8 NPV20    5.8 IRR 24.9 PB 3.8 газ исп. 0.51
+     pipe      cap    7.8 (pow   0.0 pipe   7.8, Qd  3.59) E1   0.37 E2   0.73 (pipe  0.73) NPV15   -6.5 NPV20   -6.7 IRR -20.2 PB None газ исп. 0.93
+     separate  cap   32.9 (pow  27.4 pipe   5.5, Qd  1.27) E1   8.29 E2  11.58 (pipe -0.68) NPV15    3.6 NPV20   -3.3 IRR 17.4 PB 4.5 газ исп. 0.73
+     bundle    cap   32.5 (pow  27.4 pipe   5.0, Qd  2.06) E1   9.94 E2  13.12 (pipe  0.87) NPV15   11.9 NPV20    3.4 IRR 22.5 PB 3.9 газ исп. 0.97
+     до GSA трубы: {'npv15': 11.12, 'npv20': 2.77, 'y2': 12.81} | приращение трубы NPV15 -1.88 NPV20 -2.39 | связка против раздельно NPV15 8.28
+  типовой 5 MMscf/д, отвод 4 км|base|EDTI|377
+     power     cap   29.1 (pow  29.1 pipe   0.0, Qd  0.00) E1   7.67 E2  10.62 (pipe  0.00) NPV15    5.7 NPV20   -0.7 IRR 19.4 PB 4.2 газ исп. 0.59
+     pipe      cap   11.3 (pow   0.0 pipe  11.3, Qd  3.12) E1  -1.50 E2  -1.35 (pipe -1.35) NPV15  -19.2 NPV20  -17.6 IRR None PB None газ исп. 0.86
+     separate  cap   37.0 (pow  29.1 pipe   7.8, Qd  0.86) E1   5.88 E2   8.78 (pipe -1.83) NPV15  -11.4 NPV20  -15.9 IRR 6.4 PB 5.9 газ исп. 0.7
+     bundle    cap   36.3 (pow  29.1 pipe   7.1, Qd  1.62) E1   7.59 E2  10.44 (pipe -0.18) NPV15   -2.7 NPV20   -8.8 IRR 13.2 PB 5.0 газ исп. 0.96
+     до GSA трубы: {'npv15': -3.66, 'npv20': -9.63, 'y2': 10.17} | приращение трубы NPV15 -8.41 NPV20 -8.12 | связка против раздельно NPV15 8.75
+  типовой 5 MMscf/д, отвод 4 км|base|EDTI|411
+     power     cap   29.1 (pow  29.1 pipe   0.0, Qd  0.00) E1   8.78 E2  12.00 (pipe  0.00) NPV15    9.6 NPV20    2.4 IRR 22.1 PB 3.9 газ исп. 0.59
+     pipe      cap   11.3 (pow   0.0 pipe  11.3, Qd  3.12) E1  -1.50 E2  -1.35 (pipe -1.35) NPV15  -19.2 NPV20  -17.6 IRR None PB None газ исп. 0.86
+     separate  cap   37.0 (pow  29.1 pipe   7.8, Qd  0.86) E1   6.99 E2  10.17 (pipe -1.83) NPV15   -7.5 NPV20  -12.8 IRR 9.7 PB 5.4 газ исп. 0.7
+     bundle    cap   36.3 (pow  29.1 pipe   7.1, Qd  1.62) E1   8.70 E2  11.83 (pipe -0.18) NPV15    2.2 NPV20   -4.8 IRR 16.4 PB 4.5 газ исп. 0.96
+     до GSA трубы: {'npv15': 1.25, 'npv20': -5.63, 'y2': 11.55} | приращение трубы NPV15 -7.4 NPV20 -7.27 | связка против раздельно NPV15 9.77
+  типовой 5 MMscf/д, отвод 4 км|base|noEDTI|377
+     power     cap   29.1 (pow  29.1 pipe   0.0, Qd  0.00) E1   7.67 E2  10.62 (pipe  0.00) NPV15    0.7 NPV20   -5.2 IRR 15.5 PB 5.1 газ исп. 0.59
+     pipe      cap   11.3 (pow   0.0 pipe  11.3, Qd  3.12) E1  -1.50 E2  -1.35 (pipe -1.35) NPV15  -19.2 NPV20  -17.6 IRR None PB None газ исп. 0.86
+     separate  cap   37.0 (pow  29.1 pipe   7.8, Qd  0.86) E1   5.88 E2   8.78 (pipe -1.83) NPV15  -16.5 NPV20  -20.4 IRR 3.2 PB 8.4 газ исп. 0.7
+     bundle    cap   36.3 (pow  29.1 pipe   7.1, Qd  1.62) E1   7.59 E2  10.44 (pipe -0.18) NPV15   -6.7 NPV20  -12.5 IRR 10.7 PB 6.0 газ исп. 0.96
+     до GSA трубы: {'npv15': -7.37, 'npv20': -13.06, 'y2': 10.17} | приращение трубы NPV15 -7.34 NPV20 -7.27 | связка против раздельно NPV15 9.83
+  типовой 5 MMscf/д, отвод 4 км|pess|EDTI|411
+     power     cap   30.9 (pow  30.9 pipe   0.0, Qd  0.00) E1   8.43 E2  11.61 (pipe  0.00) NPV15   -6.5 NPV20  -11.2 IRR 9.9 PB 5.3 газ исп. 0.68
+     pipe      cap   15.5 (pow   0.0 pipe  15.5, Qd  2.23) E1  -3.79 E2  -3.57 (pipe -3.57) NPV15  -30.4 NPV20  -26.9 IRR None PB None газ исп. 0.69
+     separate  cap   30.9 (pow  30.9 pipe   0.0, Qd  0.03) E1   8.43 E2  11.61 (pipe  0.00) NPV15   -6.5 NPV20  -11.2 IRR 9.9 PB 5.3 газ исп. 0.68
+     bundle    cap   40.2 (pow  30.9 pipe   9.3, Qd  0.77) E1   7.34 E2  10.59 (pipe -1.01) NPV15  -19.6 NPV20  -23.4 IRR None PB 8.2 газ исп. 0.93
+     до GSA трубы: {'npv15': -19.91, 'npv20': -23.67, 'y2': 10.47} | приращение трубы NPV15 -13.17 NPV20 -12.28 | связка против раздельно NPV15 -13.17
+  типовой 15 MMscf/д, отвод 8 км|opt|EDTI|411
+     power     cap   27.4 (pow  27.4 pipe   0.0, Qd  0.00) E1   9.00 E2  12.26 (pipe  0.00) NPV15   13.8 NPV20    5.8 IRR 24.9 PB 3.8 газ исп. 0.17
+     pipe      cap   17.3 (pow   0.0 pipe  17.3, Qd 10.77) E1   3.57 E2   4.74 (pipe  4.74) NPV15   -2.8 NPV20   -5.5 IRR 11.1 PB 5.4 газ исп. 0.93
+     separate  cap   42.7 (pow  27.4 pipe  15.3, Qd  8.45) E1  11.48 E2  15.57 (pipe  3.31) NPV15    7.7 NPV20   -2.0 IRR 18.9 PB 4.3 газ исп. 0.86
+     bundle    cap   41.4 (pow  27.4 pipe  14.0, Qd  9.24) E1  13.36 E2  17.35 (pipe  5.10) NPV15   16.4 NPV20    5.4 IRR 23.1 PB 3.9 газ исп. 0.94
+     до GSA трубы: {'npv15': 12.69, 'npv20': 2.36, 'y2': 15.95} | приращение трубы NPV15 2.6 NPV20 -0.45 | связка против раздельно NPV15 8.75
+  типовой 15 MMscf/д, отвод 8 км|base|EDTI|377
+     power     cap   29.1 (pow  29.1 pipe   0.0, Qd  0.00) E1   7.67 E2  10.62 (pipe  0.00) NPV15    7.6 NPV20    0.6 IRR 20.5 PB 4.2 газ исп. 0.21
+     pipe      cap   25.4 (pow   0.0 pipe  25.4, Qd  9.37) E1  -1.13 E2  -0.58 (pipe -0.58) NPV15  -32.9 NPV20  -31.3 IRR None PB None газ исп. 0.86
+     separate  cap   51.4 (pow  29.1 pipe  22.3, Qd  7.11) E1   6.23 E2   9.53 (pipe -1.09) NPV15  -23.8 NPV20  -29.0 IRR 2.2 PB 9.3 газ исп. 0.8
+     bundle    cap   49.4 (pow  29.1 pipe  20.3, Qd  7.87) E1   8.24 E2  11.50 (pipe  0.89) NPV15  -12.2 NPV20  -19.3 IRR 9.0 PB 6.0 газ исп. 0.9
+     до GSA трубы: {'npv15': -15.42, 'npv20': -21.95, 'y2': 10.29} | приращение трубы NPV15 -19.8 NPV20 -19.86 | связка против раздельно NPV15 11.67
+  типовой 15 MMscf/д, отвод 8 км|base|EDTI|411
+     power     cap   29.1 (pow  29.1 pipe   0.0, Qd  0.00) E1   8.78 E2  12.00 (pipe  0.00) NPV15   11.7 NPV20    3.8 IRR 23.1 PB 3.9 газ исп. 0.21
+     pipe      cap   25.4 (pow   0.0 pipe  25.4, Qd  9.37) E1  -1.13 E2  -0.58 (pipe -0.58) NPV15  -32.9 NPV20  -31.3 IRR None PB None газ исп. 0.86
+     separate  cap   51.4 (pow  29.1 pipe  22.3, Qd  7.11) E1   7.34 E2  10.91 (pipe -1.09) NPV15  -19.8 NPV20  -25.7 IRR 4.9 PB 7.6 газ исп. 0.8
+     bundle    cap   49.4 (pow  29.1 pipe  20.3, Qd  7.87) E1   9.35 E2  12.89 (pipe  0.89) NPV15   -7.1 NPV20  -15.2 IRR 11.7 PB 5.5 газ исп. 0.9
+     до GSA трубы: {'npv15': -10.32, 'npv20': -17.83, 'y2': 11.68} | приращение трубы NPV15 -18.78 NPV20 -19.01 | связка против раздельно NPV15 12.69
+  типовой 15 MMscf/д, отвод 8 км|base|noEDTI|377
+     power     cap   29.1 (pow  29.1 pipe   0.0, Qd  0.00) E1   7.67 E2  10.62 (pipe  0.00) NPV15    2.6 NPV20   -4.0 IRR 16.8 PB 5.1 газ исп. 0.21
+     pipe      cap   25.4 (pow   0.0 pipe  25.4, Qd  9.37) E1  -1.13 E2  -0.58 (pipe -0.58) NPV15  -32.9 NPV20  -31.3 IRR None PB None газ исп. 0.86
+     separate  cap   51.4 (pow  29.1 pipe  22.3, Qd  7.11) E1   6.23 E2   9.53 (pipe -1.09) NPV15  -28.9 NPV20  -33.5 IRR 0.1 PB 10.9 газ исп. 0.8
+     bundle    cap   49.4 (pow  29.1 pipe  20.3, Qd  7.87) E1   8.24 E2  11.50 (pipe  0.89) NPV15  -15.0 NPV20  -22.1 IRR 8.1 PB 7.1 газ исп. 0.9
+     до GSA трубы: {'npv15': -17.2, 'npv20': -23.84, 'y2': 10.29} | приращение трубы NPV15 -17.53 NPV20 -18.08 | связка против раздельно NPV15 13.94
+  типовой 15 MMscf/д, отвод 8 км|pess|EDTI|411
+     power     cap   30.9 (pow  30.9 pipe   0.0, Qd  0.00) E1   8.43 E2  11.61 (pipe  0.00) NPV15    3.9 NPV20   -4.0 IRR 17.3 PB 5.1 газ исп. 0.34
+     pipe      cap   32.3 (pow   0.0 pipe  32.3, Qd  6.68) E1  -6.24 E2  -5.42 (pipe -5.42) NPV15  -55.5 NPV20  -50.1 IRR None PB None газ исп. 0.69
+     separate  cap   58.6 (pow  30.9 pipe  27.7, Qd  4.48) E1   2.89 E2   6.64 (pipe -4.97) NPV15  -44.5 NPV20  -47.6 IRR -8.1 PB None газ исп. 0.68
+     bundle    cap   56.0 (pow  30.9 pipe  25.1, Qd  5.22) E1   5.28 E2   9.14 (pipe -2.46) NPV15  -30.2 NPV20  -36.2 IRR 2.4 PB 10.2 газ исп. 0.8
+     до GSA трубы: {'npv15': -31.95, 'npv20': -37.54, 'y2': 8.29} | приращение трубы NPV15 -34.19 NPV20 -32.26 | связка против раздельно NPV15 14.29
+
+=== безубыточный тариф ₦/кВт·ч: power -> bundle ===
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli   opt  EDTI   NPV15=0: 307.2 -> 313.88 | NPV20=0: 351.07 -> 366.83
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli   opt  noEDTI NPV15=0: 334.75 -> 348.85 | NPV20=0: 398.17 -> 425.35
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli   base EDTI   NPV15=0: 325.09 -> 386.72 | NPV20=0: 372.1 -> 447.19
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli   base noEDTI NPV15=0: 354.87 -> 426.23 | NPV20=0: 422.85 -> 513.38
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli   pess EDTI   NPV15=0: 419.22 -> 547.72 | NPV20=0: 510.79 -> 670.76
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli   pess noEDTI NPV15=0: 475.47 -> 622.94 | NPV20=0: 579.81 -> 763.31
+  Ughelli East min23-25 (6.3)                    opt  EDTI   NPV15=0: 307.2 -> 316.11 | NPV20=0: 351.07 -> 368.66
+  Ughelli East min23-25 (6.3)                    opt  noEDTI NPV15=0: 334.75 -> 350.76 | NPV20=0: 398.17 -> 426.69
+  Ughelli East min23-25 (6.3)                    base EDTI   NPV15=0: 326.18 -> 386.58 | NPV20=0: 373.29 -> 446.57
+  Ughelli East min23-25 (6.3)                    base noEDTI NPV15=0: 356.49 -> 426.3 | NPV20=0: 424.4 -> 512.58
+  Ughelli East min23-25 (6.3)                    pess EDTI   NPV15=0: 428.84 -> 555.85 | NPV20=0: 521.32 -> 678.92
+  Ughelli East min23-25 (6.3)                    pess noEDTI NPV15=0: 486.43 -> 632.18 | NPV20=0: 591.83 -> 772.57
+  Ughelli East 6.7, ЛЭП 10 км [Д]                opt  EDTI   NPV15=0: 279.49 -> 286.04 | NPV20=0: 318.44 -> 333.89
+  Ughelli East 6.7, ЛЭП 10 км [Д]                opt  noEDTI NPV15=0: 303.95 -> 317.79 | NPV20=0: 360.09 -> 386.78
+  Ughelli East 6.7, ЛЭП 10 км [Д]                base EDTI   NPV15=0: 296.82 -> 357.32 | NPV20=0: 338.82 -> 412.53
+  Ughelli East 6.7, ЛЭП 10 км [Д]                base noEDTI NPV15=0: 323.43 -> 393.49 | NPV20=0: 383.99 -> 472.88
+  Ughelli East 6.7, ЛЭП 10 км [Д]                pess EDTI   NPV15=0: 383.44 -> 509.6 | NPV20=0: 465.42 -> 622.47
+  Ughelli East 6.7, ЛЭП 10 км [Д]                pess noEDTI NPV15=0: 433.89 -> 578.67 | NPV20=0: 527.26 -> 707.41
+  Oredo min23-25 (8.5) -> Sapele PS              opt  EDTI   NPV15=0: 316.67 -> 372.13 | NPV20=0: 362.22 -> 439.45
+  Oredo min23-25 (8.5) -> Sapele PS              opt  noEDTI NPV15=0: 345.27 -> 416.36 | NPV20=0: 411.18 -> 513.91
+  Oredo min23-25 (8.5) -> Sapele PS              base EDTI   NPV15=0: 334.11 -> 506.94 | NPV20=0: 382.8 -> 590.74
+  Oredo min23-25 (8.5) -> Sapele PS              base noEDTI NPV15=0: 364.68 -> 560.92 | NPV20=0: 435.23 -> 682.29
+  Oredo min23-25 (8.5) -> Sapele PS              pess EDTI   NPV15=0: 404.74 -> 763.42 | NPV20=0: 495.32 -> 948.07
+  Oredo min23-25 (8.5) -> Sapele PS              pess noEDTI NPV15=0: 456.78 -> 868.5 | NPV20=0: 562.31 -> 1083.92
+  Oredo 2025 (15.5) -> Sapele PS                 opt  EDTI   NPV15=0: 316.67 -> 341.3 | NPV20=0: 362.22 -> 417.53
+  Oredo 2025 (15.5) -> Sapele PS                 opt  noEDTI NPV15=0: 345.27 -> 392.24 | NPV20=0: 411.18 -> 502.31
+  Oredo 2025 (15.5) -> Sapele PS                 base EDTI   NPV15=0: 334.11 -> 549.2 | NPV20=0: 382.8 -> 646.65
+  Oredo 2025 (15.5) -> Sapele PS                 base noEDTI NPV15=0: 364.68 -> 612.78 | NPV20=0: 435.23 -> 753.13
+  Oredo 2025 (15.5) -> Sapele PS                 pess EDTI   NPV15=0: 388.03 -> 801.25 | NPV20=0: 474.55 -> 996.25
+  Oredo 2025 (15.5) -> Sapele PS                 pess noEDTI NPV15=0: 431.71 -> 898.14 | NPV20=0: 536.55 -> 1133.79
+  типовой 5 MMscf/д, отвод 4 км                  opt  EDTI   NPV15=0: 307.2 -> 324.62 | NPV20=0: 351.07 -> 376.06
+  типовой 5 MMscf/д, отвод 4 км                  opt  noEDTI NPV15=0: 334.75 -> 358.37 | NPV20=0: 398.17 -> 432.78
+  типовой 5 MMscf/д, отвод 4 км                  base EDTI   NPV15=0: 335.79 -> 395.6 | NPV20=0: 384.7 -> 456.15
+  типовой 5 MMscf/д, отвод 4 км                  base noEDTI NPV15=0: 370.84 -> 439.94 | NPV20=0: 438.75 -> 524.28
+  типовой 5 MMscf/д, отвод 4 км                  pess EDTI   NPV15=0: 482.34 -> 615.23 | NPV20=0: 583.69 -> 747.45
+  типовой 5 MMscf/д, отвод 4 км                  pess noEDTI NPV15=0: 549.88 -> 703.12 | NPV20=0: 662.96 -> 850.64
+  типовой 15 MMscf/д, отвод 8 км                 opt  EDTI   NPV15=0: 307.2 -> 290.49 | NPV20=0: 351.07 -> 356.21
+  типовой 15 MMscf/д, отвод 8 км                 opt  noEDTI NPV15=0: 334.75 -> 334.77 | NPV20=0: 398.17 -> 429.38
+  типовой 15 MMscf/д, отвод 8 км                 base EDTI   NPV15=0: 324.47 -> 458.06 | NPV20=0: 371.44 -> 538.57
+  типовой 15 MMscf/д, отвод 8 км                 base noEDTI NPV15=0: 353.96 -> 510.94 | NPV20=0: 421.98 -> 626.3
+  типовой 15 MMscf/д, отвод 8 км                 pess EDTI   NPV15=0: 377.03 -> 644.93 | NPV20=0: 460.63 -> 798.71
+  типовой 15 MMscf/д, отвод 8 км                 pess noEDTI NPV15=0: 419.24 -> 721.12 | NPV20=0: 520.48 -> 906.27
+
+=== пороги приращения трубы (NPV20 приращения = 0), T=₦405, EDTI ===
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|opt {'inc_npv20': -1.5, 'gas_sale_price_usd_mmbtu': 3.29, 'operator_fee_usd_mscf': 0.63, 'gsa_allin_usd_mmbtu': 0.4, 'collection': None, 'pipe_cost_usd_m_per_km': 0.09}
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|base {'inc_npv20': -8.12, 'gas_sale_price_usd_mmbtu': 7.97, 'operator_fee_usd_mscf': 4.64, 'gsa_allin_usd_mmbtu': None, 'collection': None, 'pipe_cost_usd_m_per_km': None}
+  Ughelli East min23-25 (6.3)|opt {'inc_npv20': -1.67, 'gas_sale_price_usd_mmbtu': 3.43, 'operator_fee_usd_mscf': 0.77, 'gsa_allin_usd_mmbtu': 0.33, 'collection': None, 'pipe_cost_usd_m_per_km': 0.04}
+  Ughelli East min23-25 (6.3)|base {'inc_npv20': -7.88, 'gas_sale_price_usd_mmbtu': 8.42, 'operator_fee_usd_mscf': 5.0, 'gsa_allin_usd_mmbtu': None, 'collection': None, 'pipe_cost_usd_m_per_km': None}
+  Ughelli East 6.7, ЛЭП 10 км [Д]|opt {'inc_npv20': -1.38, 'gas_sale_price_usd_mmbtu': 3.3, 'operator_fee_usd_mscf': 0.65, 'gsa_allin_usd_mmbtu': 0.39, 'collection': None, 'pipe_cost_usd_m_per_km': 0.08}
+  Ughelli East 6.7, ЛЭП 10 км [Д]|base {'inc_npv20': -7.3, 'gas_sale_price_usd_mmbtu': 8.1, 'operator_fee_usd_mscf': 4.75, 'gsa_allin_usd_mmbtu': None, 'collection': None, 'pipe_cost_usd_m_per_km': None}
+  Oredo min23-25 (8.5) -> Sapele PS|opt {'inc_npv20': -8.19, 'gas_sale_price_usd_mmbtu': 4.82, 'operator_fee_usd_mscf': 2.22, 'gsa_allin_usd_mmbtu': None, 'collection': None, 'pipe_cost_usd_m_per_km': 0.04}
+  Oredo min23-25 (8.5) -> Sapele PS|base {'inc_npv20': -24.35, 'gas_sale_price_usd_mmbtu': 13.26, 'operator_fee_usd_mscf': 8.88, 'gsa_allin_usd_mmbtu': None, 'collection': None, 'pipe_cost_usd_m_per_km': None}
+  Oredo 2025 (15.5) -> Sapele PS|opt {'inc_npv20': -5.51, 'gas_sale_price_usd_mmbtu': 3.4, 'operator_fee_usd_mscf': 0.75, 'gsa_allin_usd_mmbtu': 0.2, 'collection': None, 'pipe_cost_usd_m_per_km': 0.22}
+  Oredo 2025 (15.5) -> Sapele PS|base {'inc_npv20': -30.97, 'gas_sale_price_usd_mmbtu': 8.57, 'operator_fee_usd_mscf': 5.12, 'gsa_allin_usd_mmbtu': None, 'collection': None, 'pipe_cost_usd_m_per_km': None}
+  типовой 5 MMscf/д, отвод 4 км|opt {'inc_npv20': -2.39, 'gas_sale_price_usd_mmbtu': 4.25, 'operator_fee_usd_mscf': 1.62, 'gsa_allin_usd_mmbtu': 0.01, 'collection': None, 'pipe_cost_usd_m_per_km': None}
+  типовой 5 MMscf/д, отвод 4 км|base {'inc_npv20': -7.43, 'gas_sale_price_usd_mmbtu': 11.0, 'operator_fee_usd_mscf': 7.07, 'gsa_allin_usd_mmbtu': None, 'collection': None, 'pipe_cost_usd_m_per_km': None}
+  типовой 15 MMscf/д, отвод 8 км|opt {'inc_npv20': -0.45, 'gas_sale_price_usd_mmbtu': 2.74, 'operator_fee_usd_mscf': 0.07, 'gsa_allin_usd_mmbtu': 0.7, 'collection': 0.99, 'pipe_cost_usd_m_per_km': 0.45}
+  типовой 15 MMscf/д, отвод 8 км|base {'inc_npv20': -19.15, 'gas_sale_price_usd_mmbtu': 6.41, 'operator_fee_usd_mscf': 3.39, 'gsa_allin_usd_mmbtu': None, 'collection': None, 'pipe_cost_usd_m_per_km': None}
+
+=== углерод AM0009 на газ трубы связки (база потока; EV после налога, P=0.6) ===
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|VCM4|best|8y {'base_flow': {'npv15_if_ok': -1.47, 'ev15': -1.1, 'ev20': -1.06, 'kt_y1': 40.0}, 'opt_flow': {'npv15_if_ok': -1.41, 'ev15': -1.06, 'ev20': -1.03, 'kt_y1': 51.5}}
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|VCM4|worst|8y {'base_flow': {'npv15_if_ok': -2.02, 'ev15': -1.46, 'ev20': -1.38, 'kt_y1': 40.0}, 'opt_flow': {'npv15_if_ok': -1.99, 'ev15': -1.45, 'ev20': -1.37, 'kt_y1': 51.5}}
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|C10|best|8y {'base_flow': {'npv15_if_ok': -1.33, 'ev15': -1.01, 'ev20': -0.99, 'kt_y1': 40.0}, 'opt_flow': {'npv15_if_ok': -1.21, 'ev15': -0.94, 'ev20': -0.93, 'kt_y1': 51.5}}
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|C10|worst|8y {'base_flow': {'npv15_if_ok': -1.96, 'ev15': -1.43, 'ev20': -1.35, 'kt_y1': 40.0}, 'opt_flow': {'npv15_if_ok': -1.91, 'ev15': -1.4, 'ev20': -1.33, 'kt_y1': 51.5}}
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|I20|best|4y {'base_flow': {'npv15_if_ok': -0.86, 'ev15': -0.73, 'ev20': -0.76, 'kt_y1': 40.0}, 'opt_flow': {'npv15_if_ok': -0.67, 'ev15': -0.62, 'ev20': -0.67, 'kt_y1': 51.5}}
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|I20|best|8y {'base_flow': {'npv15_if_ok': -0.88, 'ev15': -0.74, 'ev20': -0.77, 'kt_y1': 40.0}, 'opt_flow': {'npv15_if_ok': -0.56, 'ev15': -0.55, 'ev20': -0.62, 'kt_y1': 51.5}}
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|I20|worst|4y {'base_flow': {'npv15_if_ok': -1.51, 'ev15': -1.16, 'ev20': -1.15, 'kt_y1': 40.0}, 'opt_flow': {'npv15_if_ok': -1.43, 'ev15': -1.11, 'ev20': -1.11, 'kt_y1': 51.5}}
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|I20|worst|8y {'base_flow': {'npv15_if_ok': -1.77, 'ev15': -1.31, 'ev20': -1.26, 'kt_y1': 40.0}, 'opt_flow': {'npv15_if_ok': -1.64, 'ev15': -1.23, 'ev20': -1.2, 'kt_y1': 51.5}}
+  Ughelli East min23-25 (6.3)|VCM4|best|8y {'base_flow': {'npv15_if_ok': -1.48, 'ev15': -1.1, 'ev20': -1.06, 'kt_y1': 36.3}, 'opt_flow': {'npv15_if_ok': -1.43, 'ev15': -1.07, 'ev20': -1.04, 'kt_y1': 47.1}}
+  Ughelli East min23-25 (6.3)|VCM4|worst|8y {'base_flow': {'npv15_if_ok': -2.02, 'ev15': -1.47, 'ev20': -1.38, 'kt_y1': 36.3}, 'opt_flow': {'npv15_if_ok': -2.0, 'ev15': -1.45, 'ev20': -1.37, 'kt_y1': 47.1}}
+  Ughelli East min23-25 (6.3)|C10|best|8y {'base_flow': {'npv15_if_ok': -1.36, 'ev15': -1.03, 'ev20': -1.0, 'kt_y1': 36.3}, 'opt_flow': {'npv15_if_ok': -1.25, 'ev15': -0.96, 'ev20': -0.95, 'kt_y1': 47.1}}
+  Ughelli East min23-25 (6.3)|C10|worst|8y {'base_flow': {'npv15_if_ok': -1.97, 'ev15': -1.43, 'ev20': -1.36, 'kt_y1': 36.3}, 'opt_flow': {'npv15_if_ok': -1.92, 'ev15': -1.41, 'ev20': -1.33, 'kt_y1': 47.1}}
+  Ughelli East min23-25 (6.3)|I20|best|4y {'base_flow': {'npv15_if_ok': -0.91, 'ev15': -0.76, 'ev20': -0.79, 'kt_y1': 36.3}, 'opt_flow': {'npv15_if_ok': -0.73, 'ev15': -0.66, 'ev20': -0.7, 'kt_y1': 47.1}}
+  Ughelli East min23-25 (6.3)|I20|best|8y {'base_flow': {'npv15_if_ok': -0.95, 'ev15': -0.79, 'ev20': -0.81, 'kt_y1': 36.3}, 'opt_flow': {'npv15_if_ok': -0.65, 'ev15': -0.61, 'ev20': -0.67, 'kt_y1': 47.1}}
+  Ughelli East min23-25 (6.3)|I20|worst|4y {'base_flow': {'npv15_if_ok': -1.53, 'ev15': -1.17, 'ev20': -1.16, 'kt_y1': 36.3}, 'opt_flow': {'npv15_if_ok': -1.45, 'ev15': -1.12, 'ev20': -1.12, 'kt_y1': 47.1}}
+  Ughelli East min23-25 (6.3)|I20|worst|8y {'base_flow': {'npv15_if_ok': -1.8, 'ev15': -1.33, 'ev20': -1.28, 'kt_y1': 36.3}, 'opt_flow': {'npv15_if_ok': -1.68, 'ev15': -1.26, 'ev20': -1.22, 'kt_y1': 47.1}}
+  Ughelli East 6.7, ЛЭП 10 км [Д]|VCM4|best|8y {'base_flow': {'npv15_if_ok': -1.47, 'ev15': -1.1, 'ev20': -1.06, 'kt_y1': 40.0}, 'opt_flow': {'npv15_if_ok': -1.41, 'ev15': -1.06, 'ev20': -1.03, 'kt_y1': 51.5}}
+  Ughelli East 6.7, ЛЭП 10 км [Д]|VCM4|worst|8y {'base_flow': {'npv15_if_ok': -2.02, 'ev15': -1.46, 'ev20': -1.38, 'kt_y1': 40.0}, 'opt_flow': {'npv15_if_ok': -1.99, 'ev15': -1.45, 'ev20': -1.37, 'kt_y1': 51.5}}
+  Ughelli East 6.7, ЛЭП 10 км [Д]|C10|best|8y {'base_flow': {'npv15_if_ok': -1.33, 'ev15': -1.01, 'ev20': -0.99, 'kt_y1': 40.0}, 'opt_flow': {'npv15_if_ok': -1.21, 'ev15': -0.94, 'ev20': -0.93, 'kt_y1': 51.5}}
+  Ughelli East 6.7, ЛЭП 10 км [Д]|C10|worst|8y {'base_flow': {'npv15_if_ok': -1.96, 'ev15': -1.43, 'ev20': -1.35, 'kt_y1': 40.0}, 'opt_flow': {'npv15_if_ok': -1.91, 'ev15': -1.4, 'ev20': -1.33, 'kt_y1': 51.5}}
+  Ughelli East 6.7, ЛЭП 10 км [Д]|I20|best|4y {'base_flow': {'npv15_if_ok': -0.86, 'ev15': -0.73, 'ev20': -0.76, 'kt_y1': 40.0}, 'opt_flow': {'npv15_if_ok': -0.67, 'ev15': -0.62, 'ev20': -0.67, 'kt_y1': 51.5}}
+  Ughelli East 6.7, ЛЭП 10 км [Д]|I20|best|8y {'base_flow': {'npv15_if_ok': -0.88, 'ev15': -0.74, 'ev20': -0.77, 'kt_y1': 40.0}, 'opt_flow': {'npv15_if_ok': -0.56, 'ev15': -0.55, 'ev20': -0.62, 'kt_y1': 51.5}}
+  Ughelli East 6.7, ЛЭП 10 км [Д]|I20|worst|4y {'base_flow': {'npv15_if_ok': -1.51, 'ev15': -1.16, 'ev20': -1.15, 'kt_y1': 40.0}, 'opt_flow': {'npv15_if_ok': -1.43, 'ev15': -1.11, 'ev20': -1.11, 'kt_y1': 51.5}}
+  Ughelli East 6.7, ЛЭП 10 км [Д]|I20|worst|8y {'base_flow': {'npv15_if_ok': -1.77, 'ev15': -1.31, 'ev20': -1.26, 'kt_y1': 40.0}, 'opt_flow': {'npv15_if_ok': -1.64, 'ev15': -1.23, 'ev20': -1.2, 'kt_y1': 51.5}}
+  Oredo min23-25 (8.5) -> Sapele PS|VCM4|best|8y {'base_flow': {'npv15_if_ok': -1.41, 'ev15': -1.06, 'ev20': -1.03, 'kt_y1': 56.8}, 'opt_flow': {'npv15_if_ok': -1.34, 'ev15': -1.02, 'ev20': -1.0, 'kt_y1': 71.9}}
+  Oredo min23-25 (8.5) -> Sapele PS|VCM4|worst|8y {'base_flow': {'npv15_if_ok': -1.99, 'ev15': -1.45, 'ev20': -1.37, 'kt_y1': 56.8}, 'opt_flow': {'npv15_if_ok': -1.96, 'ev15': -1.43, 'ev20': -1.35, 'kt_y1': 71.9}}
+  Oredo min23-25 (8.5) -> Sapele PS|C10|best|8y {'base_flow': {'npv15_if_ok': -1.21, 'ev15': -0.94, 'ev20': -0.93, 'kt_y1': 56.8}, 'opt_flow': {'npv15_if_ok': -1.06, 'ev15': -0.85, 'ev20': -0.86, 'kt_y1': 71.9}}
+  Oredo min23-25 (8.5) -> Sapele PS|C10|worst|8y {'base_flow': {'npv15_if_ok': -1.91, 'ev15': -1.4, 'ev20': -1.33, 'kt_y1': 56.8}, 'opt_flow': {'npv15_if_ok': -1.85, 'ev15': -1.36, 'ev20': -1.3, 'kt_y1': 71.9}}
+  Oredo min23-25 (8.5) -> Sapele PS|I20|best|4y {'base_flow': {'npv15_if_ok': -0.64, 'ev15': -0.6, 'ev20': -0.65, 'kt_y1': 56.8}, 'opt_flow': {'npv15_if_ok': -0.39, 'ev15': -0.45, 'ev20': -0.53, 'kt_y1': 71.9}}
+  Oredo min23-25 (8.5) -> Sapele PS|I20|best|8y {'base_flow': {'npv15_if_ok': -0.56, 'ev15': -0.55, 'ev20': -0.62, 'kt_y1': 56.8}, 'opt_flow': {'npv15_if_ok': -0.14, 'ev15': -0.3, 'ev20': -0.42, 'kt_y1': 71.9}}
+  Oredo min23-25 (8.5) -> Sapele PS|I20|worst|4y {'base_flow': {'npv15_if_ok': -1.42, 'ev15': -1.1, 'ev20': -1.1, 'kt_y1': 56.8}, 'opt_flow': {'npv15_if_ok': -1.31, 'ev15': -1.04, 'ev20': -1.05, 'kt_y1': 71.9}}
+  Oredo min23-25 (8.5) -> Sapele PS|I20|worst|8y {'base_flow': {'npv15_if_ok': -1.64, 'ev15': -1.23, 'ev20': -1.2, 'kt_y1': 56.8}, 'opt_flow': {'npv15_if_ok': -1.46, 'ev15': -1.13, 'ev20': -1.12, 'kt_y1': 71.9}}
+  Oredo 2025 (15.5) -> Sapele PS|VCM4|best|8y {'base_flow': {'npv15_if_ok': -1.2, 'ev15': -0.94, 'ev20': -0.93, 'kt_y1': 122.0}, 'opt_flow': {'npv15_if_ok': -1.07, 'ev15': -0.86, 'ev20': -0.86, 'kt_y1': 150.8}}
+  Oredo 2025 (15.5) -> Sapele PS|VCM4|worst|8y {'base_flow': {'npv15_if_ok': -1.91, 'ev15': -1.4, 'ev20': -1.33, 'kt_y1': 122.0}, 'opt_flow': {'npv15_if_ok': -1.85, 'ev15': -1.36, 'ev20': -1.3, 'kt_y1': 150.8}}
+  Oredo 2025 (15.5) -> Sapele PS|C10|best|8y {'base_flow': {'npv15_if_ok': -0.76, 'ev15': -0.67, 'ev20': -0.72, 'kt_y1': 122.0}, 'opt_flow': {'npv15_if_ok': -0.46, 'ev15': -0.49, 'ev20': -0.58, 'kt_y1': 150.8}}
+  Oredo 2025 (15.5) -> Sapele PS|C10|worst|8y {'base_flow': {'npv15_if_ok': -1.72, 'ev15': -1.28, 'ev20': -1.24, 'kt_y1': 122.0}, 'opt_flow': {'npv15_if_ok': -1.6, 'ev15': -1.21, 'ev20': -1.19, 'kt_y1': 150.8}}
+  Oredo 2025 (15.5) -> Sapele PS|I20|best|4y {'base_flow': {'npv15_if_ok': 0.21, 'ev15': -0.09, 'ev20': -0.23, 'kt_y1': 122.0}, 'opt_flow': {'npv15_if_ok': 0.69, 'ev15': 0.2, 'ev20': 0.01, 'kt_y1': 150.8}}
+  Oredo 2025 (15.5) -> Sapele PS|I20|best|8y {'base_flow': {'npv15_if_ok': 0.68, 'ev15': 0.19, 'ev20': -0.03, 'kt_y1': 122.0}, 'opt_flow': {'npv15_if_ok': 1.48, 'ev15': 0.67, 'ev20': 0.35, 'kt_y1': 150.8}}
+  Oredo 2025 (15.5) -> Sapele PS|I20|worst|4y {'base_flow': {'npv15_if_ok': -1.06, 'ev15': -0.89, 'ev20': -0.93, 'kt_y1': 122.0}, 'opt_flow': {'npv15_if_ok': -0.86, 'ev15': -0.77, 'ev20': -0.83, 'kt_y1': 150.8}}
+  Oredo 2025 (15.5) -> Sapele PS|I20|worst|8y {'base_flow': {'npv15_if_ok': -1.12, 'ev15': -0.92, 'ev20': -0.97, 'kt_y1': 122.0}, 'opt_flow': {'npv15_if_ok': -0.78, 'ev15': -0.72, 'ev20': -0.82, 'kt_y1': 150.8}}
+  типовой 5 MMscf/д, отвод 4 км|VCM4|best|8y {'base_flow': {'npv15_if_ok': -1.52, 'ev15': -1.13, 'ev20': -1.08, 'kt_y1': 24.2}, 'opt_flow': {'npv15_if_ok': -1.48, 'ev15': -1.11, 'ev20': -1.06, 'kt_y1': 32.4}}
+  типовой 5 MMscf/д, отвод 4 км|VCM4|worst|8y {'base_flow': {'npv15_if_ok': -2.04, 'ev15': -1.47, 'ev20': -1.39, 'kt_y1': 24.2}, 'opt_flow': {'npv15_if_ok': -2.02, 'ev15': -1.47, 'ev20': -1.38, 'kt_y1': 32.4}}
+  типовой 5 MMscf/д, отвод 4 км|C10|best|8y {'base_flow': {'npv15_if_ok': -1.44, 'ev15': -1.08, 'ev20': -1.04, 'kt_y1': 24.2}, 'opt_flow': {'npv15_if_ok': -1.36, 'ev15': -1.03, 'ev20': -1.0, 'kt_y1': 32.4}}
+  типовой 5 MMscf/д, отвод 4 км|C10|worst|8y {'base_flow': {'npv15_if_ok': -2.0, 'ev15': -1.45, 'ev20': -1.37, 'kt_y1': 24.2}, 'opt_flow': {'npv15_if_ok': -1.97, 'ev15': -1.43, 'ev20': -1.36, 'kt_y1': 32.4}}
+  типовой 5 MMscf/д, отвод 4 км|I20|best|4y {'base_flow': {'npv15_if_ok': -1.07, 'ev15': -0.86, 'ev20': -0.86, 'kt_y1': 24.2}, 'opt_flow': {'npv15_if_ok': -0.94, 'ev15': -0.78, 'ev20': -0.8, 'kt_y1': 32.4}}
+  типовой 5 MMscf/д, отвод 4 км|I20|best|8y {'base_flow': {'npv15_if_ok': -1.17, 'ev15': -0.92, 'ev20': -0.91, 'kt_y1': 24.2}, 'opt_flow': {'npv15_if_ok': -0.95, 'ev15': -0.79, 'ev20': -0.81, 'kt_y1': 32.4}}
+  типовой 5 MMscf/д, отвод 4 км|I20|worst|4y {'base_flow': {'npv15_if_ok': -1.6, 'ev15': -1.21, 'ev20': -1.19, 'kt_y1': 24.2}, 'opt_flow': {'npv15_if_ok': -1.54, 'ev15': -1.18, 'ev20': -1.16, 'kt_y1': 32.4}}
+  типовой 5 MMscf/д, отвод 4 км|I20|worst|8y {'base_flow': {'npv15_if_ok': -1.89, 'ev15': -1.39, 'ev20': -1.32, 'kt_y1': 24.2}, 'opt_flow': {'npv15_if_ok': -1.8, 'ev15': -1.33, 'ev20': -1.28, 'kt_y1': 32.4}}
+  типовой 15 MMscf/д, отвод 8 км|VCM4|best|8y {'base_flow': {'npv15_if_ok': -1.22, 'ev15': -0.95, 'ev20': -0.94, 'kt_y1': 117.2}, 'opt_flow': {'npv15_if_ok': -1.09, 'ev15': -0.87, 'ev20': -0.87, 'kt_y1': 145.1}}
+  типовой 15 MMscf/д, отвод 8 км|VCM4|worst|8y {'base_flow': {'npv15_if_ok': -1.91, 'ev15': -1.4, 'ev20': -1.33, 'kt_y1': 117.2}, 'opt_flow': {'npv15_if_ok': -1.86, 'ev15': -1.37, 'ev20': -1.3, 'kt_y1': 145.1}}
+  типовой 15 MMscf/д, отвод 8 км|C10|best|8y {'base_flow': {'npv15_if_ok': -0.79, 'ev15': -0.69, 'ev20': -0.73, 'kt_y1': 117.2}, 'opt_flow': {'npv15_if_ok': -0.5, 'ev15': -0.52, 'ev20': -0.6, 'kt_y1': 145.1}}
+  типовой 15 MMscf/д, отвод 8 км|C10|worst|8y {'base_flow': {'npv15_if_ok': -1.73, 'ev15': -1.29, 'ev20': -1.25, 'kt_y1': 117.2}, 'opt_flow': {'npv15_if_ok': -1.61, 'ev15': -1.22, 'ev20': -1.19, 'kt_y1': 145.1}}
+  типовой 15 MMscf/д, отвод 8 км|I20|best|4y {'base_flow': {'npv15_if_ok': 0.15, 'ev15': -0.13, 'ev20': -0.26, 'kt_y1': 117.2}, 'opt_flow': {'npv15_if_ok': 0.61, 'ev15': 0.15, 'ev20': -0.02, 'kt_y1': 145.1}}
+  типовой 15 MMscf/д, отвод 8 км|I20|best|8y {'base_flow': {'npv15_if_ok': 0.59, 'ev15': 0.14, 'ev20': -0.07, 'kt_y1': 117.2}, 'opt_flow': {'npv15_if_ok': 1.37, 'ev15': 0.6, 'ev20': 0.29, 'kt_y1': 145.1}}
+  типовой 15 MMscf/д, отвод 8 км|I20|worst|4y {'base_flow': {'npv15_if_ok': -1.09, 'ev15': -0.9, 'ev20': -0.94, 'kt_y1': 117.2}, 'opt_flow': {'npv15_if_ok': -0.89, 'ev15': -0.79, 'ev20': -0.85, 'kt_y1': 145.1}}
+  типовой 15 MMscf/д, отвод 8 км|I20|worst|8y {'base_flow': {'npv15_if_ok': -1.16, 'ev15': -0.95, 'ev20': -0.98, 'kt_y1': 117.2}, 'opt_flow': {'npv15_if_ok': -0.83, 'ev15': -0.75, 'ev20': -0.84, 'kt_y1': 145.1}}
+
+=== чувствительность (база, T=₦405, EDTI) ===
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|база {'capex': 37.47, 'y2': 11.84, 'npv15': 2.73, 'npv20': -4.95, 'inc15': -8.15, 'inc20': -8.12, 'irr': 16.6}
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|коммерческая цена $2.68 {'capex': 37.47, 'y2': 12.19, 'npv15': 3.7, 'npv20': -4.15, 'inc15': -7.18, 'inc20': -7.32, 'irr': 17.2}
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|газ NGFCP пол $0.25+0.15/Mscf {'capex': 37.47, 'y2': 12.42, 'npv15': 4.65, 'npv20': -3.38, 'inc15': -6.23, 'inc20': -6.55, 'irr': 17.7}
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|эскроу у ТЭС: сбор 0.98, 45 дн {'capex': 37.47, 'y2': 12.12, 'npv15': 3.65, 'npv20': -4.15, 'inc15': -7.23, 'inc20': -7.32, 'irr': 17.2}
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|плата оператора $1.0/Mscf {'capex': 37.47, 'y2': 12.72, 'npv15': 5.16, 'npv20': -2.94, 'inc15': -5.72, 'inc20': -6.11, 'irr': 18.0}
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|плата оператора $1.75/Mscf {'capex': 37.47, 'y2': 13.38, 'npv15': 6.89, 'npv20': -1.51, 'inc15': -3.99, 'inc20': -4.68, 'irr': 19.0}
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|капитал трубы x2.4 вместо x2.6 {'capex': 37.12, 'y2': 11.86, 'npv15': 3.17, 'npv20': -4.53, 'inc15': -7.71, 'inc20': -7.7, 'irr': 16.9}
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|труба $0.5 млн/км {'capex': 36.17, 'y2': 11.92, 'npv15': 4.36, 'npv20': -3.39, 'inc15': -6.52, 'inc20': -6.56, 'irr': 17.6}
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|нет синергии (SHARE как отдельно) {'capex': 39.5, 'y2': 10.57, 'npv15': -4.5, 'npv20': -11.18, 'inc15': -15.38, 'inc20': -14.35, 'irr': 12.3}
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|сильная синергия (staff 0.12, sec 0, dev 0.2) {'capex': 36.82, 'y2': 12.07, 'npv15': 4.33, 'npv20': -3.53, 'inc15': -6.55, 'inc20': -6.7, 'irr': 17.6}
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|ToP трубы на весь доступный газ {'capex': 37.47, 'y2': 11.76, 'npv15': 2.28, 'npv20': -5.35, 'inc15': -8.6, 'inc20': -8.52, 'irr': 16.3}
+  Ughelli East 2025 (6.7) -> Transcorp Ughelli|всё вместе: $2.68 + эскроу + пол NGFCP {'capex': 37.47, 'y2': 13.11, 'npv15': 6.73, 'npv20': -1.61, 'inc15': -4.15, 'inc20': -4.78, 'irr': 18.9}
+  Oredo min23-25 (8.5) -> Sapele PS|база {'capex': 51.78, 'y2': 11.03, 'npv15': -15.2, 'npv20': -22.21, 'inc15': -25.04, 'inc20': -24.35, 'irr': 7.8}
+  Oredo min23-25 (8.5) -> Sapele PS|коммерческая цена $2.68 {'capex': 51.78, 'y2': 11.53, 'npv15': -13.79, 'npv20': -21.04, 'inc15': -23.63, 'inc20': -23.18, 'irr': 8.5}
+  Oredo min23-25 (8.5) -> Sapele PS|газ NGFCP пол $0.25+0.15/Mscf {'capex': 51.78, 'y2': 11.75, 'npv15': -12.81, 'npv20': -20.25, 'inc15': -22.65, 'inc20': -22.39, 'irr': 9.0}
+  Oredo min23-25 (8.5) -> Sapele PS|эскроу у ТЭС: сбор 0.98, 45 дн {'capex': 51.78, 'y2': 11.43, 'npv15': -13.86, 'npv20': -21.05, 'inc15': -23.7, 'inc20': -23.19, 'irr': 8.4}
+  Oredo min23-25 (8.5) -> Sapele PS|плата оператора $1.0/Mscf {'capex': 51.78, 'y2': 12.28, 'npv15': -11.68, 'npv20': -19.31, 'inc15': -21.52, 'inc20': -21.45, 'irr': 9.5}
+  Oredo min23-25 (8.5) -> Sapele PS|плата оператора $1.75/Mscf {'capex': 51.78, 'y2': 13.22, 'npv15': -9.04, 'npv20': -17.13, 'inc15': -18.88, 'inc20': -19.27, 'irr': 10.8}
+  Oredo min23-25 (8.5) -> Sapele PS|капитал трубы x2.4 вместо x2.6 {'capex': 51.31, 'y2': 11.06, 'npv15': -14.61, 'npv20': -21.65, 'inc15': -24.45, 'inc20': -23.79, 'irr': 8.0}
+  Oredo min23-25 (8.5) -> Sapele PS|труба $0.5 млн/км {'capex': 46.02, 'y2': 11.38, 'npv15': -8.0, 'npv20': -15.28, 'inc15': -17.84, 'inc20': -17.42, 'irr': 10.9}
+  Oredo min23-25 (8.5) -> Sapele PS|нет синергии (SHARE как отдельно) {'capex': 55.24, 'y2': 9.68, 'npv15': -24.22, 'npv20': -30.16, 'inc15': -34.06, 'inc20': -32.3, 'irr': 3.5}
+  Oredo min23-25 (8.5) -> Sapele PS|сильная синергия (staff 0.12, sec 0, dev 0.2) {'capex': 49.77, 'y2': 11.35, 'npv15': -11.9, 'npv20': -19.16, 'inc15': -21.74, 'inc20': -21.3, 'irr': 9.2}
+  Oredo min23-25 (8.5) -> Sapele PS|ToP трубы на весь доступный газ {'capex': 51.78, 'y2': 10.92, 'npv15': -15.84, 'npv20': -22.77, 'inc15': -25.68, 'inc20': -24.91, 'irr': 7.5}
+  Oredo min23-25 (8.5) -> Sapele PS|всё вместе: $2.68 + эскроу + пол NGFCP {'capex': 51.78, 'y2': 12.75, 'npv15': -9.76, 'npv20': -17.67, 'inc15': -19.6, 'inc20': -19.81, 'irr': 10.4}
+  Oredo 2025 (15.5) -> Sapele PS|база {'capex': 59.77, 'y2': 11.89, 'npv15': -21.5, 'npv20': -28.83, 'inc15': -31.34, 'inc20': -30.97, 'irr': 5.9}
+  Oredo 2025 (15.5) -> Sapele PS|коммерческая цена $2.68 {'capex': 59.77, 'y2': 12.97, 'npv15': -18.37, 'npv20': -26.28, 'inc15': -28.21, 'inc20': -28.42, 'irr': 7.3}
+  Oredo 2025 (15.5) -> Sapele PS|газ NGFCP пол $0.25+0.15/Mscf {'capex': 59.77, 'y2': 13.18, 'npv15': -17.28, 'npv20': -25.37, 'inc15': -27.12, 'inc20': -27.51, 'irr': 7.8}
+  Oredo 2025 (15.5) -> Sapele PS|эскроу у ТЭС: сбор 0.98, 45 дн {'capex': 59.77, 'y2': 12.75, 'npv15': -18.53, 'npv20': -26.3, 'inc15': -28.37, 'inc20': -28.44, 'irr': 7.2}
+  Oredo 2025 (15.5) -> Sapele PS|плата оператора $1.0/Mscf {'capex': 59.77, 'y2': 14.58, 'npv15': -13.71, 'npv20': -22.46, 'inc15': -23.55, 'inc20': -24.6, 'irr': 9.4}
+  Oredo 2025 (15.5) -> Sapele PS|плата оператора $1.75/Mscf {'capex': 59.77, 'y2': 16.59, 'npv15': -7.86, 'npv20': -17.68, 'inc15': -17.7, 'inc20': -19.82, 'irr': 11.9}
+  Oredo 2025 (15.5) -> Sapele PS|капитал трубы x2.4 вместо x2.6 {'capex': 58.87, 'y2': 11.94, 'npv15': -20.37, 'npv20': -27.75, 'inc15': -30.21, 'inc20': -29.89, 'irr': 6.3}
+  Oredo 2025 (15.5) -> Sapele PS|труба $0.5 млн/км {'capex': 53.16, 'y2': 12.29, 'npv15': -13.21, 'npv20': -20.87, 'inc15': -23.05, 'inc20': -23.01, 'irr': 9.0}
+  Oredo 2025 (15.5) -> Sapele PS|нет синергии (SHARE как отдельно) {'capex': 63.85, 'y2': 10.5, 'npv15': -31.29, 'npv20': -37.53, 'inc15': -41.13, 'inc20': -39.67, 'irr': 1.8}
+  Oredo 2025 (15.5) -> Sapele PS|сильная синергия (staff 0.12, sec 0, dev 0.2) {'capex': 57.39, 'y2': 12.22, 'npv15': -17.73, 'npv20': -25.33, 'inc15': -27.57, 'inc20': -27.47, 'irr': 7.3}
+  Oredo 2025 (15.5) -> Sapele PS|ToP трубы на весь доступный газ {'capex': 59.77, 'y2': 11.65, 'npv15': -22.87, 'npv20': -30.03, 'inc15': -32.71, 'inc20': -32.17, 'irr': 5.3}
+  Oredo 2025 (15.5) -> Sapele PS|всё вместе: $2.68 + эскроу + пол NGFCP {'capex': 59.77, 'y2': 15.31, 'npv15': -10.51, 'npv20': -19.7, 'inc15': -20.35, 'inc20': -21.84, 'irr': 10.7}
+
+=== 1 MMscf/д: только труба === {'opt|1.0km': {'capex': 3.04, 'y2': -0.7, 'npv15': -6.72, 'npv20': -5.95}, 'opt|4.0km': {'capex': 4.84, 'y2': -0.82, 'npv15': -9.1, 'npv20': -8.21}, 'base|1.0km': {'capex': 4.29, 'y2': -1.41, 'npv15': -11.23, 'npv20': -9.8}, 'base|4.0km': {'capex': 7.41, 'y2': -1.64, 'npv15': -15.44, 'npv20': -13.78}, 'pess|1.0km': {'capex': 5.78, 'y2': -2.39, 'npv15': -15.6, 'npv20': -13.26}, 'pess|4.0km': {'capex': 11.18, 'y2': -2.85, 'npv15': -22.89, 'npv20': -20.09}}

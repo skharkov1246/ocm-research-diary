@@ -1,0 +1,102 @@
+=== 0. Именованные площадки [О, VIIRS World Bank 2012-2025]
+  class1: {'name': 'Afiesere', 'op': 'Shoreline Natural Resources', 'q2025': 1.54, 'min23_25': 1.54, 'hub': 'Ughelli', 'km': 7.1}
+  class1: {'name': 'Utorogu', 'op': 'NEPL', 'q2025': 1.25, 'min23_25': 1.21, 'hub': 'Ughelli', 'km': 13.0}
+  class1: {'name': 'Oweh', 'op': 'Shoreline Natural Resources', 'q2025': 1.32, 'min23_25': 0.84, 'hub': 'Ughelli', 'km': 16.1}
+  class5: {'name': 'Ughelli East', 'op': 'NEPL', 'q2025': 6.72, 'min23_25': 6.34, 'hub': 'Ughelli', 'km': 6.5}
+  class5: {'name': 'Ughelli East', 'op': 'NEPL', 'q2025': 0.0, 'min23_25': 0.0, 'hub': 'Ughelli', 'km': 10.0}
+  class15: {'name': 'Sapele', 'op': 'SEPLAT Energy', 'q2025': 6.02, 'min23_25': 6.02, 'hub': 'Sapele', 'km': 10.8}
+  class15: {'name': 'Oben', 'op': 'SEPLAT Energy', 'q2025': 8.74, 'min23_25': 8.7, 'hub': 'Sapele', 'km': 24.7}
+  class15: {'name': 'Oredo', 'op': 'NEPL', 'q2025': 15.52, 'min23_25': 8.53, 'hub': 'Sapele', 'km': 21.8}
+
+=== 1. Стоимость готовности, $ млн [О: сумма статей]: {'R1': (0.247, 0.622), 'R2': (0.609, 1.304)}
+
+=== 2. NPV станции для покупателя-стратега и для нас ($ млн), DoP возвращает газ + эскроу, газ $1.0 всё вкл.
+   site | T | EDTI | стройка | capex наш/стратег | NPV15 наш | NPV15 стратег | NPV20 стратег | IRR стратег
+   5_UghelliEast_25km | 350 | E | 1y | 29.15/25.16 | 1.32 | 7.49 | 1.43 | 21.4
+   5_UghelliEast_25km | 350 | E | 2y | 29.15/25.16 | -1.26 | 4.53 | -1.17 | 18.8
+   5_UghelliEast_25km | 405 | E | 1y | 29.15/25.16 | 8.36 | 13.72 | 6.45 | 26.1
+   5_UghelliEast_25km | 405 | E | 2y | 29.15/25.16 | 4.97 | 9.97 | 3.04 | 22.9
+   5_UghelliEast_25km | 440 | E | 1y | 29.15/25.16 | 12.39 | 17.45 | 9.44 | 28.6
+   5_UghelliEast_25km | 440 | E | 2y | 29.15/25.16 | 8.47 | 13.22 | 5.53 | 25.1
+   15_Oredo_30km_Q8.5 | 350 | E | 1y | 30.05/26.06 | 1.6 | 8.11 | 1.51 | 21.4
+   15_Oredo_30km_Q8.5 | 350 | E | 2y | 30.05/26.06 | -1.08 | 5.0 | -1.18 | 18.9
+   15_Oredo_30km_Q8.5 | 405 | E | 1y | 30.05/26.06 | 9.24 | 14.69 | 6.79 | 25.9
+   15_Oredo_30km_Q8.5 | 405 | E | 2y | 30.05/26.06 | 5.66 | 10.73 | 3.22 | 22.8
+   15_Oredo_30km_Q8.5 | 440 | E | 1y | 30.05/26.06 | 13.43 | 18.61 | 9.89 | 28.4
+   15_Oredo_30km_Q8.5 | 440 | E | 2y | 30.05/26.06 | 9.31 | 14.16 | 5.83 | 25.0
+   15_generic_25km | 350 | E | 1y | 29.15/25.16 | 3.06 | 9.23 | 2.58 | 22.4
+   15_generic_25km | 350 | E | 2y | 29.15/25.16 | 0.26 | 6.04 | -0.21 | 19.8
+   15_generic_25km | 405 | E | 1y | 29.15/25.16 | 10.4 | 15.76 | 7.8 | 27.0
+   15_generic_25km | 405 | E | 2y | 29.15/25.16 | 6.74 | 11.74 | 4.16 | 23.7
+   15_generic_25km | 440 | E | 1y | 29.15/25.16 | 14.62 | 19.68 | 10.91 | 29.5
+   15_generic_25km | 440 | E | 2y | 29.15/25.16 | 10.41 | 15.16 | 6.75 | 25.9
+
+=== 3. Девелопер: премия и ожидаемая стоимость ($ млн), тариф LOI = T, EDTI подтверждён, стройка у покупателя 1 г
+  5_UghelliEast_25km|T350|R1|base            premium  0.38  P(sale) 0.033  P(FC) 0.021  EV15 -0.183  EV20 -0.182  найра -0.183  обход -0.186  аукцион P 1.31 EV15 -0.169  (NPV15 стратега 7.49)
+  5_UghelliEast_25km|T350|R2|base            premium  1.01  P(sale) 0.028  P(FC) 0.018  EV15 -0.226  EV20 -0.224  найра -0.226  обход -0.233  аукцион P 2.62 EV15 -0.208  (NPV15 стратега 7.49)
+  5_UghelliEast_25km|T405|R1|pess            premium  0.25  P(sale) 0.006  P(FC) 0.003  EV15 -0.230  EV20 -0.228  найра -0.230  обход -0.230  аукцион P 1.37 EV15 -0.227  (NPV15 стратега 13.72)
+  5_UghelliEast_25km|T405|R1|base            premium  0.38  P(sale) 0.033  P(FC) 0.021  EV15 -0.183  EV20 -0.182  найра -0.183  обход -0.186  аукцион P 2.40 EV15 -0.156  (NPV15 стратега 13.72)
+  5_UghelliEast_25km|T405|R1|opt             premium  0.50  P(sale) 0.095  P(FC) 0.076  EV15 -0.097  EV20 -0.097  найра -0.098  обход -0.104  аукцион P 3.43 EV15 +0.029  (NPV15 стратега 13.72)
+  5_UghelliEast_25km|T405|R2|pess            premium  0.75  P(sale) 0.004  P(FC) 0.002  EV15 -0.253  EV20 -0.251  найра -0.253  обход -0.254  аукцион P 2.74 EV15 -0.250  (NPV15 стратега 13.72)
+  5_UghelliEast_25km|T405|R2|base            premium  1.01  P(sale) 0.028  P(FC) 0.018  EV15 -0.226  EV20 -0.224  найра -0.226  обход -0.233  аукцион P 4.80 EV15 -0.186  (NPV15 стратега 13.72)
+  5_UghelliEast_25km|T405|R2|opt             premium  1.26  P(sale) 0.096  P(FC) 0.076  EV15 -0.123  EV20 -0.125  найра -0.125  обход -0.141  аукцион P 6.86 EV15 +0.113  (NPV15 стратега 13.72)
+  5_UghelliEast_25km|T440|R1|base            premium  0.38  P(sale) 0.033  P(FC) 0.021  EV15 -0.183  EV20 -0.182  найра -0.183  обход -0.186  аукцион P 3.05 EV15 -0.148  (NPV15 стратега 17.45)
+  5_UghelliEast_25km|T440|R2|base            premium  1.01  P(sale) 0.028  P(FC) 0.018  EV15 -0.226  EV20 -0.224  найра -0.226  обход -0.233  аукцион P 6.11 EV15 -0.173  (NPV15 стратега 17.45)
+  15_Oredo_30km_Q8.5|T350|R1|base            premium  0.39  P(sale) 0.033  P(FC) 0.021  EV15 -0.182  EV20 -0.181  найра -0.183  обход -0.186  аукцион P 1.42 EV15 -0.168  (NPV15 стратега 8.11)
+  15_Oredo_30km_Q8.5|T350|R2|base            premium  1.04  P(sale) 0.028  P(FC) 0.018  EV15 -0.225  EV20 -0.223  найра -0.226  обход -0.232  аукцион P 2.84 EV15 -0.206  (NPV15 стратега 8.11)
+  15_Oredo_30km_Q8.5|T405|R1|pess            premium  0.26  P(sale) 0.006  P(FC) 0.003  EV15 -0.230  EV20 -0.228  найра -0.230  обход -0.230  аукцион P 1.47 EV15 -0.227  (NPV15 стратега 14.69)
+  15_Oredo_30km_Q8.5|T405|R1|base            premium  0.39  P(sale) 0.033  P(FC) 0.021  EV15 -0.182  EV20 -0.181  найра -0.183  обход -0.186  аукцион P 2.57 EV15 -0.154  (NPV15 стратега 14.69)
+  15_Oredo_30km_Q8.5|T405|R1|opt             premium  0.52  P(sale) 0.095  P(FC) 0.076  EV15 -0.096  EV20 -0.097  найра -0.097  обход -0.104  аукцион P 3.67 EV15 +0.039  (NPV15 стратега 14.69)
+  15_Oredo_30km_Q8.5|T405|R2|pess            premium  0.78  P(sale) 0.004  P(FC) 0.002  EV15 -0.253  EV20 -0.251  найра -0.253  обход -0.254  аукцион P 2.94 EV15 -0.250  (NPV15 стратега 14.69)
+  15_Oredo_30km_Q8.5|T405|R2|base            premium  1.04  P(sale) 0.028  P(FC) 0.018  EV15 -0.225  EV20 -0.223  найра -0.226  обход -0.232  аукцион P 5.14 EV15 -0.182  (NPV15 стратега 14.69)
+  15_Oredo_30km_Q8.5|T405|R2|opt             premium  1.30  P(sale) 0.096  P(FC) 0.076  EV15 -0.121  EV20 -0.123  найра -0.124  обход -0.139  аукцион P 7.34 EV15 +0.133  (NPV15 стратега 14.69)
+  15_Oredo_30km_Q8.5|T440|R1|base            premium  0.39  P(sale) 0.033  P(FC) 0.021  EV15 -0.182  EV20 -0.181  найра -0.183  обход -0.186  аукцион P 3.26 EV15 -0.146  (NPV15 стратега 18.61)
+  15_Oredo_30km_Q8.5|T440|R2|base            premium  1.04  P(sale) 0.028  P(FC) 0.018  EV15 -0.225  EV20 -0.223  найра -0.226  обход -0.232  аукцион P 6.51 EV15 -0.169  (NPV15 стратега 18.61)
+  15_generic_25km|T350|R1|base               premium  0.38  P(sale) 0.033  P(FC) 0.021  EV15 -0.183  EV20 -0.182  найра -0.183  обход -0.186  аукцион P 1.62 EV15 -0.166  (NPV15 стратега 9.23)
+  15_generic_25km|T350|R2|base               premium  1.01  P(sale) 0.028  P(FC) 0.018  EV15 -0.226  EV20 -0.224  найра -0.226  обход -0.233  аукцион P 3.23 EV15 -0.202  (NPV15 стратега 9.23)
+  15_generic_25km|T405|R1|pess               premium  0.25  P(sale) 0.006  P(FC) 0.003  EV15 -0.230  EV20 -0.228  найра -0.230  обход -0.230  аукцион P 1.58 EV15 -0.227  (NPV15 стратега 15.76)
+  15_generic_25km|T405|R1|base               premium  0.38  P(sale) 0.033  P(FC) 0.021  EV15 -0.183  EV20 -0.182  найра -0.183  обход -0.186  аукцион P 2.76 EV15 -0.152  (NPV15 стратега 15.76)
+  15_generic_25km|T405|R1|opt                premium  0.50  P(sale) 0.095  P(FC) 0.076  EV15 -0.097  EV20 -0.097  найра -0.098  обход -0.104  аукцион P 3.94 EV15 +0.051  (NPV15 стратега 15.76)
+  15_generic_25km|T405|R2|pess               premium  0.75  P(sale) 0.004  P(FC) 0.002  EV15 -0.253  EV20 -0.251  найра -0.253  обход -0.254  аукцион P 3.15 EV15 -0.250  (NPV15 стратега 15.76)
+  15_generic_25km|T405|R2|base               premium  1.01  P(sale) 0.028  P(FC) 0.018  EV15 -0.226  EV20 -0.224  найра -0.226  обход -0.233  аукцион P 5.52 EV15 -0.179  (NPV15 стратега 15.76)
+  15_generic_25km|T405|R2|opt                premium  1.26  P(sale) 0.096  P(FC) 0.076  EV15 -0.123  EV20 -0.125  найра -0.125  обход -0.141  аукцион P 7.88 EV15 +0.156  (NPV15 стратега 15.76)
+  15_generic_25km|T440|R1|base               premium  0.38  P(sale) 0.033  P(FC) 0.021  EV15 -0.183  EV20 -0.182  найра -0.183  обход -0.186  аукцион P 3.44 EV15 -0.143  (NPV15 стратега 19.68)
+  15_generic_25km|T440|R2|base               premium  1.01  P(sale) 0.028  P(FC) 0.018  EV15 -0.226  EV20 -0.224  найра -0.226  обход -0.233  аукцион P 6.89 EV15 -0.165  (NPV15 стратега 19.68)
+
+=== 4. 1 MMscf/д: МВт нетто 3.29 < 8.33; EV если начать ворота 0: {'opt': -0.077, 'base': -0.135, 'pess': -0.192}
+  пороги 5_UghelliEast_25km|R1: {'premium_min_musd': 15.112, 'p0_min': None, 'T_min_EV20': None, 'T_buyer_npv15_0': 292, 'premium_base': 0.38, 'p_success_required_if_all_costs': 2.39, 'p_success_base': 0.021}
+  пороги 5_UghelliEast_25km|R2: {'premium_min_musd': 23.331, 'p0_min': None, 'T_min_EV20': None, 'T_buyer_npv15_0': 292, 'premium_base': 1.01, 'p_success_required_if_all_costs': 1.97, 'p_success_base': 0.018}
+  пороги 15_Oredo_30km_Q8.5|R1: {'premium_min_musd': 15.112, 'p0_min': None, 'T_min_EV20': None, 'T_buyer_npv15_0': 292, 'premium_base': 0.39, 'p_success_required_if_all_costs': 2.31, 'p_success_base': 0.021}
+  пороги 15_Oredo_30km_Q8.5|R2: {'premium_min_musd': 23.331, 'p0_min': None, 'T_min_EV20': None, 'T_buyer_npv15_0': 292, 'premium_base': 1.04, 'p_success_required_if_all_costs': 1.91, 'p_success_base': 0.018}
+
+=== 6. Своя стройка vs продажа на R2 (база, стройка 1 г, EDTI):
+   5_UghelliEast_25km|T350|1y|base {'npv15_build': 1.32, 'npv20_build': -4.29, 'ev15_build': -0.2, 'ev20_build': -0.37, 'ev15_dev_R2': -0.226, 'ev15_dev_R1': -0.183, 'capex_build': 29.15, 'ebitda_y1_own': 6.6, 'ebitda_y2_own': 9.33, 'irr_own': 16.0}
+   5_UghelliEast_25km|T350|2y|base {'npv15_build': -1.26, 'npv20_build': -6.39, 'ev15_build': -0.28, 'ev20_build': -0.43, 'ev15_dev_R2': -0.226, 'ev15_dev_R1': -0.183, 'capex_build': 29.15, 'ebitda_y1_own': 6.46, 'ebitda_y2_own': 9.19, 'irr_own': 14.0}
+   5_UghelliEast_25km|T405|1y|base {'npv15_build': 8.36, 'npv20_build': 1.41, 'ev15_build': 0.02, 'ev20_build': -0.2, 'ev15_dev_R2': -0.226, 'ev15_dev_R1': -0.183, 'capex_build': 29.15, 'ebitda_y1_own': 8.4, 'ebitda_y2_own': 11.58, 'irr_own': 21.2}
+   5_UghelliEast_25km|T405|2y|base {'npv15_build': 4.97, 'npv20_build': -1.56, 'ev15_build': -0.09, 'ev20_build': -0.28, 'ev15_dev_R2': -0.226, 'ev15_dev_R1': -0.183, 'capex_build': 29.15, 'ebitda_y1_own': 8.27, 'ebitda_y2_own': 11.44, 'irr_own': 18.6}
+   5_UghelliEast_25km|T440|1y|base {'npv15_build': 12.39, 'npv20_build': 4.67, 'ev15_build': 0.14, 'ev20_build': -0.1, 'ev15_dev_R2': -0.226, 'ev15_dev_R1': -0.183, 'capex_build': 29.15, 'ebitda_y1_own': 9.55, 'ebitda_y2_own': 13.02, 'irr_own': 23.9}
+   5_UghelliEast_25km|T440|2y|base {'npv15_build': 8.47, 'npv20_build': 1.15, 'ev15_build': 0.02, 'ev20_build': -0.2, 'ev15_dev_R2': -0.226, 'ev15_dev_R1': -0.183, 'capex_build': 29.15, 'ebitda_y1_own': 9.41, 'ebitda_y2_own': 12.88, 'irr_own': 21.0}
+   15_Oredo_30km_Q8.5|T350|1y|base {'npv15_build': 1.6, 'npv20_build': -4.5, 'ev15_build': -0.19, 'ev20_build': -0.37, 'ev15_dev_R2': -0.225, 'ev15_dev_R1': -0.182, 'capex_build': 30.05, 'ebitda_y1_own': 6.47, 'ebitda_y2_own': 9.18, 'irr_own': 16.2}
+   15_Oredo_30km_Q8.5|T350|2y|base {'npv15_build': -1.08, 'npv20_build': -6.65, 'ev15_build': -0.28, 'ev20_build': -0.44, 'ev15_dev_R2': -0.225, 'ev15_dev_R1': -0.182, 'capex_build': 30.05, 'ebitda_y1_own': 6.34, 'ebitda_y2_own': 9.04, 'irr_own': 14.2}
+   15_Oredo_30km_Q8.5|T405|1y|base {'npv15_build': 9.24, 'npv20_build': 1.66, 'ev15_build': 0.05, 'ev20_build': -0.19, 'ev15_dev_R2': -0.225, 'ev15_dev_R1': -0.182, 'capex_build': 30.05, 'ebitda_y1_own': 8.26, 'ebitda_y2_own': 11.42, 'irr_own': 21.3}
+   15_Oredo_30km_Q8.5|T405|2y|base {'npv15_build': 5.66, 'npv20_build': -1.44, 'ev15_build': -0.07, 'ev20_build': -0.28, 'ev15_dev_R2': -0.225, 'ev15_dev_R1': -0.182, 'capex_build': 30.05, 'ebitda_y1_own': 8.13, 'ebitda_y2_own': 11.28, 'irr_own': 18.8}
+   15_Oredo_30km_Q8.5|T440|1y|base {'npv15_build': 13.43, 'npv20_build': 5.02, 'ev15_build': 0.18, 'ev20_build': -0.09, 'ev15_dev_R2': -0.225, 'ev15_dev_R1': -0.182, 'capex_build': 30.05, 'ebitda_y1_own': 9.4, 'ebitda_y2_own': 12.85, 'irr_own': 23.9}
+   15_Oredo_30km_Q8.5|T440|2y|base {'npv15_build': 9.31, 'npv20_build': 1.36, 'ev15_build': 0.05, 'ev20_build': -0.2, 'ev15_dev_R2': -0.225, 'ev15_dev_R1': -0.182, 'capex_build': 30.05, 'ebitda_y1_own': 9.27, 'ebitda_y2_own': 12.7, 'irr_own': 21.1}
+
+=== 7. Девелопмент как услуга держателю (до налога/после): {'pess': {'cost': 0.622, 'fee': 0.715, 'ev_pre_tax': -0.264, 'ev_after_tax': -0.264}, 'base': {'cost': 0.435, 'fee': 0.53, 'ev_pre_tax': -0.09, 'ev_after_tax': -0.09}, 'opt': {'cost': 0.247, 'fee': 0.321, 'ev_pre_tax': 0.01, 'ev_after_tax': 0.007}}
+
+=== 8. Условно на готовность (T=₦405, EDTI, 1 г):
+   5_UghelliEast_25km|R1|pess {'premium': 0.25, 'sunk': 0.622, 'ev15_all_prob_1': -0.426, 'expected_net_proceeds_given_ready': 0.017, 'recovery_share': 0.03}
+   5_UghelliEast_25km|R2|pess {'premium': 0.75, 'sunk': 1.304, 'ev15_all_prob_1': -0.675, 'expected_net_proceeds_given_ready': 0.117, 'recovery_share': 0.09}
+   5_UghelliEast_25km|R1|base {'premium': 0.38, 'sunk': 0.435, 'ev15_all_prob_1': -0.142, 'expected_net_proceeds_given_ready': 0.07, 'recovery_share': 0.16}
+   5_UghelliEast_25km|R2|base {'premium': 1.01, 'sunk': 0.957, 'ev15_all_prob_1': -0.159, 'expected_net_proceeds_given_ready': 0.335, 'recovery_share': 0.35}
+   5_UghelliEast_25km|R1|opt {'premium': 0.5, 'sunk': 0.247, 'ev15_all_prob_1': 0.079, 'expected_net_proceeds_given_ready': 0.166, 'recovery_share': 0.67}
+   5_UghelliEast_25km|R2|opt {'premium': 1.26, 'sunk': 0.609, 'ev15_all_prob_1': 0.227, 'expected_net_proceeds_given_ready': 0.695, 'recovery_share': 1.14}
+   15_Oredo_30km_Q8.5|R1|pess {'premium': 0.26, 'sunk': 0.622, 'ev15_all_prob_1': -0.419, 'expected_net_proceeds_given_ready': 0.018, 'recovery_share': 0.03}
+   15_Oredo_30km_Q8.5|R2|pess {'premium': 0.78, 'sunk': 1.304, 'ev15_all_prob_1': -0.656, 'expected_net_proceeds_given_ready': 0.121, 'recovery_share': 0.09}
+   15_Oredo_30km_Q8.5|R1|base {'premium': 0.39, 'sunk': 0.435, 'ev15_all_prob_1': -0.131, 'expected_net_proceeds_given_ready': 0.072, 'recovery_share': 0.17}
+   15_Oredo_30km_Q8.5|R2|base {'premium': 1.04, 'sunk': 0.957, 'ev15_all_prob_1': -0.142, 'expected_net_proceeds_given_ready': 0.347, 'recovery_share': 0.36}
+   15_Oredo_30km_Q8.5|R1|opt {'premium': 0.52, 'sunk': 0.247, 'ev15_all_prob_1': 0.089, 'expected_net_proceeds_given_ready': 0.173, 'recovery_share': 0.7}
+   15_Oredo_30km_Q8.5|R2|opt {'premium': 1.3, 'sunk': 0.609, 'ev15_all_prob_1': 0.249, 'expected_net_proceeds_given_ready': 0.72, 'recovery_share': 1.18}
+
+OK -> /home/user/ocm-research-diary/routes/apg_nigeria/models/round2/dev_sale/dev_sale_out.json

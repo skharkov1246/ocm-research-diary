@@ -1,0 +1,330 @@
+{
+ "1_precontract": {
+  "UghelliE->Ughelli 8km eng": {
+   "opt": {
+    "cap": 8.91,
+    "npv15_GSA": 3.28,
+    "npv15_pre": -0.43,
+    "npv20_pre": -1.96,
+    "irr_GSA": 23.1,
+    "irr_pre": 13.9,
+    "e2_pre": 2.17
+   },
+   "base": {
+    "cap": 12.94,
+    "npv15_GSA": -9.73,
+    "npv15_pre": -17.25,
+    "npv20_pre": -16.57,
+    "irr_GSA": -7.7,
+    "irr_pre": null,
+    "e2_pre": -0.66
+   },
+   "pess": {
+    "cap": 20.36,
+    "npv15_GSA": -31.69,
+    "npv15_pre": -33.47,
+    "npv20_pre": -30.15,
+    "irr_GSA": null,
+    "irr_pre": null,
+    "e2_pre": -2.94
+   },
+   "p20_base_GSA": 12.01,
+   "p20_base_pre": 23.09,
+   "p15_base_pre": 20.06,
+   "p20_opt_pre": 9.47
+  },
+  "UghelliE->Warri 27km eng": {
+   "opt": {
+    "cap": 14.49,
+    "npv15_GSA": -2.29,
+    "npv15_pre": -6.09,
+    "npv20_pre": -7.62,
+    "irr_GSA": 11.1,
+    "irr_pre": 3.7,
+    "e2_pre": 1.9
+   },
+   "base": {
+    "cap": 21.65,
+    "npv15_GSA": -21.22,
+    "npv15_pre": -28.74,
+    "npv20_pre": -27.58,
+    "irr_GSA": -25.1,
+    "irr_pre": null,
+    "e2_pre": -1.18
+   },
+   "pess": {
+    "cap": 35.74,
+    "npv15_GSA": -50.83,
+    "npv15_pre": -52.62,
+    "npv20_pre": -48.03,
+    "irr_GSA": null,
+    "irr_pre": null,
+    "e2_pre": -3.95
+   },
+   "p20_base_GSA": 17.68,
+   "p20_base_pre": 34.43,
+   "p15_base_pre": 29.41,
+   "p20_opt_pre": 13.65
+  },
+  "Oredo->Sapele 28km eng": {
+   "opt": {
+    "cap": 14.87,
+    "npv15_GSA": -2.67,
+    "npv15_pre": -6.49,
+    "npv20_pre": -8.02,
+    "irr_GSA": 10.5,
+    "irr_pre": 3.2,
+    "e2_pre": 1.88
+   },
+   "base": {
+    "cap": 22.24,
+    "npv15_GSA": -22.0,
+    "npv15_pre": -29.52,
+    "npv20_pre": -28.33,
+    "irr_GSA": -26.4,
+    "irr_pre": null,
+    "e2_pre": -1.21
+   },
+   "pess": {
+    "cap": 36.79,
+    "npv15_GSA": -51.56,
+    "npv15_pre": -53.92,
+    "npv20_pre": -49.25,
+    "irr_GSA": null,
+    "irr_pre": null,
+    "e2_pre": -4.02
+   },
+   "p20_base_GSA": 18.06,
+   "p20_base_pre": 35.2,
+   "p15_base_pre": 30.05,
+   "p20_opt_pre": 13.93
+  },
+  "Utorogu->Ughelli 17km eng": {
+   "opt": {
+    "cap": 11.31,
+    "npv15_GSA": 0.43,
+    "npv15_pre": -2.85,
+    "npv20_pre": -4.38,
+    "irr_GSA": 15.9,
+    "irr_pre": 8.6,
+    "e2_pre": 2.05
+   },
+   "base": {
+    "cap": 16.69,
+    "npv15_GSA": -17.86,
+    "npv15_pre": -22.25,
+    "npv20_pre": -21.35,
+    "irr_GSA": null,
+    "irr_pre": null,
+    "e2_pre": -0.89
+   },
+   "pess": {
+    "cap": 26.2,
+    "npv15_GSA": -40.72,
+    "npv15_pre": -40.98,
+    "npv20_pre": -37.11,
+    "irr_GSA": null,
+    "irr_pre": null,
+    "e2_pre": -3.33
+   },
+   "p20_base_GSA": 17.64,
+   "p20_base_pre": 28.01,
+   "p15_base_pre": 24.12,
+   "p20_opt_pre": 11.28
+  },
+  "Q5 26km eng": {
+   "opt": {
+    "cap": 14.18,
+    "npv15_GSA": -1.98,
+    "npv15_pre": -5.77,
+    "npv20_pre": -7.3,
+    "irr_GSA": 11.5,
+    "irr_pre": 4.1,
+    "e2_pre": 1.92
+   },
+   "base": {
+    "cap": 21.17,
+    "npv15_GSA": -20.92,
+    "npv15_pre": -28.11,
+    "npv20_pre": -26.98,
+    "irr_GSA": null,
+    "irr_pre": null,
+    "e2_pre": -1.15
+   },
+   "pess": {
+    "cap": 34.9,
+    "npv15_GSA": -50.42,
+    "npv15_pre": -51.59,
+    "npv20_pre": -47.07,
+    "irr_GSA": null,
+    "irr_pre": null,
+    "e2_pre": -3.9
+   },
+   "p20_base_GSA": 17.67,
+   "p20_base_pre": 33.81,
+   "p15_base_pre": 28.9,
+   "p20_opt_pre": 13.41
+  },
+  "Q5 26km dual": {
+   "opt": {
+    "cap": 12.55,
+    "npv15_GSA": -6.57,
+    "npv15_pre": -9.79,
+    "npv20_pre": -10.33,
+    "irr_GSA": 0.4,
+    "irr_pre": -10.3,
+    "e2_pre": 0.63
+   },
+   "base": {
+    "cap": 18.72,
+    "npv15_GSA": -22.64,
+    "npv15_pre": -27.14,
+    "npv20_pre": -25.72,
+    "irr_GSA": null,
+    "irr_pre": null,
+    "e2_pre": -1.48
+   },
+   "pess": {
+    "cap": 31.03,
+    "npv15_GSA": -45.12,
+    "npv15_pre": -46.52,
+    "npv20_pre": -42.36,
+    "irr_GSA": null,
+    "irr_pre": null,
+    "e2_pre": -3.65
+   },
+   "p20_base_GSA": 25.31,
+   "p20_base_pre": 49.69,
+   "p15_base_pre": 42.44,
+   "p20_opt_pre": 19.7
+  },
+  "UghelliE->Ughelli 8km dual": {
+   "opt": {
+    "cap": 7.71,
+    "npv15_GSA": -1.54,
+    "npv15_pre": -3.86,
+    "npv20_pre": -4.58,
+    "irr_GSA": 10.0,
+    "irr_pre": 1.3,
+    "e2_pre": 0.87
+   },
+   "base": {
+    "cap": 11.16,
+    "npv15_GSA": -12.58,
+    "npv15_pre": -17.08,
+    "npv20_pre": -16.1,
+    "irr_GSA": -97.9,
+    "irr_pre": null,
+    "e2_pre": -1.01
+   },
+   "pess": {
+    "cap": 17.67,
+    "npv15_GSA": -28.21,
+    "npv15_pre": -29.77,
+    "npv20_pre": -26.73,
+    "irr_GSA": null,
+    "irr_pre": null,
+    "e2_pre": -2.74
+   },
+   "p20_base_GSA": 17.03,
+   "p20_base_pre": 33.14,
+   "p15_base_pre": 28.77,
+   "p20_opt_pre": 13.61
+  },
+  "Q15 26km cluster_big": {
+   "opt": {
+    "cap": 25.57,
+    "npv15_GSA": 27.55,
+    "npv15_pre": 14.24,
+    "npv20_pre": 7.1,
+    "irr_GSA": 36.9,
+    "irr_pre": 27.1,
+    "e2_pre": 10.71
+   },
+   "base": {
+    "cap": 38.57,
+    "npv15_GSA": -13.16,
+    "npv15_pre": -32.85,
+    "npv20_pre": -34.06,
+    "irr_GSA": 5.6,
+    "irr_pre": -14.1,
+    "e2_pre": 1.54
+   },
+   "pess": {
+    "cap": 62.69,
+    "npv15_GSA": -81.21,
+    "npv15_pre": -83.9,
+    "npv20_pre": -77.62,
+    "irr_GSA": null,
+    "irr_pre": null,
+    "e2_pre": -4.85
+   },
+   "p20_base_GSA": 9.26,
+   "p20_base_pre": 16.65,
+   "p15_base_pre": 14.17,
+   "p20_opt_pre": 6.52
+  }
+ },
+ "2_tax_ceiling": {
+  "UghelliE->Ughelli 8km eng": {
+   "npv15_base_GSA_notax": -9.73,
+   "npv15_base_pre_notax": -17.25,
+   "p20_base_GSA_notax": 10.29
+  },
+  "Q5 26km eng": {
+   "npv15_base_GSA_notax": -20.92,
+   "npv15_base_pre_notax": -28.11,
+   "p20_base_GSA_notax": 14.83
+  },
+  "Q15 26km cluster_big": {
+   "npv15_base_GSA_notax": -9.46,
+   "npv15_base_pre_notax": -32.85,
+   "p20_base_GSA_notax": 7.76
+  }
+ },
+ "3_frictions_UghelliE_8km": {
+  "block3m_GSA": -10.11,
+  "coll85_GSA": -11.61,
+  "pre_coll85_block": -18.36,
+  "opt_pre_coll85_block": -2.56,
+  "p20_GSA_coll85_block": 14.0
+ },
+ "4_ceiling": {
+  "cng": [
+   8.0,
+   10.75
+  ],
+  "lng_greenville": [
+   4.7,
+   6.0
+  ],
+  "commercial_DBP_2026": 2.68,
+  "note": "порог NPV20=0 любой одиночной конфигурации в базе > потолка CNG"
+ },
+ "5_methane_number": {
+  "SPE_AG2": {
+   "raw": 85.3,
+   "after_dewpoint": 89.5
+  },
+  "SPE_AG4": {
+   "raw": 64.3,
+   "after_dewpoint": 70.5
+  },
+  "SPE_AG5": {
+   "raw": 74.7,
+   "after_dewpoint": 80.6
+  },
+  "SPE_AG6": {
+   "raw": 78.8,
+   "after_dewpoint": 85.4
+  },
+  "NJTD_A": {
+   "raw": 57.9,
+   "after_dewpoint": 65.8
+  },
+  "lean_ND": {
+   "raw": 89.7,
+   "after_dewpoint": 91.2
+  }
+ }
+}

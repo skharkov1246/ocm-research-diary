@@ -1,0 +1,202 @@
+== stacks
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|base|база (как в оценке) {'capex': 37.47, 'cap_pipe': 8.32, 'y2_pipe': 0.08, 'npv15': 3.63, 'inc15': -7.97, 'inc20': -7.96, 'irr': 17.1}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|base|F1: без двойного простоя + ТОиР трубы 1% {'capex': 37.99, 'cap_pipe': 8.84, 'y2_pipe': 0.35, 'npv15': 4.06, 'inc15': -7.54, 'inc20': -7.72, 'irr': 17.3}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|base|F2: F1 + газ пол NGFCP $0.40/Mscf + эскроу {'capex': 37.99, 'cap_pipe': 8.84, 'y2_pipe': 0.95, 'npv15': 7.17, 'inc15': -4.43, 'inc20': -5.12, 'irr': 19.1}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|base|F3: F2 + премия за доставку $0.30/MMBtu [Д] {'capex': 37.99, 'cap_pipe': 8.84, 'y2_pipe': 1.24, 'npv15': 7.92, 'inc15': -3.68, 'inc20': -4.5, 'irr': 19.5}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|base|F4: F2 + премия за доставку $0.80/MMBtu [Д] {'capex': 37.99, 'cap_pipe': 8.84, 'y2_pipe': 1.71, 'npv15': 9.1, 'inc15': -2.5, 'inc20': -3.53, 'irr': 20.1}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|base|F5: F4 + цена $2.68 (коммерч., не ТЭС) [Д] {'capex': 37.99, 'cap_pipe': 8.84, 'y2_pipe': 2.19, 'npv15': 10.21, 'inc15': -1.39, 'inc20': -2.6, 'irr': 20.7}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|base|F6: F5 + сильная синергия {'capex': 37.32, 'cap_pipe': 8.18, 'y2_pipe': 2.4, 'npv15': 11.42, 'inc15': -0.18, 'inc20': -1.51, 'irr': 21.5}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|opt|база (как в оценке) {'capex': 33.39, 'cap_pipe': 5.98, 'y2_pipe': 1.63, 'npv15': 13.26, 'inc15': -0.55, 'inc20': -1.49, 'irr': 23.1}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|opt|F1: без двойного простоя + ТОиР трубы 1% {'capex': 33.77, 'cap_pipe': 6.36, 'y2_pipe': 1.96, 'npv15': 13.91, 'inc15': 0.1, 'inc20': -1.05, 'irr': 23.4}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|opt|F2: F1 + газ пол NGFCP $0.40/Mscf + эскроу {'capex': 33.77, 'cap_pipe': 6.36, 'y2_pipe': 2.39, 'npv15': 16.09, 'inc15': 2.28, 'inc20': 0.73, 'irr': 24.6}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|opt|F3: F2 + премия за доставку $0.30/MMBtu [Д] {'capex': 33.77, 'cap_pipe': 6.36, 'y2_pipe': 2.78, 'npv15': 17.03, 'inc15': 3.22, 'inc20': 1.5, 'irr': 25.1}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|opt|F4: F2 + премия за доставку $0.80/MMBtu [Д] {'capex': 33.77, 'cap_pipe': 6.36, 'y2_pipe': 3.42, 'npv15': 18.52, 'inc15': 4.71, 'inc20': 2.71, 'irr': 25.9}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|opt|F5: F4 + цена $2.68 (коммерч., не ТЭС) [Д] {'capex': 33.77, 'cap_pipe': 6.36, 'y2_pipe': 3.42, 'npv15': 18.52, 'inc15': 4.71, 'inc20': 2.71, 'irr': 25.9}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|opt|F6: F5 + сильная синергия {'capex': 33.29, 'cap_pipe': 5.88, 'y2_pipe': 3.62, 'npv15': 19.47, 'inc15': 5.66, 'inc20': 3.55, 'irr': 26.5}
+   Oredo min23-25 (8.5) -> Sapele PS|base|база (как в оценке) {'capex': 51.78, 'cap_pipe': 21.73, 'y2_pipe': -0.57, 'npv15': -14.3, 'inc15': -24.85, 'inc20': -24.19, 'irr': 8.2}
+   Oredo min23-25 (8.5) -> Sapele PS|base|F1: без двойного простоя + ТОиР трубы 1% {'capex': 52.42, 'cap_pipe': 22.37, 'y2_pipe': 0.21, 'npv15': -11.97, 'inc15': -22.52, 'inc20': -22.43, 'irr': 9.5}
+   Oredo min23-25 (8.5) -> Sapele PS|base|F2: F1 + газ пол NGFCP $0.40/Mscf + эскроу {'capex': 52.42, 'cap_pipe': 22.37, 'y2_pipe': 1.1, 'npv15': -7.87, 'inc15': -18.42, 'inc20': -19.0, 'irr': 11.4}
+   Oredo min23-25 (8.5) -> Sapele PS|base|F3: F2 + премия за доставку $0.30/MMBtu [Д] {'capex': 52.42, 'cap_pipe': 22.37, 'y2_pipe': 1.5, 'npv15': -6.7, 'inc15': -17.25, 'inc20': -18.03, 'irr': 12.0}
+   Oredo min23-25 (8.5) -> Sapele PS|base|F4: F2 + премия за доставку $0.80/MMBtu [Д] {'capex': 52.42, 'cap_pipe': 22.37, 'y2_pipe': 2.17, 'npv15': -4.75, 'inc15': -15.3, 'inc20': -16.42, 'irr': 12.9}
+   Oredo min23-25 (8.5) -> Sapele PS|base|F5: F4 + цена $2.68 (коммерч., не ТЭС) [Д] {'capex': 52.42, 'cap_pipe': 22.37, 'y2_pipe': 2.83, 'npv15': -2.8, 'inc15': -13.35, 'inc20': -14.81, 'irr': 13.8}
+   Oredo min23-25 (8.5) -> Sapele PS|base|F6: F5 + сильная синергия {'capex': 50.4, 'cap_pipe': 20.35, 'y2_pipe': 3.07, 'npv15': 0.21, 'inc15': -10.34, 'inc20': -11.98, 'irr': 15.1}
+   Oredo min23-25 (8.5) -> Sapele PS|opt|база (как в оценке) {'capex': 42.26, 'cap_pipe': 13.96, 'y2_pipe': 1.93, 'npv15': 5.84, 'inc15': -6.8, 'inc20': -8.03, 'irr': 18.0}
+   Oredo min23-25 (8.5) -> Sapele PS|opt|F1: без двойного простоя + ТОиР трубы 1% {'capex': 42.74, 'cap_pipe': 14.43, 'y2_pipe': 2.52, 'npv15': 7.53, 'inc15': -5.11, 'inc20': -6.75, 'irr': 18.8}
+   Oredo min23-25 (8.5) -> Sapele PS|opt|F2: F1 + газ пол NGFCP $0.40/Mscf + эскроу {'capex': 42.74, 'cap_pipe': 14.43, 'y2_pipe': 3.16, 'npv15': 10.72, 'inc15': -1.92, 'inc20': -4.16, 'irr': 20.3}
+   Oredo min23-25 (8.5) -> Sapele PS|opt|F3: F2 + премия за доставку $0.30/MMBtu [Д] {'capex': 42.74, 'cap_pipe': 14.43, 'y2_pipe': 3.69, 'npv15': 12.13, 'inc15': -0.51, 'inc20': -3.01, 'irr': 21.0}
+   Oredo min23-25 (8.5) -> Sapele PS|opt|F4: F2 + премия за доставку $0.80/MMBtu [Д] {'capex': 42.74, 'cap_pipe': 14.43, 'y2_pipe': 4.57, 'npv15': 14.41, 'inc15': 1.77, 'inc20': -1.14, 'irr': 22.0}
+   Oredo min23-25 (8.5) -> Sapele PS|opt|F5: F4 + цена $2.68 (коммерч., не ТЭС) [Д] {'capex': 42.74, 'cap_pipe': 14.43, 'y2_pipe': 4.57, 'npv15': 14.41, 'inc15': 1.77, 'inc20': -1.14, 'irr': 22.0}
+   Oredo min23-25 (8.5) -> Sapele PS|opt|F6: F5 + сильная синергия {'capex': 41.46, 'cap_pipe': 13.16, 'y2_pipe': 4.8, 'npv15': 16.1, 'inc15': 3.46, 'inc20': 0.46, 'irr': 23.0}
+   Oredo 2025 (15.5) -> Sapele PS|base|база (как в оценке) {'capex': 59.77, 'cap_pipe': 29.73, 'y2_pipe': 0.29, 'npv15': -20.6, 'inc15': -31.15, 'inc20': -30.82, 'irr': 6.3}
+   Oredo 2025 (15.5) -> Sapele PS|base|F1: без двойного простоя + ТОиР трубы 1% {'capex': 60.9, 'cap_pipe': 30.85, 'y2_pipe': 1.28, 'npv15': -18.02, 'inc15': -28.57, 'inc20': -28.95, 'irr': 7.7}
+   Oredo 2025 (15.5) -> Sapele PS|base|F2: F1 + газ пол NGFCP $0.40/Mscf + эскроу {'capex': 60.9, 'cap_pipe': 30.85, 'y2_pipe': 3.29, 'npv15': -10.15, 'inc15': -20.7, 'inc20': -22.37, 'irr': 11.0}
+   Oredo 2025 (15.5) -> Sapele PS|base|F3: F2 + премия за доставку $0.30/MMBtu [Д] {'capex': 60.9, 'cap_pipe': 30.85, 'y2_pipe': 4.14, 'npv15': -7.61, 'inc15': -18.16, 'inc20': -20.29, 'irr': 12.0}
+   Oredo 2025 (15.5) -> Sapele PS|base|F4: F2 + премия за доставку $0.80/MMBtu [Д] {'capex': 60.9, 'cap_pipe': 30.85, 'y2_pipe': 5.55, 'npv15': -3.39, 'inc15': -13.94, 'inc20': -16.81, 'irr': 13.7}
+   Oredo 2025 (15.5) -> Sapele PS|base|F5: F4 + цена $2.68 (коммерч., не ТЭС) [Д] {'capex': 60.9, 'cap_pipe': 30.85, 'y2_pipe': 6.96, 'npv15': 0.83, 'inc15': -9.72, 'inc20': -13.32, 'irr': 15.3}
+   Oredo 2025 (15.5) -> Sapele PS|base|F6: F5 + сильная синергия {'capex': 58.49, 'cap_pipe': 28.45, 'y2_pipe': 7.21, 'npv15': 4.27, 'inc15': -6.28, 'inc20': -10.08, 'irr': 16.7}
+   Oredo 2025 (15.5) -> Sapele PS|opt|база (как в оценке) {'capex': 47.77, 'cap_pipe': 19.47, 'y2_pipe': 4.96, 'npv15': 10.35, 'inc15': -2.29, 'inc20': -5.41, 'irr': 19.6}
+   Oredo 2025 (15.5) -> Sapele PS|opt|F1: без двойного простоя + ТОиР трубы 1% {'capex': 48.59, 'cap_pipe': 20.29, 'y2_pipe': 5.87, 'npv15': 12.5, 'inc15': -0.14, 'inc20': -3.84, 'irr': 20.4}
+   Oredo 2025 (15.5) -> Sapele PS|opt|F2: F1 + газ пол NGFCP $0.40/Mscf + эскроу {'capex': 48.59, 'cap_pipe': 20.29, 'y2_pipe': 7.31, 'npv15': 17.53, 'inc15': 4.89, 'inc20': 0.25, 'irr': 22.5}
+   Oredo 2025 (15.5) -> Sapele PS|opt|F3: F2 + премия за доставку $0.30/MMBtu [Д] {'capex': 48.59, 'cap_pipe': 20.29, 'y2_pipe': 8.41, 'npv15': 20.4, 'inc15': 7.76, 'inc20': 2.58, 'irr': 23.6}
+   Oredo 2025 (15.5) -> Sapele PS|opt|F4: F2 + премия за доставку $0.80/MMBtu [Д] {'capex': 48.59, 'cap_pipe': 20.29, 'y2_pipe': 10.24, 'npv15': 24.9, 'inc15': 12.26, 'inc20': 6.22, 'irr': 25.3}
+   Oredo 2025 (15.5) -> Sapele PS|opt|F5: F4 + цена $2.68 (коммерч., не ТЭС) [Д] {'capex': 48.59, 'cap_pipe': 20.29, 'y2_pipe': 10.24, 'npv15': 24.9, 'inc15': 12.26, 'inc20': 6.22, 'irr': 25.3}
+   Oredo 2025 (15.5) -> Sapele PS|opt|F6: F5 + сильная синергия {'capex': 47.07, 'cap_pipe': 18.76, 'y2_pipe': 10.47, 'npv15': 26.62, 'inc15': 13.98, 'inc20': 7.87, 'irr': 26.2}
+   типовой 5 MMscf/д, отвод 4 км|base|база (как в оценке) {'capex': 36.27, 'cap_pipe': 7.12, 'y2_pipe': -0.18, 'npv15': 2.22, 'inc15': -7.4, 'inc20': -7.27, 'irr': 16.4}
+   типовой 5 MMscf/д, отвод 4 км|base|F1: без двойного простоя + ТОиР трубы 1% {'capex': 36.67, 'cap_pipe': 7.52, 'y2_pipe': 0.07, 'npv15': 2.75, 'inc15': -6.87, 'inc20': -6.93, 'irr': 16.7}
+   типовой 5 MMscf/д, отвод 4 км|base|F2: F1 + газ пол NGFCP $0.40/Mscf + эскроу {'capex': 36.67, 'cap_pipe': 7.52, 'y2_pipe': 0.4, 'npv15': 4.98, 'inc15': -4.64, 'inc20': -5.06, 'irr': 18.1}
+   типовой 5 MMscf/д, отвод 4 км|base|F3: F2 + премия за доставку $0.30/MMBtu [Д] {'capex': 36.67, 'cap_pipe': 7.52, 'y2_pipe': 0.58, 'npv15': 5.45, 'inc15': -4.17, 'inc20': -4.68, 'irr': 18.4}
+   типовой 5 MMscf/д, отвод 4 км|base|F4: F2 + премия за доставку $0.80/MMBtu [Д] {'capex': 36.67, 'cap_pipe': 7.52, 'y2_pipe': 0.88, 'npv15': 6.2, 'inc15': -3.42, 'inc20': -4.05, 'irr': 18.8}
+   типовой 5 MMscf/д, отвод 4 км|base|F5: F4 + цена $2.68 (коммерч., не ТЭС) [Д] {'capex': 36.67, 'cap_pipe': 7.52, 'y2_pipe': 1.17, 'npv15': 6.92, 'inc15': -2.7, 'inc20': -3.45, 'irr': 19.3}
+   типовой 5 MMscf/д, отвод 4 км|base|F6: F5 + сильная синергия {'capex': 36.02, 'cap_pipe': 6.87, 'y2_pipe': 1.38, 'npv15': 8.16, 'inc15': -1.46, 'inc20': -2.33, 'irr': 20.1}
+   типовой 5 MMscf/д, отвод 4 км|opt|база (как в оценке) {'capex': 32.45, 'cap_pipe': 5.05, 'y2_pipe': 0.87, 'npv15': 11.93, 'inc15': -1.88, 'inc20': -2.39, 'irr': 22.5}
+   типовой 5 MMscf/д, отвод 4 км|opt|F1: без двойного простоя + ТОиР трубы 1% {'capex': 32.75, 'cap_pipe': 5.35, 'y2_pipe': 1.14, 'npv15': 12.47, 'inc15': -1.34, 'inc20': -2.01, 'irr': 22.8}
+   типовой 5 MMscf/д, отвод 4 км|opt|F2: F1 + газ пол NGFCP $0.40/Mscf + эскроу {'capex': 32.75, 'cap_pipe': 5.35, 'y2_pipe': 1.37, 'npv15': 14.11, 'inc15': 0.3, 'inc20': -0.68, 'irr': 23.7}
+   типовой 5 MMscf/д, отвод 4 км|opt|F3: F2 + премия за доставку $0.30/MMBtu [Д] {'capex': 32.75, 'cap_pipe': 5.35, 'y2_pipe': 1.62, 'npv15': 14.73, 'inc15': 0.92, 'inc20': -0.16, 'irr': 24.1}
+   типовой 5 MMscf/д, отвод 4 км|opt|F4: F2 + премия за доставку $0.80/MMBtu [Д] {'capex': 32.75, 'cap_pipe': 5.35, 'y2_pipe': 2.03, 'npv15': 15.77, 'inc15': 1.96, 'inc20': 0.69, 'irr': 24.7}
+   типовой 5 MMscf/д, отвод 4 км|opt|F5: F4 + цена $2.68 (коммерч., не ТЭС) [Д] {'capex': 32.75, 'cap_pipe': 5.35, 'y2_pipe': 2.03, 'npv15': 15.77, 'inc15': 1.96, 'inc20': 0.69, 'irr': 24.7}
+   типовой 5 MMscf/д, отвод 4 км|opt|F6: F5 + сильная синергия {'capex': 32.29, 'cap_pipe': 4.89, 'y2_pipe': 2.23, 'npv15': 16.71, 'inc15': 2.9, 'inc20': 1.52, 'irr': 25.3}
+   типовой 15 MMscf/д, отвод 8 км|base|база (как в оценке) {'capex': 49.43, 'cap_pipe': 20.29, 'y2_pipe': 0.89, 'npv15': -7.06, 'inc15': -18.78, 'inc20': -19.01, 'irr': 11.7}
+   типовой 15 MMscf/д, отвод 8 км|base|F1: без двойного простоя + ТОиР трубы 1% {'capex': 50.52, 'cap_pipe': 21.38, 'y2_pipe': 1.51, 'npv15': -5.95, 'inc15': -17.67, 'inc20': -18.32, 'irr': 12.3}
+   типовой 15 MMscf/д, отвод 8 км|base|F2: F1 + газ пол NGFCP $0.40/Mscf + эскроу {'capex': 50.52, 'cap_pipe': 21.38, 'y2_pipe': 3.44, 'npv15': 1.65, 'inc15': -10.07, 'inc20': -11.97, 'irr': 15.7}
+   типовой 15 MMscf/д, отвод 8 км|base|F3: F2 + премия за доставку $0.30/MMBtu [Д] {'capex': 50.52, 'cap_pipe': 21.38, 'y2_pipe': 4.25, 'npv15': 4.09, 'inc15': -7.63, 'inc20': -9.96, 'irr': 16.8}
+   типовой 15 MMscf/д, отвод 8 км|base|F4: F2 + премия за доставку $0.80/MMBtu [Д] {'capex': 50.52, 'cap_pipe': 21.38, 'y2_pipe': 5.61, 'npv15': 8.05, 'inc15': -3.67, 'inc20': -6.69, 'irr': 18.5}
+   типовой 15 MMscf/д, отвод 8 км|base|F5: F4 + цена $2.68 (коммерч., не ТЭС) [Д] {'capex': 50.52, 'cap_pipe': 21.38, 'y2_pipe': 6.97, 'npv15': 11.65, 'inc15': -0.07, 'inc20': -3.75, 'irr': 20.0}
+   типовой 15 MMscf/д, отвод 8 км|base|F6: F5 + сильная синергия {'capex': 49.13, 'cap_pipe': 19.99, 'y2_pipe': 7.2, 'npv15': 13.58, 'inc15': 1.86, 'inc20': -1.94, 'irr': 21.0}
+   типовой 15 MMscf/д, отвод 8 км|opt|база (как в оценке) {'capex': 41.36, 'cap_pipe': 13.96, 'y2_pipe': 5.1, 'npv15': 16.41, 'inc15': 2.6, 'inc20': -0.45, 'irr': 23.1}
+   типовой 15 MMscf/д, отвод 8 км|opt|F1: без двойного простоя + ТОиР трубы 1% {'capex': 42.16, 'cap_pipe': 14.76, 'y2_pipe': 5.84, 'npv15': 17.91, 'inc15': 4.1, 'inc20': 0.61, 'irr': 23.6}
+   типовой 15 MMscf/д, отвод 8 км|opt|F2: F1 + газ пол NGFCP $0.40/Mscf + эскроу {'capex': 42.16, 'cap_pipe': 14.76, 'y2_pipe': 7.22, 'npv15': 22.54, 'inc15': 8.73, 'inc20': 4.35, 'irr': 25.6}
+   типовой 15 MMscf/д, отвод 8 км|opt|F3: F2 + премия за доставку $0.30/MMBtu [Д] {'capex': 42.16, 'cap_pipe': 14.76, 'y2_pipe': 8.29, 'npv15': 25.06, 'inc15': 11.25, 'inc20': 6.38, 'irr': 26.7}
+   типовой 15 MMscf/д, отвод 8 км|opt|F4: F2 + премия за доставку $0.80/MMBtu [Д] {'capex': 42.16, 'cap_pipe': 14.76, 'y2_pipe': 10.05, 'npv15': 29.26, 'inc15': 15.45, 'inc20': 9.76, 'irr': 28.4}
+   типовой 15 MMscf/д, отвод 8 км|opt|F5: F4 + цена $2.68 (коммерч., не ТЭС) [Д] {'capex': 42.16, 'cap_pipe': 14.76, 'y2_pipe': 10.05, 'npv15': 29.26, 'inc15': 15.45, 'inc20': 9.76, 'irr': 28.4}
+   типовой 15 MMscf/д, отвод 8 км|opt|F6: F5 + сильная синергия {'capex': 41.22, 'cap_pipe': 13.81, 'y2_pipe': 10.27, 'npv15': 30.55, 'inc15': 16.74, 'inc20': 10.96, 'irr': 29.1}
+== hourly
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|f=0.5 {'cap': 3.35, 'avail': 4.41, 'burned': 1.58, 'L': 0.44, 'pipe_take_avg_model': 2.83, 'pipe_take_hourly': 2.74, 'lost_share': 0.032}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|f=0.6 {'cap': 3.35, 'avail': 4.41, 'burned': 1.58, 'L': 0.3, 'pipe_take_avg_model': 2.83, 'pipe_take_hourly': 2.618, 'lost_share': 0.075}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|f=0.72 {'cap': 3.35, 'avail': 4.41, 'burned': 1.58, 'L': 0.0, 'pipe_take_avg_model': 2.83, 'pipe_take_hourly': 2.472, 'lost_share': 0.126}
+   Oredo min23-25 (8.5) -> Sapele PS|f=0.5 {'cap': 4.76, 'avail': 5.59, 'burned': 1.58, 'L': 0.44, 'pipe_take_avg_model': 4.01, 'pipe_take_hourly': 3.944, 'lost_share': 0.017}
+   Oredo min23-25 (8.5) -> Sapele PS|f=0.6 {'cap': 4.76, 'avail': 5.59, 'burned': 1.58, 'L': 0.3, 'pipe_take_avg_model': 4.01, 'pipe_take_hourly': 3.903, 'lost_share': 0.027}
+   Oredo min23-25 (8.5) -> Sapele PS|f=0.72 {'cap': 4.76, 'avail': 5.59, 'burned': 1.58, 'L': 0.0, 'pipe_take_avg_model': 4.01, 'pipe_take_hourly': 3.731, 'lost_share': 0.07}
+   Oredo 2025 (15.5) -> Sapele PS|f=0.5 {'cap': 10.22, 'avail': 10.2, 'burned': 1.58, 'L': 0.44, 'pipe_take_avg_model': 8.62, 'pipe_take_hourly': 8.62, 'lost_share': 0.0}
+   Oredo 2025 (15.5) -> Sapele PS|f=0.6 {'cap': 10.22, 'avail': 10.2, 'burned': 1.58, 'L': 0.3, 'pipe_take_avg_model': 8.62, 'pipe_take_hourly': 8.62, 'lost_share': 0.0}
+   Oredo 2025 (15.5) -> Sapele PS|f=0.72 {'cap': 10.22, 'avail': 10.2, 'burned': 1.58, 'L': 0.0, 'pipe_take_avg_model': 8.62, 'pipe_take_hourly': 8.62, 'lost_share': 0.0}
+   типовой 5 MMscf/д, отвод 4 км|f=0.5 {'cap': 2.03, 'avail': 3.29, 'burned': 1.58, 'L': 0.44, 'pipe_take_avg_model': 1.71, 'pipe_take_hourly': 1.51, 'lost_share': 0.117}
+   типовой 5 MMscf/д, отвод 4 км|f=0.6 {'cap': 2.03, 'avail': 3.29, 'burned': 1.58, 'L': 0.3, 'pipe_take_avg_model': 1.71, 'pipe_take_hourly': 1.407, 'lost_share': 0.177}
+   типовой 5 MMscf/д, отвод 4 км|f=0.72 {'cap': 2.03, 'avail': 3.29, 'burned': 1.58, 'L': 0.0, 'pipe_take_avg_model': 1.71, 'pipe_take_hourly': 1.283, 'lost_share': 0.25}
+   типовой 15 MMscf/д, отвод 8 км|f=0.5 {'cap': 9.84, 'avail': 9.87, 'burned': 1.58, 'L': 0.44, 'pipe_take_avg_model': 8.29, 'pipe_take_hourly': 8.287, 'lost_share': 0.0}
+   типовой 15 MMscf/д, отвод 8 км|f=0.6 {'cap': 9.84, 'avail': 9.87, 'burned': 1.58, 'L': 0.3, 'pipe_take_avg_model': 8.29, 'pipe_take_hourly': 8.287, 'lost_share': 0.0}
+   типовой 15 MMscf/д, отвод 8 км|f=0.72 {'cap': 9.84, 'avail': 9.87, 'burned': 1.58, 'L': 0.0, 'pipe_take_avg_model': 8.29, 'pipe_take_hourly': 8.279, 'lost_share': 0.001}
+== hcdp
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|+0.03 {'inc15': -8.11}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|+0.08 {'inc15': -8.33}
+   Oredo min23-25 (8.5) -> Sapele PS|+0.03 {'inc15': -25.05}
+   Oredo min23-25 (8.5) -> Sapele PS|+0.08 {'inc15': -25.38}
+   Oredo 2025 (15.5) -> Sapele PS|+0.03 {'inc15': -31.59}
+   Oredo 2025 (15.5) -> Sapele PS|+0.08 {'inc15': -32.32}
+   типовой 5 MMscf/д, отвод 4 км|+0.03 {'inc15': -7.48}
+   типовой 5 MMscf/д, отвод 4 км|+0.08 {'inc15': -7.62}
+   типовой 15 MMscf/д, отвод 8 км|+0.03 {'inc15': -19.2}
+   типовой 15 MMscf/д, отвод 8 км|+0.08 {'inc15': -19.9}
+== tie_in
+   base|$1.0|сбор как в базе {'cap_pipe': 4.75, 'hp': 679, 'y2_pipe': -0.49, 'inc15': -5.62, 'inc20': -5.42}
+   base|$1.0|эскроу {'cap_pipe': 4.75, 'hp': 679, 'y2_pipe': -0.36, 'inc15': -5.2, 'inc20': -5.06}
+   base|$1.5|сбор как в базе {'cap_pipe': 4.75, 'hp': 679, 'y2_pipe': -0.14, 'inc15': -4.67, 'inc20': -4.64}
+   base|$1.5|эскроу {'cap_pipe': 4.75, 'hp': 679, 'y2_pipe': 0.06, 'inc15': -4.09, 'inc20': -4.14}
+   base|$2.18|сбор как в базе {'cap_pipe': 4.75, 'hp': 679, 'y2_pipe': 0.34, 'inc15': -3.52, 'inc20': -3.7}
+   base|$2.18|эскроу {'cap_pipe': 4.75, 'hp': 679, 'y2_pipe': 0.62, 'inc15': -2.75, 'inc20': -3.03}
+   base|$1.5|F2 {'cap_pipe': 5.19, 'y2_pipe': 0.45, 'inc15': -2.4, 'inc20': -2.84}
+   base|$2.18|F2 {'cap_pipe': 5.19, 'y2_pipe': 1.09, 'inc15': -0.95, 'inc20': -1.63}
+   opt|$1.0|сбор как в базе {'cap_pipe': 3.96, 'hp': 723, 'y2_pipe': -0.16, 'inc15': -3.64, 'inc20': -3.67}
+   opt|$1.0|эскроу {'cap_pipe': 3.96, 'hp': 723, 'y2_pipe': -0.15, 'inc15': -3.61, 'inc20': -3.64}
+   opt|$1.5|сбор как в базе {'cap_pipe': 3.96, 'hp': 723, 'y2_pipe': 0.41, 'inc15': -2.14, 'inc20': -2.44}
+   opt|$1.5|эскроу {'cap_pipe': 3.96, 'hp': 723, 'y2_pipe': 0.43, 'inc15': -2.09, 'inc20': -2.4}
+   opt|$2.18|сбор как в базе {'cap_pipe': 3.96, 'hp': 723, 'y2_pipe': 1.19, 'inc15': -0.09, 'inc20': -0.76}
+   opt|$2.18|эскроу {'cap_pipe': 3.96, 'hp': 723, 'y2_pipe': 1.22, 'inc15': -0.02, 'inc20': -0.71}
+   opt|$1.5|F2 {'cap_pipe': 4.3, 'y2_pipe': 0.94, 'inc15': 0.04, 'inc20': -0.73}
+   opt|$2.18|F2 {'cap_pipe': 4.3, 'y2_pipe': 1.83, 'inc15': 2.39, 'inc20': 1.19}
+== operator_ratio
+   Qd 2.68
+   hp 855
+   compr_pkg_raw_musd 1.07
+   per_mmscfd_raw 0.399
+   per_mmscfd_x2_6 1.037
+   whole_block_per_mmscfd 3.1
+   ratio_like_for_like_raw [1.1, 1.8]
+   ratio_like_for_like_x2_6 [2.9, 4.7]
+   ratio_in_assessment [8.6, 14.1]
+== opt_stackA
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|T405|стек A {'inc15': 1.46, 'inc20': 0.13}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|T405|только газ по полу {'inc15': 1.38, 'inc20': 0.07}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|T411|стек A {'inc15': 1.45, 'inc20': 0.14}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|T411|только газ по полу {'inc15': 1.37, 'inc20': 0.07}
+   Oredo min23-25 (8.5) -> Sapele PS|T405|стек A {'inc15': -3.82, 'inc20': -5.6}
+   Oredo min23-25 (8.5) -> Sapele PS|T405|только газ по полу {'inc15': -3.97, 'inc20': -5.72}
+   Oredo min23-25 (8.5) -> Sapele PS|T411|стек A {'inc15': -3.69, 'inc20': -5.49}
+   Oredo min23-25 (8.5) -> Sapele PS|T411|только газ по полу {'inc15': -3.83, 'inc20': -5.61}
+   Oredo 2025 (15.5) -> Sapele PS|T405|стек A {'inc15': 2.48, 'inc20': -1.55}
+   Oredo 2025 (15.5) -> Sapele PS|T405|только газ по полу {'inc15': 2.23, 'inc20': -1.75}
+   Oredo 2025 (15.5) -> Sapele PS|T411|стек A {'inc15': 2.48, 'inc20': -1.54}
+   Oredo 2025 (15.5) -> Sapele PS|T411|только газ по полу {'inc15': 2.23, 'inc20': -1.74}
+   типовой 5 MMscf/д, отвод 4 км|T405|стек A {'inc15': -0.37, 'inc20': -1.17}
+   типовой 5 MMscf/д, отвод 4 км|T405|только газ по полу {'inc15': -0.42, 'inc20': -1.21}
+   типовой 5 MMscf/д, отвод 4 км|T411|стек A {'inc15': -0.38, 'inc20': -1.17}
+   типовой 5 MMscf/д, отвод 4 км|T411|только газ по полу {'inc15': -0.43, 'inc20': -1.21}
+   типовой 15 MMscf/д, отвод 8 км|T405|стек A {'inc15': 7.01, 'inc20': 3.12}
+   типовой 15 MMscf/д, отвод 8 км|T405|только газ по полу {'inc15': 6.79, 'inc20': 2.95}
+   типовой 15 MMscf/д, отвод 8 км|T411|стек A {'inc15': 6.95, 'inc20': 3.08}
+   типовой 15 MMscf/д, отвод 8 км|T411|только газ по полу {'inc15': 6.73, 'inc20': 2.9}
+== gas_fix
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|base|стек A {'inc15_as_in_assessment': -4.03, 'inc15_correct': -5.16, 'inc20_correct': -5.59, 'power_gain_from_gas15': 1.13}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|base|газ по полу {'inc15_as_in_assessment': -6.05, 'inc15_correct': -7.18, 'inc20_correct': -7.3, 'power_gain_from_gas15': 1.13}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|base|F2 (up+tor+пол+эскроу) {'inc15_as_in_assessment': -4.43, 'inc15_correct': -5.56, 'inc20_correct': -6.03, 'power_gain_from_gas15': 1.13}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|base|F4 (F2 + премия доставки $0.80) {'inc15_as_in_assessment': -2.5, 'inc15_correct': -3.63, 'inc20_correct': -4.44, 'power_gain_from_gas15': 1.13}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|base|F6 (F4 + $2.68 + сильная синергия) {'inc15_as_in_assessment': -0.18, 'inc15_correct': -1.31, 'inc20_correct': -2.42, 'power_gain_from_gas15': 1.13}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|opt|стек A {'inc15_as_in_assessment': 1.45, 'inc15_correct': 0.32, 'inc20_correct': -0.77, 'power_gain_from_gas15': 1.13}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|opt|газ по полу {'inc15_as_in_assessment': 1.37, 'inc15_correct': 0.24, 'inc20_correct': -0.84, 'power_gain_from_gas15': 1.13}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|opt|F2 (up+tor+пол+эскроу) {'inc15_as_in_assessment': 2.28, 'inc15_correct': 1.15, 'inc20_correct': -0.18, 'power_gain_from_gas15': 1.13}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|opt|F4 (F2 + премия доставки $0.80) {'inc15_as_in_assessment': 4.71, 'inc15_correct': 3.58, 'inc20_correct': 1.8, 'power_gain_from_gas15': 1.13}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|opt|F6 (F4 + $2.68 + сильная синергия) {'inc15_as_in_assessment': 5.66, 'inc15_correct': 4.53, 'inc20_correct': 2.64, 'power_gain_from_gas15': 1.13}
+   Ughelli East 2025 (6.7) -> Transcorp Ughelli|base|порог платы оператора поверх стека A, верно 3.34
+   Oredo min23-25 (8.5) -> Sapele PS|base|стек A {'inc15_as_in_assessment': -19.41, 'inc15_correct': -20.54, 'inc20_correct': -20.57, 'power_gain_from_gas15': 1.13}
+   Oredo min23-25 (8.5) -> Sapele PS|base|газ по полу {'inc15_as_in_assessment': -22.47, 'inc15_correct': -23.6, 'inc20_correct': -23.14, 'power_gain_from_gas15': 1.13}
+   Oredo min23-25 (8.5) -> Sapele PS|base|F2 (up+tor+пол+эскроу) {'inc15_as_in_assessment': -18.42, 'inc15_correct': -19.55, 'inc20_correct': -19.91, 'power_gain_from_gas15': 1.13}
+   Oredo min23-25 (8.5) -> Sapele PS|base|F4 (F2 + премия доставки $0.80) {'inc15_as_in_assessment': -15.3, 'inc15_correct': -16.43, 'inc20_correct': -17.33, 'power_gain_from_gas15': 1.13}
+   Oredo min23-25 (8.5) -> Sapele PS|base|F6 (F4 + $2.68 + сильная синергия) {'inc15_as_in_assessment': -10.34, 'inc15_correct': -11.47, 'inc20_correct': -12.89, 'power_gain_from_gas15': 1.13}
+   Oredo min23-25 (8.5) -> Sapele PS|opt|стек A {'inc15_as_in_assessment': -3.69, 'inc15_correct': -4.82, 'inc20_correct': -6.4, 'power_gain_from_gas15': 1.13}
+   Oredo min23-25 (8.5) -> Sapele PS|opt|газ по полу {'inc15_as_in_assessment': -3.83, 'inc15_correct': -4.96, 'inc20_correct': -6.52, 'power_gain_from_gas15': 1.13}
+   Oredo min23-25 (8.5) -> Sapele PS|opt|F2 (up+tor+пол+эскроу) {'inc15_as_in_assessment': -1.92, 'inc15_correct': -3.05, 'inc20_correct': -5.07, 'power_gain_from_gas15': 1.13}
+   Oredo min23-25 (8.5) -> Sapele PS|opt|F4 (F2 + премия доставки $0.80) {'inc15_as_in_assessment': 1.77, 'inc15_correct': 0.64, 'inc20_correct': -2.05, 'power_gain_from_gas15': 1.13}
+   Oredo min23-25 (8.5) -> Sapele PS|opt|F6 (F4 + $2.68 + сильная синергия) {'inc15_as_in_assessment': 3.46, 'inc15_correct': 2.33, 'inc20_correct': -0.45, 'power_gain_from_gas15': 1.13}
+   Oredo min23-25 (8.5) -> Sapele PS|base|порог платы оператора поверх стека A, верно 7.32
+   Oredo 2025 (15.5) -> Sapele PS|base|стек A {'inc15_as_in_assessment': -20.17, 'inc15_correct': -21.3, 'inc20_correct': -22.6, 'power_gain_from_gas15': 1.13}
+   Oredo 2025 (15.5) -> Sapele PS|base|газ по полу {'inc15_as_in_assessment': -26.94, 'inc15_correct': -28.07, 'inc20_correct': -28.27, 'power_gain_from_gas15': 1.13}
+   Oredo 2025 (15.5) -> Sapele PS|base|F2 (up+tor+пол+эскроу) {'inc15_as_in_assessment': -20.7, 'inc15_correct': -21.83, 'inc20_correct': -23.28, 'power_gain_from_gas15': 1.13}
+   Oredo 2025 (15.5) -> Sapele PS|base|F4 (F2 + премия доставки $0.80) {'inc15_as_in_assessment': -13.94, 'inc15_correct': -15.07, 'inc20_correct': -17.72, 'power_gain_from_gas15': 1.13}
+   Oredo 2025 (15.5) -> Sapele PS|base|F6 (F4 + $2.68 + сильная синергия) {'inc15_as_in_assessment': -6.28, 'inc15_correct': -7.41, 'inc20_correct': -10.99, 'power_gain_from_gas15': 1.13}
+   Oredo 2025 (15.5) -> Sapele PS|opt|стек A {'inc15_as_in_assessment': 2.48, 'inc15_correct': 1.35, 'inc20_correct': -2.45, 'power_gain_from_gas15': 1.13}
+   Oredo 2025 (15.5) -> Sapele PS|opt|газ по полу {'inc15_as_in_assessment': 2.23, 'inc15_correct': 1.1, 'inc20_correct': -2.65, 'power_gain_from_gas15': 1.13}
+   Oredo 2025 (15.5) -> Sapele PS|opt|F2 (up+tor+пол+эскроу) {'inc15_as_in_assessment': 4.89, 'inc15_correct': 3.76, 'inc20_correct': -0.66, 'power_gain_from_gas15': 1.13}
+   Oredo 2025 (15.5) -> Sapele PS|opt|F4 (F2 + премия доставки $0.80) {'inc15_as_in_assessment': 12.26, 'inc15_correct': 11.13, 'inc20_correct': 5.31, 'power_gain_from_gas15': 1.13}
+   Oredo 2025 (15.5) -> Sapele PS|opt|F6 (F4 + $2.68 + сильная синергия) {'inc15_as_in_assessment': 13.98, 'inc15_correct': 12.85, 'inc20_correct': 6.96, 'power_gain_from_gas15': 1.13}
+   Oredo 2025 (15.5) -> Sapele PS|base|порог платы оператора поверх стека A, верно 3.66
+   типовой 5 MMscf/д, отвод 4 км|base|стек A {'inc15_as_in_assessment': -4.68, 'inc15_correct': -5.76, 'inc20_correct': -5.89, 'power_gain_from_gas15': 1.08}
+   типовой 5 MMscf/д, отвод 4 км|base|газ по полу {'inc15_as_in_assessment': -5.92, 'inc15_correct': -7.0, 'inc20_correct': -6.94, 'power_gain_from_gas15': 1.08}
+   типовой 5 MMscf/д, отвод 4 км|base|F2 (up+tor+пол+эскроу) {'inc15_as_in_assessment': -4.64, 'inc15_correct': -5.72, 'inc20_correct': -5.94, 'power_gain_from_gas15': 1.08}
+   типовой 5 MMscf/д, отвод 4 км|base|F4 (F2 + премия доставки $0.80) {'inc15_as_in_assessment': -3.42, 'inc15_correct': -4.5, 'inc20_correct': -4.93, 'power_gain_from_gas15': 1.08}
+   типовой 5 MMscf/д, отвод 4 км|base|F6 (F4 + $2.68 + сильная синергия) {'inc15_as_in_assessment': -1.46, 'inc15_correct': -2.54, 'inc20_correct': -3.21, 'power_gain_from_gas15': 1.08}
+   типовой 5 MMscf/д, отвод 4 км|opt|стек A {'inc15_as_in_assessment': -0.38, 'inc15_correct': -1.51, 'inc20_correct': -2.08, 'power_gain_from_gas15': 1.13}
+   типовой 5 MMscf/д, отвод 4 км|opt|газ по полу {'inc15_as_in_assessment': -0.43, 'inc15_correct': -1.56, 'inc20_correct': -2.12, 'power_gain_from_gas15': 1.13}
+   типовой 5 MMscf/д, отвод 4 км|opt|F2 (up+tor+пол+эскроу) {'inc15_as_in_assessment': 0.3, 'inc15_correct': -0.83, 'inc20_correct': -1.59, 'power_gain_from_gas15': 1.13}
+   типовой 5 MMscf/д, отвод 4 км|opt|F4 (F2 + премия доставки $0.80) {'inc15_as_in_assessment': 1.96, 'inc15_correct': 0.83, 'inc20_correct': -0.22, 'power_gain_from_gas15': 1.13}
+   типовой 5 MMscf/д, отвод 4 км|opt|F6 (F4 + $2.68 + сильная синергия) {'inc15_as_in_assessment': 2.9, 'inc15_correct': 1.77, 'inc20_correct': 0.61, 'power_gain_from_gas15': 1.13}
+   типовой 5 MMscf/д, отвод 4 км|base|порог платы оператора поверх стека A, верно 5.77
+   типовой 15 MMscf/д, отвод 8 км|base|стек A {'inc15_as_in_assessment': -8.2, 'inc15_correct': -9.33, 'inc20_correct': -11.11, 'power_gain_from_gas15': 1.13}
+   типовой 15 MMscf/д, отвод 8 км|base|газ по полу {'inc15_as_in_assessment': -14.7, 'inc15_correct': -15.83, 'inc20_correct': -16.56, 'power_gain_from_gas15': 1.13}
+   типовой 15 MMscf/д, отвод 8 км|base|F2 (up+tor+пол+эскроу) {'inc15_as_in_assessment': -10.07, 'inc15_correct': -11.2, 'inc20_correct': -12.88, 'power_gain_from_gas15': 1.13}
+   типовой 15 MMscf/д, отвод 8 км|base|F4 (F2 + премия доставки $0.80) {'inc15_as_in_assessment': -3.67, 'inc15_correct': -4.8, 'inc20_correct': -7.6, 'power_gain_from_gas15': 1.13}
+   типовой 15 MMscf/д, отвод 8 км|base|F6 (F4 + $2.68 + сильная синергия) {'inc15_as_in_assessment': 1.86, 'inc15_correct': 0.73, 'inc20_correct': -2.85, 'power_gain_from_gas15': 1.13}
+   типовой 15 MMscf/д, отвод 8 км|opt|стек A {'inc15_as_in_assessment': 6.95, 'inc15_correct': 5.82, 'inc20_correct': 2.17, 'power_gain_from_gas15': 1.13}
+   типовой 15 MMscf/д, отвод 8 км|opt|газ по полу {'inc15_as_in_assessment': 6.73, 'inc15_correct': 5.6, 'inc20_correct': 1.99, 'power_gain_from_gas15': 1.13}
+   типовой 15 MMscf/д, отвод 8 км|opt|F2 (up+tor+пол+эскроу) {'inc15_as_in_assessment': 8.73, 'inc15_correct': 7.6, 'inc20_correct': 3.44, 'power_gain_from_gas15': 1.13}
+   типовой 15 MMscf/д, отвод 8 км|opt|F4 (F2 + премия доставки $0.80) {'inc15_as_in_assessment': 15.45, 'inc15_correct': 14.32, 'inc20_correct': 8.85, 'power_gain_from_gas15': 1.13}
+   типовой 15 MMscf/д, отвод 8 км|opt|F6 (F4 + $2.68 + сильная синергия) {'inc15_as_in_assessment': 16.74, 'inc15_correct': 15.61, 'inc20_correct': 10.05, 'power_gain_from_gas15': 1.13}
+   типовой 15 MMscf/д, отвод 8 км|base|порог платы оператора поверх стека A, верно 2.01

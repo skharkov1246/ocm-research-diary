@@ -1,0 +1,42 @@
+repro_U8 {'cap': 12.94, 'e2': 0.86, 'npv15': -9.73, 'npv20': -10.41, 'be15': 10.49, 'be20': 12.01}
+repro_K26 {'cap': 21.17, 'e2': 0.38, 'npv15': -20.92, 'npv20': -21.04, 'be15': 15.23, 'be20': 17.67}
+repro_BIG {'cap': 38.57, 'e2': 7.02, 'npv15': -13.16, 'npv20': -17.55, 'be15': 8.02, 'be20': 9.26}
+peak_hcdp_U8_base {'cap': 13.77, 'e2': 0.73, 'npv15': -11.26, 'npv20': -11.81, 'be15': 11.19, 'be20': 12.83}
+peak_hcdp_U8_base_hcdp6 {'cap': 13.94, 'e2': 0.7, 'npv15': -11.6, 'npv20': -12.12, 'be15': 11.33, 'be20': 12.99}
+peak_hcdp_K26_base {'cap': 22.0, 'e2': 0.24, 'npv15': -22.51, 'npv20': -22.48, 'be15': 16.1, 'be20': 18.69}
+peak_hcdp_K26_base_hcdp6 {'cap': 22.17, 'e2': 0.22, 'npv15': -22.93, 'npv20': -22.85, 'be15': 16.35, 'be20': 18.96}
+peak_hcdp_BIG_base {'cap': 41.06, 'e2': 6.57, 'npv15': -17.32, 'npv20': -21.39, 'be15': 8.7, 'be20': 10.05}
+peak_hcdp_BIG_base_hcdp6 {'cap': 41.57, 'e2': 6.47, 'npv15': -18.62, 'npv20': -22.51, 'be15': 8.92, 'be20': 10.3}
+peak_hcdp_U8_lean_EDTI {'cap': 11.28, 'e2': 2.8, 'npv15': 0.71, 'npv20': -1.41, 'be15': 7.7, 'be20': 8.85}
+peak_hcdp_U8_opt {'cap': 9.43, 'e2': 3.2, 'npv15': 2.59, 'npv20': 0.42, 'be15': 6.77, 'be20': 7.76}
+competitor_spur_8.45km_gas3.18 {'cap': 7.68, 'npv20_at6': -10.38, 'be20': 11.34}
+competitor_spur_8.45km_gas3.48 {'cap': 7.68, 'npv20_at6': -11.21, 'be20': 11.69}
+competitor_spur_8.45km_gas3.98 {'cap': 7.68, 'npv20_at6': -12.58, 'be20': 12.26}
+competitor_spur_18.0km_gas3.18 {'cap': 11.8, 'npv20_at6': -15.63, 'be20': 14.04}
+competitor_spur_18.0km_gas3.48 {'cap': 11.8, 'npv20_at6': -16.46, 'be20': 14.39}
+competitor_spur_18.0km_gas3.98 {'cap': 11.8, 'npv20_at6': -17.84, 'be20': 14.96}
+competitor_spur_26.0km_gas3.18 {'cap': 15.92, 'npv20_at6': -20.79, 'be20': 16.71}
+competitor_spur_26.0km_gas3.48 {'cap': 15.92, 'npv20_at6': -21.62, 'be20': 17.05}
+competitor_spur_26.0km_gas3.98 {'cap': 15.92, 'npv20_at6': -23.0, 'be20': 17.62}
+system_capital {'gas_8km': [30.2, 32.1], 'gas_26km': [38.4, 40.3], 'gas_26km_engines_audited': 41.9, 'power_25km': 29.15, 'power_8km_approx': 26.2}
+parity_consistent_350 {'price': 17.57, 'om_kwh': 0.0265, 'npv15_8km': 13.72, 'npv15_26km': 4.45, 'npv20_26km': -0.15}
+parity_consistent_383 {'price': 20.07, 'om_kwh': 0.0265, 'npv15_8km': 18.56, 'npv15_26km': 9.17, 'npv20_26km': 3.73}
+npv_at_4.0_U8 {'npv15': -15.65, 'npv20': -15.26}
+npv_at_4.7_U8 {'npv15': -13.58, 'npv20': -13.56}
+npv_at_8.0_U8 {'npv15': -4.98, 'npv20': -6.5}
+npv_at_10.75_U8 {'npv15': 0.5, 'npv20': -2.0}
+npv_at_4.0_K26 {'npv15': -26.71, 'npv20': -25.8}
+npv_at_4.7_K26 {'npv15': -24.68, 'npv20': -24.13}
+npv_at_8.0_K26 {'npv15': -15.13, 'npv20': -16.27}
+npv_at_10.75_K26 {'npv15': -8.68, 'npv20': -10.96}
+lean_U8_be20_EDTI_model 8.21
+lean_U8_be20_EDTI_stressed 8.85
+U8_pre_contract {'npv15': -17.25, 'npv20': -16.57}
+incumbent_spur_8.45km_gas3.18 {'cap': 7.26, 'fixed': 0.67, 'be20': 8.92}
+incumbent_spur_8.45km_gas3.98 {'cap': 7.26, 'fixed': 0.67, 'be20': 9.84}
+incumbent_spur_18.0km_gas3.18 {'cap': 11.37, 'fixed': 0.87, 'be20': 11.54}
+incumbent_spur_18.0km_gas3.98 {'cap': 11.37, 'fixed': 0.87, 'be20': 12.46}
+incumbent_spur_26.0km_gas3.18 {'cap': 15.49, 'fixed': 1.06, 'be20': 14.14}
+incumbent_spur_26.0km_gas3.98 {'cap': 15.49, 'fixed': 1.06, 'be20': 15.06}
+operator_self_U8_be20 9.83
+operator_self_K26_be20 15.31

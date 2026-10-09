@@ -1,0 +1,95 @@
+repro_U8: {'g': {'npv15': -9.73, 'npv20': -10.41, 'e2': 0.86}, 'run2': {'cap': 12.94, 'e2': 0.86, 'npv15': -9.73, 'npv20': -10.41, 'irr': -7.7}, 'be15': 10.49, 'be20': 12.01}
+repro_K26: {'g': {'npv15': -20.92, 'npv20': -21.04, 'e2': 0.38}, 'run2': {'cap': 21.17, 'e2': 0.38, 'npv15': -20.92, 'npv20': -21.04, 'irr': None}, 'be15': 15.23, 'be20': 17.67}
+repro_BIG: {'g': {'npv15': -13.16, 'npv20': -17.55, 'e2': 7.02}, 'run2': {'cap': 38.57, 'e2': 7.02, 'npv15': -13.16, 'npv20': -17.55, 'irr': 5.6}, 'be15': 8.02, 'be20': 9.26}
+outage_U8: {'cap': 12.94, 'e2': 0.62, 'npv15': -10.96, 'npv20': -11.42, 'irr': -12.5, 'be15': 11.34, 'be20': 12.99}
+outage_K26: {'cap': 21.17, 'e2': 0.13, 'npv15': -21.95, 'npv20': -21.91, 'irr': None, 'be15': 16.29, 'be20': 18.95}
+outage_BIG: {'cap': 38.57, 'e2': 6.14, 'npv15': -15.27, 'npv20': -19.42, 'irr': 4.1, 'be15': 8.45, 'be20': 9.8}
+outage_pen50_U8: {'cap': 12.94, 'e2': 0.47, 'npv15': -11.72, 'npv20': -12.05, 'irr': -16.2, 'be20': 13.63}
+outage_pen50_K26: {'cap': 21.17, 'e2': -0.02, 'npv15': -22.8, 'npv20': -22.6, 'irr': None, 'be20': 19.99}
+fx_S1_shock_coll_U8: {'cap': 12.94, 'e2': -0.43, 'npv15': -12.95, 'npv20': -13.13, 'irr': -19.0, 'be20': 14.89}
+fx_S2_shock_coll_reprice25_U8: {'cap': 12.94, 'e2': -0.43, 'npv15': -15.63, 'npv20': -15.21, 'irr': None, 'be20': 18.1}
+fx_S3_lost_year3_U8: {'cap': 12.94, 'e2': 0.62, 'npv15': -13.15, 'npv20': -13.34, 'irr': -16.8, 'be20': 15.81}
+fx_S1_shock_coll_K26: {'cap': 21.17, 'e2': -0.92, 'npv15': -23.93, 'npv20': -23.62, 'irr': None, 'be20': 21.74}
+fx_S2_shock_coll_reprice25_K26: {'cap': 21.17, 'e2': -0.92, 'npv15': -26.58, 'npv20': -25.67, 'irr': None, 'be20': 26.42}
+fx_S3_lost_year3_K26: {'cap': 21.17, 'e2': 0.13, 'npv15': -24.15, 'npv20': -23.84, 'irr': None, 'be20': 23.02}
+fx_S1_shock_coll_BIG: {'cap': 38.57, 'e2': 2.38, 'npv15': -20.62, 'npv20': -24.05, 'irr': 0.3, 'be20': 11.27}
+fx_S2_shock_coll_reprice25_BIG: {'cap': 38.57, 'e2': 2.38, 'npv15': -28.43, 'npv20': -30.11, 'irr': -10.5, 'be20': 13.66}
+fx_S3_lost_year3_BIG: {'cap': 38.57, 'e2': 6.14, 'npv15': -22.62, 'npv20': -25.86, 'irr': -0.6, 'be20': 11.97}
+operator_takes_from_y3_U8: {'cap': 12.94, 'e2': 0.62, 'npv15': -21.07, 'npv20': -19.29, 'irr': None}
+operator_takes_from_y3_K26: {'cap': 21.17, 'e2': 0.13, 'npv15': -31.93, 'npv20': -29.69, 'irr': None}
+operator_takes_from_y5_U8: {'cap': 12.94, 'e2': 0.62, 'npv15': -17.58, 'npv20': -16.29, 'irr': None}
+operator_takes_from_y5_K26: {'cap': 21.17, 'e2': 0.13, 'npv15': -28.44, 'npv20': -26.7, 'irr': None}
+operator_cut_y4_p0.25_U8: {'npv15': -13.03, 'npv20': -12.98}
+operator_cut_y4_p0.4_U8: {'npv15': -14.26, 'npv20': -13.92}
+operator_cut_y4_p0.25_K26: {'npv15': -23.98, 'npv20': -23.45}
+operator_cut_y4_p0.4_K26: {'npv15': -25.2, 'npv20': -24.37}
+buyer_minus25_U8: {'cap': 12.94, 'e2': 0.62, 'npv15': -13.49, 'npv20': -13.39, 'irr': -84.3, 'be20': 15.52}
+buyer_minus25_top70_U8: {'cap': 12.94, 'e2': 0.62, 'npv15': -13.49, 'npv20': -13.39, 'irr': -84.3}
+buyer_minus25_K26: {'cap': 21.17, 'e2': 0.13, 'npv15': -24.34, 'npv20': -23.79, 'irr': None, 'be20': 22.56}
+buyer_minus25_top70_K26: {'cap': 21.17, 'e2': 0.13, 'npv15': -24.34, 'npv20': -23.79, 'irr': None}
+combined_base_U8: {'npv15_at_own_price': -16.96, 'npv20_at_own_price': -16.22, 'be15': 20.74, 'be20': 23.07}
+combined_opt_U8: {'npv15_at_own_price': -4.15, 'npv20_at_own_price': -4.79, 'be15': 11.33, 'be20': 12.59}
+combined_base_K26: {'npv15_at_own_price': -27.97, 'npv20_at_own_price': -26.73, 'be15': 30.15, 'be20': 33.96}
+combined_opt_K26: {'npv15_at_own_price': -9.68, 'npv20_at_own_price': -10.27, 'be15': 15.72, 'be20': 17.76}
+combined_base_BIG: {'npv15_at_own_price': -34.82, 'npv20_at_own_price': -34.93, 'be15': 16.01, 'be20': 17.88}
+combined_opt_BIG: {'npv15_at_own_price': 1.83, 'npv20_at_own_price': -2.36, 'be15': 7.59, 'be20': 8.63}
+combined_lean_EDTI_U8: {'npv15_at_own_price': -6.97, 'npv20_at_own_price': -7.45, 'be15': 13.68, 'be20': 15.49}
+combined_base_U8_p6.4: {'npv15_at_own_price': -16.3, 'npv20_at_own_price': -15.66}
+combined_opt_U8_p6.4: {'npv15_at_own_price': -6.15, 'npv20_at_own_price': -6.48}
+combined_base_U8_p9.0: {'npv15_at_own_price': -12.36, 'npv20_at_own_price': -12.35}
+combined_opt_U8_p9.0: {'npv15_at_own_price': -2.9, 'npv20_at_own_price': -3.76}
+combined_base_U8_p12.25: {'npv15_at_own_price': -8.54, 'npv20_at_own_price': -9.11}
+combined_opt_U8_p12.25: {'npv15_at_own_price': 1.14, 'npv20_at_own_price': -0.35}
+combined_base_K26_p6.4: {'npv15_at_own_price': -27.32, 'npv20_at_own_price': -26.18}
+combined_opt_K26_p6.4: {'npv15_at_own_price': -12.08, 'npv20_at_own_price': -12.32}
+combined_base_K26_p9.0: {'npv15_at_own_price': -23.08, 'npv20_at_own_price': -22.63}
+combined_opt_K26_p9.0: {'npv15_at_own_price': -8.36, 'npv20_at_own_price': -9.16}
+combined_base_K26_p12.25: {'npv15_at_own_price': -18.33, 'npv20_at_own_price': -18.62}
+combined_opt_K26_p12.25: {'npv15_at_own_price': -4.32, 'npv20_at_own_price': -5.76}
+combined_base_BIG_p6.4: {'npv15_at_own_price': -32.98, 'npv20_at_own_price': -33.36}
+combined_opt_BIG_p6.4: {'npv15_at_own_price': -5.32, 'npv20_at_own_price': -8.36}
+combined_base_BIG_p9.0: {'npv15_at_own_price': -23.15, 'npv20_at_own_price': -24.98}
+combined_opt_BIG_p9.0: {'npv15_at_own_price': 6.29, 'npv20_at_own_price': 1.39}
+combined_base_BIG_p12.25: {'npv15_at_own_price': -12.41, 'npv20_at_own_price': -15.84}
+combined_opt_BIG_p12.25: {'npv15_at_own_price': 20.79, 'npv20_at_own_price': 13.57}
+debt_U8_p6.0: {'debt_musd': 1.95, 'capex': 12.94, 'gearing': 0.15}
+debt_U8_p8.0: {'debt_musd': 5.24, 'capex': 12.94, 'gearing': 0.4}
+debt_U8_p10.75: {'debt_musd': 8.68, 'capex': 12.94, 'gearing': 0.67}
+debt_K26_p6.0: {'debt_musd': 0.23, 'capex': 21.17, 'gearing': 0.01}
+debt_K26_p8.0: {'debt_musd': 4.03, 'capex': 21.17, 'gearing': 0.19}
+debt_K26_p10.75: {'debt_musd': 8.47, 'capex': 21.17, 'gearing': 0.4}
+debt_BIG_p6.0: {'debt_musd': 17.6, 'capex': 38.57, 'gearing': 0.46}
+debt_BIG_p8.0: {'debt_musd': 26.43, 'capex': 38.57, 'gearing': 0.69}
+debt_BIG_p10.75: {'debt_musd': 38.56, 'capex': 38.57, 'gearing': 1.0}
+buyer_parity_350_crf15: 19.19
+buyer_parity_383_crf15: 21.68
+buyer_parity_350_crf20: 18.11
+buyer_parity_383_crf20: 20.6
+buyer_parity_350_crf25: 16.97
+buyer_parity_383_crf25: 19.46
+buyer_parity_350_crf30: 15.78
+buyer_parity_383_crf30: 18.27
+ceiling: {'lng': [5.2, 6.4], 'cng': [8.5, 12.25]}
+at_ceiling_U8_p6.4: {'cap': 12.94, 'e2': 0.84, 'npv15': -9.87, 'npv20': -10.53, 'irr': -8.2}
+at_ceiling_U8_p9.0: {'cap': 12.94, 'e2': 2.27, 'npv15': -4.27, 'npv20': -5.92, 'irr': 6.7}
+at_ceiling_U8_p12.25: {'cap': 12.94, 'e2': 4.07, 'npv15': 1.63, 'npv20': -1.07, 'irr': 17.8}
+at_ceiling_K26_p6.4: {'cap': 21.17, 'e2': 0.35, 'npv15': -20.87, 'npv20': -21.03, 'irr': -30.1}
+at_ceiling_K26_p9.0: {'cap': 21.17, 'e2': 1.79, 'npv15': -13.86, 'npv20': -15.27, 'irr': -4.4}
+at_ceiling_K26_p12.25: {'cap': 21.17, 'e2': 3.58, 'npv15': -7.26, 'npv20': -9.82, 'irr': 6.1}
+operator_self_U8_fine0.0: 9.44
+operator_self_U8_fine0.5: 8.86
+operator_self_U8_fine2.0: 7.13
+us_U8_be20_time_outage: 12.99
+operator_self_K26_fine0.0: 15.23
+operator_self_K26_fine0.5: 14.65
+operator_self_K26_fine2.0: 12.92
+us_K26_be20_time_outage: 18.95
+naira_fixed_U8: {'npv15': -16.89, 'npv20': -15.95}
+naira_fixed_K26: {'npv15': -27.81, 'npv20': -26.4}
+system_capital: {'U8': [30.2, 32.1], 'K26': [38.4, 40.3], 'power': 29.15}
+== доп.: сводный без вероятности отъёма (простой по времени + штраф 50% + шок S1)
+nocut_U8_base: be20=15.75, npv15@12.25=-2.06, npv20@12.25=-4.2
+nocut_U8_opt: be20=8.84, npv15@12.25=8.12, npv20@12.25=4.94
+nocut_K26_base: be20=23.13, npv15@12.25=-11.62, npv20@12.25=-13.52
+nocut_K26_opt: be20=12.48, npv15@12.25=2.85, npv20@12.25=-0.33
+nocut_U8_lean_EDTI be20 10.82

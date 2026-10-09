@@ -1,0 +1,1758 @@
+{
+ "potential": {
+  "SPE_AG1": {
+   "C5p_bbl_per_MMscf": 2.13,
+   "C3p_bbl_per_MMscf": 4.0,
+   "GPM_C3p": 0.17,
+   "GPM_C5p": 0.09,
+   "C5p_mol": 0.22
+  },
+  "SPE_AG2": {
+   "C5p_bbl_per_MMscf": 5.55,
+   "C3p_bbl_per_MMscf": 29.0,
+   "GPM_C3p": 1.22,
+   "GPM_C5p": 0.23,
+   "C5p_mol": 0.59
+  },
+  "SPE_AG3": {
+   "C5p_bbl_per_MMscf": 9.63,
+   "C3p_bbl_per_MMscf": 40.77,
+   "GPM_C3p": 1.71,
+   "GPM_C5p": 0.4,
+   "C5p_mol": 1.04
+  },
+  "SPE_AG4": {
+   "C5p_bbl_per_MMscf": 7.05,
+   "C3p_bbl_per_MMscf": 60.59,
+   "GPM_C3p": 2.54,
+   "GPM_C5p": 0.3,
+   "C5p_mol": 0.77
+  },
+  "SPE_AG5": {
+   "C5p_bbl_per_MMscf": 8.13,
+   "C3p_bbl_per_MMscf": 39.77,
+   "GPM_C3p": 1.67,
+   "GPM_C5p": 0.34,
+   "C5p_mol": 0.87
+  },
+  "SPE_AG6": {
+   "C5p_bbl_per_MMscf": 9.84,
+   "C3p_bbl_per_MMscf": 36.68,
+   "GPM_C3p": 1.54,
+   "GPM_C5p": 0.41,
+   "C5p_mol": 1.04
+  },
+  "NJTD_A": {
+   "C5p_bbl_per_MMscf": 9.3,
+   "C3p_bbl_per_MMscf": 70.66,
+   "GPM_C3p": 2.97,
+   "GPM_C5p": 0.39,
+   "C5p_mol": 1.02
+  },
+  "lean_ND": {
+   "C5p_bbl_per_MMscf": 1.65,
+   "C3p_bbl_per_MMscf": 12.56,
+   "GPM_C3p": 0.53,
+   "GPM_C5p": 0.07,
+   "C5p_mol": 0.19
+  }
+ },
+ "dew": {
+  "SPE_AG1": {
+   "3bar": -10.8,
+   "15bar": 6.7,
+   "30bar": 10.1,
+   "50bar": 6.8
+  },
+  "SPE_AG2": {
+   "3bar": 0.3,
+   "15bar": 21.4,
+   "30bar": 27.4,
+   "50bar": 27.0
+  },
+  "SPE_AG3": {
+   "3bar": 10.7,
+   "15bar": 32.9,
+   "30bar": 39.6,
+   "50bar": 39.9
+  },
+  "SPE_AG4": {
+   "3bar": -8.2,
+   "15bar": 15.7,
+   "30bar": 24.0,
+   "50bar": 26.1
+  },
+  "SPE_AG5": {
+   "3bar": -0.7,
+   "15bar": 23.0,
+   "30bar": 30.6,
+   "50bar": 31.8
+  },
+  "SPE_AG6": {
+   "3bar": 3.6,
+   "15bar": 28.4,
+   "30bar": 36.6,
+   "50bar": 38.3
+  },
+  "NJTD_A": {
+   "3bar": -9.9,
+   "15bar": 16.5,
+   "30bar": 26.5,
+   "50bar": 30.1
+  },
+  "lean_ND": {
+   "3bar": -61.4,
+   "15bar": -40.7,
+   "30bar": -34.1,
+   "50bar": -34.5
+  }
+ },
+ "yield_grid": {
+  "SPE_AG1": {
+   "3bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_25C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_15C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_5C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_-5C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_-15C": {
+    "raw": 0.12,
+    "stab": 0.12,
+    "c5_mol_in_stab": 1.0
+   },
+   "3bar_-25C": {
+    "raw": 0.42,
+    "stab": 0.41,
+    "c5_mol_in_stab": 1.0
+   },
+   "15bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "15bar_25C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "15bar_15C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "15bar_5C": {
+    "raw": 0.05,
+    "stab": 0.05,
+    "c5_mol_in_stab": 1.0
+   },
+   "15bar_-5C": {
+    "raw": 0.37,
+    "stab": 0.34,
+    "c5_mol_in_stab": 1.0
+   },
+   "15bar_-15C": {
+    "raw": 0.73,
+    "stab": 0.67,
+    "c5_mol_in_stab": 1.0
+   },
+   "15bar_-25C": {
+    "raw": 1.12,
+    "stab": 1.01,
+    "c5_mol_in_stab": 0.99
+   },
+   "30bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "30bar_25C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "30bar_15C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "30bar_5C": {
+    "raw": 0.17,
+    "stab": 0.15,
+    "c5_mol_in_stab": 1.0
+   },
+   "30bar_-5C": {
+    "raw": 0.52,
+    "stab": 0.46,
+    "c5_mol_in_stab": 1.0
+   },
+   "30bar_-15C": {
+    "raw": 0.93,
+    "stab": 0.79,
+    "c5_mol_in_stab": 0.99
+   },
+   "30bar_-25C": {
+    "raw": 1.37,
+    "stab": 1.11,
+    "c5_mol_in_stab": 0.99
+   },
+   "50bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "50bar_25C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "50bar_15C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "50bar_5C": {
+    "raw": 0.06,
+    "stab": 0.05,
+    "c5_mol_in_stab": 1.0
+   },
+   "50bar_-5C": {
+    "raw": 0.43,
+    "stab": 0.35,
+    "c5_mol_in_stab": 1.0
+   },
+   "50bar_-15C": {
+    "raw": 0.86,
+    "stab": 0.67,
+    "c5_mol_in_stab": 0.99
+   },
+   "50bar_-25C": {
+    "raw": 1.35,
+    "stab": 0.98,
+    "c5_mol_in_stab": 0.99
+   }
+  },
+  "SPE_AG2": {
+   "3bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_25C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_15C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_5C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_-5C": {
+    "raw": 0.34,
+    "stab": 0.33,
+    "c5_mol_in_stab": 0.99
+   },
+   "3bar_-15C": {
+    "raw": 1.04,
+    "stab": 0.98,
+    "c5_mol_in_stab": 0.99
+   },
+   "3bar_-25C": {
+    "raw": 1.84,
+    "stab": 1.69,
+    "c5_mol_in_stab": 0.98
+   },
+   "15bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "15bar_25C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "15bar_15C": {
+    "raw": 0.48,
+    "stab": 0.43,
+    "c5_mol_in_stab": 0.98
+   },
+   "15bar_5C": {
+    "raw": 1.32,
+    "stab": 1.13,
+    "c5_mol_in_stab": 0.97
+   },
+   "15bar_-5C": {
+    "raw": 2.35,
+    "stab": 1.91,
+    "c5_mol_in_stab": 0.96
+   },
+   "15bar_-15C": {
+    "raw": 3.77,
+    "stab": 2.79,
+    "c5_mol_in_stab": 0.93
+   },
+   "15bar_-25C": {
+    "raw": 6.0,
+    "stab": 3.85,
+    "c5_mol_in_stab": 0.89
+   },
+   "30bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "30bar_25C": {
+    "raw": 0.2,
+    "stab": 0.17,
+    "c5_mol_in_stab": 0.97
+   },
+   "30bar_15C": {
+    "raw": 1.12,
+    "stab": 0.89,
+    "c5_mol_in_stab": 0.96
+   },
+   "30bar_5C": {
+    "raw": 2.26,
+    "stab": 1.68,
+    "c5_mol_in_stab": 0.95
+   },
+   "30bar_-5C": {
+    "raw": 3.86,
+    "stab": 2.58,
+    "c5_mol_in_stab": 0.92
+   },
+   "30bar_-15C": {
+    "raw": 6.32,
+    "stab": 3.63,
+    "c5_mol_in_stab": 0.88
+   },
+   "30bar_-25C": {
+    "raw": 10.26,
+    "stab": 4.78,
+    "c5_mol_in_stab": 0.83
+   },
+   "50bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "50bar_25C": {
+    "raw": 0.19,
+    "stab": 0.15,
+    "c5_mol_in_stab": 0.96
+   },
+   "50bar_15C": {
+    "raw": 1.28,
+    "stab": 0.91,
+    "c5_mol_in_stab": 0.95
+   },
+   "50bar_5C": {
+    "raw": 2.73,
+    "stab": 1.75,
+    "c5_mol_in_stab": 0.93
+   },
+   "50bar_-5C": {
+    "raw": 4.86,
+    "stab": 2.7,
+    "c5_mol_in_stab": 0.9
+   },
+   "50bar_-15C": {
+    "raw": 8.25,
+    "stab": 3.78,
+    "c5_mol_in_stab": 0.86
+   },
+   "50bar_-25C": {
+    "raw": 13.6,
+    "stab": 4.88,
+    "c5_mol_in_stab": 0.81
+   }
+  },
+  "SPE_AG3": {
+   "3bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_25C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_15C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_5C": {
+    "raw": 0.33,
+    "stab": 0.32,
+    "c5_mol_in_stab": 0.99
+   },
+   "3bar_-5C": {
+    "raw": 1.15,
+    "stab": 1.08,
+    "c5_mol_in_stab": 0.99
+   },
+   "3bar_-15C": {
+    "raw": 2.25,
+    "stab": 2.06,
+    "c5_mol_in_stab": 0.98
+   },
+   "3bar_-25C": {
+    "raw": 3.73,
+    "stab": 3.25,
+    "c5_mol_in_stab": 0.97
+   },
+   "15bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "15bar_25C": {
+    "raw": 0.65,
+    "stab": 0.57,
+    "c5_mol_in_stab": 0.98
+   },
+   "15bar_15C": {
+    "raw": 1.83,
+    "stab": 1.53,
+    "c5_mol_in_stab": 0.97
+   },
+   "15bar_5C": {
+    "raw": 3.48,
+    "stab": 2.74,
+    "c5_mol_in_stab": 0.95
+   },
+   "15bar_-5C": {
+    "raw": 5.94,
+    "stab": 4.25,
+    "c5_mol_in_stab": 0.93
+   },
+   "15bar_-15C": {
+    "raw": 9.89,
+    "stab": 6.17,
+    "c5_mol_in_stab": 0.89
+   },
+   "15bar_-25C": {
+    "raw": 15.81,
+    "stab": 8.24,
+    "c5_mol_in_stab": 0.84
+   },
+   "30bar_35C": {
+    "raw": 0.45,
+    "stab": 0.36,
+    "c5_mol_in_stab": 0.97
+   },
+   "30bar_25C": {
+    "raw": 1.79,
+    "stab": 1.36,
+    "c5_mol_in_stab": 0.96
+   },
+   "30bar_15C": {
+    "raw": 3.76,
+    "stab": 2.64,
+    "c5_mol_in_stab": 0.94
+   },
+   "30bar_5C": {
+    "raw": 6.77,
+    "stab": 4.23,
+    "c5_mol_in_stab": 0.91
+   },
+   "30bar_-5C": {
+    "raw": 11.55,
+    "stab": 6.16,
+    "c5_mol_in_stab": 0.87
+   },
+   "30bar_-15C": {
+    "raw": 18.62,
+    "stab": 8.16,
+    "c5_mol_in_stab": 0.83
+   },
+   "30bar_-25C": {
+    "raw": 27.99,
+    "stab": 9.82,
+    "c5_mol_in_stab": 0.78
+   },
+   "50bar_35C": {
+    "raw": 0.64,
+    "stab": 0.45,
+    "c5_mol_in_stab": 0.95
+   },
+   "50bar_25C": {
+    "raw": 2.48,
+    "stab": 1.6,
+    "c5_mol_in_stab": 0.94
+   },
+   "50bar_15C": {
+    "raw": 5.35,
+    "stab": 3.06,
+    "c5_mol_in_stab": 0.91
+   },
+   "50bar_5C": {
+    "raw": 9.96,
+    "stab": 4.85,
+    "c5_mol_in_stab": 0.88
+   },
+   "50bar_-5C": {
+    "raw": 17.26,
+    "stab": 6.84,
+    "c5_mol_in_stab": 0.84
+   },
+   "50bar_-15C": {
+    "raw": 28.0,
+    "stab": 8.69,
+    "c5_mol_in_stab": 0.8
+   },
+   "50bar_-25C": {
+    "raw": 43.54,
+    "stab": 10.15,
+    "c5_mol_in_stab": 0.76
+   }
+  },
+  "SPE_AG4": {
+   "3bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_25C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_15C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_5C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_-5C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_-15C": {
+    "raw": 0.82,
+    "stab": 0.72,
+    "c5_mol_in_stab": 0.97
+   },
+   "3bar_-25C": {
+    "raw": 2.3,
+    "stab": 1.9,
+    "c5_mol_in_stab": 0.95
+   },
+   "15bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "15bar_25C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "15bar_15C": {
+    "raw": 0.11,
+    "stab": 0.09,
+    "c5_mol_in_stab": 0.95
+   },
+   "15bar_5C": {
+    "raw": 1.92,
+    "stab": 1.37,
+    "c5_mol_in_stab": 0.93
+   },
+   "15bar_-5C": {
+    "raw": 4.85,
+    "stab": 2.95,
+    "c5_mol_in_stab": 0.88
+   },
+   "15bar_-15C": {
+    "raw": 10.51,
+    "stab": 5.03,
+    "c5_mol_in_stab": 0.81
+   },
+   "15bar_-25C": {
+    "raw": 20.36,
+    "stab": 7.29,
+    "c5_mol_in_stab": 0.72
+   },
+   "30bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "30bar_25C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "30bar_15C": {
+    "raw": 2.14,
+    "stab": 1.3,
+    "c5_mol_in_stab": 0.9
+   },
+   "30bar_5C": {
+    "raw": 6.19,
+    "stab": 3.08,
+    "c5_mol_in_stab": 0.85
+   },
+   "30bar_-5C": {
+    "raw": 13.78,
+    "stab": 5.27,
+    "c5_mol_in_stab": 0.78
+   },
+   "30bar_-15C": {
+    "raw": 25.63,
+    "stab": 7.39,
+    "c5_mol_in_stab": 0.7
+   },
+   "30bar_-25C": {
+    "raw": 40.23,
+    "stab": 8.93,
+    "c5_mol_in_stab": 0.64
+   },
+   "50bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "50bar_25C": {
+    "raw": 0.31,
+    "stab": 0.17,
+    "c5_mol_in_stab": 0.9
+   },
+   "50bar_15C": {
+    "raw": 4.22,
+    "stab": 1.91,
+    "c5_mol_in_stab": 0.86
+   },
+   "50bar_5C": {
+    "raw": 11.54,
+    "stab": 4.03,
+    "c5_mol_in_stab": 0.79
+   },
+   "50bar_-5C": {
+    "raw": 23.69,
+    "stab": 6.24,
+    "c5_mol_in_stab": 0.72
+   },
+   "50bar_-15C": {
+    "raw": 39.78,
+    "stab": 8.01,
+    "c5_mol_in_stab": 0.66
+   },
+   "50bar_-25C": {
+    "raw": 58.62,
+    "stab": 9.21,
+    "c5_mol_in_stab": 0.62
+   }
+  },
+  "SPE_AG5": {
+   "3bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_25C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_15C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_5C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_-5C": {
+    "raw": 0.64,
+    "stab": 0.61,
+    "c5_mol_in_stab": 0.99
+   },
+   "3bar_-15C": {
+    "raw": 2.02,
+    "stab": 1.87,
+    "c5_mol_in_stab": 0.98
+   },
+   "3bar_-25C": {
+    "raw": 3.5,
+    "stab": 3.1,
+    "c5_mol_in_stab": 0.97
+   },
+   "15bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "15bar_25C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "15bar_15C": {
+    "raw": 1.3,
+    "stab": 1.11,
+    "c5_mol_in_stab": 0.97
+   },
+   "15bar_5C": {
+    "raw": 3.0,
+    "stab": 2.43,
+    "c5_mol_in_stab": 0.96
+   },
+   "15bar_-5C": {
+    "raw": 5.09,
+    "stab": 3.79,
+    "c5_mol_in_stab": 0.94
+   },
+   "15bar_-15C": {
+    "raw": 8.06,
+    "stab": 5.29,
+    "c5_mol_in_stab": 0.9
+   },
+   "15bar_-25C": {
+    "raw": 12.57,
+    "stab": 6.92,
+    "c5_mol_in_stab": 0.86
+   },
+   "30bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "30bar_25C": {
+    "raw": 1.04,
+    "stab": 0.81,
+    "c5_mol_in_stab": 0.96
+   },
+   "30bar_15C": {
+    "raw": 3.02,
+    "stab": 2.2,
+    "c5_mol_in_stab": 0.95
+   },
+   "30bar_5C": {
+    "raw": 5.5,
+    "stab": 3.63,
+    "c5_mol_in_stab": 0.92
+   },
+   "30bar_-5C": {
+    "raw": 9.03,
+    "stab": 5.17,
+    "c5_mol_in_stab": 0.89
+   },
+   "30bar_-15C": {
+    "raw": 14.3,
+    "stab": 6.77,
+    "c5_mol_in_stab": 0.84
+   },
+   "30bar_-25C": {
+    "raw": 21.69,
+    "stab": 8.2,
+    "c5_mol_in_stab": 0.79
+   },
+   "50bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "50bar_25C": {
+    "raw": 1.49,
+    "stab": 1.01,
+    "c5_mol_in_stab": 0.95
+   },
+   "50bar_15C": {
+    "raw": 4.03,
+    "stab": 2.48,
+    "c5_mol_in_stab": 0.93
+   },
+   "50bar_5C": {
+    "raw": 7.46,
+    "stab": 4.0,
+    "c5_mol_in_stab": 0.9
+   },
+   "50bar_-5C": {
+    "raw": 12.53,
+    "stab": 5.59,
+    "c5_mol_in_stab": 0.86
+   },
+   "50bar_-15C": {
+    "raw": 19.97,
+    "stab": 7.12,
+    "c5_mol_in_stab": 0.82
+   },
+   "50bar_-25C": {
+    "raw": 30.22,
+    "stab": 8.39,
+    "c5_mol_in_stab": 0.77
+   }
+  },
+  "SPE_AG6": {
+   "3bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_25C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_15C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_5C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_-5C": {
+    "raw": 1.68,
+    "stab": 1.6,
+    "c5_mol_in_stab": 0.99
+   },
+   "3bar_-15C": {
+    "raw": 3.47,
+    "stab": 3.24,
+    "c5_mol_in_stab": 0.98
+   },
+   "3bar_-25C": {
+    "raw": 5.25,
+    "stab": 4.73,
+    "c5_mol_in_stab": 0.97
+   },
+   "15bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "15bar_25C": {
+    "raw": 0.71,
+    "stab": 0.64,
+    "c5_mol_in_stab": 0.98
+   },
+   "15bar_15C": {
+    "raw": 2.72,
+    "stab": 2.37,
+    "c5_mol_in_stab": 0.97
+   },
+   "15bar_5C": {
+    "raw": 4.75,
+    "stab": 3.96,
+    "c5_mol_in_stab": 0.96
+   },
+   "15bar_-5C": {
+    "raw": 6.99,
+    "stab": 5.46,
+    "c5_mol_in_stab": 0.95
+   },
+   "15bar_-15C": {
+    "raw": 9.81,
+    "stab": 6.98,
+    "c5_mol_in_stab": 0.92
+   },
+   "15bar_-25C": {
+    "raw": 13.6,
+    "stab": 8.48,
+    "c5_mol_in_stab": 0.89
+   },
+   "30bar_35C": {
+    "raw": 0.35,
+    "stab": 0.29,
+    "c5_mol_in_stab": 0.97
+   },
+   "30bar_25C": {
+    "raw": 2.56,
+    "stab": 2.07,
+    "c5_mol_in_stab": 0.97
+   },
+   "30bar_15C": {
+    "raw": 4.84,
+    "stab": 3.7,
+    "c5_mol_in_stab": 0.96
+   },
+   "30bar_5C": {
+    "raw": 7.41,
+    "stab": 5.26,
+    "c5_mol_in_stab": 0.94
+   },
+   "30bar_-5C": {
+    "raw": 10.61,
+    "stab": 6.78,
+    "c5_mol_in_stab": 0.91
+   },
+   "30bar_-15C": {
+    "raw": 14.86,
+    "stab": 8.26,
+    "c5_mol_in_stab": 0.88
+   },
+   "30bar_-25C": {
+    "raw": 20.4,
+    "stab": 9.56,
+    "c5_mol_in_stab": 0.84
+   },
+   "50bar_35C": {
+    "raw": 0.81,
+    "stab": 0.62,
+    "c5_mol_in_stab": 0.96
+   },
+   "50bar_25C": {
+    "raw": 3.3,
+    "stab": 2.37,
+    "c5_mol_in_stab": 0.95
+   },
+   "50bar_15C": {
+    "raw": 6.01,
+    "stab": 4.01,
+    "c5_mol_in_stab": 0.94
+   },
+   "50bar_5C": {
+    "raw": 9.25,
+    "stab": 5.57,
+    "c5_mol_in_stab": 0.92
+   },
+   "50bar_-5C": {
+    "raw": 13.42,
+    "stab": 7.08,
+    "c5_mol_in_stab": 0.89
+   },
+   "50bar_-15C": {
+    "raw": 18.95,
+    "stab": 8.48,
+    "c5_mol_in_stab": 0.86
+   },
+   "50bar_-25C": {
+    "raw": 26.2,
+    "stab": 9.66,
+    "c5_mol_in_stab": 0.83
+   }
+  },
+  "NJTD_A": {
+   "3bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_25C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_15C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_5C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_-5C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_-15C": {
+    "raw": 1.34,
+    "stab": 1.14,
+    "c5_mol_in_stab": 0.96
+   },
+   "3bar_-25C": {
+    "raw": 3.96,
+    "stab": 3.11,
+    "c5_mol_in_stab": 0.94
+   },
+   "15bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "15bar_25C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "15bar_15C": {
+    "raw": 0.51,
+    "stab": 0.37,
+    "c5_mol_in_stab": 0.94
+   },
+   "15bar_5C": {
+    "raw": 4.08,
+    "stab": 2.67,
+    "c5_mol_in_stab": 0.9
+   },
+   "15bar_-5C": {
+    "raw": 9.48,
+    "stab": 5.15,
+    "c5_mol_in_stab": 0.85
+   },
+   "15bar_-15C": {
+    "raw": 18.84,
+    "stab": 8.0,
+    "c5_mol_in_stab": 0.77
+   },
+   "15bar_-25C": {
+    "raw": 31.97,
+    "stab": 10.51,
+    "c5_mol_in_stab": 0.69
+   },
+   "30bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "30bar_25C": {
+    "raw": 0.6,
+    "stab": 0.38,
+    "c5_mol_in_stab": 0.91
+   },
+   "30bar_15C": {
+    "raw": 5.38,
+    "stab": 2.91,
+    "c5_mol_in_stab": 0.87
+   },
+   "30bar_5C": {
+    "raw": 12.91,
+    "stab": 5.63,
+    "c5_mol_in_stab": 0.81
+   },
+   "30bar_-5C": {
+    "raw": 24.64,
+    "stab": 8.4,
+    "c5_mol_in_stab": 0.74
+   },
+   "30bar_-15C": {
+    "raw": 39.44,
+    "stab": 10.64,
+    "c5_mol_in_stab": 0.68
+   },
+   "30bar_-25C": {
+    "raw": 55.65,
+    "stab": 12.15,
+    "c5_mol_in_stab": 0.64
+   },
+   "50bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "50bar_25C": {
+    "raw": 2.95,
+    "stab": 1.42,
+    "c5_mol_in_stab": 0.87
+   },
+   "50bar_15C": {
+    "raw": 10.86,
+    "stab": 4.24,
+    "c5_mol_in_stab": 0.81
+   },
+   "50bar_5C": {
+    "raw": 23.04,
+    "stab": 7.07,
+    "c5_mol_in_stab": 0.75
+   },
+   "50bar_-5C": {
+    "raw": 39.04,
+    "stab": 9.49,
+    "c5_mol_in_stab": 0.69
+   },
+   "50bar_-15C": {
+    "raw": 57.38,
+    "stab": 11.25,
+    "c5_mol_in_stab": 0.65
+   },
+   "50bar_-25C": {
+    "raw": 77.5,
+    "stab": 12.42,
+    "c5_mol_in_stab": 0.62
+   }
+  },
+  "lean_ND": {
+   "3bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_25C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_15C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_5C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_-5C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_-15C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "3bar_-25C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "15bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "15bar_25C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "15bar_15C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "15bar_5C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "15bar_-5C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "15bar_-15C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "15bar_-25C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "30bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "30bar_25C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "30bar_15C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "30bar_5C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "30bar_-5C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "30bar_-15C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "30bar_-25C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "50bar_35C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "50bar_25C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "50bar_15C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "50bar_5C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "50bar_-5C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "50bar_-15C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   },
+   "50bar_-25C": {
+    "raw": 0.0,
+    "stab": 0.0,
+    "c5_mol_in_stab": 0.0
+   }
+  }
+ },
+ "jt_adiabatic": {
+  "SPE_AG1": {
+   "15->3bar_from35C": 29.0,
+   "30->3bar_from35C": 21.3,
+   "50->3bar_from35C": 11.1,
+   "50->15bar_from35C": 17.9,
+   "70->30bar_from35C": 16.5
+  },
+  "SPE_AG2": {
+   "15->3bar_from35C": 28.4,
+   "30->3bar_from35C": 20.1,
+   "50->3bar_from35C": 8.7,
+   "50->15bar_from35C": 16.5,
+   "70->30bar_from35C": 15.3
+  },
+  "SPE_AG3": {
+   "15->3bar_from35C": 27.4,
+   "30->3bar_from35C": 17.3,
+   "50->3bar_from35C": 3.8,
+   "50->15bar_from35C": 13.8,
+   "70->30bar_from35C": 12.9
+  },
+  "SPE_AG4": {
+   "15->3bar_from35C": 27.7,
+   "30->3bar_from35C": 18.1,
+   "50->3bar_from35C": 4.9,
+   "50->15bar_from35C": 13.7,
+   "70->30bar_from35C": 12.9
+  },
+  "SPE_AG5": {
+   "15->3bar_from35C": 28.1,
+   "30->3bar_from35C": 19.2,
+   "50->3bar_from35C": 7.0,
+   "50->15bar_from35C": 15.8,
+   "70->30bar_from35C": 14.9
+  },
+  "SPE_AG6": {
+   "15->3bar_from35C": 28.3,
+   "30->3bar_from35C": 19.4,
+   "50->3bar_from35C": 7.4,
+   "50->15bar_from35C": 16.9,
+   "70->30bar_from35C": 16.6
+  },
+  "NJTD_A": {
+   "15->3bar_from35C": 27.5,
+   "30->3bar_from35C": 17.6,
+   "50->3bar_from35C": 3.8,
+   "50->15bar_from35C": 13.4,
+   "70->30bar_from35C": 13.6
+  },
+  "lean_ND": {
+   "15->3bar_from35C": 28.7,
+   "30->3bar_from35C": 20.7,
+   "50->3bar_from35C": 10.0,
+   "50->15bar_from35C": 17.1,
+   "70->30bar_from35C": 15.7
+  }
+ },
+ "jt_recup": {
+  "SPE_AG2": {
+   "15->3": {
+    "Tx": 3.0,
+    "T_LTS": -5.1,
+    "L_HP": 0.00159,
+    "L_LTS": 0.0,
+    "minDT": 5.1,
+    "yield_stab_bbl_per_MMscf": 1.28,
+    "split_HP_LTS": [
+     1.28,
+     0.0
+    ],
+    "meoh": {
+     "hydrate_T": 3.0,
+     "need": true,
+     "wt_pct": 6.9,
+     "water_cond": 69.7,
+     "meoh_aq": 5.2,
+     "kg_per_MMscf_lo": 7.7,
+     "kg_per_MMscf_hi": 20.6
+    },
+    "C5p_recovery_vs_potential": 0.23
+   },
+   "30->3": {
+    "Tx": -25.0,
+    "T_LTS": -48.0,
+    "L_HP": 0.01433,
+    "L_LTS": 0.0,
+    "minDT": 5.7,
+    "yield_stab_bbl_per_MMscf": 4.78,
+    "split_HP_LTS": [
+     4.78,
+     0.0
+    ],
+    "meoh": {
+     "hydrate_T": 8.9,
+     "need": true,
+     "wt_pct": 47.7,
+     "water_cond": 39.7,
+     "meoh_aq": 36.1,
+     "kg_per_MMscf_lo": 54.2,
+     "kg_per_MMscf_hi": 144.5
+    },
+    "C5p_recovery_vs_potential": 0.86
+   },
+   "50->3": {
+    "Tx": -33.0,
+    "T_LTS": -75.7,
+    "L_HP": 0.03184,
+    "L_LTS": 0.00426,
+    "minDT": 6.7,
+    "yield_stab_bbl_per_MMscf": 6.64,
+    "split_HP_LTS": [
+     5.64,
+     1.0
+    ],
+    "meoh": {
+     "hydrate_T": 12.8,
+     "need": true,
+     "wt_pct": 54.6,
+     "water_cond": 24.0,
+     "meoh_aq": 28.9,
+     "kg_per_MMscf_lo": 43.3,
+     "kg_per_MMscf_hi": 115.6
+    },
+    "C5p_recovery_vs_potential": 1.2
+   }
+  },
+  "SPE_AG4": {
+   "15->3": {
+    "Tx": 3.0,
+    "T_LTS": -6.2,
+    "L_HP": 0.00282,
+    "L_LTS": 0.0,
+    "minDT": 5.4,
+    "yield_stab_bbl_per_MMscf": 1.65,
+    "split_HP_LTS": [
+     1.65,
+     0.0
+    ],
+    "meoh": {
+     "hydrate_T": 5.8,
+     "need": true,
+     "wt_pct": 12.5,
+     "water_cond": 69.7,
+     "meoh_aq": 10.0,
+     "kg_per_MMscf_lo": 15.0,
+     "kg_per_MMscf_hi": 39.9
+    },
+    "C5p_recovery_vs_potential": 0.23
+   },
+   "30->3": {
+    "Tx": -5.0,
+    "T_LTS": -27.3,
+    "L_HP": 0.01957,
+    "L_LTS": 0.0,
+    "minDT": 6.5,
+    "yield_stab_bbl_per_MMscf": 5.27,
+    "split_HP_LTS": [
+     5.27,
+     0.0
+    ],
+    "meoh": {
+     "hydrate_T": 11.4,
+     "need": true,
+     "wt_pct": 32.4,
+     "water_cond": 37.3,
+     "meoh_aq": 17.8,
+     "kg_per_MMscf_lo": 26.8,
+     "kg_per_MMscf_hi": 71.3
+    },
+    "C5p_recovery_vs_potential": 0.75
+   },
+   "50->3": {
+    "Tx": -11.0,
+    "T_LTS": -52.4,
+    "L_HP": 0.05288,
+    "L_LTS": 0.00062,
+    "minDT": 6.9,
+    "yield_stab_bbl_per_MMscf": 7.63,
+    "split_HP_LTS": [
+     7.37,
+     0.26
+    ],
+    "meoh": {
+     "hydrate_T": 15.1,
+     "need": true,
+     "wt_pct": 41.8,
+     "water_cond": 23.0,
+     "meoh_aq": 16.5,
+     "kg_per_MMscf_lo": 24.8,
+     "kg_per_MMscf_hi": 66.1
+    },
+    "C5p_recovery_vs_potential": 1.08
+   }
+  },
+  "SPE_AG5": {
+   "15->3": {
+    "Tx": 11.0,
+    "T_LTS": 2.9,
+    "L_HP": 0.00211,
+    "L_LTS": 0.0,
+    "minDT": 5.2,
+    "yield_stab_bbl_per_MMscf": 1.64,
+    "split_HP_LTS": [
+     1.64,
+     0.0
+    ],
+    "meoh": {
+     "hydrate_T": 4.2,
+     "need": false,
+     "kg_per_MMscf": 0.0
+    },
+    "C5p_recovery_vs_potential": 0.2
+   },
+   "30->3": {
+    "Tx": -11.0,
+    "T_LTS": -32.8,
+    "L_HP": 0.01616,
+    "L_LTS": 0.0,
+    "minDT": 5.9,
+    "yield_stab_bbl_per_MMscf": 6.14,
+    "split_HP_LTS": [
+     6.14,
+     0.0
+    ],
+    "meoh": {
+     "hydrate_T": 9.9,
+     "need": true,
+     "wt_pct": 37.1,
+     "water_cond": 38.4,
+     "meoh_aq": 22.6,
+     "kg_per_MMscf_lo": 34.0,
+     "kg_per_MMscf_hi": 90.5
+    },
+    "C5p_recovery_vs_potential": 0.76
+   },
+   "50->3": {
+    "Tx": -21.0,
+    "T_LTS": -62.5,
+    "L_HP": 0.04057,
+    "L_LTS": 0.00189,
+    "minDT": 6.7,
+    "yield_stab_bbl_per_MMscf": 8.65,
+    "split_HP_LTS": [
+     7.93,
+     0.72
+    ],
+    "meoh": {
+     "hydrate_T": 13.8,
+     "need": true,
+     "wt_pct": 48.3,
+     "water_cond": 23.7,
+     "meoh_aq": 22.1,
+     "kg_per_MMscf_lo": 33.1,
+     "kg_per_MMscf_hi": 88.3
+    },
+    "C5p_recovery_vs_potential": 1.06
+   }
+  },
+  "SPE_AG6": {
+   "15->3": {
+    "Tx": 19.0,
+    "T_LTS": 11.5,
+    "L_HP": 0.00201,
+    "L_LTS": 0.0,
+    "minDT": 5.1,
+    "yield_stab_bbl_per_MMscf": 1.7,
+    "split_HP_LTS": [
+     1.7,
+     0.0
+    ],
+    "meoh": {
+     "hydrate_T": 3.4,
+     "need": false,
+     "kg_per_MMscf": 0.0
+    },
+    "C5p_recovery_vs_potential": 0.17
+   },
+   "30->3": {
+    "Tx": -9.0,
+    "T_LTS": -29.6,
+    "L_HP": 0.01574,
+    "L_LTS": 0.0,
+    "minDT": 5.0,
+    "yield_stab_bbl_per_MMscf": 7.38,
+    "split_HP_LTS": [
+     7.38,
+     0.0
+    ],
+    "meoh": {
+     "hydrate_T": 9.2,
+     "need": true,
+     "wt_pct": 34.3,
+     "water_cond": 38.1,
+     "meoh_aq": 19.9,
+     "kg_per_MMscf_lo": 29.9,
+     "kg_per_MMscf_hi": 79.6
+    },
+    "C5p_recovery_vs_potential": 0.75
+   },
+   "50->3": {
+    "Tx": -23.0,
+    "T_LTS": -63.3,
+    "L_HP": 0.03751,
+    "L_LTS": 0.00169,
+    "minDT": 6.1,
+    "yield_stab_bbl_per_MMscf": 10.17,
+    "split_HP_LTS": [
+     9.44,
+     0.73
+    ],
+    "meoh": {
+     "hydrate_T": 13.1,
+     "need": true,
+     "wt_pct": 49.1,
+     "water_cond": 23.8,
+     "meoh_aq": 22.9,
+     "kg_per_MMscf_lo": 34.4,
+     "kg_per_MMscf_hi": 91.6
+    },
+    "C5p_recovery_vs_potential": 1.03
+   }
+  },
+  "NJTD_A": {
+   "15->3": {
+    "Tx": 9.0,
+    "T_LTS": -0.0,
+    "L_HP": 0.00304,
+    "L_LTS": 0.0,
+    "minDT": 5.6,
+    "yield_stab_bbl_per_MMscf": 1.76,
+    "split_HP_LTS": [
+     1.76,
+     0.0
+    ],
+    "meoh": {
+     "hydrate_T": 6.5,
+     "need": true,
+     "wt_pct": 1.2,
+     "water_cond": 64.1,
+     "meoh_aq": 0.8,
+     "kg_per_MMscf_lo": 1.2,
+     "kg_per_MMscf_hi": 3.2
+    },
+    "C5p_recovery_vs_potential": 0.19
+   },
+   "30->3": {
+    "Tx": 1.0,
+    "T_LTS": -20.7,
+    "L_HP": 0.024,
+    "L_LTS": 0.0,
+    "minDT": 5.1,
+    "yield_stab_bbl_per_MMscf": 6.76,
+    "split_HP_LTS": [
+     6.76,
+     0.0
+    ],
+    "meoh": {
+     "hydrate_T": 12.0,
+     "need": true,
+     "wt_pct": 25.7,
+     "water_cond": 35.6,
+     "meoh_aq": 12.3,
+     "kg_per_MMscf_lo": 18.4,
+     "kg_per_MMscf_hi": 49.2
+    },
+    "C5p_recovery_vs_potential": 0.73
+   },
+   "50->3": {
+    "Tx": -3.0,
+    "T_LTS": -42.8,
+    "L_HP": 0.05565,
+    "L_LTS": 0.00023,
+    "minDT": 7.5,
+    "yield_stab_bbl_per_MMscf": 9.18,
+    "split_HP_LTS": [
+     9.06,
+     0.13
+    ],
+    "meoh": {
+     "hydrate_T": 15.7,
+     "need": true,
+     "wt_pct": 34.9,
+     "water_cond": 22.1,
+     "meoh_aq": 11.8,
+     "kg_per_MMscf_lo": 17.7,
+     "kg_per_MMscf_hi": 47.3
+    },
+    "C5p_recovery_vs_potential": 0.99
+   }
+  },
+  "lean_ND": {
+   "15->3": {
+    "Tx": -43.0,
+    "T_LTS": -54.0,
+    "L_HP": 0.00092,
+    "L_LTS": 0.0,
+    "minDT": 5.6,
+    "yield_stab_bbl_per_MMscf": 0.34,
+    "split_HP_LTS": [
+     0.34,
+     0.0
+    ],
+    "meoh": {
+     "hydrate_T": 1.0,
+     "need": true,
+     "wt_pct": 53.7,
+     "water_cond": 80.3,
+     "meoh_aq": 93.1,
+     "kg_per_MMscf_lo": 139.7,
+     "kg_per_MMscf_hi": 372.6
+    },
+    "C5p_recovery_vs_potential": 0.21
+   },
+   "30->3": {
+    "Tx": -43.0,
+    "T_LTS": -69.2,
+    "L_HP": 0.00531,
+    "L_LTS": 1e-05,
+    "minDT": 11.2,
+    "yield_stab_bbl_per_MMscf": 1.09,
+    "split_HP_LTS": [
+     1.08,
+     0.0
+    ],
+    "meoh": {
+     "hydrate_T": 7.0,
+     "need": true,
+     "wt_pct": 56.7,
+     "water_cond": 40.2,
+     "meoh_aq": 52.5,
+     "kg_per_MMscf_lo": 78.8,
+     "kg_per_MMscf_hi": 210.1
+    },
+    "C5p_recovery_vs_potential": 0.66
+   },
+   "50->3": {
+    "Tx": -43.0,
+    "T_LTS": -88.8,
+    "L_HP": 0.0084,
+    "L_LTS": 0.00759,
+    "minDT": 15.3,
+    "yield_stab_bbl_per_MMscf": 2.29,
+    "split_HP_LTS": [
+     0.99,
+     1.3
+    ],
+    "meoh": {
+     "hydrate_T": 11.0,
+     "need": true,
+     "wt_pct": 58.4,
+     "water_cond": 24.1,
+     "meoh_aq": 33.9,
+     "kg_per_MMscf_lo": 50.8,
+     "kg_per_MMscf_hi": 135.5
+    },
+    "C5p_recovery_vs_potential": 1.39
+   }
+  }
+ },
+ "hydrate": {
+  "SPE_AG1": {
+   "3bar": -15.6,
+   "15bar": 0.4,
+   "30bar": 6.5,
+   "50bar": 10.6
+  },
+  "SPE_AG2": {
+   "3bar": -12.5,
+   "15bar": 3.0,
+   "30bar": 8.9,
+   "50bar": 12.8
+  },
+  "SPE_AG3": {
+   "3bar": -4.0,
+   "15bar": 9.6,
+   "30bar": 14.6,
+   "50bar": 17.9
+  },
+  "SPE_AG4": {
+   "3bar": -9.1,
+   "15bar": 5.8,
+   "30bar": 11.4,
+   "50bar": 15.1
+  },
+  "SPE_AG5": {
+   "3bar": -11.1,
+   "15bar": 4.2,
+   "30bar": 9.9,
+   "50bar": 13.8
+  },
+  "SPE_AG6": {
+   "3bar": -12.1,
+   "15bar": 3.4,
+   "30bar": 9.2,
+   "50bar": 13.1
+  },
+  "NJTD_A": {
+   "3bar": -8.2,
+   "15bar": 6.5,
+   "30bar": 12.0,
+   "50bar": 15.7
+  },
+  "lean_ND": {
+   "3bar": -15.0,
+   "15bar": 1.0,
+   "30bar": 7.0,
+   "50bar": 11.0
+  }
+ }
+}

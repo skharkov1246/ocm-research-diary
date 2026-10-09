@@ -1,0 +1,186 @@
+{
+ "SPE_AG1": {
+  "15": {
+   "hydrate_T": 0.4,
+   "Tx": 3.4,
+   "yield_stab_bbl_per_MMscf": 0.09,
+   "gas_gravity": 0.59,
+   "recovery_vs_C5p": 0.04
+  },
+  "30": {
+   "hydrate_T": 6.5,
+   "Tx": 9.5,
+   "yield_stab_bbl_per_MMscf": 0.02,
+   "gas_gravity": 0.59,
+   "recovery_vs_C5p": 0.01
+  },
+  "50": {
+   "hydrate_T": 10.6,
+   "Tx": 13.6,
+   "yield_stab_bbl_per_MMscf": 0.0,
+   "gas_gravity": 0.59,
+   "recovery_vs_C5p": 0.0
+  }
+ },
+ "SPE_AG2": {
+  "15": {
+   "hydrate_T": 3.0,
+   "Tx": 6.0,
+   "yield_stab_bbl_per_MMscf": 1.06,
+   "gas_gravity": 0.637,
+   "recovery_vs_C5p": 0.19
+  },
+  "30": {
+   "hydrate_T": 8.9,
+   "Tx": 11.9,
+   "yield_stab_bbl_per_MMscf": 1.13,
+   "gas_gravity": 0.637,
+   "recovery_vs_C5p": 0.2
+  },
+  "50": {
+   "hydrate_T": 12.8,
+   "Tx": 15.8,
+   "yield_stab_bbl_per_MMscf": 0.84,
+   "gas_gravity": 0.637,
+   "recovery_vs_C5p": 0.15
+  }
+ },
+ "SPE_AG3": {
+  "15": {
+   "hydrate_T": 9.6,
+   "Tx": 12.6,
+   "yield_stab_bbl_per_MMscf": 1.8,
+   "gas_gravity": 0.818,
+   "recovery_vs_C5p": 0.19
+  },
+  "30": {
+   "hydrate_T": 14.6,
+   "Tx": 17.6,
+   "yield_stab_bbl_per_MMscf": 2.28,
+   "gas_gravity": 0.818,
+   "recovery_vs_C5p": 0.24
+  },
+  "50": {
+   "hydrate_T": 17.9,
+   "Tx": 20.9,
+   "yield_stab_bbl_per_MMscf": 2.16,
+   "gas_gravity": 0.818,
+   "recovery_vs_C5p": 0.22
+  }
+ },
+ "SPE_AG4": {
+  "15": {
+   "hydrate_T": 5.8,
+   "Tx": 8.8,
+   "yield_stab_bbl_per_MMscf": 0.86,
+   "gas_gravity": 0.697,
+   "recovery_vs_C5p": 0.12
+  },
+  "30": {
+   "hydrate_T": 11.4,
+   "Tx": 14.4,
+   "yield_stab_bbl_per_MMscf": 1.39,
+   "gas_gravity": 0.697,
+   "recovery_vs_C5p": 0.2
+  },
+  "50": {
+   "hydrate_T": 15.1,
+   "Tx": 18.1,
+   "yield_stab_bbl_per_MMscf": 1.33,
+   "gas_gravity": 0.697,
+   "recovery_vs_C5p": 0.19
+  }
+ },
+ "SPE_AG5": {
+  "15": {
+   "hydrate_T": 4.2,
+   "Tx": 7.2,
+   "yield_stab_bbl_per_MMscf": 2.14,
+   "gas_gravity": 0.661,
+   "recovery_vs_C5p": 0.26
+  },
+  "30": {
+   "hydrate_T": 9.9,
+   "Tx": 12.9,
+   "yield_stab_bbl_per_MMscf": 2.5,
+   "gas_gravity": 0.661,
+   "recovery_vs_C5p": 0.31
+  },
+  "50": {
+   "hydrate_T": 13.8,
+   "Tx": 16.8,
+   "yield_stab_bbl_per_MMscf": 2.21,
+   "gas_gravity": 0.661,
+   "recovery_vs_C5p": 0.27
+  }
+ },
+ "SPE_AG6": {
+  "15": {
+   "hydrate_T": 3.4,
+   "Tx": 6.4,
+   "yield_stab_bbl_per_MMscf": 3.74,
+   "gas_gravity": 0.644,
+   "recovery_vs_C5p": 0.38
+  },
+  "30": {
+   "hydrate_T": 9.2,
+   "Tx": 12.2,
+   "yield_stab_bbl_per_MMscf": 4.14,
+   "gas_gravity": 0.644,
+   "recovery_vs_C5p": 0.42
+  },
+  "50": {
+   "hydrate_T": 13.1,
+   "Tx": 16.1,
+   "yield_stab_bbl_per_MMscf": 3.83,
+   "gas_gravity": 0.644,
+   "recovery_vs_C5p": 0.39
+  }
+ },
+ "NJTD_A": {
+  "15": {
+   "hydrate_T": 6.5,
+   "Tx": 9.5,
+   "yield_stab_bbl_per_MMscf": 1.65,
+   "gas_gravity": 0.715,
+   "recovery_vs_C5p": 0.18
+  },
+  "30": {
+   "hydrate_T": 12.0,
+   "Tx": 15.0,
+   "yield_stab_bbl_per_MMscf": 2.91,
+   "gas_gravity": 0.715,
+   "recovery_vs_C5p": 0.31
+  },
+  "50": {
+   "hydrate_T": 15.7,
+   "Tx": 18.7,
+   "yield_stab_bbl_per_MMscf": 3.18,
+   "gas_gravity": 0.715,
+   "recovery_vs_C5p": 0.34
+  }
+ },
+ "lean_ND": {
+  "15": {
+   "hydrate_T": 1.0,
+   "Tx": 4.0,
+   "yield_stab_bbl_per_MMscf": 0.0,
+   "gas_gravity": 0.6,
+   "recovery_vs_C5p": 0.0
+  },
+  "30": {
+   "hydrate_T": 7.0,
+   "Tx": 10.0,
+   "yield_stab_bbl_per_MMscf": 0.0,
+   "gas_gravity": 0.6,
+   "recovery_vs_C5p": 0.0
+  },
+  "50": {
+   "hydrate_T": 11.0,
+   "Tx": 14.0,
+   "yield_stab_bbl_per_MMscf": 0.0,
+   "gas_gravity": 0.6,
+   "recovery_vs_C5p": 0.0
+  }
+ }
+}

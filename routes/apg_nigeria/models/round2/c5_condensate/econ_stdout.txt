@@ -1,0 +1,203 @@
+== generic
+Q1_lean_opt: y=2.29 net$76.83 pkg0.89 capex2.61 fixed0.718 y2:G0.78 bbl/d1.8 rev0.049 opex0.749 E-0.7 NPV15 -6.44 NPV20 -5.78 IRR None pb None
+Q1_lean_base: y=0.0 net$48.16 pkg0.89 capex3.02 fixed1.054 y2:G0.41 bbl/d0.0 rev0.0 opex1.085 E-1.085 NPV15 -8.88 NPV20 -7.87 IRR None pb None
+Q1_lean_pess: y=0.0 net$27.56 pkg0.89 capex3.76 fixed1.483 y2:G0.16 bbl/d0.0 rev0.0 opex1.542 E-1.542 NPV15 -10.74 NPV20 -9.18 IRR None pb None
+Q1_lean_base_precontract: y=0.0 net$48.16 pkg0.89 capex3.02 fixed1.054 y2:G0.2 bbl/d0.0 rev0.0 opex1.085 E-1.085 NPV15 -8.88 NPV20 -7.87 IRR None pb None
+Q1_mid_opt: y=10.17 net$76.83 pkg0.89 capex2.61 fixed0.718 y2:G0.78 bbl/d8.0 rev0.219 opex0.752 E-0.533 NPV15 -5.73 NPV20 -5.19 IRR None pb None
+Q1_mid_base: y=1.13 net$48.16 pkg0.89 capex3.02 fixed1.054 y2:G0.41 bbl/d0.5 rev0.008 opex1.086 E-1.078 NPV15 -8.85 NPV20 -7.85 IRR None pb None
+Q1_mid_pess: y=1.06 net$27.56 pkg0.89 capex3.76 fixed1.483 y2:G0.16 bbl/d0.2 rev0.001 opex1.542 E-1.541 NPV15 -10.73 NPV20 -9.17 IRR None pb None
+Q1_mid_base_precontract: y=1.13 net$48.16 pkg0.89 capex3.02 fixed1.054 y2:G0.2 bbl/d0.2 rev0.004 opex1.086 E-1.082 NPV15 -8.87 NPV20 -7.86 IRR None pb None
+Q1_rich_opt: y=9.18 net$76.83 pkg0.89 capex2.61 fixed0.718 y2:G0.78 bbl/d7.2 rev0.198 opex0.748 E-0.551 NPV15 -5.81 NPV20 -5.25 IRR None pb None
+Q1_rich_base: y=1.39 net$48.16 pkg0.89 capex3.02 fixed1.054 y2:G0.41 bbl/d0.6 rev0.009 opex1.086 E-1.077 NPV15 -8.85 NPV20 -7.84 IRR None pb None
+Q1_rich_pess: y=0.86 net$27.56 pkg0.89 capex3.76 fixed1.483 y2:G0.16 bbl/d0.1 rev0.001 opex1.542 E-1.541 NPV15 -10.73 NPV20 -9.17 IRR None pb None
+Q1_rich_base_precontract: y=1.39 net$48.16 pkg0.89 capex3.02 fixed1.054 y2:G0.2 bbl/d0.3 rev0.005 opex1.086 E-1.081 NPV15 -8.87 NPV20 -7.86 IRR None pb None
+Q5_lean_opt: y=2.29 net$76.83 pkg1.45 capex4.04 fixed0.882 y2:G3.92 bbl/d9.0 rev0.246 opex0.96 E-0.713 NPV15 -8.13 NPV20 -7.42 IRR None pb None
+Q5_lean_base: y=0.0 net$48.16 pkg1.45 capex4.57 fixed1.28 y2:G2.05 bbl/d0.0 rev0.0 opex1.319 E-1.319 NPV15 -11.69 NPV20 -10.47 IRR None pb None
+Q5_lean_pess: y=0.0 net$27.56 pkg1.45 capex5.54 fixed1.783 y2:G0.79 bbl/d0.0 rev0.0 opex1.908 E-1.908 NPV15 -14.02 NPV20 -12.1 IRR None pb None
+Q5_lean_base_precontract: y=0.0 net$48.16 pkg1.45 capex4.57 fixed1.28 y2:G1.02 bbl/d0.0 rev0.0 opex1.319 E-1.319 NPV15 -11.69 NPV20 -10.47 IRR None pb None
+Q5_mid_opt: y=10.17 net$76.83 pkg1.45 capex4.04 fixed0.882 y2:G3.92 bbl/d39.8 rev1.095 opex0.971 E0.123 NPV15 -4.59 NPV20 -4.44 IRR None pb None
+Q5_mid_base: y=1.13 net$48.16 pkg1.45 capex4.57 fixed1.28 y2:G2.05 bbl/d2.3 rev0.039 opex1.322 E-1.284 NPV15 -11.56 NPV20 -10.35 IRR None pb None
+Q5_mid_pess: y=1.06 net$27.56 pkg1.45 capex5.54 fixed1.783 y2:G0.79 bbl/d0.8 rev0.007 opex1.908 E-1.901 NPV15 -14.0 NPV20 -12.08 IRR None pb None
+Q5_mid_base_precontract: y=1.13 net$48.16 pkg1.45 capex4.57 fixed1.28 y2:G1.02 bbl/d1.2 rev0.019 opex1.321 E-1.301 NPV15 -11.63 NPV20 -10.41 IRR None pb None
+Q5_rich_opt: y=9.18 net$76.83 pkg1.45 capex4.04 fixed0.882 y2:G3.92 bbl/d36.0 rev0.988 opex0.954 E0.034 NPV15 -4.96 NPV20 -4.76 IRR None pb None
+Q5_rich_base: y=1.39 net$48.16 pkg1.45 capex4.57 fixed1.28 y2:G2.05 bbl/d2.8 rev0.047 opex1.323 E-1.276 NPV15 -11.53 NPV20 -10.33 IRR None pb None
+Q5_rich_pess: y=0.86 net$27.56 pkg1.45 capex5.54 fixed1.783 y2:G0.79 bbl/d0.7 rev0.006 opex1.908 E-1.903 NPV15 -14.01 NPV20 -12.08 IRR None pb None
+Q5_rich_base_precontract: y=1.39 net$48.16 pkg1.45 capex4.57 fixed1.28 y2:G1.02 bbl/d1.4 rev0.024 opex1.321 E-1.297 NPV15 -11.61 NPV20 -10.4 IRR None pb None
+Q15_lean_opt: y=2.29 net$76.83 pkg2.29 capex6.2 fixed1.079 y2:G11.75 bbl/d26.9 rev0.739 opex1.265 E-0.525 NPV15 -9.73 NPV20 -9.1 IRR None pb None
+Q15_lean_base: y=0.0 net$48.16 pkg2.29 capex6.91 fixed1.552 y2:G6.14 bbl/d0.0 rev0.0 opex1.599 E-1.599 NPV15 -15.54 NPV20 -14.05 IRR None pb None
+Q15_lean_pess: y=0.0 net$27.56 pkg2.29 capex8.22 fixed2.145 y2:G2.37 bbl/d0.0 rev0.0 opex2.426 E-2.426 NPV15 -18.71 NPV20 -16.3 IRR None pb None
+Q15_lean_base_precontract: y=0.0 net$48.16 pkg2.29 capex6.91 fixed1.552 y2:G3.07 bbl/d0.0 rev0.0 opex1.599 E-1.599 NPV15 -15.54 NPV20 -14.05 IRR None pb None
+Q15_mid_opt: y=10.17 net$76.83 pkg2.29 capex6.2 fixed1.079 y2:G11.75 bbl/d119.5 rev3.284 opex1.3 E1.983 NPV15 -0.54 NPV20 -1.42 IRR 12.5 pb 5.0
+Q15_mid_base: y=1.13 net$48.16 pkg2.29 capex6.91 fixed1.552 y2:G6.14 bbl/d6.9 rev0.116 opex1.61 E-1.494 NPV15 -15.14 NPV20 -13.72 IRR None pb None
+Q15_mid_pess: y=1.06 net$27.56 pkg2.29 capex8.22 fixed2.145 y2:G2.37 bbl/d2.5 rev0.021 opex2.426 E-2.405 NPV15 -18.65 NPV20 -16.25 IRR None pb None
+Q15_mid_base_precontract: y=1.13 net$48.16 pkg2.29 capex6.91 fixed1.552 y2:G3.07 bbl/d3.5 rev0.058 opex1.604 E-1.547 NPV15 -15.34 NPV20 -13.89 IRR None pb None
+Q15_rich_opt: y=9.18 net$76.83 pkg2.29 capex6.2 fixed1.079 y2:G11.75 bbl/d107.9 rev2.964 opex1.248 E1.717 NPV15 -1.29 NPV20 -2.05 IRR 8.9 pb 5.8
+Q15_rich_base: y=1.39 net$48.16 pkg2.29 capex6.91 fixed1.552 y2:G6.14 bbl/d8.5 rev0.142 opex1.613 E-1.471 NPV15 -15.05 NPV20 -13.64 IRR None pb None
+Q15_rich_pess: y=0.86 net$27.56 pkg2.29 capex8.22 fixed2.145 y2:G2.37 bbl/d2.0 rev0.017 opex2.426 E-2.409 NPV15 -18.66 NPV20 -16.26 IRR None pb None
+Q15_rich_base_precontract: y=1.39 net$48.16 pkg2.29 capex6.91 fixed1.552 y2:G3.07 bbl/d4.3 rev0.071 opex1.606 E-1.535 NPV15 -15.3 NPV20 -13.85 IRR None pb None
+== operator
+Q1_lean_base: y=0.0 net$48.16 pkg0.89 capex1.4 fixed0.193 y2:G0.41 bbl/d0.0 rev0.0 opex0.199 E-0.199 NPV15 -2.48 NPV20 -2.29 IRR None pb None
+Q1_mid_base: y=1.13 net$48.16 pkg0.89 capex1.4 fixed0.193 y2:G0.41 bbl/d0.5 rev0.008 opex0.2 E-0.192 NPV15 -2.45 NPV20 -2.27 IRR None pb None
+Q1_rich_base: y=1.39 net$48.16 pkg0.89 capex1.4 fixed0.193 y2:G0.41 bbl/d0.6 rev0.009 opex0.2 E-0.19 NPV15 -2.44 NPV20 -2.26 IRR None pb None
+Q5_lean_base: y=0.0 net$48.16 pkg1.45 capex2.18 fixed0.248 y2:G2.05 bbl/d0.0 rev0.0 opex0.255 E-0.255 NPV15 -3.56 NPV20 -3.32 IRR None pb None
+Q5_mid_base: y=1.13 net$48.16 pkg1.45 capex2.18 fixed0.248 y2:G2.05 bbl/d2.3 rev0.039 opex0.259 E-0.221 NPV15 -3.42 NPV20 -3.21 IRR None pb None
+Q5_rich_base: y=1.39 net$48.16 pkg1.45 capex2.18 fixed0.248 y2:G2.05 bbl/d2.8 rev0.047 opex0.26 E-0.213 NPV15 -3.39 NPV20 -3.18 IRR None pb None
+Q15_lean_base: y=0.0 net$48.16 pkg2.29 capex3.35 fixed0.321 y2:G6.14 bbl/d0.0 rev0.0 opex0.33 E-0.33 NPV15 -5.13 NPV20 -4.82 IRR None pb None
+Q15_mid_base: y=1.13 net$48.16 pkg2.29 capex3.35 fixed0.321 y2:G6.14 bbl/d6.9 rev0.116 opex0.342 E-0.226 NPV15 -4.73 NPV20 -4.49 IRR None pb None
+Q15_rich_base: y=1.39 net$48.16 pkg2.29 capex3.35 fixed0.321 y2:G6.14 bbl/d8.5 rev0.142 opex0.344 E-0.202 NPV15 -4.64 NPV20 -4.41 IRR None pb None
+== lp
+Q1_lean_base: y=0.0 net$48.16 pkg1.23 capex3.95 fixed1.207 y2:G0.68 bbl/d0.0 rev0.0 opex1.243 E-1.243 NPV15 -10.67 NPV20 -9.51 IRR None pb None
+Q1_mid_base: y=1.13 net$48.16 pkg1.23 capex3.95 fixed1.207 y2:G0.68 bbl/d0.8 rev0.013 opex1.245 E-1.232 NPV15 -10.63 NPV20 -9.48 IRR None pb None
+Q1_rich_base: y=1.39 net$48.16 pkg1.23 capex3.95 fixed1.207 y2:G0.68 bbl/d0.9 rev0.016 opex1.245 E-1.229 NPV15 -10.62 NPV20 -9.47 IRR None pb None
+Q5_lean_base: y=0.0 net$48.16 pkg3.13 capex9.24 fixed1.674 y2:G3.41 bbl/d0.0 rev0.0 opex1.724 E-1.724 NPV15 -18.55 NPV20 -16.95 IRR None pb None
+Q5_mid_base: y=1.13 net$48.16 pkg3.13 capex9.24 fixed1.674 y2:G3.41 bbl/d3.9 rev0.064 opex1.73 E-1.666 NPV15 -18.33 NPV20 -16.76 IRR None pb None
+Q5_rich_base: y=1.39 net$48.16 pkg3.13 capex9.24 fixed1.674 y2:G3.41 bbl/d4.7 rev0.079 opex1.732 E-1.653 NPV15 -18.28 NPV20 -16.72 IRR None pb None
+Q15_lean_base: y=0.0 net$48.16 pkg7.33 capex20.91 fixed2.508 y2:G10.23 bbl/d0.0 rev0.0 opex2.583 E-2.583 NPV15 -34.87 NPV20 -32.46 IRR None pb None
+Q15_mid_base: y=1.13 net$48.16 pkg7.33 capex20.91 fixed2.508 y2:G10.23 bbl/d11.6 rev0.193 opex2.602 E-2.409 NPV15 -34.21 NPV20 -31.91 IRR None pb None
+Q15_rich_base: y=1.39 net$48.16 pkg7.33 capex20.91 fixed2.508 y2:G10.23 bbl/d14.2 rev0.237 opex2.607 E-2.369 NPV15 -34.05 NPV20 -31.78 IRR None pb None
+== addon
+power_anchor_mid_opt: {'station_mmscfd': 2.6, 'yield_': 10.17, 'bbl_d': 24.4, 'capex': 1.96, 'ebitda_y2': 0.349, 'npv15': -0.51, 'npv20': -0.73}
+power_anchor_mid_base: {'station_mmscfd': 2.6, 'yield_': 1.13, 'bbl_d': 2.7, 'capex': 2.11, 'ebitda_y2': -0.2, 'npv15': -3.15, 'npv20': -2.98}
+power_anchor_mid_pess: {'station_mmscfd': 2.6, 'yield_': 1.06, 'bbl_d': 2.5, 'capex': 2.26, 'ebitda_y2': -0.259, 'npv15': -3.58, 'npv20': -3.36}
+power_anchor_rich_opt: {'station_mmscfd': 2.6, 'yield_': 9.18, 'bbl_d': 22.0, 'capex': 1.96, 'ebitda_y2': 0.308, 'npv15': -0.68, 'npv20': -0.88}
+power_anchor_rich_base: {'station_mmscfd': 2.6, 'yield_': 1.39, 'bbl_d': 3.3, 'capex': 2.11, 'ebitda_y2': -0.19, 'npv15': -3.11, 'npv20': -2.94}
+power_anchor_rich_pess: {'station_mmscfd': 2.6, 'yield_': 0.86, 'bbl_d': 2.1, 'capex': 2.26, 'ebitda_y2': -0.263, 'npv15': -3.6, 'npv20': -3.37}
+== thresholds
+Q1_mid_base: {'brent': None, 'yield_bbl_per_MMscf': None, 'capex_mult': None, 'Q_mmscfd': None}
+Q1_mid_opt: {'brent': 732.66, 'yield_bbl_per_MMscf': 91.74, 'capex_mult': None, 'Q_mmscfd': 19.61}
+Q1_rich_base: {'brent': None, 'yield_bbl_per_MMscf': None, 'capex_mult': None, 'Q_mmscfd': None}
+Q1_rich_opt: {'brent': 809.97, 'yield_bbl_per_MMscf': 91.6, 'capex_mult': None, 'Q_mmscfd': 22.47}
+Q5_mid_base: {'brent': None, 'yield_bbl_per_MMscf': 122.51, 'capex_mult': None, 'Q_mmscfd': None}
+Q5_mid_opt: {'brent': 208.44, 'yield_bbl_per_MMscf': 25.72, 'capex_mult': None, 'Q_mmscfd': 19.61}
+Q5_rich_base: {'brent': None, 'yield_bbl_per_MMscf': 122.51, 'capex_mult': None, 'Q_mmscfd': None}
+Q5_rich_opt: {'brent': 229.21, 'yield_bbl_per_MMscf': 25.58, 'capex_mult': None, 'Q_mmscfd': 22.47}
+Q15_mid_base: {'brent': None, 'yield_bbl_per_MMscf': 55.57, 'capex_mult': None, 'Q_mmscfd': None}
+Q15_mid_opt: {'brent': 100.63, 'yield_bbl_per_MMscf': 12.14, 'capex_mult': 1.81, 'Q_mmscfd': 19.61}
+Q15_rich_base: {'brent': None, 'yield_bbl_per_MMscf': 55.57, 'capex_mult': None, 'Q_mmscfd': None}
+Q15_rich_opt: {'brent': 109.78, 'yield_bbl_per_MMscf': 12.0, 'capex_mult': 1.56, 'Q_mmscfd': 22.47}
+== sens
+base: {'yield_bbl_per_MMscf': 1.13, 'net_usd_bbl': 48.16, 'capex': 4.57, 'fixed': 1.28, 'y2': {'t': 2, 'G': 2.05, 'bbl_d': 2.3, 'rev': 0.039, 'opex': 1.322, 'ebitda': -1.284}, 'npv15': -11.56, 'npv20': -10.35, 'irr': None}
+brent_90: {'yield_bbl_per_MMscf': 1.13, 'net_usd_bbl': 63.43, 'capex': 4.57, 'fixed': 1.28, 'y2': {'t': 2, 'G': 2.05, 'bbl_d': 2.3, 'rev': 0.051, 'opex': 1.322, 'ebitda': -1.272}, 'npv15': -11.51, 'npv20': -10.31, 'irr': None}
+brent_100: {'yield_bbl_per_MMscf': 1.13, 'net_usd_bbl': 71.07, 'capex': 4.57, 'fixed': 1.28, 'y2': {'t': 2, 'G': 2.05, 'bbl_d': 2.3, 'rev': 0.057, 'opex': 1.322, 'ebitda': -1.266}, 'npv15': -11.49, 'npv20': -10.29, 'irr': None}
+roy_5: {'yield_bbl_per_MMscf': 1.13, 'net_usd_bbl': 55.56, 'capex': 4.57, 'fixed': 1.28, 'y2': {'t': 2, 'G': 2.05, 'bbl_d': 2.3, 'rev': 0.045, 'opex': 1.322, 'ebitda': -1.278}, 'npv15': -11.54, 'npv20': -10.33, 'irr': None}
+loss_0_tariff_0: {'yield_bbl_per_MMscf': 1.13, 'net_usd_bbl': 55.61, 'capex': 4.57, 'fixed': 1.28, 'y2': {'t': 2, 'G': 2.05, 'bbl_d': 2.3, 'rev': 0.045, 'opex': 1.322, 'ebitda': -1.278}, 'npv15': -11.54, 'npv20': -10.33, 'irr': None}
+hp_1.0: {'yield_bbl_per_MMscf': 1.13, 'net_usd_bbl': 48.16, 'capex': 4.57, 'fixed': 1.28, 'y2': {'t': 2, 'G': 3.41, 'bbl_d': 3.9, 'rev': 0.064, 'opex': 1.325, 'ebitda': -1.261}, 'npv15': -11.47, 'npv20': -10.28, 'irr': None}
+cm_1.0: {'yield_bbl_per_MMscf': 1.13, 'net_usd_bbl': 48.16, 'capex': 2.09, 'fixed': 1.137, 'y2': {'t': 2, 'G': 2.05, 'bbl_d': 2.3, 'rev': 0.039, 'opex': 1.175, 'ebitda': -1.137}, 'npv15': -8.28, 'npv20': -7.21, 'irr': None}
+gas_throughput_0.25: {'yield_bbl_per_MMscf': 1.13, 'net_usd_bbl': 48.16, 'capex': 4.57, 'fixed': 1.28, 'y2': {'t': 2, 'G': 2.05, 'bbl_d': 2.3, 'rev': 0.039, 'opex': 1.505, 'ebitda': -1.467}, 'npv15': -12.28, 'npv20': -10.96, 'irr': None}
+no_meoh: {'yield_bbl_per_MMscf': 1.13, 'net_usd_bbl': 48.16, 'capex': 4.57, 'fixed': 1.28, 'y2': {'t': 2, 'G': 2.05, 'bbl_d': 2.3, 'rev': 0.039, 'opex': 1.322, 'ebitda': -1.284}, 'npv15': -11.56, 'npv20': -10.35, 'irr': None}
+staff_sec_half: {'yield_bbl_per_MMscf': 1.13, 'net_usd_bbl': 48.16, 'capex': 4.57, 'fixed': 0.9, 'y2': {'t': 2, 'G': 2.05, 'bbl_d': 2.3, 'rev': 0.039, 'opex': 0.931, 'ebitda': -0.893}, 'npv15': -9.45, 'npv20': -8.6, 'irr': None}
+deep_jt_30->3_meoh: {'yield_bbl_per_MMscf': 4.78, 'net_usd_bbl': 48.16, 'capex': 4.57, 'fixed': 1.28, 'y2': {'t': 2, 'G': 2.05, 'bbl_d': 9.8, 'rev': 0.163, 'opex': 1.365, 'ebitda': -1.202}, 'npv15': -11.25, 'npv20': -10.09, 'irr': None}
+deep_jt_50->3_meoh: {'yield_bbl_per_MMscf': 6.64, 'net_usd_bbl': 48.16, 'capex': 4.57, 'fixed': 1.28, 'y2': {'t': 2, 'G': 2.05, 'bbl_d': 13.6, 'rev': 0.227, 'opex': 1.366, 'ebitda': -1.139}, 'npv15': -11.01, 'npv20': -9.89, 'irr': None}
+noinh_15: {'yield_bbl_per_MMscf': 1.06, 'net_usd_bbl': 48.16, 'capex': 4.57, 'fixed': 1.28, 'y2': {'t': 2, 'G': 2.05, 'bbl_d': 2.2, 'rev': 0.036, 'opex': 1.322, 'ebitda': -1.286}, 'npv15': -11.57, 'npv20': -10.36, 'irr': None}
+noinh_50: {'yield_bbl_per_MMscf': 0.84, 'net_usd_bbl': 48.16, 'capex': 4.57, 'fixed': 1.28, 'y2': {'t': 2, 'G': 2.05, 'bbl_d': 1.7, 'rev': 0.029, 'opex': 1.322, 'ebitda': -1.293}, 'npv15': -11.59, 'npv20': -10.38, 'irr': None}
+AG6_noinh30: {'yield_bbl_per_MMscf': 4.14, 'net_usd_bbl': 48.16, 'capex': 4.57, 'fixed': 1.28, 'y2': {'t': 2, 'G': 2.05, 'bbl_d': 8.5, 'rev': 0.141, 'opex': 1.333, 'ebitda': -1.191}, 'npv15': -11.21, 'npv20': -10.06, 'irr': None}
+AG6_deep30_meoh: {'yield_bbl_per_MMscf': 7.38, 'net_usd_bbl': 48.16, 'capex': 4.57, 'fixed': 1.28, 'y2': {'t': 2, 'G': 2.05, 'bbl_d': 15.1, 'rev': 0.252, 'opex': 1.361, 'ebitda': -1.109}, 'npv15': -10.89, 'npv20': -9.79, 'irr': None}
+== named
+Umuseti (Pillar Oil)|q2025=1.2|mid|opt: {'capex': 2.73, 'y2': {'t': 2, 'G': 0.96, 'bbl_d': 9.8, 'rev': 0.269, 'opex': 0.76, 'ebitda': -0.491}, 'npv15': -5.68, 'npv20': -5.16, 'irr': None, 'payback': None}
+Umuseti (Pillar Oil)|q2025=1.2|mid|base: {'capex': 3.14, 'y2': {'t': 2, 'G': 0.5, 'bbl_d': 0.6, 'rev': 0.009, 'opex': 1.094, 'ebitda': -1.084}, 'npv15': -9.01, 'npv20': -8.0, 'irr': None, 'payback': None}
+Umuseti (Pillar Oil)|q2025=1.2|mid|pess: {'capex': 3.9, 'y2': {'t': 2, 'G': 0.19, 'bbl_d': 0.2, 'rev': 0.002, 'opex': 1.556, 'ebitda': -1.554}, 'npv15': -10.92, 'npv20': -9.35, 'irr': None, 'payback': None}
+Umuseti (Pillar Oil)|q2025=1.2|rich|opt: {'capex': 2.73, 'y2': {'t': 2, 'G': 0.96, 'bbl_d': 8.8, 'rev': 0.243, 'opex': 0.756, 'ebitda': -0.513}, 'npv15': -5.77, 'npv20': -5.24, 'irr': None, 'payback': None}
+Umuseti (Pillar Oil)|q2025=1.2|rich|base: {'capex': 3.14, 'y2': {'t': 2, 'G': 0.5, 'bbl_d': 0.7, 'rev': 0.012, 'opex': 1.094, 'ebitda': -1.082}, 'npv15': -9.01, 'npv20': -8.0, 'irr': None, 'payback': None}
+Umuseti (Pillar Oil)|q2025=1.2|rich|pess: {'capex': 3.9, 'y2': {'t': 2, 'G': 0.19, 'bbl_d': 0.2, 'rev': 0.001, 'opex': 1.556, 'ebitda': -1.554}, 'npv15': -10.93, 'npv20': -9.35, 'irr': None, 'payback': None}
+Umuseti (Pillar Oil)|qmin=1.2|mid|opt: {'capex': 2.73, 'y2': {'t': 2, 'G': 0.96, 'bbl_d': 9.8, 'rev': 0.269, 'opex': 0.76, 'ebitda': -0.491}, 'npv15': -5.68, 'npv20': -5.16, 'irr': None, 'payback': None}
+Umuseti (Pillar Oil)|qmin=1.2|mid|base: {'capex': 3.14, 'y2': {'t': 2, 'G': 0.5, 'bbl_d': 0.6, 'rev': 0.009, 'opex': 1.094, 'ebitda': -1.084}, 'npv15': -9.01, 'npv20': -8.0, 'irr': None, 'payback': None}
+Umuseti (Pillar Oil)|qmin=1.2|mid|pess: {'capex': 3.9, 'y2': {'t': 2, 'G': 0.19, 'bbl_d': 0.2, 'rev': 0.002, 'opex': 1.556, 'ebitda': -1.554}, 'npv15': -10.92, 'npv20': -9.35, 'irr': None, 'payback': None}
+Umuseti (Pillar Oil)|qmin=1.2|rich|opt: {'capex': 2.73, 'y2': {'t': 2, 'G': 0.96, 'bbl_d': 8.8, 'rev': 0.243, 'opex': 0.756, 'ebitda': -0.513}, 'npv15': -5.77, 'npv20': -5.24, 'irr': None, 'payback': None}
+Umuseti (Pillar Oil)|qmin=1.2|rich|base: {'capex': 3.14, 'y2': {'t': 2, 'G': 0.5, 'bbl_d': 0.7, 'rev': 0.012, 'opex': 1.094, 'ebitda': -1.082}, 'npv15': -9.01, 'npv20': -8.0, 'irr': None, 'payback': None}
+Umuseti (Pillar Oil)|qmin=1.2|rich|pess: {'capex': 3.9, 'y2': {'t': 2, 'G': 0.19, 'bbl_d': 0.2, 'rev': 0.001, 'opex': 1.556, 'ebitda': -1.554}, 'npv15': -10.93, 'npv20': -9.35, 'irr': None, 'payback': None}
+Utorogu (NEPL)|q2025=4.3|mid|opt: {'capex': 3.86, 'y2': {'t': 2, 'G': 3.4, 'bbl_d': 34.6, 'rev': 0.95, 'opex': 0.954, 'ebitda': -0.004}, 'npv15': -4.93, 'npv20': -4.7, 'irr': None, 'payback': None}
+Utorogu (NEPL)|q2025=4.3|mid|base: {'capex': 4.37, 'y2': {'t': 2, 'G': 1.78, 'bbl_d': 2.0, 'rev': 0.034, 'opex': 1.31, 'ebitda': -1.276}, 'npv15': -11.31, 'npv20': -10.11, 'irr': None, 'payback': None}
+Utorogu (NEPL)|q2025=4.3|mid|pess: {'capex': 5.31, 'y2': {'t': 2, 'G': 0.69, 'bbl_d': 0.7, 'rev': 0.006, 'opex': 1.882, 'ebitda': -1.876}, 'npv15': -13.68, 'npv20': -11.78, 'irr': None, 'payback': None}
+Utorogu (NEPL)|q2025=4.3|rich|opt: {'capex': 3.86, 'y2': {'t': 2, 'G': 3.4, 'bbl_d': 31.2, 'rev': 0.858, 'opex': 0.939, 'ebitda': -0.081}, 'npv15': -5.26, 'npv20': -4.97, 'irr': None, 'payback': None}
+Utorogu (NEPL)|q2025=4.3|rich|base: {'capex': 4.37, 'y2': {'t': 2, 'G': 1.78, 'bbl_d': 2.5, 'rev': 0.041, 'opex': 1.311, 'ebitda': -1.269}, 'npv15': -11.28, 'npv20': -10.09, 'irr': None, 'payback': None}
+Utorogu (NEPL)|q2025=4.3|rich|pess: {'capex': 5.31, 'y2': {'t': 2, 'G': 0.69, 'bbl_d': 0.6, 'rev': 0.005, 'opex': 1.882, 'ebitda': -1.877}, 'npv15': -13.68, 'npv20': -11.79, 'irr': None, 'payback': None}
+Utorogu (NEPL)|qmin=4.3|mid|opt: {'capex': 3.86, 'y2': {'t': 2, 'G': 3.4, 'bbl_d': 34.6, 'rev': 0.95, 'opex': 0.954, 'ebitda': -0.004}, 'npv15': -4.93, 'npv20': -4.7, 'irr': None, 'payback': None}
+Utorogu (NEPL)|qmin=4.3|mid|base: {'capex': 4.37, 'y2': {'t': 2, 'G': 1.78, 'bbl_d': 2.0, 'rev': 0.034, 'opex': 1.31, 'ebitda': -1.276}, 'npv15': -11.31, 'npv20': -10.11, 'irr': None, 'payback': None}
+Utorogu (NEPL)|qmin=4.3|mid|pess: {'capex': 5.31, 'y2': {'t': 2, 'G': 0.69, 'bbl_d': 0.7, 'rev': 0.006, 'opex': 1.882, 'ebitda': -1.876}, 'npv15': -13.68, 'npv20': -11.78, 'irr': None, 'payback': None}
+Utorogu (NEPL)|qmin=4.3|rich|opt: {'capex': 3.86, 'y2': {'t': 2, 'G': 3.4, 'bbl_d': 31.2, 'rev': 0.858, 'opex': 0.939, 'ebitda': -0.081}, 'npv15': -5.26, 'npv20': -4.97, 'irr': None, 'payback': None}
+Utorogu (NEPL)|qmin=4.3|rich|base: {'capex': 4.37, 'y2': {'t': 2, 'G': 1.78, 'bbl_d': 2.5, 'rev': 0.041, 'opex': 1.311, 'ebitda': -1.269}, 'npv15': -11.28, 'npv20': -10.09, 'irr': None, 'payback': None}
+Utorogu (NEPL)|qmin=4.3|rich|pess: {'capex': 5.31, 'y2': {'t': 2, 'G': 0.69, 'bbl_d': 0.6, 'rev': 0.005, 'opex': 1.882, 'ebitda': -1.877}, 'npv15': -13.68, 'npv20': -11.79, 'irr': None, 'payback': None}
+Ughelli East (NEPL)|q2025=6.7|mid|opt: {'capex': 4.49, 'y2': {'t': 2, 'G': 5.27, 'bbl_d': 53.6, 'rev': 1.472, 'opex': 1.014, 'ebitda': 0.458}, 'npv15': -3.65, 'npv20': -3.73, 'irr': None, 'payback': None}
+Ughelli East (NEPL)|q2025=6.7|mid|base: {'capex': 5.06, 'y2': {'t': 2, 'G': 2.75, 'bbl_d': 3.1, 'rev': 0.052, 'opex': 1.353, 'ebitda': -1.301}, 'npv15': -12.16, 'npv20': -10.93, 'irr': None, 'payback': None}
+Ughelli East (NEPL)|q2025=6.7|mid|pess: {'capex': 6.1, 'y2': {'t': 2, 'G': 1.06, 'bbl_d': 1.1, 'rev': 0.009, 'opex': 1.973, 'ebitda': -1.964}, 'npv15': -14.78, 'npv20': -12.8, 'irr': None, 'payback': None}
+Ughelli East (NEPL)|q2025=6.7|rich|opt: {'capex': 4.49, 'y2': {'t': 2, 'G': 5.27, 'bbl_d': 48.3, 'rev': 1.328, 'opex': 0.99, 'ebitda': 0.338}, 'npv15': -4.15, 'npv20': -4.15, 'irr': None, 'payback': None}
+Ughelli East (NEPL)|q2025=6.7|rich|base: {'capex': 5.06, 'y2': {'t': 2, 'G': 2.75, 'bbl_d': 3.8, 'rev': 0.064, 'opex': 1.354, 'ebitda': -1.29}, 'npv15': -12.12, 'npv20': -10.9, 'irr': None, 'payback': None}
+Ughelli East (NEPL)|q2025=6.7|rich|pess: {'capex': 6.1, 'y2': {'t': 2, 'G': 1.06, 'bbl_d': 0.9, 'rev': 0.007, 'opex': 1.973, 'ebitda': -1.966}, 'npv15': -14.78, 'npv20': -12.8, 'irr': None, 'payback': None}
+Ughelli East (NEPL)|qmin=6.3|mid|opt: {'capex': 4.4, 'y2': {'t': 2, 'G': 4.96, 'bbl_d': 50.5, 'rev': 1.387, 'opex': 1.005, 'ebitda': 0.382}, 'npv15': -3.86, 'npv20': -3.89, 'irr': None, 'payback': None}
+Ughelli East (NEPL)|qmin=6.3|mid|base: {'capex': 4.95, 'y2': {'t': 2, 'G': 2.59, 'bbl_d': 2.9, 'rev': 0.049, 'opex': 1.346, 'ebitda': -1.297}, 'npv15': -12.03, 'npv20': -10.81, 'irr': None, 'payback': None}
+Ughelli East (NEPL)|qmin=6.3|mid|pess: {'capex': 5.98, 'y2': {'t': 2, 'G': 1.0, 'bbl_d': 1.1, 'rev': 0.009, 'opex': 1.959, 'ebitda': -1.951}, 'npv15': -14.61, 'npv20': -12.64, 'irr': None, 'payback': None}
+Ughelli East (NEPL)|qmin=6.3|rich|opt: {'capex': 4.4, 'y2': {'t': 2, 'G': 4.96, 'bbl_d': 45.6, 'rev': 1.252, 'opex': 0.982, 'ebitda': 0.27}, 'npv15': -4.34, 'npv20': -4.29, 'irr': None, 'payback': None}
+Ughelli East (NEPL)|qmin=6.3|rich|base: {'capex': 4.95, 'y2': {'t': 2, 'G': 2.59, 'bbl_d': 3.6, 'rev': 0.06, 'opex': 1.347, 'ebitda': -1.287}, 'npv15': -11.99, 'npv20': -10.77, 'irr': None, 'payback': None}
+Ughelli East (NEPL)|qmin=6.3|rich|pess: {'capex': 5.98, 'y2': {'t': 2, 'G': 1.0, 'bbl_d': 0.9, 'rev': 0.007, 'opex': 1.959, 'ebitda': -1.952}, 'npv15': -14.62, 'npv20': -12.65, 'irr': None, 'payback': None}
+Sapele (SEPLAT Energy)|q2025=6.0|mid|opt: {'capex': 4.32, 'y2': {'t': 2, 'G': 4.71, 'bbl_d': 47.9, 'rev': 1.317, 'opex': 0.997, 'ebitda': 0.32}, 'npv15': -4.04, 'npv20': -4.03, 'irr': None, 'payback': None}
+Sapele (SEPLAT Energy)|q2025=6.0|mid|base: {'capex': 4.86, 'y2': {'t': 2, 'G': 2.46, 'bbl_d': 2.8, 'rev': 0.046, 'opex': 1.341, 'ebitda': -1.294}, 'npv15': -11.92, 'npv20': -10.7, 'irr': None, 'payback': None}
+Sapele (SEPLAT Energy)|q2025=6.0|mid|pess: {'capex': 5.88, 'y2': {'t': 2, 'G': 0.95, 'bbl_d': 1.0, 'rev': 0.008, 'opex': 1.947, 'ebitda': -1.939}, 'npv15': -14.47, 'npv20': -12.51, 'irr': None, 'payback': None}
+Sapele (SEPLAT Energy)|q2025=6.0|rich|opt: {'capex': 4.32, 'y2': {'t': 2, 'G': 4.71, 'bbl_d': 43.3, 'rev': 1.189, 'opex': 0.976, 'ebitda': 0.213}, 'npv15': -4.49, 'npv20': -4.41, 'irr': None, 'payback': None}
+Sapele (SEPLAT Energy)|q2025=6.0|rich|base: {'capex': 4.86, 'y2': {'t': 2, 'G': 2.46, 'bbl_d': 3.4, 'rev': 0.057, 'opex': 1.342, 'ebitda': -1.285}, 'npv15': -11.89, 'npv20': -10.67, 'irr': None, 'payback': None}
+Sapele (SEPLAT Energy)|q2025=6.0|rich|pess: {'capex': 5.88, 'y2': {'t': 2, 'G': 0.95, 'bbl_d': 0.8, 'rev': 0.007, 'opex': 1.947, 'ebitda': -1.941}, 'npv15': -14.48, 'npv20': -12.52, 'irr': None, 'payback': None}
+Sapele (SEPLAT Energy)|qmin=6.0|mid|opt: {'capex': 4.32, 'y2': {'t': 2, 'G': 4.71, 'bbl_d': 47.9, 'rev': 1.317, 'opex': 0.997, 'ebitda': 0.32}, 'npv15': -4.04, 'npv20': -4.03, 'irr': None, 'payback': None}
+Sapele (SEPLAT Energy)|qmin=6.0|mid|base: {'capex': 4.86, 'y2': {'t': 2, 'G': 2.46, 'bbl_d': 2.8, 'rev': 0.046, 'opex': 1.341, 'ebitda': -1.294}, 'npv15': -11.92, 'npv20': -10.7, 'irr': None, 'payback': None}
+Sapele (SEPLAT Energy)|qmin=6.0|mid|pess: {'capex': 5.88, 'y2': {'t': 2, 'G': 0.95, 'bbl_d': 1.0, 'rev': 0.008, 'opex': 1.947, 'ebitda': -1.939}, 'npv15': -14.47, 'npv20': -12.51, 'irr': None, 'payback': None}
+Sapele (SEPLAT Energy)|qmin=6.0|rich|opt: {'capex': 4.32, 'y2': {'t': 2, 'G': 4.71, 'bbl_d': 43.3, 'rev': 1.189, 'opex': 0.976, 'ebitda': 0.213}, 'npv15': -4.49, 'npv20': -4.41, 'irr': None, 'payback': None}
+Sapele (SEPLAT Energy)|qmin=6.0|rich|base: {'capex': 4.86, 'y2': {'t': 2, 'G': 2.46, 'bbl_d': 3.4, 'rev': 0.057, 'opex': 1.342, 'ebitda': -1.285}, 'npv15': -11.89, 'npv20': -10.67, 'irr': None, 'payback': None}
+Sapele (SEPLAT Energy)|qmin=6.0|rich|pess: {'capex': 5.88, 'y2': {'t': 2, 'G': 0.95, 'bbl_d': 0.8, 'rev': 0.007, 'opex': 1.947, 'ebitda': -1.941}, 'npv15': -14.48, 'npv20': -12.52, 'irr': None, 'payback': None}
+Oben (SEPLAT Energy)|q2025=8.7|mid|opt: {'capex': 4.97, 'y2': {'t': 2, 'G': 6.85, 'bbl_d': 69.7, 'rev': 1.914, 'opex': 1.164, 'ebitda': 0.75}, 'npv15': -3.13, 'npv20': -3.36, 'irr': -12.1, 'payback': None}
+Oben (SEPLAT Energy)|q2025=8.7|mid|base: {'capex': 5.57, 'y2': {'t': 2, 'G': 3.58, 'bbl_d': 4.0, 'rev': 0.068, 'opex': 1.526, 'ebitda': -1.459}, 'npv15': -13.54, 'npv20': -12.17, 'irr': None, 'payback': None}
+Oben (SEPLAT Energy)|q2025=8.7|mid|pess: {'capex': 6.69, 'y2': {'t': 2, 'G': 1.38, 'bbl_d': 1.5, 'rev': 0.012, 'opex': 2.225, 'ebitda': -2.213}, 'npv15': -16.45, 'npv20': -14.23, 'irr': None, 'payback': None}
+Oben (SEPLAT Energy)|q2025=8.7|rich|opt: {'capex': 4.97, 'y2': {'t': 2, 'G': 6.85, 'bbl_d': 62.9, 'rev': 1.728, 'opex': 1.133, 'ebitda': 0.595}, 'npv15': -3.71, 'npv20': -3.85, 'irr': None, 'payback': None}
+Oben (SEPLAT Energy)|q2025=8.7|rich|base: {'capex': 5.57, 'y2': {'t': 2, 'G': 3.58, 'bbl_d': 5.0, 'rev': 0.083, 'opex': 1.528, 'ebitda': -1.445}, 'npv15': -13.49, 'npv20': -12.12, 'irr': None, 'payback': None}
+Oben (SEPLAT Energy)|q2025=8.7|rich|pess: {'capex': 6.69, 'y2': {'t': 2, 'G': 1.38, 'bbl_d': 1.2, 'rev': 0.01, 'opex': 2.225, 'ebitda': -2.215}, 'npv15': -16.46, 'npv20': -14.23, 'irr': None, 'payback': None}
+Oben (SEPLAT Energy)|qmin=8.7|mid|opt: {'capex': 4.96, 'y2': {'t': 2, 'G': 6.82, 'bbl_d': 69.3, 'rev': 1.905, 'opex': 1.163, 'ebitda': 0.742}, 'npv15': -3.15, 'npv20': -3.38, 'irr': -12.6, 'payback': None}
+Oben (SEPLAT Energy)|qmin=8.7|mid|base: {'capex': 5.56, 'y2': {'t': 2, 'G': 3.56, 'bbl_d': 4.0, 'rev': 0.067, 'opex': 1.526, 'ebitda': -1.458}, 'npv15': -13.53, 'npv20': -12.15, 'irr': None, 'payback': None}
+Oben (SEPLAT Energy)|qmin=8.7|mid|pess: {'capex': 6.67, 'y2': {'t': 2, 'G': 1.37, 'bbl_d': 1.5, 'rev': 0.012, 'opex': 2.224, 'ebitda': -2.212}, 'npv15': -16.44, 'npv20': -14.21, 'irr': None, 'payback': None}
+Oben (SEPLAT Energy)|qmin=8.7|rich|opt: {'capex': 4.96, 'y2': {'t': 2, 'G': 6.82, 'bbl_d': 62.6, 'rev': 1.72, 'opex': 1.133, 'ebitda': 0.587}, 'npv15': -3.73, 'npv20': -3.86, 'irr': None, 'payback': None}
+Oben (SEPLAT Energy)|qmin=8.7|rich|base: {'capex': 5.56, 'y2': {'t': 2, 'G': 3.56, 'bbl_d': 4.9, 'rev': 0.083, 'opex': 1.527, 'ebitda': -1.444}, 'npv15': -13.48, 'npv20': -12.11, 'irr': None, 'payback': None}
+Oben (SEPLAT Energy)|qmin=8.7|rich|pess: {'capex': 6.67, 'y2': {'t': 2, 'G': 1.37, 'bbl_d': 1.2, 'rev': 0.01, 'opex': 2.224, 'ebitda': -2.214}, 'npv15': -16.44, 'npv20': -14.22, 'irr': None, 'payback': None}
+Kwale (Oando Oil)|q2025=10.0|mid|opt: {'capex': 5.24, 'y2': {'t': 2, 'G': 7.86, 'bbl_d': 79.9, 'rev': 2.196, 'opex': 1.193, 'ebitda': 1.003}, 'npv15': -2.56, 'npv20': -2.94, 'irr': -2.2, 'payback': None}
+Kwale (Oando Oil)|q2025=10.0|mid|base: {'capex': 5.87, 'y2': {'t': 2, 'G': 4.1, 'bbl_d': 4.6, 'rev': 0.077, 'opex': 1.545, 'ebitda': -1.468}, 'npv15': -13.91, 'npv20': -12.52, 'irr': None, 'payback': None}
+Kwale (Oando Oil)|q2025=10.0|mid|pess: {'capex': 7.03, 'y2': {'t': 2, 'G': 1.58, 'bbl_d': 1.7, 'rev': 0.014, 'opex': 2.269, 'ebitda': -2.255}, 'npv15': -16.94, 'npv20': -14.68, 'irr': None, 'payback': None}
+Kwale (Oando Oil)|q2025=10.0|rich|opt: {'capex': 5.24, 'y2': {'t': 2, 'G': 7.86, 'bbl_d': 72.1, 'rev': 1.982, 'opex': 1.158, 'ebitda': 0.824}, 'npv15': -3.14, 'npv20': -3.42, 'irr': -9.1, 'payback': None}
+Kwale (Oando Oil)|q2025=10.0|rich|base: {'capex': 5.87, 'y2': {'t': 2, 'G': 4.1, 'bbl_d': 5.7, 'rev': 0.095, 'opex': 1.547, 'ebitda': -1.451}, 'npv15': -13.85, 'npv20': -12.47, 'irr': None, 'payback': None}
+Kwale (Oando Oil)|q2025=10.0|rich|pess: {'capex': 7.03, 'y2': {'t': 2, 'G': 1.58, 'bbl_d': 1.4, 'rev': 0.011, 'opex': 2.269, 'ebitda': -2.257}, 'npv15': -16.95, 'npv20': -14.68, 'irr': None, 'payback': None}
+Kwale (Oando Oil)|qmin=9.9|mid|opt: {'capex': 5.21, 'y2': {'t': 2, 'G': 7.75, 'bbl_d': 78.8, 'rev': 2.166, 'opex': 1.19, 'ebitda': 0.976}, 'npv15': -2.62, 'npv20': -2.99, 'irr': -3.0, 'payback': None}
+Kwale (Oando Oil)|qmin=9.9|mid|base: {'capex': 5.84, 'y2': {'t': 2, 'G': 4.05, 'bbl_d': 4.6, 'rev': 0.076, 'opex': 1.543, 'ebitda': -1.467}, 'npv15': -13.87, 'npv20': -12.48, 'irr': None, 'payback': None}
+Kwale (Oando Oil)|qmin=9.9|mid|pess: {'capex': 6.99, 'y2': {'t': 2, 'G': 1.56, 'bbl_d': 1.7, 'rev': 0.014, 'opex': 2.264, 'ebitda': -2.25}, 'npv15': -16.89, 'npv20': -14.63, 'irr': None, 'payback': None}
+Kwale (Oando Oil)|qmin=9.9|rich|opt: {'capex': 5.21, 'y2': {'t': 2, 'G': 7.75, 'bbl_d': 71.1, 'rev': 1.955, 'opex': 1.155, 'ebitda': 0.8}, 'npv15': -3.19, 'npv20': -3.46, 'irr': -10.3, 'payback': None}
+Kwale (Oando Oil)|qmin=9.9|rich|base: {'capex': 5.84, 'y2': {'t': 2, 'G': 4.05, 'bbl_d': 5.6, 'rev': 0.094, 'opex': 1.545, 'ebitda': -1.451}, 'npv15': -13.81, 'npv20': -12.43, 'irr': None, 'payback': None}
+Kwale (Oando Oil)|qmin=9.9|rich|pess: {'capex': 6.99, 'y2': {'t': 2, 'G': 1.56, 'bbl_d': 1.3, 'rev': 0.011, 'opex': 2.264, 'ebitda': -2.253}, 'npv15': -16.9, 'npv20': -14.64, 'irr': None, 'payback': None}
+Opuama (NEPL)|q2025=11.6|mid|opt: {'capex': 5.57, 'y2': {'t': 2, 'G': 9.11, 'bbl_d': 92.6, 'rev': 2.545, 'opex': 1.228, 'ebitda': 1.317}, 'npv15': -1.89, 'npv20': -2.45, 'irr': 4.3, 'payback': 7.2}
+Opuama (NEPL)|q2025=11.6|mid|base: {'capex': 6.22, 'y2': {'t': 2, 'G': 4.76, 'bbl_d': 5.4, 'rev': 0.09, 'opex': 1.567, 'ebitda': -1.477}, 'npv15': -14.33, 'npv20': -12.93, 'irr': None, 'payback': None}
+Opuama (NEPL)|q2025=11.6|mid|pess: {'capex': 7.43, 'y2': {'t': 2, 'G': 1.84, 'bbl_d': 1.9, 'rev': 0.016, 'opex': 2.321, 'ebitda': -2.305}, 'npv15': -17.52, 'npv20': -15.21, 'irr': None, 'payback': None}
+Opuama (NEPL)|q2025=11.6|rich|opt: {'capex': 5.57, 'y2': {'t': 2, 'G': 9.11, 'bbl_d': 83.6, 'rev': 2.297, 'opex': 1.188, 'ebitda': 1.11}, 'npv15': -2.52, 'npv20': -2.96, 'irr': -0.4, 'payback': None}
+Opuama (NEPL)|q2025=11.6|rich|base: {'capex': 6.22, 'y2': {'t': 2, 'G': 4.76, 'bbl_d': 6.6, 'rev': 0.11, 'opex': 1.569, 'ebitda': -1.459}, 'npv15': -14.26, 'npv20': -12.87, 'irr': None, 'payback': None}
+Opuama (NEPL)|q2025=11.6|rich|pess: {'capex': 7.43, 'y2': {'t': 2, 'G': 1.84, 'bbl_d': 1.6, 'rev': 0.013, 'opex': 2.321, 'ebitda': -2.308}, 'npv15': -17.53, 'npv20': -15.21, 'irr': None, 'payback': None}
+Opuama (NEPL)|qmin=9.4|mid|opt: {'capex': 5.11, 'y2': {'t': 2, 'G': 7.37, 'bbl_d': 74.9, 'rev': 2.059, 'opex': 1.179, 'ebitda': 0.879}, 'npv15': -2.83, 'npv20': -3.14, 'irr': -6.1, 'payback': None}
+Opuama (NEPL)|qmin=9.4|mid|base: {'capex': 5.72, 'y2': {'t': 2, 'G': 3.85, 'bbl_d': 4.3, 'rev': 0.073, 'opex': 1.536, 'ebitda': -1.463}, 'npv15': -13.73, 'npv20': -12.35, 'irr': None, 'payback': None}
+Opuama (NEPL)|qmin=9.4|mid|pess: {'capex': 6.86, 'y2': {'t': 2, 'G': 1.48, 'bbl_d': 1.6, 'rev': 0.013, 'opex': 2.247, 'ebitda': -2.235}, 'npv15': -16.71, 'npv20': -14.46, 'irr': None, 'payback': None}
+Opuama (NEPL)|qmin=9.4|rich|opt: {'capex': 5.11, 'y2': {'t': 2, 'G': 7.37, 'bbl_d': 67.6, 'rev': 1.858, 'opex': 1.146, 'ebitda': 0.712}, 'npv15': -3.41, 'npv20': -3.62, 'irr': None, 'payback': None}
+Opuama (NEPL)|qmin=9.4|rich|base: {'capex': 5.72, 'y2': {'t': 2, 'G': 3.85, 'bbl_d': 5.3, 'rev': 0.089, 'opex': 1.538, 'ebitda': -1.448}, 'npv15': -13.67, 'npv20': -12.3, 'irr': None, 'payback': None}
+Opuama (NEPL)|qmin=9.4|rich|pess: {'capex': 6.86, 'y2': {'t': 2, 'G': 1.48, 'bbl_d': 1.3, 'rev': 0.01, 'opex': 2.247, 'ebitda': -2.237}, 'npv15': -16.71, 'npv20': -14.47, 'irr': None, 'payback': None}
+Oredo (NEPL)|q2025=15.5|mid|opt: {'capex': 6.29, 'y2': {'t': 2, 'G': 12.16, 'bbl_d': 123.6, 'rev': 3.397, 'opex': 1.311, 'ebitda': 2.086}, 'npv15': -0.33, 'npv20': -1.27, 'irr': 13.5, 'payback': 4.8}
+Oredo (NEPL)|q2025=15.5|mid|base: {'capex': 7.01, 'y2': {'t': 2, 'G': 6.35, 'bbl_d': 7.2, 'rev': 0.12, 'opex': 1.617, 'ebitda': -1.497}, 'npv15': -15.26, 'npv20': -13.83, 'irr': None, 'payback': None}
+Oredo (NEPL)|q2025=15.5|mid|pess: {'capex': 8.34, 'y2': {'t': 2, 'G': 2.45, 'bbl_d': 2.6, 'rev': 0.021, 'opex': 2.442, 'ebitda': -2.42}, 'npv15': -18.82, 'npv20': -16.4, 'irr': None, 'payback': None}
+Oredo (NEPL)|q2025=15.5|rich|opt: {'capex': 6.29, 'y2': {'t': 2, 'G': 12.16, 'bbl_d': 111.6, 'rev': 3.067, 'opex': 1.256, 'ebitda': 1.81}, 'npv15': -1.11, 'npv20': -1.91, 'irr': 9.9, 'payback': 5.6}
+Oredo (NEPL)|q2025=15.5|rich|base: {'capex': 7.01, 'y2': {'t': 2, 'G': 6.35, 'bbl_d': 8.8, 'rev': 0.147, 'opex': 1.619, 'ebitda': -1.472}, 'npv15': -15.17, 'npv20': -13.75, 'irr': None, 'payback': None}
+Oredo (NEPL)|q2025=15.5|rich|pess: {'capex': 8.34, 'y2': {'t': 2, 'G': 2.45, 'bbl_d': 2.1, 'rev': 0.017, 'opex': 2.442, 'ebitda': -2.424}, 'npv15': -18.83, 'npv20': -16.41, 'irr': None, 'payback': None}
+Oredo (NEPL)|qmin=8.5|mid|opt: {'capex': 4.92, 'y2': {'t': 2, 'G': 6.68, 'bbl_d': 67.9, 'rev': 1.866, 'opex': 1.159, 'ebitda': 0.707}, 'npv15': -3.24, 'npv20': -3.44, 'irr': None, 'payback': None}
+Oredo (NEPL)|qmin=8.5|mid|base: {'capex': 5.51, 'y2': {'t': 2, 'G': 3.49, 'bbl_d': 3.9, 'rev': 0.066, 'opex': 1.523, 'ebitda': -1.457}, 'npv15': -13.48, 'npv20': -12.1, 'irr': None, 'payback': None}
+Oredo (NEPL)|qmin=8.5|mid|pess: {'capex': 6.62, 'y2': {'t': 2, 'G': 1.35, 'bbl_d': 1.4, 'rev': 0.012, 'opex': 2.218, 'ebitda': -2.206}, 'npv15': -16.37, 'npv20': -14.15, 'irr': None, 'payback': None}
+Oredo (NEPL)|qmin=8.5|rich|opt: {'capex': 4.92, 'y2': {'t': 2, 'G': 6.68, 'bbl_d': 61.3, 'rev': 1.685, 'opex': 1.129, 'ebitda': 0.555}, 'npv15': -3.82, 'npv20': -3.93, 'irr': None, 'payback': None}
+Oredo (NEPL)|qmin=8.5|rich|base: {'capex': 5.51, 'y2': {'t': 2, 'G': 3.49, 'bbl_d': 4.8, 'rev': 0.081, 'opex': 1.524, 'ebitda': -1.443}, 'npv15': -13.43, 'npv20': -12.06, 'irr': None, 'payback': None}
+Oredo (NEPL)|qmin=8.5|rich|pess: {'capex': 6.62, 'y2': {'t': 2, 'G': 1.35, 'bbl_d': 1.2, 'rev': 0.01, 'opex': 2.218, 'ebitda': -2.208}, 'npv15': -16.37, 'npv20': -14.15, 'irr': None, 'payback': None}
+Obiafu-Obrikom (Oando Oil)|q2025=18.0|mid|opt: {'capex': 6.72, 'y2': {'t': 2, 'G': 14.11, 'bbl_d': 143.5, 'rev': 3.944, 'opex': 1.362, 'ebitda': 2.581}, 'npv15': 0.67, 'npv20': -0.5, 'irr': 17.7, 'payback': 4.1}
+Obiafu-Obrikom (Oando Oil)|q2025=18.0|mid|base: {'capex': 7.47, 'y2': {'t': 2, 'G': 7.37, 'bbl_d': 8.3, 'rev': 0.139, 'opex': 1.646, 'ebitda': -1.507}, 'npv15': -15.81, 'npv20': -14.36, 'irr': None, 'payback': None}
+Obiafu-Obrikom (Oando Oil)|q2025=18.0|mid|pess: {'capex': 8.87, 'y2': {'t': 2, 'G': 2.84, 'bbl_d': 3.0, 'rev': 0.025, 'opex': 2.516, 'ebitda': -2.491}, 'npv15': -19.59, 'npv20': -17.11, 'irr': None, 'payback': None}
+Obiafu-Obrikom (Oando Oil)|q2025=18.0|rich|opt: {'capex': 6.72, 'y2': {'t': 2, 'G': 14.11, 'bbl_d': 129.5, 'rev': 3.56, 'opex': 1.299, 'ebitda': 2.261}, 'npv15': -0.22, 'npv20': -1.24, 'irr': 14.1, 'payback': 4.7}
+Obiafu-Obrikom (Oando Oil)|q2025=18.0|rich|base: {'capex': 7.47, 'y2': {'t': 2, 'G': 7.37, 'bbl_d': 10.2, 'rev': 0.171, 'opex': 1.649, 'ebitda': -1.478}, 'npv15': -15.7, 'npv20': -14.27, 'irr': None, 'payback': None}
+Obiafu-Obrikom (Oando Oil)|q2025=18.0|rich|pess: {'capex': 8.87, 'y2': {'t': 2, 'G': 2.84, 'bbl_d': 2.4, 'rev': 0.02, 'opex': 2.516, 'ebitda': -2.496}, 'npv15': -19.6, 'npv20': -17.12, 'irr': None, 'payback': None}
+Obiafu-Obrikom (Oando Oil)|qmin=10.4|mid|opt: {'capex': 5.32, 'y2': {'t': 2, 'G': 8.14, 'bbl_d': 82.8, 'rev': 2.275, 'opex': 1.201, 'ebitda': 1.074}, 'npv15': -2.41, 'npv20': -2.83, 'irr': -0.5, 'payback': None}
+Obiafu-Obrikom (Oando Oil)|qmin=10.4|mid|base: {'capex': 5.95, 'y2': {'t': 2, 'G': 4.25, 'bbl_d': 4.8, 'rev': 0.08, 'opex': 1.55, 'ebitda': -1.47}, 'npv15': -14.0, 'npv20': -12.61, 'irr': None, 'payback': None}
+Obiafu-Obrikom (Oando Oil)|qmin=10.4|mid|pess: {'capex': 7.12, 'y2': {'t': 2, 'G': 1.64, 'bbl_d': 1.7, 'rev': 0.014, 'opex': 2.28, 'ebitda': -2.266}, 'npv15': -17.08, 'npv20': -14.8, 'irr': None, 'payback': None}
+Obiafu-Obrikom (Oando Oil)|qmin=10.4|rich|opt: {'capex': 5.32, 'y2': {'t': 2, 'G': 8.14, 'bbl_d': 74.7, 'rev': 2.054, 'opex': 1.165, 'ebitda': 0.889}, 'npv15': -3.0, 'npv20': -3.31, 'irr': -6.5, 'payback': None}
+Obiafu-Obrikom (Oando Oil)|qmin=10.4|rich|base: {'capex': 5.95, 'y2': {'t': 2, 'G': 4.25, 'bbl_d': 5.9, 'rev': 0.099, 'opex': 1.552, 'ebitda': -1.453}, 'npv15': -13.94, 'npv20': -12.56, 'irr': None, 'payback': None}
+Obiafu-Obrikom (Oando Oil)|qmin=10.4|rich|pess: {'capex': 7.12, 'y2': {'t': 2, 'G': 1.64, 'bbl_d': 1.4, 'rev': 0.012, 'opex': 2.28, 'ebitda': -2.269}, 'npv15': -17.08, 'npv20': -14.81, 'irr': None, 'payback': None}

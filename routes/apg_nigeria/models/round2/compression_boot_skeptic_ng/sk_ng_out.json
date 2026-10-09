@@ -1,0 +1,185 @@
+{
+ "Q5|model_base|fee1.75": {
+  "npv15": -13.54,
+  "npv20": -12.85,
+  "e2": -0.08,
+  "capex": 10.11
+ },
+ "Q5|model_base|fee_npv20=0": 6.407,
+ "Q5|N1_credit|fee1.75": {
+  "npv15": -14.84,
+  "npv20": -14.03,
+  "e2": -0.33,
+  "capex": 10.11
+ },
+ "Q5|N1_credit|fee_npv20=0": 8.256,
+ "Q5|N2_hazard5|fee1.75": {
+  "npv15": -12.88,
+  "npv20": -12.37,
+  "e2": -0.08,
+  "capex": 10.11
+ },
+ "Q5|N2_hazard5|fee_npv20=0": 7.104,
+ "Q5|N2_hazard10|fee1.75": {
+  "npv15": -12.38,
+  "npv20": -12.0,
+  "e2": -0.08,
+  "capex": 10.11
+ },
+ "Q5|N2_hazard10|fee_npv20=0": 7.875,
+ "Q5|N3_security_up|fee1.75": {
+  "npv15": -16.59,
+  "npv20": -15.38,
+  "e2": -0.69,
+  "capex": 10.11
+ },
+ "Q5|N3_security_up|fee_npv20=0": 7.588,
+ "Q5|N4_offtake|fee1.75": {
+  "npv15": -14.26,
+  "npv20": -13.46,
+  "e2": -0.27,
+  "capex": 10.11
+ },
+ "Q5|N4_offtake|fee_npv20=0": 7.116,
+ "Q5|NG_real(N1+N2_7%+N3+N4)|fee1.75": {
+  "npv15": -16.59,
+  "npv20": -15.62,
+  "e2": -1.07,
+  "capex": 10.11
+ },
+ "Q5|NG_real(N1+N2_7%+N3+N4)|fee_npv20=0": 13.015,
+ "Q5|NG_real+naira12%|fee1.75": {
+  "npv15": -17.48,
+  "npv20": -16.31,
+  "e2": -1.22,
+  "capex": 10.11
+ },
+ "Q5|NG_real+naira12%|fee_npv20=0": 16.622,
+ "Q5|seplat_like_model|fee1.75": {
+  "npv15": -1.67,
+  "npv20": -1.84,
+  "e2": 0.87,
+  "capex": 3.06
+ },
+ "Q5|seplat_like_model|fee_npv20=0": 2.51,
+ "Q5|seplat_like+NG_real|fee1.75": {
+  "npv15": -5.49,
+  "npv20": -5.14,
+  "e2": -0.12,
+  "capex": 3.06
+ },
+ "Q5|seplat_like+NG_real|fee_npv20=0": 5.522,
+ "Q5|seplat_like+NG_real+naira12%|fee1.75": {
+  "npv15": -6.38,
+  "npv20": -5.83,
+  "e2": -0.26,
+  "capex": 3.06
+ },
+ "Q5|seplat_like+NG_real+naira12%|fee_npv20=0": 7.108,
+ "Q5|enerflex_like+NG_real|fee1.75": {
+  "npv15": -10.17,
+  "npv20": -9.68,
+  "e2": -0.34,
+  "capex": 6.8
+ },
+ "Q5|enerflex_like+NG_real|fee_npv20=0": 8.902,
+ "Q15|model_base|fee1.75": {
+  "npv15": -18.48,
+  "npv20": -19.12,
+  "e2": 2.65,
+  "capex": 23.73
+ },
+ "Q15|model_base|fee_npv20=0": 4.322,
+ "Q15|N1_credit|fee1.75": {
+  "npv15": -22.3,
+  "npv20": -22.58,
+  "e2": 1.9,
+  "capex": 23.73
+ },
+ "Q15|N1_credit|fee_npv20=0": 5.572,
+ "Q15|N2_hazard5|fee1.75": {
+  "npv15": -19.0,
+  "npv20": -19.57,
+  "e2": 2.65,
+  "capex": 23.73
+ },
+ "Q15|N2_hazard5|fee_npv20=0": 4.873,
+ "Q15|N2_hazard10|fee1.75": {
+  "npv15": -19.48,
+  "npv20": -19.98,
+  "e2": 2.65,
+  "capex": 23.73
+ },
+ "Q15|N2_hazard10|fee_npv20=0": 5.484,
+ "Q15|N3_security_up|fee1.75": {
+  "npv15": -22.56,
+  "npv20": -22.51,
+  "e2": 1.76,
+  "capex": 23.73
+ },
+ "Q15|N3_security_up|fee_npv20=0": 4.893,
+ "Q15|N4_offtake|fee1.75": {
+  "npv15": -20.56,
+  "npv20": -20.86,
+  "e2": 2.09,
+  "capex": 23.73
+ },
+ "Q15|N4_offtake|fee_npv20=0": 4.798,
+ "Q15|NG_real(N1+N2_7%+N3+N4)|fee1.75": {
+  "npv15": -26.97,
+  "npv20": -26.53,
+  "e2": 0.61,
+  "capex": 23.73
+ },
+ "Q15|NG_real(N1+N2_7%+N3+N4)|fee_npv20=0": 8.633,
+ "Q15|NG_real+naira12%|fee1.75": {
+  "npv15": -29.66,
+  "npv20": -28.62,
+  "e2": 0.16,
+  "capex": 23.73
+ },
+ "Q15|NG_real+naira12%|fee_npv20=0": 10.989,
+ "Q15|seplat_like_model|fee1.75": {
+  "npv15": 4.17,
+  "npv20": 2.51,
+  "e2": 4.35,
+  "capex": 6.2
+ },
+ "Q15|seplat_like_model|fee_npv20=0": 1.381,
+ "Q15|seplat_like+NG_real|fee1.75": {
+  "npv15": -3.38,
+  "npv20": -3.94,
+  "e2": 2.31,
+  "capex": 6.2
+ },
+ "Q15|seplat_like+NG_real|fee_npv20=0": 2.892,
+ "Q15|seplat_like+NG_real+naira12%|fee1.75": {
+  "npv15": -5.55,
+  "npv20": -5.58,
+  "e2": 1.86,
+  "capex": 6.2
+ },
+ "Q15|seplat_like+NG_real+naira12%|fee_npv20=0": 3.704,
+ "Q15|enerflex_like+NG_real|fee1.75": {
+  "npv15": -13.54,
+  "npv20": -13.86,
+  "e2": 1.78,
+  "capex": 15.18
+ },
+ "Q15|enerflex_like+NG_real|fee_npv20=0": 5.598,
+ "NAMED Oredo (NEPL, IGHF)|qmin|NG_real|fee_npv20=0": 15.545,
+ "NAMED Odidi (NEPL)|qmin|NG_real|fee_npv20=0": 32.488,
+ "NAMED Ughelli East (NEPL)|qmin|NG_real|fee_npv20=0": 12.044,
+ "NAMED Obiafu-Obrikom (Oando)|qmin|NG_real|fee_npv20=0": 14.157,
+ "sites_total_MMscfd_2025": 108.4,
+ "NEPL_share": 0.554,
+ "penalty_all9_$M_per_y_at_1.6": 63.3,
+ "penalty_all9_$M_per_y_at_1.9": 75.2,
+ "penalty_all9_$M_per_y_at_3.5": 138.5,
+ "avg_penalty_$per_Mscf_fx1330": 1.92,
+ "avg_penalty_$per_Mscf_fx1450": 1.76,
+ "avg_penalty_$per_Mscf_fx1530": 1.67,
+ "avg_penalty_$per_Mscf_fx1600": 1.6,
+ "implied_billed_share_at_3.50_fx1450": 0.5,
+ "implied_billed_share_at_3.50_fx1530": 0.48
+}

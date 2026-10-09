@@ -1,0 +1,408 @@
+== generic (contract)
+boost|Q1|opt|fee1.0|contract                         cap   2.79 (pkg 0.81 hp 235) F 0.98(x2.95) E1  -0.75 E2  -0.73 NPV15  -6.99 NPV20  -6.26 IRR None PB None
+boost|Q1|opt|fee1.375|contract                       cap   2.79 (pkg 0.81 hp 235) F 0.98(x2.95) E1  -0.66 E2  -0.62 NPV15  -6.52 NPV20  -5.87 IRR None PB None
+boost|Q1|opt|fee1.75|contract                        cap   2.79 (pkg 0.81 hp 235) F 0.98(x2.95) E1  -0.57 E2  -0.52 NPV15  -6.05 NPV20  -5.47 IRR None PB None
+boost|Q1|base|fee1.0|contract                        cap   4.22 (pkg 0.98 hp 318) F 1.34(x3.95) E1  -1.18 E2  -1.17 NPV15 -10.88 NPV20  -9.72 IRR None PB None
+boost|Q1|base|fee1.375|contract                      cap   4.22 (pkg 0.98 hp 318) F 1.34(x3.95) E1  -1.12 E2  -1.09 NPV15 -10.57 NPV20  -9.46 IRR None PB None
+boost|Q1|base|fee1.75|contract                       cap   4.22 (pkg 0.98 hp 318) F 1.34(x3.95) E1  -1.06 E2  -1.01 NPV15 -10.26 NPV20  -9.20 IRR None PB None
+boost|Q1|pess|fee1.0|contract                        cap   7.38 (pkg 1.17 hp 392) F 1.97(x5.55) E1  -1.90 E2  -1.90 NPV15 -16.07 NPV20 -14.04 IRR None PB None
+boost|Q1|pess|fee1.375|contract                      cap   7.38 (pkg 1.17 hp 392) F 1.97(x5.55) E1  -1.87 E2  -1.85 NPV15 -15.94 NPV20 -13.93 IRR None PB None
+boost|Q1|pess|fee1.75|contract                       cap   7.38 (pkg 1.17 hp 392) F 1.97(x5.55) E1  -1.84 E2  -1.81 NPV15 -15.80 NPV20 -13.82 IRR None PB None
+boost|Q5|opt|fee1.0|contract                         cap   6.55 (pkg 2.28 hp 1173) F 1.32(x3.1) E1  -0.18 E2   0.02 NPV15  -7.79 NPV20  -7.53 IRR None PB None
+boost|Q5|opt|fee1.375|contract                       cap   6.55 (pkg 2.28 hp 1173) F 1.32(x3.1) E1   0.26 E2   0.55 NPV15  -5.44 NPV20  -5.57 IRR None PB None
+boost|Q5|opt|fee1.75|contract                        cap   6.55 (pkg 2.28 hp 1173) F 1.32(x3.1) E1   0.69 E2   1.08 NPV15  -3.34 NPV20  -3.83 IRR -1.9 PB None
+boost|Q5|base|fee1.0|contract                        cap  10.11 (pkg 3.10 hp 1592) F 1.91(x4.21) E1  -1.10 E2  -0.90 NPV15 -16.68 NPV20 -15.49 IRR None PB None
+boost|Q5|base|fee1.375|contract                      cap  10.11 (pkg 3.10 hp 1592) F 1.91(x4.21) E1  -0.79 E2  -0.49 NPV15 -15.11 NPV20 -14.18 IRR None PB None
+boost|Q5|base|fee1.75|contract                       cap  10.11 (pkg 3.10 hp 1592) F 1.91(x4.21) E1  -0.47 E2  -0.08 NPV15 -13.54 NPV20 -12.86 IRR None PB None
+boost|Q5|pess|fee1.0|contract                        cap  16.57 (pkg 4.05 hp 1960) F 2.89(x5.95) E1  -2.54 E2  -2.37 NPV15 -27.78 NPV20 -24.93 IRR None PB None
+boost|Q5|pess|fee1.375|contract                      cap  16.57 (pkg 4.05 hp 1960) F 2.89(x5.95) E1  -2.41 E2  -2.12 NPV15 -27.11 NPV20 -24.39 IRR None PB None
+boost|Q5|pess|fee1.75|contract                       cap  16.57 (pkg 4.05 hp 1960) F 2.89(x5.95) E1  -2.27 E2  -1.88 NPV15 -26.43 NPV20 -23.84 IRR None PB None
+boost|Q15|opt|fee1.0|contract                        cap  14.92 (pkg 5.54 hp 3519) F 1.88(x3.31) E1   1.55 E2   2.22 NPV15  -7.41 NPV20  -8.60 IRR -0.7 PB None
+boost|Q15|opt|fee1.375|contract                      cap  14.92 (pkg 5.54 hp 3519) F 1.88(x3.31) E1   2.86 E2   3.81 NPV15  -2.63 NPV20  -4.64 IRR 10.2 PB 5.8
+boost|Q15|opt|fee1.75|contract                       cap  14.92 (pkg 5.54 hp 3519) F 1.88(x3.31) E1   4.18 E2   5.40 NPV15   1.98 NPV20  -0.80 IRR 18.4 PB 4.2
+boost|Q15|base|fee1.0|contract                       cap  23.73 (pkg 7.99 hp 4776) F 2.91(x4.59) E1  -0.49 E2   0.18 NPV15 -27.82 NPV20 -26.97 IRR None PB None
+boost|Q15|base|fee1.375|contract                     cap  23.73 (pkg 7.99 hp 4776) F 2.91(x4.59) E1   0.45 E2   1.42 NPV15 -23.12 NPV20 -23.01 IRR None PB None
+boost|Q15|base|fee1.75|contract                      cap  23.73 (pkg 7.99 hp 4776) F 2.91(x4.59) E1   1.39 E2   2.65 NPV15 -18.48 NPV20 -19.12 IRR None PB None
+boost|Q15|pess|fee1.0|contract                       cap  38.25 (pkg 10.84 hp 5881) F 4.70(x6.56) E1  -3.65 E2  -2.99 NPV15 -53.35 NPV20 -48.98 IRR None PB None
+boost|Q15|pess|fee1.375|contract                     cap  38.25 (pkg 10.84 hp 5881) F 4.70(x6.56) E1  -3.23 E2  -2.26 NPV15 -51.31 NPV20 -47.35 IRR None PB None
+boost|Q15|pess|fee1.75|contract                      cap  38.25 (pkg 10.84 hp 5881) F 4.70(x6.56) E1  -2.82 E2  -1.53 NPV15 -49.27 NPV20 -45.72 IRR None PB None
+reinj|Q1|opt|fee1.0|contract                         cap   4.03 (pkg 1.13 hp 393) F 1.03(x3.0) E1  -0.80 E2  -0.79 NPV15  -8.54 NPV20  -7.76 IRR None PB None
+reinj|Q1|opt|fee1.375|contract                       cap   4.03 (pkg 1.13 hp 393) F 1.03(x3.0) E1  -0.71 E2  -0.68 NPV15  -8.07 NPV20  -7.36 IRR None PB None
+reinj|Q1|opt|fee1.75|contract                        cap   4.03 (pkg 1.13 hp 393) F 1.03(x3.0) E1  -0.63 E2  -0.57 NPV15  -7.60 NPV20  -6.97 IRR None PB None
+reinj|Q1|base|fee1.0|contract                        cap   6.82 (pkg 1.42 hp 468) F 1.49(x4.14) E1  -1.33 E2  -1.32 NPV15 -14.32 NPV20 -13.01 IRR None PB None
+reinj|Q1|base|fee1.375|contract                      cap   6.82 (pkg 1.42 hp 468) F 1.49(x4.14) E1  -1.27 E2  -1.24 NPV15 -14.00 NPV20 -12.75 IRR None PB None
+reinj|Q1|base|fee1.75|contract                       cap   6.82 (pkg 1.42 hp 468) F 1.49(x4.14) E1  -1.21 E2  -1.16 NPV15 -13.69 NPV20 -12.49 IRR None PB None
+reinj|Q1|pess|fee1.0|contract                        cap  12.00 (pkg 1.80 hp 531) F 2.29(x6.03) E1  -2.22 E2  -2.24 NPV15 -21.96 NPV20 -19.51 IRR None PB None
+reinj|Q1|pess|fee1.375|contract                      cap  12.00 (pkg 1.80 hp 531) F 2.29(x6.03) E1  -2.19 E2  -2.19 NPV15 -21.82 NPV20 -19.41 IRR None PB None
+reinj|Q1|pess|fee1.75|contract                       cap  12.00 (pkg 1.80 hp 531) F 2.29(x6.03) E1  -2.16 E2  -2.14 NPV15 -21.68 NPV20 -19.30 IRR None PB None
+reinj|Q5|opt|fee1.0|contract                         cap  11.03 (pkg 3.86 hp 1966) F 1.53(x3.24) E1  -0.38 E2  -0.19 NPV15 -13.39 NPV20 -12.94 IRR None PB None
+reinj|Q5|opt|fee1.375|contract                       cap  11.03 (pkg 3.86 hp 1966) F 1.53(x3.24) E1   0.06 E2   0.34 NPV15 -11.04 NPV20 -10.98 IRR None PB None
+reinj|Q5|opt|fee1.75|contract                        cap  11.03 (pkg 3.86 hp 1966) F 1.53(x3.24) E1   0.49 E2   0.87 NPV15  -8.69 NPV20  -9.02 IRR -19.0 PB None
+reinj|Q5|base|fee1.0|contract                        cap  17.65 (pkg 5.31 hp 2338) F 2.34(x4.52) E1  -1.53 E2  -1.35 NPV15 -26.63 NPV20 -25.03 IRR None PB None
+reinj|Q5|base|fee1.375|contract                      cap  17.65 (pkg 5.31 hp 2338) F 2.34(x4.52) E1  -1.22 E2  -0.94 NPV15 -25.06 NPV20 -23.71 IRR None PB None
+reinj|Q5|base|fee1.75|contract                       cap  17.65 (pkg 5.31 hp 2338) F 2.34(x4.52) E1  -0.91 E2  -0.53 NPV15 -23.49 NPV20 -22.39 IRR None PB None
+reinj|Q5|pess|fee1.0|contract                        cap  29.28 (pkg 7.22 hp 2656) F 3.78(x6.58) E1  -3.43 E2  -3.28 NPV15 -43.97 NPV20 -39.99 IRR None PB None
+reinj|Q5|pess|fee1.375|contract                      cap  29.28 (pkg 7.22 hp 2656) F 3.78(x6.58) E1  -3.30 E2  -3.04 NPV15 -43.29 NPV20 -39.45 IRR None PB None
+reinj|Q5|pess|fee1.75|contract                       cap  29.28 (pkg 7.22 hp 2656) F 3.78(x6.58) E1  -3.16 E2  -2.80 NPV15 -42.61 NPV20 -38.91 IRR None PB None
+reinj|Q15|opt|fee1.0|contract                        cap  27.51 (pkg 10.28 hp 5897) F 2.45(x3.54) E1   0.98 E2   1.64 NPV15 -22.73 NPV20 -23.42 IRR -20.0 PB None
+reinj|Q15|opt|fee1.375|contract                      cap  27.51 (pkg 10.28 hp 5897) F 2.45(x3.54) E1   2.30 E2   3.23 NPV15 -15.86 NPV20 -17.70 IRR -3.9 PB None
+reinj|Q15|opt|fee1.75|contract                       cap  27.51 (pkg 10.28 hp 5897) F 2.45(x3.54) E1   3.61 E2   4.82 NPV15 -10.56 NPV20 -13.33 IRR 3.8 PB 8.1
+reinj|Q15|base|fee1.0|contract                       cap  43.60 (pkg 14.64 hp 7013) F 4.06(x5.0) E1  -1.63 E2  -1.00 NPV15 -54.05 NPV20 -52.10 IRR None PB None
+reinj|Q15|base|fee1.375|contract                     cap  43.60 (pkg 14.64 hp 7013) F 4.06(x5.0) E1  -0.70 E2   0.24 NPV15 -49.35 NPV20 -48.14 IRR None PB None
+reinj|Q15|base|fee1.75|contract                      cap  43.60 (pkg 14.64 hp 7013) F 4.06(x5.0) E1   0.24 E2   1.47 NPV15 -44.64 NPV20 -44.19 IRR None PB None
+reinj|Q15|pess|fee1.0|contract                       cap  71.19 (pkg 20.35 hp 7968) F 7.00(x7.27) E1  -5.95 E2  -5.37 NPV15 -95.30 NPV20 -88.02 IRR None PB None
+reinj|Q15|pess|fee1.375|contract                     cap  71.19 (pkg 20.35 hp 7968) F 7.00(x7.27) E1  -5.54 E2  -4.64 NPV15 -93.26 NPV20 -86.39 IRR None PB None
+reinj|Q15|pess|fee1.75|contract                      cap  71.19 (pkg 20.35 hp 7968) F 7.00(x7.27) E1  -5.12 E2  -3.91 NPV15 -91.22 NPV20 -84.76 IRR None PB None
+gaslift|Q1|opt|fee1.0|contract                       cap   3.45 (pkg 0.97 hp 325) F 1.01(x2.96) E1  -0.78 E2  -0.76 NPV15  -7.82 NPV20  -7.06 IRR None PB None
+gaslift|Q1|opt|fee1.375|contract                     cap   3.45 (pkg 0.97 hp 325) F 1.01(x2.96) E1  -0.69 E2  -0.65 NPV15  -7.35 NPV20  -6.66 IRR None PB None
+gaslift|Q1|opt|fee1.75|contract                      cap   3.45 (pkg 0.97 hp 325) F 1.01(x2.96) E1  -0.60 E2  -0.55 NPV15  -6.88 NPV20  -6.27 IRR None PB None
+gaslift|Q1|base|fee1.0|contract                      cap   5.57 (pkg 1.15 hp 383) F 1.42(x4.01) E1  -1.26 E2  -1.25 NPV15 -12.67 NPV20 -11.43 IRR None PB None
+gaslift|Q1|base|fee1.375|contract                    cap   5.57 (pkg 1.15 hp 383) F 1.42(x4.01) E1  -1.20 E2  -1.17 NPV15 -12.35 NPV20 -11.17 IRR None PB None
+gaslift|Q1|base|fee1.75|contract                     cap   5.57 (pkg 1.15 hp 383) F 1.42(x4.01) E1  -1.13 E2  -1.09 NPV15 -12.04 NPV20 -10.90 IRR None PB None
+gaslift|Q1|pess|fee1.0|contract                      cap   9.35 (pkg 1.36 hp 433) F 2.10(x5.7) E1  -2.03 E2  -2.04 NPV15 -18.58 NPV20 -16.37 IRR None PB None
+gaslift|Q1|pess|fee1.375|contract                    cap   9.35 (pkg 1.36 hp 433) F 2.10(x5.7) E1  -2.01 E2  -2.00 NPV15 -18.45 NPV20 -16.26 IRR None PB None
+gaslift|Q1|pess|fee1.75|contract                     cap   9.35 (pkg 1.36 hp 433) F 2.10(x5.7) E1  -1.98 E2  -1.95 NPV15 -18.31 NPV20 -16.16 IRR None PB None
+gaslift|Q5|opt|fee1.0|contract                       cap   8.81 (pkg 3.06 hp 1625) F 1.43(x3.16) E1  -0.28 E2  -0.08 NPV15 -10.61 NPV20 -10.26 IRR None PB None
+gaslift|Q5|opt|fee1.375|contract                     cap   8.81 (pkg 3.06 hp 1625) F 1.43(x3.16) E1   0.16 E2   0.45 NPV15  -8.27 NPV20  -8.30 IRR None PB None
+gaslift|Q5|opt|fee1.75|contract                      cap   8.81 (pkg 3.06 hp 1625) F 1.43(x3.16) E1   0.59 E2   0.98 NPV15  -5.94 NPV20  -6.36 IRR -10.4 PB None
+gaslift|Q5|base|fee1.0|contract                      cap  13.42 (pkg 3.98 hp 1915) F 2.10(x4.33) E1  -1.29 E2  -1.10 NPV15 -21.05 NPV20 -19.68 IRR None PB None
+gaslift|Q5|base|fee1.375|contract                    cap  13.42 (pkg 3.98 hp 1915) F 2.10(x4.33) E1  -0.98 E2  -0.69 NPV15 -19.48 NPV20 -18.36 IRR None PB None
+gaslift|Q5|base|fee1.75|contract                     cap  13.42 (pkg 3.98 hp 1915) F 2.10(x4.33) E1  -0.66 E2  -0.28 NPV15 -17.91 NPV20 -17.04 IRR None PB None
+gaslift|Q5|pess|fee1.0|contract                      cap  20.98 (pkg 5.00 hp 2163) F 3.20(x6.16) E1  -2.85 E2  -2.68 NPV15 -33.40 NPV20 -30.16 IRR None PB None
+gaslift|Q5|pess|fee1.375|contract                    cap  20.98 (pkg 5.00 hp 2163) F 3.20(x6.16) E1  -2.72 E2  -2.44 NPV15 -32.72 NPV20 -29.61 IRR None PB None
+gaslift|Q5|pess|fee1.75|contract                     cap  20.98 (pkg 5.00 hp 2163) F 3.20(x6.16) E1  -2.58 E2  -2.20 NPV15 -32.04 NPV20 -29.07 IRR None PB None
+gaslift|Q15|opt|fee1.0|contract                      cap  21.17 (pkg 7.87 hp 4874) F 2.16(x3.42) E1   1.27 E2   1.93 NPV15 -14.80 NPV20 -15.76 IRR -10.5 PB None
+gaslift|Q15|opt|fee1.375|contract                    cap  21.17 (pkg 7.87 hp 4874) F 2.16(x3.42) E1   2.58 E2   3.52 NPV15  -8.90 NPV20 -10.89 IRR 2.4 PB 8.7
+gaslift|Q15|opt|fee1.75|contract                     cap  21.17 (pkg 7.87 hp 4874) F 2.16(x3.42) E1   3.90 E2   5.11 NPV15  -4.23 NPV20  -7.01 IRR 9.5 PB 6.0
+gaslift|Q15|base|fee1.0|contract                     cap  31.94 (pkg 10.63 hp 5744) F 3.39(x4.76) E1  -0.96 E2  -0.30 NPV15 -38.66 NPV20 -37.35 IRR None PB None
+gaslift|Q15|base|fee1.375|contract                   cap  31.94 (pkg 10.63 hp 5744) F 3.39(x4.76) E1  -0.02 E2   0.93 NPV15 -33.96 NPV20 -33.39 IRR None PB None
+gaslift|Q15|base|fee1.75|contract                    cap  31.94 (pkg 10.63 hp 5744) F 3.39(x4.76) E1   0.91 E2   2.16 NPV15 -29.25 NPV20 -29.44 IRR None PB None
+gaslift|Q15|pess|fee1.0|contract                     cap  48.75 (pkg 13.70 hp 6489) F 5.43(x6.81) E1  -4.38 E2  -3.75 NPV15 -66.72 NPV20 -61.43 IRR None PB None
+gaslift|Q15|pess|fee1.375|contract                   cap  48.75 (pkg 13.70 hp 6489) F 5.43(x6.81) E1  -3.97 E2  -3.02 NPV15 -64.68 NPV20 -59.79 IRR None PB None
+gaslift|Q15|pess|fee1.75|contract                    cap  48.75 (pkg 13.70 hp 6489) F 5.43(x6.81) E1  -3.55 E2  -2.29 NPV15 -62.64 NPV20 -58.16 IRR None PB None
+== generic pre-contract, base
+boost|Q1|base|fee1.0|pre                             cap   4.22 (pkg 0.98 hp 318) F 1.34(x3.95) E1  -1.26 E2  -1.28 NPV15 -11.29 NPV20 -10.06 IRR None PB None
+boost|Q1|base|fee1.375|pre                           cap   4.22 (pkg 0.98 hp 318) F 1.34(x3.95) E1  -1.23 E2  -1.24 NPV15 -11.13 NPV20  -9.93 IRR None PB None
+boost|Q1|base|fee1.75|pre                            cap   4.22 (pkg 0.98 hp 318) F 1.34(x3.95) E1  -1.20 E2  -1.19 NPV15 -10.97 NPV20  -9.80 IRR None PB None
+boost|Q5|base|fee1.0|pre                             cap  10.11 (pkg 3.10 hp 1592) F 1.91(x4.21) E1  -1.50 E2  -1.43 NPV15 -18.70 NPV20 -17.19 IRR None PB None
+boost|Q5|base|fee1.375|pre                           cap  10.11 (pkg 3.10 hp 1592) F 1.91(x4.21) E1  -1.35 E2  -1.23 NPV15 -17.91 NPV20 -16.53 IRR None PB None
+boost|Q5|base|fee1.75|pre                            cap  10.11 (pkg 3.10 hp 1592) F 1.91(x4.21) E1  -1.19 E2  -1.02 NPV15 -17.13 NPV20 -15.87 IRR None PB None
+boost|Q15|base|fee1.0|pre                            cap  23.73 (pkg 7.99 hp 4776) F 2.91(x4.59) E1  -1.70 E2  -1.41 NPV15 -33.89 NPV20 -32.06 IRR None PB None
+boost|Q15|base|fee1.375|pre                          cap  23.73 (pkg 7.99 hp 4776) F 2.91(x4.59) E1  -1.23 E2  -0.79 NPV15 -31.53 NPV20 -30.08 IRR None PB None
+boost|Q15|base|fee1.75|pre                           cap  23.73 (pkg 7.99 hp 4776) F 2.91(x4.59) E1  -0.76 E2  -0.18 NPV15 -29.18 NPV20 -28.10 IRR None PB None
+reinj|Q1|base|fee1.0|pre                             cap   6.82 (pkg 1.42 hp 468) F 1.49(x4.14) E1  -1.41 E2  -1.43 NPV15 -14.72 NPV20 -13.35 IRR None PB None
+reinj|Q1|base|fee1.375|pre                           cap   6.82 (pkg 1.42 hp 468) F 1.49(x4.14) E1  -1.38 E2  -1.39 NPV15 -14.56 NPV20 -13.22 IRR None PB None
+reinj|Q1|base|fee1.75|pre                            cap   6.82 (pkg 1.42 hp 468) F 1.49(x4.14) E1  -1.35 E2  -1.35 NPV15 -14.41 NPV20 -13.09 IRR None PB None
+reinj|Q5|base|fee1.0|pre                             cap  17.65 (pkg 5.31 hp 2338) F 2.34(x4.52) E1  -1.94 E2  -1.88 NPV15 -28.65 NPV20 -26.73 IRR None PB None
+reinj|Q5|base|fee1.375|pre                           cap  17.65 (pkg 5.31 hp 2338) F 2.34(x4.52) E1  -1.78 E2  -1.67 NPV15 -27.87 NPV20 -26.07 IRR None PB None
+reinj|Q5|base|fee1.75|pre                            cap  17.65 (pkg 5.31 hp 2338) F 2.34(x4.52) E1  -1.62 E2  -1.47 NPV15 -27.08 NPV20 -25.41 IRR None PB None
+reinj|Q15|base|fee1.0|pre                            cap  43.60 (pkg 14.64 hp 7013) F 4.06(x5.0) E1  -2.85 E2  -2.59 NPV15 -60.12 NPV20 -57.19 IRR None PB None
+reinj|Q15|base|fee1.375|pre                          cap  43.60 (pkg 14.64 hp 7013) F 4.06(x5.0) E1  -2.38 E2  -1.97 NPV15 -57.76 NPV20 -55.21 IRR None PB None
+reinj|Q15|base|fee1.75|pre                           cap  43.60 (pkg 14.64 hp 7013) F 4.06(x5.0) E1  -1.91 E2  -1.35 NPV15 -55.41 NPV20 -53.24 IRR None PB None
+gaslift|Q1|base|fee1.0|pre                           cap   5.57 (pkg 1.15 hp 383) F 1.42(x4.01) E1  -1.34 E2  -1.36 NPV15 -13.07 NPV20 -11.77 IRR None PB None
+gaslift|Q1|base|fee1.375|pre                         cap   5.57 (pkg 1.15 hp 383) F 1.42(x4.01) E1  -1.31 E2  -1.32 NPV15 -12.91 NPV20 -11.64 IRR None PB None
+gaslift|Q1|base|fee1.75|pre                          cap   5.57 (pkg 1.15 hp 383) F 1.42(x4.01) E1  -1.28 E2  -1.27 NPV15 -12.76 NPV20 -11.51 IRR None PB None
+gaslift|Q5|base|fee1.0|pre                           cap  13.42 (pkg 3.98 hp 1915) F 2.10(x4.33) E1  -1.69 E2  -1.63 NPV15 -23.07 NPV20 -21.38 IRR None PB None
+gaslift|Q5|base|fee1.375|pre                         cap  13.42 (pkg 3.98 hp 1915) F 2.10(x4.33) E1  -1.54 E2  -1.42 NPV15 -22.28 NPV20 -20.72 IRR None PB None
+gaslift|Q5|base|fee1.75|pre                          cap  13.42 (pkg 3.98 hp 1915) F 2.10(x4.33) E1  -1.38 E2  -1.22 NPV15 -21.50 NPV20 -20.06 IRR None PB None
+gaslift|Q15|base|fee1.0|pre                          cap  31.94 (pkg 10.63 hp 5744) F 3.39(x4.76) E1  -2.18 E2  -1.90 NPV15 -44.72 NPV20 -42.44 IRR None PB None
+gaslift|Q15|base|fee1.375|pre                        cap  31.94 (pkg 10.63 hp 5744) F 3.39(x4.76) E1  -1.71 E2  -1.28 NPV15 -42.37 NPV20 -40.47 IRR None PB None
+gaslift|Q15|base|fee1.75|pre                         cap  31.94 (pkg 10.63 hp 5744) F 3.39(x4.76) E1  -1.24 E2  -0.66 NPV15 -40.02 NPV20 -38.49 IRR None PB None
+== named
+Ughelli East (NEPL)|q2025|opt|fee1.0                 cap   8.30 (pkg 2.86 hp 1572) F 1.40(x3.14) E1   0.13 E2   0.41 NPV15  -7.89 NPV20  -7.90 IRR None PB None
+Ughelli East (NEPL)|q2025|opt|fee1.375               cap   8.30 (pkg 2.86 hp 1572) F 1.40(x3.14) E1   0.72 E2   1.12 NPV15  -4.87 NPV20  -5.39 IRR -5.3 PB None
+Ughelli East (NEPL)|q2025|opt|fee1.75                cap   8.30 (pkg 2.86 hp 1572) F 1.40(x3.14) E1   1.30 E2   1.83 NPV15  -2.55 NPV20  -3.48 IRR 6.1 PB 7.0
+Ughelli East (NEPL)|q2025|base|fee1.0                cap  12.49 (pkg 3.95 hp 2133) F 2.04(x4.31) E1  -0.96 E2  -0.68 NPV15 -18.44 NPV20 -17.35 IRR None PB None
+Ughelli East (NEPL)|q2025|base|fee1.375              cap  12.49 (pkg 3.95 hp 2133) F 2.04(x4.31) E1  -0.54 E2  -0.13 NPV15 -16.34 NPV20 -15.58 IRR None PB None
+Ughelli East (NEPL)|q2025|base|fee1.75               cap  12.49 (pkg 3.95 hp 2133) F 2.04(x4.31) E1  -0.12 E2   0.42 NPV15 -14.24 NPV20 -13.82 IRR None PB None
+Ughelli East (NEPL)|q2025|pess|fee1.0                cap  18.95 (pkg 5.22 hp 2627) F 3.06(x6.06) E1  -2.59 E2  -2.33 NPV15 -30.23 NPV20 -27.28 IRR None PB None
+Ughelli East (NEPL)|q2025|pess|fee1.375              cap  18.95 (pkg 5.22 hp 2627) F 3.06(x6.06) E1  -2.41 E2  -2.00 NPV15 -29.32 NPV20 -26.56 IRR None PB None
+Ughelli East (NEPL)|q2025|pess|fee1.75               cap  18.95 (pkg 5.22 hp 2627) F 3.06(x6.06) E1  -2.22 E2  -1.68 NPV15 -28.41 NPV20 -25.83 IRR None PB None
+Ughelli East (NEPL)|qmin|opt|fee1.0                  cap   8.30 (pkg 2.86 hp 1572) F 1.40(x3.14) E1   0.04 E2   0.30 NPV15  -8.38 NPV20  -8.31 IRR None PB None
+Ughelli East (NEPL)|qmin|opt|fee1.375                cap   8.30 (pkg 2.86 hp 1572) F 1.40(x3.14) E1   0.59 E2   0.97 NPV15  -5.46 NPV20  -5.88 IRR -9.5 PB None
+Ughelli East (NEPL)|qmin|opt|fee1.75                 cap   8.30 (pkg 2.86 hp 1572) F 1.40(x3.14) E1   1.14 E2   1.64 NPV15  -3.14 NPV20  -3.97 IRR 3.7 PB 7.9
+Ughelli East (NEPL)|qmin|base|fee1.0                 cap  12.49 (pkg 3.95 hp 2133) F 2.04(x4.31) E1  -1.03 E2  -0.77 NPV15 -18.77 NPV20 -17.62 IRR None PB None
+Ughelli East (NEPL)|qmin|base|fee1.375               cap  12.49 (pkg 3.95 hp 2133) F 2.04(x4.31) E1  -0.63 E2  -0.25 NPV15 -16.79 NPV20 -15.96 IRR None PB None
+Ughelli East (NEPL)|qmin|base|fee1.75                cap  12.49 (pkg 3.95 hp 2133) F 2.04(x4.31) E1  -0.24 E2   0.27 NPV15 -14.81 NPV20 -14.30 IRR None PB None
+Ughelli East (NEPL)|qmin|pess|fee1.0                 cap  18.95 (pkg 5.22 hp 2627) F 3.06(x6.06) E1  -2.62 E2  -2.38 NPV15 -30.37 NPV20 -27.39 IRR None PB None
+Ughelli East (NEPL)|qmin|pess|fee1.375               cap  18.95 (pkg 5.22 hp 2627) F 3.06(x6.06) E1  -2.45 E2  -2.07 NPV15 -29.51 NPV20 -26.71 IRR None PB None
+Ughelli East (NEPL)|qmin|pess|fee1.75                cap  18.95 (pkg 5.22 hp 2627) F 3.06(x6.06) E1  -2.27 E2  -1.76 NPV15 -28.66 NPV20 -26.02 IRR None PB None
+Oredo (NEPL, IGHF)|q2025|opt|fee1.0                  cap  15.59 (pkg 5.70 hp 3637) F 1.91(x3.31) E1   1.63 E2   2.33 NPV15  -7.67 NPV20  -8.93 IRR -0.5 PB None
+Oredo (NEPL, IGHF)|q2025|opt|fee1.375                cap  15.59 (pkg 5.70 hp 3637) F 1.91(x3.31) E1   2.99 E2   3.97 NPV15  -2.74 NPV20  -4.84 IRR 10.2 PB 5.8
+Oredo (NEPL, IGHF)|q2025|opt|fee1.75                 cap  15.59 (pkg 5.70 hp 3637) F 1.91(x3.31) E1   4.35 E2   5.62 NPV15   2.03 NPV20  -0.88 IRR 18.3 PB 4.3
+Oredo (NEPL, IGHF)|q2025|base|fee1.0                 cap  24.39 (pkg 8.23 hp 4936) F 2.95(x4.61) E1  -0.45 E2   0.25 NPV15 -28.29 NPV20 -27.46 IRR None PB None
+Oredo (NEPL, IGHF)|q2025|base|fee1.375               cap  24.39 (pkg 8.23 hp 4936) F 2.95(x4.61) E1   0.52 E2   1.52 NPV15 -23.43 NPV20 -23.37 IRR None PB None
+Oredo (NEPL, IGHF)|q2025|base|fee1.75                cap  24.39 (pkg 8.23 hp 4936) F 2.95(x4.61) E1   1.49 E2   2.80 NPV15 -18.66 NPV20 -19.37 IRR None PB None
+Oredo (NEPL, IGHF)|q2025|pess|fee1.0                 cap  37.95 (pkg 11.18 hp 6077) F 4.68(x6.55) E1  -3.59 E2  -2.91 NPV15 -52.79 NPV20 -48.49 IRR None PB None
+Oredo (NEPL, IGHF)|q2025|pess|fee1.375               cap  37.95 (pkg 11.18 hp 6077) F 4.68(x6.55) E1  -3.16 E2  -2.15 NPV15 -50.69 NPV20 -46.80 IRR None PB None
+Oredo (NEPL, IGHF)|q2025|pess|fee1.75                cap  37.95 (pkg 11.18 hp 6077) F 4.68(x6.55) E1  -2.73 E2  -1.40 NPV15 -48.58 NPV20 -45.11 IRR None PB None
+Oredo (NEPL, IGHF)|qmin|opt|fee1.0                   cap  15.59 (pkg 5.70 hp 3637) F 1.91(x3.31) E1   0.03 E2   0.39 NPV15 -15.80 NPV20 -15.69 IRR None PB None
+Oredo (NEPL, IGHF)|qmin|opt|fee1.375                 cap  15.59 (pkg 5.70 hp 3637) F 1.91(x3.31) E1   0.78 E2   1.29 NPV15 -11.81 NPV20 -12.36 IRR -15.3 PB None
+Oredo (NEPL, IGHF)|qmin|opt|fee1.75                  cap  15.59 (pkg 5.70 hp 3637) F 1.91(x3.31) E1   1.52 E2   2.19 NPV15  -8.14 NPV20  -9.31 IRR -1.8 PB None
+Oredo (NEPL, IGHF)|qmin|base|fee1.0                  cap  24.39 (pkg 8.23 hp 4936) F 2.95(x4.61) E1  -1.58 E2  -1.24 NPV15 -33.95 NPV20 -32.22 IRR None PB None
+Oredo (NEPL, IGHF)|qmin|base|fee1.375                cap  24.39 (pkg 8.23 hp 4936) F 2.95(x4.61) E1  -1.05 E2  -0.54 NPV15 -31.28 NPV20 -29.97 IRR None PB None
+Oredo (NEPL, IGHF)|qmin|base|fee1.75                 cap  24.39 (pkg 8.23 hp 4936) F 2.95(x4.61) E1  -0.52 E2   0.16 NPV15 -28.62 NPV20 -27.73 IRR None PB None
+Oredo (NEPL, IGHF)|qmin|pess|fee1.0                  cap  37.95 (pkg 11.18 hp 6077) F 4.68(x6.55) E1  -4.08 E2  -3.77 NPV15 -55.19 NPV20 -50.41 IRR None PB None
+Oredo (NEPL, IGHF)|qmin|pess|fee1.375                cap  37.95 (pkg 11.18 hp 6077) F 4.68(x6.55) E1  -3.85 E2  -3.36 NPV15 -54.04 NPV20 -49.48 IRR None PB None
+Oredo (NEPL, IGHF)|qmin|pess|fee1.75                 cap  37.95 (pkg 11.18 hp 6077) F 4.68(x6.55) E1  -3.61 E2  -2.94 NPV15 -52.88 NPV20 -48.56 IRR None PB None
+Opuama (NEPL, болото)|q2025|opt|fee1.0               cap  22.67 (pkg 8.12 hp 4560) F 2.23(x3.44) E1   0.42 E2   0.92 NPV15 -20.85 NPV20 -21.06 IRR None PB None
+Opuama (NEPL, болото)|q2025|opt|fee1.375             cap  22.67 (pkg 8.12 hp 4560) F 2.23(x3.44) E1   1.44 E2   2.15 NPV15 -15.40 NPV20 -16.51 IRR -9.3 PB None
+Opuama (NEPL, болото)|q2025|opt|fee1.75              cap  22.67 (pkg 8.12 hp 4560) F 2.23(x3.44) E1   2.46 E2   3.38 NPV15 -10.70 NPV20 -12.63 IRR 0.5 PB 9.7
+Opuama (NEPL, болото)|q2025|base|fee1.0              cap  34.85 (pkg 11.50 hp 5423) F 3.55(x4.85) E1  -1.68 E2  -1.20 NPV15 -45.25 NPV20 -43.34 IRR None PB None
+Opuama (NEPL, болото)|q2025|base|fee1.375            cap  34.85 (pkg 11.50 hp 5423) F 3.55(x4.85) E1  -0.95 E2  -0.24 NPV15 -41.61 NPV20 -40.28 IRR None PB None
+Opuama (NEPL, болото)|q2025|base|fee1.75             cap  34.85 (pkg 11.50 hp 5423) F 3.55(x4.85) E1  -0.23 E2   0.71 NPV15 -37.97 NPV20 -37.22 IRR None PB None
+Opuama (NEPL, болото)|q2025|pess|fee1.0              cap  55.25 (pkg 15.91 hp 6162) F 5.89(x6.99) E1  -5.08 E2  -4.64 NPV15 -76.16 NPV20 -70.06 IRR None PB None
+Opuama (NEPL, болото)|q2025|pess|fee1.375            cap  55.25 (pkg 15.91 hp 6162) F 5.89(x6.99) E1  -4.75 E2  -4.07 NPV15 -74.59 NPV20 -68.80 IRR None PB None
+Opuama (NEPL, болото)|q2025|pess|fee1.75             cap  55.25 (pkg 15.91 hp 6162) F 5.89(x6.99) E1  -4.43 E2  -3.51 NPV15 -73.01 NPV20 -67.54 IRR None PB None
+Opuama (NEPL, болото)|qmin|opt|fee1.0                cap  22.67 (pkg 8.12 hp 4560) F 2.23(x3.44) E1  -0.08 E2   0.31 NPV15 -23.55 NPV20 -23.31 IRR None PB None
+Opuama (NEPL, болото)|qmin|opt|fee1.375              cap  22.67 (pkg 8.12 hp 4560) F 2.23(x3.44) E1   0.74 E2   1.31 NPV15 -19.13 NPV20 -19.63 IRR -22.9 PB None
+Opuama (NEPL, болото)|qmin|opt|fee1.75               cap  22.67 (pkg 8.12 hp 4560) F 2.23(x3.44) E1   1.57 E2   2.30 NPV15 -14.73 NPV20 -15.95 IRR -7.7 PB None
+Opuama (NEPL, болото)|qmin|base|fee1.0               cap  34.85 (pkg 11.50 hp 5423) F 3.55(x4.85) E1  -2.04 E2  -1.67 NPV15 -47.03 NPV20 -44.83 IRR None PB None
+Opuama (NEPL, болото)|qmin|base|fee1.375             cap  34.85 (pkg 11.50 hp 5423) F 3.55(x4.85) E1  -1.45 E2  -0.89 NPV15 -44.08 NPV20 -42.36 IRR None PB None
+Opuama (NEPL, болото)|qmin|base|fee1.75              cap  34.85 (pkg 11.50 hp 5423) F 3.55(x4.85) E1  -0.86 E2  -0.12 NPV15 -41.13 NPV20 -39.88 IRR None PB None
+Opuama (NEPL, болото)|qmin|pess|fee1.0               cap  55.25 (pkg 15.91 hp 6162) F 5.89(x6.99) E1  -5.23 E2  -4.91 NPV15 -76.92 NPV20 -70.67 IRR None PB None
+Opuama (NEPL, болото)|qmin|pess|fee1.375             cap  55.25 (pkg 15.91 hp 6162) F 5.89(x6.99) E1  -4.97 E2  -4.45 NPV15 -75.64 NPV20 -69.64 IRR None PB None
+Opuama (NEPL, болото)|qmin|pess|fee1.75              cap  55.25 (pkg 15.91 hp 6162) F 5.89(x6.99) E1  -4.71 E2  -3.99 NPV15 -74.36 NPV20 -68.62 IRR None PB None
+Odidi (NEPL)|q2025|opt|fee1.0                        cap  19.68 (pkg 7.29 hp 4833) F 2.10(x3.4) E1   2.62 E2   3.55 NPV15  -7.50 NPV20  -9.48 IRR 3.8 PB 8.0
+Odidi (NEPL)|q2025|opt|fee1.375                      cap  19.68 (pkg 7.29 hp 4833) F 2.10(x3.4) E1   4.42 E2   5.74 NPV15  -1.14 NPV20  -4.19 IRR 13.5 PB 5.1
+Odidi (NEPL)|q2025|opt|fee1.75                       cap  19.68 (pkg 7.29 hp 4833) F 2.10(x3.4) E1   6.23 E2   7.92 NPV15   5.19 NPV20   1.08 IRR 21.6 PB 3.8
+Odidi (NEPL)|q2025|base|fee1.0                       cap  31.13 (pkg 10.65 hp 6560) F 3.34(x4.76) E1  -0.01 E2   0.93 NPV15 -33.07 NPV20 -32.52 IRR None PB None
+Odidi (NEPL)|q2025|base|fee1.375                     cap  31.13 (pkg 10.65 hp 6560) F 3.34(x4.76) E1   1.28 E2   2.63 NPV15 -26.60 NPV20 -27.09 IRR None PB None
+Odidi (NEPL)|q2025|base|fee1.75                      cap  31.13 (pkg 10.65 hp 6560) F 3.34(x4.76) E1   2.57 E2   4.32 NPV15 -20.56 NPV20 -22.04 IRR -11.1 PB None
+Odidi (NEPL)|q2025|pess|fee1.0                       cap  48.78 (pkg 14.57 hp 8077) F 5.43(x6.8) E1  -3.99 E2  -3.06 NPV15 -64.84 NPV20 -59.93 IRR None PB None
+Odidi (NEPL)|q2025|pess|fee1.375                     cap  48.78 (pkg 14.57 hp 8077) F 5.43(x6.8) E1  -3.42 E2  -2.06 NPV15 -62.04 NPV20 -57.69 IRR None PB None
+Odidi (NEPL)|q2025|pess|fee1.75                      cap  48.78 (pkg 14.57 hp 8077) F 5.43(x6.8) E1  -2.85 E2  -1.06 NPV15 -59.24 NPV20 -55.44 IRR None PB None
+Odidi (NEPL)|qmin|opt|fee1.0                         cap  19.68 (pkg 7.29 hp 4833) F 2.10(x3.4) E1  -0.95 E2  -0.77 NPV15 -25.21 NPV20 -24.21 IRR None PB None
+Odidi (NEPL)|qmin|opt|fee1.375                       cap  19.68 (pkg 7.29 hp 4833) F 2.10(x3.4) E1  -0.51 E2  -0.24 NPV15 -22.86 NPV20 -22.25 IRR None PB None
+Odidi (NEPL)|qmin|opt|fee1.75                        cap  19.68 (pkg 7.29 hp 4833) F 2.10(x3.4) E1  -0.08 E2   0.29 NPV15 -20.51 NPV20 -20.29 IRR None PB None
+Odidi (NEPL)|qmin|base|fee1.0                        cap  31.13 (pkg 10.65 hp 6560) F 3.34(x4.76) E1  -2.53 E2  -2.38 NPV15 -45.68 NPV20 -43.12 IRR None PB None
+Odidi (NEPL)|qmin|base|fee1.375                      cap  31.13 (pkg 10.65 hp 6560) F 3.34(x4.76) E1  -2.22 E2  -1.97 NPV15 -44.11 NPV20 -41.80 IRR None PB None
+Odidi (NEPL)|qmin|base|fee1.75                       cap  31.13 (pkg 10.65 hp 6560) F 3.34(x4.76) E1  -1.91 E2  -1.56 NPV15 -42.54 NPV20 -40.48 IRR None PB None
+Odidi (NEPL)|qmin|pess|fee1.0                        cap  48.78 (pkg 14.57 hp 8077) F 5.43(x6.8) E1  -5.08 E2  -4.98 NPV15 -70.18 NPV20 -64.20 IRR None PB None
+Odidi (NEPL)|qmin|pess|fee1.375                      cap  48.78 (pkg 14.57 hp 8077) F 5.43(x6.8) E1  -4.95 E2  -4.74 NPV15 -69.51 NPV20 -63.66 IRR None PB None
+Odidi (NEPL)|qmin|pess|fee1.75                       cap  48.78 (pkg 14.57 hp 8077) F 5.43(x6.8) E1  -4.81 E2  -4.50 NPV15 -68.83 NPV20 -63.11 IRR None PB None
+Obiafu-Obrikom (Oando)|q2025|opt|fee1.0              cap  17.60 (pkg 6.48 hp 4223) F 2.00(x3.35) E1   2.12 E2   2.93 NPV15  -7.57 NPV20  -9.19 IRR 2.0 PB 8.9
+Obiafu-Obrikom (Oando)|q2025|opt|fee1.375            cap  17.60 (pkg 6.48 hp 4223) F 2.00(x3.35) E1   3.69 E2   4.84 NPV15  -1.96 NPV20  -4.53 IRR 12.0 PB 5.4
+Obiafu-Obrikom (Oando)|q2025|opt|fee1.75             cap  17.60 (pkg 6.48 hp 4223) F 2.00(x3.35) E1   5.27 E2   6.75 NPV15   3.57 NPV20   0.08 IRR 20.1 PB 4.0
+Obiafu-Obrikom (Oando)|q2025|base|fee1.0             cap  27.71 (pkg 9.42 hp 5732) F 3.14(x4.69) E1  -0.24 E2   0.58 NPV15 -30.65 NPV20 -29.96 IRR None PB None
+Obiafu-Obrikom (Oando)|q2025|base|fee1.375           cap  27.71 (pkg 9.42 hp 5732) F 3.14(x4.69) E1   0.89 E2   2.06 NPV15 -25.01 NPV20 -25.22 IRR None PB None
+Obiafu-Obrikom (Oando)|q2025|base|fee1.75            cap  27.71 (pkg 9.42 hp 5732) F 3.14(x4.69) E1   2.02 E2   3.55 NPV15 -19.59 NPV20 -20.68 IRR -15.5 PB None
+Obiafu-Obrikom (Oando)|q2025|pess|fee1.0             cap  43.27 (pkg 12.84 hp 7057) F 5.05(x6.68) E1  -3.79 E2  -2.98 NPV15 -58.71 NPV20 -54.11 IRR None PB None
+Obiafu-Obrikom (Oando)|q2025|pess|fee1.375           cap  43.27 (pkg 12.84 hp 7057) F 5.05(x6.68) E1  -3.29 E2  -2.11 NPV15 -56.27 NPV20 -52.15 IRR None PB None
+Obiafu-Obrikom (Oando)|q2025|pess|fee1.75            cap  43.27 (pkg 12.84 hp 7057) F 5.05(x6.68) E1  -2.79 E2  -1.23 NPV15 -53.82 NPV20 -50.19 IRR None PB None
+Obiafu-Obrikom (Oando)|qmin|opt|fee1.0               cap  17.60 (pkg 6.48 hp 4223) F 2.00(x3.35) E1   0.38 E2   0.82 NPV15 -15.98 NPV20 -16.17 IRR None PB None
+Obiafu-Obrikom (Oando)|qmin|opt|fee1.375             cap  17.60 (pkg 6.48 hp 4223) F 2.00(x3.35) E1   1.29 E2   1.92 NPV15 -11.14 NPV20 -12.13 IRR -7.0 PB None
+Obiafu-Obrikom (Oando)|qmin|opt|fee1.75              cap  17.60 (pkg 6.48 hp 4223) F 2.00(x3.35) E1   2.20 E2   3.03 NPV15  -7.26 NPV20  -8.93 IRR 2.7 PB 8.6
+Obiafu-Obrikom (Oando)|qmin|base|fee1.0              cap  27.71 (pkg 9.42 hp 5732) F 3.14(x4.69) E1  -1.46 E2  -1.03 NPV15 -36.80 NPV20 -35.12 IRR None PB None
+Obiafu-Obrikom (Oando)|qmin|base|fee1.375            cap  27.71 (pkg 9.42 hp 5732) F 3.14(x4.69) E1  -0.81 E2  -0.17 NPV15 -33.53 NPV20 -32.38 IRR None PB None
+Obiafu-Obrikom (Oando)|qmin|base|fee1.75             cap  27.71 (pkg 9.42 hp 5732) F 3.14(x4.69) E1  -0.16 E2   0.68 NPV15 -30.27 NPV20 -29.64 IRR None PB None
+Obiafu-Obrikom (Oando)|qmin|pess|fee1.0              cap  43.27 (pkg 12.84 hp 7057) F 5.05(x6.68) E1  -4.32 E2  -3.92 NPV15 -61.32 NPV20 -56.19 IRR None PB None
+Obiafu-Obrikom (Oando)|qmin|pess|fee1.375            cap  43.27 (pkg 12.84 hp 7057) F 5.05(x6.68) E1  -4.03 E2  -3.41 NPV15 -59.90 NPV20 -55.06 IRR None PB None
+Obiafu-Obrikom (Oando)|qmin|pess|fee1.75             cap  43.27 (pkg 12.84 hp 7057) F 5.05(x6.68) E1  -3.75 E2  -2.91 NPV15 -58.49 NPV20 -53.93 IRR None PB None
+Kwale (Oando)|q2025|opt|fee1.0                       cap  11.08 (pkg 3.94 hp 2346) F 1.71(x3.2) E1   0.58 E2   1.01 NPV15  -8.32 NPV20  -8.71 IRR -16.0 PB None
+Kwale (Oando)|q2025|opt|fee1.375                     cap  11.08 (pkg 3.94 hp 2346) F 1.71(x3.2) E1   1.45 E2   2.07 NPV15  -4.41 NPV20  -5.48 IRR 3.0 PB 8.3
+Kwale (Oando)|q2025|opt|fee1.75                      cap  11.08 (pkg 3.94 hp 2346) F 1.71(x3.2) E1   2.33 E2   3.13 NPV15  -1.29 NPV20  -2.89 IRR 11.8 PB 5.4
+Kwale (Oando)|q2025|base|fee1.0                      cap  17.01 (pkg 5.58 hp 3184) F 2.53(x4.4) E1  -0.91 E2  -0.48 NPV15 -23.00 NPV20 -21.86 IRR None PB None
+Kwale (Oando)|q2025|base|fee1.375                    cap  17.01 (pkg 5.58 hp 3184) F 2.53(x4.4) E1  -0.29 E2   0.34 NPV15 -19.86 NPV20 -19.23 IRR None PB None
+Kwale (Oando)|q2025|base|fee1.75                     cap  17.01 (pkg 5.58 hp 3184) F 2.53(x4.4) E1   0.34 E2   1.16 NPV15 -16.72 NPV20 -16.59 IRR None PB None
+Kwale (Oando)|q2025|pess|fee1.0                      cap  26.14 (pkg 7.48 hp 3921) F 3.85(x6.19) E1  -3.15 E2  -2.73 NPV15 -39.64 NPV20 -36.00 IRR None PB None
+Kwale (Oando)|q2025|pess|fee1.375                    cap  26.14 (pkg 7.48 hp 3921) F 3.85(x6.19) E1  -2.87 E2  -2.25 NPV15 -38.28 NPV20 -34.91 IRR None PB None
+Kwale (Oando)|q2025|pess|fee1.75                     cap  26.14 (pkg 7.48 hp 3921) F 3.85(x6.19) E1  -2.60 E2  -1.76 NPV15 -36.92 NPV20 -33.82 IRR None PB None
+Kwale (Oando)|qmin|opt|fee1.0                        cap  11.08 (pkg 3.94 hp 2346) F 1.71(x3.2) E1   0.56 E2   0.98 NPV15  -8.44 NPV20  -8.81 IRR -17.1 PB None
+Kwale (Oando)|qmin|opt|fee1.375                      cap  11.08 (pkg 3.94 hp 2346) F 1.71(x3.2) E1   1.42 E2   2.03 NPV15  -4.53 NPV20  -5.58 IRR 2.6 PB 8.5
+Kwale (Oando)|qmin|opt|fee1.75                       cap  11.08 (pkg 3.94 hp 2346) F 1.71(x3.2) E1   2.29 E2   3.09 NPV15  -1.43 NPV20  -3.00 IRR 11.5 PB 5.5
+Kwale (Oando)|qmin|base|fee1.0                       cap  17.01 (pkg 5.58 hp 3184) F 2.53(x4.4) E1  -0.93 E2  -0.50 NPV15 -23.08 NPV20 -21.93 IRR None PB None
+Kwale (Oando)|qmin|base|fee1.375                     cap  17.01 (pkg 5.58 hp 3184) F 2.53(x4.4) E1  -0.31 E2   0.31 NPV15 -19.97 NPV20 -19.32 IRR None PB None
+Kwale (Oando)|qmin|base|fee1.75                      cap  17.01 (pkg 5.58 hp 3184) F 2.53(x4.4) E1   0.31 E2   1.13 NPV15 -16.86 NPV20 -16.71 IRR None PB None
+Kwale (Oando)|qmin|pess|fee1.0                       cap  26.14 (pkg 7.48 hp 3921) F 3.85(x6.19) E1  -3.16 E2  -2.75 NPV15 -39.67 NPV20 -36.02 IRR None PB None
+Kwale (Oando)|qmin|pess|fee1.375                     cap  26.14 (pkg 7.48 hp 3921) F 3.85(x6.19) E1  -2.88 E2  -2.26 NPV15 -38.33 NPV20 -34.95 IRR None PB None
+Kwale (Oando)|qmin|pess|fee1.75                      cap  26.14 (pkg 7.48 hp 3921) F 3.85(x6.19) E1  -2.61 E2  -1.78 NPV15 -36.98 NPV20 -33.87 IRR None PB None
+Saghara (Renaissance)|q2025|opt|fee1.0               cap  22.84 (pkg 8.18 hp 4600) F 2.24(x3.45) E1   0.44 E2   0.94 NPV15 -20.94 NPV20 -21.16 IRR None PB None
+Saghara (Renaissance)|q2025|opt|fee1.375             cap  22.84 (pkg 8.18 hp 4600) F 2.24(x3.45) E1   1.46 E2   2.18 NPV15 -15.44 NPV20 -16.58 IRR -9.1 PB None
+Saghara (Renaissance)|q2025|opt|fee1.75              cap  22.84 (pkg 8.18 hp 4600) F 2.24(x3.45) E1   2.49 E2   3.42 NPV15 -10.73 NPV20 -12.67 IRR 0.6 PB 9.7
+Saghara (Renaissance)|q2025|base|fee1.0              cap  35.11 (pkg 11.59 hp 5470) F 3.57(x4.86) E1  -1.68 E2  -1.19 NPV15 -45.51 NPV20 -43.60 IRR None PB None
+Saghara (Renaissance)|q2025|base|fee1.375            cap  35.11 (pkg 11.59 hp 5470) F 3.57(x4.86) E1  -0.95 E2  -0.23 NPV15 -41.84 NPV20 -40.52 IRR None PB None
+Saghara (Renaissance)|q2025|base|fee1.75             cap  35.11 (pkg 11.59 hp 5470) F 3.57(x4.86) E1  -0.21 E2   0.73 NPV15 -38.17 NPV20 -37.43 IRR None PB None
+Saghara (Renaissance)|q2025|pess|fee1.0              cap  55.67 (pkg 16.04 hp 6215) F 5.92(x6.99) E1  -5.10 E2  -4.65 NPV15 -76.66 NPV20 -70.53 IRR None PB None
+Saghara (Renaissance)|q2025|pess|fee1.375            cap  55.67 (pkg 16.04 hp 6215) F 5.92(x6.99) E1  -4.77 E2  -4.08 NPV15 -75.07 NPV20 -69.26 IRR None PB None
+Saghara (Renaissance)|q2025|pess|fee1.75             cap  55.67 (pkg 16.04 hp 6215) F 5.92(x6.99) E1  -4.45 E2  -3.51 NPV15 -73.48 NPV20 -67.99 IRR None PB None
+Saghara (Renaissance)|qmin|opt|fee1.0                cap  22.84 (pkg 8.18 hp 4600) F 2.24(x3.45) E1  -1.25 E2  -1.11 NPV15 -30.02 NPV20 -28.74 IRR None PB None
+Saghara (Renaissance)|qmin|opt|fee1.375              cap  22.84 (pkg 8.18 hp 4600) F 2.24(x3.45) E1  -0.88 E2  -0.66 NPV15 -28.00 NPV20 -27.06 IRR None PB None
+Saghara (Renaissance)|qmin|opt|fee1.75               cap  22.84 (pkg 8.18 hp 4600) F 2.24(x3.45) E1  -0.50 E2  -0.20 NPV15 -25.98 NPV20 -25.37 IRR None PB None
+Saghara (Renaissance)|qmin|base|fee1.0               cap  35.11 (pkg 11.59 hp 5470) F 3.57(x4.86) E1  -2.87 E2  -2.76 NPV15 -51.49 NPV20 -48.63 IRR None PB None
+Saghara (Renaissance)|qmin|base|fee1.375             cap  35.11 (pkg 11.59 hp 5470) F 3.57(x4.86) E1  -2.61 E2  -2.41 NPV15 -50.15 NPV20 -47.49 IRR None PB None
+Saghara (Renaissance)|qmin|base|fee1.75              cap  35.11 (pkg 11.59 hp 5470) F 3.57(x4.86) E1  -2.34 E2  -2.06 NPV15 -48.80 NPV20 -46.36 IRR None PB None
+Saghara (Renaissance)|qmin|pess|fee1.0               cap  55.67 (pkg 16.04 hp 6215) F 5.92(x6.99) E1  -5.62 E2  -5.56 NPV15 -79.20 NPV20 -72.56 IRR None PB None
+Saghara (Renaissance)|qmin|pess|fee1.375             cap  55.67 (pkg 16.04 hp 6215) F 5.92(x6.99) E1  -5.50 E2  -5.36 NPV15 -78.61 NPV20 -72.09 IRR None PB None
+Saghara (Renaissance)|qmin|pess|fee1.75              cap  55.67 (pkg 16.04 hp 6215) F 5.92(x6.99) E1  -5.38 E2  -5.15 NPV15 -78.03 NPV20 -71.63 IRR None PB None
+Oben (Seplat)|q2025|opt|fee1.0                       cap   9.73 (pkg 3.52 hp 2041) F 1.65(x3.18) E1   0.34 E2   0.71 NPV15  -8.22 NPV20  -8.41 IRR None PB None
+Oben (Seplat)|q2025|opt|fee1.375                     cap   9.73 (pkg 3.52 hp 2041) F 1.65(x3.18) E1   1.10 E2   1.64 NPV15  -4.58 NPV20  -5.39 IRR 0.1 PB 9.9
+Oben (Seplat)|q2025|opt|fee1.75                      cap   9.73 (pkg 3.52 hp 2041) F 1.65(x3.18) E1   1.87 E2   2.56 NPV15  -1.79 NPV20  -3.08 IRR 9.9 PB 5.8
+Oben (Seplat)|q2025|base|fee1.0                      cap  14.81 (pkg 4.94 hp 2770) F 2.40(x4.34) E1  -1.00 E2  -0.63 NPV15 -21.14 NPV20 -19.96 IRR None PB None
+Oben (Seplat)|q2025|base|fee1.375                    cap  14.81 (pkg 4.94 hp 2770) F 2.40(x4.34) E1  -0.45 E2   0.09 NPV15 -18.41 NPV20 -17.67 IRR None PB None
+Oben (Seplat)|q2025|base|fee1.75                     cap  14.81 (pkg 4.94 hp 2770) F 2.40(x4.34) E1   0.09 E2   0.80 NPV15 -15.68 NPV20 -15.37 IRR None PB None
+Oben (Seplat)|q2025|pess|fee1.0                      cap  22.64 (pkg 6.59 hp 3411) F 3.60(x6.06) E1  -3.00 E2  -2.64 NPV15 -35.63 NPV20 -32.20 IRR None PB None
+Oben (Seplat)|q2025|pess|fee1.375                    cap  22.64 (pkg 6.59 hp 3411) F 3.60(x6.06) E1  -2.76 E2  -2.22 NPV15 -34.44 NPV20 -31.26 IRR None PB None
+Oben (Seplat)|q2025|pess|fee1.75                     cap  22.64 (pkg 6.59 hp 3411) F 3.60(x6.06) E1  -2.51 E2  -1.79 NPV15 -33.26 NPV20 -30.31 IRR None PB None
+Oben (Seplat)|qmin|opt|fee1.0                        cap   9.73 (pkg 3.52 hp 2041) F 1.65(x3.18) E1   0.34 E2   0.71 NPV15  -8.22 NPV20  -8.41 IRR None PB None
+Oben (Seplat)|qmin|opt|fee1.375                      cap   9.73 (pkg 3.52 hp 2041) F 1.65(x3.18) E1   1.10 E2   1.64 NPV15  -4.58 NPV20  -5.39 IRR 0.1 PB 9.9
+Oben (Seplat)|qmin|opt|fee1.75                       cap   9.73 (pkg 3.52 hp 2041) F 1.65(x3.18) E1   1.87 E2   2.56 NPV15  -1.79 NPV20  -3.08 IRR 9.9 PB 5.8
+Oben (Seplat)|qmin|base|fee1.0                       cap  14.81 (pkg 4.94 hp 2770) F 2.40(x4.34) E1  -1.00 E2  -0.63 NPV15 -21.14 NPV20 -19.96 IRR None PB None
+Oben (Seplat)|qmin|base|fee1.375                     cap  14.81 (pkg 4.94 hp 2770) F 2.40(x4.34) E1  -0.45 E2   0.09 NPV15 -18.41 NPV20 -17.67 IRR None PB None
+Oben (Seplat)|qmin|base|fee1.75                      cap  14.81 (pkg 4.94 hp 2770) F 2.40(x4.34) E1   0.09 E2   0.80 NPV15 -15.68 NPV20 -15.37 IRR None PB None
+Oben (Seplat)|qmin|pess|fee1.0                       cap  22.64 (pkg 6.59 hp 3411) F 3.60(x6.06) E1  -3.00 E2  -2.64 NPV15 -35.63 NPV20 -32.20 IRR None PB None
+Oben (Seplat)|qmin|pess|fee1.375                     cap  22.64 (pkg 6.59 hp 3411) F 3.60(x6.06) E1  -2.76 E2  -2.22 NPV15 -34.44 NPV20 -31.26 IRR None PB None
+Oben (Seplat)|qmin|pess|fee1.75                      cap  22.64 (pkg 6.59 hp 3411) F 3.60(x6.06) E1  -2.51 E2  -1.79 NPV15 -33.26 NPV20 -30.31 IRR None PB None
+Afam Umuosi (NEPL)|q2025|opt|fee1.0                  cap   7.34 (pkg 2.48 hp 1314) F 1.36(x3.11) E1  -0.08 E2   0.15 NPV15  -8.04 NPV20  -7.87 IRR None PB None
+Afam Umuosi (NEPL)|q2025|opt|fee1.375                cap   7.34 (pkg 2.48 hp 1314) F 1.36(x3.11) E1   0.41 E2   0.75 NPV15  -5.41 NPV20  -5.68 IRR -16.3 PB None
+Afam Umuosi (NEPL)|q2025|opt|fee1.75                 cap   7.34 (pkg 2.48 hp 1314) F 1.36(x3.11) E1   0.90 E2   1.34 NPV15  -3.22 NPV20  -3.87 IRR 1.3 PB 9.2
+Afam Umuosi (NEPL)|q2025|base|fee1.0                 cap  10.96 (pkg 3.40 hp 1783) F 1.96(x4.25) E1  -1.05 E2  -0.83 NPV15 -17.31 NPV20 -16.16 IRR None PB None
+Afam Umuosi (NEPL)|q2025|base|fee1.375               cap  10.96 (pkg 3.40 hp 1783) F 1.96(x4.25) E1  -0.70 E2  -0.36 NPV15 -15.56 NPV20 -14.69 IRR None PB None
+Afam Umuosi (NEPL)|q2025|base|fee1.75                cap  10.96 (pkg 3.40 hp 1783) F 1.96(x4.25) E1  -0.35 E2   0.10 NPV15 -13.80 NPV20 -13.21 IRR None PB None
+Afam Umuosi (NEPL)|q2025|pess|fee1.0                 cap  16.53 (pkg 4.46 hp 2196) F 2.89(x5.94) E1  -2.50 E2  -2.29 NPV15 -27.53 NPV20 -24.72 IRR None PB None
+Afam Umuosi (NEPL)|q2025|pess|fee1.375               cap  16.53 (pkg 4.46 hp 2196) F 2.89(x5.94) E1  -2.35 E2  -2.02 NPV15 -26.77 NPV20 -24.11 IRR None PB None
+Afam Umuosi (NEPL)|q2025|pess|fee1.75                cap  16.53 (pkg 4.46 hp 2196) F 2.89(x5.94) E1  -2.19 E2  -1.74 NPV15 -26.01 NPV20 -23.50 IRR None PB None
+Afam Umuosi (NEPL)|qmin|opt|fee1.0                   cap   7.34 (pkg 2.48 hp 1314) F 1.36(x3.11) E1  -0.70 E2  -0.60 NPV15 -11.35 NPV20 -10.63 IRR None PB None
+Afam Umuosi (NEPL)|qmin|opt|fee1.375                 cap   7.34 (pkg 2.48 hp 1314) F 1.36(x3.11) E1  -0.44 E2  -0.29 NPV15  -9.99 NPV20  -9.50 IRR None PB None
+Afam Umuosi (NEPL)|qmin|opt|fee1.75                  cap   7.34 (pkg 2.48 hp 1314) F 1.36(x3.11) E1  -0.19 E2   0.02 NPV15  -8.63 NPV20  -8.36 IRR None PB None
+Afam Umuosi (NEPL)|qmin|base|fee1.0                  cap  10.96 (pkg 3.40 hp 1783) F 1.96(x4.25) E1  -1.49 E2  -1.40 NPV15 -19.50 NPV20 -18.00 IRR None PB None
+Afam Umuosi (NEPL)|qmin|base|fee1.375                cap  10.96 (pkg 3.40 hp 1783) F 1.96(x4.25) E1  -1.31 E2  -1.16 NPV15 -18.59 NPV20 -17.23 IRR None PB None
+Afam Umuosi (NEPL)|qmin|base|fee1.75                 cap  10.96 (pkg 3.40 hp 1783) F 1.96(x4.25) E1  -1.12 E2  -0.92 NPV15 -17.68 NPV20 -16.47 IRR None PB None
+Afam Umuosi (NEPL)|qmin|pess|fee1.0                  cap  16.53 (pkg 4.46 hp 2196) F 2.89(x5.94) E1  -2.69 E2  -2.62 NPV15 -28.45 NPV20 -25.46 IRR None PB None
+Afam Umuosi (NEPL)|qmin|pess|fee1.375                cap  16.53 (pkg 4.46 hp 2196) F 2.89(x5.94) E1  -2.61 E2  -2.48 NPV15 -28.06 NPV20 -25.14 IRR None PB None
+Afam Umuosi (NEPL)|qmin|pess|fee1.75                 cap  16.53 (pkg 4.46 hp 2196) F 2.89(x5.94) E1  -2.53 E2  -2.34 NPV15 -27.67 NPV20 -24.83 IRR None PB None
+== thresholds
+  boost|Q1|opt {'fee_npv20_contract': 7.877, 'fee_npv15_contract': 7.222, 'fee_npv20_pre': 10.233, 'Q_npv20_fee1375': 46.155, 'Q_npv20_fee175': 17.113, 'cm_npv20_fee175': None}
+  boost|Q1|base {'fee_npv20_contract': 17.037, 'fee_npv15_contract': 15.669, 'fee_npv20_pre': 34.04, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': None, 'cm_npv20_fee175': None}
+  boost|Q1|pess {'fee_npv20_contract': None, 'fee_npv15_contract': None, 'fee_npv20_pre': None, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': None, 'cm_npv20_fee175': None}
+  boost|Q5|opt {'fee_npv20_contract': 2.847, 'fee_npv15_contract': 2.534, 'fee_npv20_pre': 3.695, 'Q_npv20_fee1375': 46.155, 'Q_npv20_fee175': 17.113, 'cm_npv20_fee175': 0.857}
+  boost|Q5|base {'fee_npv20_contract': 6.407, 'fee_npv15_contract': 5.712, 'fee_npv20_pre': 12.778, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': None, 'cm_npv20_fee175': None}
+  boost|Q5|pess {'fee_npv20_contract': 22.56, 'fee_npv15_contract': 19.434, 'fee_npv20_pre': None, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': None, 'cm_npv20_fee175': None}
+  boost|Q15|opt {'fee_npv20_contract': 1.829, 'fee_npv15_contract': 1.589, 'fee_npv20_pre': 2.371, 'Q_npv20_fee1375': 46.155, 'Q_npv20_fee175': 17.113, 'cm_npv20_fee175': 2.264}
+  boost|Q15|base {'fee_npv20_contract': 4.323, 'fee_npv15_contract': 3.765, 'fee_npv20_pre': 8.611, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': None, 'cm_npv20_fee175': 0.613}
+  boost|Q15|pess {'fee_npv20_contract': 15.529, 'fee_npv15_contract': 13.096, 'fee_npv20_pre': 41.831, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': None, 'cm_npv20_fee175': None}
+  reinj|Q1|opt {'fee_npv20_contract': 9.683, 'fee_npv15_contract': 8.727, 'fee_npv20_pre': 12.581, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': None, 'cm_npv20_fee175': None}
+  reinj|Q1|base {'fee_npv20_contract': 22.916, 'fee_npv15_contract': 20.607, 'fee_npv20_pre': 45.797, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': None, 'cm_npv20_fee175': None}
+  reinj|Q1|pess {'fee_npv20_contract': None, 'fee_npv15_contract': None, 'fee_npv20_pre': None, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': None, 'cm_npv20_fee175': None}
+  reinj|Q5|opt {'fee_npv20_contract': 4.152, 'fee_npv15_contract': 3.622, 'fee_npv20_pre': 5.392, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': None, 'cm_npv20_fee175': None}
+  reinj|Q5|base {'fee_npv20_contract': 9.834, 'fee_npv15_contract': 8.592, 'fee_npv20_pre': 19.634, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': None, 'cm_npv20_fee175': None}
+  reinj|Q5|pess {'fee_npv20_contract': None, 'fee_npv15_contract': None, 'fee_npv20_pre': None, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': None, 'cm_npv20_fee175': None}
+  reinj|Q15|opt {'fee_npv20_contract': 3.051, 'fee_npv15_contract': 2.608, 'fee_npv20_pre': 3.96, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': None, 'cm_npv20_fee175': 1.182}
+  reinj|Q15|base {'fee_npv20_contract': 7.334, 'fee_npv15_contract': 6.303, 'fee_npv20_pre': 14.633, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': None, 'cm_npv20_fee175': None}
+  reinj|Q15|pess {'fee_npv20_contract': 27.244, 'fee_npv15_contract': 22.697, 'fee_npv20_pre': None, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': None, 'cm_npv20_fee175': None}
+  gaslift|Q1|opt {'fee_npv20_contract': 8.838, 'fee_npv15_contract': 8.023, 'fee_npv20_pre': 11.483, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': 183.877, 'cm_npv20_fee175': None}
+  gaslift|Q1|base {'fee_npv20_contract': 20.087, 'fee_npv15_contract': 18.233, 'fee_npv20_pre': 40.139, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': None, 'cm_npv20_fee175': None}
+  gaslift|Q1|pess {'fee_npv20_contract': None, 'fee_npv15_contract': None, 'fee_npv20_pre': None, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': None, 'cm_npv20_fee175': None}
+  gaslift|Q5|opt {'fee_npv20_contract': 3.505, 'fee_npv15_contract': 3.083, 'fee_npv20_pre': 4.551, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': 183.877, 'cm_npv20_fee175': 0.557}
+  gaslift|Q5|base {'fee_npv20_contract': 7.911, 'fee_npv15_contract': 6.976, 'fee_npv20_pre': 15.788, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': None, 'cm_npv20_fee175': None}
+  gaslift|Q5|pess {'fee_npv20_contract': 27.256, 'fee_npv15_contract': 23.277, 'fee_npv20_pre': None, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': None, 'cm_npv20_fee175': None}
+  gaslift|Q15|opt {'fee_npv20_contract': 2.436, 'fee_npv15_contract': 2.095, 'fee_npv20_pre': 3.16, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': 183.877, 'cm_npv20_fee175': 1.562}
+  gaslift|Q15|base {'fee_npv20_contract': 5.567, 'fee_npv15_contract': 4.814, 'fee_npv20_pre': 11.099, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': None, 'cm_npv20_fee175': None}
+  gaslift|Q15|pess {'fee_npv20_contract': 19.263, 'fee_npv15_contract': 16.157, 'fee_npv20_pre': 51.914, 'Q_npv20_fee1375': None, 'Q_npv20_fee175': None, 'cm_npv20_fee175': None}
+  NAMED Ughelli East (NEPL)|q2025|base {'fee_npv20_contract': 5.597}
+  NAMED Ughelli East (NEPL)|qmin|base {'fee_npv20_contract': 5.951}
+  NAMED Oredo (NEPL, IGHF)|q2025|base {'fee_npv20_contract': 4.282}
+  NAMED Oredo (NEPL, IGHF)|qmin|base {'fee_npv20_contract': 7.779}
+  NAMED Opuama (NEPL, болото)|q2025|base {'fee_npv20_contract': 7.759}
+  NAMED Opuama (NEPL, болото)|qmin|base {'fee_npv20_contract': 9.567}
+  NAMED Odidi (NEPL)|q2025|base {'fee_npv20_contract': 3.974}
+  NAMED Odidi (NEPL)|qmin|base {'fee_npv20_contract': 16.263}
+  NAMED Obiafu-Obrikom (Oando)|q2025|base {'fee_npv20_contract': 4.111}
+  NAMED Obiafu-Obrikom (Oando)|qmin|base {'fee_npv20_contract': 7.09}
+  NAMED Kwale (Oando)|q2025|base {'fee_npv20_contract': 4.94}
+  NAMED Kwale (Oando)|qmin|base {'fee_npv20_contract': 4.989}
+  NAMED Saghara (Renaissance)|q2025|base {'fee_npv20_contract': 7.743}
+  NAMED Saghara (Renaissance)|qmin|base {'fee_npv20_contract': 21.009}
+  NAMED Oben (Seplat)|q2025|base {'fee_npv20_contract': 5.098}
+  NAMED Oben (Seplat)|qmin|base {'fee_npv20_contract': 5.098}
+  NAMED Afam Umuosi (NEPL)|q2025|base {'fee_npv20_contract': 6.069}
+  NAMED Afam Umuosi (NEPL)|qmin|base {'fee_npv20_contract': 11.687}
+== operator
+  boost|Q1|opt {'lcoc15': 2.794, 'lcoc20': 3.003, 'capex_oper': 1.56}
+  boost|Q1|base {'lcoc15': 4.544, 'lcoc20': 4.946, 'capex_oper': 2.38}
+  boost|Q1|pess {'lcoc15': 12.984, 'lcoc20': 14.655, 'capex_oper': 4.64}
+  boost|Q5|opt {'lcoc15': 0.993, 'lcoc20': 1.094, 'capex_oper': 3.6}
+  boost|Q5|base {'lcoc15': 1.721, 'lcoc20': 1.908, 'capex_oper': 5.32}
+  boost|Q5|pess {'lcoc15': 4.73, 'lcoc20': 5.379, 'capex_oper': 8.9}
+  boost|Q15|opt {'lcoc15': 0.659, 'lcoc20': 0.737, 'capex_oper': 8.13}
+  boost|Q15|base {'lcoc15': 1.211, 'lcoc20': 1.355, 'capex_oper': 12.13}
+  boost|Q15|pess {'lcoc15': 3.218, 'lcoc20': 3.684, 'capex_oper': 18.97}
+  reinj|Q1|opt {'lcoc15': 3.55, 'lcoc20': 3.887, 'capex_oper': 2.43}
+  reinj|Q1|base {'lcoc15': 6.957, 'lcoc20': 7.723, 'capex_oper': 4.36}
+  reinj|Q1|pess {'lcoc15': 21.339, 'lcoc20': 24.33, 'capex_oper': 8.18}
+  reinj|Q5|opt {'lcoc15': 1.507, 'lcoc20': 1.686, 'capex_oper': 6.22}
+  reinj|Q5|base {'lcoc15': 2.896, 'lcoc20': 3.245, 'capex_oper': 9.78}
+  reinj|Q5|pess {'lcoc15': 8.18, 'lcoc20': 9.373, 'capex_oper': 16.2}
+  reinj|Q15|opt {'lcoc15': 1.135, 'lcoc20': 1.281, 'capex_oper': 15.15}
+  reinj|Q15|base {'lcoc15': 2.143, 'lcoc20': 2.417, 'capex_oper': 22.75}
+  reinj|Q15|pess {'lcoc15': 5.849, 'lcoc20': 6.729, 'capex_oper': 35.66}
+  gaslift|Q1|opt {'lcoc15': 3.22, 'lcoc20': 3.499, 'capex_oper': 2.04}
+  gaslift|Q1|base {'lcoc15': 5.789, 'lcoc20': 6.394, 'capex_oper': 3.48}
+  gaslift|Q1|pess {'lcoc15': 16.898, 'lcoc20': 19.189, 'capex_oper': 6.29}
+  gaslift|Q5|opt {'lcoc15': 1.248, 'lcoc20': 1.39, 'capex_oper': 4.95}
+  gaslift|Q5|base {'lcoc15': 2.272, 'lcoc20': 2.535, 'capex_oper': 7.41}
+  gaslift|Q5|pess {'lcoc15': 6.047, 'lcoc20': 6.903, 'capex_oper': 11.69}
+  gaslift|Q15|opt {'lcoc15': 0.896, 'lcoc20': 1.009, 'capex_oper': 11.64}
+  gaslift|Q15|base {'lcoc15': 1.609, 'lcoc20': 1.809, 'capex_oper': 16.67}
+  gaslift|Q15|pess {'lcoc15': 4.103, 'lcoc20': 4.708, 'capex_oper': 24.58}
+== benchmark
+  boost|Q1|opt {'prem1.0': 0.166, 'prem1.5': 0.25, 'prem2.5': 0.416}
+  boost|Q1|base {'prem1.0': 0.294, 'prem1.5': 0.441, 'prem2.5': 0.734}
+  boost|Q1|pess {'prem1.0': 0.599, 'prem1.5': 0.899, 'prem2.5': 1.498}
+  boost|Q5|opt {'prem1.0': 0.166, 'prem1.5': 0.249, 'prem2.5': 0.415}
+  boost|Q5|base {'prem1.0': 0.294, 'prem1.5': 0.441, 'prem2.5': 0.735}
+  boost|Q5|pess {'prem1.0': 0.599, 'prem1.5': 0.899, 'prem2.5': 1.498}
+  boost|Q15|opt {'prem1.0': 0.166, 'prem1.5': 0.249, 'prem2.5': 0.415}
+  boost|Q15|base {'prem1.0': 0.294, 'prem1.5': 0.441, 'prem2.5': 0.735}
+  boost|Q15|pess {'prem1.0': 0.599, 'prem1.5': 0.899, 'prem2.5': 1.498}
+  reinj|Q1|opt {'prem1.0': 0.278, 'prem1.5': 0.417, 'prem2.5': 0.696}
+  reinj|Q1|base {'prem1.0': 0.432, 'prem1.5': 0.648, 'prem2.5': 1.081}
+  reinj|Q1|pess {'prem1.0': 0.811, 'prem1.5': 1.217, 'prem2.5': 2.029}
+  reinj|Q5|opt {'prem1.0': 0.278, 'prem1.5': 0.418, 'prem2.5': 0.696}
+  reinj|Q5|base {'prem1.0': 0.432, 'prem1.5': 0.648, 'prem2.5': 1.08}
+  reinj|Q5|pess {'prem1.0': 0.812, 'prem1.5': 1.218, 'prem2.5': 2.029}
+  reinj|Q15|opt {'prem1.0': 0.278, 'prem1.5': 0.418, 'prem2.5': 0.696}
+  reinj|Q15|base {'prem1.0': 0.432, 'prem1.5': 0.648, 'prem2.5': 1.08}
+  reinj|Q15|pess {'prem1.0': 0.812, 'prem1.5': 1.218, 'prem2.5': 2.029}
+  gaslift|Q1|opt {'prem1.0': 0.23, 'prem1.5': 0.345, 'prem2.5': 0.575}
+  gaslift|Q1|base {'prem1.0': 0.354, 'prem1.5': 0.531, 'prem2.5': 0.884}
+  gaslift|Q1|pess {'prem1.0': 0.662, 'prem1.5': 0.993, 'prem2.5': 1.654}
+  gaslift|Q5|opt {'prem1.0': 0.23, 'prem1.5': 0.345, 'prem2.5': 0.575}
+  gaslift|Q5|base {'prem1.0': 0.354, 'prem1.5': 0.531, 'prem2.5': 0.884}
+  gaslift|Q5|pess {'prem1.0': 0.661, 'prem1.5': 0.992, 'prem2.5': 1.653}
+  gaslift|Q15|opt {'prem1.0': 0.23, 'prem1.5': 0.345, 'prem2.5': 0.575}
+  gaslift|Q15|base {'prem1.0': 0.354, 'prem1.5': 0.531, 'prem2.5': 0.884}
+  gaslift|Q15|pess {'prem1.0': 0.661, 'prem1.5': 0.992, 'prem2.5': 1.653}
+== sens
+  boost|base {'capex': 10.11, 'fixed': 1.91, 'e1': -0.79, 'e2': -0.49, 'npv15': -15.11, 'npv20': -14.18, 'irr': None}
+  reinj|base {'capex': 17.65, 'fixed': 2.34, 'e1': -1.22, 'e2': -0.94, 'npv15': -25.06, 'npv20': -23.71, 'irr': None}
+  boost|ngn_8 {'capex': 10.11, 'fixed': 1.91, 'e1': -0.79, 'e2': -0.6, 'npv15': -16.21, 'npv20': -15.03, 'irr': None}
+  reinj|ngn_8 {'capex': 17.65, 'fixed': 2.34, 'e1': -1.22, 'e2': -1.05, 'npv15': -26.17, 'npv20': -24.57, 'irr': None}
+  boost|ngn_16 {'capex': 10.11, 'fixed': 1.91, 'e1': -0.79, 'e2': -0.7, 'npv15': -16.93, 'npv20': -15.6, 'irr': None}
+  reinj|ngn_16 {'capex': 17.65, 'fixed': 2.34, 'e1': -1.22, 'e2': -1.15, 'npv15': -26.89, 'npv20': -25.14, 'irr': None}
+  boost|ToP70 {'capex': 10.11, 'fixed': 1.91, 'e1': -0.33, 'e2': -0.49, 'npv15': -14.73, 'npv20': -13.81, 'irr': None}
+  reinj|ToP70 {'capex': 17.65, 'fixed': 2.34, 'e1': -0.77, 'e2': -0.94, 'npv15': -24.68, 'npv20': -23.35, 'irr': None}
+  boost|coll_0.6_dso240 {'capex': 10.11, 'fixed': 1.91, 'e1': -1.19, 'e2': -1.02, 'npv15': -17.31, 'npv20': -16.08, 'irr': None}
+  reinj|coll_0.6_dso240 {'capex': 17.65, 'fixed': 2.34, 'e1': -1.62, 'e2': -1.46, 'npv15': -27.26, 'npv20': -25.61, 'irr': None}
+  boost|build_2y {'capex': 10.77, 'fixed': 1.94, 'e1': -1.14, 'e2': -0.53, 'npv15': -14.83, 'npv20': -13.62, 'irr': None}
+  reinj|build_2y {'capex': 18.81, 'fixed': 2.41, 'e1': -1.61, 'e2': -1.01, 'npv15': -24.58, 'npv20': -22.76, 'irr': None}
+  boost|decl_15 {'capex': 10.11, 'fixed': 1.91, 'e1': -0.79, 'e2': -0.6, 'npv15': -16.21, 'npv20': -15.03, 'irr': None}
+  reinj|decl_15 {'capex': 17.65, 'fixed': 2.34, 'e1': -1.22, 'e2': -1.05, 'npv15': -26.16, 'npv20': -24.57, 'irr': None}
+  boost|cm_1.6 {'capex': 6.8, 'fixed': 1.72, 'e1': -0.6, 'e2': -0.29, 'npv15': -10.74, 'npv20': -9.99, 'irr': None}
+  reinj|cm_1.6 {'capex': 11.97, 'fixed': 2.01, 'e1': -0.89, 'e2': -0.6, 'npv15': -17.56, 'npv20': -16.53, 'irr': None}
+  boost|no_expat {'capex': 10.11, 'fixed': 1.39, 'e1': -0.27, 'e2': 0.04, 'npv15': -12.21, 'npv20': -11.78, 'irr': None}
+  reinj|no_expat {'capex': 17.65, 'fixed': 1.82, 'e1': -0.7, 'e2': -0.4, 'npv15': -22.17, 'npv20': -21.32, 'irr': None}
+  boost|lf_0.6 {'capex': 10.11, 'fixed': 1.91, 'e1': -1.04, 'e2': -0.83, 'npv15': -16.4, 'npv20': -15.26, 'irr': None}
+  reinj|lf_0.6 {'capex': 17.65, 'fixed': 2.34, 'e1': -1.48, 'e2': -1.28, 'npv15': -26.36, 'npv20': -24.8, 'irr': None}
+== wtp
+  fact_lo {'t0.34': 2.42, 't0.51': 3.27, 't0.85': 10.67}
+  fact_hi {'t0.34': 2.88, 't0.51': 3.88, 't0.85': 12.67}
+  statute {'t0.34': 5.3, 't0.51': 7.14, 't0.85': 23.33}
+== extra
+  boost|Q5|cm1.6_noexpat {'capex': 6.8, 'e1': 0.24, 'e2': 0.65, 'npv15': -6.28, 'npv20': -6.28, 'irr': None, 'fee_npv20': 4.206}
+  boost|Q5|cm1.6_noexpat_ToP70 {'capex': 6.8, 'e1': 0.81, 'e2': 0.65, 'npv15': -5.83, 'npv20': -5.85, 'irr': None, 'fee_npv20': 3.915}
+  boost|Q5|seplat_like_cm0.6_noexpat {'capex': 3.06, 'e1': 0.45, 'e2': 0.87, 'npv15': -1.67, 'npv20': -1.84, 'irr': None, 'fee_npv20': 2.511}
+  boost|Q15|cm1.6_noexpat {'capex': 15.18, 'e1': 2.52, 'e2': 3.82, 'npv15': -5.33, 'npv20': -6.87, 'irr': 4.2, 'fee_npv20': 2.742}
+  boost|Q15|cm1.6_noexpat_ToP70 {'capex': 15.18, 'e1': 4.24, 'e2': 3.82, 'npv15': -4.39, 'npv20': -5.98, 'irr': 5.8, 'fee_npv20': 2.552}
+  boost|Q15|seplat_like_cm0.6_noexpat {'capex': 6.2, 'e1': 3.03, 'e2': 4.35, 'npv15': 4.17, 'npv20': 2.51, 'irr': 31.4, 'fee_npv20': 1.383}
+  best_Q15_opt_fee1.75_ToP70 {'Q': 15, 'conf': 'boost', 'sc': 'opt', 'fee': 1.75, 'capex': {'hp_per': 156, 'hp': 3519, 'pkg': 5.54, 'pipe': 0.25, 'total': 14.92, 'screen': 5.94}, 'fixed': 1.88, 'x_screen': 3.31, 'y1': {'t': 1, 'G': 9.89, 'rev': 6.51, 'opex': 1.95, 'ebitda': 4.55}, 'y2': {'t': 2, 'G': 11.75, 'rev': 7.43, 'opex': 2.02, 'ebitda': 5.4}, 'npv15': 2.19, 'npv20': -0.6, 'irr': 18.8, 'payback': 4.2}

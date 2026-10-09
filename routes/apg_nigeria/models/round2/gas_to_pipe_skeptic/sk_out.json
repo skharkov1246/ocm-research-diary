@@ -1,0 +1,262 @@
+{
+ "Ughelli East|base": {
+  "cap": 17.14,
+  "fixed": 2.34,
+  "e2": -0.93,
+  "npv15": -24.79,
+  "npv20": -23.47,
+  "irr": null
+ },
+ "Ughelli East|+transport": {
+  "cap": 17.14,
+  "fixed": 2.34,
+  "e2": 0.01,
+  "npv15": -21.26,
+  "npv20": -20.51,
+  "irr": null
+ },
+ "Ughelli East|+up1.0": {
+  "cap": 17.14,
+  "fixed": 2.34,
+  "e2": -0.8,
+  "npv15": -24.32,
+  "npv20": -23.08,
+  "irr": null
+ },
+ "Ughelli East|+gas0.25": {
+  "cap": 17.14,
+  "fixed": 2.34,
+  "e2": -0.12,
+  "npv15": -21.59,
+  "npv20": -20.75,
+  "irr": null
+ },
+ "Ughelli East|+all3": {
+  "cap": 17.14,
+  "fixed": 2.34,
+  "e2": 1.1,
+  "npv15": -17.0,
+  "npv20": -16.91,
+  "irr": null
+ },
+ "Ughelli East|+all3+coll1_nofx_dso45 (эскроу)": {
+  "cap": 17.14,
+  "fixed": 2.34,
+  "e2": 1.98,
+  "npv15": -13.25,
+  "npv20": -13.64,
+  "irr": null
+ },
+ "Ughelli East|all3+Seplat_capex_0.22": {
+  "cap": 9.48,
+  "fixed": 1.9,
+  "e2": 1.55,
+  "npv15": -7.11,
+  "npv20": -7.42,
+  "irr": -90.1
+ },
+ "Ughelli East|all3+Seplat_capex_0.36": {
+  "cap": 11.97,
+  "fixed": 2.05,
+  "e2": 1.41,
+  "npv15": -10.23,
+  "npv20": -10.42,
+  "irr": null
+ },
+ "Afam Umuosi qmin|base": {
+  "cap": 8.3,
+  "fixed": 1.92,
+  "e2": -1.34,
+  "npv15": -16.67,
+  "npv20": -15.23,
+  "irr": null
+ },
+ "Afam Umuosi qmin|+transport": {
+  "cap": 8.3,
+  "fixed": 1.92,
+  "e2": -0.93,
+  "npv15": -15.14,
+  "npv20": -13.94,
+  "irr": null
+ },
+ "Afam Umuosi qmin|+up1.0": {
+  "cap": 8.3,
+  "fixed": 1.92,
+  "e2": -1.28,
+  "npv15": -16.47,
+  "npv20": -15.06,
+  "irr": null
+ },
+ "Afam Umuosi qmin|+gas0.25": {
+  "cap": 8.3,
+  "fixed": 1.92,
+  "e2": -0.99,
+  "npv15": -15.29,
+  "npv20": -14.05,
+  "irr": null
+ },
+ "Afam Umuosi qmin|+all3": {
+  "cap": 8.3,
+  "fixed": 1.92,
+  "e2": -0.46,
+  "npv15": -13.3,
+  "npv20": -12.39,
+  "irr": null
+ },
+ "Afam Umuosi qmin|+all3+coll1_nofx_dso45 (эскроу)": {
+  "cap": 8.3,
+  "fixed": 1.92,
+  "e2": -0.08,
+  "npv15": -11.65,
+  "npv20": -10.95,
+  "irr": null
+ },
+ "Afam Umuosi qmin|all3+Seplat_capex_0.22": {
+  "cap": 3.84,
+  "fixed": 1.67,
+  "e2": -0.2,
+  "npv15": -7.41,
+  "npv20": -6.75,
+  "irr": null
+ },
+ "Afam Umuosi qmin|all3+Seplat_capex_0.36": {
+  "cap": 4.93,
+  "fixed": 1.73,
+  "e2": -0.26,
+  "npv15": -8.85,
+  "npv20": -8.13,
+  "irr": null
+ },
+ "generic5_4km|base": {
+  "cap": 14.96,
+  "fixed": 2.21,
+  "e2": -1.17,
+  "npv15": -23.23,
+  "npv20": -21.8,
+  "irr": null
+ },
+ "generic5_4km|+transport": {
+  "cap": 14.96,
+  "fixed": 2.21,
+  "e2": -0.47,
+  "npv15": -20.59,
+  "npv20": -19.59,
+  "irr": null
+ },
+ "generic5_4km|+up1.0": {
+  "cap": 14.96,
+  "fixed": 2.21,
+  "e2": -1.07,
+  "npv15": -22.88,
+  "npv20": -21.51,
+  "irr": null
+ },
+ "generic5_4km|+gas0.25": {
+  "cap": 14.96,
+  "fixed": 2.21,
+  "e2": -0.56,
+  "npv15": -20.84,
+  "npv20": -19.78,
+  "irr": null
+ },
+ "generic5_4km|+all3": {
+  "cap": 14.96,
+  "fixed": 2.21,
+  "e2": 0.35,
+  "npv15": -17.42,
+  "npv20": -16.91,
+  "irr": null
+ },
+ "generic5_4km|+all3+coll1_nofx_dso45 (эскроу)": {
+  "cap": 14.96,
+  "fixed": 2.21,
+  "e2": 1.01,
+  "npv15": -14.57,
+  "npv20": -14.42,
+  "irr": null
+ },
+ "generic5_4km|all3+Seplat_capex_0.22": {
+  "cap": 8.68,
+  "fixed": 1.85,
+  "e2": 0.72,
+  "npv15": -9.13,
+  "npv20": -8.97,
+  "irr": null
+ },
+ "generic5_4km|all3+Seplat_capex_0.36": {
+  "cap": 10.55,
+  "fixed": 1.96,
+  "e2": 0.61,
+  "npv15": -11.6,
+  "npv20": -11.33,
+  "irr": null
+ },
+ "generic15_4km|base": {
+  "cap": 29.93,
+  "fixed": 3.27,
+  "e2": -0.05,
+  "npv15": -36.04,
+  "npv20": -34.97,
+  "irr": null
+ },
+ "generic15_4km|+transport": {
+  "cap": 29.93,
+  "fixed": 3.27,
+  "e2": 2.05,
+  "npv15": -28.13,
+  "npv20": -28.35,
+  "irr": null
+ },
+ "generic15_4km|+up1.0": {
+  "cap": 29.93,
+  "fixed": 3.27,
+  "e2": 0.24,
+  "npv15": -34.98,
+  "npv20": -34.1,
+  "irr": null
+ },
+ "generic15_4km|+gas0.25": {
+  "cap": 29.93,
+  "fixed": 3.27,
+  "e2": 1.77,
+  "npv15": -28.87,
+  "npv20": -28.9,
+  "irr": null
+ },
+ "generic15_4km|+all3": {
+  "cap": 29.93,
+  "fixed": 3.27,
+  "e2": 4.5,
+  "npv15": -19.18,
+  "npv20": -20.82,
+  "irr": -8.2
+ },
+ "generic15_4km|+all3+coll1_nofx_dso45 (эскроу)": {
+  "cap": 29.93,
+  "fixed": 3.27,
+  "e2": 6.48,
+  "npv15": -12.43,
+  "npv20": -14.98,
+  "irr": 1.1
+ },
+ "generic15_4km|all3+Seplat_capex_0.22": {
+  "cap": 15.96,
+  "fixed": 2.47,
+  "e2": 5.33,
+  "npv15": -3.4,
+  "npv20": -5.48,
+  "irr": 9.1
+ },
+ "generic15_4km|all3+Seplat_capex_0.36": {
+  "cap": 21.49,
+  "fixed": 2.78,
+  "e2": 5.0,
+  "npv15": -9.45,
+  "npv20": -11.4,
+  "irr": 1.4
+ },
+ "Q_threshold_all3_escrow_4km": 224.6,
+ "Q_threshold_all3_4km": null,
+ "margin_per_Mscf_in|base": 0.97,
+ "margin_per_Mscf_in|all3": 2.11
+}

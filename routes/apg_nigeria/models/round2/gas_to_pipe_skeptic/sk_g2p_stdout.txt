@@ -1,0 +1,28 @@
+UghelliEast|base GSA (как в g2p)                                       cap  17.1 F 2.51 E2  -1.10 Gin2 4.20 N15  -25.7 IRR None
+UghelliEast|base GSA, up=1.0 (снят двойной счёт простоя)               cap  17.1 F 2.51 E2  -0.97 Gin2 4.57 N15  -25.2 IRR None
+UghelliEast|base GSA, стальной человек                                 cap  16.2 F 2.25 E2   1.65 Gin2 4.57 N15  -13.4 IRR None
+UghelliEast|base GSA, дебит к старту 2028 (x0.92^2)                    cap  15.6 F 2.42 E2  -1.24 Gin2 3.56 N15  -24.5 IRR None
+Afam|base GSA (как в g2p)                                              cap  12.4 F 2.20 E2  -1.03 Gin2 3.51 N15  -20.1 IRR None
+Afam|base GSA, up=1.0 (снят двойной счёт простоя)                      cap  12.4 F 2.20 E2  -0.92 Gin2 3.82 N15  -19.8 IRR None
+Afam|base GSA, стальной человек                                        cap  11.6 F 2.01 E2   1.25 Gin2 3.82 N15  -10.0 IRR None
+Afam|base GSA, дебит к старту 2028 (x0.92^2)                           cap  11.1 F 2.13 E2  -1.14 Gin2 2.97 N15  -19.1 IRR None
+Oben|base GSA (как в g2p)                                              cap  18.5 F 2.79 E2  -0.95 Gin2 5.46 N15  -27.0 IRR None
+Oben|base GSA, up=1.0 (снят двойной счёт простоя)                      cap  18.5 F 2.79 E2  -0.78 Gin2 5.93 N15  -26.4 IRR None
+Oben|base GSA, стальной человек                                        cap  17.3 F 2.51 E2   2.57 Gin2 5.93 N15  -11.6 IRR None
+Oben|base GSA, дебит к старту 2028 (x0.92^2)                           cap  16.6 F 2.68 E2  -1.13 Gin2 4.62 N15  -25.5 IRR None
+Q5_4km|base GSA (как в g2p)                                            cap  15.0 F 2.39 E2  -1.35 Gin2 3.14 N15  -24.2 IRR None
+Q5_4km|base GSA, up=1.0 (снят двойной счёт простоя)                    cap  15.0 F 2.39 E2  -1.26 Gin2 3.41 N15  -23.9 IRR None
+Q5_4km|base GSA, стальной человек                                      cap  14.2 F 2.17 E2   0.73 Gin2 3.41 N15  -14.8 IRR None
+Q5_4km|base GSA, дебит к старту 2028 (x0.92^2)                         cap  13.8 F 2.32 E2  -1.45 Gin2 2.65 N15  -23.3 IRR None
+Q15_4km|base GSA (как в g2p)                                           cap  29.9 F 3.47 E2  -0.26 Gin2 9.41 N15  -37.2 IRR None
+Q15_4km|base GSA, up=1.0 (снят двойной счёт простоя)                   cap  29.9 F 3.47 E2   0.03 Gin2 10.23 N15  -36.1 IRR None
+Q15_4km|base GSA, стальной человек                                     cap  28.1 F 3.02 E2   5.78 Gin2 10.23 N15  -12.4 IRR -0.1
+Q15_4km|base GSA, дебит к старту 2028 (x0.92^2)                        cap  26.7 F 3.29 E2  -0.57 Gin2 7.96 N15  -34.8 IRR None
+порог цены (стальной человек) Ughelli East: 5.7
+UghelliEast|стальной + без персонала/охраны/общины                     cap  16.2 F 0.78 E2   3.17 Gin2 4.57 N15   -6.4 IRR 2.7
+{'margin_per_nominal': 0.221, 'marginal_capex_per_mmscfd': 1.39, 'capital_charge': 0.357}
+UghelliEast|стальной + компрессия под Q*0.78                           cap  14.2 F 2.16 E2   1.74 Gin2 4.57 N15  -11.0 IRR None
+Afam|стальной + компрессия под Q*0.78                                  cap   9.9 F 1.93 E2   1.33 Gin2 3.82 N15   -7.9 IRR None
+Oben|стальной + компрессия под Q*0.78                                  cap  14.4 F 2.15 E2   2.94 Gin2 5.93 N15   -7.3 IRR -4.2
+Q5_4km|стальной + компрессия под Q*0.78                                cap  12.7 F 2.10 E2   0.80 Gin2 3.41 N15  -12.9 IRR None
+Q15_4km|стальной + компрессия под Q*0.78                               cap  23.8 F 2.82 E2   5.98 Gin2 10.23 N15   -7.9 IRR 4.3

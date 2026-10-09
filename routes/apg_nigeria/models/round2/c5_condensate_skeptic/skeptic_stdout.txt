@@ -1,0 +1,179 @@
+== big_flares
+Egbema West (NEPL) 2025|mid {'opt_npv15': 8.29, 'opt_npv20': 5.48, 'opt_irr': 36.5, 'opt_capex': 9.26, 'opt_y2_ebitda': 6.133, 'base_npv20': -17.45}
+Egbema West (NEPL) 2025|rich {'opt_npv15': 6.54, 'opt_npv20': 4.01, 'opt_irr': 32.3, 'opt_capex': 9.26, 'opt_y2_ebitda': 5.496, 'base_npv20': -17.27}
+Egbema West min23-25|mid {'opt_npv15': -5.63, 'opt_npv20': -5.13, 'opt_irr': None, 'opt_capex': 2.81, 'opt_y2_ebitda': -0.459, 'base_npv20': -8.11}
+Egbema West min23-25|rich {'opt_npv15': -5.74, 'opt_npv20': -5.22, 'opt_irr': None, 'opt_capex': 2.81, 'opt_y2_ebitda': -0.484, 'base_npv20': -8.1}
+Odidi (NEPL) 2025|mid {'opt_npv15': 1.73, 'opt_npv20': 0.32, 'opt_irr': 21.4, 'opt_capex': 7.14, 'opt_y2_ebitda': 3.095, 'base_npv20': -14.88}
+Odidi (NEPL) 2025|rich {'opt_npv15': 0.72, 'opt_npv20': -0.52, 'opt_irr': 17.7, 'opt_capex': 7.14, 'opt_y2_ebitda': 2.729, 'base_npv20': -14.77}
+Odidi min|mid {'opt_npv15': -4.59, 'opt_npv20': -4.44, 'opt_irr': None, 'opt_capex': 4.04, 'opt_y2_ebitda': 0.123, 'base_npv20': -10.35}
+Odidi min|rich {'opt_npv15': -4.96, 'opt_npv20': -4.76, 'opt_irr': None, 'opt_capex': 4.04, 'opt_y2_ebitda': 0.034, 'base_npv20': -10.33}
+Obiafu-Obrikom 2025|mid {'opt_npv15': 0.66, 'opt_npv20': -0.5, 'opt_irr': 17.7, 'opt_capex': 6.72, 'opt_y2_ebitda': 2.578, 'base_npv20': -14.36}
+Obiafu-Obrikom 2025|rich {'opt_npv15': -0.22, 'opt_npv20': -1.24, 'opt_irr': 14.1, 'opt_capex': 6.72, 'opt_y2_ebitda': 2.258, 'base_npv20': -14.27}
+Agu (Sterling) 2025|mid {'opt_npv15': 0.42, 'opt_npv20': -0.69, 'opt_irr': 16.7, 'opt_capex': 6.62, 'opt_y2_ebitda': 2.459, 'base_npv20': -14.24}
+Agu (Sterling) 2025|rich {'opt_npv15': -0.44, 'opt_npv20': -1.41, 'opt_irr': 13.1, 'opt_capex': 6.62, 'opt_y2_ebitda': 2.15, 'base_npv20': -14.15}
+max single flare 27.6|mid {'opt_npv15': 4.69, 'opt_npv20': 2.64, 'opt_irr': 29.3, 'opt_capex': 8.18, 'opt_y2_ebitda': 4.492, 'base_npv20': -16.14}
+max single flare 27.6|rich {'opt_npv15': 3.34, 'opt_npv20': 1.5, 'opt_irr': 25.4, 'opt_capex': 8.18, 'opt_y2_ebitda': 4.001, 'base_npv20': -16.0}
+== egbema_collapse_decl50
+{'npv15': -7.25, 'npv20': -6.83, 'irr': None}
+== operator
+Q5|SPE_AG6_30->3|base|tax34|audit0 {'capex': 2.18, 'fixed': 0.248, 'y2E': 0.095, 'npv15': -2.22, 'npv20': -2.2, 'irr': None}
+Q5|SPE_AG6_30->3|base|tax34|audit1 {'capex': 4.57, 'fixed': 0.606, 'y2E': -0.249, 'npv15': -6.51, 'npv20': -6.16, 'irr': None}
+Q5|SPE_AG6_30->3|base|taxHT30+CIT30=51|audit0 {'capex': 2.18, 'fixed': 0.248, 'y2E': 0.095, 'npv15': -2.22, 'npv20': -2.2, 'irr': None}
+Q5|SPE_AG6_30->3|base|taxHT30+CIT30=51|audit1 {'capex': 4.57, 'fixed': 0.606, 'y2E': -0.249, 'npv15': -6.51, 'npv20': -6.16, 'irr': None}
+Q5|SPE_AG6_30->3|base|taxPPT85|audit0 {'capex': 2.18, 'fixed': 0.248, 'y2E': 0.095, 'npv15': -2.22, 'npv20': -2.2, 'irr': None}
+Q5|SPE_AG6_30->3|base|taxPPT85|audit1 {'capex': 4.57, 'fixed': 0.606, 'y2E': -0.249, 'npv15': -6.51, 'npv20': -6.16, 'irr': None}
+Q5|SPE_AG6_30->3|opt|tax34|audit0 {'capex': 2.18, 'fixed': 0.248, 'y2E': 0.489, 'npv15': -0.66, 'npv20': -0.9, 'irr': 5.9}
+Q5|SPE_AG6_30->3|opt|tax34|audit1 {'capex': 4.04, 'fixed': 0.432, 'y2E': 0.315, 'npv15': -3.23, 'npv20': -3.34, 'irr': -23.9}
+Q5|SPE_AG6_30->3|opt|taxHT30+CIT30=51|audit0 {'capex': 2.18, 'fixed': 0.248, 'y2E': 0.489, 'npv15': -0.79, 'npv20': -1.01, 'irr': 4.3}
+Q5|SPE_AG6_30->3|opt|taxHT30+CIT30=51|audit1 {'capex': 4.04, 'fixed': 0.432, 'y2E': 0.315, 'npv15': -3.23, 'npv20': -3.34, 'irr': -23.9}
+Q5|SPE_AG6_30->3|opt|taxPPT85|audit0 {'capex': 2.18, 'fixed': 0.248, 'y2E': 0.489, 'npv15': -1.04, 'npv20': -1.23, 'irr': 0.9}
+Q5|SPE_AG6_30->3|opt|taxPPT85|audit1 {'capex': 4.04, 'fixed': 0.432, 'y2E': 0.315, 'npv15': -3.23, 'npv20': -3.34, 'irr': -23.9}
+Q5|NJTD_A_50->3|base|tax34|audit0 {'capex': 2.18, 'fixed': 0.248, 'y2E': 0.198, 'npv15': -1.83, 'npv20': -1.86, 'irr': None}
+Q5|NJTD_A_50->3|base|tax34|audit1 {'capex': 4.57, 'fixed': 0.606, 'y2E': -0.139, 'npv15': -6.09, 'npv20': -5.8, 'irr': None}
+Q5|NJTD_A_50->3|base|taxHT30+CIT30=51|audit0 {'capex': 2.18, 'fixed': 0.248, 'y2E': 0.198, 'npv15': -1.83, 'npv20': -1.86, 'irr': None}
+Q5|NJTD_A_50->3|base|taxHT30+CIT30=51|audit1 {'capex': 4.57, 'fixed': 0.606, 'y2E': -0.139, 'npv15': -6.09, 'npv20': -5.8, 'irr': None}
+Q5|NJTD_A_50->3|base|taxPPT85|audit0 {'capex': 2.18, 'fixed': 0.248, 'y2E': 0.198, 'npv15': -1.83, 'npv20': -1.86, 'irr': None}
+Q5|NJTD_A_50->3|base|taxPPT85|audit1 {'capex': 4.57, 'fixed': 0.606, 'y2E': -0.139, 'npv15': -6.09, 'npv20': -5.8, 'irr': None}
+Q5|NJTD_A_50->3|opt|tax34|audit0 {'capex': 2.18, 'fixed': 0.248, 'y2E': 0.687, 'npv15': -0.11, 'npv20': -0.44, 'irr': 13.6}
+Q5|NJTD_A_50->3|opt|tax34|audit1 {'capex': 4.04, 'fixed': 0.432, 'y2E': 0.517, 'npv15': -2.42, 'npv20': -2.65, 'irr': -6.5}
+Q5|NJTD_A_50->3|opt|taxHT30+CIT30=51|audit0 {'capex': 2.18, 'fixed': 0.248, 'y2E': 0.687, 'npv15': -0.38, 'npv20': -0.67, 'irr': 10.2}
+Q5|NJTD_A_50->3|opt|taxHT30+CIT30=51|audit1 {'capex': 4.04, 'fixed': 0.432, 'y2E': 0.517, 'npv15': -2.44, 'npv20': -2.67, 'irr': -6.7}
+Q5|NJTD_A_50->3|opt|taxPPT85|audit0 {'capex': 2.18, 'fixed': 0.248, 'y2E': 0.687, 'npv15': -0.91, 'npv20': -1.13, 'irr': 3.2}
+Q5|NJTD_A_50->3|opt|taxPPT85|audit1 {'capex': 4.04, 'fixed': 0.432, 'y2E': 0.517, 'npv15': -2.48, 'npv20': -2.71, 'irr': -7.0}
+Q15|SPE_AG6_30->3|base|tax34|audit0 {'capex': 3.35, 'fixed': 0.321, 'y2E': 0.72, 'npv15': -1.4, 'npv20': -1.7, 'irr': 1.8}
+Q15|SPE_AG6_30->3|base|tax34|audit1 {'capex': 6.91, 'fixed': 0.81, 'y2E': 0.295, 'npv15': -7.11, 'npv20': -7.02, 'irr': None}
+Q15|SPE_AG6_30->3|base|taxHT30+CIT30=51|audit0 {'capex': 3.35, 'fixed': 0.321, 'y2E': 0.72, 'npv15': -1.54, 'npv20': -1.82, 'irr': 0.6}
+Q15|SPE_AG6_30->3|base|taxHT30+CIT30=51|audit1 {'capex': 6.91, 'fixed': 0.81, 'y2E': 0.295, 'npv15': -7.11, 'npv20': -7.02, 'irr': None}
+Q15|SPE_AG6_30->3|base|taxPPT85|audit0 {'capex': 3.35, 'fixed': 0.321, 'y2E': 0.72, 'npv15': -1.81, 'npv20': -2.07, 'irr': -1.8}
+Q15|SPE_AG6_30->3|base|taxPPT85|audit1 {'capex': 6.91, 'fixed': 0.81, 'y2E': 0.295, 'npv15': -7.11, 'npv20': -7.02, 'irr': None}
+Q15|SPE_AG6_30->3|opt|tax34|audit0 {'capex': 3.35, 'fixed': 0.321, 'y2E': 1.903, 'npv15': 2.23, 'npv20': 1.33, 'irr': 31.3}
+Q15|SPE_AG6_30->3|opt|tax34|audit1 {'capex': 6.2, 'fixed': 0.579, 'y2E': 1.683, 'npv15': -0.96, 'npv20': -1.79, 'irr': 10.6}
+Q15|SPE_AG6_30->3|opt|taxHT30+CIT30=51|audit0 {'capex': 3.35, 'fixed': 0.321, 'y2E': 1.903, 'npv15': 1.18, 'npv20': 0.44, 'irr': 23.8}
+Q15|SPE_AG6_30->3|opt|taxHT30+CIT30=51|audit1 {'capex': 6.2, 'fixed': 0.579, 'y2E': 1.683, 'npv15': -1.55, 'npv20': -2.31, 'irr': 7.9}
+Q15|SPE_AG6_30->3|opt|taxPPT85|audit0 {'capex': 3.35, 'fixed': 0.321, 'y2E': 1.903, 'npv15': -0.9, 'npv20': -1.33, 'irr': 7.9}
+Q15|SPE_AG6_30->3|opt|taxPPT85|audit1 {'capex': 6.2, 'fixed': 0.579, 'y2E': 1.683, 'npv15': -2.73, 'npv20': -3.33, 'irr': 2.4}
+Q15|NJTD_A_50->3|base|tax34|audit0 {'capex': 3.35, 'fixed': 0.321, 'y2E': 1.03, 'npv15': -0.58, 'npv20': -1.02, 'irr': 10.0}
+Q15|NJTD_A_50->3|base|tax34|audit1 {'capex': 6.91, 'fixed': 0.81, 'y2E': 0.624, 'npv15': -5.84, 'npv20': -5.95, 'irr': None}
+Q15|NJTD_A_50->3|base|taxHT30+CIT30=51|audit0 {'capex': 3.35, 'fixed': 0.321, 'y2E': 1.03, 'npv15': -0.91, 'npv20': -1.31, 'irr': 7.3}
+Q15|NJTD_A_50->3|base|taxHT30+CIT30=51|audit1 {'capex': 6.91, 'fixed': 0.81, 'y2E': 0.624, 'npv15': -5.84, 'npv20': -5.95, 'irr': None}
+Q15|NJTD_A_50->3|base|taxPPT85|audit0 {'capex': 3.35, 'fixed': 0.321, 'y2E': 1.03, 'npv15': -1.55, 'npv20': -1.88, 'irr': 2.0}
+Q15|NJTD_A_50->3|base|taxPPT85|audit1 {'capex': 6.91, 'fixed': 0.81, 'y2E': 0.624, 'npv15': -5.84, 'npv20': -5.95, 'irr': None}
+Q15|NJTD_A_50->3|opt|tax34|audit0 {'capex': 3.35, 'fixed': 0.321, 'y2E': 2.498, 'npv15': 3.88, 'npv20': 2.71, 'irr': 42.1}
+Q15|NJTD_A_50->3|opt|tax34|audit1 {'capex': 6.2, 'fixed': 0.579, 'y2E': 2.289, 'npv15': 0.72, 'npv20': -0.39, 'irr': 18.1}
+Q15|NJTD_A_50->3|opt|taxHT30+CIT30=51|audit0 {'capex': 3.35, 'fixed': 0.321, 'y2E': 2.498, 'npv15': 2.4, 'npv20': 1.46, 'irr': 32.1}
+Q15|NJTD_A_50->3|opt|taxHT30+CIT30=51|audit1 {'capex': 6.2, 'fixed': 0.579, 'y2E': 2.289, 'npv15': -0.31, 'npv20': -1.27, 'irr': 13.6}
+Q15|NJTD_A_50->3|opt|taxPPT85|audit0 {'capex': 3.35, 'fixed': 0.321, 'y2E': 2.498, 'npv15': -0.56, 'npv20': -1.05, 'irr': 10.7}
+Q15|NJTD_A_50->3|opt|taxPPT85|audit1 {'capex': 6.2, 'fixed': 0.579, 'y2E': 2.289, 'npv15': -2.38, 'npv20': -3.04, 'irr': 4.3}
+Q20.6|SPE_AG6_30->3|base|tax34|audit0 {'capex': 3.85, 'fixed': 0.343, 'y2E': 1.088, 'npv15': -0.9, 'npv20': -1.37, 'irr': 8.3}
+Q20.6|SPE_AG6_30->3|base|tax34|audit1 {'capex': 7.92, 'fixed': 0.868, 'y2E': 0.656, 'npv15': -6.84, 'npv20': -6.95, 'irr': None}
+Q20.6|SPE_AG6_30->3|base|taxHT30+CIT30=51|audit0 {'capex': 3.85, 'fixed': 0.343, 'y2E': 1.088, 'npv15': -1.21, 'npv20': -1.65, 'irr': 6.0}
+Q20.6|SPE_AG6_30->3|base|taxHT30+CIT30=51|audit1 {'capex': 7.92, 'fixed': 0.868, 'y2E': 0.656, 'npv15': -6.84, 'npv20': -6.95, 'irr': None}
+Q20.6|SPE_AG6_30->3|base|taxPPT85|audit0 {'capex': 3.85, 'fixed': 0.343, 'y2E': 1.088, 'npv15': -1.85, 'npv20': -2.2, 'irr': 1.5}
+Q20.6|SPE_AG6_30->3|base|taxPPT85|audit1 {'capex': 7.92, 'fixed': 0.868, 'y2E': 0.656, 'npv15': -6.84, 'npv20': -6.95, 'irr': None}
+Q20.6|SPE_AG6_30->3|opt|tax34|audit0 {'capex': 3.85, 'fixed': 0.343, 'y2E': 2.713, 'npv15': 4.03, 'npv20': 2.76, 'irr': 39.6}
+Q20.6|SPE_AG6_30->3|opt|tax34|audit1 {'capex': 7.14, 'fixed': 0.621, 'y2E': 2.491, 'npv15': 0.46, 'npv20': -0.75, 'irr': 16.7}
+Q20.6|SPE_AG6_30->3|opt|taxHT30+CIT30=51|audit0 {'capex': 3.85, 'fixed': 0.343, 'y2E': 2.713, 'npv15': 2.44, 'npv20': 1.41, 'irr': 30.2}
+Q20.6|SPE_AG6_30->3|opt|taxHT30+CIT30=51|audit1 {'capex': 7.14, 'fixed': 0.621, 'y2E': 2.491, 'npv15': -0.63, 'npv20': -1.69, 'irr': 12.6}
+Q20.6|SPE_AG6_30->3|opt|taxPPT85|audit0 {'capex': 3.85, 'fixed': 0.343, 'y2E': 2.713, 'npv15': -0.74, 'npv20': -1.29, 'irr': 10.1}
+Q20.6|SPE_AG6_30->3|opt|taxPPT85|audit1 {'capex': 7.14, 'fixed': 0.621, 'y2E': 2.491, 'npv15': -2.81, 'npv20': -3.56, 'irr': 4.0}
+Q20.6|NJTD_A_50->3|base|tax34|audit0 {'capex': 3.85, 'fixed': 0.343, 'y2E': 1.515, 'npv15': 0.18, 'npv20': -0.47, 'irr': 16.2}
+Q20.6|NJTD_A_50->3|base|tax34|audit1 {'capex': 7.92, 'fixed': 0.868, 'y2E': 1.109, 'npv15': -5.21, 'npv20': -5.59, 'irr': -11.3}
+Q20.6|NJTD_A_50->3|base|taxHT30+CIT30=51|audit0 {'capex': 3.85, 'fixed': 0.343, 'y2E': 1.515, 'npv15': -0.42, 'npv20': -0.99, 'irr': 12.1}
+Q20.6|NJTD_A_50->3|base|taxHT30+CIT30=51|audit1 {'capex': 7.92, 'fixed': 0.868, 'y2E': 1.109, 'npv15': -5.27, 'npv20': -5.64, 'irr': -11.6}
+Q20.6|NJTD_A_50->3|base|taxPPT85|audit0 {'capex': 3.85, 'fixed': 0.343, 'y2E': 1.515, 'npv15': -1.61, 'npv20': -2.02, 'irr': 3.7}
+Q20.6|NJTD_A_50->3|base|taxPPT85|audit1 {'capex': 7.92, 'fixed': 0.868, 'y2E': 1.109, 'npv15': -5.38, 'npv20': -5.74, 'irr': -12.0}
+Q20.6|NJTD_A_50->3|opt|tax34|audit0 {'capex': 3.85, 'fixed': 0.343, 'y2E': 3.53, 'npv15': 6.3, 'npv20': 4.66, 'irr': 51.8}
+Q20.6|NJTD_A_50->3|opt|tax34|audit1 {'capex': 7.14, 'fixed': 0.621, 'y2E': 3.323, 'npv15': 2.77, 'npv20': 1.18, 'irr': 24.9}
+Q20.6|NJTD_A_50->3|opt|taxHT30+CIT30=51|audit0 {'capex': 3.85, 'fixed': 0.343, 'y2E': 3.53, 'npv15': 4.11, 'npv20': 2.81, 'irr': 39.5}
+Q20.6|NJTD_A_50->3|opt|taxHT30+CIT30=51|audit1 {'capex': 7.14, 'fixed': 0.621, 'y2E': 3.323, 'npv15': 1.07, 'npv20': -0.27, 'irr': 18.9}
+Q20.6|NJTD_A_50->3|opt|taxPPT85|audit0 {'capex': 3.85, 'fixed': 0.343, 'y2E': 3.53, 'npv15': -0.26, 'npv20': -0.9, 'irr': 13.3}
+Q20.6|NJTD_A_50->3|opt|taxPPT85|audit1 {'capex': 7.14, 'fixed': 0.621, 'y2E': 3.323, 'npv15': -2.33, 'npv20': -3.17, 'irr': 6.1}
+Q35.8|SPE_AG6_30->3|base|tax34|audit0 {'capex': 5.0, 'fixed': 0.395, 'y2E': 2.099, 'npv15': 0.6, 'npv20': -0.31, 'irr': 18.1}
+Q35.8|SPE_AG6_30->3|base|tax34|audit1 {'capex': 10.22, 'fixed': 1.0, 'y2E': 1.663, 'npv15': -5.81, 'npv20': -6.46, 'irr': -5.2}
+Q35.8|SPE_AG6_30->3|base|taxHT30+CIT30=51|audit0 {'capex': 5.0, 'fixed': 0.395, 'y2E': 2.099, 'npv15': -0.28, 'npv20': -1.06, 'irr': 13.5}
+Q35.8|SPE_AG6_30->3|base|taxHT30+CIT30=51|audit1 {'capex': 10.22, 'fixed': 1.0, 'y2E': 1.663, 'npv15': -5.96, 'npv20': -6.59, 'irr': -5.6}
+Q35.8|SPE_AG6_30->3|base|taxPPT85|audit0 {'capex': 5.0, 'fixed': 0.395, 'y2E': 2.099, 'npv15': -2.03, 'npv20': -2.57, 'irr': 4.2}
+Q35.8|SPE_AG6_30->3|base|taxPPT85|audit1 {'capex': 10.22, 'fixed': 1.0, 'y2E': 1.663, 'npv15': -6.25, 'npv20': -6.85, 'irr': -6.5}
+Q35.8|SPE_AG6_30->3|opt|tax34|audit0 {'capex': 5.0, 'fixed': 0.395, 'y2E': 4.923, 'npv15': 9.15, 'npv20': 6.86, 'irr': 55.6}
+Q35.8|SPE_AG6_30->3|opt|tax34|audit1 {'capex': 9.26, 'fixed': 0.717, 'y2E': 4.702, 'npv15': 4.74, 'npv20': 2.49, 'irr': 27.7}
+Q35.8|SPE_AG6_30->3|opt|taxHT30+CIT30=51|audit0 {'capex': 5.0, 'fixed': 0.395, 'y2E': 4.923, 'npv15': 6.05, 'npv20': 4.24, 'irr': 42.4}
+Q35.8|SPE_AG6_30->3|opt|taxHT30+CIT30=51|audit1 {'capex': 9.26, 'fixed': 0.717, 'y2E': 4.702, 'npv15': 2.23, 'npv20': 0.35, 'irr': 21.1}
+Q35.8|SPE_AG6_30->3|opt|taxPPT85|audit0 {'capex': 5.0, 'fixed': 0.395, 'y2E': 4.923, 'npv15': -0.14, 'npv20': -1.0, 'irr': 14.3}
+Q35.8|SPE_AG6_30->3|opt|taxPPT85|audit1 {'capex': 9.26, 'fixed': 0.717, 'y2E': 4.702, 'npv15': -2.79, 'npv20': -3.92, 'irr': 6.9}
+Q35.8|NJTD_A_50->3|base|tax34|audit0 {'capex': 5.0, 'fixed': 0.395, 'y2E': 2.84, 'npv15': 2.45, 'npv20': 1.24, 'irr': 27.1}
+Q35.8|NJTD_A_50->3|base|tax34|audit1 {'capex': 10.22, 'fixed': 1.0, 'y2E': 2.45, 'npv15': -3.61, 'npv20': -4.65, 'irr': 4.2}
+Q35.8|NJTD_A_50->3|base|taxHT30+CIT30=51|audit0 {'capex': 5.0, 'fixed': 0.395, 'y2E': 2.84, 'npv15': 1.08, 'npv20': 0.07, 'irr': 20.4}
+Q35.8|NJTD_A_50->3|base|taxHT30+CIT30=51|audit1 {'capex': 10.22, 'fixed': 1.0, 'y2E': 2.45, 'npv15': -4.17, 'npv20': -5.14, 'irr': 2.6}
+Q35.8|NJTD_A_50->3|base|taxPPT85|audit0 {'capex': 5.0, 'fixed': 0.395, 'y2E': 2.84, 'npv15': -1.66, 'npv20': -2.29, 'irr': 6.4}
+Q35.8|NJTD_A_50->3|base|taxPPT85|audit1 {'capex': 10.22, 'fixed': 1.0, 'y2E': 2.45, 'npv15': -5.29, 'npv20': -6.13, 'irr': -0.5}
+Q35.8|NJTD_A_50->3|opt|tax34|audit0 {'capex': 5.0, 'fixed': 0.395, 'y2E': 6.342, 'npv15': 13.09, 'npv20': 10.16, 'irr': 71.0}
+Q35.8|NJTD_A_50->3|opt|tax34|audit1 {'capex': 9.26, 'fixed': 0.717, 'y2E': 6.149, 'npv15': 8.76, 'npv20': 5.85, 'irr': 37.4}
+Q35.8|NJTD_A_50->3|opt|taxHT30+CIT30=51|audit0 {'capex': 5.0, 'fixed': 0.395, 'y2E': 6.342, 'npv15': 8.95, 'npv20': 6.66, 'irr': 53.9}
+Q35.8|NJTD_A_50->3|opt|taxHT30+CIT30=51|audit1 {'capex': 9.26, 'fixed': 0.717, 'y2E': 6.149, 'npv15': 5.19, 'npv20': 2.82, 'irr': 28.6}
+Q35.8|NJTD_A_50->3|opt|taxPPT85|audit0 {'capex': 5.0, 'fixed': 0.395, 'y2E': 6.342, 'npv15': 0.68, 'npv20': -0.33, 'irr': 18.2}
+Q35.8|NJTD_A_50->3|opt|taxPPT85|audit1 {'capex': 9.26, 'fixed': 0.717, 'y2E': 6.149, 'npv15': -1.95, 'npv20': -3.23, 'irr': 9.6}
+== op_threshold
+SPE_AG6_30->3|tax34|audit0 {'opt': 9.47, 'base': 39.79}
+SPE_AG6_30->3|tax34|audit1 {'opt': 24.38, 'base': 148.89}
+SPE_AG6_30->3|tax51|audit0 {'opt': 12.32, 'base': 57.1}
+SPE_AG6_30->3|tax51|audit1 {'opt': 33.4, 'base': 223.0}
+SPE_AG6_30->3|tax85|audit0 {'opt': 69.86, 'base': None}
+SPE_AG6_30->3|tax85|audit1 {'opt': 248.14, 'base': None}
+NJTD_A_50->3|tax34|audit0 {'opt': 6.49, 'base': 25.06}
+NJTD_A_50->3|tax34|audit1 {'opt': 16.44, 'base': 88.75}
+NJTD_A_50->3|tax51|audit0 {'opt': 8.55, 'base': 34.97}
+NJTD_A_50->3|tax51|audit1 {'opt': 22.04, 'base': 129.51}
+NJTD_A_50->3|tax85|audit0 {'opt': 43.48, 'base': 332.62}
+NJTD_A_50->3|tax85|audit1 {'opt': 146.79, 'base': None}
+== opt_strip
+Q15|opt {'y2E': 1.983, 'npv15': -0.54, 'npv20': -1.42, 'irr': 12.5}
+Q15|brent70 {'y2E': 1.393, 'npv15': -2.24, 'npv20': -2.84, 'irr': 3.6}
+Q15|hp0.6 {'y2E': 0.745, 'npv15': -4.38, 'npv20': -4.61, 'irr': None}
+Q15|decl8 {'y2E': 1.886, 'npv15': -1.42, 'npv20': -2.09, 'irr': 7.4}
+Q15|cm2.8 {'y2E': 1.938, 'npv15': -1.53, 'npv20': -2.41, 'irr': 8.8}
+Q15|roy17 {'y2E': 1.561, 'npv15': -1.74, 'npv20': -2.43, 'irr': 6.5}
+Q15|loss8_tariff3 {'y2E': 1.747, 'npv15': -1.21, 'npv20': -1.98, 'irr': 9.3}
+Q15|lf0.78 {'y2E': 1.729, 'npv15': -1.26, 'npv20': -2.02, 'irr': 9.0}
+Q15|meoh_hi_900 {'y2E': 1.718, 'npv15': -1.31, 'npv20': -2.07, 'irr': 8.8}
+Q15|opx2.0_staff0.4_sec0.25 {'y2E': 1.726, 'npv15': -1.5, 'npv20': -2.21, 'irr': 7.7}
+Q15|dso120_coll0.85 {'y2E': 1.548, 'npv15': -2.1, 'npv20': -2.8, 'irr': 5.6}
+Q15|build2 {'y2E': 1.965, 'npv15': -1.25, 'npv20': -2.08, 'irr': 9.7}
+Q15|precontract/2 {'y2E': 0.436, 'npv15': -5.66, 'npv20': -5.68, 'irr': None}
+Q20.6|opt {'y2E': 3.095, 'npv15': 1.73, 'npv20': 0.32, 'irr': 21.4}
+Q20.6|brent70 {'y2E': 2.284, 'npv15': -0.52, 'npv20': -1.56, 'irr': 12.9}
+Q20.6|hp0.6 {'y2E': 1.395, 'npv15': -3.09, 'npv20': -3.69, 'irr': 0.8}
+Q20.6|decl8 {'y2E': 2.961, 'npv15': 0.63, 'npv20': -0.52, 'irr': 17.6}
+Q20.6|cm2.8 {'y2E': 3.043, 'npv15': 0.6, 'npv20': -0.81, 'irr': 17.0}
+Q20.6|roy17 {'y2E': 2.515, 'npv15': 0.12, 'npv20': -1.03, 'irr': 15.5}
+Q20.6|loss8_tariff3 {'y2E': 2.77, 'npv15': 0.83, 'npv20': -0.43, 'irr': 18.1}
+Q20.6|lf0.78 {'y2E': 2.745, 'npv15': 0.76, 'npv20': -0.49, 'irr': 17.9}
+Q20.6|meoh_hi_900 {'y2E': 2.731, 'npv15': 0.69, 'npv20': -0.55, 'irr': 17.6}
+Q20.6|opx2.0_staff0.4_sec0.25 {'y2E': 2.838, 'npv15': 0.81, 'npv20': -0.44, 'irr': 18.1}
+Q20.6|dso120_coll0.85 {'y2E': 2.497, 'npv15': -0.36, 'npv20': -1.54, 'irr': 13.7}
+Q20.6|build2 {'y2E': 3.074, 'npv15': 0.6, 'npv20': -0.75, 'irr': 17.0}
+Q20.6|precontract/2 {'y2E': 0.97, 'npv15': -4.48, 'npv20': -4.84, 'irr': -9.8}
+Q27.6|opt {'y2E': 4.492, 'npv15': 4.69, 'npv20': 2.64, 'irr': 29.3}
+Q27.6|brent70 {'y2E': 3.405, 'npv15': 1.68, 'npv20': 0.11, 'irr': 20.4}
+Q27.6|hp0.6 {'y2E': 2.214, 'npv15': -1.62, 'npv20': -2.65, 'irr': 9.3}
+Q27.6|decl8 {'y2E': 4.312, 'npv15': 3.23, 'npv20': 1.52, 'irr': 25.9}
+Q27.6|cm2.8 {'y2E': 4.431, 'npv15': 3.39, 'npv20': 1.34, 'irr': 24.2}
+Q27.6|roy17 {'y2E': 3.714, 'npv15': 2.54, 'npv20': 0.83, 'irr': 23.0}
+Q27.6|loss8_tariff3 {'y2E': 4.056, 'npv15': 3.49, 'npv20': 1.63, 'irr': 25.9}
+Q27.6|lf0.78 {'y2E': 4.023, 'npv15': 3.4, 'npv20': 1.55, 'irr': 25.6}
+Q27.6|meoh_hi_900 {'y2E': 4.004, 'npv15': 3.31, 'npv20': 1.47, 'irr': 25.3}
+Q27.6|opx2.0_staff0.4_sec0.25 {'y2E': 4.234, 'npv15': 3.78, 'npv20': 1.88, 'irr': 26.8}
+Q27.6|dso120_coll0.85 {'y2E': 3.69, 'npv15': 1.89, 'npv20': 0.15, 'irr': 20.5}
+Q27.6|build2 {'y2E': 4.467, 'npv15': 3.05, 'npv20': 1.03, 'irr': 23.3}
+Q27.6|precontract/2 {'y2E': 1.644, 'npv15': -3.27, 'npv20': -4.02, 'irr': 2.3}
+Q20.6|share1.0 {'net_usd_bbl': 76.8, 'npv15': 1.73, 'npv20': 0.32, 'irr': 21.4}
+Q20.6|share0.8 {'net_usd_bbl': 61.5, 'npv15': -0.77, 'npv20': -1.77, 'irr': 11.9}
+Q20.6|share0.65 {'net_usd_bbl': 49.9, 'npv15': -2.72, 'npv20': -3.39, 'irr': 2.9}
+Q20.6|share0.5 {'net_usd_bbl': 38.4, 'npv15': -4.98, 'npv20': -5.26, 'irr': -15.6}
+Q27.6|share1.0 {'net_usd_bbl': 76.8, 'npv15': 4.69, 'npv20': 2.64, 'irr': 29.3}
+Q27.6|share0.8 {'net_usd_bbl': 61.5, 'npv15': 1.34, 'npv20': -0.17, 'irr': 19.4}
+Q27.6|share0.65 {'net_usd_bbl': 49.9, 'npv15': -1.17, 'npv20': -2.27, 'irr': 10.9}
+Q27.6|share0.5 {'net_usd_bbl': 38.4, 'npv15': -3.82, 'npv20': -4.47, 'irr': -0.5}
+Q35.8|share1.0 {'net_usd_bbl': 76.8, 'npv15': 8.29, 'npv20': 5.48, 'irr': 36.5}
+Q35.8|share0.8 {'net_usd_bbl': 61.5, 'npv15': 3.95, 'npv20': 1.84, 'irr': 25.8}
+Q35.8|share0.65 {'net_usd_bbl': 49.9, 'npv15': 0.69, 'npv20': -0.89, 'irr': 17.0}
+Q35.8|share0.5 {'net_usd_bbl': 38.4, 'npv15': -2.59, 'npv20': -3.64, 'irr': 6.7}
