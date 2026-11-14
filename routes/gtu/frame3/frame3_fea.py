@@ -384,17 +384,27 @@ def node_fields(case, wd):
     return np.array(out)
 
 
-def creep_margins(case, wd, res, lmp):
+def sigma_allow(lmp, uts_tab, T_C, hours):
+    """допускаемое напряжение длительной прочности, МПа: σ_LM(T, t), но не больше σв(T) — ниже диапазона данных
+    (P < P_min) касательное продолжение lg σ(P) уходит выше кратковременной прочности; возврат (σ, P вне данных,
+    ограничено σв)"""
+    T = np.asarray(T_C, float)
+    P = (T + 273.15) * (lmp.C + math.log10(hours))
+    s_lm = 10.0 ** lmp.log_sigma_v(P)
+    uts = np.interp(T, [u[0] for u in uts_tab], [u[1] for u in uts_tab])
+    return np.minimum(s_lm, uts), (P < lmp.Pmin) | (P > lmp.Pmax), s_lm > uts
+
+
+def creep_margins(case, wd, res, lmp, uts_tab):
     """Длительная прочность (Ларсон — Миллер, типовые свойства отдельно отлитых образцов, разрыв):
-    допускаемое σ_LM(T, t) в каждом узле и наименьшее отношение σ_LM/σ — по Мизесу и по наибольшему главному
-    растягивающему; по σθ,ср сечения при средней и наибольшей температуре."""
+    допускаемое σ_доп(T, t) = min(σ_LM, σв) в каждом узле и наименьшее отношение σ_доп/σ — по Мизесу и по
+    наибольшему главному растягивающему; по σθ,ср сечения при средней и наибольшей температуре."""
     a = node_fields(case, wd)
     T, vm, s1 = a[:, 2], a[:, 3], a[:, 4]
     out = {}
     for th in A["creep_hours"]:
-        P = (T + 273.15) * (lmp.C + math.log10(th))
-        sall = 10.0 ** lmp.log_sigma_v(P) * 1e6
-        ex = (P < lmp.Pmin) | (P > lmp.Pmax)
+        sa, ex, cap = sigma_allow(lmp, uts_tab, T, th)
+        sall = sa * 1e6
         rv = sall / np.maximum(vm, 1.0)
         iv = int(np.argmin(rv))
         pos = s1 > 0
@@ -406,18 +416,19 @@ def creep_margins(case, wd, res, lmp):
         out[f"{int(th)}h"] = dict(
             vm=dict(ratio=float(rv[iv]), at=dict(r_mm=a[iv, 0] * 1e3, z_mm=a[iv, 1] * 1e3, T_C=T[iv],
                                                   sigma_MPa=vm[iv] / 1e6, sigma_allow_MPa=sall[iv] / 1e6),
-                    extrapolated=bool(ex[iv])),
+                    extrapolated=bool(ex[iv]), capped_by_uts=bool(cap[iv])),
             s1=dict(ratio=float(r1[i1]), at=dict(r_mm=a[i1, 0] * 1e3, z_mm=a[i1, 1] * 1e3, T_C=T[i1],
                                                   sigma_MPa=s1[i1] / 1e6, sigma_allow_MPa=sall[i1] / 1e6),
-                    extrapolated=bool(ex[i1])),
-            section_mean_T=dict(T_C=Tm, sigma_MPa=s_sec, sigma_allow_MPa=lmp.sigma(Tm, th),
-                                ratio=lmp.sigma(Tm, th) / s_sec if s_sec > 0 else None),
-            section_hot_T=dict(T_C=Tx, sigma_MPa=s_sec, sigma_allow_MPa=lmp.sigma(Tx, th),
-                               ratio=lmp.sigma(Tx, th) / s_sec if s_sec > 0 else None))
+                    extrapolated=bool(ex[i1]), capped_by_uts=bool(cap[i1])),
+            section_mean_T=dict(T_C=Tm, sigma_MPa=s_sec, sigma_allow_MPa=float(sigma_allow(lmp, uts_tab, Tm, th)[0]),
+                                ratio=float(sigma_allow(lmp, uts_tab, Tm, th)[0]) / s_sec if s_sec > 0 else None),
+            section_hot_T=dict(T_C=Tx, sigma_MPa=s_sec, sigma_allow_MPa=float(sigma_allow(lmp, uts_tab, Tx, th)[0]),
+                               ratio=float(sigma_allow(lmp, uts_tab, Tx, th)[0]) / s_sec if s_sec > 0 else None),
+            share_nodes_extrapolated=float(ex.mean()), share_nodes_capped_by_uts=float(cap.mean()))
     return out
 
 
-def hot_zone(case, wd, thresholds=(300.0, 350.0, 400.0)):
+def hot_zone(case, wd, thresholds=(200.0, 300.0, 350.0, 400.0)):
     """наибольшее σ_Мизес среди узлов не холоднее порога (горячая зона колеса компрессора)"""
     a = node_fields(case, wd)
     out = {}
@@ -648,11 +659,11 @@ def assemble(pt, tin, meta, out, cases, wall):
         bl["creep_life_h"] = disk._fin(life)
         bl["creep_life_extrapolated"] = ex
         for th in A["creep_hours"]:
-            sa = lmp.sigma(g["T_rel_rotor_C"], th)
-            P = (g["T_rel_rotor_C"] + 273.15) * (lmp.C + math.log10(th))
-            bl[f"sigma_allow_{int(th)}h_MPa"] = sa
-            bl[f"ratio_{int(th)}h"] = sa / g["sigma_root_MPa"]
-            bl[f"extrapolated_{int(th)}h"] = bool(P < lmp.Pmin or P > lmp.Pmax)
+            sa, ex_, cap = sigma_allow(lmp, ni["uts_MPa"], g["T_rel_rotor_C"], th)
+            bl[f"sigma_allow_{int(th)}h_MPa"] = float(sa)
+            bl[f"ratio_{int(th)}h"] = float(sa) / g["sigma_root_MPa"]
+            bl[f"extrapolated_{int(th)}h"] = bool(ex_)
+            bl[f"capped_by_uts_{int(th)}h"] = bool(cap)
         bl["sigma_root_115_MPa"] = g["sigma_root_MPa"] * 1.15 ** 2
         bl["sigma_root_120_MPa"] = g["sigma_root_MPa"] * 1.20 ** 2
         bl["uts_at_T_MPa"] = disk.tab_interp(ni["uts_MPa"], g["T_rel_rotor_C"])[0]
@@ -675,7 +686,7 @@ def assemble(pt, tin, meta, out, cases, wall):
                 c["yield_ratio_ref_20C"] = f["vm_max_node_MPa"] / ni["ys_MPa"][0][1]
                 c["convergence_fine_vs_base"] = conv(f, b)
                 if abs(sp - 1.0) < 1e-12:
-                    c["creep_margins"] = creep_margins(cases[key + ("fine",)][0], cases[key + ("fine",)][1], f, lmp)
+                    c["creep_margins"] = creep_margins(cases[key + ("fine",)][0], cases[key + ("fine",)][1], f, lmp, ni["uts_MPa"])
                 v["cases"][f"{int(round(sp * 100))}"] = c
             e["variants"][tv] = v
         sens = {}
@@ -684,7 +695,7 @@ def assemble(pt, tin, meta, out, cases, wall):
                     and not kk[1].startswith("fillet")):
                 f = get(kk[:3])
                 c = summary(f, n0)
-                c["creep_margins"] = creep_margins(cases[kk][0], cases[kk][1], f, lmp)
+                c["creep_margins"] = creep_margins(cases[kk][0], cases[kk][1], f, lmp, ni["uts_MPa"])
                 if kk[1].startswith("dT"):
                     c["dT_hub_K"] = meta[(part, kk[1])]["dT_hub_K"]
                 else:
@@ -696,7 +707,7 @@ def assemble(pt, tin, meta, out, cases, wall):
         fs = {}
         for kk in sorted(k2 for k2 in out if k2[0] == part and str(k2[1]).startswith("fillet")):
             f = get(kk[:4])
-            cm = creep_margins(cases[kk][0], cases[kk][1], f, lmp)
+            cm = creep_margins(cases[kk][0], cases[kk][1], f, lmp, ni["uts_MPa"])
             fs.setdefault(kk[1], dict(fillet_w=meta[(part, kk[1])]["profile_info"]["fillet_w"],
                                       profile=meta[(part, kk[1])]["profile"], cases={}))
             fs[kk[1]]["cases"][kk[3]] = dict(
@@ -723,18 +734,23 @@ def assemble(pt, tin, meta, out, cases, wall):
         for tv in mt["T_variants"]:
             Tf = meta[(part, tv)]["T_C"]
             T_rb = float(np.interp(pr["r_b_m"], Tf["r"], Tf["T"]))
-            need[tv] = dict(T_at_r_b_C=T_rb)
+            T_ro = meta[(part, tv)]["T_rim_C"]
+            p_ro = e["variants"][tv]["cases"]["100"]["rim_p_MPa"]
+            need[tv] = dict(T_at_r_b_C=T_rb, T_live_rim_C=T_ro, p_live_rim_MPa=p_ro)
             for th in A["creep_hours"]:
-                sa = lmp.sigma(T_rb, th)
-                P = (T_rb + 273.15) * (lmp.C + math.log10(th))
-                need[tv][f"{int(th)}h"] = dict(sigma_allow_MPa=sa, t_web_needed_m=pr["Q_N_per_m"] / (sa * 1e6),
-                                              extrapolated=bool(P < lmp.Pmin or P > lmp.Pmax))
+                sa, ex_, cap = sigma_allow(lmp, ni["uts_MPa"], T_rb, th)
+                sr, exr, capr = sigma_allow(lmp, ni["uts_MPa"], T_ro, th)
+                need[tv][f"{int(th)}h"] = dict(sigma_allow_MPa=float(sa), t_web_needed_m=pr["Q_N_per_m"] / (float(sa) * 1e6),
+                                              extrapolated=bool(ex_), capped_by_uts=bool(cap),
+                                              live_rim_sigma_allow_MPa=float(sr), live_rim_ratio=float(sr) / p_ro,
+                                              live_rim_extrapolated=bool(exr))
         e["creep_sized_web"] = dict(
             r_b_m=pr["r_b_m"], t_b_design_m=pr["t_b_m"], t_rim_m=pr["band_t_m"], t_max_hub_m=pr["t_max_m"],
             Q_N_per_m=pr["Q_N_per_m"], variants=need,
-            note=("толщина полотна у низа обода r_b, при которой номинальное радиальное напряжение Q/(t·r_b) равно "
-                  "длительной прочности за t часов при температуре в r_b; сравнить с толщиной обода и наибольшей "
-                  "толщиной ступицы (осевой шаг ступени)"))
+            note=("t_web_needed — толщина полотна у низа обода r_b, при которой номинальное радиальное напряжение "
+                  "Q/(t·r_b) равно длительной прочности за t часов при температуре в r_b (сравнить с толщиной обода и "
+                  "наибольшей толщиной ступицы — осевой шаг ступени); live_rim — давление лопаток на живом ободе "
+                  "(100 %) против длительной прочности при температуре обода: от толщины полотна не зависит"))
         # сверка полотна с равнопрочным диском (изотермический расчёт)
         iso = get((part, "iso", 1.0))
         mp = iso["midplane"]
