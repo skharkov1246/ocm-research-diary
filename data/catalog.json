@@ -4,12 +4,12 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 335,
-    "total_bytes": 2752296,
-    "results_files": 161,
-    "results_with_script": 42,
+    "datasets": 336,
+    "total_bytes": 2770650,
+    "results_files": 162,
+    "results_with_script": 43,
     "results_referenced_in_site": 22,
-    "results_with_provenance_fields": 13,
+    "results_with_provenance_fields": 14,
     "by_track": {
       "ammonia": 91,
       "battery-cathode": 1,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 32,
+      "не определён": 33,
       "прочее": 25
     }
   },
@@ -6321,6 +6321,25 @@
       "last_change": "2026-11-14",
       "last_author": "Claude",
       "last_commit": "98bd6ff"
+    },
+    {
+      "path": "routes/gtu/platform/geom/impeller_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 18354,
+      "referenced_in_site": false,
+      "produced_by": "routes/impeller.py",
+      "shape": "объект",
+      "top_keys": [
+        "method",
+        "runs"
+      ],
+      "provenance_fields": [
+        "method"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "d25ab38"
     },
     {
       "path": "routes/halogen_Br.json",
