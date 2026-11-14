@@ -47,7 +47,7 @@ RAMP_MOTION_FRAME_COEFF= (${RAMP_ROT_INI}, ${RAMP_ROT_FREQ}, ${RAMP_ROT_ITER})
 %
 % ---- стенки: адиабатные; покрышка неподвижна в абсолютной системе (MARKER_SHROUD) — открытое колесо;
 % без MARKER_SHROUD покрышка вращается с колесом (закрытое колесо, run_case.py --rotating-shroud) ----
-MARKER_HEATFLUX= (hub, 0.0, blade, 0.0, shroud, 0.0)
+MARKER_HEATFLUX= (${WALLS})
 ${SHROUD_LINE}
 %
 % ---- периодичность поворотом: periodic_2 = periodic_1, повёрнутый на +360/Z вокруг +z ----

@@ -176,3 +176,41 @@ def test_geom_json_contract():
     assert 360.0 / s2["periodic"]["angle_deg"] == pytest.approx(round(360.0 / s2["periodic"]["angle_deg"]))
     assert set(s2["markers"]) == {"inlet", "outlet", "hub", "shroud", "blade", "periodic_1", "periodic_2"}
     assert s2["rotation_rate_rad_s"][2] == pytest.approx(mj["d1"]["rpm"] * 2 * math.pi / 60, rel=1e-9)
+
+
+SU2_FIXTURE = """NDIME= 3
+NELEM= 1
+10 0 1 2 3 0
+NPOIN= 6
+0.10 0.0 0.0 0
+0.30 0.0 0.0 1
+0.0 0.30 0.0 2
+0.0 0.0 0.1 3
+0.25 0.05 0.0 4
+0.0 0.12 0.0 5
+NMARK= 3
+MARKER_TAG= hub
+MARKER_ELEMS= 2
+5 0 1 2
+5 1 2 4
+MARKER_TAG= shroud
+MARKER_ELEMS= 1
+5 0 3 5
+MARKER_TAG= inlet
+MARKER_ELEMS= 1
+5 0 1 3
+"""
+
+
+def test_split_vaneless(tmp_path):
+    """Придуманная сетка (FIXTURE): грань hub с узлами только на r >= 0,2 уходит в hub_vaneless."""
+    src, dst = tmp_path / "m.su2", tmp_path / "s.su2"
+    src.write_text(SU2_FIXTURE, encoding="utf-8")
+    counts = rc.split_vaneless(str(src), str(dst), 0.2)
+    assert counts == {"hub_vaneless": 1, "shroud_vaneless": 0}
+    h = rc.read_mesh_header(str(dst))
+    assert h["NMARK"] == 5
+    assert h["markers"] == {"hub": 1, "hub_vaneless": 1, "shroud": 1, "shroud_vaneless": 0, "inlet": 1}
+    txt = dst.read_text(encoding="utf-8")
+    assert "MARKER_TAG= hub_vaneless\nMARKER_ELEMS= 1\n5 1 2 4\n" in txt
+    assert txt.split("NMARK")[0] == SU2_FIXTURE.split("NMARK")[0]  # элементы и узлы не тронуты

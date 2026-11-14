@@ -48,7 +48,8 @@ NUMERICS = dict(
     GAMMA=1.4, R_GAS=287.058, RELAX_IN=0.3, RELAX_OUT=0.3, NSPAN=10,
     FLOW_SCHEME="ROE", MUSCL="NO", LIMITER="VENKATAKRISHNAN", VENKAT=0.05, ENTROPY_FIX=0.05,
     CFL=5.0, CFL_ADAPT="YES", CFL_ADAPT_PARAM="0.5, 1.1, 1.0, 20.0, 0.1", LIN_PREC="ILU", LIN_ITER=10,
-    RES_MIN=-10, OUTPUT_FILES="RESTART, PARAVIEW", WRT_FREQ=500, EXTRA="", SHROUD_LINE="MARKER_SHROUD= (shroud)",
+    RES_MIN=-10, OUTPUT_FILES="RESTART, PARAVIEW", WRT_FREQ=500, EXTRA="",
+    WALLS="hub, 0.0, blade, 0.0, shroud, 0.0", SHROUD_LINE="MARKER_SHROUD= (shroud)",
 )
 
 # Планы стадий. frac — доля номинальной частоты в конце стадии, pfrac — доля оценки статического давления
@@ -112,6 +113,52 @@ def read_mesh_header(su2: str):
                 markers[tag] = int(ln.split("=")[1])
     info["markers"] = markers
     return info
+
+
+def split_vaneless(su2_in: str, su2_out: str, r_split: float, rtol: float = 1e-6):
+    """Копия сетки, где грани hub и shroud за колесом (все узлы на r >= r_split) вынесены в маркеры
+    hub_vaneless и shroud_vaneless — чтобы стенки безлопаточного участка были неподвижны (MARKER_SHROUD).
+    Возвращает число граней в новых маркерах."""
+    with open(su2_in, encoding="utf-8") as f:
+        lines = f.read().splitlines()
+    i = next(k for k, ln in enumerate(lines) if ln.startswith("NPOIN"))
+    npoin = int(lines[i].split("=")[1].split()[0])
+    rad = [0.0] * npoin
+    for k in range(i + 1, i + 1 + npoin):
+        s = lines[k].split()
+        idx = int(s[3]) if len(s) > 3 else k - i - 1
+        rad[idx] = math.hypot(float(s[0]), float(s[1]))
+    j = next(k for k, ln in enumerate(lines) if ln.startswith("NMARK"))
+    head, rest = lines[:j], lines[j + 1:]
+    markers, k = [], 0
+    while k < len(rest):
+        if rest[k].startswith("MARKER_TAG"):
+            tag = rest[k].split("=")[1].strip()
+            n = int(rest[k + 1].split("=")[1])
+            markers.append([tag, rest[k + 2:k + 2 + n]])
+            k += 2 + n
+        else:
+            k += 1
+    out_markers, counts = [], {}
+    lim = r_split * (1 - rtol)
+    for tag, elems in markers:
+        if tag in ("hub", "shroud"):
+            inner, outer = [], []
+            for e in elems:
+                nodes = [int(v) for v in e.split()[1:]]
+                (outer if min(rad[v] for v in nodes) >= lim else inner).append(e)
+            out_markers += [[tag, inner], [f"{tag}_vaneless", outer]]
+            counts[f"{tag}_vaneless"] = len(outer)
+        else:
+            out_markers.append([tag, elems])
+    with open(su2_out, "w", encoding="utf-8") as f:
+        f.write("\n".join(head) + "\n")
+        f.write(f"NMARK= {len(out_markers)}\n")
+        for tag, elems in out_markers:
+            f.write(f"MARKER_TAG= {tag}\nMARKER_ELEMS= {len(elems)}\n")
+            if elems:
+                f.write("\n".join(elems) + "\n")
+    return counts
 
 
 def estimate_p_out(d1: dict, frac: float, r_out: float, b_out: float, gamma: float, R: float) -> float:
@@ -439,6 +486,9 @@ def main(argv=None):
     ap.add_argument("--cfl", type=float, default=None)
     ap.add_argument("--rotating-shroud", action="store_true",
                     help="покрышка вращается с колесом (без MARKER_SHROUD): закрытое колесо, не открытое")
+    ap.add_argument("--stationary-vaneless", action="store_true",
+                    help="стенки hub и shroud за колесом (r >= r2) неподвижны: копия сетки с маркерами "
+                         "hub_vaneless, shroud_vaneless в папке прогона")
     ap.add_argument("--set", action="append", default=[], metavar="KEY=VAL",
                     help="переопределить параметр шаблона (имя поля $ИМЯ), можно несколько раз")
     ap.add_argument("--extra", action="append", default=[], metavar="'KEY= VAL'",
@@ -528,6 +578,14 @@ def main(argv=None):
     os.makedirs(os.path.join(out, "TURBOMACHINERY"), exist_ok=True)
     tpl = open(TEMPLATE, encoding="utf-8").read()
     cconfig = find_cconfig(a.su2_src)
+    split_info = None
+    if a.stationary_vaneless:
+        split_mesh = os.path.join(out, "mesh_vaneless_split.su2")
+        split_info = split_vaneless(su2_mesh, split_mesh, d1["r2"])
+        su2_mesh = split_mesh
+        params["WALLS"] = "hub, 0.0, hub_vaneless, 0.0, blade, 0.0, shroud, 0.0, shroud_vaneless, 0.0"
+        params["SHROUD_LINE"] = ("MARKER_SHROUD= (hub_vaneless, shroud_vaneless)" if a.rotating_shroud
+                                 else "MARKER_SHROUD= (shroud, hub_vaneless, shroud_vaneless)")
 
     summ = {
         "created_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -536,7 +594,10 @@ def main(argv=None):
                    "mesh_header": hdr, "n_passages": n_pass, "periodic_angle_deg": per["angle_deg"],
                    "omega_nominal_rad_s": omega[2], "rpm_nominal": d1["rpm"], "p01": d1["p01"], "T01": d1["T01"],
                    "gamma": gamma, "R": R, "r_out": r_out, "b_out": d1["b2"],
-                   "p_out_estimate_nominal": p_out_est, "plan": a.plan, "time_limit_s": a.time_limit},
+                   "p_out_estimate_nominal": p_out_est, "plan": a.plan, "time_limit_s": a.time_limit,
+                   "shroud": "rotating" if a.rotating_shroud else "stationary",
+                   "vaneless_walls": "stationary (split)" if a.stationary_vaneless else "hub rotates, shroud as above",
+                   "vaneless_split_faces": split_info},
         "d1_reference": {"m_wheel": d1["m"], "PR_stage": d1["PR"], "eta_comp_stage": d1.get("eta_comp_stage"),
                          "U2": d1["U2"], "note": "одномерная оценка gtu_explore.comp_stage — для сравнения, не эталон"},
         "numerics": params, "stages": [],
