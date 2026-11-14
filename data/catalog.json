@@ -4,8 +4,8 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 380,
-    "total_bytes": 4227233,
+    "datasets": 381,
+    "total_bytes": 4227753,
     "results_files": 173,
     "results_with_script": 50,
     "results_referenced_in_site": 22,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 60,
+      "не определён": 61,
       "прочее": 25
     }
   },
@@ -6699,6 +6699,21 @@
       "last_change": "2026-11-14",
       "last_author": "Claude",
       "last_commit": "493cb81"
+    },
+    {
+      "path": "routes/gtu/organic/cycles/aws_jobs_cycles.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 520,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "defaults",
+        "jobs"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "6821db5"
     },
     {
       "path": "routes/gtu/organic/exergy/exergy_results.json",
