@@ -27,9 +27,11 @@ from __future__ import annotations
 
 import argparse
 import csv
+import functools
 import inspect
 import json
 import math
+import os
 import re
 import sys
 import time
@@ -48,12 +50,32 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import ConstantKernel, Matern, WhiteKernel
 from sklearn.model_selection import GroupKFold
 from sklearn.neural_network import MLPRegressor
+from threadpoolctl import ThreadpoolController
 
 __all__ = [
     "Space", "design", "Surrogate", "GPModel", "MLPEnsemble", "metrics", "block_cv",
     "validate", "optimize", "propose", "expected_improvement", "parse_constraint",
     "read_table", "write_table",
 ]
+
+
+# Матрицы малы (сотни точек): многопоточный BLAS только мешает, а на занятой машине (соседние
+# расчёты) замедляет обучение в 4-14 раз (замер в README). Число потоков BLAS — SURROGATE_BLAS_THREADS.
+_BLAS = int(os.environ.get("SURROGATE_BLAS_THREADS", "1"))
+_TPC = None
+
+
+def _blas_limited(fn):
+    @functools.wraps(fn)
+    def wrap(*a, **k):
+        global _TPC
+        if _BLAS <= 0:
+            return fn(*a, **k)
+        if _TPC is None:
+            _TPC = ThreadpoolController()
+        with _TPC.limit(limits=_BLAS, user_api="blas"):
+            return fn(*a, **k)
+    return wrap
 
 
 def _rng_kw(fn, seed):
@@ -136,8 +158,10 @@ class GPModel:
 
     def __init__(self, nu=2.5, restarts=3, seed=0):
         self.nu, self.restarts, self.seed = nu, restarts, seed
-        self.gps = []
+        self.gps, self.noise_ = [], np.zeros(0)
+        self.white = True       # шум входит в ядро (WhiteKernel); у копии condition() — в alpha
 
+    @_blas_limited
     def fit(self, U, Ys):
         self.gps = []
         with warnings.catch_warnings():
@@ -147,27 +171,40 @@ class GPModel:
                                               n_restarts_optimizer=self.restarts, random_state=self.seed + j)
                 gp.fit(U, Ys[:, j])
                 self.gps.append(gp)
+        self.noise_ = np.array([gp.kernel_.k2.noise_level for gp in self.gps])
         return self
 
     def noise_var(self):
         """оценка дисперсии шума по каждому показателю (в стандартизованных единицах)"""
-        return np.array([gp.kernel_.k2.noise_level for gp in self.gps])
+        return self.noise_
 
+    @_blas_limited
     def predict(self, U, latent=True):
         """среднее и СКО; latent=True — СКО самой функции без шума расчёта"""
         mu, sd = [], []
-        for gp, nv in zip(self.gps, self.noise_var()):
+        for gp, nv in zip(self.gps, self.noise_):
             m, s = gp.predict(U, return_std=True)
-            v = s ** 2 - (nv if latent else 0.0)
+            if self.white:
+                v = s ** 2 - (nv if latent else 0.0)
+            else:
+                v = s ** 2 + (0.0 if latent else nv)
             mu.append(m)
             sd.append(np.sqrt(np.clip(v, 0.0, None)))
         return np.column_stack(mu), np.column_stack(sd)
 
+    @_blas_limited
     def condition(self, U_add, Ys_add):
-        """копия модели с добавленными точками при неизменных гиперпараметрах (Kriging believer)"""
+        """копия модели с добавленными точками при неизменных гиперпараметрах (Kriging believer).
+        Добавленные точки считаются точными (дорогой расчёт детерминирован: повтор той же точки
+        ничего не даёт), исходные — с оценённым шумом; шум переносится из ядра в alpha."""
         new = GPModel(self.nu, 0, self.seed)
+        new.white, new.noise_ = False, self.noise_.copy()
         for j, gp in enumerate(self.gps):
-            g = GaussianProcessRegressor(gp.kernel_, optimizer=None, normalize_y=False)
+            k = gp.kernel_.k1 if self.white else gp.kernel_
+            n0 = len(gp.X_train_)
+            a0 = (np.full(n0, self.noise_[j]) if self.white else np.asarray(gp.alpha, float) * np.ones(n0))
+            alpha = np.concatenate([a0 + 1e-10, np.full(len(U_add), 1e-8)])
+            g = GaussianProcessRegressor(k, alpha=alpha, optimizer=None, normalize_y=False)
             g.fit(np.vstack([gp.X_train_, U_add]), np.concatenate([gp.y_train_, Ys_add[:, j]]))
             new.gps.append(g)
         return new
@@ -176,6 +213,7 @@ class GPModel:
         return [str(gp.kernel_) for gp in self.gps]
 
 
+@_blas_limited
 def _fit_member(Ub, Yb, hidden, alpha, activation, max_iter, seed):
     net = MLPRegressor(hidden_layer_sizes=hidden, activation=activation, solver="lbfgs", alpha=alpha,
                        max_iter=max_iter, tol=1e-8, random_state=seed)
@@ -185,39 +223,69 @@ def _fit_member(Ub, Yb, hidden, alpha, activation, max_iter, seed):
     return net
 
 
+def _alpha_job(U, Yc, tr, te, hidden, alpha, activation, max_iter, seed):
+    net = _fit_member(U[tr], Yc[tr], hidden, alpha, activation, max_iter, seed)
+    e = np.asarray(net.predict(2.0 * U[te] - 1.0)).reshape(len(te), -1) - Yc[te].reshape(len(te), -1)
+    return float(np.sum(e ** 2))
+
+
 class MLPEnsemble:
     """ансамбль многослойных перцептронов (lbfgs); у каждого члена своя начальная инициализация и,
-    при bootstrap=True, своя бутстреп-выборка. Разброс членов — мера неопределённости."""
+    при bootstrap=True, своя бутстреп-выборка. Разброс членов — мера неопределённости.
+    alpha='auto' — L2-регуляризация подбирается по каждому показателю внутренней 4-кратной
+    перекрёстной проверкой из alpha_grid (шумному показателю нужна сильнее, гладкому — слабее)."""
 
     name = "mlp"
 
-    def __init__(self, members=8, hidden=(64, 64), alpha=1e-2, activation="tanh", bootstrap=True,
-                 per_output=True, max_iter=3000, seed=0, n_jobs=1):
+    def __init__(self, members=8, hidden=(32, 32), alpha="auto", activation="tanh", bootstrap=True,
+                 per_output=True, alpha_grid=(1e-4, 1e-3, 1e-2, 1e-1, 1.0), max_iter=3000, seed=0, n_jobs=1):
         self.members, self.hidden, self.alpha = members, tuple(hidden), alpha
         self.activation, self.bootstrap, self.max_iter = activation, bootstrap, max_iter
-        self.per_output, self.seed, self.n_jobs = per_output, seed, n_jobs
-        self.nets = []
+        self.per_output, self.alpha_grid, self.seed, self.n_jobs = per_output, tuple(alpha_grid), seed, n_jobs
+        self.nets, self.alpha_ = [], []
+
+    def _par(self, fn, jobs):
+        if self.n_jobs == 1:
+            return [fn(*j) for j in jobs]
+        return joblib.Parallel(n_jobs=self.n_jobs)(joblib.delayed(fn)(*j) for j in jobs)
+
+    def _select_alpha(self, U, Ys, cols):
+        from sklearn.model_selection import KFold
+        splits = list(KFold(4, shuffle=True, random_state=self.seed).split(U))
+        jobs, keys = [], []
+        for ci, c in enumerate(cols):
+            Yc = Ys[:, c[0]] if len(c) == 1 else Ys[:, c]
+            for a in self.alpha_grid:
+                for tr, te in splits:
+                    jobs.append((U, Yc, tr, te, self.hidden, a, self.activation, self.max_iter, self.seed))
+                    keys.append((ci, a))
+        sse = self._par(_alpha_job, jobs)
+        table = {}
+        for (ci, a), e in zip(keys, sse):
+            table[(ci, a)] = table.get((ci, a), 0.0) + e
+        self.alpha_cv_ = {f"{ci}:{a:g}": v / len(U) for (ci, a), v in table.items()}
+        return [min(self.alpha_grid, key=lambda a: table[(ci, a)]) for ci in range(len(cols))]
 
     def fit(self, U, Ys):
         """per_output=True — своя сеть на каждый показатель (у показателей разная гладкость и шум),
         иначе одна сеть с несколькими выходами"""
         n, p = Ys.shape
         cols = [[j] for j in range(p)] if self.per_output else [list(range(p))]
+        self.alpha_ = (self._select_alpha(U, Ys, cols) if self.alpha == "auto"
+                       else [float(self.alpha)] * len(cols))
         jobs = []
         for i in range(self.members):
             rng = np.random.default_rng(self.seed + 1000 * i)
             idx = rng.integers(0, n, n) if self.bootstrap else np.arange(n)
-            for c in cols:
+            for ci, c in enumerate(cols):
                 yb = Ys[np.ix_(idx, c)]
-                jobs.append((U[idx], yb[:, 0] if len(c) == 1 else yb, self.seed + i))
-        args = (self.hidden, self.alpha, self.activation, self.max_iter)
-        if self.n_jobs == 1:
-            nets = [_fit_member(a, b, *args, sd) for a, b, sd in jobs]
-        else:
-            nets = joblib.Parallel(n_jobs=self.n_jobs)(joblib.delayed(_fit_member)(a, b, *args, sd) for a, b, sd in jobs)
+                jobs.append((U[idx], yb[:, 0] if len(c) == 1 else yb, self.hidden, self.alpha_[ci],
+                             self.activation, self.max_iter, self.seed + i))
+        nets = self._par(_fit_member, jobs)
         self.nets = [nets[i * len(cols):(i + 1) * len(cols)] for i in range(self.members)]
         return self
 
+    @_blas_limited
     def predict(self, U, latent=True):
         Z = 2.0 * U - 1.0
         P = np.stack([np.column_stack([np.asarray(net.predict(Z)).reshape(len(U), -1) for net in member])
@@ -226,18 +294,24 @@ class MLPEnsemble:
         return P.mean(axis=0), sd
 
     def describe(self):
-        return dict(members=self.members, hidden=list(self.hidden), alpha=self.alpha,
+        return dict(members=self.members, hidden=list(self.hidden), alpha=self.alpha, alpha_used=self.alpha_,
                     activation=self.activation, bootstrap=self.bootstrap, per_output=self.per_output,
                     iters_max=max(int(net.n_iter_) for member in self.nets for net in member))
 
 
 class Surrogate:
     """модель-заменитель: входы -> показатели. Обучает выбранные виды моделей ('mlp', 'gp')
-    на одной таблице; хранит обучающие данные (изученная область, плотность точек)."""
+    на одной таблице; хранит обучающие данные (изученная область, плотность точек).
+    log — показатели, которые учатся в логарифме (положительные величины с разбросом в разы:
+    диаметр, расход, напряжение); прогноз — exp(среднего логарифма), СКО — exp(mu)*СКО логарифма."""
 
-    def __init__(self, space, outputs, kinds=("mlp", "gp"), mlp=None, gp=None, seed=0, n_jobs=1):
+    def __init__(self, space, outputs, kinds=("mlp", "gp"), mlp=None, gp=None, log=(), seed=0, n_jobs=1):
         self.space, self.outputs = space, list(outputs)
         self.kinds = tuple(kinds)
+        bad = [o for o in log if o not in self.outputs]
+        if bad:
+            raise ValueError(f"log: нет таких показателей {bad}")
+        self.log = np.array([o in set(log) for o in self.outputs])
         self.mlp_kw, self.gp_kw = dict(mlp or {}), dict(gp or {})
         self.seed, self.n_jobs = seed, n_jobs
         self.models, self.report = {}, {}
@@ -249,10 +323,16 @@ class Surrogate:
             raise ValueError("число столбцов Y не совпадает с числом показателей")
         if not (np.isfinite(X).all() and np.isfinite(Y).all()):
             raise ValueError("в данных NaN/inf — отбросьте неудачные прогоны до обучения (read_table это делает)")
+        if (Y[:, self.log] <= 0).any():
+            raise ValueError("показатель из списка log должен быть положительным")
         self.X, self.Y = X, Y
-        self.y_mu, self.y_sd = Y.mean(0), Y.std(0)
+        self.y_scale = Y.std(0)                      # масштаб показателя для штрафов и допусков
+        self.y_scale[self.y_scale == 0] = 1.0
+        Yt = Y.copy()
+        Yt[:, self.log] = np.log(Y[:, self.log])
+        self.y_mu, self.y_sd = Yt.mean(0), Yt.std(0)
         self.y_sd[self.y_sd == 0] = 1.0
-        U, Ys = self.space.to_unit(X), (Y - self.y_mu) / self.y_sd
+        U, Ys = self.space.to_unit(X), (Yt - self.y_mu) / self.y_sd
         self.models = {}
         for kind in self.kinds:
             if kind == "mlp":
@@ -282,14 +362,24 @@ class Surrogate:
         """среднее и СКО (в единицах показателей), массивы (n, p)"""
         kind = kind or self.kinds[0]
         X = np.atleast_2d(np.asarray(X, float))
-        mu, sd = self.models[kind].predict(self.space.to_unit(X), latent=latent)
-        return mu * self.y_sd + self.y_mu, sd * self.y_sd
+        return self._inverse(*self.models[kind].predict(self.space.to_unit(X), latent=latent))
+
+    def _inverse(self, mu_s, sd_s):
+        """из стандартизованных (и, для log, логарифмированных) единиц модели — в единицы показателя"""
+        mu, sd = mu_s * self.y_sd + self.y_mu, sd_s * self.y_sd
+        if self.log.any():
+            mu, sd = mu.copy(), sd.copy()
+            mu[:, self.log] = np.exp(mu[:, self.log])
+            sd[:, self.log] = mu[:, self.log] * sd[:, self.log]
+        return mu, sd
 
     def noise_sd(self):
         """оценка СКО шума расчёта по GP, в единицах показателей"""
         if "gp" not in self.models:
             return None
-        return dict(zip(self.outputs, (np.sqrt(self.models["gp"].noise_var()) * self.y_sd).tolist()))
+        s = np.sqrt(self.models["gp"].noise_var()) * self.y_sd
+        s = np.where(self.log, s * np.exp(self.y_mu), s)   # для log — относительный шум, умноженный на типичное значение
+        return dict(zip(self.outputs, s.tolist()))
 
     def nn_ratio(self, X):
         """расстояние до ближайшей обучающей точки / медианное расстояние между соседями"""
@@ -304,6 +394,7 @@ class Surrogate:
 
     def describe(self):
         return dict(inputs=self.space.bounds(), outputs=self.outputs, n=len(self.X),
+                    log=[o for o, f in zip(self.outputs, self.log) if f],
                     studied=dict(zip(self.space.names, zip(self.box_lo.tolist(), self.box_hi.tolist()))),
                     nn_median_unit=self.nn_med, noise_sd_gp=self.noise_sd(),
                     models={k: m.describe() for k, m in self.models.items()},
@@ -340,8 +431,8 @@ def validate(sur, X, Y, latent=False):
     return {k: metrics(Y, *sur.predict(X, kind=k, latent=latent), names=sur.outputs) for k in sur.kinds}
 
 
-def _fold(space, outputs, kinds, mlp, gp, seed, X, Y, tr, te):
-    s = Surrogate(space, outputs, kinds=kinds, mlp=dict(mlp or {}, n_jobs=1), gp=gp, seed=seed, n_jobs=1)
+def _fold(space, outputs, kinds, mlp, gp, log, seed, X, Y, tr, te):
+    s = Surrogate(space, outputs, kinds=kinds, mlp=dict(mlp or {}, n_jobs=1), gp=gp, log=log, seed=seed, n_jobs=1)
     s.fit(X[tr], Y[tr])
     return te, {k: s.predict(X[te], kind=k, latent=False) for k in kinds}
 
@@ -358,7 +449,7 @@ def block_groups(X, space, n_blocks=20, mode="kmeans", seed=0):
 
 
 def block_cv(X, Y, space, outputs, n_folds=5, groups="kmeans", n_blocks=20, kinds=("mlp", "gp"),
-             mlp=None, gp=None, seed=0, n_jobs=1):
+             mlp=None, gp=None, log=(), seed=0, n_jobs=1):
     """перекрёстная проверка по блокам: точки делятся на блоки (groups — 'kmeans', 'order' или
     массив меток), блоки — на n_folds частей; модель учится без части и предсказывает её.
     Возвращает {вид: {'metrics': ..., 'pred': (mu, sd)}} и метки блоков."""
@@ -368,7 +459,7 @@ def block_cv(X, Y, space, outputs, n_folds=5, groups="kmeans", n_blocks=20, kind
         raise ValueError(f"блоков {len(np.unique(g))} меньше числа частей {n_folds}")
     splits = list(GroupKFold(n_splits=n_folds).split(X, Y, g))
     res = joblib.Parallel(n_jobs=n_jobs)(
-        joblib.delayed(_fold)(space, outputs, kinds, mlp, gp, seed, X, Y, tr, te) for tr, te in splits)
+        joblib.delayed(_fold)(space, outputs, kinds, mlp, gp, log, seed, X, Y, tr, te) for tr, te in splits)
     out = {}
     for k in kinds:
         mu, sd = np.zeros_like(Y), np.zeros_like(Y)
@@ -416,7 +507,7 @@ def _evaluate(sur, X, kind, objective, sign, cons, kappa):
     for name, op, c in cons:
         if name in sur.outputs:
             j = sur.outputs.index(name)
-            g, s, scale = mu[:, j], sd[:, j], sur.y_sd[j]
+            g, s, scale = mu[:, j], sd[:, j], sur.y_scale[j]
         else:
             j = sur.space.names.index(name)
             g, s, scale = X[:, j], 0.0, sur.space.hi[j] - sur.space.lo[j]
@@ -438,7 +529,11 @@ def optimize(sur, objective, maximize=True, constraints=(), fixed=None, kind="ml
       + w_gap  * (nn/nn_med - gap_ratio)^2, если ближайшая обучающая точка дальше gap_ratio
                типичных расстояний (дыра в данных).
     s_obj — СКО цели по данным. fixed — входы, закреплённые на значении (например, T1 = ISO).
-    Возвращает словарь: точка, прогноз обеих моделей, флаги неопределённости и края."""
+    Флаги: sigma — СКО модели в оптимуме больше tol; disagree — MLP и GP расходятся больше tol;
+    gap — дыра в данных; constraint — ограничения не выполнены по среднему прогнозу. Отдельно
+    at_edge — оси, по которым без штрафа за край модель ушла бы дальше (оптимум упирается в край
+    изученной области; истинный может лежать снаружи). tol — допуск цели (см. _tol).
+    Возвращает словарь: точка, прогноз обеих моделей, флаги, сведения о поиске."""
     if objective not in sur.outputs:
         raise ValueError(f"цель {objective!r} не среди показателей {sur.outputs}")
     if kind not in sur.models:
@@ -449,20 +544,23 @@ def optimize(sur, objective, maximize=True, constraints=(), fixed=None, kind="ml
         if name not in sur.outputs and name not in sur.space.names:
             raise ValueError(f"ограничение по неизвестной величине {name!r}")
     free, base = _full(sur, fixed)
+    if not free:
+        raise ValueError("все входы закреплены — оптимизировать нечего")
     io = sur.outputs.index(objective)
-    s_obj = float(sur.y_sd[io])
+    s_obj = float(sur.y_scale[io])
 
     def assemble(Xf):  # Xf: (S, n_free)
         X = np.tile(base, (len(Xf), 1))
         X[:, free] = Xf
         return X
 
-    def penal(X):
+    def penal(X, with_edge=True):
         val, viol, _, _ = _evaluate(sur, X, kind, objective, sign, cons, kappa)
         J = -sign * val / s_obj + w_con * (viol + viol ** 2)
-        Ub = sur._ub(X)[:, free]
-        t = np.minimum(Ub, 1.0 - Ub) / edge
-        J += w_edge * np.sum(np.clip(1.0 - t, 0.0, None) ** 2, axis=1)
+        if with_edge:
+            Ub = sur._ub(X)[:, free]
+            t = np.minimum(Ub, 1.0 - Ub) / edge
+            J += w_edge * np.sum(np.clip(1.0 - t, 0.0, None) ** 2, axis=1)
         r = sur.nn_ratio(X)
         J += w_gap * np.clip(r - gap_ratio, 0.0, None) ** 2
         return J
@@ -479,17 +577,31 @@ def optimize(sur, objective, maximize=True, constraints=(), fixed=None, kind="ml
                                init="sobol", vectorized=True, updating="deferred",
                                **_rng_kw(differential_evolution, seed))
     x = assemble(np.asarray(r.x)[None, :])
-    return _report_point(sur, x, objective, sign, cons, kind, kappa, edge, gap_ratio, tol, free,
+    tol = _tol(sur, objective, tol)
+    # упирается ли оптимум в край: без штрафа за край стало бы лучше, если сдвинуть точку на край оси
+    J0, at_edge = float(penal(x, False)[0]), []
+    for j in free:
+        u = sur._ub(x)[0, j]
+        xe = x.copy()
+        xe[0, j] = sur.box_lo[j] if u < 0.5 else sur.box_hi[j]
+        if float(penal(xe, False)[0]) < J0 - 0.1 * tol / s_obj:
+            at_edge.append(f"{sur.space.names[j]}:{'низ' if u < 0.5 else 'верх'}")
+    return _report_point(sur, x, objective, sign, cons, kind, kappa, edge, gap_ratio, tol, free, at_edge,
                          de=dict(success=bool(r.success), message=str(r.message), nfev=int(r.nfev),
                                  nit=int(r.nit), fun=float(r.fun), seconds=round(time.time() - t0, 2)))
 
 
-def _report_point(sur, x, objective, sign, cons, kind, kappa, edge, gap_ratio, tol, free, de=None):
-    io = sur.outputs.index(objective)
+def _tol(sur, objective, tol):
+    """допуск цели: заданный; иначе 2 RMSE перекрёстной проверки (если модель обучалась через CLI);
+    иначе 0,1 СКО цели по данным"""
     if tol is None:
         tol = (sur.report.get("tol") or {}).get(objective)
     if tol is None:
-        tol = 0.1 * float(sur.y_sd[io])
+        tol = 0.1 * float(sur.y_scale[sur.outputs.index(objective)])
+    return float(tol)
+
+
+def _report_point(sur, x, objective, sign, cons, kind, kappa, edge, gap_ratio, tol, free, at_edge, de=None):
     pred = {}
     for k in sur.kinds:
         mu, sd = sur.predict(x, kind=k)
@@ -514,15 +626,10 @@ def _report_point(sur, x, objective, sign, cons, kind, kappa, edge, gap_ratio, t
         flags.append("constraint")
         notes.append("ограничения не выполнены даже по среднему прогнозу")
     Ub = sur._ub(x)[0]
-    at_edge = []
-    for j in free:
-        if Ub[j] < edge:
-            at_edge.append(f"{sur.space.names[j]}:низ")
-        elif Ub[j] > 1.0 - edge:
-            at_edge.append(f"{sur.space.names[j]}:верх")
     if at_edge:
-        notes.append("оптимум в краевой полосе изученной области (" + ", ".join(at_edge)
-                     + ") — истинный оптимум может лежать снаружи; расширить план в эту сторону")
+        notes.append("оптимум упирается в край изученной области (" + ", ".join(at_edge)
+                     + "): без штрафа за край модель ушла бы дальше; истинный оптимум может лежать "
+                       "снаружи — расширить план в эту сторону")
     return dict(x=dict(zip(sur.space.names, x[0].tolist())), objective=objective,
                 maximize=sign > 0, kind=kind, kappa=kappa, tol=tol, constraints=[list(c) for c in cons],
                 pred=pred, nn_ratio=nn, edge_unit=dict(zip(sur.space.names, Ub.tolist())),
@@ -555,15 +662,20 @@ def _pof(sur, X, mu, sd, cons):
 
 
 def propose(sur, k, objective, maximize=True, constraints=(), fixed=None, kind="gp", domain="bounds",
-            n_cand=4096, local_frac=0.25, local_sd=0.05, xi=None, exclude=0.5, seed=0):
+            n_cand=4096, local_frac=0.25, local_sd=0.05, xi=None, exclude=0.5, beta=2.0, seed=0):
     """k новых точек по ожидаемому улучшению, умноженному на вероятность выполнить ограничения.
 
     Кандидаты: точки Соболя в номинальных границах (domain='bounds') или в изученной области
     ('studied') + облако вокруг текущего лучшего прогноза (local_frac кандидатов, СКО local_sd в
     долях диапазона). Лучшее значение — лучший средний прогноз среди кандидатов, выполняющих
     ограничения по среднему (подходит для зашумлённых расчётов). Порция: kind='gp' — Kriging
-    believer (точка добавляется в GP со своим прогнозом, гиперпараметры прежние, EI пересчитывается);
-    kind='mlp' — разброс ансамбля как СКО и запрет кандидатов ближе exclude*nn_med к уже выбранным."""
+    believer (точка добавляется в GP как точная со своим прогнозом, гиперпараметры прежние, EI
+    пересчитывается); kind='mlp' — разброс ансамбля как СКО. При обоих видах кандидаты ближе
+    exclude*nn_med (типичных расстояний между соседями) к уже выбранным точкам исключаются.
+    Когда EI исчезает везде (максимум меньше 1e-6 СКО цели — уточнённый believer-точками район
+    модели уже нечего улучшать), точка берётся по верхней доверительной границе
+    sign*mu + beta*sigma среди кандидатов с вероятностью выполнить ограничения >= 0,5
+    (режим 'ucb' в строке результата), а не по шуму в EI."""
     cons = [parse_constraint(c) for c in constraints]
     sign = 1.0 if maximize else -1.0
     io = sur.outputs.index(objective)
@@ -588,13 +700,12 @@ def propose(sur, k, objective, maximize=True, constraints=(), fixed=None, kind="
         Xl[:, free] = np.clip(Xl[:, free], lo[free], hi[free])
         Xc = np.vstack([Xc, Xl])
     if xi is None:
-        xi = 0.01 * float(sur.y_sd[io])
+        xi = 0.01 * float(sur.y_scale[io])
     model = sur.models[kind]
     Uc = sur.space.to_unit(Xc)
     chosen, rows = [], []
     for step in range(int(k)):
-        mu, sd = model.predict(Uc)
-        mu, sd = mu * sur.y_sd + sur.y_mu, sd * sur.y_sd
+        mu, sd = sur._inverse(*model.predict(Uc))
         ok = _feasible_mean(sur, Xc, mu, cons)
         pof = _pof(sur, Xc, mu, sd, cons)
         if ok.any():
@@ -602,17 +713,21 @@ def propose(sur, k, objective, maximize=True, constraints=(), fixed=None, kind="
             acq = expected_improvement(mu[:, io], sd[:, io], best, xi, maximize) * pof
         else:
             best, acq = None, pof.copy()
-        if chosen:
-            if kind != "gp":
-                d = cKDTree(sur._ub(np.array(chosen))).query(sur._ub(Xc), k=1)[0]
-                acq[d < exclude * sur.nn_med] = -1.0
-            # повтор той же точки запрещён при любом виде модели
-            same = cKDTree(sur.space.to_unit(np.array(chosen))).query(Uc, k=1)[0] < 1e-9
-            acq[same] = -1.0
+        banned = np.zeros(len(Xc), bool)
+        if chosen:  # не ближе exclude типичных расстояний к уже выбранным точкам порции
+            d = cKDTree(sur._ub(np.array(chosen))).query(sur._ub(Xc), k=1)[0]
+            banned = d < exclude * sur.nn_med
+        acq[banned] = -1.0
+        mode = "ei" if best is not None else "pof"
+        if best is not None and acq.max() < 1e-6 * float(sur.y_scale[io]):
+            mode = "ucb"
+            ucb = sign * mu[:, io] + beta * sd[:, io]
+            good = (pof >= 0.5) & ~banned
+            acq = np.where(good if good.any() else ~banned, ucb, -np.inf)
         i = int(np.argmax(acq))
         x = Xc[i].copy()
         chosen.append(x)
-        rows.append(dict(x=dict(zip(sur.space.names, x.tolist())), acq=float(acq[i]), pof=float(pof[i]),
+        rows.append(dict(x=dict(zip(sur.space.names, x.tolist())), mode=mode, acq=float(acq[i]), pof=float(pof[i]),
                          best=best, pred={o: dict(mean=float(mu[i, j]), sd=float(sd[i, j]))
                                           for j, o in enumerate(sur.outputs)}))
         if kind == "gp":  # Kriging believer: точка входит в модель со своим прогнозом
@@ -648,7 +763,8 @@ def read_table(path, inputs, outputs, group_col=None):
     X, Y, G, dropped = [], [], [], 0
     with open(path, newline="", encoding="utf-8") as fh:
         rd = csv.DictReader(fh)
-        miss = [c for c in list(inputs) + list(outputs) if c not in (rd.fieldnames or [])]
+        need = list(inputs) + list(outputs) + ([group_col] if group_col else [])
+        miss = [c for c in need if c not in (rd.fieldnames or [])]
         if miss:
             raise ValueError(f"{path}: нет столбцов {miss}")
         for row in rd:
@@ -718,9 +834,10 @@ def main(argv=None):
     a.add_argument("--folds", type=int, default=5)
     a.add_argument("--blocks", default="kmeans", help="kmeans | order | имя столбца с метками порций")
     a.add_argument("--n-blocks", type=int, default=20)
+    a.add_argument("--log", default="", help="показатели через запятую, которые учить в логарифме")
     a.add_argument("--members", type=int, default=8)
-    a.add_argument("--hidden", default="64,64")
-    a.add_argument("--alpha", type=float, default=1e-2)
+    a.add_argument("--hidden", default="32,32")
+    a.add_argument("--alpha", default="auto", help="auto или число (L2-регуляризация MLP)")
     a.add_argument("--jobs", type=int, default=4)
     a.add_argument("--seed", type=int, default=0)
     a.add_argument("--out", required=True)
@@ -761,11 +878,13 @@ def main(argv=None):
         blocks_col = args.blocks if args.blocks not in ("kmeans", "order") else None
         X, Y, G, dropped = read_table(args.data, space.names, outputs, blocks_col)
         kinds = tuple(args.kinds.split(","))
-        mlp = dict(members=args.members, hidden=tuple(int(v) for v in args.hidden.split(",")), alpha=args.alpha)
+        mlp = dict(members=args.members, hidden=tuple(int(v) for v in args.hidden.split(",")),
+                   alpha=args.alpha if args.alpha == "auto" else float(args.alpha))
         t0 = time.time()
+        log = tuple(v for v in args.log.split(",") if v)
         cv, _ = block_cv(X, Y, space, outputs, n_folds=args.folds, groups=G if blocks_col else args.blocks,
-                         n_blocks=args.n_blocks, kinds=kinds, mlp=mlp, seed=args.seed, n_jobs=args.jobs)
-        sur = Surrogate(space, outputs, kinds=kinds, mlp=mlp, seed=args.seed, n_jobs=args.jobs).fit(X, Y)
+                         n_blocks=args.n_blocks, kinds=kinds, mlp=mlp, log=log, seed=args.seed, n_jobs=args.jobs)
+        sur = Surrogate(space, outputs, kinds=kinds, mlp=mlp, log=log, seed=args.seed, n_jobs=args.jobs).fit(X, Y)
         rep = dict(data=args.data, n=len(X), dropped=dropped, cv=_strip(cv),
                    tol={o: 2.0 * cv[kinds[0]]["metrics"][o]["rmse"] for o in outputs})
         print(_fmt_metrics(f"перекрёстная по блокам ({args.blocks}, {args.folds} частей), {kinds[0]}:",

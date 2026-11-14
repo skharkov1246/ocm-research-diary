@@ -8,7 +8,6 @@ Coldun). Машины работают под ролью экземпляра: �
   python3 runner.py plan    jobs.json --assume-price 1.5   # без AWS: user-data, параметры, бюджет
   python3 runner.py run     jobs.json --branch B            # по умолчанию: проверка прав (DryRun=True), без запуска
   python3 runner.py run     jobs.json --branch B --live     # живой запуск спотовых машин (расходы!)
-  python3 runner.py run     jobs.json --branch B            # боевой прогон
   python3 runner.py status                                  # журнал: израсходовано / в работе / остаток
   python3 runner.py reap    --run-id ID                     # погасить машины прогона по тегам
   python3 runner.py collect --run-id ID --job NAME          # скачать результаты задачи
@@ -925,7 +924,7 @@ def main(argv=None) -> int:
         sp.add_argument("--out", help="куда скачивать результаты (runs/)")
         common(sp)
 
-    sp = sub.add_parser("run", help="прогон (или --dryrun)")
+    sp = sub.add_parser("run", help="по умолчанию проверка прав (DryRun); --live — живой запуск")
     knobs(sp)
     sp.add_argument("--dryrun", action="store_true", help="DryRun=True: проверка прав без запуска (и так по умолчанию)")
     sp.add_argument("--live", action="store_true", help="живой запуск спотовых машин (расходы!)")

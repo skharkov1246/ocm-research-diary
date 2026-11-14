@@ -640,3 +640,37 @@ def test_cli_run_refuses_without_env_before_any_aws_call(tmp_path, capsys, monke
     rc = R.main(["run", jobs, "--dryrun", "--ledger", str(tmp_path / "l.jsonl")])
     err = capsys.readouterr().err
     assert rc == 2 and "ALPHA_O_S3" in err and FAKE_SECRET not in err and FAKE_AKID not in err
+
+
+def test_cli_run_without_live_is_dryrun(tmp_path, capsys, monkeypatch):
+    """`run` без --live: run_instances только с DryRun=True, номер аккаунта в выводе скрыт."""
+    monkeypatch.setenv("ALPHA_O_S3", f"s3://{BUCKET}/{PREFIX}")
+    monkeypatch.setenv("ALPHA_O_INSTANCE_PROFILE", "gtu-test-profile")
+    monkeypatch.delenv("GTU_LIVE", raising=False)
+    aws, sts = Aws(), client("sts")
+    st_sts = Stubber(sts)
+    st_sts.add_response("get_caller_identity", {"UserId": "AIDAEXAMPLE", "Account": "123456789012",
+                                                "Arn": "arn:aws:iam::123456789012:user/alpha-o-agent"})
+    st_sts.activate()
+    aws.st["s3"].add_response("list_objects_v2", {"IsTruncated": False},
+                              {"Bucket": BUCKET, "Prefix": f"{PREFIX}/gtu/", "MaxKeys": 1})
+    aws.st["ec2"].add_response("describe_spot_price_history", spot_resp("c7a.16xlarge", PRICES_C7A),
+                               {"InstanceTypes": ["c7a.16xlarge"], "ProductDescriptions": ["Linux/UNIX"],
+                                "StartTime": ANY, "EndTime": ANY})
+    add_ami(aws)
+    exp = dict(expected_run_params(), DryRun=True, ImageId="ami-0123456789abcdef0")
+    exp["TagSpecifications"] = ANY                              # run_id генерируется
+    aws.st["ec2"].add_client_error("run_instances", service_error_code="DryRunOperation",
+                                   service_message="Request would have succeeded", http_status_code=412,
+                                   expected_params=exp)
+    monkeypatch.setattr(R, "_clients", lambda region: (aws.ec2, aws.s3, aws.ssm, sts))
+    f = tmp_path / "jobs.json"
+    f.write_text(json.dumps([{"name": "su2-comp130", "command": "true", "max_min": 60}]))
+    rc = R.main(["run", str(f), "--skip-branch-check", "--ledger", str(tmp_path / "ledger.jsonl"),
+                 "--out", str(tmp_path / "runs")])
+    out = capsys.readouterr().out
+    assert rc == 0 and "[умолчание]" in out and "DryRunOperation" in out
+    assert "123456789012" not in out and BUCKET not in out
+    assert not (tmp_path / "ledger.jsonl").exists()
+    aws.done()
+    st_sts.assert_no_pending_responses()

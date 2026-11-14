@@ -12,8 +12,8 @@ CalculiX, Gmsh и любые скрипты репозитория) идёт н�
 
 | Файл | Что это |
 |---|---|
-| `runner.py` | Исполнитель: `plan`, `run` (и `run --dryrun`), `status`, `reap`, `collect` |
-| `test_runner.py` | 24 теста без сети: botocore Stubber вместо AWS; user-data выполняется локально на подменённых командах |
+| `runner.py` | Исполнитель: `plan`, `run` (по умолчанию DryRun; живой запуск — `--live`), `status`, `reap`, `collect` |
+| `test_runner.py` | 25 тестов без сети: botocore Stubber вместо AWS; user-data выполняется локально на подменённых командах |
 | `jobs.example.json` | Пример пакета: `smoke` (проверка машины) и `explore-249` (`routes/gtu/gtu_explore.py`) |
 | `iam_policy_addendum.json` | Дополнение к `calc/aws_setup/user_policy.json`: спот, цена спота, образ Ubuntu 24.04 |
 | `ledger.jsonl` | Журнал расходов (появится после первого боевого прогона; коммитить) |
@@ -112,18 +112,21 @@ python3 routes/gtu/platform/aws/runner.py plan routes/gtu/platform/aws/jobs.exam
         --assume-price 1.5 --show-userdata        # без AWS; цена — допущение
 python3 routes/gtu/platform/aws/runner.py status  # израсходовано / в работе / остаток
 python3 routes/gtu/platform/aws/runner.py run routes/gtu/platform/aws/jobs.example.json \
-        --branch <ветка> --dryrun                 # права и бюджет, без запуска
+        --branch <ветка>                          # по умолчанию DryRun: права и бюджет, без запуска
 python3 routes/gtu/platform/aws/runner.py run routes/gtu/platform/aws/jobs.example.json \
-        --branch <ветка>                          # боевой прогон
+        --branch <ветка> --live                   # живой прогон (или GTU_LIVE=1); расходы
 ```
 
-Долгий прогон — в фоне с журналом в файл: `... run ... > /tmp/gtu_run.log 2>&1 &`. Если сессия
+Без `--live` (или `GTU_LIVE=1`) `run` машин не создаёт: `run_instances` идёт с `DryRun=True`.
+`--dryrun`, `GTU_DRYRUN=1`, `ALPHA_O_DRYRUN=1` включают проверку даже при `--live`.
+
+Долгий прогон — в фоне с журналом в файл: `... run ... --live > /tmp/gtu_run.log 2>&1 &`. Если сессия
 оборвётся, машины погасит сторож (`max_min`), а `reap` по `run_id` (в первой строке вывода и в
 `runs/<run_id>/`) погасит остатки и закроет записи.
 
 ## Порядок проверки (до первого боевого прогона)
 
-1. Тесты: `python3 -m pytest -q routes/gtu/platform/aws/test_runner.py` — 24 passed.
+1. Тесты: `python3 -m pytest -q routes/gtu/platform/aws/test_runner.py` — 25 passed.
 2. `plan` — прочитать user-data и параметры `run_instances`.
 3. Владелец с админ-доступом (не агент) применяет дополнение политики и создаёт
    служебную роль спота (если её нет):
@@ -138,9 +141,9 @@ python3 routes/gtu/platform/aws/runner.py run routes/gtu/platform/aws/jobs.examp
    `RunInstances` нужен ресурс `spot-instances-request/*` и служебная роль `AWSServiceRoleForEC2Spot`.
    Путь SSM образа Ubuntu 24.04 сверен с документацией Canonical (шаблон
    `ubuntu/server/<выпуск>/stable/current/<арх>/hvm/ebs-gp3/ami-id`, gp3 — для 23.10 и новее).
-4. `run --dryrun` в окружении Coldun: ожидается `запуск разрешён (DryRunOperation)` для каждой задачи
+4. `run` без `--live` в окружении Coldun: ожидается `запуск разрешён (DryRunOperation)` для каждой задачи
    и `чтение префикса результатов: OK`. `UnauthorizedOperation` — не хватает прав (п. 3).
-5. Первый боевой — только `smoke` (вынести в отдельный файл задач, `max_min` 20): проверить
+5. Первый живой прогон (`--live`) — только `smoke` (вынести в отдельный файл задач, `max_min` 20): проверить
    `runs/<run_id>/smoke/` (`nproc.txt` = 64, `commit.txt`, `_job.log`, `_DONE.json`), `status`
    (открытых машин 0) и в консоли EC2 — что машина в `terminated`.
 6. Затем `explore-249`: сравнить скачанный `gtu_explore_results.json` с `routes/gtu/gtu_explore_results.json`.
