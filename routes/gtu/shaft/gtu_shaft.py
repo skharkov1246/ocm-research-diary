@@ -205,6 +205,7 @@ class CompressorMap:
         self.Wm_d, self.PRm_d, self.Em_d = float(self.fW(x)), float(self.fPR(x)), float(self.fE(x))
         self.sW, self.sPR = Wc_d / self.Wm_d, (PR_d - 1) / (self.PRm_d - 1)
         self.R_stall = float(m.get("RlineStall") or self.R[0])
+        self.R_lo, self.R_hi = float(self.R[0]) - 0.4, float(self.R[-1]) + 0.4   # допустимая экстраполяция по R
 
     def __call__(self, Nc_rel, R):
         x = (Nc_rel * self.Nc_d, R)
@@ -418,6 +419,8 @@ class Unit:
         return self.e_at(self.eta3, self.P5)
 
     def front(self, T1, Nc, R, T41, e):
+        if not (self.map.R_lo <= R <= self.map.R_hi):           # дальняя экстраполяция даёт ложные ветви решений
+            raise ValueError(f"R вне карты: {R:.3f}")
         Wc, PR, eta = self.map(Nc, R)
         if not (PR > 1.5 and Wc > 0 and 0.3 < eta < 1.0):     # экстраполяция карты ушла за смысл
             raise ValueError(f"карта вне области: Nc={Nc:.3f} R={R:.3f} PR={PR:.3f}")
@@ -450,11 +453,11 @@ class Unit:
         def res(R):
             try:
                 fr = self.front(T1, Nc, R, T41, e)
-            except ValueError:            # за стороной запирания карты (PR < 1,5): расход «слишком велик»
-                return 1.0
+            except ValueError:            # вне карты: левее — расход мал (помпаж), правее — велик (запирание)
+                return -1.0 if R < self.map.R_d else 1.0
             return ellipse_resid(fr["FF41"], fr["P41"], e["P5"], self.K41)
 
-        R = _bracket_root(res, self.map.R[0] - 0.4, self.map.R[-1] + 0.4)
+        R = _bracket_root(res, self.map.R_lo, self.map.R_hi)
         fr = self.front(T1, Nc, R, T41, e)
         gg = cycle_ggt(fr, e, 1.0)
         pt = cycle_pt(gg, fr, e, 1.0)
@@ -712,13 +715,8 @@ class Unit:
 
 def _bracket_root(f, lo, hi):
     a, b = f(lo), f(hi)
-    k = 0
-    while a * b > 0 and k < 3:
-        lo, hi = lo - 0.3, hi + 0.3
-        a, b = f(lo), f(hi)
-        k += 1
     if a * b > 0:
-        raise RuntimeError("рабочая точка на линии частоты не найдена")
+        raise RuntimeError("рабочая точка на линии частоты не найдена в пределах карты (±0,4 по R)")
     return brentq(f, lo, hi, xtol=1e-9)
 
 

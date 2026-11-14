@@ -24,7 +24,9 @@ SU2 (сжимаемые уравнения Рейнольдса во враща�
 - работает сборка из исходников: `bash install_su2.sh [префикс] [папка исходников]`. Скрипт ставит
   `openmpi-bin libopenmpi-dev` (apt), клонирует тег `v8.6.0`, `./meson.py setup build_mpi -Dwith-mpi=enabled
   -Dbuildtype=release`, `./ninja -C build_mpi install`. Здесь: `apt-get install -y libopenmpi-dev` (OpenMPI
-  4.1.6), сборка с установкой — 8 мин на 4 ядрах, код 0. Версия: `SU2_CFD --help` → `SU2 v8.6.0 "Harrier"`.
+  4.1.6), затем `meson.py setup` + сборка с установкой — 8 мин на 4 ядрах (клон тега v8.6.0 и подмодули уже
+  лежали от прежней сборки без MPI), код 0, `ldd SU2_CFD` → `libmpi.so.40`. Версия: `SU2_CFD --help` →
+  `SU2 v8.6.0 "Harrier"`. Сам `install_su2.sh` целиком (с клоном) здесь не запускался — шаги те же.
 - после установки: `export SU2_RUN=<префикс>/bin PATH=<префикс>/bin:$PATH`.
 - **Особенность OpenMPI 4.1.6:** MPI-сборка SU2, запущенная одним процессом (без `mpirun` или `-np 1`),
   падает в `MPI_Win_create` («MPI_ERR_WIN: invalid window»); с `OMPI_MCA_osc=pt2pt` идёт, с 4 процессами
@@ -41,14 +43,14 @@ SU2 (сжимаемые уравнения Рейнольдса во враща�
 | уравнения | `SOLVER= RANS`, `KIND_TURB_MODEL= SST` (по умолчанию V2003m) или `SA` (`--turb SA`) | — |
 | газ | идеальный газ, γ = 1,4, R = 287,058, вязкость по Сазерленду | — |
 | вращение | `GRID_MOVEMENT= ROTATING_FRAME`, ось z, `ROTATION_RATE` = ω из JSON сетки × доля частоты стадии; скорость в решении абсолютная | `su2.rotation_rate_rad_s` |
-| стенки | `MARKER_HEATFLUX` = 0 на hub, blade, shroud; `MARKER_SHROUD= (shroud)` — покрышка неподвижна | — |
+| стенки | hub и blade — адиабатные с прилипанием, вращаются с колесом (`MARKER_HEATFLUX`). Покрышка (`--shroud`): `stationary` — с прилипанием, неподвижна (`MARKER_SHROUD`), открытое колесо — по умолчанию; `rotating` — вращается (закрытое колесо); `slip` — без трения (`MARKER_EULER`). Стенки за колесом r ≥ r2 (`--vaneless`): `as-is` — как в сетке (часть hub вращается); `stationary` или `slip` — копия сетки с маркерами `hub_vaneless`, `shroud_vaneless` (`split_vaneless`) | — |
 | периодичность | `MARKER_PERIODIC= (periodic_1, periodic_2, центр 0, угол (0, 0, 360/Z), сдвиг 0)` | `su2.periodic` |
 | вход | Giles `TOTAL_CONDITIONS_PT`: p01, T01, направление (1, 0, 0) в осях решётки = по нормали, без закрутки | `d1.p01`, `d1.T01` |
 | выход | Giles `STATIC_PRESSURE_1D`: статическое давление на r = 1,3 r2 | оценка `estimate_p_out` или `--p-out` |
 | турбомашинные маркеры | `MARKER_TURBOMACHINERY= (inlet, outlet)`, `AXIAL_CENTRIFUGAL`, `TURBO_PERF_KIND= COMPRESSOR`, осреднение `MIXEDOUT` | — |
-| разгон | `RAMP_MOTION_FRAME` (частота) и `RAMP_OUTLET` (давление на выходе) — линейно, обновление каждую итерацию | стадии плана |
-| начальное поле | M = 0,4 вдоль +z (`AOA= 90`), статические p, T — из p01, T01 при этом M | — |
-| схема | Roe, первый порядок на разгоне, `MUSCL` + Venkatakrishnan на рабочей точке; неявная схема, `CFL_ADAPT` (CFL 1–20), FGMRES + ILU; `MGLEVEL= 0` (Giles — только на мелкой сетке) | — |
+| разгон | `RAMP_MOTION_FRAME` (частота) и `RAMP_OUTLET` (давление на выходе) — линейно, обновление каждые 5 итераций (`--ramp-freq`); давление растёт вдвое дольше частоты и отстаёт от неё | стадии плана |
+| начальное поле | M = 0,4 вдоль +z (`AOA= 90`), статические p, T — из p01, T01 при этом M; рампа давления на выходе стартует с этого статического давления | — |
+| схема | Roe, первый порядок на разгоне, `MUSCL` + Venkatakrishnan на рабочей точке; неявная схема, CFL 5 с `CFL_ADAPT` (1–20), FGMRES + ILU; `MGLEVEL= 0` (Giles — только на мелкой сетке) | — |
 | вывод | `history_<стадия>.csv`: невязки, `Avg_Massflow/TotalPress/TotalTemp(inlet/outlet)` (осреднение по расходу), группа `TURBO_PERF` | — |
 
 Оценка давления на выходе (`estimate_p_out`, граничное условие, а не результат): p02 = PR·p01 из JSON сетки
@@ -62,9 +64,10 @@ SU2 (сжимаемые уравнения Рейнольдса во враща�
 ## Запуск
 
 ```bash
-python run_case.py --case core130 --level coarse --plan smoke --np 4 --time-limit 1200   # дымовой прогон
+python run_case.py --case core130 --level coarse --plan smoke --np 4 --time-limit 1190 \
+       --shroud slip --vaneless slip --record                 # дымовой прогон (раздел «Проверка»)
 python run_case.py --case core130 --plan smoke --dry          # только cfg + SU2_CFD -d по первой стадии
-python run_case.py --parse runs/core130_coarse_smoke          # заново разобрать готовый прогон
+python run_case.py --parse runs/core130_coarse_smoke_slip     # заново разобрать готовый прогон
 python run_case.py --case taurus60 --level medium --plan design --np 64 --time-limit 7000 --out "$GTU_OUT"
 python -m pytest -q test_run_case.py                          # тесты без SU2
 ```
@@ -75,14 +78,20 @@ python -m pytest -q test_run_case.py                          # тесты бе�
   z-компоненту, код `CConfig::SetRate`).
 - План стадий (`--plan`): каждая стадия — отдельный запуск SU2 с рестартом от предыдущей
   (`RESTART_SOL`, `SOLUTION_FILENAME`); частота и давление на выходе рампой идут от значений конца
-  прошлой стадии. `smoke`: 0 → 0,6 номинала (рампа 150 итераций, всего 200), 0,6 → 1,0 (150/250),
-  затем 300 итераций второго порядка на рабочей точке. `design` — то же для облака с 6000 итерациями.
-  Свой план — JSON-список стадий (`name, frac, pfrac, ramp, iter, muscl`); `--iter-scale` — множитель итераций.
-- Прочие ключи: `--p-out`, `--frac`, `--turb`, `--cfl`, `--set ИМЯ=значение` (поле шаблона), `--extra "KEY= VAL"`
-  (строка SU2 вне шаблона), `--np`, `--time-limit` (общий на все стадии; по истечении — SIGTERM группе
-  процессов, затем SIGKILL), `--su2-bin`, `--su2-src`, `--mass-tol`, `--record`.
+  прошлой стадии. `smoke`: 0 → 0,6 номинала (рампа частоты 80 итераций, давления — 160, до 0,95 оценки;
+  всего 170), 0,6 → 1,0 (80/160, всего 200), затем 150 итераций второго порядка на рабочей точке — 520
+  итераций. `design` — то же для облака с 6000 итерациями второго порядка. Свой план — JSON-список стадий
+  (`name, frac, pfrac, ramp, pramp, iter, muscl`); `--iter-scale` — множитель итераций.
+- Прочие ключи: `--shroud`, `--vaneless`, `--p-out` (давление последней стадии, промежуточные — в той же
+  пропорции к оценке), `--frac`, `--turb`, `--cfl`, `--set ИМЯ=значение` (поле шаблона), `--extra "KEY= VAL"`
+  (строка SU2 вне шаблона), `--np`, `--mpi-args` (по умолчанию `--mca mpi_yield_when_idle 1`: на общей
+  машине с чужой нагрузкой процессы MPI уступают ядро при ожидании; здесь это дало 2,2 с на итерацию против
+  4–6 с без него при загрузке 7–9 на 4 ядрах, замер грубый), `--ramp-freq`, `--time-limit` (общий на все
+  стадии; по истечении — SIGTERM группе процессов, через 30 с SIGKILL), `--su2-bin`, `--su2-src`,
+  `--mass-tol`, `--record`. SIGTERM, SIGINT, SIGHUP самому скрипту гасят SU2 (он дописывает рестарт),
+  стадия получает статус `terminated`, итог пишется.
 - В `run_summary.json` папки прогона: версия SU2, вход (сетка, число узлов, маркеры, ω, оценка p_вых),
-  все параметры шаблона, по стадиям — статус (`finished`, `timeout`, `diverged`, `error`), секунды,
+  все параметры шаблона, по стадиям — статус (`finished`, `timeout`, `diverged`, `error`, `terminated`), секунды,
   невязки (начало, максимум, конец, наклон на второй половине), расход вход/выход и дисбаланс, PR и КПД,
   периодичность из журнала («Matched N points», число «Bad match»); затем проверки дымового прогона.
 

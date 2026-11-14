@@ -150,6 +150,19 @@ def test_generator_cap_limits_power():
     assert P_eng > pt["P_shaft"]
 
 
+def test_md_solution_independent_of_warm_start():
+    """решение газогенератора не зависит от истории: за пределами карты (R вне ±0,4) есть ложные ветви"""
+    u = S.Unit(MD)
+    u.full_engine(243.15)                                   # тёплый старт с холодной точки на пределе частоты
+    fr, gg, e = u.md_gg(288.15, u.d["T41"])
+    assert fr["Nc"] == pytest.approx(1.0, abs=1e-6)
+    assert fr["R"] == pytest.approx(u.map.R_d, abs=1e-5)
+    fr2 = u.md_gg(288.15, u.d["T41"] - 150.0, x0=[1.0886, 2.0666])[0]
+    fr3 = S.Unit(MD).md_gg(288.15, u.d["T41"] - 150.0)[0]
+    assert fr2["Nc"] == pytest.approx(fr3["Nc"], rel=1e-7)
+    assert u.map.R_lo <= fr2["R"] <= u.map.R_hi
+
+
 def test_map_scaling_reproduces_design_point():
     u = S.Unit(GS)
     Wc, PR, eta = u.map(1.0, u.map.R_d)
