@@ -403,7 +403,8 @@ class Config:
     repo: str = DEFAULT_REPO
     branch: str = "main"
     region: str = REGION
-    ceiling: float = 300.0
+    ceiling: float = 2000.0          # решение владельца 14.11.2026: до 2000 долл. со стоп-краном
+    report_step: float = 500.0       # отчёт владельцу при пересечении каждых 500 долл.
     max_parallel: int = 6
     vcpu_quota: int = 384
     price_margin: float = 1.2
@@ -542,6 +543,14 @@ class Runner:
                             spot_usd_h=round(max(info.latest.values()) if info.latest else 0.0, 4),
                             max_usd_h=maxp, ok=ok, **nums)
         verdict = "можно" if ok else "ОТКАЗ: превышение потолка"
+        step = self.cfg.report_step
+        before = total - new
+        if ok and step > 0 and int(total // step) > int(before // step):
+            порог = int(total // step) * step
+            self.journal.append("budget_report", run_id=self.cfg.run_id, job=job.name, threshold=порог,
+                                total=round(total, 4), ceiling=self.cfg.ceiling)
+            self.say(f"[бюджет] ОТЧЁТ ВЛАДЕЛЬЦУ: с этой задачей расходы пересекают {порог:.0f} долл. "
+                     f"(всего {total:.2f} из {self.cfg.ceiling:.0f})")
         self.say(f"[бюджет] {job.name} на {itype}: израсходовано {spent:.2f} + в работе "
                  f"{s['committed']:.2f} + пакет {self.virtual:.2f} + новая {new:.2f} = {total:.2f} "
                  f"из {self.cfg.ceiling:.2f} долл. (MaxPrice {maxp:.4f}/ч) — {verdict}")
@@ -984,7 +993,7 @@ def main(argv=None) -> int:
 
     def common(sp):
         sp.add_argument("--ledger", default=str(HERE / "ledger.jsonl"), help="журнал расходов (JSONL)")
-        sp.add_argument("--ceiling", type=float, default=300.0, help="потолок расходов, долл. (300)")
+        sp.add_argument("--ceiling", type=float, default=2000.0, help="потолок расходов, долл. (2000, решение владельца 14.11.2026)")
         sp.add_argument("--region", default=REGION)
 
     def knobs(sp):

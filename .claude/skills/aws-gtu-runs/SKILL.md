@@ -1,6 +1,6 @@
 ---
 name: aws-gtu-runs
-description: Прогоны трека «Простая литая ГТУ-заменитель» на AWS через доступ MatterForge скриптом routes/gtu/platform/aws/runner.py — где действуют ключи (окружение Coldun, дочерняя сессия), us-east-1, квоты 384 vCPU, спот c7a.16xlarge с запасным c7i.16xlarge, бакет из ALPHA_O_S3 с подпапкой gtu/, IMDSv2, автогашение тремя способами, бюджетный предохранитель 300 долл. и журнал ledger.jsonl, пакет задач, сбор и проверка результатов, прерывание спота, запрет ключей в файлах и выводе. Используй, когда ставишь расчёт SU2, OpenFOAM, CalculiX или скрипт трека на облачные машины, проверяешь права и бюджет, гасишь машины прогона, забираешь результаты или разбираешь сбой прогона. Триггеры — «прогон на AWS», «запусти на споте», «runner.py», «облачный расчёт ГТУ», «Coldun», «ALPHA_O_S3», «погаси машины», «бюджет AWS», «прерывание спота», «ledger.jsonl».
+description: Прогоны трека «Простая литая ГТУ-заменитель» на AWS через доступ MatterForge скриптом routes/gtu/platform/aws/runner.py — где действуют ключи (окружение Coldun, дочерняя сессия), us-east-1, квоты 384 vCPU, спот c7a.16xlarge с запасным c7i.16xlarge, бакет из ALPHA_O_S3 с подпапкой gtu/, IMDSv2, автогашение тремя способами, бюджетный предохранитель 2000 долл. (решение владельца 14.11.2026; отчёт после каждых 500) и журнал ledger.jsonl, пакет задач, сбор и проверка результатов, прерывание спота, запрет ключей в файлах и выводе. Используй, когда ставишь расчёт SU2, OpenFOAM, CalculiX или скрипт трека на облачные машины, проверяешь права и бюджет, гасишь машины прогона, забираешь результаты или разбираешь сбой прогона. Триггеры — «прогон на AWS», «запусти на споте», «runner.py», «облачный расчёт ГТУ», «Coldun», «ALPHA_O_S3», «погаси машины», «бюджет AWS», «прерывание спота», «ledger.jsonl».
 ---
 
 # Прогоны трека ГТУ на AWS
@@ -61,7 +61,7 @@ description: Прогоны трека «Простая литая ГТУ-зам
 | запись | `s3://<бакет>/<префикс>/gtu/<run_id>/<job>/` | роль машины: только `s3:PutObject` в `<префикс>/*` |
 | чтение | `ListBucket` по префиксу, `GetObject`; `DeleteObject` нет | `user_policy.json` |
 | теги | `Project=<ALPHA_O_TAG>`, `RunId`, `Job`, `Name=gtu-<job>` на машине и диске | политика гасит только машины с тегом `Project` |
-| потолок | 300 долл. (`--ceiling`) | журнал `ledger.jsonl` |
+| потолок | 2000 долл. (`--ceiling`), отчёт после каждых 500 (`report_step`) | журнал `ledger.jsonl` |
 
 Квоты EC2 считаются в vCPU (архив руководства EC2, `using-spot-limits.md`). Коды: `L-1216C47A` — Running
 On-Demand Standard (A, C, D, H, I, M, R, T, Z) instances (сверено по примеру awscli 1.46.3
@@ -145,7 +145,7 @@ echo "$RUN"
 
 Перед каждым запуском (код `budget_check`, `Ledger.summary`):
 ```
-итого    = израсходовано + в работе + пакет (только DryRun/plan) + новая  ≤  300 (--ceiling)
+итого    = израсходовано + в работе + пакет (только DryRun/plan) + новая  ≤  2000 (--ceiling)
 новая    = (MaxPrice + диск + IPv4) × (max_min + grace_min) / 60,   grace_min = 10
 MaxPrice = максимум цены спота за 6 ч по всем зонам × 1,2 (--price-margin), вверх до 0,0001
 диск     = disk_gb × 0,08 / 730 долл./ч;   IPv4 = 0,005 долл./ч   (обе ставки — допущения кода, не сверены)
@@ -160,7 +160,7 @@ MaxPrice = максимум цены спота за 6 ч по всем зона
 не гасит; без фильтров считает весь аккаунт, включая флот других треков:
 ```bash
 aws budgets create-budget --account-id <аккаунт> \
-  --budget '{"BudgetName":"gtu","BudgetLimit":{"Amount":"300","Unit":"USD"},"TimeUnit":"MONTHLY","BudgetType":"COST"}' \
+  --budget '{"BudgetName":"gtu","BudgetLimit":{"Amount":"2000","Unit":"USD"},"TimeUnit":"MONTHLY","BudgetType":"COST"}' \
   --notifications-with-subscribers '[{"Notification":{"NotificationType":"ACTUAL","ComparisonOperator":"GREATER_THAN","Threshold":80,"ThresholdType":"PERCENTAGE"},"Subscribers":[{"SubscriptionType":"EMAIL","Address":"<почта владельца>"}]}]'
 ```
 

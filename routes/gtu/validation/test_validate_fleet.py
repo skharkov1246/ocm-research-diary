@@ -102,6 +102,20 @@ def test_real_fit_matches_results_file(recs, cal, cfg):
         assert abs(o["dP_pct"] - ref["dP_pct"]) < 0.01 and abs(o["deta_pp"] - ref["deta_pp"]) < 0.005
 
 
+def test_plant_data_request_is_marked_example():
+    # данных установки нет: каждое значение — тестовое, с единицами, владельцем и влиянием на точность
+    import tomllib
+    d = tomllib.load(open(V.HERE / "plant_data_request.toml", "rb"))
+    assert d["meta"]["example"] is True
+    assert len(d["signal"]) >= 15
+    for s in d["signal"]:
+        assert s["example"] is True and "EXAMPLE" in s["value"], s["tag"]
+        for k in ("tag", "name", "unit", "rate", "accuracy", "owner", "impact"):
+            assert s.get(k), (s["tag"], k)
+    for doc in d.get("document", []):
+        assert doc["example"] is True and doc["owner"] and doc["impact"]
+
+
 @pytest.mark.skipif(not RES.exists(), reason="нет validation_fleet_results.json — сначала python3 validate_fleet.py")
 def test_results_file_complete_and_csv_consistent(cfg):
     res = json.load(open(RES))

@@ -692,6 +692,11 @@ def run():
     P_sh = cyc["P_MW"] * 1e3
     w_sp = P_sh / G
     tb_eta = dp["opts"][z]["turb"]["eta_p"]
+    # вариант без проектного запаса: тот же цикл с его КПД сжатия (КПД турбины — выбранного варианта)
+    w1x, T2x = poly_air(C.T0, C.P0, C.P0 * pi1_620, c620["s1"]["eta_p"])
+    w2x, _ = poly_air(T2x, C.P0 * pi1_620, C.P0 * PR, c620["s2"]["eta_p"])
+    eta_pc620 = eta_equiv(w1x + w2x, PR)
+    cyc620 = C.cycle(PR, T41_C, eta_pc=eta_pc620, eta_pt_gg=tb_eta, eta_pt_pt=tb_eta, x_ngv=0.0, x_rot=0.0, x_leak=X_LEAK, dp_duct=0.0, W1=G)
     T41_need = brentq(lambda t: C.cycle(PR, t, eta_pc=dp["eta_pc"], eta_pt_gg=dp["opts"][z]["turb"]["eta_p"],
                                         eta_pt_pt=dp["opts"][z]["turb"]["eta_p"], x_ngv=0.0, x_rot=0.0, x_leak=X_LEAK,
                                         dp_duct=0.0, W1=G)["P_MW"] * 1e3 - P_SH_KW, 900.0, 1150.0, xtol=0.05)
@@ -822,7 +827,9 @@ def run():
                    without_margin=dict(pi1=pi1_620, pi2=PR / pi1_620, U2_limit=U_TI, scan=scan_620, eta_p_equiv_tables=c620["eta_eq"],
                                        w_kJkg=c620["w"] / 1e3, eta_p1=c620["s1"]["eta_p"], eta_p2=c620["s2"]["eta_p"],
                                        U2_1=c620["s1"]["act"]["U2"], U2_2=c620["s2"]["act"]["U2"], D2_1=c620["s1"]["act"]["D2"],
-                                       D2_2=c620["s2"]["act"]["D2"], beta2_1=c620["s1"]["act"]["beta_deg"], beta2_2=c620["s2"]["act"]["beta_deg"])),
+                                       D2_2=c620["s2"]["act"]["D2"], beta2_1=c620["s1"]["act"]["beta_deg"], beta2_2=c620["s2"]["act"]["beta_deg"],
+                                       margin_U_2_pct=(1 - c620["s2"]["act"]["U2"] / U_TI) * 100, eta_pc=eta_pc620,
+                                       P_shaft_kW=cyc620["P_MW"] * 1e3, eff_shaft=cyc620["eff"], EGT_C=cyc620["EGT_C"])),
         stage1=s1r, stage2=s2r,
         compressor=dict(eta_p_equiv=dp["eta_pc"], eta_p_equiv_tables=dp["comp"]["eta_eq"], w_cantera_kJkg=sum(dp["w_stage_cantera"]) / 1e3,
                         w_tables_kJkg=dp["comp"]["w"] / 1e3, T3_C=dp["T_stage_cantera"][1] - 273.15),

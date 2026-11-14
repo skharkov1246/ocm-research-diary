@@ -313,7 +313,12 @@
    "D2_1": 0.65664,
    "D2_2": 0.756833,
    "beta2_1": 50.0,
-   "beta2_2": 50.0
+   "beta2_2": 50.0,
+   "margin_U_2_pct": 4.44617,
+   "eta_pc": 0.846707,
+   "P_shaft_kW": 5882.2,
+   "eff_shaft": 0.319992,
+   "EGT_C": 458.235
   }
  },
  "stage1": {
@@ -358,8 +363,9 @@
   "eta_is": 0.809131,
   "eta_basis": {
    "comp_stage_eta_p": 0.856117,
-   "comp_stage_D2": 0.343967,
-   "comp_stage_rpm": 28788.0,
+   "comp_stage_D2": 0.486442,
+   "comp_stage_rpm": 20356.2,
+   "comp_stage_U2": 518.473,
    "model_eta_p_at_n": 0.880181,
    "model_eta_p_at_nref": 0.892255,
    "n_ref_rpm": 22464.6,
@@ -448,6 +454,7 @@
    "comp_stage_eta_p": 0.871316,
    "comp_stage_D2": 0.407887,
    "comp_stage_rpm": 25468.8,
+   "comp_stage_U2": 543.934,
    "model_eta_p_at_n": 0.858558,
    "model_eta_p_at_nref": 0.890735,
    "n_ref_rpm": 28789.1,
@@ -699,6 +706,9 @@
    }
   },
   "one_stage_feasible": false,
+  "work_needed_kJkg": 640.734,
+  "one_stage_max_work_kJkg": 441.0,
+  "one_stage_work_ratio": 1.45291,
   "criteria": {
    "psi_max": 2.5,
    "reaction_min": 0.0,
@@ -791,11 +801,14 @@
    "EGT_cap": 610.0
   },
   "power_balance": {
-   "P_comp_kW": 10414.8,
-   "P_turb_from_cycle_kW": 16359.3,
-   "P_turb_from_turbine_kW": 16359.3,
-   "P_shaft_kW": 5780.87,
-   "eta_m": 0.99
+   "P_comp_cantera_kW": 10414.8,
+   "P_comp_stages_tables_kW": 10428.3,
+   "P_turb_tables_kW": 16364.7,
+   "P_turb_needed_kW": 16359.3,
+   "P_shaft_cantera_kW": 5780.87,
+   "eta_m": 0.99,
+   "residual_pct": 0.0327141,
+   "note": "P_turb*eta_m = P_comp + P_shaft; турбина посчитана по таблицам (gtu_explore), компрессор и вал — Cantera"
   },
   "turbine_crosscheck_tables": {
    "ER_tables": 12.7059,
@@ -887,37 +900,37 @@
     "EGT_C": 457.971,
     "P_share_pct": 157.237
    },
-   "igv_target_W1": 22.404,
+   "igv_target_W1": 22.394,
    "with_igv": {
     "n": 14950.0,
-    "T41_C": 887.099,
-    "alpha1_deg": 30.6311,
-    "W1": 22.404,
-    "PR": 12.8879,
-    "w_c": 400429.0,
-    "T3_C": 403.635,
-    "EGT_C": 391.902,
+    "T41_C": 887.26,
+    "alpha1_deg": 30.7042,
+    "W1": 22.394,
+    "PR": 12.8867,
+    "w_c": 400427.0,
+    "T3_C": 403.633,
+    "EGT_C": 392.02,
     "P_kW": 3671.0,
-    "eff": 0.285299,
+    "eff": 0.285323,
     "eta_t": 0.885,
-    "psi": 1.08087,
+    "psi": 1.081,
     "ok": true,
     "why": null,
-    "inc1_deg": -12.0935,
-    "eta_p1": 0.841804,
-    "eta_p2": 0.832661,
-    "PR1": 4.08011,
-    "PR2": 3.1587,
+    "inc1_deg": -12.1367,
+    "eta_p1": 0.841784,
+    "eta_p2": 0.832626,
+    "PR1": 4.07919,
+    "PR2": 3.15913,
     "confirm_gtu_cycle": {
      "P_kW": 3666.51,
-     "eff": 0.284852,
-     "EGT_C": 392.094,
-     "dP_pct": -0.122234,
-     "dEGT_K": 0.192727
+     "eff": 0.284876,
+     "EGT_C": 392.213,
+     "dP_pct": -0.122231,
+     "dEGT_K": 0.192781
     },
     "surge": {
      "W_surge": 16.6075,
-     "PR_surge": 14.5856,
+     "PR_surge": 14.5844,
      "W_choke": 22.484,
      "choke_where": "горло входа колеса заперто",
      "scan_W": [
@@ -926,14 +939,16 @@
      ]
     }
    },
+   "choke_margin_pct": 0.40201,
+   "surge_margin_pct": 25.8394,
    "checks": {
     "T41_ok": true,
     "G_ok": true,
     "EGT_ok": true,
-    "surge_ok": 1.0,
+    "surge_ok": true,
     "choke_ok": true
    },
-   "verdict": "да (с поворотным входным аппаратом)",
+   "verdict": "да (с поворотным входным аппаратом), но у запирания: запас по расходу 0.4 % — нужна характеристика (SU2)",
    "notes": []
   },
   {
@@ -994,37 +1009,37 @@
     "EGT_C": 457.971,
     "P_share_pct": 120.129
    },
-   "igv_target_W1": 22.512,
+   "igv_target_W1": 22.502,
    "with_igv": {
     "n": 14950.0,
-    "T41_C": 977.902,
-    "alpha1_deg": 29.8383,
-    "W1": 22.5121,
-    "PR": 12.9005,
-    "w_c": 400448.0,
-    "T3_C": 403.653,
-    "EGT_C": 451.034,
+    "T41_C": 978.103,
+    "alpha1_deg": 29.912,
+    "W1": 22.5021,
+    "PR": 12.8993,
+    "w_c": 400446.0,
+    "T3_C": 403.651,
+    "EGT_C": 451.18,
     "P_kW": 4805.0,
-    "eff": 0.307883,
+    "eff": 0.307901,
     "eta_t": 0.885,
-    "psi": 1.17309,
+    "psi": 1.17326,
     "ok": true,
     "why": null,
-    "inc1_deg": -11.634,
-    "eta_p1": 0.842025,
-    "eta_p2": 0.833027,
-    "PR1": 4.09006,
-    "PR2": 3.15411,
+    "inc1_deg": -11.6759,
+    "eta_p1": 0.842005,
+    "eta_p2": 0.832993,
+    "PR1": 4.08915,
+    "PR2": 3.15453,
     "confirm_gtu_cycle": {
-     "P_kW": 4800.45,
-     "eff": 0.30747,
-     "EGT_C": 451.229,
-     "dP_pct": -0.0946518,
-     "dEGT_K": 0.194718
+     "P_kW": 4800.46,
+     "eff": 0.307489,
+     "EGT_C": 451.375,
+     "dP_pct": -0.0945242,
+     "dEGT_K": 0.194579
     },
     "surge": {
      "W_surge": 16.6075,
-     "PR_surge": 14.5973,
+     "PR_surge": 14.5963,
      "W_choke": 22.7395,
      "choke_where": "горло входа колеса заперто",
      "scan_W": [
@@ -1033,14 +1048,16 @@
      ]
     }
    },
+   "choke_margin_pct": 1.05515,
+   "surge_margin_pct": 26.1957,
    "checks": {
     "T41_ok": true,
-    "G_ok": false,
+    "G_ok": true,
     "EGT_ok": true,
-    "surge_ok": 1.0,
+    "surge_ok": true,
     "choke_ok": true
    },
-   "verdict": "нет: расход выше допуска",
+   "verdict": "да (с поворотным входным аппаратом), но у запирания: запас по расходу 1.1 % — нужна характеристика (SU2)",
    "notes": []
   },
   {
@@ -1172,11 +1189,13 @@
     "P_share_pct": 96.0297
    },
    "with_igv": null,
+   "choke_margin_pct": 4.04731,
+   "surge_margin_pct": 26.2998,
    "checks": {
     "T41_ok": false,
     "G_ok": true,
     "EGT_ok": true,
-    "surge_ok": 1.0,
+    "surge_ok": true,
     "choke_ok": true
    },
    "verdict": "нет в классе U: нужна T41 1021 °C; при 1000 °C — 96 % мощности",
@@ -1241,11 +1260,13 @@
     "P_share_pct": 89.4037
    },
    "with_igv": null,
+   "choke_margin_pct": 5.07644,
+   "surge_margin_pct": 25.5709,
    "checks": {
     "T41_ok": false,
     "G_ok": true,
     "EGT_ok": true,
-    "surge_ok": 1.0,
+    "surge_ok": true,
     "choke_ok": true
    },
    "verdict": "нет в классе U: нужна T41 1061 °C; при 1000 °C — 89 % мощности",
@@ -1311,11 +1332,13 @@
     "P_share_pct": 97.4703
    },
    "with_igv": null,
+   "choke_margin_pct": 3.30731,
+   "surge_margin_pct": 26.7822,
    "checks": {
     "T41_ok": false,
     "G_ok": true,
     "EGT_ok": true,
-    "surge_ok": 1.0,
+    "surge_ok": true,
     "choke_ok": true
    },
    "verdict": "нет в классе U: нужна T41 1013 °C; при 1000 °C — 97 % мощности",

@@ -1,0 +1,203 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="980" viewBox="0 0 1240 980" font-family="DejaVu Sans, Arial, sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">Taurus 60: расчётные границы, валы и муфта</title>
+  <desc id="d">Два исполнения Taurus 60. Генераторное: одновальный двигатель, муфта, эпициклический редуктор, генератор; на муфте механическая мощность, на клеммах электрическая. Механический привод: газогенератор, свободная силовая турбина, муфта, технологический центробежный компрессор с картой напор-расход по частоте. Граница замены — муфта на валу двигателя.</desc>
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#333"/>
+    </marker>
+    <marker id="arB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1f5fa8"/>
+    </marker>
+    <pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="8" height="8" fill="#fde9c8"/>
+      <line x1="0" y1="0" x2="0" y2="8" stroke="#f3c47a" stroke-width="3"/>
+    </pattern>
+  </defs>
+  <rect width="1240" height="980" fill="#ffffff"/>
+
+  <!-- заголовок -->
+  <text x="30" y="40" font-size="22" font-weight="bold" fill="#111">Taurus 60: расчётные границы, валы и муфта</text>
+  <text x="30" y="64" font-size="14" fill="#333">Граница замены — муфта на выходном валу двигателя. Заменяется двигатель; редуктор, генератор,</text>
+  <text x="30" y="82" font-size="14" fill="#333">технологический компрессор, рама, вход и выхлоп сохраняются.</text>
+
+  <!-- легенда -->
+  <g transform="translate(30,96)" font-size="13" fill="#222">
+    <rect x="0" y="0" width="26" height="16" fill="url(#hatch)" stroke="#c98a1c"/><text x="34" y="13">заменяется (двигатель)</text>
+    <rect x="210" y="0" width="26" height="16" fill="#eceff3" stroke="#7b8794"/><text x="244" y="13">сохраняется (агрегат площадки)</text>
+    <line x1="478" y1="8" x2="514" y2="8" stroke="#1f5fa8" stroke-width="6"/><text x="522" y="13">вал</text>
+    <line x1="566" y1="-2" x2="566" y2="20" stroke="#c0262d" stroke-width="3" stroke-dasharray="7 4"/><text x="576" y="13">граница замены (муфта)</text>
+    <text x="770" y="13">P_мех — на муфте · P_эл — на клеммах · P_газ — в газе</text>
+  </g>
+
+  <!-- ===================== А. Генераторное исполнение ===================== -->
+  <text x="30" y="146" font-size="17" font-weight="bold" fill="#111">А. Генераторное исполнение (GS): одновальный двигатель → эпициклический редуктор → генератор</text>
+
+  <!-- вход воздуха -->
+  <g font-size="12" fill="#333">
+    <line x1="40" y1="272" x2="96" y2="272" stroke="#333" stroke-width="1.5" marker-end="url(#ar)"/>
+    <text x="34" y="258">воздух</text>
+    <text x="30" y="292" font-size="11">G_в, T_нв,</text>
+    <text x="30" y="306" font-size="11">p_атм</text>
+  </g>
+
+  <!-- двигатель GS -->
+  <rect x="100" y="170" width="430" height="190" rx="8" fill="url(#hatch)" stroke="#c98a1c" stroke-width="1.5"/>
+  <text x="112" y="190" font-size="13" font-weight="bold" fill="#5a3b00">ГТД — заменяется</text>
+  <!-- компрессор -->
+  <polygon points="125,215 225,235 225,309 125,329" fill="#fff7e8" stroke="#8a5a00" stroke-width="1.2"/>
+  <text x="133" y="246" font-size="12" fill="#222">компрессор</text>
+  <text x="133" y="260" font-size="12" fill="#222">12 ст., ВНА</text>
+  <text x="140" y="298" font-size="11" fill="#555">π 12,2</text>
+  <!-- КС -->
+  <rect x="240" y="222" width="80" height="100" rx="10" fill="#ffe2d6" stroke="#a8471e" stroke-width="1.2"/>
+  <text x="252" y="246" font-size="12" fill="#222">камера</text>
+  <text x="252" y="300" font-size="12" fill="#222">сгорания</text>
+  <line x1="280" y1="196" x2="280" y2="220" stroke="#333" stroke-width="1.4" marker-end="url(#ar)"/>
+  <text x="290" y="206" font-size="11" fill="#333">топливо G_т</text>
+  <!-- турбина -->
+  <polygon points="335,235 435,215 435,329 335,309" fill="#fff7e8" stroke="#8a5a00" stroke-width="1.2"/>
+  <text x="347" y="246" font-size="12" fill="#222">турбина</text>
+  <text x="347" y="260" font-size="12" fill="#222">3 ст.</text>
+  <text x="342" y="298" font-size="11" fill="#555">T41 — предел</text>
+  <!-- выхлоп -->
+  <line x1="470" y1="214" x2="470" y2="150" stroke="#333" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text x="478" y="166" font-size="12" fill="#333">выхлоп G, T</text>
+  <!-- вал GS -->
+  <line x1="118" y1="272" x2="600" y2="272" stroke="#1f5fa8" stroke-width="7"/>
+  <text x="446" y="350" font-size="12" fill="#1f5fa8">один вал</text>
+
+  <!-- муфта и граница -->
+  <rect x="598" y="256" width="22" height="32" rx="3" fill="#ffffff" stroke="#222" stroke-width="1.5"/>
+  <line x1="609" y1="160" x2="609" y2="420" stroke="#c0262d" stroke-width="3" stroke-dasharray="9 5"/>
+  <text x="560" y="438" font-size="12" font-weight="bold" fill="#c0262d">граница замены</text>
+  <g font-size="12.5" fill="#111">
+    <rect x="520" y="372" width="180" height="0" />
+    <text x="626" y="230" font-weight="bold">на муфте:</text>
+    <text x="626" y="246">P_мех, кВт</text>
+    <text x="626" y="320">M = P_мех/ω, Н·м</text>
+    <text x="626" y="336">n = 14 950 об/мин</text>
+    <text x="626" y="352" font-size="11" fill="#555">(паспорт, частота постоянна)</text>
+  </g>
+
+  <!-- редуктор -->
+  <line x1="620" y1="272" x2="780" y2="272" stroke="#1f5fa8" stroke-width="7"/>
+  <rect x="780" y="222" width="120" height="100" rx="8" fill="#eceff3" stroke="#7b8794" stroke-width="1.5"/>
+  <circle cx="840" cy="272" r="26" fill="none" stroke="#7b8794" stroke-width="1.4"/>
+  <circle cx="840" cy="272" r="9" fill="none" stroke="#7b8794" stroke-width="1.4"/>
+  <circle cx="840" cy="252" r="7" fill="none" stroke="#7b8794"/><circle cx="822" cy="282" r="7" fill="none" stroke="#7b8794"/><circle cx="858" cy="282" r="7" fill="none" stroke="#7b8794"/>
+  <text x="788" y="238" font-size="11.5" fill="#222">эпицикл.</text>
+  <text x="788" y="316" font-size="11.5" fill="#222">редуктор η_ред</text>
+  <!-- генератор -->
+  <line x1="900" y1="272" x2="1000" y2="272" stroke="#1f5fa8" stroke-width="5"/>
+  <text x="910" y="260" font-size="11" fill="#1f5fa8">1500 / 1800</text>
+  <text x="922" y="292" font-size="11" fill="#1f5fa8">об/мин</text>
+  <rect x="1000" y="212" width="120" height="120" rx="10" fill="#eceff3" stroke="#7b8794" stroke-width="1.5"/>
+  <text x="1012" y="250" font-size="12" fill="#222">генератор</text>
+  <text x="1012" y="300" font-size="12" fill="#222">4 полюса, η_ген</text>
+  <line x1="1120" y1="272" x2="1170" y2="272" stroke="#333" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text x="1124" y="256" font-size="12" fill="#222">клеммы</text>
+  <text x="1176" y="277" font-size="12.5" font-weight="bold" fill="#111">P_эл</text>
+
+  <!-- формула GS -->
+  <rect x="760" y="356" width="440" height="66" rx="6" fill="#f7f9fb" stroke="#c9d1da"/>
+  <text x="774" y="380" font-size="13.5" fill="#111">P_эл = P_мех · η_ред · η_ген  (P_эл ≠ P_мех)</text>
+  <text x="774" y="402" font-size="12" fill="#444">паспорт ISO даёт P_эл на клеммах: 5670 кВт эл., 31,5 %;</text>
+  <text x="774" y="416" font-size="12" fill="#444">η_ред, η_ген, номиналы — EXAMPLE (data_needed.csv)</text>
+
+  <!-- ===================== Б. Механический привод ===================== -->
+  <line x1="30" y1="460" x2="1210" y2="460" stroke="#d5dbe2"/>
+  <text x="30" y="494" font-size="17" font-weight="bold" fill="#111">Б. Механический привод (MD): газогенератор + свободная силовая турбина → муфта → технологический компрессор</text>
+
+  <g font-size="12" fill="#333">
+    <line x1="40" y1="632" x2="96" y2="632" stroke="#333" stroke-width="1.5" marker-end="url(#ar)"/>
+    <text x="34" y="618">воздух</text>
+  </g>
+  <rect x="100" y="520" width="520" height="210" rx="8" fill="url(#hatch)" stroke="#c98a1c" stroke-width="1.5"/>
+  <text x="112" y="540" font-size="13" font-weight="bold" fill="#5a3b00">ГТД — заменяется</text>
+  <polygon points="125,575 215,595 215,669 125,689" fill="#fff7e8" stroke="#8a5a00" stroke-width="1.2"/>
+  <text x="131" y="608" font-size="12" fill="#222">компрессор</text>
+  <text x="140" y="662" font-size="12" fill="#222">12 ст.</text>
+  <rect x="228" y="582" width="74" height="100" rx="10" fill="#ffe2d6" stroke="#a8471e" stroke-width="1.2"/>
+  <text x="238" y="608" font-size="12" fill="#222">камера</text>
+  <text x="240" y="662" font-size="12" fill="#222">сгор.</text>
+  <line x1="265" y1="552" x2="265" y2="580" stroke="#333" stroke-width="1.4" marker-end="url(#ar)"/>
+  <text x="274" y="562" font-size="11" fill="#333">G_т</text>
+  <polygon points="315,595 385,580 385,684 315,669" fill="#fff7e8" stroke="#8a5a00" stroke-width="1.2"/>
+  <text x="331" y="614" font-size="12" fill="#222">ТГГ</text>
+  <text x="329" y="658" font-size="12" fill="#222">2 ст.</text>
+  <!-- вал газогенератора -->
+  <line x1="118" y1="632" x2="392" y2="632" stroke="#1f5fa8" stroke-width="7"/>
+  <text x="118" y="712" font-size="12" fill="#1f5fa8">вал газогенератора: n_гг ≤ 15 000 об/мин (паспорт)</text>
+  <!-- СТ -->
+  <polygon points="420,590 500,572 500,692 420,674" fill="#fff7e8" stroke="#8a5a00" stroke-width="1.2"/>
+  <text x="448" y="614" font-size="12" fill="#222">СТ</text>
+  <text x="442" y="658" font-size="12" fill="#222">2 ст.</text>
+  <line x1="392" y1="600" x2="420" y2="600" stroke="#333" stroke-width="1.2" marker-end="url(#ar)"/>
+  <text x="388" y="592" font-size="10.5" fill="#555">газ</text>
+  <line x1="545" y1="572" x2="545" y2="508" stroke="#333" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text x="553" y="524" font-size="12" fill="#333">выхлоп G, T</text>
+  <!-- вал СТ -->
+  <line x1="460" y1="632" x2="690" y2="632" stroke="#1f5fa8" stroke-width="7"/>
+  <text x="392" y="756" font-size="11.5" fill="#1f5fa8">свободная СТ: n_СТ ≤ 14 300 об/мин (паспорт)</text>
+
+  <!-- муфта и граница MD -->
+  <rect x="688" y="616" width="22" height="32" rx="3" fill="#ffffff" stroke="#222" stroke-width="1.5"/>
+  <line x1="699" y1="510" x2="699" y2="800" stroke="#c0262d" stroke-width="3" stroke-dasharray="9 5"/>
+  <text x="650" y="818" font-size="12" font-weight="bold" fill="#c0262d">граница замены</text>
+  <g font-size="12.5" fill="#111">
+    <text x="716" y="566" font-weight="bold">на муфте:</text>
+    <text x="716" y="582">P_мех, кВт; M = P_мех/ω, Н·м</text>
+    <text x="716" y="598">n — из нагрузки техкомпрессора</text>
+  </g>
+
+  <!-- техкомпрессор -->
+  <line x1="710" y1="632" x2="770" y2="632" stroke="#1f5fa8" stroke-width="7"/>
+  <rect x="770" y="604" width="150" height="110" rx="10" fill="#eceff3" stroke="#7b8794" stroke-width="1.5"/>
+  <text x="782" y="630" font-size="12" fill="#222">технологический</text>
+  <text x="782" y="646" font-size="12" fill="#222">центробежный</text>
+  <text x="782" y="662" font-size="12" fill="#222">компрессор</text>
+  <text x="782" y="690" font-size="11" fill="#555">прямой привод</text>
+  <line x1="845" y1="760" x2="845" y2="716" stroke="#333" stroke-width="1.4" marker-end="url(#ar)"/>
+  <text x="790" y="776" font-size="11.5" fill="#333">всасывание: p_вс, T_вс, M, Z, κ</text>
+  <line x1="920" y1="690" x2="960" y2="690" stroke="#333" stroke-width="1.4" marker-end="url(#ar)"/>
+  <text x="926" y="708" font-size="11" fill="#333">p_н</text>
+
+  <!-- карта техкомпрессора -->
+  <g transform="translate(975,530)">
+    <rect x="0" y="0" width="235" height="210" rx="6" fill="#f7f9fb" stroke="#c9d1da"/>
+    <text x="10" y="18" font-size="12" font-weight="bold" fill="#111">карта: напор–расход по n</text>
+    <line x1="34" y1="180" x2="222" y2="180" stroke="#333" stroke-width="1" marker-end="url(#ar)"/>
+    <line x1="34" y1="180" x2="34" y2="30" stroke="#333" stroke-width="1" marker-end="url(#ar)"/>
+    <text x="196" y="198" font-size="11" fill="#333">Q, м³/с</text>
+    <text x="8" y="42" font-size="11" fill="#333">H_p</text>
+    <!-- линии частоты (законы подобия) -->
+    <path d="M70,128 Q105,118 150,140" fill="none" stroke="#1f5fa8" stroke-width="1.6"/>
+    <path d="M82,98 Q125,86 178,114" fill="none" stroke="#1f5fa8" stroke-width="1.6"/>
+    <path d="M94,66 Q145,52 206,86" fill="none" stroke="#1f5fa8" stroke-width="1.6"/>
+    <text x="152" y="150" font-size="10.5" fill="#1f5fa8">0,8 n_d</text>
+    <text x="180" y="124" font-size="10.5" fill="#1f5fa8">n_d</text>
+    <text x="200" y="76" font-size="10.5" fill="#1f5fa8">1,05</text>
+    <!-- граница помпажа -->
+    <path d="M62,150 L102,48" fill="none" stroke="#c0262d" stroke-width="1.3" stroke-dasharray="5 3"/>
+    <text x="40" y="168" font-size="10.5" fill="#c0262d">помпаж</text>
+    <!-- сеть -->
+    <path d="M34,150 Q120,140 214,62" fill="none" stroke="#2c8a3e" stroke-width="1.8"/>
+    <text x="118" y="170" font-size="10.5" fill="#2c8a3e">сеть H = H_ст + kQ²</text>
+    <circle cx="113.4" cy="127" r="3.5" fill="#111"/><circle cx="156.2" cy="104" r="3.5" fill="#111"/><circle cx="192.5" cy="79" r="3.5" fill="#111"/>
+  </g>
+
+  <!-- формула MD -->
+  <rect x="716" y="820" width="494" height="74" rx="6" fill="#f7f9fb" stroke="#c9d1da"/>
+  <text x="730" y="844" font-size="13.5" fill="#111">P_мех = ṁ·H_p/η_p + P_мех.потерь техкомпрессора</text>
+  <text x="730" y="864" font-size="12" fill="#444">рабочая точка: карта (Q ~ n, H ~ n², η по Q/n) ∩ сеть; n_СТ — там,</text>
+  <text x="730" y="880" font-size="12" fill="#444">где P_СТ(n) = P_мех(n); карта, газ, сеть — EXAMPLE (data_needed.csv)</text>
+
+  <!-- поток расчёта -->
+  <rect x="30" y="840" width="660" height="118" rx="6" fill="#ffffff" stroke="#c9d1da"/>
+  <text x="44" y="862" font-size="13" font-weight="bold" fill="#111">Как получается таблица на муфте (gtu_shaft.py)</text>
+  <text x="44" y="882" font-size="12" fill="#333">1. паспорт ISO (fleet/gtu_fleet_taurus60.json) → калибровка КПД узлов и T41 (как gtu_study)</text>
+  <text x="44" y="899" font-size="12" fill="#333">2. T_нв: карта компрессора ГТД (NPSS axi-5 — допущение) + пропускная способность турбин</text>
+  <text x="44" y="916" font-size="12" fill="#333">3. предел: T41 = const; MD — ещё n_гг ≤ 15 000; GS — n = const; MD — n_СТ по техкомпрессору</text>
+  <text x="44" y="933" font-size="12" fill="#333">4. нагрузка 100/90/75/50 %: T41 по мощности → P_мех, M, n (+ P_эл у GS) → shaft_&lt;конфиг&gt;.csv</text>
+  <text x="44" y="950" font-size="12" fill="#333">5. проверка вне ISO: оцифрованные кривые листов данных Solar → shaft_results.json → validation</text>
+</svg>

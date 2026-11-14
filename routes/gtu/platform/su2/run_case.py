@@ -48,18 +48,21 @@ NUMERICS = dict(
     GAMMA=1.4, R_GAS=287.058, RELAX_IN=0.3, RELAX_OUT=0.3, NSPAN=10,
     FLOW_SCHEME="ROE", MUSCL="NO", LIMITER="VENKATAKRISHNAN", VENKAT=0.05, ENTROPY_FIX=0.05,
     CFL=5.0, CFL_ADAPT="YES", CFL_ADAPT_PARAM="0.5, 1.1, 1.0, 20.0, 0.1", LIN_PREC="ILU", LIN_ITER=10,
-    RES_MIN=-10, OUTPUT_FILES="RESTART, PARAVIEW", WRT_FREQ=500, EXTRA="",
+    RES_MIN=-10, OUTPUT_FILES="RESTART, PARAVIEW", WRT_FREQ=500, EXTRA="", SHROUD_LINE="MARKER_SHROUD= (shroud)",
 )
 
 # Планы стадий. frac — доля номинальной частоты в конце стадии, pfrac — доля оценки статического давления
-# на выходе (estimate_p_out) в конце стадии; ramp — длина линейной рампы частоты и давления в итерациях
-# (от значений конца предыдущей стадии); muscl — второй порядок по пространству.
+# на выходе (estimate_p_out) в конце стадии; ramp — длина линейной рампы частоты, pramp — рампы давления
+# (по умолчанию = ramp), обе от значений конца предыдущей стадии; muscl — второй порядок по пространству.
+# Давление на выходе нужно примерно ~ частоте², а рампы SU2 линейны: при pramp = ramp давление в середине
+# разгона выше, чем колесо держит, и расход падает почти до нуля (прогон 14.11.2026, 30 % частоты:
+# 0,03 кг/с на канал при расчётных 1,1). Поэтому давление растёт вдвое дольше частоты и отстаёт от неё.
 PLANS = {
     # дымовой прогон: разгон до номинала с первым порядком, затем второй порядок на рабочей точке
     "smoke": [
-        dict(name="s1_ramp60", frac=0.6, pfrac=1.0, ramp=150, iter=200, muscl=False),
-        dict(name="s2_ramp100", frac=1.0, pfrac=1.0, ramp=150, iter=250, muscl=False),
-        dict(name="s3_point", frac=1.0, pfrac=1.0, ramp=0, iter=300, muscl=True),
+        dict(name="s1_ramp60", frac=0.6, pfrac=0.95, ramp=80, pramp=160, iter=170, muscl=False),
+        dict(name="s2_ramp100", frac=1.0, pfrac=1.0, ramp=80, pramp=160, iter=200, muscl=False),
+        dict(name="s3_point", frac=1.0, pfrac=1.0, ramp=0, iter=150, muscl=True),
     ],
     # одна стадия: разгон и расчёт подряд
     "single": [dict(name="s1", frac=1.0, pfrac=1.0, ramp=300, iter=1000, muscl=False)],
@@ -75,7 +78,7 @@ PLANS = {
 # сетка и исходные данные
 # ----------------------------------------------------------------------------------------------
 def mesh_paths(case: str, level: str, geom_out: str | None = None):
-    d = geom_out or os.path.join(GEOM, "out", f"{case}_{level}")
+    d = os.path.abspath(geom_out) if geom_out else os.path.join(GEOM, "out", f"{case}_{level}")
     return (os.path.join(d, f"passage_{case}_{level}.su2"),
             os.path.join(d, f"impeller_{case}_{level}.json"))
 
@@ -87,7 +90,7 @@ def ensure_mesh(case: str, level: str, geom_out: str | None, extra: list[str], l
     cmd = [sys.executable, os.path.join(GEOM, "impeller.py"), "--case", case, "--level", level,
            "--no-step"] + extra
     if geom_out:
-        cmd += ["--out", geom_out]
+        cmd += ["--out", os.path.abspath(geom_out)]
     log(f"сетки нет ({su2}) — строю: {' '.join(cmd)}")
     r = subprocess.run(cmd, cwd=GEOM)
     if r.returncode != 0 or not (os.path.isfile(su2) and os.path.isfile(js)):
@@ -186,7 +189,7 @@ def check_keys(cfg_text: str, cconfig: str):
     return sorted(keys - known), len(known)
 
 
-def mpi_cmd(np_: int, exe: str, cfg: str):
+def mpi_cmd(np_: int, exe: str, cfg: str, extra: list[str] | None = None):
     if np_ <= 1:
         return [exe, cfg]
     mpirun = shutil.which("mpirun") or shutil.which("mpiexec")
@@ -195,7 +198,23 @@ def mpi_cmd(np_: int, exe: str, cfg: str):
     cmd = [mpirun, "-np", str(np_), "--bind-to", "none"]
     if hasattr(os, "geteuid") and os.geteuid() == 0:
         cmd.append("--allow-run-as-root")
-    return cmd + [exe, cfg]
+    return cmd + list(extra or []) + [exe, cfg]
+
+
+_CHILD = {"pgid": None}
+
+
+def _kill_child(signum, frame):  # noqa: ARG001
+    """SIGTERM/SIGINT/SIGHUP самому run_case.py (timeout, runner.py, Ctrl-C) гасит и группу SU2:
+    SU2 запущен в своей сессии (start_new_session) и сам по себе сигнал родителя не получит."""
+    if _CHILD["pgid"]:
+        try:
+            os.killpg(_CHILD["pgid"], signal.SIGTERM)
+            time.sleep(5)
+            os.killpg(_CHILD["pgid"], signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+    raise SystemExit(128 + signum)
 
 
 def su2_env(np_: int):
@@ -215,6 +234,7 @@ def run_limited(cmd, cwd, log_path, deadline, env=None):
         return None, "no_time", 0.0
     with open(log_path, "w", encoding="utf-8") as lf:
         p = subprocess.Popen(cmd, cwd=cwd, stdout=lf, stderr=subprocess.STDOUT, start_new_session=True, env=env)
+        _CHILD["pgid"] = p.pid
         try:
             rc = p.wait(timeout=budget)
             status = "finished" if rc == 0 else "error"
@@ -226,6 +246,7 @@ def run_limited(cmd, cwd, log_path, deadline, env=None):
                 os.killpg(p.pid, signal.SIGKILL)
                 p.wait()
             rc, status = p.returncode, "timeout"
+        _CHILD["pgid"] = None
     txt = open(log_path, encoding="utf-8", errors="replace").read()
     if "NaN detected" in txt or "has diverged" in txt:
         status = "diverged"
@@ -243,7 +264,10 @@ def read_history(path: str):
     head = [h.strip().strip('"') for h in rows[0]]
     first = {}
     for j, h in enumerate(head):
-        first.setdefault(h, j)  # повторённый заголовок (например, Time(sec)) — берётся первый столбец
+        k, n = h, 2
+        while k in first:  # повторённый заголовок (Time(sec) у WALL_TIME) -> «Time(sec)#2»
+            k, n = f"{h}#{n}", n + 1
+        first[k] = j
     data = {h: [] for h in first}
     for r in rows[1:]:
         if len(r) != len(head):
@@ -350,9 +374,11 @@ def parse_log(path: str):
                 o[key] = float(mm.group(1).rstrip("."))
             except ValueError:
                 pass
-    errs = re.findall(r"^Error in .*$\n?^(.*)$", txt, re.M)
-    if errs:
-        o["error"] = errs[-1].strip()
+    m_err = list(re.finditer(r"^Error in .*$", txt, re.M))
+    if m_err:
+        tail = txt[m_err[-1].end():].splitlines()
+        msg = [ln.strip() for ln in tail if ln.strip() and not set(ln.strip()) <= set("-")]
+        o["error"] = msg[0] if msg else "?"
     mrank = re.search(r"Parallel Computation with (\d+) MPI", txt) or re.search(r"(\d+) MPI ranks", txt)
     if mrank:
         o["mpi_ranks"] = int(mrank.group(1))
@@ -407,15 +433,20 @@ def main(argv=None):
     ap.add_argument("--plan", default="smoke", help=f"план стадий: {', '.join(PLANS)} или путь к JSON")
     ap.add_argument("--iter-scale", type=float, default=1.0, help="множитель итераций всех стадий")
     ap.add_argument("--frac", type=float, default=None, help="доля номинальной частоты (переопределяет план)")
-    ap.add_argument("--p-out", type=float, default=None, help="статическое давление на выходе, Па "
-                    "(по умолчанию — оценка estimate_p_out x pfrac стадии)")
+    ap.add_argument("--p-out", type=float, default=None, help="статическое давление на выходе в последней стадии, Па "
+                    "(по умолчанию — оценка estimate_p_out x pfrac; промежуточные стадии — в той же пропорции)")
     ap.add_argument("--turb", default=None, choices=["SST", "SA"])
     ap.add_argument("--cfl", type=float, default=None)
+    ap.add_argument("--rotating-shroud", action="store_true",
+                    help="покрышка вращается с колесом (без MARKER_SHROUD): закрытое колесо, не открытое")
     ap.add_argument("--set", action="append", default=[], metavar="KEY=VAL",
                     help="переопределить параметр шаблона (имя поля $ИМЯ), можно несколько раз")
     ap.add_argument("--extra", action="append", default=[], metavar="'KEY= VAL'",
                     help="дописать строку в конец cfg (ключ SU2 вне шаблона), можно несколько раз")
     ap.add_argument("--np", type=int, default=4, help="число процессов MPI (1 — без mpirun)")
+    ap.add_argument("--mpi-args", default="--mca mpi_yield_when_idle 1",
+                    help="доп. ключи mpirun; по умолчанию процессы MPI уступают ядро при ожидании (общая машина)")
+    ap.add_argument("--ramp-freq", type=int, default=5, help="обновлять частоту и давление рамп каждые N итераций")
     ap.add_argument("--time-limit", type=float, default=1200.0, help="общий лимит, с (по умолчанию 20 мин)")
     ap.add_argument("--su2-bin", default=None)
     ap.add_argument("--su2-src", default=None, help="исходник SU2 для сверки ключей (Common/src/CConfig.cpp)")
@@ -425,6 +456,8 @@ def main(argv=None):
     ap.add_argument("--mass-tol", type=float, default=0.05, help="допуск дисбаланса расхода (0,05 = 5 %%)")
     ap.add_argument("--record", action="store_true", help="дописать краткий итог в su2_results.json")
     a = ap.parse_args(argv)
+    for sig in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
+        signal.signal(sig, _kill_child)
 
     if a.parse:
         summ_path = os.path.join(a.parse, "run_summary.json")
@@ -448,6 +481,8 @@ def main(argv=None):
     for s in plan:
         s["iter"] = max(1, int(round(s["iter"] * a.iter_scale)))
         s["ramp"] = int(round(s["ramp"] * a.iter_scale))
+        if "pramp" in s:
+            s["pramp"] = int(round(s["pramp"] * a.iter_scale))
         if a.frac is not None:
             s["frac"] = a.frac
 
@@ -475,6 +510,8 @@ def main(argv=None):
         params[k.strip()] = v.strip()
     if a.extra:
         params["EXTRA"] = "\n".join(a.extra)
+    if a.rotating_shroud:
+        params["SHROUD_LINE"] = "% MARKER_SHROUD не задан: покрышка вращается с колесом (--rotating-shroud)"
     if params["TURB"] == "SA" and not params["SA_OPTIONS"]:
         params["SA_OPTIONS"] = "SA_OPTIONS= NONE"
     gamma, R = float(params["GAMMA"]), float(params["R_GAS"])
@@ -513,7 +550,12 @@ def main(argv=None):
     key_problems = None
     for i, st in enumerate(plan):
         frac, pfrac = st["frac"], st["pfrac"]
-        p_target = a.p_out if a.p_out is not None else pfrac * estimate_p_out(d1, frac, r_out, d1["b2"], gamma, R)
+        p_est = pfrac * estimate_p_out(d1, frac, r_out, d1["b2"], gamma, R)
+        if a.p_out is not None:  # --p-out — давление последней стадии, промежуточные — в той же пропорции к оценке
+            last = plan[-1]
+            p_target = a.p_out * p_est / (last["pfrac"] * estimate_p_out(d1, last["frac"], r_out, d1["b2"], gamma, R))
+        else:
+            p_target = p_est
         ramp = st["ramp"]
         name = st["name"]
         p = dict(params)
@@ -529,10 +571,11 @@ def main(argv=None):
         )
         rot_changes = ramp > 0 and abs(frac - prev_frac) > 1e-9
         p.update(RAMP_ROT="YES" if rot_changes else "NO",
-                 RAMP_ROT_INI=f"{omega[2] * prev_frac:.10g}", RAMP_ROT_FREQ=1, RAMP_ROT_ITER=max(ramp, 1))
-        p_changes = ramp > 0 and abs(p_target - prev_p) > 1.0
+                 RAMP_ROT_INI=f"{omega[2] * prev_frac:.10g}", RAMP_ROT_FREQ=a.ramp_freq, RAMP_ROT_ITER=max(ramp, 1))
+        pramp = int(st.get("pramp", ramp))
+        p_changes = pramp > 0 and abs(p_target - prev_p) > 1.0
         p.update(RAMP_OUT="YES" if p_changes else "NO",
-                 RAMP_OUT_INI=f"{prev_p:.6g}", RAMP_OUT_FREQ=1, RAMP_OUT_ITER=max(ramp, 1))
+                 RAMP_OUT_INI=f"{prev_p:.6g}", RAMP_OUT_FREQ=a.ramp_freq, RAMP_OUT_ITER=max(pramp, 1))
         for k in ("FLOW_SCHEME", "CFL", "LIMITER", "TURB"):
             if k.lower() in st:
                 p[k] = st[k.lower()]
@@ -547,7 +590,7 @@ def main(argv=None):
                 raise SystemExit(f"ключей нет в {cconfig}: {unknown}")
         rec = {"name": name, "cfg": cfg_name, "frac": frac, "rpm": d1["rpm"] * frac, "p_out": p_target,
                "p_out_ramp_from": prev_p if p_changes else None, "rot_ramp_from_frac": prev_frac if rot_changes else None,
-               "ramp_iter": ramp, "iter": st["iter"], "muscl": bool(st.get("muscl")),
+               "ramp_iter": ramp, "p_ramp_iter": pramp, "iter": st["iter"], "muscl": bool(st.get("muscl")),
                "restart_from": prev_restart, "history_file": f"history_{name}.csv", "log_file": f"su2_{name}.log"}
         summ["stages"].append(rec)
         if su2 is None:
@@ -556,7 +599,7 @@ def main(argv=None):
         if a.dry and prev_restart:
             # SU2_CFD -d читает файл рестарта, а его в сухом прогоне нет: cfg только записан
             rec.update(status="cfg_only")
-            prev_frac, prev_p = frac, p_target
+            prev_frac, prev_p, prev_restart = frac, p_target, f"restart_{name}.dat"
             continue
         if a.dry:
             rc, status, dt = run_limited([su2, "-d", cfg_name], out, os.path.join(out, f"dry_{name}.log"), deadline,
@@ -565,7 +608,7 @@ def main(argv=None):
             rec.update(status="dry_ok" if "Exit Success" in txt else "dry_failed", seconds=round(dt, 1))
             prev_frac, prev_p, prev_restart = frac, p_target, f"restart_{name}.dat"  # цепочка стадий для просмотра cfg
             continue
-        rc, status, dt = run_limited(mpi_cmd(a.np, su2, cfg_name), out, os.path.join(out, rec["log_file"]), deadline,
+        rc, status, dt = run_limited(mpi_cmd(a.np, su2, cfg_name, a.mpi_args.split()), out, os.path.join(out, rec["log_file"]), deadline,
                                      env=su2_env(a.np))
         rec.update(returncode=rc, status=status, seconds=round(dt, 1))
         hp = os.path.join(out, rec["history_file"])
@@ -633,7 +676,6 @@ def record(summ: dict, out: str):
         res = {"about": "Итоги прогонов SU2 узла platform/su2 (run_case.py --record). Числа дымовых прогонов на "
                         "грубой сетке без пристенных призм — проверка постановки, не характеристика колеса.",
                "runs": []}
-    last = next((st for st in reversed(summ["stages"]) if st.get("history", {}).get("rows")), {})
     res["runs"].append({
         "created_utc": summ["created_utc"], "su2": summ["su2"]["version"], "np": summ["su2"]["np"],
         "case": summ["inputs"]["case"], "level": summ["inputs"]["level"], "plan": summ["inputs"]["plan"],

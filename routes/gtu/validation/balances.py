@@ -25,7 +25,7 @@ Q_ext — теплота, подведённая к воздуху перед к
 при температуре за рекуператором; точная температура считается из баланса рекуператора и
 сравнивается с оценкой recup (Tstack_C = EGT − 0,93·(T3r − T3)).
 
-Запуск: python3 balances.py  ->  validation_balances_results.json, validation_balances.csv."""
+Запуск: python3 balances.py  ->  balances_results.json, balances.csv."""
 from __future__ import annotations
 
 import csv
@@ -266,13 +266,13 @@ def main():
         units=dict(mass="кг/с", energy="МВт", residual="% от расхода массы на входе / от теплоты топлива Wf·LHV",
                    temperature="°C"),
     )
-    json.dump(dict(**meta, summary=summary, points=rows), open(HERE / "validation_balances_results.json", "w"),
+    json.dump(dict(**meta, summary=summary, points=rows), open(HERE / "balances_results.json", "w"),
               ensure_ascii=False, indent=1)
     cols = ["id", "kind", "W1_kg_s", "Wf_kg_s", "W_exh_kg_s", "P_MW", "eff_pct", "Q_fuel_MW", "Q_ext_MW", "Q_exh_MW",
             "Q_leak_MW", "L_mech_MW", "L_comb_MW", "mass_residual_pct", "energy_residual_abs_pct",
             "energy_residual_lhv_pct", "lhv_form_expected_pct", "Tstack_exact_C", "Tstack_recup_estimate_C",
             "Tstack_estimate_error_K", "energy_residual_recup_estimate_pct"]
-    with open(HERE / "validation_balances.csv", "w", newline="") as fh:
+    with open(HERE / "balances.csv", "w", newline="") as fh:
         w = csv.writer(fh)
         w.writerow(cols)
         for r in rows:

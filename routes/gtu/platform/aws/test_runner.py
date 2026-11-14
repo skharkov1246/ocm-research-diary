@@ -175,7 +175,8 @@ def test_budget_refusal_blocks_launch(tmp_path):
                    spot_params("c7i.16xlarge"))
     e.add_response("describe_instances", {"Reservations": []}, reap_filters())   # сборщик в finally
     # run_instances НЕ заготовлен: если исполнитель попробует запустить машину, Stubber упадёт.
-    r = R.Runner(make_cfg(tmp_path), aws.ec2, aws.s3, aws.ssm, clock=clk, sleep=clk.sleep, out=lambda m: None)
+    # потолок задан явно: тест проверяет отказ при превышении, а не значение по умолчанию
+    r = R.Runner(make_cfg(tmp_path, ceiling=300.0), aws.ec2, aws.s3, aws.ssm, clock=clk, sleep=clk.sleep, out=lambda m: None)
     res = r.run([make_job()])
     assert res == {"su2-comp130": {"status": "refused", "attempts": 1}}
     budget = [x for x in R.Ledger(tmp_path / "ledger.jsonl").records() if x["ev"] == "budget"]
@@ -763,7 +764,7 @@ def test_cli_plan_offline_and_status(tmp_path, capsys, monkeypatch):
     write_ledger(tmp_path / "ledger.jsonl", HIST)
     assert R.main(["status", "--ledger", str(tmp_path / "ledger.jsonl")]) == 0
     out = capsys.readouterr().out
-    assert "израсходовано ≈ 1.01" in out and "по ним 2.34" in out and "остаток 296.64" in out   # 2.345 → 2.34 (float)
+    assert "израсходовано ≈ 1.01" in out and "по ним 2.34" in out and "остаток 1996.64" in out   # 2.345 → 2.34 (float); потолок по умолчанию 2000 (решение 14.11.2026)
 
 
 def test_cli_run_refuses_without_env_before_any_aws_call(tmp_path, capsys, monkeypatch):
@@ -807,3 +808,10 @@ def test_cli_run_without_live_is_dryrun(tmp_path, capsys, monkeypatch):
     assert not (tmp_path / "ledger.jsonl").exists()
     aws.done()
     st_sts.assert_no_pending_responses()
+
+
+def test_default_ceiling_is_owner_decision():
+    # Решение владельца 14.11.2026: потолок 2000 долл., отчёт после каждых 500 долл.
+    import dataclasses
+    f = {x.name: x.default for x in dataclasses.fields(R.Config)}
+    assert f["ceiling"] == 2000.0 and f["report_step"] == 500.0

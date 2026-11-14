@@ -45,9 +45,10 @@ MACH_MOTION= 0.35
 RAMP_MOTION_FRAME= ${RAMP_ROT}
 RAMP_MOTION_FRAME_COEFF= (${RAMP_ROT_INI}, ${RAMP_ROT_FREQ}, ${RAMP_ROT_ITER})
 %
-% ---- стенки: адиабатные; покрышка неподвижна в абсолютной системе (MARKER_SHROUD) ----
+% ---- стенки: адиабатные; покрышка неподвижна в абсолютной системе (MARKER_SHROUD) — открытое колесо;
+% без MARKER_SHROUD покрышка вращается с колесом (закрытое колесо, run_case.py --rotating-shroud) ----
 MARKER_HEATFLUX= (hub, 0.0, blade, 0.0, shroud, 0.0)
-MARKER_SHROUD= (shroud)
+${SHROUD_LINE}
 %
 % ---- периодичность поворотом: periodic_2 = periodic_1, повёрнутый на +360/Z вокруг +z ----
 MARKER_PERIODIC= (${PER_MASTER}, ${PER_SLAVE}, 0.0, 0.0, 0.0, 0.0, 0.0, ${ANGLE}, 0.0, 0.0, 0.0)
@@ -98,7 +99,7 @@ CONV_STARTITER= 10
 %
 % ---- вывод ----
 SCREEN_OUTPUT= (INNER_ITER, WALL_TIME, RMS_DENSITY, RMS_ENERGY, RMS_TKE, SURFACE_MASSFLOW, SURFACE_TOTAL_PRESSURE)
-HISTORY_OUTPUT= (ITER, RMS_RES, FLOW_COEFF, FLOW_COEFF_SURF, TURBO_PERF)
+HISTORY_OUTPUT= (ITER, WALL_TIME, RMS_RES, FLOW_COEFF, FLOW_COEFF_SURF, TURBO_PERF)
 SCREEN_WRT_FREQ_INNER= 10
 VOLUME_OUTPUT= (COORDINATES, SOLUTION, PRIMITIVE)
 OUTPUT_FILES= (${OUTPUT_FILES})

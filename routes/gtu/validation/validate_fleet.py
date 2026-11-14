@@ -117,7 +117,8 @@ def load_records(cfg: dict) -> list[dict]:
                 W_exh=W, EGT_C=T, PR=PR,
                 cls="calibration" if rid in cal else ("related" if rid in related else "independent"),
                 recuperated=any(m in str(model) for m in recup_models),
-                aeroderivative="SGT-A05" in str(model)))
+                aeroderivative="SGT-A05" in str(model),
+                data_caveat=cfg.get("data_caveats", {}).get(rid)))
     return out
 
 
@@ -311,11 +312,26 @@ def _run(task):
 
 # ---------------------------------------------------------------- статистика
 METRICS = ("dP_pct", "deta_pp", "dHR_pct", "dW_pct")
+BREAKS = load_cfg()["breaks"]
+PR_CAL = (12.2, 16.8)        # π калибровочных расчётов (литералы gtu_study.py)
+
+
+def in_cal_range(rec: dict, cal: dict) -> bool:
+    """Запись внутри диапазона калибровки по расходу выхлопа (±10 %) и π (±0,5)."""
+    return (cal["T60"]["W_cal"] * 0.9 <= rec["W_exh"] <= cal["SGT400"]["W_cal"] * 1.1
+            and PR_CAL[0] - 0.5 <= rec["PR"] <= PR_CAL[1] + 0.5)
 
 
 def stats(rows: list[dict]) -> dict:
     ok = [r for r in rows if r.get("status") == "ok"]
-    s = dict(n=len(ok), n_failed=len(rows) - len(ok), failed=[r["id"] for r in rows if r.get("status") != "ok"])
+    s = dict(n=len(ok), n_failed=len(rows) - len(ok), failed=[r["id"] for r in rows if r.get("status") != "ok"],
+             ids=[r["id"] for r in ok])
+    if ok:
+        b = BREAKS
+        s["share_eta_within_pp"] = dict(threshold_pp=b["eff_pp"],
+                                        share=sum(abs(r["deta_pp"]) <= b["eff_pp"] for r in ok) / len(ok))
+        s["share_P_within_pct"] = dict(threshold_pct=b["power_pct"],
+                                       share=sum(abs(r["dP_pct"]) <= b["power_pct"] for r in ok) / len(ok))
     for m in METRICS:
         if not ok:
             continue
@@ -354,12 +370,49 @@ def tags(row: dict, rec: dict, cal: dict) -> list[str]:
         elif row["T41_C"] < Tlo - 75:
             t.append(f"T41 {row['T41_C']:.0f} °C ниже калибровочных ({Tlo:.0f}–{Thi:.0f} °C): доли охлаждения калибровки, "
                      "вероятно, больше нужных")
-    PRlo, PRhi = 12.2, 16.8   # π калибровки (gtu_study.py)
+    PRlo, PRhi = PR_CAL
     if rec["PR"] < PRlo - 0.5 or rec["PR"] > PRhi + 0.5:
         t.append(f"π {rec['PR']} вне диапазона калибровки {PRlo}–{PRhi}")
     if rec["W_exh"] < cal["T60"]["W_cal"] * 0.9 or rec["W_exh"] > cal["SGT400"]["W_cal"] * 1.1:
         t.append(f"расход {rec['W_exh']} кг/с вне диапазона калибровки {cal['T60']['W_cal']}–{cal['SGT400']['W_cal']} кг/с")
+    if rec.get("data_caveat"):
+        t.append("оговорка данных паспорта: " + rec["data_caveat"])
     return t
+
+
+# ---------------------------------------------------------------- чувствительность (локальные производные)
+def sensitivity_cycle(rec: dict, var: dict, cal: dict, T41: float, dT: float = 10.0) -> dict:
+    """Производные по T41 центральной разностью ±dT; пересчёт на 1 K температуры выхлопа."""
+    p = base_params(rec, var, cal)
+    rs = [G.cycle(rec["PR"], T, W1=1.0, **cycle_kwargs(p, var, T, rec)) for T in (T41 - dT, T41 + dT)]
+    dEGT = (rs[1]["EGT_C"] - rs[0]["EGT_C"]) / (2 * dT)
+    pw = [r["P_MW"] / r["W_exh"] for r in rs]
+    dP = (pw[1] - pw[0]) / (2 * dT) / (0.5 * (pw[0] + pw[1])) * 100
+    de = (rs[1]["eff"] - rs[0]["eff"]) * 100 / (2 * dT)
+    return dict(id=rec["id"], variant=var["key"], T41_C=T41, dT_K=dT, dEGT_dT41=dEGT, dT41_dEGT=1 / dEGT,
+                dP_pct_per_K_T41=dP, deta_shaft_pp_per_K_T41=de,
+                dP_pct_per_K_EGT=dP / dEGT, deta_shaft_pp_per_K_EGT=de / dEGT)
+
+
+def sensitivity_recup(rec: dict, var: dict, cal: dict, T41: float, eps: float, dT: float = 10.0,
+                      de: float = 0.01) -> dict:
+    """Обусловленность перевода через рекуператор: производные точной температуры за рекуператором по T41 и ε."""
+    p = base_params(rec, var, cal)
+
+    def ts(T, e):
+        kw = dict(cycle_kwargs(p, var, T, rec), W1=1.0)
+        r = G.recup(rec["PR"], T, e, **kw)
+        return B.stack_temperature(r, kw), r
+
+    (a, ra), (b, rb) = ts(T41 - dT, eps), ts(T41 + dT, eps)
+    (c, _), (d, _) = ts(T41, eps - de), ts(T41, eps + de)
+    dTs_dT41 = (b - a) / (2 * dT)
+    dTs_deps = (d - c) / (2 * de)
+    pw = [r["P_MW"] / r["W_exh"] for r in (ra, rb)]
+    dP = (pw[1] - pw[0]) / (2 * dT) / (0.5 * (pw[0] + pw[1])) * 100
+    return dict(id=rec["id"], eps=eps, T41_C=T41, dTstack_dT41=dTs_dT41, dT41_dTstack=1 / dTs_dT41,
+                dTstack_deps=dTs_deps, dT41_per_0p01_eps=-dTs_deps * 0.01 / dTs_dT41,
+                dP_pct_per_K_T41=dP, dP_pct_per_K_Tstack=dP / dTs_dT41)
 
 
 # ---------------------------------------------------------------- главная
@@ -411,6 +464,8 @@ def main():
             label=v["label"],
             independent=stats(rows(k, ("independent",))),
             independent_no_recup=stats(rows(k, ("independent",), lambda r: not r["recuperated"])),
+            independent_no_recup_no_caveat=stats(rows(k, ("independent",),
+                                                      lambda r: not r["recuperated"] and not r["data_caveat"])),
             related=stats(rows(k, ("related",))),
             calibration=stats(rows(k, ("calibration",))),
         )
@@ -424,7 +479,20 @@ def main():
         "приводные": stats(rows(P, ("independent",), lambda r: not r["generator"])),
         "Solar": stats(rows(P, ("independent",), lambda r: noR(r) and r["maker"] == "Solar")),
         "Siemens": stats(rows(P, ("independent",), lambda r: r["maker"] == "Siemens")),
+        "Solar без оговорок данных": stats(rows(P, ("independent",),
+                                                lambda r: noR(r) and r["maker"] == "Solar" and not r["data_caveat"])),
+        "Siemens без оговорок данных": stats(rows(P, ("independent",),
+                                                  lambda r: r["maker"] == "Siemens" and not r["data_caveat"])),
+        "в диапазоне калибровки (расход и π)": stats(rows(P, ("independent",),
+                                                          lambda r: noR(r) and in_cal_range(r, cal))),
+        "вне диапазона калибровки": stats(rows(P, ("independent",), lambda r: noR(r) and not in_cal_range(r, cal))),
         "рекуперативные (простой цикл)": stats(rows(P, ("independent",), lambda r: r["recuperated"])),
+    }
+    groups_cool = {
+        "в диапазоне калибровки (расход и π)": stats(rows("interp_coolT41", ("independent",),
+                                                          lambda r: noR(r) and in_cal_range(r, cal))),
+        "вне диапазона калибровки": stats(rows("interp_coolT41", ("independent",),
+                                               lambda r: noR(r) and not in_cal_range(r, cal))),
     }
     ind = rows(P, ("independent",), noR)
     trends = [t for t in (
@@ -456,6 +524,35 @@ def main():
 
     recup_rows = [res for res in results if res["variant"].startswith("recup_")]
 
+    # чувствительность: как погрешность температуры выхлопа переходит в мощность и КПД; обусловленность рекуператора
+    pv = next(v for v in variants if v["key"] == P)
+    sens = []
+    for rid in cfg["sensitivity"]["cycle_records"]:
+        row = by_rec[rid]["results"][P]
+        if row["status"] == "ok":
+            sens.append(sensitivity_cycle(by_rec[rid], pv, cal, row["T41_C"]))
+    sens_recup = [sensitivity_recup(by_rec[row["id"]], rv, cal, row["T41_C"], row["eps"]) for row in recup_rows
+                  if row["status"] == "ok" and abs(row["eps"] - cfg["sensitivity"]["recup_eps"]) < 1e-9]
+
+    # пары «генератор — привод» одной модели: где ошибки расходятся — перевод вал -> клеммы или другой двигатель
+    pairs = []
+    stems = {}
+    for rec in by_rec.values():
+        stems.setdefault(rec["id"].split(":")[0], []).append(rec)
+    for lst in stems.values():
+        for g in (r for r in lst if r["generator"]):
+            for m in (r for r in lst if not r["generator"]):
+                rg, rm = g["results"][P], m["results"][P]
+                if rg["status"] != "ok" or rm["status"] != "ok":
+                    continue
+                pairs.append(dict(generator=g["id"], drive=m["id"], same_PR=g["PR"] == m["PR"],
+                                  PR_generator=g["PR"], PR_drive=m["PR"],
+                                  shafts_generator=g["shafts"], shafts_drive=m["shafts"],
+                                  dP_generator_pct=rg["dP_pct"], dP_drive_pct=rm["dP_pct"],
+                                  dP_diff_pct=rg["dP_pct"] - rm["dP_pct"], deta_diff_pp=rg["deta_pp"] - rm["deta_pp"],
+                                  passport_eff_ratio_generator_to_drive=g["eff_pct"] / m["eff_pct"],
+                                  model_conversion=eta_conv(g, cfg)))
+
     meta = dict(
         method=("Проверка вне калибровки: модель gtu_cycle.cycle (0D, Cantera GRI-Mech 3.0, метан, ISO) с КПД узлов и "
                 "долями охлаждения калибровки gtu_study.py; для каждой записи паспорта T41 подобрана под паспортную "
@@ -478,9 +575,19 @@ def main():
         primary_variant=P, runtime_s=round(time.time() - t_start, 1),
     )
     calib_out = {k: {kk: vv for kk, vv in v.items()} for k, v in cal.items()}
+    same = [p for p in pairs if p["same_PR"]]
+    pairs_summary = dict(
+        n_same_PR=len(same),
+        mean_dP_diff_pct_same_PR=float(np.mean([p["dP_diff_pct"] for p in same])) if same else None,
+        mean_deta_diff_pp_same_PR=float(np.mean([p["deta_diff_pp"] for p in same])) if same else None,
+        passport_eff_ratio_same_PR_min=min((p["passport_eff_ratio_generator_to_drive"] for p in same), default=None),
+        passport_eff_ratio_same_PR_max=max((p["passport_eff_ratio_generator_to_drive"] for p in same), default=None),
+        model_conversion=cfg["model"]["eta_generator"] * cfg["model"]["eta_gearbox"])
     res = dict(**meta, config=cfg, calibration_sets=calib_out, summary=summary, groups_primary_independent=groups,
+               groups_coolT41_independent=groups_cool, generator_drive_pairs_summary=pairs_summary,
                trends_primary_independent=trends, trends_coolT41_independent=trends_cool,
-               single_shaft_duct_effect=duct, breaks_primary=breaks, recuperated=recup_rows,
+               single_shaft_duct_effect=duct, generator_drive_pairs=pairs, sensitivity_cycle=sens,
+               sensitivity_recup=sens_recup, breaks_primary=breaks, recuperated=recup_rows,
                records=list(by_rec.values()))
     json.dump(res, open(HERE / "validation_fleet_results.json", "w"), ensure_ascii=False, indent=1, default=float)
     write_csv(by_rec, variants, primary)

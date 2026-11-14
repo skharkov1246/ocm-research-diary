@@ -1,0 +1,138 @@
+{
+ "method": "оцифровка векторного графика «Available Power»: рамка графика -> оси (−30…+45 °C; шкала мощности по подписям), кривая — точное вычисление Безье первого подпути толстого пути (pdftocairo -svg). Точность ограничена самим графиком: это сглаженная кривая чертёжника; толщина линии 3 pt ≈ ±1,5 pt по вертикали — см. kW_per_pt. Значения — ПРЕДВАРИТЕЛЬНО (оцифровка)",
+ "software": "poppler pdftocairo, python3",
+ "date": "2026-11-14",
+ "GS": {
+  "sheet": {
+   "doc": "DS60PG/0320, Taurus 60 Gas Turbine Generator Set",
+   "url": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-49890",
+   "chart": "DS60GS-002M",
+   "y_axis": "OUTPUT POWER, kWe",
+   "y_bottom": 4000.0,
+   "y_top": 8000.0,
+   "unit": "кВт эл. (клеммы)",
+   "basis": "Nominal rating – per ISO; at 15°C, sea level; no inlet/exhaust losses; relative humidity 60%; natural gas LHV = 35 MJ/Nm3; no accessory losses"
+  },
+  "pdf_sha256": "220a6b4a202d5e5ba7efd93ae36fe44ef7c0efbf4c5d7640202a4f56715cf529",
+  "frame_pt": [
+   274.094,
+   164.961,
+   511.418,
+   338.898
+  ],
+  "curve_T_range_C": [
+   -30.0,
+   44.92
+  ],
+  "kW_per_pt": 22.997,
+  "points": [
+   {
+    "T_amb_C": -30.0,
+    "P_kW": 7220.1
+   },
+   {
+    "T_amb_C": -22.5,
+    "P_kW": 6962.3
+   },
+   {
+    "T_amb_C": -15.0,
+    "P_kW": 6704.4
+   },
+   {
+    "T_amb_C": -7.5,
+    "P_kW": 6446.1
+   },
+   {
+    "T_amb_C": 0.0,
+    "P_kW": 6187.3
+   },
+   {
+    "T_amb_C": 7.5,
+    "P_kW": 5927.6
+   },
+   {
+    "T_amb_C": 15.0,
+    "P_kW": 5654.9
+   },
+   {
+    "T_amb_C": 22.5,
+    "P_kW": 5351.5
+   },
+   {
+    "T_amb_C": 30.0,
+    "P_kW": 5039.2
+   },
+   {
+    "T_amb_C": 37.5,
+    "P_kW": 4722.3
+   },
+   {
+    "T_amb_C": 45.0,
+    "P_kW": 4402.2,
+    "extrapolated_C": 0.08
+   }
+  ]
+ },
+ "MD": {
+  "sheet": {
+   "doc": "DS60MD/713, Taurus 60 Gas Turbine Mechanical-Drive Package",
+   "url": "https://s7d2.scene7.com/is/content/Caterpillar/C10550209",
+   "chart": "DS60MD-002M",
+   "y_axis": "OUTPUT POWER, kW (hp)",
+   "y_bottom": 4500.0,
+   "y_top": 6500.0,
+   "unit": "кВт (вал)",
+   "basis": "Nominal Rating – ISO; at 15°C, sea level; no inlet/exhaust losses; relative humidity 60%; natural gas LHV = 35 MJ/nm3; optimum power turbine speed; AC-driven accessories"
+  },
+  "pdf_sha256": "7b39868c5c938d0483e721d21ed443fa32d82ba2aea067a3bc1641a38446d5a1",
+  "frame_pt": [
+   283.574,
+   168.578,
+   517.574,
+   340.078
+  ],
+  "curve_T_range_C": [
+   -22.96,
+   42.91
+  ],
+  "kW_per_pt": 11.662,
+  "points": [
+   {
+    "T_amb_C": -22.5,
+    "P_kW": 6480.4
+   },
+   {
+    "T_amb_C": -15.0,
+    "P_kW": 6364.9
+   },
+   {
+    "T_amb_C": -7.5,
+    "P_kW": 6242.5
+   },
+   {
+    "T_amb_C": 0.0,
+    "P_kW": 6110.9
+   },
+   {
+    "T_amb_C": 7.5,
+    "P_kW": 5962.1
+   },
+   {
+    "T_amb_C": 15.0,
+    "P_kW": 5752.6
+   },
+   {
+    "T_amb_C": 22.5,
+    "P_kW": 5452.4
+   },
+   {
+    "T_amb_C": 30.0,
+    "P_kW": 5120.1
+   },
+   {
+    "T_amb_C": 37.5,
+    "P_kW": 4770.8
+   }
+  ]
+ }
+}
