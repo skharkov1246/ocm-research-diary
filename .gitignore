@@ -4,7 +4,9 @@ __pycache__/
 *.chk
 calc/cha_scf.chk
 routes/_constr_*.txt
-.claude/
+.claude/*
+!.claude/settings.json
+!.claude/skills/
 *.chk.npz
 routes/*_scf_spin*.npz
 routes/_hx_*.txt
