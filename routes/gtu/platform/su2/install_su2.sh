@@ -19,7 +19,11 @@ if [ ! -d "$SRC/.git" ]; then
   git clone --depth 1 -b v8.6.0 https://github.com/su2code/SU2.git "$SRC"
 fi
 cd "$SRC"
-./meson.py setup build_mpi -Dwith-mpi=enabled -Dbuildtype=release --prefix="$PREFIX"
+if [ -d build_mpi ]; then   # повторный запуск: перенастроить существующую папку сборки
+  ./meson.py setup --reconfigure build_mpi -Dwith-mpi=enabled -Dbuildtype=release --prefix="$PREFIX"
+else
+  ./meson.py setup build_mpi -Dwith-mpi=enabled -Dbuildtype=release --prefix="$PREFIX"
+fi
 ./ninja -C build_mpi -j"$JOBS" install
 "$PREFIX/bin/SU2_CFD" --help | head -1
 echo "SU2_RUN=$PREFIX/bin"
