@@ -4,8 +4,8 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 353,
-    "total_bytes": 3268143,
+    "datasets": 354,
+    "total_bytes": 3273916,
     "results_files": 163,
     "results_with_script": 44,
     "results_referenced_in_site": 22,
@@ -16,7 +16,7 @@
       "cc-activation-recycling": 36,
       "ch4-to-methanol": 9,
       "co2-to-fuels": 5,
-      "gas-turbine": 25,
+      "gas-turbine": 26,
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
@@ -3489,6 +3489,32 @@
       "last_change": "2026-11-14",
       "last_author": "Claude",
       "last_commit": "f5eddae"
+    },
+    {
+      "path": "routes/gtu/gtu_fleet_closed_crosscheck.json",
+      "track": "gas-turbine",
+      "kind": "данные",
+      "bytes": 5773,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "method",
+        "software",
+        "date",
+        "documents",
+        "results",
+        "summary",
+        "ask_customer",
+        "ask_customer_note"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "fec4555"
     },
     {
       "path": "routes/gtu/gtu_point_results.json",
