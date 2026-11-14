@@ -138,7 +138,7 @@ A = dict(
     pgc_f_real=0.25, pgc_deta_t=0.02,
     # химическая рекуперация
     p_fuel_k=1.25, dT_app=40.0, approach_eq=15.0, T_ref_max=850.0, T_fh_max=400.0, dp_ref_g=0.02, dp_fh_g=0.002, dp_ref_f=0.05,
-    pinch=20.0, sc=(1.5, 2.0, 3.0), R_egr=(0.5, 1.0, 2.0, 4.0), eta_rc=0.78, eta_pump=0.6,
+    pinch=20.0, sc=(1.5, 2.0, 3.0), R_egr=(0.5, 1.0, 2.0, 4.0), eta_rc=0.78, eta_pump=0.6, T_rc_cool=80.0,
     cat_loading=0.05,                   # кг катализатора (с носителем) на м² стенки — покрытие стенок риформера, оценка
     eta_eff_cat=1.0,                    # фактор эффективности тонкого покрытия (для гранул ~0,05 — оценка)
     xf_h2_seed=1e-3,                    # затравка H2/CH4 на входе (в уравнениях Xu — Froment p_H2 в знаменателе)
@@ -661,13 +661,27 @@ def make_fuel(tcr, gin, mf_guess, prm, p_fuel, stack):
         return dict(Y=Ye, h=h_out, T=T, lhv=L, yC=yC, q=h_out - h_in, info=info, feeds=feeds, Pout=Pout)
     if tcr == "egr":
         R = prm["R_egr"]
-        # рециркулят: газ из трубы (stack), сжатие до давления топлива
+        # рециркулят: газ за рекуператором; охлаждение воздухом до T_rc_cool и две ступени сжатия с промохлаждением
+        # до давления топлива (без охлаждения одна ступень дала бы на выходе 1500 °C — нереально)
         rc = stack.cp(m=1.0)
         Mrc = 1.0 / np.sum(rc.Y / MW)
         mC, mR = MW[I["CH4"]], R * Mrc
         yC = mC / (mC + mR)
-        rc_c = rc.cp()
-        w_rc = poly(rc_c, p_fuel, A["eta_rc"], True)
+        Tc = A["T_rc_cool"] + 273.15
+        rho_c = P0 / (RU / 28.96 * T0)
+        fan = lambda Q, Th: A["Cr_ic"] * Q / max(Th - T0, 1.0) / 1006.0 * A["dp_fan"] / rho_c / (A["eta_fan"] * A["eta_motor"])
+        s1 = rc.cp(T=min(rc.T, Tc))
+        q1 = hs(rc)[0] - hs(s1)[0]
+        w_fan = fan(q1, rc.T)
+        pm = math.sqrt(rc.P * p_fuel)
+        w1 = poly(s1, pm, A["eta_rc"], True)
+        s2 = s1.cp(T=min(s1.T, Tc))
+        q2 = hs(s1)[0] - hs(s2)[0]
+        w_fan += fan(q2, s1.T)
+        w2 = poly(s2, p_fuel, A["eta_rc"], True)
+        rc_c = s2
+        w_rc = w1 + w2 + w_fan
+        q_rc = q1 + q2 + w_fan
         feed = mix([St(yC, T0, p_fuel, Y_CH4), rc_c.cp(m=1 - yC)], p_fuel)
         h_in = hs(feed)[0]
         T = max(T_top, feed.T)
@@ -686,10 +700,10 @@ def make_fuel(tcr, gin, mf_guess, prm, p_fuel, stack):
         info = dict(T_ref_C=T - 273.15, X_CH4=X, R_egr=R, O2_per_CH4=Xf[I["O2"]] / Xf[I["CH4"]],
                     H2O_per_CH4=Xf[I["H2O"]] / Xf[I["CH4"]], CO2_per_CH4=Xf[I["CO2"]] / Xf[I["CH4"]],
                     lhv_gain=L / yC / LHV_CH4_CT - 1, aC=carbon_activity(Ye, T, Pout), w_rc_per_kg_rc=w_rc,
-                    T_rc_C=rc_c.T - 273.15)
+                    T_rc_C=rc_c.T - 273.15, q_rc_cool_per_kg_rc=q1 + q2)
         feeds = [("CH4", yC, St(1, T0, p_fuel, Y_CH4)), ("RC", 1 - yC, rc_c.cp(m=1.0))]
         return dict(Y=Ye, h=h_out, T=T, lhv=L, yC=yC, q=h_out - h_in, info=info, feeds=feeds, Pout=Pout,
-                    w_rc=w_rc * (1 - yC), rc_in=rc)
+                    w_rc=w_rc * (1 - yC), q_rc=q_rc * (1 - yC), rc_in=rc)
     raise ValueError(tcr)
 
 
@@ -818,7 +832,8 @@ def evaluate(topo, PR, prm=None, detail=False):
         fuel_out = St(mf, fuel["T"], fuel.get("Pout", p_fuel), fuel["Y"])
         if tcr == "egr":
             rc_in = fuel["rc_in"].cp(m=mf * (1 - fuel["yC"]))
-            comps.append(("Компрессор рециркуляции", [rc_in], [feeds[1]], -mf * fuel["w_rc"], 0.0))
+            comps.append(("Компрессор рециркуляции (2 ступени, охлаждение воздухом)", [rc_in], [feeds[1]], -mf * fuel["w_rc"],
+                          mf * fuel["q_rc"]))
         if tcr == "steam":
             w_pump = mf * (1 - fuel["yC"]) * (p_fuel - P0) / 999.1 / A["eta_pump"]
             comps.append(("Насос питательной воды", [St(mf * (1 - fuel["yC"]), T0, P0, Y_of("H2O:1"), liq=True)], [feeds[1]],
@@ -1119,32 +1134,30 @@ def hx_list(res, tech):
     return out
 
 
-def murray_tree(m, rho, mu, Dh, A_free, v_root=30.0, lam_LD=6.0, exponent=3.0, K_branch=0.3):
-    """разветвлённый коллектор от газохода до каналов сердцевины по закону Мюррея (D_родитель^a = 2·D_ребёнок^a;
-    a = 3 — ламинар, Murray 1926; 7/3 — турбулентный, Uylings 1977 — по выдержке поиска). Длина ветви — lam_LD·D.
-    Возвращает уровни, диаметры, Re, потерю давления и объём дерева (оценка)."""
+def murray_tree(m, rho, mu, A_front, A_free_face, v_root=30.0, patch=0.10, exponent=3.0, K_branch=0.3):
+    """дерево-распределитель от газохода до лицевой поверхности сердцевины (H-дерево, покрывающее фронт A_front):
+    ветвь уровня k обслуживает площадку A_front/2^k, её длина — половина стороны площадки; деление — до площадки
+    стороной patch (дальше поток растекается внутри решётки: у гироида каналы связаны во все стороны — оценка).
+    Диаметры — по закону Мюррея D_родитель^a = 2·D_ребёнок^a: a = 3 — ламинар (Murray 1926), 7/3 — турбулентный
+    (Uylings 1977) — по выдержке поиска; a = 2 — сохранение площади (постоянная скорость). Всё — оценка."""
     D0 = math.sqrt(4 * m / (math.pi * rho * v_root))
-    N_ch = A_free / (math.pi * Dh ** 2 / 4)
-    levels = max(1, math.ceil(math.log2(N_ch)))
+    levels = max(1, math.ceil(math.log2(A_front / patch ** 2)))
     rows, dp, vol = [], 0.0, 0.0
-    D = D0
-    stop = None
     for k in range(levels + 1):
         n = 2 ** k
+        D = D0 * 2 ** (-k / exponent)
+        L = 0.5 * math.sqrt(A_front / n)
         u = m / (n * rho * math.pi * D ** 2 / 4)
         Re = rho * u * D / mu
         f = 64 / Re if Re < 2300 else 0.316 * Re ** -0.25
-        L = lam_LD * D
         dpk = f * L / D * rho * u ** 2 / 2 + K_branch * rho * u ** 2 / 2
         dp += dpk
         vol += n * math.pi * D ** 2 / 4 * L
-        rows.append(dict(level=k, branches=n, D_mm=D * 1e3, u=u, Re=Re, dP_Pa=dpk))
-        if D <= 4 * Dh:
-            stop = k
-            break
-        D = D * 2 ** (-1.0 / exponent)
-    return dict(D_root_m=D0, N_channels=N_ch, levels_used=len(rows), end_D_mm=rows[-1]["D_mm"], dP_Pa=dp, volume_m3=vol,
-                rows=rows[:3] + rows[-2:], exponent=exponent)
+        rows.append(dict(level=k, branches=n, D_mm=D * 1e3, L_m=L, u=u, Re=Re, dP_Pa=dpk))
+    u_face = m / (rho * A_free_face)
+    return dict(exponent=exponent, D_root_m=D0, levels=levels, end_D_mm=rows[-1]["D_mm"], end_u=rows[-1]["u"],
+                u_core_face=u_face, end_area_over_face=(2 ** levels) * math.pi * (rows[-1]["D_mm"] / 1e3) ** 2 / 4 / A_free_face,
+                dP_Pa=dp, volume_m3=vol, rows=rows[:2] + rows[-2:])
 
 
 # ======================================================================== детали, Plug&Play, готовность
@@ -1191,8 +1204,8 @@ def parts(res, hx, tech):
         items += [("риформер с катализатором + парогенератор: модули", mods("риформер")), ("водоподготовка", 1),
                   ("питательный насос + двигатель", 2), ("клапан пара", 1), ("бак воды", 1)]
     if t["tcr"] == "egr":
-        items += [("риформер с катализатором: модули", mods("риформер")), ("компрессор рециркуляции + двигатель", 2),
-                  ("клапан", 1), ("газоход рециркуляции", 1)]
+        items += [("риформер с катализатором: модули", mods("риформер")), ("компрессор рециркуляции (2 колеса) + двигатель", 3),
+                  ("охладители рециркулята", 2), ("вентилятор + двигатель", 2), ("клапан", 1), ("газоход рециркуляции", 1)]
     dwheels = (res["nc"] + res["nt"]) - 5
     added = sum(n for _, n in items) + dwheels
     trl = min([TRL["simple"]] + [TRL[k] for k, on in (("rec", t["rec"]), ("ic", t["ic"]), ("rh", t["rh"]),
@@ -1365,20 +1378,20 @@ def finish(r):
 
 
 # ======================================================================== исследования (таблицы)
-def study_recup_tradeoff(PR=5.0):
+def study_recup_tradeoff(PR=8.22, prm=None, rh=True):
     """компромисс «степень регенерации — потеря давления» (Бежан: минимум производства энтропии = максимум КПД
-    при заданном объёме): КПД, объём и масса печатной сердцевины"""
+    при заданном объёме): КПД, объём и масса печатной сердцевины; по умолчанию — рекуператор + подогрев"""
     rows = []
     base = dict(A)
     for eps in (0.70, 0.80, 0.85, 0.90, 0.92):
         for k in (0.5, 1.0, 1.5, 2.0):
             A["dp_ra"], A["dp_rg"] = base["dp_ra"] * k, base["dp_rg"] * k
-            r = _safe(dict(rec=eps, ic=False, rh=False, ibc=False, pgc="none", tcr="none"), PR, None, detail=True)
+            r = _safe(dict(rec=eps, ic=False, rh=rh, ibc=False, pgc="none", tcr="none"), PR, prm, detail=True)
             if r.get("ok"):
                 hx = hx_list(r, "lpbf")[0]
                 rows.append(dict(eps=eps, dp_total_pct=100 * (A["dp_ra"] + A["dp_rg"]), eff_el=r["eff_el"], W_air=r["W_air"],
-                                 EGT_C=r["EGT_C"], V_core_m3=hx["V_core_m3"], mass_kg=hx["mass_kg"], L_m=hx["L_m"],
-                                 A_front_m2=hx["A_front_m2"]))
+                                 EGT_C=r["EGT_C"], limits_ok=r["limits"]["all"], V_core_m3=hx["V_core_m3"], mass_kg=hx["mass_kg"],
+                                 L_m=hx["L_m"], A_front_m2=hx["A_front_m2"]))
     A["dp_ra"], A["dp_rg"] = base["dp_ra"], base["dp_rg"]
     return rows
 
@@ -1506,6 +1519,7 @@ def flat(o, tag, tech):
                 added=p["added"], V_added_m3=p["V_added_m3"], mass_hx_kg=p["mass_hx_kg"], TRL=p["TRL"], pnp=p["pnp"],
                 water_t_h=r["water_t_h"], maintenance=p["maintenance"], X_comb_kW=r["exergy"]["X_comb_kW"],
                 eta_ex=r["exergy"]["eta_ex"], bound=(o["topo"]["pgc"] == "ideal"),
+                degenerate=bool(o["topo"]["ibc"] and (r.get("ibc") or {}).get("useless", False)),
                 lhv_gain=fi.get("lhv_gain"), X_CH4=fi.get("X_CH4"), T_ref_C=fi.get("T_ref_C"),
                 x_rh=r["prm"].get("x_rh") if o["topo"]["rh"] else None,
                 sc=r["prm"].get("sc") if o["topo"]["tcr"] == "steam" else None,
@@ -1617,7 +1631,8 @@ def main():
                 f = flat(o, tag, tc)
                 if f:
                     rows.append(f)
-    sel = [r for r in rows if r["point"] == "opt" and r["tech"] == tech and r["limits_ok"] and not r["bound"]]
+    sel = [r for r in rows if r["point"] == "opt" and r["tech"] == tech and r["limits_ok"] and not r["bound"]
+           and not r["degenerate"]]
     front_i = pareto(sel, [("eff_el", 1), ("added", -1), ("V_added_m3", -1)])
     front = sorted([sel[i] for i in front_i], key=lambda r: (r["added"], -r["eff_el"]))
     sel_p = [r for r in sel if r["pnp"] != "нет" and r["TRL"] >= 5]
@@ -1625,30 +1640,32 @@ def main():
                      key=lambda r: (r["added"], -r["eff_el"]))
     base = [o for o in res if o["key"] == "R00-ic-rh-ibc-none-none"][0]
     ref_eff = base["pr135"]["eff_el"]
-    # исследования
-    trade = study_recup_tradeoff(5.0)
+    # исследования — на рекомендуемом семействе «рекуператор + подогрев» (степень регенерации 0,90)
+    rec_best = next((r for r in sel if r["key"] == "R90-ic-RH-ibc-none-none"), None) or max(
+        [r for r in sel if "-RH-" in r["key"] and not r["key"].startswith("R00") and "-ic-" in r["key"]],
+        key=lambda r: r["eff_el"], default=None)
+    o_best = [x for x in res if x["key"] == rec_best["key"]][0] if rec_best else None
+    trade = study_recup_tradeoff(o_best["opt"]["PR"], o_best["opt"]["prm"]) if o_best else []
     refm = study_reformer()
-    # коллектор по Мюррею для рекуператора лучшего варианта с рекуператором из фронта
-    rec_best = max([r for r in sel if r["key"].startswith("R") and not r["key"].startswith("R00") and r["pnp"] != "нет"],
-                   key=lambda r: r["eff_el"] - 0.002 * r["added"], default=None)
     murray = None
-    if rec_best:
-        o = [x for x in res if x["key"] == rec_best["key"]][0]
-        rr = _safe(o["topo"], o["opt"]["PR"], o["opt"]["prm"], detail=True)
+    if o_best:
+        rr = _safe(o_best["topo"], o_best["opt"]["PR"], o_best["opt"]["prm"], detail=True)
         st = rr["_streams"]
         hx = [h for h in hx_list(rr, tech) if h["name"] == "рекуператор"][0]
         W1 = rr["W_air"]
         gin = st["g_in"]
         rho, mu, _, _ = tprops(gin.T, gin.P, gin.Y)
-        Afree = hx["A_m2"] * HX_TECH[tech]["Dh"] / (4 * hx["L_m"])
-        murray = dict(key=rec_best["key"], gas_lam=murray_tree(gin.m * W1, rho, mu, HX_TECH[tech]["Dh"], Afree, exponent=3.0),
-                      gas_turb=murray_tree(gin.m * W1, rho, mu, HX_TECH[tech]["Dh"], Afree, exponent=7.0 / 3.0),
-                      dP_budget_gas_Pa=(1 - A["dp_core_share"]) * A["dp_rg"] * gin.P)
+        Afree_face = HX_TECH[tech]["Dh"] / 2 / (HX_TECH[tech]["Dh"] + 2 * HX_TECH[tech]["t"]) * hx["A_front_m2"]
+        murray = dict(key=rec_best["key"], A_front_m2=hx["A_front_m2"], A_free_face_m2=Afree_face,
+                      trees={str(a): murray_tree(gin.m * W1, rho, mu, hx["A_front_m2"], Afree_face, exponent=a)
+                             for a in (3.0, 7.0 / 3.0, 2.0)},
+                      dP_budget_gas_Pa=(1 - A["dp_core_share"]) * A["dp_rg"] * gin.P,
+                      V_core_m3=hx["V_core_m3"])
     rows800 = [f for o in res800 for f in [flat(o, "opt", tech)] if f]
     sel800 = [r for r in rows800 if r["limits_ok"]]
     front800 = sorted([sel800[i] for i in pareto(sel800, [("eff_el", 1), ("added", -1), ("V_added_m3", -1)])],
                       key=lambda r: (r["added"], -r["eff_el"])) if sel800 else []
-    wall = study_wall([x for x in res if x["key"] == rec_best["key"]][0]) if rec_best else None
+    wall = study_wall(o_best) if o_best else None
     # Plug&Play реперы: пакеты Taurus 60 GS и Mercury 50 (тот же класс мощности, с рекуператором)
     m50 = IN["m50"]
     v_t60 = IN["pkg"][0] * IN["pkg"][1] * IN["pkg"][2]

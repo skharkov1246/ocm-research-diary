@@ -64,6 +64,8 @@ K_CRZ = 0.5                # рециркуляция закрутки: K = K_CR
 KV_MAX = 3.0               # предел степени рециркуляции FLOX (стеснение струи)
 T_LO_CAT, T_CAT_MAX = 723.0, 1173.0   # зажигание катализатора и предел его температуры, K (оценка)
 PHI_PB = 0.5               # phi бедной предгорелки каталитической схемы (оценка)
+F_SEG = 0.3                # доля времени догорания, которую струйки неравномерности идут раздельно (оценка)
+T_REC = 1.0e-3             # возраст рециркулирующих продуктов (догорание после зоны пламени), с (оценка)
 ETA_PG = 0.05              # доля идеального прироста давления постоянного объёма, реализуемая RDC (оценка)
 EPS_W = {"металл": 0.7, "керамика": 0.85}   # излучательная способность стенки: 0,7 Nimonic (по выдержке поиска), CMC - оценка
 EPS_C = 0.4                # кожуха
@@ -407,18 +409,24 @@ class Kin:
         return Stream(s.m, s.h, r.phase.Y.copy(), s.p), t_half
 
     def psr_recirc(self, fresh, tau, K):
-        """зона пламени с рециркуляцией продуктов K (кг продуктов на кг свежей смеси): вход = свежая + K·выход;
-        время пребывания по полному расходу tau/(1+K); две итерации"""
+        """зона пламени с рециркуляцией продуктов догорания K (кг на кг свежей смеси): вход PSR = свежая + K·(выход
+        PSR после T_REC догорания) - горячий газ у корня пламени (закрутка, FLOX); время пребывания по полному
+        расходу tau/(1+K); первое приближение - равновесие без NOx; три итерации"""
         if K <= 1e-6:
             out, lit, st = self.psr(fresh, tau)
             return out, lit, st, fresh
-        self.GM.HPY = fresh.h, fresh.p, fresh.Y; self.GM.equilibrate("HP")
-        rec = Stream(fresh.m * K, fresh.h, self.GM.Y.copy(), fresh.p)
-        st = None
-        for _ in range(2):
+        self.GM.HPY = fresh.h, fresh.p, fresh.Y
+        self.GM.equilibrate("HP")
+        Y = self.GM.Y.copy()
+        for sp in ("NO", "NO2", "N2O"):
+            Y[self.i[sp]] = 0.0
+        rec = Stream(fresh.m * K, fresh.h, Y / Y.sum(), fresh.p)
+        st, out, lit, inlet = None, None, False, None
+        for _ in range(3):
             inlet = self.mix(fresh, rec)
             out, lit, st = self.psr(inlet, tau / (1 + K), st)
-            rec = Stream(fresh.m * K, out.h, out.Y, out.p)
+            b = self.pfr(out, T_REC)
+            rec = Stream(fresh.m * K, b.h, b.Y, b.p)
         return Stream(fresh.m, out.h, out.Y, out.p), lit, st, inlet
 
     def tau_ext(self, inlet, tau_act, K=0.0, init=None):
@@ -509,7 +517,9 @@ def _node_streams(K, m_air, m_fuel, S, n_nodes, T3, Tf, p, fuel="CH4:1"):
 
 
 def gas_network(c, d, bc, li):
-    """сеть реакторов схемы на газе при нагрузке LOADS[li] -> выбросы, температуры, запас по срыву"""
+    """сеть реакторов схемы на газе при нагрузке LOADS[li] -> выбросы, температуры, запас по срыву.
+    Узлы неравномерности (и пилот) раздельно проходят PSR и первую долю F_SEG догорания, затем смешиваются и догорают
+    вместе (бедные струйки дожигаются в горячем газе), затем разбавление и PFR зоны разбавления."""
     K = kin()
     L = bc["loads"][li]
     p, T3, W, Wf = L["p3_Pa"], L["T3_K"], L["W_air"], L["W_fuel"]
@@ -520,41 +530,39 @@ def gas_network(c, d, bc, li):
     S = d["S_unmix"]
     a_pz, a_aux = c["a_pz"], c["a_aux"]
     res = dict(load=L["load"])
-    hot_parts, bypass_air = [], 0.0
+    seg, Ts, bypass_air, margins = [], [], 0.0, []
+    lit_frac = 1.0
     K_crz = K_CRZ * max(0.0, c["swirl"] - 0.4) if c["injector"] == "закрутка" else 0.0
     nn = N_NODES[s]
-    margins, lit_frac = [], 1.0
 
-    def chain_nodes(m_air, m_fuel, S_eff, Krec, pre=None, pre_share=None):
-        """узлы основной зоны: [горячий газ пилота/полости] + свежая -> PSR(рециркуляция) -> PFR(догорание)"""
+    def nodes_chain(m_air, m_fuel, S_eff, Krec, pre=None):
+        """узлы основной зоны: [горячий газ пилота/полости] + свежая -> PSR (рециркуляция продуктов) -> PFR F_SEG·tb"""
         nodes, _ = _node_streams(K, m_air, m_fuel, S_eff, nn, T3, Tf, p)
-        outs, Ts, lit_w = [], [], 0.0
+        lit_w = 0.0
         for wk, fr in nodes:
             inlet = fr if pre is None else K.mix(fr, Stream(pre.m * wk, pre.h, pre.Y, pre.p))
             o, lit, st, _ = K.psr_recirc(inlet, tp, Krec)
-            o = K.pfr(o, tb)
-            outs.append(o); Ts.append((wk, K.T(o)))
+            o = K.pfr(o, F_SEG * tb)
+            seg.append(o); Ts.append((wk, K.T(o)))
             lit_w += wk if lit else 0.0
-        return outs, Ts, lit_w
+        return lit_w
 
     if s in ("LPP", "MM", "FLOX", "TVC"):
-        Krec = K_crz
-        S_eff = S
+        Krec, S_eff = K_crz, S
         if s == "FLOX":
-            rho_ratio = math.sqrt(max(0.05, L["T3_K"] / max(bc["eq_T"](L["phi_ov"] / a_pz)[0], 800.0)))
-            Krec = min(KV_MAX, max(0.0, 0.32 * (0.5 * d["L_L"] / (1e-3 * d["d_air_mm"])) * rho_ratio - 1.0))
+            T_b = max(bc["eq_T"](L["phi_ov"] / a_pz)[0], 800.0)
+            Krec = min(KV_MAX, max(0.0, 0.32 * (0.5 * d["L_L"] / (1e-3 * d["d_air_mm"])) * math.sqrt(T3 / T_b) - 1.0))
             S_eff = S / (1 + Krec)
         res["K_recirc"] = Krec
-        # пассивное деление
         pilot = None
         x100 = CS.fuel_split100(c, bc["loads"][0]["phi_ov"])
         if s == "TVC":
             x = pilot_share(x100, m_rel) if c["passive"] == "гидравлика" else x100
-            pilot = dict(m_air=a_aux * W, m_fuel=x * Wf, kind="полость")
+            pilot = dict(m_air=a_aux * W, m_fuel=x * Wf)
             m_air_main, m_fuel_main = a_pz * W, (1 - x) * Wf
         elif c["passive"] == "гидравлика":
             x = pilot_share(x100, m_rel)
-            pilot = dict(m_air=a_aux * a_pz * W, m_fuel=x * Wf, kind="пилот")
+            pilot = dict(m_air=a_aux * a_pz * W, m_fuel=x * Wf)
             m_air_main, m_fuel_main = (1 - a_aux) * a_pz * W, (1 - x) * Wf
         else:
             m_air_main, m_fuel_main = a_pz * W, Wf
@@ -567,19 +575,17 @@ def gas_network(c, d, bc, li):
         res["S_eff"] = S_eff
         pre = None
         if pilot is not None:
+            Kp = 0.0 if s == "TVC" else K_crz
             pf = K.fresh(pilot["m_air"], pilot["m_fuel"], T3, Tf, p)
-            po, plit, pst, pin = K.psr_recirc(pf, tp, K_crz if s != "TVC" else 0.0)
-            margins.append(("пилот" if s != "TVC" else "полость",
-                            K.tau_ext(pin, tp, K_crz if s != "TVC" else 0.0, pst)))
+            po, plit, pst, pin = K.psr_recirc(pf, tp, Kp)
+            margins.append(("полость" if s == "TVC" else "пилот", K.tau_ext(pin, tp, Kp, pst)))
             res["phi_pilot"] = (pilot["m_fuel"] / pilot["m_air"]) / bc["far_st_CH4"]
             res["fuel_pilot_share"] = pilot["m_fuel"] / Wf
-            pre = po if plit else None
-            if pre is None:
-                hot_parts.append(K.pfr(po, tb))
-        outs, Ts, lit_w = chain_nodes(m_air_main, m_fuel_main, S_eff, Krec, pre)
-        hot_parts += outs
-        lit_frac = lit_w
-        # запас по срыву основной зоны (средний узел): без горячего газа пилота
+            if plit:
+                pre = po                       # горячий газ пилота/полости уходит в основную зону
+            else:
+                seg.append(K.pfr(po, F_SEG * tb))
+        lit_frac = nodes_chain(m_air_main, m_fuel_main, S_eff, Krec, pre)
         fr = K.fresh(m_air_main, m_fuel_main, T3, Tf, p)
         _, _, st0, inl0 = K.psr_recirc(fr, tp, Krec)
         margins.append(("основная", K.tau_ext(inl0, tp, Krec, st0)))
@@ -590,53 +596,46 @@ def gas_network(c, d, bc, li):
         margins.append(("богатая", K.tau_ext(rin, tp, K_crz, rst)))
         res["phi_rich"] = (Wf / (a_pz * W)) / bc["far_st_CH4"]
         tq = 1e-3 * next(z["tau_ms"] for z in d["zones"] if z["name"] == "гашение")
-        cur, Ts = ro, []
-        st = None
-        for k in range(3):
+        cur = ro
+        for k in range(3):                      # гашение: воздух тремя долями, каждая - PSR tq/3
             cur = K.mix(cur, K.air(a_aux * W / 3, T3, p))
-            cur, _, st = K.psr(cur, tq / 3, None)
-        cur = K.pfr(cur, tb)
-        hot_parts.append(cur)
-        Ts = [(1.0, K.T(cur))]
+            cur, _, _ = K.psr(cur, tq / 3)
+        seg.append(cur); Ts.append((1.0, K.T(cur)))
         lit_frac = 1.0 if rlit else 0.0
     elif s == "CAT":
-        m_air, Tin = a_pz * W, T3
-        pre = None
-        f_pb = 0.0
-        a_pb = 0.0
-        if T3 < T_LO_CAT:                     # бедная предгорелка phi 0,5 поднимает вход катализатора до T_LO_CAT
-            f_pb = min(0.5, L["cp3"] * (T_LO_CAT - T3) * m_air / (bc["LHV_J_kg"]["CH4"] * Wf))
+        m_air = a_pz * W
+        pre, f_pb, a_pb = None, 0.0, 0.0
+        if T3 < T_LO_CAT:                     # бедная предгорелка phi 0,5 поднимает вход катализатора выше T_LO_CAT
+            f_pb = min(0.5, L["cp3"] * (T_LO_CAT + 40.0 - T3) * m_air / (bc["LHV_J_kg"]["CH4"] * Wf))
             a_pb = f_pb * Wf / (PHI_PB * bc["far_st_CH4"])
-            pb, plit, pst = K.psr(K.fresh(a_pb, f_pb * Wf, T3, Tf, p), 1e-3)
-            pre = pb
+            pre, plit, pst = K.psr(K.fresh(a_pb, f_pb * Wf, T3, Tf, p), 1e-3)
         res["preburner_fuel_share"] = f_pb
         nodes, _ = _node_streams(K, m_air - a_pb, (1 - f_pb) * Wf, S, nn, T3, Tf, p)
-        Ts, t_halves, conv = [], [], []
+        conv, t_half = [], []
+        G = K.GM
+        iC, iO2, iCO2, iH2O = (G.species_index(z) for z in ("CH4", "O2", "CO2", "H2O"))
+        MW = G.molecular_weights
         for wk, fr in nodes:
             inlet = fr if pre is None else K.mix(fr, Stream(pre.m * wk, pre.h, pre.Y, pre.p))
-            T_in = K.T(inlet)
-            T_ad = K.T_eq(inlet)
-            x = min(1.0, max(0.0, (T_CAT_MAX - T_in) / max(T_ad - T_in, 1.0))) if T_in >= T_LO_CAT - 1 else 0.0
+            T_in, T_ad = K.T(inlet), K.T_eq(inlet)
+            x = min(1.0, max(0.0, (T_CAT_MAX - T_in) / max(T_ad - T_in, 1.0))) if T_in >= T_LO_CAT else 0.0
             conv.append(wk * x)
             Y = inlet.Y.copy()
-            iC, iO2, iCO2, iH2O = (K.GM.species_index(z) for z in ("CH4", "O2", "CO2", "H2O"))
-            MW = K.GM.molecular_weights
             dn = x * Y[iC] / MW[iC]
             Y[iC] -= dn * MW[iC]; Y[iO2] -= 2 * dn * MW[iO2]; Y[iCO2] += dn * MW[iCO2]; Y[iH2O] += 2 * dn * MW[iH2O]
-            o, th = K.pfr_ign(Stream(inlet.m, inlet.h, Y, p), tb)
-            t_halves.append(th)
-            hot_parts.append(o); Ts.append((wk, K.T(o)))
+            o, th = K.pfr_ign(Stream(inlet.m, inlet.h, Y, p), F_SEG * tb + (1 - F_SEG) * tb, n=24)
+            t_half.append(th)
+            seg.append(o); Ts.append((wk, K.T(o)))
         res["catalyst_conversion"] = sum(conv)
-        th_mid = t_halves[len(t_halves) // 2]
+        th_mid = t_half[len(t_half) // 2]
         margins.append(("гомогенное догорание", (tb / th_mid) if th_mid else 0.0))
-        lit_frac = sum(wk for (wk, _), th in zip(nodes, t_halves) if th is not None)
+        lit_frac = sum(wk for (wk, _), th in zip(nodes, t_half) if th is not None)
     elif s == "RDC":
         nodes, _ = _node_streams(K, a_pz * W, Wf, S, nn, T3, Tf, p)
-        Ts, pcv = [], []
+        pcv = []
         for wk, fr in nodes:
-            # сгорание при постоянном объёме вместо волны (цикл Хамфри, оценка): равновесие UV основных веществ,
-            # NO/NO2/N2O обнулены; образование NOx - закрытый реактор на время tau_pz; затем изоэнтропическое
-            # расширение (замороженный состав) до p3 и догорание PFR
+            # сгорание при постоянном объёме вместо волны (цикл Хамфри, оценка): равновесие UV, NO/NO2/N2O обнулены;
+            # NOx - закрытый реактор на время tau_pz; изоэнтропическое расширение (замороженный состав) до p3
             K.GP.HPY = fr.h, fr.p, fr.Y
             K.GP.equilibrate("UV")
             Y = K.GP.Y.copy()
@@ -648,26 +647,26 @@ def gas_network(c, d, bc, li):
             net.advance(tp)
             pcv.append(r.phase.P / p)
             K.GM.TPY = r.T, r.phase.P, r.phase.Y
-            sent = K.GM.entropy_mass
-            K.GM.SP = sent, p
-            o = Stream(fr.m, K.GM.enthalpy_mass, K.GM.Y.copy(), p)
-            o = K.pfr(o, tb)
-            hot_parts.append(o); Ts.append((wk, K.T(o)))
+            K.GM.SP = K.GM.entropy_mass, p
+            o = K.pfr(Stream(fr.m, K.GM.enthalpy_mass, K.GM.Y.copy(), p), F_SEG * tb)
+            seg.append(o); Ts.append((wk, K.T(o)))
         res["p_cv_ratio"] = float(np.mean(pcv))
         margins.append(("детонация", 1.0))
-        lit_frac = 1.0
-    # смешение горячих потоков, разбавление и выход
-    hot = K.mix(*hot_parts)
+    # смешение струек, совместное догорание, разбавление, выход
+    if s == "CAT":
+        hot = K.mix(*seg)
+    else:
+        hot = K.pfr(K.mix(*seg), (1 - F_SEG) * tb)
     T_hot = K.T(hot)
-    sigT = math.sqrt(sum(w * (T - T_hot) ** 2 for w, T in Ts) / max(sum(w for w, _ in Ts), 1e-12)) if Ts else 0.0
-    dil = K.air(d["a_dil"] * W + d["a_cool"] * W + bypass_air + (a_aux * W if s == "TVC" and False else 0.0), T3, p)
+    wsum = max(sum(w for w, _ in Ts), 1e-12)
+    T_mean = sum(w * T for w, T in Ts) / wsum
+    sigT = math.sqrt(sum(w * (T - T_mean) ** 2 for w, T in Ts) / wsum)
+    dil = K.air(d["a_dil"] * W + d["a_cool"] * W + bypass_air, T3, p)
     ex = K.pfr(K.mix(hot, dil), td)
-    fuel_frac = Wf / ex.m
-    em = K.emissions(ex, fuel_frac, bc["LHV_J_kg"], bc["LHV_J_kg"]["CH4"])
+    em = K.emissions(ex, Wf / ex.m, bc["LHV_J_kg"], bc["LHV_J_kg"]["CH4"])
     res.update(NOx=em["NOx"], CO=em["CO"], UHC=em["UHC"], eta_c=em["eta_c"], O2_dry=em["O2_dry"], T_exit=em["T"],
-               T_hot=T_hot, sigma_T_hot=sigT, m_hot=hot.m, lit_frac=lit_frac,
-               margin_lbo=min(m for _, m in margins) if margins else None,
-               margins={k: v for k, v in margins})
+               T_hot=T_hot, T_flame=T_mean, sigma_T_hot=sigT, m_hot=hot.m, lit_frac=lit_frac,
+               margin_lbo=min(m for _, m in margins) if margins else None, margins={k: v for k, v in margins})
     if s == "RDC":
         res["p_gain"] = ETA_PG * max(0.0, res["p_cv_ratio"] - 1.0)
     return res
@@ -710,7 +709,7 @@ def diesel_network(c, d, bc, li, gas_res):
     far_d = bc["far_st_diesel"]
     tp, tb, td = 1e-3 * c["tau_pz_ms"], 1e-3 * c["tau_bo_ms"], 1e-3 * c["tau_dil_ms"]
     D, dPf = smd(c, d, bc, li, Wfd)
-    T_fl = max(gas_res["T_hot"], 1500.0)
+    T_fl = max(gas_res["T_flame"], 1500.0)
     t_ev_air, B_air = _evap(K, D, T3, p)
     t_ev_fl, B_fl = _evap(K, D, T_fl, p)
     u = math.sqrt(2 * c["dp_inj"] * p / L["rho3"])
@@ -1117,7 +1116,7 @@ def evaluate(i, n, kv="KV-3", seed=CS.SEED):
             rej.append(dict(code="САМОВОСПЛАМЕНЕНИЕ", value=min(ig), limit=1.0,
                             why="дизель самовоспламеняется в смесителе (задержка меньше времени смешения)"))
         far_pz = (bc["loads"][0]["W_fuel"] / (c["a_pz"] * bc["loads"][0]["W_air"]))
-        row["wall_gas"] = wall_temperature(c, d, bc, g100["T_hot"], min(far_pz, bc["far_st_CH4"]), 1.0)
+        row["wall_gas"] = wall_temperature(c, d, bc, g100["T_flame"], min(far_pz, bc["far_st_CH4"]), 1.0)
         far_dz = bc["loads"][0]["W_fuel_diesel"] / (c["a_pz"] * bc["loads"][0]["W_air"])
         row["wall_diesel"] = wall_temperature(c, d, bc, dz[0]["T_hot"], min(far_dz, bc["far_st_diesel"]),
                                               336.0 / H_FUEL_DIESEL ** 2)
