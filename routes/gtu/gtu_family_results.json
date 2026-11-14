@@ -1750,7 +1750,7 @@
    ],
    "w0": 298.8,
    "src": "gtu_fleet_sgt100.json",
-   "wheels0": 15,
+   "wheels0": 13,
    "recup": false,
    "строгий": {
     "arch": "2В-2Ц",
@@ -2012,7 +2012,7 @@
    ],
    "w0": 289.6,
    "src": "gtu_fleet_sgt300.json",
-   "wheels0": 18,
+   "wheels0": 14,
    "recup": false,
    "строгий": null,
    "базовый": {
@@ -2117,7 +2117,7 @@
    ],
    "w0": 304.4,
    "src": "gtu_fleet_sgt300.json",
-   "wheels0": 18,
+   "wheels0": 14,
    "recup": false,
    "строгий": null,
    "базовый": {
@@ -2590,7 +2590,7 @@
    ],
    "w0": 207.2,
    "src": "gtu_fleet_sgt500.json",
-   "wheels0": 48,
+   "wheels0": 24,
    "recup": false,
    "строгий": null,
    "базовый": {
@@ -2829,7 +2829,7 @@
    ],
    "w0": 269.3,
    "src": "gtu_fleet_sgta05.json",
-   "wheels0": 46,
+   "wheels0": 19,
    "recup": false,
    "строгий": {
     "arch": "1В-2Ц",
@@ -2960,7 +2960,7 @@
    ],
    "w0": 287.9,
    "src": "gtu_fleet_sgta05.json",
-   "wheels0": 33,
+   "wheels0": 19,
    "recup": false,
    "строгий": {
     "arch": "1В-2Ц",

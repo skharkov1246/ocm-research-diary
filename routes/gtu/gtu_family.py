@@ -93,7 +93,11 @@ def stages_sum(v):
         return 0
     if isinstance(v, (int, float)):
         return int(v)
-    return sum(int(x) for x in re.findall(r"\d+", str(v)) if int(x) < 30)
+    # Пояснения в скобках не считать: в сверенных паспортах «18 (LP 10 + HP 8)»
+    # и «15 (14-stage core + 1 zero-stage boost)» — это 18 и 15 ступеней, а не 36 и 30.
+    # Слагаемые вне скобок («GP 2 (reaction) + PT 2», «1 HP + 2 LP + 3 PT») суммируются.
+    s = re.sub(r"\([^()]*\)", " ", str(v))
+    return sum(int(x) for x in re.findall(r"\b\d+\b", s) if int(x) < 30)
 
 
 def slots(paths):
