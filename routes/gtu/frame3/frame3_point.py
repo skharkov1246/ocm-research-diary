@@ -60,6 +60,7 @@ def load_inputs():
 
 
 FAM, SLOT, PT, FRAME, MEMBERS, MAT, FEA = load_inputs()
+assert len(MEMBERS) == FRAME["n"], (len(MEMBERS), FRAME)
 PR = PT["PR"]                    # 13.5
 T41_C = PT["T41"]                # 1000
 G = PT["G"]                      # 25.55 кг/с воздуха
@@ -618,7 +619,9 @@ def material_check(st):
 
 # ------------------------------------------------------------------ сборка результата
 def sig(x, k=6):
-    if isinstance(x, (bool, str)) or x is None:
+    if isinstance(x, (bool, np.bool_)):
+        return bool(x)
+    if isinstance(x, str) or x is None:
         return x
     if isinstance(x, (int, np.integer)):
         return int(x)
@@ -652,8 +655,8 @@ def stage_report(st, label):
         alpha2_flow_from_radial_deg=math.degrees(f["alpha2"]), c2_m_s=f["c2"], W2_W1t=f["W2"] / ind["W1t"],
         tip_clearance_m=g["cl"], axial_length_m=g["Lax"], w_kJkg=d["w0"] / 1e3,
         eta_p=st["eta_p"], eta_is=None,
-        eta_basis=dict(comp_stage_eta_p=st["cs"]["eta"], comp_stage_D2=st["cs"]["D2"] / (math.sqrt(2) if dbl else 1.0),
-                       comp_stage_rpm=st["cs"]["rpm"] * (math.sqrt(2) if dbl else 1.0),
+        eta_basis=dict(comp_stage_eta_p=st["cs"]["eta"], comp_stage_D2=st["cs"]["D2"], comp_stage_rpm=st["cs"]["rpm"],
+                       comp_stage_U2=st["cs"]["U2"],
                        model_eta_p_at_n=d["eta_p_model"], model_eta_p_at_nref=r["eta_p_model"], n_ref_rpm=st["nref"],
                        ref_D2_m=r["D2"], ref_U2_m_s=r["U2"], ref_M1t_rel=r["ind"]["M1t"],
                        d_eta_raw=st["d_raw"], d_eta_used=st["d_used"], d_eta_without_diffuser_friction=st["d_nofr"],
@@ -698,13 +701,13 @@ def run():
         r = C.cycle(prx, T41_C, eta_pc=dp["eta_pc"], eta_pt_gg=tb_eta, eta_pt_pt=tb_eta, x_ngv=0.0, x_rot=0.0, x_leak=X_LEAK,
                     dp_duct=0.0, W1=G)
         pr_sens.append(dict(PR=prx, P_shaft_kW=r["P_MW"] * 1e3, eff_shaft=r["eff"], EGT_C=r["EGT_C"]))
-    # баланс мощности
-    P_c = cyc["wc_kJkg"] * G
-    P_t_cycle = P_c / ETA_M + P_sh / ETA_M
-    P_t_turb = dp["opts"][z]["w_t"] * cyc["W_exh"] / 1e3
+    # баланс мощности: компрессор и вал — Cantera (gtu_cycle), турбина — независимо, по таблицам gtu_explore
     tb = dp["opts"][z]["turb"]
-    # независимый расчёт турбины по таблицам: степень расширения и выход против Cantera
     hs_chk = hot_section(dp["T_stage_cantera"][1], PR, T41_C + 273.15, G, tb["eta_p"])
+    P_c = cyc["wc_kJkg"] * G
+    P_c_stages = dp["comp"]["w"] * G / 1e3
+    P_t_tab = hs_chk["W41"] * hs_chk["w_t"] / 1e3
+    P_t_need = (P_c + P_sh) / ETA_M
     # члены типоразмера
     design_op = gg_point(dp, N, T41_C)
     members = []
@@ -736,7 +739,7 @@ def run():
         notes = []
         igv = None
         if op is not None and (op["W1"] > row["G_cap"] or not op["ok"]) and op["T41_C"] <= T41_MAX_U:
-            target = min(row["G_cap"], (sl["W_choke"] or 1e9) - 0.5)       # в допуске пакета и не у запирания
+            target = min(row["G_cap"], (sl["W_choke"] or 1e9) - 0.5) - 0.01   # в допуске пакета и не у запирания
             row["igv_target_W1"] = target
 
             def wres(a):
@@ -756,13 +759,18 @@ def run():
             row["verdict"] = "нет: мощность не набирается и при 1250 °C"
         else:
             okT = use["T41_C"] <= T41_MAX_U + 1e-6
-            okG = use["W1"] <= row["G_cap"] + 1e-6
+            okG = use["W1"] <= row["G_cap"] * (1 + 1e-4)
             okE = use["EGT_C"] <= row["EGT_cap"]
             okS = use["W1"] > (use.get("surge") or sl)["W_surge"]
             okC = bool(use["ok"])
+            wch = (use.get("surge") or sl)["W_choke"]
+            row["choke_margin_pct"] = None if wch is None else (wch / use["W1"] - 1) * 100
+            row["surge_margin_pct"] = (1 - (use.get("surge") or sl)["W_surge"] / use["W1"]) * 100
             row["checks"] = dict(T41_ok=okT, G_ok=okG, EGT_ok=okE, surge_ok=okS, choke_ok=okC)
             if okT and okG and okE and okS and okC:
-                row["verdict"] = "да" + (" (с поворотным входным аппаратом)" if igv else "")
+                tight = row["choke_margin_pct"] is not None and row["choke_margin_pct"] < 2.0
+                row["verdict"] = ("да" + (" (с поворотным входным аппаратом)" if igv else "") +
+                                  (f", но у запирания: запас по расходу {row['choke_margin_pct']:.1f} % — нужна характеристика (SU2)" if tight else ""))
             elif not okT:
                 row["verdict"] = (f"нет в классе U: нужна T41 {use['T41_C']:.0f} °C; "
                                   f"при 1000 °C — {row['at_T41_1000']['P_share_pct']:.0f} % мощности")
@@ -820,6 +828,9 @@ def run():
                         w_tables_kJkg=dp["comp"]["w"] / 1e3, T3_C=dp["T_stage_cantera"][1] - 273.15),
         turbine=dict(selected_z=z, options=turb,
                      one_stage_feasible=turb["1"]["feasible"],
+                     work_needed_kJkg=dp["opts"][z]["w_t"] / 1e3,
+                     one_stage_max_work_kJkg=A["psi_max"] * U_AX ** 2 / 1e3,
+                     one_stage_work_ratio=dp["opts"][z]["w_t"] / (A["psi_max"] * U_AX ** 2),
                      criteria=dict(psi_max=A["psi_max"], reaction_min=0.0, M2_max=A["m2_max"], U_max=U_AX, T41_max=T_AX)),
         cycle=dict(
             frame3=dict(P_shaft_kW=P_sh, P_el_kW=P_sh * ETA_GEN * ETA_GB, eff_shaft=cyc["eff"], eff_el=cyc["eff"] * ETA_GEN * ETA_GB,
@@ -832,8 +843,10 @@ def run():
             pr_sensitivity_fixed_eta=pr_sens,
             required=dict(P_el_kW=P_EL_KW, P_shaft_kW=P_SH_KW, G_for_required_power=P_SH_KW / w_sp, G_cap=G_CAP,
                           T41_for_required_power_at_G=T41_need, EGT_cap=EGT_CAP),
-            power_balance=dict(P_comp_kW=P_c, P_turb_from_cycle_kW=P_t_cycle, P_turb_from_turbine_kW=P_t_turb,
-                               P_shaft_kW=P_sh, eta_m=ETA_M),
+            power_balance=dict(P_comp_cantera_kW=P_c, P_comp_stages_tables_kW=P_c_stages, P_turb_tables_kW=P_t_tab,
+                               P_turb_needed_kW=P_t_need, P_shaft_cantera_kW=P_sh, eta_m=ETA_M,
+                               residual_pct=(P_t_tab * ETA_M - P_c - P_sh) / P_t_tab * 100,
+                               note="P_turb*eta_m = P_comp + P_shaft; турбина посчитана по таблицам (gtu_explore), компрессор и вал — Cantera"),
             turbine_crosscheck_tables=dict(ER_tables=hs_chk["ER"], ER_cantera=cyc["GG_ER"] * cyc["PT_ER"], EGT_tables_C=hs_chk["T5"] - 273.15,
                                            EGT_cantera_C=cyc["EGT_C"], ER_stagewise=tb["ER_total"],
                                            ER_target=(C.P0 * PR * (1 - DP_COMB)) / (C.P0 * P_EXH)),

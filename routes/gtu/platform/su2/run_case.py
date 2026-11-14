@@ -506,7 +506,9 @@ def main(argv=None):
     }
 
     deadline = time.monotonic() + a.time_limit
-    prev_frac, prev_p = 0.0, d1["p01"]
+    # рампа давления на выходе стартует со статического давления начального поля (FS_P), а не с p01:
+    # при p_вых = p01 и неподвижном колесе поток идёт в область и со входа, и с выхода (прогон 14.11.2026)
+    prev_frac, prev_p = 0.0, fs_p
     prev_restart = None
     key_problems = None
     for i, st in enumerate(plan):
