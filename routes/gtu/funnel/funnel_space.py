@@ -22,7 +22,7 @@ KV-1 ... KV-7, ../gtu_lineup_results.json). Воронка: 20 000 концеп�
   python funnel_space.py --selfcheck                                                    # отладка на малой выборке
 Все результаты уровня 0 - «оценка»: КПД узлов, пределы и коэффициенты - принятые величины трека и свои оценки (README).
 """
-import argparse, datetime, hashlib, inspect, json, math, os, platform, sys, time, warnings
+import argparse, datetime, hashlib, inspect, itertools, json, math, os, platform, sys, time, warnings
 
 import numpy as np
 import scipy
@@ -95,27 +95,50 @@ CAT = {
     "cartridge": [0, 1],
     "split_bl": [0, 1],
 }
-CONT = {   # непрерывные оси: доля 0..1 переводится в величину в concept() (диапазоны могут зависеть от дискретных осей)
-    "pi": "общая степень сжатия: 1Ц 3-8, Д 2,5-6, 2Ц 6-20, ОЦ (1 осевая) 4-14, ОЦ (2 осевые) 5-18 (оценка); верхняя граница "
-          "не выше pi_max_U - π, при которой ступени укладываются в предел окружной скорости материала при выбранных mu1, mu2, split",
-    "split": "доля ln π на первую ступень (2Ц) или на осевую часть (ОЦ): 0,35-0,65",
-    "t41": "T41, °C: от 850 до предела класса охлаждения, типа турбины и сплава (make_model.t41_limit); плотность смещена к пределу: "
-           "T41 = Tlim - (Tlim - 850)·u² (низкая T41 не даёт мощности при мягком допуске по расходу)",
-    "mu1": "коэффициент работы первой ступени w/U²: центробежная 0,60-0,80, диагональная 0,50-0,70, осевая (по периферии) 0,20-0,35 (оценка)",
+CONT = {   # непрерывные оси, выборка v2: доля 0..1 Соболя -> величина ВНУТРИ допустимого окна; окна строит design()
+    # по номинальному циклу концепции (КПД узлов при выбранных безразмерных параметрах, запасы M_W, M_T, M_GEO), зависимые
+    # величины (расход, диаметры, частота газогенератора, окружная скорость турбины) выводятся, а не разыгрываются
+    "t41": "T41, °C: окно [T41_lo, Tlim]; Tlim - по классу охлаждения, типу турбины и сплаву (make_model.t41_limit); T41_lo - наименьшая "
+           "T41, при которой номинальный цикл даёт w >= w_need·(1+M_W) при выхлопе <= t0+100-M_T (рекуператор: газ на входе <= 700-M_T, "
+           "алюминиевое колесо: T2 <= 200-M_T); равномерно в окне",
+    "pi": "общая степень сжатия: окно при выбранной T41, где выполнены те же условия, внутри диапазона типа компрессора (1Ц 3-8, Д 2,5-6, "
+          "2Ц 6-20, ОЦ 4-14 / 5-18 - оценка) и не выше pi_max_U (ступени в пределе окружной скорости при лучшем делении); равномерно по ln π",
+    "split": "доля ln π на первую ступень (2Ц: 0,35-0,65) или на осевую часть (ОЦ: 0,12-0,60); окно - где каждая ступень проходит предел "
+             "окружной скорости, π осевой ступени <= 1,8, а у вала с частотой пакета - коэффициент расхода в хорошем диапазоне GOOD",
+    "mu1": "коэффициент работы w/U² первой (ОЦ - осевых) ступени: центробежная 0,60-0,80, диагональная 0,50-0,70, осевая 0,20-0,35 (оценка); "
+           "окно сужают предел окружной скорости и (вал с частотой пакета) коэффициент расхода GOOD",
     "mu2": "то же для последней ступени (2Ц, ОЦ)",
-    "phi1": "коэффициент расхода G/(ρ·U2·D2²) первой центробежной ступени свободного вала: 0,04-0,12; у вала с частотой пакета - выводится",
+    "phi1": "вал газогенератора: частота n выводится из окна, где все колёса и турбина в пределах размеров способа изготовления, коэффициенты "
+            "расхода ступеней и быстроходность радиальной турбины в GOOD, AN² и втулка осевой турбины проходят при ca/U <= 0,8; "
+            "phi1 = коэффициент расхода первой центробежной ступени при этой n (равномерно по ln n); у вала с частотой пакета - выводится",
     "kcm": "cm2/U2 на выходе колеса - ширина b2: 0,20-0,35",
     "zc": "число основных лопаток колеса компрессора: 7-15",
-    "kUt": "окружная скорость турбины в долях предела: 0,75-1,00; предел - меньшее из предела материала и (одновальная схема) "
-           "π·n·Dmax/60, где Dmax - предел отливки, поковки, керамики или камеры принтера",
+    "lt": "нагрузка турбины газогенератора: осевая - ψ = w/(nt·U²) в окне [1,2; 2,3] (не ниже ψ при предельной окружной скорости); "
+          "радиальная - U/C0 в окне [0,62; 0,78] (не выше U_max/C0); окружная скорость выводится: U = √(w/(nt·ψ)) или (U/C0)·C0",
     "zt": "лопаток рабочего колеса турбины: радиальная 9-17, осевая 30-80 на ступень",
     "zn": "лопаток соплового аппарата: радиальная 12-24, осевая 20-60 на ступень",
-    "kUpt": "окружная скорость силовой турбины в долях 380 м/с: 0,85-1,00 (ниже - лопатки последней ступени слишком длинные при частоте пакета)",
-    "phit": "ca/U на выходе осевой турбины и СТ: 0,45-0,80 (frame3 - 0,5); выше 0,5 - потеря с выходной скоростью: половина прироста c²/2 (оценка)",
-    "eps_rec": "эффективность рекуператора: 0,75-0,92",
+    "kUpt": "окружная скорость силовой турбины в долях 380 м/с: окно [max(0,85; U_min/380); 1,00], U_min - при котором AN² и втулка "
+            "последней ступени СТ проходят при ca/U <= 0,8",
+    "phit": "ca/U на выходе осевой турбины газогенератора: окно [max(0,45; по втулке 0,40 и AN²); 0,80]; выше 0,5 - потеря с выходной "
+            "скоростью (половина прироста c²/2, оценка)",
+    "phipt": "ca/U на выходе силовой турбины: окно как у phit, по D и U силовой турбины на частоте пакета",
+    "eps_rec": "эффективность рекуператора: 0,75-0,92; рекуператор в корпусе - не выше ε, при которой корпус входит в габарит пакета",
     "pgain": "прирост полного давления в камере: RDC 0-0,10, волновой ротор 0-0,15 (оценка; модели обещают +3-5 % КПД у RDC - по выдержке поиска)",
-    "kD_case": "диаметр корпуса / наибольший D2: 1,7-2,1 (gtu_family - 1,9)",
+    "kD_case": "диаметр корпуса / наибольший D2: окно [1,7; min(2,1; по габариту пакета)] (gtu_family - 1,9)",
 }
+SAMPLER = ("v2 (14.11.2026): дискретные оси - по шаблону архетипа; комбинация, номинальный цикл которой не замыкает точку ни при каких "
+           "T41 и π (repair), заменяется ближайшей замыкающей по осям REPAIR_AXES с записью причины; непрерывные оси - внутри окон "
+           "допустимости (CONT), зависимые величины выводятся. Первая версия (v1: все оси независимо во всём диапазоне) дала 1,2 % "
+           "допустимых в KV-3 и 0 % в KV-6 (прогоны AWS 20261114T231900Z-b7cc и 20261114T232200Z-7ce3)")
+GOOD = dict(phi={"Ц": (0.055, 0.13), "Д": (0.08, 0.20)}, nu=(0.62, 0.78), psi=(1.2, 2.3), ns_t=(0.35, 0.85), phit=(0.45, 0.80))
+GOOD_BASIS = ("хорошие диапазоны для выборки (оценка): φ центробежной ступени 0,055-0,13 (оптимум КПД около 0,085-0,11, frame3 при 0,028-0,040 "
+              "теряет 1,2-3,2 п.); U/C0 радиальной турбины 0,62-0,78 вокруг оптимума 0,70 (gtu_explore.turb_radial); ψ осевой 1,2-2,3 "
+              "(eta_axial не растёт ниже 1,2, предел 2,5); быстроходность радиальной турбины 0,35-0,85 вокруг 0,60; правила check шире")
+M_W, M_T, M_GEO = 0.04, 10.0, 0.03     # запасы окон: удельная работа +4 %, температуры -10 K, геометрия 3 % (оценка; КПД итога ниже номинала)
+ETA_NOM = dict(comp=-0.015, ax=-0.012, rad=-0.02, pt=0.87)   # номинальные КПД окон: поправки к формулам ступеней (зазор, ns, U/C0) - оценка
+SPLIT_RANGE = {"2Ц": (0.35, 0.65), "ОЦ": (0.12, 0.60)}
+N_PI_GRID, N_T41_GRID, N_SPLIT_GRID = 10, 6, 21
+REPAIR_AXES = ("mat_tw", "mat_cw", "cool", "comp", "turb", "recup", "rotors")
 _DEF = dict(rotors=[1, 2], comp=["1Ц", "2Ц", "Д", "ОЦ"], n_ax=[1, 2], inlet=["одно", "двух"], turb=["Р", "О"], nt=[1, 2],
             npt=[1, 2], cool=["U", "N", "K"], recup=["нет", "печатный"], comb=["выносная", "кольцевая"], bear=["масло", "магнит"],
             cores=[1], rotor_join=["сварка", "сборный"], m_cw=["поковка", "литьё", "печать"], m_tw=["литьё", "печать"],
@@ -208,19 +231,18 @@ def stage_types(c):
     return {"1Ц": ["Ц"], "Д": ["Д"], "2Ц": ["Ц", "Ц"], "ОЦ": ["О"] * max(c.get("n_ax", 1), 1) + ["Ц"]}[c["comp"]]
 
 
-def concept(i, n, kv="KV-3", seed=SEED):
-    """концепция с индексом i выборки объёма n: значения всех осей (детерминированно по i, n, seed)"""
-    if not 0 <= i < n:
-        raise IndexError(i)
-    u = dict(zip(AXES, design_matrix(n, seed)[i]))
-    arch = _pick(u["arch"], ARCH_KEYS)
+def _discrete(u, arch, ov=None):
+    """дискретные оси по шаблону архетипа; ov - замены отдельных осей (repair), применяются, если значение допустимо"""
+    ov = ov or {}
     T = ARCH[arch]["allowed"]
 
     def cat(name, vals=None):
-        v = vals if vals is not None else T.get(name, _DEF[name])
+        v = list(vals if vals is not None else T.get(name, _DEF[name]))
+        if name in ov and ov[name] in v:
+            return ov[name]
         return _pick(u[name], v)
 
-    c = dict(idx=int(i), n=int(n), seed=int(seed), kv=kv, arch=arch)
+    c = dict(arch=arch)
     c["cores"] = cat("cores")
     c["rotors"] = 2 if c["cores"] > 1 else cat("rotors")
     c["comp"] = cat("comp")
@@ -240,10 +262,7 @@ def concept(i, n, kv="KV-3", seed=SEED):
     else:
         c["m_cw"] = cat("m_cw")
         c["mat_cw"] = cat("mat_cw", [m for m in T.get("mat_cw", _DEF["mat_cw"]) if m != "Ni"])
-    tw = [m for m in MAT_TW[c["m_tw"]] if not (m == "SC" and c["turb"] != "О") and not (m == "Si3N4" and c["turb"] != "Р")]
-    if "mat_tw" in T:
-        tw = [m for m in tw if m in T["mat_tw"]] or tw
-    c["mat_tw"] = cat("mat_tw", tw)
+    c["mat_tw"] = cat("mat_tw", _mat_tw_list(c, T))
     c["m_hot"] = "печать" if c["cool"] == "P" else cat("m_hot")
     hv = MAT_HOT[c["m_hot"]]
     if "mat_hot" in T:
@@ -256,32 +275,618 @@ def concept(i, n, kv="KV-3", seed=SEED):
     c["conn"] = cat("conn")
     c["cartridge"] = cat("cartridge")
     c["split_bl"] = cat("split_bl")
-    # непрерывные
-    st = stage_types(c)
-    c["mu1"] = _lerp(u["mu1"], *MU_RANGE[st[0]])
-    c["mu2"] = _lerp(u["mu2"], *MU_RANGE[st[-1]])
-    c["split"] = _lerp(u["split"], 0.35, 0.65)
-    lo, hi = PI_RANGE[(c["comp"], c["n_ax"])] if c["comp"] == "ОЦ" else PI_RANGE[c["comp"]]
-    c["pi_max_U"] = round(pi_max_by_speed(c), 4)
-    hi_eff = min(hi, c["pi_max_U"])
-    c["pi"] = _lerp(u["pi"], lo, hi_eff) if hi_eff > lo else lo
-    tl = MK.t41_limit(c["turb"], c["cool"], c["mat_tw"], c["m_tw"])[0]
-    c["t41"] = tl - (tl - T41_MIN) * float(u["t41"]) ** 2 if tl > T41_MIN else T41_MIN
-    c["phi1"] = _lerp(u["phi1"], 0.04, 0.12)
-    c["kcm"] = _lerp(u["kcm"], 0.20, 0.35)
-    c["zc"] = int(round(_lerp(u["zc"], 7, 15)))
-    c["kUt"] = _lerp(u["kUt"], 0.75, 1.00)
-    c["zt"] = int(round(_lerp(u["zt"], *((9, 17) if c["turb"] == "Р" else (30, 80)))))
-    c["zn"] = int(round(_lerp(u["zn"], *((12, 24) if c["turb"] == "Р" else (20, 60)))))
-    c["kUpt"] = _lerp(u["kUpt"], 0.85, 1.00) if c["rotors"] == 2 else 0.0
-    c["phit"] = _lerp(u["phit"], 0.45, 0.80)
-    c["eps_rec"] = _lerp(u["eps_rec"], 0.75, 0.92) if c["recup"] == "печатный" else 0.0
-    c["pgain"] = _lerp(u["pgain"], 0.0, {"RDC": 0.10, "ВР": 0.15}.get(c["comb"], 0.0))
-    c["kD_case"] = _lerp(u["kD_case"], 1.7, 2.1)
-    for k in CONT:
-        if isinstance(c[k], float):
+    return c
+
+
+def _mat_tw_list(c, T):
+    tw = [m for m in MAT_TW[c["m_tw"]] if not (m == "SC" and c["turb"] != "О") and not (m == "Si3N4" and c["turb"] != "Р")]
+    if "mat_tw" in T:
+        tw = [m for m in tw if m in T["mat_tw"]] or tw
+    return tw
+
+
+def _axis_vals(c, arch, axis):
+    T = ARCH[arch]["allowed"]
+    if axis == "mat_tw":
+        return _mat_tw_list(c, T)
+    if axis == "mat_cw":
+        return [c["mat_cw"]] if c["rotor_join"] in ("заодно", "сварка") else [m for m in T.get("mat_cw", _DEF["mat_cw"]) if m != "Ni"]
+    if axis == "rotors" and c["cores"] > 1:
+        return [2]
+    return list(T.get(axis, _DEF[axis]))
+
+
+SIG_KEYS = ("kv", "rotors", "cores", "comp", "n_ax", "inlet", "turb", "cool", "m_tw", "mat_tw", "recup", "comb", "rotor_join", "m_cw",
+            "mat_cw")
+
+
+def _sig(c):
+    return tuple((k, c[k]) for k in SIG_KEYS)
+
+
+def w_need(tgt):
+    """наименьшая удельная работа, при которой расход укладывается в мягкий допуск: P_вал / ((1 + α)·G0), Дж/кг"""
+    return tgt["P_shaft_kW"] * 1e3 / (tgt["G0"] * (1 + PP.SOFT["alpha"]))
+
+
+def egt_max(tgt):
+    return tgt["EGT0"] + PP.SOFT["dT"]
+
+
+def pi_range(c):
+    return PI_RANGE[(c["comp"], c["n_ax"])] if c["comp"] == "ОЦ" else PI_RANGE[c["comp"]]
+
+
+def _stage_mats(c):
+    return [c["mat_cw"] if not (c["mat_cw"] == "Al" and k > 0) else "Ti64" for k in range(len(stage_types(c)))]
+
+
+def _eta_turb_nom(c):
+    """номинальные политропные КПД турбин для окон: формулы ступеней при выбранной нагрузке lt и поправки ETA_NOM (оценка)"""
+    E = _E()
+    if c["turb"] == "О":
+        eg = E.eta_axial(c["lt"]) + ETA_NOM["ax"]
+    else:
+        eg = 0.86 * max(0.05, 1 - ((c["lt"] - 0.70) / 0.70) ** 2) + ETA_NOM["rad"]
+    return eg, ETA_NOM["pt"]
+
+
+def _nominal(c, tgt):
+    """номинальный цикл концепции (КПД ступеней по формулам + ETA_NOM): ступени компрессора, ядро, расход"""
+    pis, typ, mats, mus = stages_pi(c), stage_types(c), _stage_mats(c), stage_mus(c)
+    comp = _comp([(p, max(0.60, eta_comp(t, p, m, k, c["inlet"], mu) + ETA_NOM["comp"]))
+                  for k, (p, t, m, mu) in enumerate(zip(pis, typ, mats, mus))])
+    eg, ep = _eta_turb_nom(c)
+    r = _core(c, comp, eg, ep)
+    if "fail" in r:
+        return dict(ok=False, fail=r["fail"], comp=comp)
+    return dict(ok=True, comp=comp, r=r, G=tgt["P_shaft_kW"] * 1e3 / r["wnet"])
+
+
+def _margins(c, tgt, pi, t41):
+    """запасы номинального цикла при (π, T41): min из w/w_need - 1 - M_W, (t0+100-M_T-EGT)/100, рекуператор (700-M_T-T5)/100,
+    алюминиевое колесо (200-M_T-T2_1)/100; < 0 - вне окна"""
+    cc = dict(c, pi=pi, t41=t41)
+    nm = _nominal(cc, tgt)
+    if not nm["ok"]:
+        return -1.0, dict(fail=nm["fail"], w=0.0, EGT=None, T5=None)
+    r = nm["r"]
+    w, egt, t5 = r["wnet"], r["Tstack"] - 273.15, r["T5"] - 273.15
+    m = {"w": w / w_need(tgt) - 1.0 - M_W, "EGT": (egt_max(tgt) - M_T - egt) / 100.0}
+    if c["recup"] == "печатный":
+        m["T5"] = (T_REC_MAX - M_T - t5) / 100.0
+    if c["mat_cw"] == "Al":
+        m["T_al"] = (MK.MAT["Al"]["T_max"] - M_T - (nm["comp"][0]["T2"] - 273.15)) / 100.0
+    worst = min(m, key=m.get)
+    return m[worst], dict(w=w / 1e3, EGT=egt, T5=t5, worst=worst, G=nm["G"])
+
+
+def _run_edges(xs, ms):
+    """наибольший непрерывный отрезок xs с ms >= 0; края уточняются линейной интерполяцией запаса до нуля"""
+    best, cur = None, None
+    for k, m in enumerate(ms):
+        if m >= 0:
+            cur = (cur[0], k) if cur else (k, k)
+            if best is None or cur[1] - cur[0] > best[1] - best[0]:
+                best = cur
+        else:
+            cur = None
+    if best is None:
+        return None
+    i0, i1 = best
+
+    def edge(a, b):                                   # a - вне окна, b - в окне
+        ma, mb = ms[a], ms[b]
+        t = mb / (mb - ma) if mb - ma > 1e-12 else 0.0
+        return xs[b] + (xs[a] - xs[b]) * min(1.0, max(0.0, t)) * 0.999
+    lo = xs[i0] if i0 == 0 else edge(i0 - 1, i0)
+    hi = xs[i1] if i1 == len(xs) - 1 else edge(i1 + 1, i1)
+    return lo, hi
+
+
+def _pi_window(c, tgt, t41):
+    """окно π при T41: сетка по ln π в [lo, min(hi, pi_max_U)]; возврат (окно (a, b) или None, лучшая точка)"""
+    lo, hi = pi_range(c)
+    hi = min(hi, c["pi_max_U"])
+    if hi <= lo * 1.001:
+        m, d = _margins(c, tgt, lo, t41)
+        return ((lo, lo) if m >= 0 else None), dict(d, pi=lo, m=m)
+    xs = [math.log(lo) + (math.log(hi) - math.log(lo)) * k / (N_PI_GRID - 1) for k in range(N_PI_GRID)]
+    res = [_margins(c, tgt, math.exp(x), t41) for x in xs]
+    ms = [m for m, _ in res]
+    kb = max(range(len(ms)), key=lambda k: ms[k])
+    best = dict(res[kb][1], pi=math.exp(xs[kb]), m=ms[kb])
+    e = _run_edges(xs, ms)
+    return ((math.exp(e[0]), math.exp(e[1])) if e else None), best
+
+
+def _t41_pi_window(c, tgt, tl):
+    """окно T41: строки T41 от Tlim вниз (N_T41_GRID), в строке - окно π; края уточняются делением пополам (3 шага).
+    Возврат: (Ta, Tb) или None, лучшая точка (наибольший запас)"""
+    if tl <= T41_MIN:
+        w, best = _pi_window(c, tgt, tl)
+        return ((tl, tl) if w else None), dict(best, t41=tl)
+    Ts = [tl - (tl - T41_MIN) * k / (N_T41_GRID - 1) for k in range(N_T41_GRID)]
+    ok, best, seen = [], None, False
+    for T in Ts:
+        w, b = _pi_window(c, tgt, T)
+        b = dict(b, t41=T)
+        if best is None or b["m"] > best["m"]:
+            best = b
+        ok.append(w is not None)
+        if w is not None:
+            seen = True
+        elif seen:
+            break
+    if not any(ok):
+        return None, best
+    ks = [k for k, v in enumerate(ok) if v]
+    k_top, k_bot = ks[0], ks[-1]
+
+    def bis(a, b):                                    # a - вне окна, b - в окне
+        for _ in range(3):
+            mid = 0.5 * (a + b)
+            if _pi_window(c, tgt, mid)[0] is not None:
+                b = mid
+            else:
+                a = mid
+        return b
+    Tb = Ts[k_top] if k_top == 0 else bis(Ts[k_top - 1], Ts[k_top])
+    Ta = Ts[k_bot] if (k_bot == len(Ts) - 1 or k_bot + 1 >= len(ok)) else bis(Ts[k_bot + 1], Ts[k_bot])
+    return (Ta, Tb), best
+
+
+_CLOSURE = {}
+
+
+def closure(c):
+    """замыкает ли дискретная комбинация точку KV: есть ли T41 <= Tlim и π в диапазоне, при которых номинальный цикл с лучшими
+    в диапазонах непрерывными осями (μ - середина, ψ или U/C0 - середина GOOD, прирост давления - наибольший, ε = 0,92, деление -
+    лучшее) даёт w_need·(1+M_W) в мягком допуске по выхлопу (и 700 °C перед рекуператором). Кэш по сигнатуре _sig"""
+    key = _sig(c)
+    if key in _CLOSURE:
+        return _CLOSURE[key]
+    tgt = target(c["kv"])
+    cc = dict(c)
+    st = stage_types(cc)
+    cc["mu1"] = sum(MU_RANGE[st[0]]) / 2
+    cc["mu2"] = sum(MU_RANGE[st[-1]]) / 2
+    cc["lt"] = sum(GOOD["psi"] if cc["turb"] == "О" else GOOD["nu"]) / 2
+    cc["pgain"] = {"RDC": 0.10, "ВР": 0.15}.get(cc["comb"], 0.0)
+    cc["eps_rec"] = 0.92 if cc["recup"] == "печатный" else 0.0
+    cc["pi_max_U"], cc["split"] = pi_max_by_speed(cc, best_split=True)
+    tl = MK.t41_limit(cc["turb"], cc["cool"], cc["mat_tw"], cc["m_tw"])[0]
+    win, best = _t41_pi_window(cc, tgt, tl)
+    res = dict(ok=win is not None, t41_lim=round(tl, 1), w_need=round(w_need(tgt) * (1 + M_W) / 1e3, 1),
+               best=({k: (round(v, 3) if isinstance(v, float) else v) for k, v in best.items()} if best else None))
+    if not res["ok"]:
+        b = best or {}
+        why = {"w": "мала удельная работа", "EGT": "горячий выхлоп", "T5": "газ перед рекуператором выше 700 °C",
+               "T_al": "алюминиевое колесо выше 200 °C"}.get(b.get("worst"), b.get("fail", "цикл не решается"))
+        res["reason"] = (f"{why}: лучшая точка T41 {b.get('t41', tl):.0f} °C, π {b.get('pi', 0):.2f} - w {b.get('w', 0):.0f} кДж/кг "
+                         f"(нужно {res['w_need']:.0f}), выхлоп {b.get('EGT') or 0:.0f} °C (предел {egt_max(tgt) - M_T:.0f})"
+                         + (f", газ перед рекуператором {b.get('T5') or 0:.0f} °C" if c["recup"] == "печатный" else ""))
+    _CLOSURE[key] = res
+    return res
+
+
+def _repair(u, arch, c0):
+    """если комбинация не замыкает точку - ближайшая замыкающая: меньше изменённых осей, затем раньше по REPAIR_AXES, затем
+    ближе по индексу значения; оси вне шаблона архетипа не трогаются. Возврат: (концепция, запись)"""
+    cl = closure(c0)
+    if cl["ok"]:
+        return c0, ""
+    lists = {a: _axis_vals(c0, arch, a) for a in REPAIR_AXES}
+    cands = []
+    for combo in itertools.product(*[lists[a] for a in REPAIR_AXES]):
+        ch = {a: v for a, v in zip(REPAIR_AXES, combo) if v != c0[a]}
+        if not ch:
+            continue
+        dist = sum(min((lists[a].index(v) - lists[a].index(c0[a])) % len(lists[a]),
+                       (lists[a].index(c0[a]) - lists[a].index(v)) % len(lists[a])) if c0[a] in lists[a] else 1 for a, v in ch.items())
+        cands.append(((len(ch), max(REPAIR_AXES.index(a) for a in ch), dist, tuple(sorted(ch.items()))), ch))
+    cands.sort(key=lambda x: x[0])
+    for _, ov in cands:
+        c = _discrete(u, arch, ov)
+        c["kv"] = c0["kv"]
+        if any(c[a] != v for a, v in ov.items()):
+            continue
+        if closure(c)["ok"]:
+            diff = [f"{a}: {c0[a]} -> {c[a]}" for a in CAT if a != "arch" and c[a] != c0[a]]
+            return c, "; ".join(diff) + f" (исходная не замыкает точку - {cl['reason']})"
+    return c0, f"нет замыкающей комбинации в шаблоне архетипа - {cl['reason']}"
+
+
+def _interval(bounds):
+    lo = max([b[0] for b in bounds] or [-math.inf]); hi = min([b[1] for b in bounds] or [math.inf])
+    return (lo, hi) if lo <= hi else None
+
+
+def _place(u, win, log=False):
+    a, b = win
+    if log and a > 0:
+        return math.exp(math.log(a) + (math.log(b) - math.log(a)) * float(u))
+    return a + (b - a) * float(u)
+
+
+def concept(i, n, kv="KV-3", seed=SEED):
+    """концепция с индексом i выборки объёма n: значения всех осей (детерминированно по i, kv, seed; от n не зависит)"""
+    if not 0 <= i < n:
+        raise IndexError(i)
+    u = dict(zip(AXES, design_matrix(n, seed)[i]))
+    arch = _pick(u["arch"], ARCH_KEYS)
+    c0 = _discrete(u, arch)
+    c0["kv"] = kv
+    c, rep = _repair(u, arch, c0)
+    c.update(idx=int(i), n=int(n), seed=int(seed), kv=kv)
+    c = {k: c[k] for k in ["idx", "n", "seed", "kv", "arch"] + [a for a in CAT if a != "arch"]}
+    c["repair"] = rep
+    design(c, u, target(kv))
+    for k in list(CONT) + ["pi_max_U", "w_need", "pi_lo", "pi_hi", "t41_lo", "t41_hi", "n_gg"]:
+        if isinstance(c.get(k), float):
             c[k] = round(c[k], 6)
     return c
+
+
+def design(c, u, tgt):
+    """непрерывные оси в окнах допустимости по номинальному циклу (выборка v2); dflags - условия, окно которых пусто
+    (концепция тогда почти наверняка не пройдёт соответствующее правило check - это и есть причина отсева)"""
+    E = _E()
+    fl = []
+    st = stage_types(c)
+    fixed = c["rotors"] == 1
+    c["mu1"] = _lerp(u["mu1"], *MU_RANGE[st[0]])
+    c["mu2"] = _lerp(u["mu2"], *MU_RANGE[st[-1]])
+    c["lt"] = _lerp(u["lt"], *(GOOD["psi"] if c["turb"] == "О" else GOOD["nu"]))
+    c["eps_rec"] = _lerp(u["eps_rec"], 0.75, 0.92) if c["recup"] == "печатный" else 0.0
+    c["pgain"] = _lerp(u["pgain"], 0.0, {"RDC": 0.10, "ВР": 0.15}.get(c["comb"], 0.0))
+    c["kcm"] = _lerp(u["kcm"], 0.20, 0.35)
+    c["zc"] = int(round(_lerp(u["zc"], 7, 15)))
+    c["zt"] = int(round(_lerp(u["zt"], *((9, 17) if c["turb"] == "Р" else (30, 80)))))
+    c["zn"] = int(round(_lerp(u["zn"], *((12, 24) if c["turb"] == "Р" else (20, 60)))))
+    c["pi_max_U"], c["split"] = pi_max_by_speed(c, best_split=True)
+    c["w_need"] = w_need(tgt) / 1e3
+    # ---------------------------------------------------------------- T41 и π
+    tl = MK.t41_limit(c["turb"], c["cool"], c["mat_tw"], c["m_tw"])[0]
+    tw, best = _t41_pi_window(c, tgt, tl)
+    pw = None
+    if tw:
+        c["t41"] = _place(u["t41"], tw)
+        pw, _ = _pi_window(c, tgt, c["t41"])
+        if pw is None:                                    # край окна T41 уточнён с погрешностью - ближе к середине
+            c["t41"] = 0.5 * (tw[0] + tw[1])
+            pw, _ = _pi_window(c, tgt, c["t41"])
+    if pw is None:
+        fl.append("T41/π: окно пусто" + (f" ({best.get('worst', best.get('fail', ''))})" if best else ""))
+        c["t41"] = best["t41"] if best else max(tl, T41_MIN)
+        c["pi"] = best["pi"] if best else pi_range(c)[0]
+        c["t41_lo"] = c["t41_hi"] = c["t41"]; c["pi_lo"] = c["pi_hi"] = c["pi"]
+    else:
+        c["t41_lo"], c["t41_hi"] = (tw[0], tw[1]) if tw else (c["t41"], c["t41"])
+        c["pi_lo"], c["pi_hi"] = pw
+        c["pi"] = _place(u["pi"], pw, log=True)
+    # ---------------------------------------------------------------- вход, деление π, коэффициенты работы
+    nm0 = _nominal(c, tgt)
+    G0n = nm0["G"] if nm0["ok"] else tgt["G0"] * 1.2
+    inlets = _axis_vals(c, c["arch"], "inlet")
+    order = inlets[inlets.index(c["inlet"]):] + inlets[:inlets.index(c["inlet"])]
+    chosen = None
+    for inl in order:
+        cc = dict(c, inlet=inl)
+        sw = _split_window(cc, tgt, G0n, fixed)
+        if sw is not None:
+            chosen = (inl, sw)
+            break
+    if chosen is None:
+        fl.append("ступени компрессора: нет деления π и μ в пределах окружной скорости и коэффициента расхода")
+        sw = SPLIT_RANGE.get(c["comp"], (c["split"], c["split"]))
+    else:
+        if chosen[0] != c["inlet"]:
+            c["repair"] = (c["repair"] + "; " if c["repair"] else "") + f"inlet: {c['inlet']} -> {chosen[0]} (коэффициент расхода)"
+        c["inlet"], sw = chosen
+    if c["comp"] in SPLIT_RANGE:
+        c["split"] = _place(u["split"], sw)
+    nm = _nominal(c, tgt)
+    Gn = nm["G"] if nm["ok"] else G0n
+    mw = _mu_windows(c, tgt, nm["comp"], Gn, fixed)
+    if mw[0] is None:
+        fl.append("μ1: окно пусто")
+    else:
+        c["mu1"] = _place(u["mu1"], mw[0])
+    if len(st) > 1:
+        if mw[1] is None:
+            fl.append("μ2: окно пусто")
+        else:
+            c["mu2"] = _place(u["mu2"], mw[1])
+    nm = _nominal(c, tgt)
+    if not nm["ok"]:
+        fl.append(f"номинальный цикл: {nm['fail']}")
+        _fill_defaults(c, u)
+        c["dflags"] = "|".join(fl)
+        return c
+    r, G = nm["r"], nm["G"]
+    Gc = G / c["cores"]
+    stn = _stages_nom(c, nm["comp"], Gc)
+    # ---------------------------------------------------------------- турбина газогенератора: число ступеней и нагрузка
+    t = r["t"]
+    rho5 = t["p_out"] / (E.Rg(t["b"]) * t["T_out"]); Q5 = t["m"] * Gc / rho5
+    n_fix = tgt["n_pkg"] if fixed else None
+    U_lim = MK.u_limit_turb(c["turb"], c["mat_tw"], c["t41"])[0]
+    U_max = min(U_lim, u_cap_size(c, d_cap_turb(c)) * (1 - M_GEO))
+    nts = _axis_vals(c, c["arch"], "nt")
+    cand = []
+    for nt in nts:
+        if c["turb"] == "О":
+            psi_min = t["w"] / (nt * U_max ** 2)
+            good = psi_min <= GOOD["psi"][1]; rule = psi_min <= PSI_MAX
+        else:
+            dhs = _stage_dhs(t, nt); C0 = math.sqrt(2 * dhs)
+            nu_max = U_max / C0
+            good = nu_max >= GOOD["nu"][0]; rule = nu_max >= NU_RANGE[0]
+            if fixed:
+                ns = (2 * math.pi * n_fix / 60) * math.sqrt(Q5) / dhs ** 0.75
+                good = good and GOOD["ns_t"][0] <= ns <= GOOD["ns_t"][1]
+                rule = rule and NS_RANGE[0] <= ns <= NS_RANGE[1]
+        cand.append((nt, good, rule))
+    k0 = nts.index(c["nt"])
+    rot = cand[k0:] + cand[:k0]
+    pick = next((x for x in rot if x[1]), None) or next((x for x in rot if x[2]), None)
+    if pick is None:
+        fl.append("турбина: нет числа ступеней с допустимой нагрузкой (ψ, U/C0, быстроходность)")
+    elif pick[0] != c["nt"]:
+        c["repair"] = (c["repair"] + "; " if c["repair"] else "") + f"nt: {c['nt']} -> {pick[0]} (нагрузка турбины)"
+        c["nt"] = pick[0]
+    if c["turb"] == "О":
+        psi_min = t["w"] / (c["nt"] * U_max ** 2) * (1 + M_GEO)
+        win = _interval([GOOD["psi"], (psi_min, math.inf)]) or (min(psi_min, PSI_MAX), PSI_MAX)
+        c["lt"] = _place(u["lt"], win)
+        Ut = math.sqrt(t["w"] / (c["nt"] * c["lt"]))
+    else:
+        C0 = math.sqrt(2 * _stage_dhs(t, c["nt"]))
+        win = _interval([GOOD["nu"], (-math.inf, U_max / C0)]) or (NU_RANGE[0], max(NU_RANGE[0], U_max / C0))
+        c["lt"] = _place(u["lt"], win)
+        Ut = c["lt"] * C0
+    Ut = min(Ut, U_max)
+    # ---------------------------------------------------------------- частота газогенератора (двухвальная) или пакета
+    if fixed:
+        n = tgt["n_pkg"]
+        c["n_gg"] = n
+        c["phi1"] = 0.0
+    else:
+        inl0 = c["inlet"]
+        nwin, how = None, None
+        for inl in order:
+            stn_i = _stages_nom(dict(c, inlet=inl), nm["comp"], Gc)
+            nwin, how = _n_window(c, stn_i, Ut, Q5, t)
+            if how != "нет":
+                if inl != c["inlet"]:
+                    c["repair"] = (c["repair"] + "; " if c["repair"] else "") + f"inlet: {c['inlet']} -> {inl} (частота газогенератора)"
+                    c["inlet"] = inl
+                stn = stn_i
+                break
+        if how == "нет":
+            c["inlet"] = inl0
+            stn = _stages_nom(c, nm["comp"], Gc)
+            nwin, _ = _n_window(c, stn, Ut, Q5, t)
+            fl.append("частота газогенератора: окно пусто (размеры, коэффициенты расхода, турбина) - взята наименее нарушающая")
+        elif how == "правило":
+            fl.append("частота газогенератора: только в пределах правил, не в GOOD")
+        n = _place(u["phi1"], nwin, log=True)
+        k = next(k for k, s in enumerate(stn) if s["type"] != "О")
+        s = stn[k]
+        c["phi1"] = s["Gs"] * (math.pi * n / 60) ** 2 / (s["rho1"] * s["U"] ** 3)
+        c["n_gg"] = n
+    # ---------------------------------------------------------------- выход осевой турбины: ca/U по втулке и AN²
+    if c["turb"] == "О":
+        D = 60 * Ut / (math.pi * n)
+        lo = max(GOOD["phit"][0], Q5 / (math.pi * D ** 2 * Ut * HTR_H * (1 - M_GEO)), n ** 2 * Q5 / (Ut * AN2_MAX * (1 - M_GEO)))
+        if lo > GOOD["phit"][1]:
+            fl.append("турбина: втулка или AN² не проходят и при ca/U = 0,8")
+            c["phit"] = GOOD["phit"][1]
+        else:
+            c["phit"] = _place(u["phit"], (lo, GOOD["phit"][1]))
+    else:
+        c["phit"] = _lerp(u["phit"], *GOOD["phit"])
+    # ---------------------------------------------------------------- силовая турбина
+    if c["rotors"] == 2:
+        p = r["pt"]
+        rho = p["p_out"] / (E.Rg(p["b"]) * p["T_out"]); Qp = p["m"] * G / rho
+        npk = tgt["n_pkg"]
+        U_an = npk ** 2 * Qp / (GOOD["phit"][1] * AN2_MAX * (1 - M_GEO))
+        U_ht = (Qp * (math.pi * npk / 60) ** 2 / (math.pi * GOOD["phit"][1] * HTR_H * (1 - M_GEO))) ** (1 / 3)
+        klo = max(0.85, U_an / U_PT_MAX, U_ht / U_PT_MAX)
+        if klo > 1.0:
+            fl.append("силовая турбина: AN² или втулка не проходят и при 380 м/с и ca/U = 0,8")
+            c["kUpt"] = 1.0
+        else:
+            c["kUpt"] = _place(u["kUpt"], (klo, 1.0))
+        Upt = c["kUpt"] * U_PT_MAX
+        npts = _axis_vals(c, c["arch"], "npt")
+        ok_n = [m for m in npts if p["w"] / (m * Upt ** 2) <= GOOD["psi"][1]] or [m for m in npts if p["w"] / (m * Upt ** 2) <= PSI_MAX]
+        if not ok_n:
+            fl.append("силовая турбина: нагрузка ψ > 2,5 при любом числе ступеней")
+        elif c["npt"] not in ok_n:
+            new = ok_n[0] if ok_n[0] > c["npt"] else ok_n[-1]
+            c["repair"] = (c["repair"] + "; " if c["repair"] else "") + f"npt: {c['npt']} -> {new} (нагрузка СТ)"
+            c["npt"] = new
+        Dp = 60 * Upt / (math.pi * npk)
+        lo = max(GOOD["phit"][0], Qp / (math.pi * Dp ** 2 * Upt * HTR_H * (1 - M_GEO)), npk ** 2 * Qp / (Upt * AN2_MAX * (1 - M_GEO)))
+        c["phipt"] = GOOD["phit"][1] if lo > GOOD["phit"][1] else _place(u["phipt"], (lo, GOOD["phit"][1]))
+    else:
+        c["kUpt"], c["phipt"] = 0.0, 0.0
+    # ---------------------------------------------------------------- габарит: корпус и рекуператор в корпусе
+    Dc = max(60 * s["U"] / (math.pi * n) for s in stn)
+    side = min(tgt["pkg_W"], tgt["pkg_H"])
+    f = 1.0 if c["cores"] == 1 else math.sqrt(c["cores"]) * 1.1
+    kmax = (side - 0.5) / (Dc * f)
+    if kmax < 1.7:
+        fl.append(f"габарит: корпус шире пакета и при D_корп/D2 = 1,7 (нужно {kmax:.2f})")
+        c["kD_case"] = 1.7
+    else:
+        c["kD_case"] = _place(u["kD_case"], (1.7, min(2.1, kmax)))
+    if c["recup"] == "печатный" and c["recup_integral"]:
+        Denv = c["kD_case"] * Dc * f + 0.5
+        Vmax = max(0.0, (side ** 2 - Denv ** 2) * math.pi * Denv / 4)
+        A = Vmax * REC_BETA / REC_HDR
+        ntu = A * REC_K / (G * 1100.0)
+        emax = ntu / (1 + ntu)
+        if emax < 0.75:
+            fl.append(f"рекуператор в корпусе: в габарит входит ε не выше {emax:.2f}")
+            c["eps_rec"] = 0.75
+        else:
+            c["eps_rec"] = _place(u["eps_rec"], (0.75, min(0.92, emax)))
+    c["dflags"] = "|".join(fl)
+    return c
+
+
+def _fill_defaults(c, u):
+    c.setdefault("phi1", 0.0); c.setdefault("n_gg", None)
+    c["phit"] = _lerp(u["phit"], *GOOD["phit"])
+    c["kUpt"] = _lerp(u["kUpt"], 0.85, 1.0) if c["rotors"] == 2 else 0.0
+    c["phipt"] = _lerp(u["phipt"], *GOOD["phit"]) if c["rotors"] == 2 else 0.0
+    c["kD_case"] = _lerp(u["kD_case"], 1.7, 2.1)
+
+
+def _stage_dhs(t, nt):
+    """изоэнтропический перепад одной ступени турбины при делении степени расширения поровну (от входа), Дж/кг"""
+    E = _E()
+    ERs = t["ER"] ** (1.0 / nt)
+    return E.h(t["T_in"], t["b"]) - E.h(E.T_s(E.s0(t["T_in"], t["b"]) - E.Rg(t["b"]) * math.log(ERs), t["b"]), t["b"])
+
+
+def _stages_nom(c, comp, Gc):
+    E = _E()
+    out = []
+    for k, (s, t, m, mu) in enumerate(zip(comp, stage_types(c), _stage_mats(c), stage_mus(c))):
+        Gs = Gc / 2 if (k == 0 and c["inlet"] == "двух") else Gc
+        out.append(dict(type=t, mat=m, mu=mu, Gs=Gs, rho1=s["p1"] / (E.RA * s["T1"]), w=s["w"], pi=s["pi"], T2=s["T2"] - 273.15,
+                        U=math.sqrt(s["w"] / mu)))
+    return out
+
+
+def _stage_mu_win(s, c, n_fixed):
+    """окно μ ступени: предел окружной скорости материала (и размера при частоте пакета); при частоте пакета - коэффициент
+    расхода в GOOD (центробежная, диагональная) или втулка >= HTR_MIN_AX (осевая)"""
+    lo, hi = MU_RANGE[s["type"]]
+    Umax = MK.u_limit_comp(s["mat"], c["m_cw"])[0]
+    if n_fixed:
+        Umax = min(Umax, u_cap_size(c, d_cap_comp(c)))
+    lo = max(lo, s["w"] / (Umax * (1 - M_GEO)) ** 2)
+    if n_fixed:
+        a = (math.pi * n_fixed / 60) ** 2
+        if s["type"] == "О":
+            Umin = (s["Gs"] / (0.5 * s["rho1"] * (1 - (HTR_MIN_AX * (1 + M_GEO)) ** 2) * math.pi / 4 / a)) ** (1 / 3)
+            hi = min(hi, s["w"] / Umin ** 2)
+        else:
+            plo, phi_ = GOOD["phi"][s["type"]]
+            K = s["Gs"] * a / s["rho1"]
+            lo = max(lo, s["w"] / ((K / plo) ** (1 / 3)) ** 2)
+            hi = min(hi, s["w"] / ((K / phi_) ** (1 / 3)) ** 2)
+    return (lo, hi) if lo <= hi else None
+
+
+def _stage_ok(s, c, n_fixed):
+    if s["type"] == "О" and s["pi"] > AX_PI_MAX * (1 - 0.01):
+        return None
+    if s["type"] == "Д" and s["pi"] > D_PI_MAX * (1 - 0.01):
+        return None
+    if s["mat"] == "Al" and s["T2"] > MK.MAT["Al"]["T_max"] - 2:
+        return None
+    return _stage_mu_win(s, c, n_fixed)
+
+
+def _split_window(c, tgt, G, fixed):
+    """окно деления π: каждая ступень - в пределе окружной скорости при каком-нибудь μ из диапазона, осевая π <= 1,8, (вал с
+    частотой пакета) коэффициент расхода в GOOD"""
+    n_fixed = tgt["n_pkg"] if fixed else None
+    Gc = G / c["cores"]
+    if c["comp"] not in SPLIT_RANGE:
+        nm = _nominal(c, tgt)
+        stn = _stages_nom(c, nm["comp"], Gc)
+        return (c["split"], c["split"]) if all(_stage_ok(s, c, n_fixed) for s in stn) else None
+    a, b = SPLIT_RANGE[c["comp"]]
+    xs = [a + (b - a) * k / (N_SPLIT_GRID - 1) for k in range(N_SPLIT_GRID)]
+    ms = []
+    for x in xs:
+        cc = dict(c, split=x)
+        pis, typ, mats, mus = stages_pi(cc), stage_types(cc), _stage_mats(cc), stage_mus(cc)
+        comp = _comp([(p, max(0.60, eta_comp(t, p, m, k, cc["inlet"], mu) + ETA_NOM["comp"]))
+                      for k, (p, t, m, mu) in enumerate(zip(pis, typ, mats, mus))])
+        stn = _stages_nom(cc, comp, Gc)
+        ms.append(1.0 if all(_stage_ok(s, cc, n_fixed) for s in stn) else -1.0)
+    return _run_strict(xs, ms)
+
+
+def _run_strict(xs, ms):
+    best, cur = None, None
+    for k, m in enumerate(ms):
+        if m > 0:
+            cur = (cur[0], k) if cur else (k, k)
+            if best is None or cur[1] - cur[0] > best[1] - best[0]:
+                best = cur
+        else:
+            cur = None
+    return (xs[best[0]], xs[best[1]]) if best else None
+
+
+def _mu_windows(c, tgt, comp, G, fixed):
+    """окна μ1 (первая, у ОЦ - все осевые) и μ2 (последняя ступень)"""
+    n_fixed = tgt["n_pkg"] if fixed else None
+    stn = _stages_nom(c, comp, G / c["cores"])
+    wins = [_stage_ok(s, c, n_fixed) for s in stn]
+    if c["comp"] == "ОЦ":
+        na = c["n_ax"]
+        w1 = _interval([w for w in wins[:na]]) if all(wins[:na]) else None
+        return w1, wins[-1]
+    return wins[0], (wins[-1] if len(wins) > 1 else None)
+
+
+def _n_window(c, stn, Ut, Q5, t):
+    """окно частоты газогенератора, об/мин: границы «хорошие» (GOOD) и «по правилам»; возврат (окно, "хорошее"|"правило"|"нет")"""
+    good, rule = [], []
+
+    def add(lo, hi, both=True, g=True):
+        if both or g:
+            good.append((lo, hi))
+        if both:
+            rule.append((lo, hi))
+    Dcap = d_cap_comp(c) * (1 - M_GEO)
+    for k, s in enumerate(stn):
+        add(60 * s["U"] / (math.pi * Dcap), math.inf)
+        if s["type"] == "О":
+            nmax = (60 * s["U"] / math.pi) * math.sqrt(0.5 * s["rho1"] * s["U"] * (1 - (HTR_MIN_AX * (1 + M_GEO)) ** 2) * math.pi / 4 / s["Gs"])
+            add(0.0, nmax)
+        else:
+            f = lambda phi: (60 / math.pi) * math.sqrt(phi * s["rho1"] * s["U"] ** 3 / s["Gs"])
+            good.append((f(GOOD["phi"][s["type"]][0]), f(GOOD["phi"][s["type"]][1])))
+            rule.append((f(PHI_RANGE[s["type"]][0]), f(PHI_RANGE[s["type"]][1])))
+    Dt = d_cap_turb(c)
+    if Dt is not None:
+        add(60 * Ut / (math.pi * Dt * (1 - M_GEO)), math.inf)
+    if c["turb"] == "Р":
+        dhs = _stage_dhs(t, c["nt"])
+        f = lambda ns: ns * 60 / (2 * math.pi) * dhs ** 0.75 / math.sqrt(Q5)
+        good.append((f(GOOD["ns_t"][0]), f(GOOD["ns_t"][1])))
+        rule.append((f(NS_RANGE[0]), f(NS_RANGE[1])))
+    else:
+        add(0.0, math.sqrt(AN2_MAX * (1 - M_GEO) * GOOD["phit"][1] * Ut / Q5))
+        add(0.0, (60 * Ut / math.pi) / math.sqrt(Q5 / (math.pi * GOOD["phit"][1] * Ut * HTR_H * (1 - M_GEO))))
+    w = _interval(good)
+    if w:
+        return w, "хорошее"
+    w = _interval(rule)
+    if w:
+        return w, "правило"
+    lo = min(b[0] for b in rule if b[0] > 0); hi = max(b[1] for b in rule if math.isfinite(b[1]))
+    xs = [math.log(lo) + (math.log(hi) - math.log(lo)) * k / 40 for k in range(41)] if hi > lo else [math.log(lo)]
+
+    def viol(x):
+        v = 0.0
+        for a, b in rule:
+            v += max(0.0, math.log(max(a, 1e-9)) - x) + (max(0.0, x - math.log(b)) if math.isfinite(b) else 0.0)
+        return v
+    x = min(xs, key=viol)
+    return (math.exp(x), math.exp(x)), "нет"
 
 
 # =========================================================================== быстрая оценка цикла (уровень 0)
@@ -317,17 +922,24 @@ def d_cap_comp(c):
     return (MK.FORGE if m == "поковка" else MK.CAST)[kind]["max"]
 
 
+DTIP_AX = 1.15        # Dtip / D осевой турбины для предела размера до расчёта высоты лопатки (оценка; frame3 - 1,2 на последней ступени)
+
+
 def d_cap_turb(c):
-    """наибольший диаметр колеса турбины (радиальная - периферия; осевая - средний по ротору заодно), м"""
+    """наибольший диаметр колеса турбины (радиальная - периферия; осевая - средний диаметр), м; None - без предела
+    (сборный ротор: диск с лопатками)"""
     m, j = c["m_tw"], c["rotor_join"]
     if m == "печать":
         return MK.largest_print_dim()
     if m == "керамика":
         return MK.CERAMIC["turb_radial"]["max"]
+    ax = 1.0 / DTIP_AX if c["turb"] == "О" else 1.0          # осевая: средний диаметр при Dtip ≈ DTIP_AX·D (оценка)
     if j == "заодно":
-        return MK.CAST["rotor_mono"]["max"]
+        return MK.CAST["rotor_mono"]["max"] * ax
     if c["turb"] == "Р":
         return MK.CAST["turb_radial"]["max"] if j == "сборный" else MK.CAST["rotor_section"]["max"]
+    if j == "сварка":                                          # сварной ротор требует цельнолитых осевых колёс (правило mono_blisk)
+        return MK.CAST["turb_axial_blisk"]["max"] * ax
     return None
 
 
@@ -338,10 +950,9 @@ def u_cap_size(c, D):
     return math.pi * target(c["kv"])["n_pkg"] * D / 60.0
 
 
-def pi_max_by_speed(c):
-    """наибольшая общая π, при которой каждая ступень укладывается в предел окружной скорости своего материала при
-    выбранных коэффициентах работы mu1/mu2 и распределении split (с запасом U_MARGIN, ETA_MARGIN). Нужна, чтобы
-    выборка не тратилась на заведомо превышенную окружную скорость; правило U_comp всё равно проверяется."""
+def stage_pmax(c):
+    """наибольшая π каждой ступени в пределе окружной скорости материала (и размера при частоте пакета) при её μ,
+    с запасом U_MARGIN и ETA_MARGIN; осевая - не выше AX_PI_MAX, диагональная - D_PI_MAX"""
     E = _E()
     typ = stage_types(c)
     mus = stage_mus(c)
@@ -359,13 +970,28 @@ def pi_max_by_speed(c):
         if t == "Д":
             pis = min(pis, D_PI_MAX)
         pmax.append(pis); T = T2
-    s = c["split"]
+    return pmax
+
+
+def pi_max_by_speed(c, best_split=False):
+    """наибольшая общая π, при которой каждая ступень укладывается в предел окружной скорости своего материала при
+    выбранных μ и делении split (best_split - при лучшем делении внутри SPLIT_RANGE; тогда возврат (π, split)).
+    Нужна, чтобы выборка не тратилась на заведомо превышенную окружную скорость; правило U_comp всё равно проверяется."""
+    pmax = stage_pmax(c)
     if c["comp"] in ("1Ц", "Д"):
-        return pmax[0]
+        return (pmax[0], c.get("split", 0.5)) if best_split else pmax[0]
     if c["comp"] == "2Ц":
-        return min(pmax[0] ** (1 / s), pmax[1] ** (1 / (1 - s)))
-    na = c["n_ax"]
-    return min(min(pmax[:na]) ** (na / s), pmax[-1] ** (1 / (1 - s)))
+        la, lb = math.log(pmax[0]), math.log(pmax[1])
+    else:
+        na = c["n_ax"]
+        la, lb = na * math.log(min(pmax[:na])), math.log(pmax[-1])
+    if best_split:
+        lo, hi = SPLIT_RANGE[c["comp"]]
+        s = min(hi, max(lo, la / (la + lb)))
+    else:
+        s = c["split"]
+    p = math.exp(min(la / s, lb / (1 - s)))
+    return (p, s) if best_split else p
 
 
 def stage_mus(c):
@@ -486,20 +1112,39 @@ def _core(c, comp_out, eta_gg, eta_pt):
                 T5=Tex, Tstack=(Tex - (T3 - T2) * 0.93) if rec else Tex, t=t, pt=pt, xn=xn, xr=xr, xl=xl)
 
 
-def turb_speed(c):
-    """окружная скорость турбины: kUt x меньшее из предела материала и предела размера при частоте пакета"""
+def turb_umax(c):
+    """наибольшая окружная скорость турбины газогенератора: предел сплава при T41 и (вал с частотой пакета) предел размера"""
     U, ub = MK.u_limit_turb(c["turb"], c["mat_tw"], c["t41"])
     cap = u_cap_size(c, d_cap_turb(c)) * 0.99
-    return c["kUt"] * min(U, cap), U, ub
+    return min(U, cap), U, ub
+
+
+def turb_speed(c, t):
+    """окружная скорость турбины газогенератора из нагрузки lt (выборка v2): осевая U = √(w/(nt·ψ)), радиальная U = (U/C0)·C0
+    ступени; не выше turb_umax. t - турбина из _core. Возврат: U, предел сплава, основание"""
+    Umax, U_lim, ub = turb_umax(c)
+    if c["turb"] == "О":
+        U = math.sqrt(max(t["w"], 1.0) / (c["nt"] * c["lt"]))
+    else:
+        U = c["lt"] * math.sqrt(2 * max(_stage_dhs(t, c["nt"]), 1.0))
+    return min(U, Umax), U_lim, ub
 
 
 def _radial_stage(t, nt, U):
-    """радиальная турбина: КПД по U/C0 (turb_radial gtu_explore: 0,86 при 0,70); степень расширения делится поровну"""
+    """радиальная турбина: изоэнтропический КПД по U/C0 (gtu_explore.turb_radial: w = η·Δh_s, 0,86 при 0,70), степень
+    расширения делится поровну; _core расширяет газ политропно, поэтому возвращается политропный эквивалент той же
+    изоэнтропической величины на ступени (исправление скептика физики P1). Возврат: η_p, U/C0, Δh_s ступени, η_is"""
     E = _E()
     ERs = t["ER"] ** (1.0 / nt)
-    dhs = E.h(t["T_in"], t["b"]) - E.h(E.T_s(E.s0(t["T_in"], t["b"]) - E.Rg(t["b"]) * math.log(ERs), t["b"]), t["b"])
+    Tin, b = t["T_in"], t["b"]
+    dhs = E.h(Tin, b) - E.h(E.T_s(E.s0(Tin, b) - E.Rg(b) * math.log(ERs), b), b)
     C0 = math.sqrt(2 * max(dhs, 1.0)); nu = U / C0
-    return 0.86 * max(0.05, 1 - ((nu - 0.70) / 0.70) ** 2), nu, dhs
+    eta_is = 0.86 * max(0.05, 1 - ((nu - 0.70) / 0.70) ** 2)
+    if ERs <= 1.0001:
+        return eta_is, nu, dhs, eta_is
+    T2 = E.T_h(E.h(Tin, b) - eta_is * dhs, b)
+    eta_p = (E.s0(Tin, b) - E.s0(T2, b)) / (E.Rg(b) * math.log(ERs))
+    return eta_p, nu, dhs, eta_is
 
 
 LEAVE_K = 0.5      # не восстановленная диффузором доля прироста выходной кинетической энергии (оценка)
@@ -510,33 +1155,39 @@ def leaving_loss(phit, U, dhs):
     return LEAVE_K * max(0.0, (phit * U) ** 2 - (CX_T * U) ** 2) / 2.0 / max(dhs, 1.0)
 
 
-def quick_perf(c, tgt, d_eta=None):
-    """быстрый цикл концепции: КПД турбин - по нагрузке ступеней при окружной скорости концепции (итерации).
-    d_eta - поправки КПД ступеней компрессора от геометрии (коэффициент расхода, зазор), из derive."""
+def quick_perf(c, tgt, d_eta=None, d_eta_t=0.0, iters=8):
+    """быстрый цикл концепции: КПД турбин - по нагрузке ступеней при окружной скорости концепции (итерации; окружная скорость
+    турбины газогенератора выводится из нагрузки lt). d_eta - поправки КПД ступеней компрессора от геометрии (из derive или
+    funnel_l0.corrections), d_eta_t - поправка КПД радиальной турбины по быстроходности (funnel_l0)"""
     E = _E()
     pis = stages_pi(c); typ = stage_types(c)
     d_eta = d_eta or [0.0] * len(pis)
-    mats = [c["mat_cw"] if not (c["mat_cw"] == "Al" and k > 0) else "Ti64" for k in range(len(pis))]
+    mats = _stage_mats(c)
     mus = stage_mus(c)
     comp = _comp([(p, max(0.60, eta_comp(t, p, m, k, c["inlet"], mu) + de))
                   for k, (p, t, m, de, mu) in enumerate(zip(pis, typ, mats, d_eta, mus))])
-    Ut, Ulim, _ = turb_speed(c)
-    Upt = c["kUpt"] * 380.0
-    eg, ep = 0.86, 0.88
-    r, load = None, {}
-    for _ in range(6):
+    Upt = c["kUpt"] * U_PT_MAX
+    eg, ep = _eta_turb_nom(c)
+    eg -= ETA_NOM["ax"] if c["turb"] == "О" else ETA_NOM["rad"]
+    r, load, Ut, Ulim = None, {}, None, None
+    for _ in range(iters):
         r = _core(c, comp, eg, ep)
         if "fail" in r:
             break
+        Ut, Ulim, _ = turb_speed(c, r["t"])
         if c["turb"] == "О":
-            psi = r["t"]["w"] / (c["nt"] * Ut ** 2); eg_n = E.eta_axial(psi) - leaving_loss(c["phit"], Ut, r["t"]["w"] / eg)
+            psi = r["t"]["w"] / (c["nt"] * Ut ** 2)
+            eg_n = E.eta_axial(psi) - leaving_loss(c["phit"], Ut, r["t"]["w"] / eg)
             load = dict(psi=psi)
         else:
-            eg_n, nu, dhs = _radial_stage(r["t"], c["nt"], Ut); load = dict(nu=nu, dhs=dhs)
+            eg_n, nu, dhs, eis = _radial_stage(r["t"], c["nt"], Ut)
+            eg_n += d_eta_t
+            load = dict(nu=nu, dhs=dhs, eta_is=eis)
         ep_n = ep
         if r["pt"]:
             psi_pt = r["pt"]["w"] / (c["npt"] * Upt ** 2)
-            ep_n = E.eta_axial(psi_pt) - leaving_loss(c["phit"], Upt, r["pt"]["w"] / ep); load["psi_pt"] = psi_pt
+            ep_n = E.eta_axial(psi_pt) - leaving_loss(c["phipt"], Upt, r["pt"]["w"] / ep)
+            load["psi_pt"] = psi_pt
         eg_n, ep_n = max(0.40, eg_n), max(0.40, ep_n)
         if abs(eg_n - eg) < 1e-4 and abs(ep_n - ep) < 1e-4:
             break

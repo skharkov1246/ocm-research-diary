@@ -35,6 +35,19 @@ def grid(topo, n, centered=True, periods=(1, 1, 1)):
     return field(topo, X, Y, Z)
 
 
+def voxel_mask(topo, level, n, shift=(0.0, 0.0, 0.0), eps_target=None):
+    """воксели тракта F > level на сетке n³, сдвинутой на shift (доли вокселя); при eps_target порог
+    сдвигается так, чтобы доля жидких вокселей равнялась истинной пористости (снимает ошибку объёма
+    при наложении сетки на период — главную ошибку первого порядка)"""
+    axes = [2 * np.pi * (np.arange(n) + 0.5 + s) / n for s in shift]
+    X, Y, Z = np.meshgrid(*axes, indexing="ij")
+    F = field(topo, X, Y, Z)
+    thr = level
+    if eps_target is not None:
+        thr = float(np.quantile(F, 1.0 - eps_target))
+    return F > thr, thr
+
+
 def fraction_above(topo, level, n=160):
     return float((grid(topo, n) > level).mean())
 

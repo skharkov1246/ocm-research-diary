@@ -291,5 +291,39 @@
   "disk_rate": "0,08 долл./ГБ·мес / 730 ч и IPv4 0,005 долл./ч — ставки раннера (допущения кода)",
   "memory_check": "память точек на машину ≤ 128 ГБ при 13.0 КБ/узел (миниатюра 11,7–12,2 с запасом) — поле mem_gb_points; база на 64 процессах идёт одна, до точек",
   "s3_transfer_rates": "S3 0,023 долл./ГБ·мес, выход из AWS 0,09 долл./ГБ — допущения, не сверены"
+ },
+ "plan_check": {
+  "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/platform/su2/jobs_aws_su2_kv3_fine.json --assume-price 0.748 --assume-zone-prices us-east-1a=0.955,us-east-1b=0.748,us-east-1c=0.706 --branch claude/lucid-allen-yvps5d",
+  "exit_code": 0,
+  "lines": [
+   "[задача] su2-kv3-stage1-fine-a: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 600 мин",
+   "[бюджет] su2-kv3-stage1-fine-a на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 0.00 + новая 11.79 = 11.96 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] su2-kv3-stage1-fine-a c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] su2-kv3-stage1-fine-b: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 600 мин",
+   "[бюджет] su2-kv3-stage1-fine-b на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 11.79 + новая 11.79 = 23.75 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] su2-kv3-stage1-fine-b c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] su2-kv3-stage1-fine-c: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 600 мин",
+   "[бюджет] su2-kv3-stage1-fine-c на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 23.58 + новая 11.79 = 35.54 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] su2-kv3-stage1-fine-c c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] su2-kv3-stage1-fine-d: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 600 мин",
+   "[бюджет] su2-kv3-stage1-fine-d на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 35.37 + новая 11.79 = 47.33 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] su2-kv3-stage1-fine-d c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] su2-core130-fine-a: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 570 мин",
+   "[бюджет] su2-core130-fine-a на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 47.16 + новая 11.21 = 58.54 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] su2-core130-fine-a c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] su2-core130-fine-b: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 570 мин",
+   "[бюджет] su2-core130-fine-b на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 58.38 + новая 11.21 = 69.75 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] su2-core130-fine-b c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[план] прогноз пакета 69.59 долл. (цена спота — допущение 0.748/ч)"
+  ],
+  "userdata_sizes": [
+   "\"UserData\": \"<7648 байт>\"",
+   "\"UserData\": \"<7648 байт>\"",
+   "\"UserData\": \"<7648 байт>\"",
+   "\"UserData\": \"<7648 байт>\"",
+   "\"UserData\": \"<7608 байт>\"",
+   "\"UserData\": \"<7608 байт>\""
+  ],
+  "stderr": ""
  }
 }

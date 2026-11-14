@@ -249,5 +249,31 @@
   "disk_rate": "0,08 долл./ГБ·мес / 730 ч и IPv4 0,005 долл./ч — ставки раннера (допущения кода)",
   "memory_check": "память точек на машину ≤ 128 ГБ при 13.0 КБ/узел (миниатюра 11,7–12,2 с запасом) — поле mem_gb_points; база на 64 процессах идёт одна, до точек",
   "s3_transfer_rates": "S3 0,023 долл./ГБ·мес, выход из AWS 0,09 долл./ГБ — допущения, не сверены"
+ },
+ "plan_check": {
+  "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/platform/su2/jobs_aws_su2_kv3.json --assume-price 0.748 --assume-zone-prices us-east-1a=0.955,us-east-1b=0.748,us-east-1c=0.706 --branch claude/lucid-allen-yvps5d",
+  "exit_code": 0,
+  "lines": [
+   "[задача] su2-kv3-stage1-medium-a: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 510 мин",
+   "[бюджет] su2-kv3-stage1-medium-a на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 0.00 + новая 10.02 = 10.19 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] su2-kv3-stage1-medium-a c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] su2-kv3-stage1-medium-b: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 510 мин",
+   "[бюджет] su2-kv3-stage1-medium-b на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 10.02 + новая 10.02 = 20.21 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] su2-kv3-stage1-medium-b c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] su2-core130-medium-a: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 270 мин",
+   "[бюджет] su2-core130-medium-a на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 20.05 + новая 5.40 = 25.61 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] su2-core130-medium-a c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] su2-core130-medium-b: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 270 мин",
+   "[бюджет] su2-core130-medium-b на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 25.44 + новая 5.40 = 31.01 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] su2-core130-medium-b c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[план] прогноз пакета 30.84 долл. (цена спота — допущение 0.748/ч)"
+  ],
+  "userdata_sizes": [
+   "\"UserData\": \"<7675 байт>\"",
+   "\"UserData\": \"<7675 байт>\"",
+   "\"UserData\": \"<7632 байт>\"",
+   "\"UserData\": \"<7632 байт>\""
+  ],
+  "stderr": ""
  }
 }

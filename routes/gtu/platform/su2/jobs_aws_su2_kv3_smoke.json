@@ -51,5 +51,19 @@
   },
   "upper_bound_usd": 1.67,
   "basis": "загрузка 3 + подготовка 12 + 2 сетки coarse по ~5 + 2 прогона по ~3 мин (оценки; сетка KV-3 coarse здесь — 131 с, core130 coarse — 40 с); цена — как этапы A и B"
+ },
+ "plan_check": {
+  "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/platform/su2/jobs_aws_su2_kv3_smoke.json --assume-price 0.748 --assume-zone-prices us-east-1a=0.955,us-east-1b=0.748,us-east-1c=0.706 --branch claude/lucid-allen-yvps5d",
+  "exit_code": 0,
+  "lines": [
+   "[задача] su2-kv3-core130-smoke: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 60 мин",
+   "[бюджет] su2-kv3-core130-smoke на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 0.00 + новая 1.35 = 1.52 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] su2-kv3-core130-smoke c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[план] прогноз пакета 1.35 долл. (цена спота — допущение 0.748/ч)"
+  ],
+  "userdata_sizes": [
+   "\"UserData\": \"<8491 байт>\""
+  ],
+  "stderr": ""
  }
 }
