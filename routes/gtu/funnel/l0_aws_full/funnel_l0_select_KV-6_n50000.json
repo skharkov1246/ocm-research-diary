@@ -1,0 +1,245 @@
+{
+ "title": "Воронка, уровень 0 -> уровень 1: отбор KV-6",
+ "method": "воронка, уровень 0: концепции по индексу из последовательности Соболя (funnel_space, зерно SEED); быстрый цикл на таблицах gtu_explore (Cantera GRI-Mech 3.0, метан, ISO) с КПД ступеней comp_stage, поправками за зазор и удельную быстроходность (подбор по frame3) и КПД турбин по нагрузке и U/C0; геометрия derive, габарит и масса (оценка); правила допустимости funnel_space.check; баллы parts/service/plugplay/make, s_eta, s_size; взвешенная оценка по весам владельца 14.11.2026. Всё - оценка (README узла).",
+ "software": "python 3.12.16, numpy 2.5.3, scipy 1.18.1, cantera 3.2.0",
+ "date": "2026-11-14",
+ "kv": "KV-6",
+ "n": 50000,
+ "seed": 20261114,
+ "fingerprint": "07c57f2e9705931a",
+ "code_sha": "3ae8efb057b3ed8e",
+ "weights": {
+  "parts": 0.35,
+  "plugplay": 0.25,
+  "service": 0.2,
+  "effmake": 0.2
+ },
+ "params": {
+  "k": 3,
+  "top": 1000,
+  "pareto": true,
+  "k_near": 1,
+  "near_max": 0.25,
+  "target": 4000
+ },
+ "how_to_rebuild": "funnel_space.concept(idx, n, kv, seed) с закреплёнными версиями (fingerprint должен совпасть)",
+ "summary": {
+  "n_selected": 13,
+  "n_feasible": 0,
+  "n_near": 13,
+  "K_per_niche": 1,
+  "K_max_in_niche": 1,
+  "target": 4000,
+  "target_exceeded": false,
+  "feasible_niches": 0,
+  "feasible_niches_covered": 0,
+  "lost_feasible_niches": [],
+  "near_candidates": 13,
+  "archetypes": {
+   "RDC": 9,
+   "безмасляный": 2,
+   "традиционная": 1,
+   "гибрид": 1
+  },
+  "reasons": {
+   "ниша без допустимых": 13
+  }
+ },
+ "selected": [
+  {
+   "idx": 31416,
+   "niche": "безмасляный|2р|2Ц|О|K|нет|сборный:печать/печать",
+   "arch": "безмасляный",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 3.526,
+   "feasible": false,
+   "violation": -0.1286,
+   "eta_el": 26.005,
+   "reasons": [
+    "ниша без допустимых: превышение -0.129 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 25903,
+   "niche": "RDC|1р|2Ц|О|K|нет|сборный:поковка/печать",
+   "arch": "RDC",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.4279,
+   "feasible": false,
+   "violation": 0.0098,
+   "eta_el": 28.24,
+   "reasons": [
+    "ниша без допустимых: превышение 0.010 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 36465,
+   "niche": "традиционная|1р|2Ц|О|U|нет|сборный:поковка/литьё",
+   "arch": "традиционная",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 3.6235,
+   "feasible": false,
+   "violation": 0.06,
+   "eta_el": 28.294,
+   "reasons": [
+    "ниша без допустимых: превышение 0.060 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 10991,
+   "niche": "RDC|1р|2Ц|О|P|нет|сборный:поковка/печать",
+   "arch": "RDC",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.984,
+   "feasible": false,
+   "violation": 0.0731,
+   "eta_el": 27.116,
+   "reasons": [
+    "ниша без допустимых: превышение 0.073 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 20247,
+   "niche": "RDC|1р|2Ц|О|P|нет|сборный:печать/печать",
+   "arch": "RDC",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.7998,
+   "feasible": false,
+   "violation": 0.1429,
+   "eta_el": 28.5,
+   "reasons": [
+    "ниша без допустимых: превышение 0.143 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 37077,
+   "niche": "гибрид|1р|ОЦ|О|N|нет|сборный:поковка/литьё",
+   "arch": "гибрид",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.0986,
+   "feasible": false,
+   "violation": 0.1532,
+   "eta_el": 24.582,
+   "reasons": [
+    "ниша без допустимых: превышение 0.153 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 14551,
+   "niche": "RDC|1р|2Ц|О|K|нет|сварка:печать",
+   "arch": "RDC",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.7172,
+   "feasible": false,
+   "violation": 0.1577,
+   "eta_el": 25.664,
+   "reasons": [
+    "ниша без допустимых: превышение 0.158 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 47535,
+   "niche": "RDC|1р|2Ц|О|P|нет|сварка:печать",
+   "arch": "RDC",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.8038,
+   "feasible": false,
+   "violation": 0.171,
+   "eta_el": 24.728,
+   "reasons": [
+    "ниша без допустимых: превышение 0.171 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 8456,
+   "niche": "RDC|2р|2Ц|О|P|нет|сварка:печать",
+   "arch": "RDC",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.7105,
+   "feasible": false,
+   "violation": 0.1807,
+   "eta_el": 25.243,
+   "reasons": [
+    "ниша без допустимых: превышение 0.181 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 13463,
+   "niche": "RDC|1р|2Ц|О|P|нет|сборный:печать/литьё",
+   "arch": "RDC",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.2043,
+   "feasible": false,
+   "violation": 0.1808,
+   "eta_el": 26.342,
+   "reasons": [
+    "ниша без допустимых: превышение 0.181 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 25287,
+   "niche": "безмасляный|1р|ОЦ|О|K|нет|сборный:поковка/литьё",
+   "arch": "безмасляный",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.0739,
+   "feasible": false,
+   "violation": 0.1884,
+   "eta_el": 23.945,
+   "reasons": [
+    "ниша без допустимых: превышение 0.188 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 23144,
+   "niche": "RDC|2р|2Ц|О|P|нет|сборный:поковка/литьё",
+   "arch": "RDC",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.25,
+   "feasible": false,
+   "violation": 0.1995,
+   "eta_el": 27.858,
+   "reasons": [
+    "ниша без допустимых: превышение 0.200 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 20328,
+   "niche": "RDC|2р|2Ц|О|K|нет|сборный:поковка/печать",
+   "arch": "RDC",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 6.1866,
+   "feasible": false,
+   "violation": 0.2318,
+   "eta_el": 32.186,
+   "reasons": [
+    "ниша без допустимых: превышение 0.232 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  }
+ ]
+}
