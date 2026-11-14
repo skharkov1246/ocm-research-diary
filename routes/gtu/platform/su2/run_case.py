@@ -529,6 +529,12 @@ def main(argv=None):
     ap.add_argument("--su2-bin", default=None)
     ap.add_argument("--su2-src", default=None, help="исходник SU2 для сверки ключей (Common/src/CConfig.cpp)")
     ap.add_argument("--out", default=None, help="папка прогона (по умолчанию runs/<case>_<level>_<plan>)")
+    ap.add_argument("--restart-from", default=None, metavar="RESTART_DAT",
+                    help="продолжить с готового решения (restart_*.dat другого прогона): первая стадия плана "
+                         "без рамп, сразу при своих частоте и давлении")
+    ap.add_argument("--restart-state", default=None, metavar="FRAC,P_OUT",
+                    help="с --restart-from: доля частоты и давление на выходе (Па), при которых получен рестарт; "
+                         "тогда первая стадия идёт рампами от них")
     ap.add_argument("--dry", action="store_true", help="только cfg и SU2_CFD -d (сухой прогон)")
     ap.add_argument("--parse", default=None, metavar="RUN_DIR", help="только разобрать готовый прогон")
     ap.add_argument("--mass-tol", type=float, default=0.05, help="допуск дисбаланса расхода (0,05 = 5 %%)")
@@ -596,7 +602,8 @@ def main(argv=None):
     fs_t = d1["T01"] / (1 + 0.5 * (gamma - 1) * m0 ** 2)
     fs_p = d1["p01"] * (fs_t / d1["T01"]) ** (gamma / (gamma - 1))
     params.update(FS_P=f"{fs_p:.6g}", FS_T=f"{fs_t:.6g}")
-    r_out = 1.3 * d1["r2"]  # длина безлопаточного участка в impeller.py: до 1,3 r2
+    # радиус выхода области: contours.r_out JSON сетки (в impeller.py — 1,3 r2)
+    r_out = float(mj.get("contours", {}).get("r_out", 1.3 * d1["r2"]))
     p_out_est = estimate_p_out(d1, 1.0, r_out, d1["b2"], gamma, R)
 
     su2 = find_su2(a.su2_bin)
@@ -630,6 +637,14 @@ def main(argv=None):
     # при p_вых = p01 и неподвижном колесе поток идёт в область и со входа, и с выхода (прогон 14.11.2026)
     prev_frac, prev_p = 0.0, fs_p
     prev_restart = None
+    if a.restart_from:
+        src = os.path.abspath(a.restart_from)
+        if not os.path.isfile(src):
+            raise SystemExit(f"нет файла рестарта {src}")
+        # SU2 v8.6.0 с длинным абсолютным путём в SOLUTION_FILENAME (~105 знаков) падает при чтении рестарта
+        # («*** buffer overflow detected ***», прогон 14.11.2026) — копия в папку прогона, короткое имя
+        prev_restart = "restart_in.dat"
+        shutil.copyfile(src, os.path.join(out, prev_restart))
     key_problems = None
     for i, st in enumerate(plan):
         frac, pfrac = st["frac"], st["pfrac"]
@@ -641,6 +656,12 @@ def main(argv=None):
             p_target = p_est
         ramp = st["ramp"]
         name = st["name"]
+        if i == 0 and prev_restart:  # продолжение с чужого рестарта
+            if a.restart_state:
+                f0, p0 = (float(x) for x in a.restart_state.split(","))
+                prev_frac, prev_p = f0, p0
+            else:  # решение уже при условиях первой стадии
+                prev_frac, prev_p = frac, p_target
         p = dict(params)
         p.update(
             RESTART="YES" if prev_restart else "NO",
@@ -703,6 +724,7 @@ def main(argv=None):
             break
         prev_frac, prev_p, prev_restart = frac, p_target, rec_restart(out, name)
 
+    summ["inputs"]["restart_from"] = os.path.abspath(a.restart_from) if a.restart_from else None
     summ["key_check"] = key_problems or {"note": "исходник SU2 не найден — ключи не сверялись (--su2-src)"}
     if su2 is None:
         summ["blocker"] = "SU2_CFD не найден: --su2-bin, $SU2_RUN или PATH (установка — install_su2.sh)"

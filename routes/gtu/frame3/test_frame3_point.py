@@ -115,6 +115,18 @@ def test_offdesign_model_reproduces_design(dp):
     assert close(sc["W1"], sc["G_design"], 1e-5) and close(sc["PR"], RES["split"]["pi"], 1e-5)
 
 
+def test_inputs_have_provenance():
+    for k in ("method", "software", "date", "status", "inputs", "assumptions"):
+        assert RES.get(k)
+    gtu = os.path.dirname(HERE)
+    for i in RES["inputs"]:
+        assert i["field"] and i["used"] is not None
+        assert i["file"].startswith("routes/gtu/"), i["file"]
+        assert os.path.isfile(os.path.join(gtu, i["file"][len("routes/gtu/"):])), i["file"]
+    cyc = next(i["used"] for i in RES["inputs"] if i["file"].endswith("gtu_cycle.py"))
+    assert (cyc["eta_m"], cyc["dp_comb"], cyc["p_exh_ratio"]) == (M.ETA_M, M.DP_COMB, M.P_EXH)
+
+
 def test_members_listed():
     fr = inp("frames.")
     rows = RES["members"]

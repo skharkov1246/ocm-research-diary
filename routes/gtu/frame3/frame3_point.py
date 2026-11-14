@@ -22,6 +22,7 @@ import sys
 import json
 import math
 import datetime
+import inspect
 import platform
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -76,8 +77,12 @@ U_AX = E.LIM["U_ax"]             # 420 м/с, осевая неохлаждае�
 T_AX = E.LIM["T_ax_max"]         # 1050 °C
 T41_MAX_U = max(F.COOL["U"]["T"])  # 1000 °C, класс U
 X_LEAK = 0.015                   # как gtu_family._run
+FAM_ETA_T_GG, FAM_ETA_T_PT = 0.865, 0.885   # КПД турбин в gtu_family._run (для воспроизведения gtu_family)
 ETA_M = 0.99                     # gtu_cycle.cycle по умолчанию
 DP_COMB, P_EXH = 0.04, 1.02      # gtu_cycle.cycle по умолчанию
+_CYC_DEF = {k: v.default for k, v in inspect.signature(C.cycle).parameters.items() if v.default is not inspect.Parameter.empty}
+assert (_CYC_DEF["eta_m"], _CYC_DEF["dp_comb"], _CYC_DEF["p_exh_ratio"]) == (ETA_M, DP_COMB, P_EXH), _CYC_DEF
+POLY_N = inspect.signature(C.poly_process).parameters["n"].default   # шагов политропного процесса в gtu_cycle
 
 # ------------------------------------------------------------------ принятые величины одномерного расчёта (оценка)
 A = dict(
@@ -686,7 +691,8 @@ def run():
         sr["eta_is"] = eta_is_from_p(st["act"]["T01"], st["act"]["PRs"], st["eta_p"])
         sr["material"] = material_check(st)
     # сравнение с gtu_family
-    fam = C.cycle(PR, T41_C, eta_pc=F.ARCH["1В-2Ц"]["eta_pc"], eta_pt_gg=0.865, eta_pt_pt=0.885, x_ngv=0.0, x_rot=0.0, x_leak=X_LEAK, W1=G)
+    fam = C.cycle(PR, T41_C, eta_pc=F.ARCH["1В-2Ц"]["eta_pc"], eta_pt_gg=FAM_ETA_T_GG, eta_pt_pt=FAM_ETA_T_PT, x_ngv=0.0, x_rot=0.0,
+                  x_leak=X_LEAK, W1=G)
     duct = C.cycle(PR, T41_C, eta_pc=dp["eta_pc"], eta_pt_gg=dp["opts"][z]["turb"]["eta_p"], eta_pt_pt=dp["opts"][z]["turb"]["eta_p"],
                    x_ngv=0.0, x_rot=0.0, x_leak=X_LEAK, dp_duct=0.01, W1=G)
     P_sh = cyc["P_MW"] * 1e3
@@ -813,12 +819,18 @@ def run():
             dict(file="routes/gtu/gtu_family_results.json", field=f"frames.{SCEN}", used=FRAME),
             dict(file="routes/gtu/gtu_family.py", field="SCEN, COOL['U'], ARCH['1В-2Ц'].eta_pc, ETA_GEN, _run (eta_pt_gg, eta_pt_pt, x_leak)",
                  used=dict(alpha=F.SCEN[SCEN]["alpha"], dT=F.SCEN[SCEN]["dT"], T41_max_U=T41_MAX_U, eta_pc_family=F.ARCH["1В-2Ц"]["eta_pc"],
-                           eta_gen=ETA_GEN, eta_gearbox=ETA_GB, x_leak=X_LEAK)),
-            dict(file="routes/gtu/gtu_explore.py", field="LIM['U_ti'], LIM['U_ax'], LIM['T_ax_max'], comp_stage, eta_axial",
-                 used=dict(U_ti=U_TI, U_ax=U_AX, T_ax_max=T_AX)),
+                           eta_gen=ETA_GEN, eta_gearbox=ETA_GB, x_leak=X_LEAK, eta_pt_gg=FAM_ETA_T_GG, eta_pt_pt=FAM_ETA_T_PT)),
+            dict(file="routes/gtu/gtu_explore.py", field="LIM['U_ti'], LIM['U_ax'], LIM['T_ax_max'], T0, P0, comp_stage, eta_axial",
+                 used=dict(U_ti=U_TI, U_ax=U_AX, T_ax_max=T_AX, T0=E.T0, P0=E.P0)),
             dict(file="routes/gtu/platform/fea/materials.json", field="ti64.ys_MPa", used=MAT["ys_MPa"]),
             dict(file="routes/gtu/platform/fea/disk_results.json", field="cases[comp_T60_1C_ti, comp_T60_1C_ti_solid].result.vm_max_node_MPa, U_tip",
                  used={k: dict(vm=FEA[k]["vm_max_node_MPa"], U_tip=FEA[k]["U_tip"]) for k in ("comp_T60_1C_ti", "comp_T60_1C_ti_solid")}),
+            dict(file="routes/gtu/gtu_cycle.py", field="T0, P0, LHV; значения cycle(...) по умолчанию: dp_comb, p_exh_ratio, eta_b, eta_m; poly_process(n)",
+                 used=dict(T0=C.T0, P0=C.P0, LHV=C.LHV, dp_comb=_CYC_DEF["dp_comb"], p_exh_ratio=_CYC_DEF["p_exh_ratio"],
+                           eta_b=_CYC_DEF["eta_b"], eta_m=_CYC_DEF["eta_m"], poly_process_steps=POLY_N)),
+            dict(file="routes/gtu/gtu_family_results.json",
+                 field=f"slots[исполнения типоразмера № 3, сценарий «{SCEN}»]: G, arch, cool, T41, n_out, P_shaft_kW, G_air, EGT0 (раздел members)",
+                 used=dict(n=len(MEMBERS), members=[f"{s['model']} / {s['variant']}" for s in MEMBERS])),
         ],
         assumptions=dict(A, note="все — оценка; в JSON — как в коде (A в frame3_point.py)"),
         problem=dict(D2_family=PT["D2"], n_family=PT["n_gg"], U2_family=PT["U2"], U2_at_n_out_same_D2=math.pi * PT["D2"] * N / 60),
