@@ -5,7 +5,7 @@
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
     "datasets": 378,
-    "total_bytes": 4124152,
+    "total_bytes": 4125473,
     "results_files": 172,
     "results_with_script": 50,
     "results_referenced_in_site": 22,
@@ -7033,17 +7033,18 @@
       "path": "routes/gtu/platform/su2/su2_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 15321,
+      "bytes": 16642,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
         "about",
         "runs",
-        "diagnostics_2026_11_14"
+        "diagnostics_2026_11_14",
+        "smoke_checks_note"
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "493cb81"
+      "last_commit": "be4581b"
     },
     {
       "path": "routes/gtu/platform/surrogate/test_surrogate_results.json",
