@@ -4,12 +4,12 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 377,
-    "total_bytes": 3999572,
-    "results_files": 171,
-    "results_with_script": 49,
+    "datasets": 378,
+    "total_bytes": 4124152,
+    "results_files": 172,
+    "results_with_script": 50,
     "results_referenced_in_site": 22,
-    "results_with_provenance_fields": 22,
+    "results_with_provenance_fields": 23,
     "by_track": {
       "ammonia": 91,
       "battery-cathode": 1,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 58,
+      "не определён": 59,
       "прочее": 25
     }
   },
@@ -6658,6 +6658,41 @@
       "last_change": "2026-11-14",
       "last_author": "Claude",
       "last_commit": "493cb81"
+    },
+    {
+      "path": "routes/gtu/organic/exergy/exergy_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 124580,
+      "referenced_in_site": false,
+      "produced_by": "routes/exergy.py",
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "status",
+        "inputs",
+        "assumptions",
+        "fuel_exergy_check",
+        "variants",
+        "recup_scan",
+        "recup_hot_scan",
+        "hot_sweep",
+        "reserve",
+        "svg",
+        "feed_to_funnels",
+        "runtime_s"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "aadf663"
     },
     {
       "path": "routes/gtu/platform/aws/iam_policy_addendum.json",
