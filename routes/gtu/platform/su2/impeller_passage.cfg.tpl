@@ -45,10 +45,11 @@ MACH_MOTION= 0.35
 RAMP_MOTION_FRAME= ${RAMP_ROT}
 RAMP_MOTION_FRAME_COEFF= (${RAMP_ROT_INI}, ${RAMP_ROT_FREQ}, ${RAMP_ROT_ITER})
 %
-% ---- стенки: адиабатные; покрышка неподвижна в абсолютной системе (MARKER_SHROUD) — открытое колесо;
-% без MARKER_SHROUD покрышка вращается с колесом (закрытое колесо, run_case.py --rotating-shroud) ----
+% ---- стенки (run_case.py --shroud, --vaneless): MARKER_HEATFLUX — адиабатные с прилипанием, вращаются
+% с колесом, кроме перечисленных в MARKER_SHROUD (неподвижны в абсолютной системе); MARKER_EULER — без трения ----
 MARKER_HEATFLUX= (${WALLS})
 ${SHROUD_LINE}
+${EULER_LINE}
 %
 % ---- периодичность поворотом: periodic_2 = periodic_1, повёрнутый на +360/Z вокруг +z ----
 MARKER_PERIODIC= (${PER_MASTER}, ${PER_SLAVE}, 0.0, 0.0, 0.0, 0.0, 0.0, ${ANGLE}, 0.0, 0.0, 0.0)

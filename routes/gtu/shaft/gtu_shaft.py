@@ -609,8 +609,18 @@ class Unit:
         """полная мощность: T41 = предел (или T45 = расчётной при control='T45'); частота СТ — где мощность СТ
         равна мощности техкомпрессора на сети; выше верхней частоты — ограничение по частоте"""
         if control == "T45":
-            T41 = brentq(lambda T: self.md_gg(T1, T, e)[1]["T45"] - self.d["T45"],
-                         self.d["T41"] - 150, self.d["T41"] + 60, xtol=1e-3)
+            try:
+                T41 = brentq(lambda T: self.md_gg(T1, T, e)[1]["T45"] - self.d["T45"],
+                             self.d["T41"] - 150, self.d["T41"] + 60, xtol=1e-3)
+            except (RuntimeError, ValueError):
+                # без предела частоты точка уходит за карту; если предел частоты действует раньше, чем T45
+                # дойдёт до уставки, полная мощность задана пределом частоты
+                if not self.gg_limit:
+                    raise
+                fr, gg, ee, lim = self.md_limited_gg(T1, self.d["T41"] + 60, e)
+                if lim is None or gg["T45"] > self.d["T45"]:
+                    raise
+                T41 = fr["T41"]
         else:
             T41 = self.d["T41"]
         fr, gg, ee, lim_gg = self.md_limited_gg(T1, T41, e)

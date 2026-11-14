@@ -49,7 +49,7 @@ NUMERICS = dict(
     FLOW_SCHEME="ROE", MUSCL="NO", LIMITER="VENKATAKRISHNAN", VENKAT=0.05, ENTROPY_FIX=0.05,
     CFL=5.0, CFL_ADAPT="YES", CFL_ADAPT_PARAM="0.5, 1.1, 1.0, 20.0, 0.1", LIN_PREC="ILU", LIN_ITER=10,
     RES_MIN=-10, OUTPUT_FILES="RESTART, PARAVIEW", WRT_FREQ=500, EXTRA="",
-    WALLS="hub, 0.0, blade, 0.0, shroud, 0.0", SHROUD_LINE="MARKER_SHROUD= (shroud)",
+    WALLS="hub, 0.0, blade, 0.0, shroud, 0.0", SHROUD_LINE="MARKER_SHROUD= (shroud)", EULER_LINE="",
 )
 
 # Планы стадий. frac — доля номинальной частоты в конце стадии, pfrac — доля оценки статического давления
@@ -248,19 +248,21 @@ def mpi_cmd(np_: int, exe: str, cfg: str, extra: list[str] | None = None):
     return cmd + list(extra or []) + [exe, cfg]
 
 
-_CHILD = {"pgid": None}
+_CHILD = {"pgid": None, "signal": None}
 
 
 def _kill_child(signum, frame):  # noqa: ARG001
     """SIGTERM/SIGINT/SIGHUP самому run_case.py (timeout, runner.py, Ctrl-C) гасит и группу SU2:
-    SU2 запущен в своей сессии (start_new_session) и сам по себе сигнал родителя не получит."""
+    SU2 запущен в своей сессии (start_new_session) и сам по себе сигнал родителя не получит.
+    Если SU2 идёт — он получает SIGTERM (SU2 v8.6.0 на нём дописывает рестарт и выходит, проверено),
+    стадия помечается «terminated», итог прогона записывается; иначе выход сразу."""
+    _CHILD["signal"] = signum
     if _CHILD["pgid"]:
         try:
             os.killpg(_CHILD["pgid"], signal.SIGTERM)
-            time.sleep(5)
-            os.killpg(_CHILD["pgid"], signal.SIGKILL)
         except ProcessLookupError:
             pass
+        return
     raise SystemExit(128 + signum)
 
 
@@ -285,6 +287,8 @@ def run_limited(cmd, cwd, log_path, deadline, env=None):
         try:
             rc = p.wait(timeout=budget)
             status = "finished" if rc == 0 else "error"
+            if _CHILD["signal"]:
+                status = "terminated"
         except subprocess.TimeoutExpired:
             os.killpg(p.pid, signal.SIGTERM)
             try:
@@ -465,6 +469,29 @@ def smoke_checks(stages_out: list, mass_tol: float):
 # ----------------------------------------------------------------------------------------------
 # основной ход
 # ----------------------------------------------------------------------------------------------
+def wall_lines(shroud: str, vaneless: str) -> dict:
+    """Строки стенок шаблона: MARKER_HEATFLUX (адиабатные с прилипанием), MARKER_SHROUD (неподвижные во
+    вращающейся системе), MARKER_EULER (без трения). hub и blade всегда вращаются с колесом."""
+    heat, still, euler = ["hub", "blade"], [], []
+    if shroud == "stationary":
+        heat.append("shroud"); still.append("shroud")
+    elif shroud == "rotating":
+        heat.append("shroud")
+    else:
+        euler.append("shroud")
+    if vaneless != "as-is":
+        vl = ["hub_vaneless", "shroud_vaneless"]
+        if vaneless == "stationary":
+            heat += vl; still += vl
+        else:
+            euler += vl
+    return {
+        "WALLS": ", ".join(f"{m}, 0.0" for m in heat),
+        "SHROUD_LINE": f"MARKER_SHROUD= ({', '.join(still)})" if still else "% MARKER_SHROUD не задан: все стенки с прилипанием вращаются с колесом",
+        "EULER_LINE": f"MARKER_EULER= ({', '.join(euler)})" if euler else "% MARKER_EULER не задан",
+    }
+
+
 def build_cfg(tpl: str, params: dict) -> str:
     txt = string.Template(tpl).substitute(params)
     # пустая строка ${SA_OPTIONS} не мешает SU2, но уберём её для чистоты
@@ -484,11 +511,12 @@ def main(argv=None):
                     "(по умолчанию — оценка estimate_p_out x pfrac; промежуточные стадии — в той же пропорции)")
     ap.add_argument("--turb", default=None, choices=["SST", "SA"])
     ap.add_argument("--cfl", type=float, default=None)
-    ap.add_argument("--rotating-shroud", action="store_true",
-                    help="покрышка вращается с колесом (без MARKER_SHROUD): закрытое колесо, не открытое")
-    ap.add_argument("--stationary-vaneless", action="store_true",
-                    help="стенки hub и shroud за колесом (r >= r2) неподвижны: копия сетки с маркерами "
-                         "hub_vaneless, shroud_vaneless в папке прогона")
+    ap.add_argument("--shroud", default="stationary", choices=["stationary", "rotating", "slip"],
+                    help="покрышка: stationary — неподвижная стенка с прилипанием (открытое колесо, MARKER_SHROUD); "
+                         "rotating — вращается с колесом (закрытое колесо); slip — стенка без трения (MARKER_EULER)")
+    ap.add_argument("--vaneless", default="as-is", choices=["as-is", "stationary", "slip"],
+                    help="стенки за колесом (r >= r2): as-is — как в сетке (часть hub вращается, часть shroud — "
+                         "по --shroud); stationary или slip — копия сетки с маркерами hub_vaneless, shroud_vaneless")
     ap.add_argument("--set", action="append", default=[], metavar="KEY=VAL",
                     help="переопределить параметр шаблона (имя поля $ИМЯ), можно несколько раз")
     ap.add_argument("--extra", action="append", default=[], metavar="'KEY= VAL'",
@@ -560,8 +588,6 @@ def main(argv=None):
         params[k.strip()] = v.strip()
     if a.extra:
         params["EXTRA"] = "\n".join(a.extra)
-    if a.rotating_shroud:
-        params["SHROUD_LINE"] = "% MARKER_SHROUD не задан: покрышка вращается с колесом (--rotating-shroud)"
     if params["TURB"] == "SA" and not params["SA_OPTIONS"]:
         params["SA_OPTIONS"] = "SA_OPTIONS= NONE"
     gamma, R = float(params["GAMMA"]), float(params["R_GAS"])
@@ -579,13 +605,11 @@ def main(argv=None):
     tpl = open(TEMPLATE, encoding="utf-8").read()
     cconfig = find_cconfig(a.su2_src)
     split_info = None
-    if a.stationary_vaneless:
+    if a.vaneless != "as-is":
         split_mesh = os.path.join(out, "mesh_vaneless_split.su2")
         split_info = split_vaneless(su2_mesh, split_mesh, d1["r2"])
         su2_mesh = split_mesh
-        params["WALLS"] = "hub, 0.0, hub_vaneless, 0.0, blade, 0.0, shroud, 0.0, shroud_vaneless, 0.0"
-        params["SHROUD_LINE"] = ("MARKER_SHROUD= (hub_vaneless, shroud_vaneless)" if a.rotating_shroud
-                                 else "MARKER_SHROUD= (shroud, hub_vaneless, shroud_vaneless)")
+    params.update(wall_lines(a.shroud, a.vaneless))
 
     summ = {
         "created_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -595,9 +619,7 @@ def main(argv=None):
                    "omega_nominal_rad_s": omega[2], "rpm_nominal": d1["rpm"], "p01": d1["p01"], "T01": d1["T01"],
                    "gamma": gamma, "R": R, "r_out": r_out, "b_out": d1["b2"],
                    "p_out_estimate_nominal": p_out_est, "plan": a.plan, "time_limit_s": a.time_limit,
-                   "shroud": "rotating" if a.rotating_shroud else "stationary",
-                   "vaneless_walls": "stationary (split)" if a.stationary_vaneless else "hub rotates, shroud as above",
-                   "vaneless_split_faces": split_info},
+                   "shroud": a.shroud, "vaneless_walls": a.vaneless, "vaneless_split_faces": split_info},
         "d1_reference": {"m_wheel": d1["m"], "PR_stage": d1["PR"], "eta_comp_stage": d1.get("eta_comp_stage"),
                          "U2": d1["U2"], "note": "одномерная оценка gtu_explore.comp_stage — для сравнения, не эталон"},
         "numerics": params, "stages": [],
@@ -677,7 +699,7 @@ def main(argv=None):
             rec["history"] = analyse_history(hp, gamma, n_pass)
         rec["log"] = parse_log(os.path.join(out, rec["log_file"]))
         print(f"[{name}] {status} за {dt:.0f} с; строк истории {rec.get('history', {}).get('rows', 0)}", flush=True)
-        if status != "finished":
+        if status != "finished" or _CHILD["signal"]:
             break
         prev_frac, prev_p, prev_restart = frac, p_target, rec_restart(out, name)
 
@@ -692,6 +714,8 @@ def main(argv=None):
     print(f"папка прогона: {out}")
     if a.record and not a.dry and su2:
         record(summ, out)
+    if _CHILD["signal"]:
+        return 128 + _CHILD["signal"]
     return 0 if (a.dry or su2) else 2
 
 

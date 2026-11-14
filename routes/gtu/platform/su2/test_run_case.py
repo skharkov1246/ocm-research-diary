@@ -24,7 +24,7 @@ def _params():
     p.update(RESTART="NO", SOLUTION_FILENAME="solution.dat", P01="101325", T01="288.15", OMEGA_X="0.0",
              OMEGA_Y="0.0", OMEGA_Z="2324.46", PER_MASTER="periodic_1", PER_SLAVE="periodic_2", ANGLE="40",
              P_OUT="300000", ITER=10, MUSCL="NO", HISTORY_NAME="history_x", RESTART_NAME="restart_x.dat",
-             VOLUME_NAME="vol_x", MESH="mesh.su2", FS_P="90000", FS_T="279", RAMP_ROT="YES", RAMP_ROT_INI="0", RAMP_ROT_FREQ=1,
+             VOLUME_NAME="vol_x", MESH="mesh.su2", FS_P="90000", FS_T="279", EULER_LINE="", RAMP_ROT="YES", RAMP_ROT_INI="0", RAMP_ROT_FREQ=1,
              RAMP_ROT_ITER=100, RAMP_OUT="YES", RAMP_OUT_INI="101325", RAMP_OUT_FREQ=1, RAMP_OUT_ITER=100)
     return p
 
@@ -214,3 +214,21 @@ def test_split_vaneless(tmp_path):
     txt = dst.read_text(encoding="utf-8")
     assert "MARKER_TAG= hub_vaneless\nMARKER_ELEMS= 1\n5 1 2 4\n" in txt
     assert txt.split("NMARK")[0] == SU2_FIXTURE.split("NMARK")[0]  # элементы и узлы не тронуты
+
+
+@pytest.mark.parametrize("shroud,vaneless,heat,still,euler", [
+    ("stationary", "as-is", "hub, 0.0, blade, 0.0, shroud, 0.0", "(shroud)", None),
+    ("rotating", "as-is", "hub, 0.0, blade, 0.0, shroud, 0.0", None, None),
+    ("slip", "slip", "hub, 0.0, blade, 0.0", None, "(shroud, hub_vaneless, shroud_vaneless)"),
+    ("stationary", "stationary", "hub, 0.0, blade, 0.0, shroud, 0.0, hub_vaneless, 0.0, shroud_vaneless, 0.0",
+     "(shroud, hub_vaneless, shroud_vaneless)", None),
+])
+def test_wall_lines(shroud, vaneless, heat, still, euler):
+    w = rc.wall_lines(shroud, vaneless)
+    assert w["WALLS"] == heat
+    assert (w["SHROUD_LINE"] == f"MARKER_SHROUD= {still}") if still else w["SHROUD_LINE"].startswith("%")
+    assert (w["EULER_LINE"] == f"MARKER_EULER= {euler}") if euler else w["EULER_LINE"].startswith("%")
+    # каждая стенка ровно в одном виде граничного условия
+    names = [m for m in heat.split(", ") if not m.replace(".", "").isdigit()]
+    eu = euler.strip("()").split(", ") if euler else []
+    assert not set(names) & set(eu)
