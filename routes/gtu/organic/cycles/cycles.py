@@ -684,7 +684,8 @@ def evaluate(topo, PR, prm=None, detail=False):
     tcr ('none','fh','steam','egr'). Возвращает словарь показателей на 1 кг/с воздуха и при мощности 5922 кВт."""
     prm = {**DEFAULT_PRM, **(prm or {})}
     rec, ic, rh, ibc, pgc, tcr = (topo[k] for k in ("rec", "ic", "rh", "ibc", "pgc", "tcr"))
-    T41 = A["T41_C"] + 273.15
+    T41 = prm.get("T41_C", A["T41_C"]) + 273.15
+    T_rec_max = prm.get("T_rec_max", A["T_rec_max"])
     eta_t = A["eta_t"] - (A["pgc_deta_t"] if pgc == "real" else 0.0)
     comps = []                          # (имя, входы, выходы, работа наружу Вт/(кг/с), тепловая потеря)
 
@@ -865,8 +866,10 @@ def evaluate(topo, PR, prm=None, detail=False):
                Q_rec_kW=W1 * Qrec / 1e3, Q_ic_kW=W1 * Qic / 1e3, W_fans_kW=W1 * (Wf_ic + Wf_ibc) / 1e3,
                W_rc_kW=W1 * W_rc / 1e3, fuel_T_C=fuel["T"] - 273.15, fuel_info=fuel["info"],
                water_t_h=(W1 * mf * (1 - fuel["yC"]) * 3.6 if tcr == "steam" else 0.0), ibc=ibc_info, mf=mf, m_ch4=m_ch4)
+    R_exh = RU / (1.0 / np.sum(exh.Y / MW))
+    res["Vexh_ratio"] = (W_exh * R_exh * exh.T / (P0 * A["p_exh"])) / (IN["W_exh0"] * RU / 28.6 * (IN["EGT0"] + 273.15) / (P0 * A["p_exh"]))
     res["limits"] = dict(G_ok=W1 <= A["G_cap"] + 1e-9, Wexh_ok=W_exh <= A["W_exh_cap"] + 1e-9, EGT_ok=EGT <= A["EGT_cap"] + 1e-9,
-                         rec_ok=(T_rec_in is None) or (T_rec_in - 273.15 <= A["T_rec_max"] + 1e-6))
+                         rec_ok=(T_rec_in is None) or (T_rec_in - 273.15 <= T_rec_max + 1e-6))
     res["limits"]["all"] = all(res["limits"].values())
     if detail:
         res["_comps"] = comps
@@ -1169,7 +1172,8 @@ def parts(res, hx, tech):
     dwheels = (res["nc"] + res["nt"]) - 5
     added = sum(n for _, n in items) + dwheels
     trl = min([TRL["simple"]] + [TRL[k] for k, on in (("rec", t["rec"]), ("ic", t["ic"]), ("rh", t["rh"]),
-                                                    ("ibc", t["ibc"]), ("pgc", t["pgc"] != "none"))] + ([TRL[t["tcr"]]] if t["tcr"] != "none" else []) if True else [])
+                                                    ("ibc", t["ibc"]), ("pgc", t["pgc"] != "none")) if on]
+              + ([TRL[t["tcr"]]] if t["tcr"] != "none" else []))
     V = sum(h["V_core_m3"] for h in hx) * 2.0       # с коллекторами и корпусами — ×2 (оценка)
     water = t["tcr"] == "steam"
     if water or not res["limits"]["all"]:
@@ -1249,10 +1253,11 @@ def score(r):
     return (1 if r["limits"]["all"] else 0, r["eff_el"])
 
 
-def optimize_topo(t):
+def optimize_topo(t, extra=None):
     """оптимум π (сетка + уточнение) и параметров; плюс точка «как есть» π 13,5"""
     best = None
-    for prm in prm_grid(t):
+    grid_p = [dict(p, **(extra or {})) for p in prm_grid(t)]
+    for prm in grid_p:
         grid = [(PR, _safe(t, PR, prm)) for PR in PR_GRID]
         ok = [(PR, r) for PR, r in grid if r.get("ok")]
         if not ok:
@@ -1278,7 +1283,7 @@ def optimize_topo(t):
         if best is None or score(rb) > score(best[1]):
             best = (PRb, rb, prm)
     fixed = None
-    for prm in prm_grid(t):
+    for prm in grid_p:
         r = _safe(t, A["PR0"], prm)
         if r.get("ok") and (fixed is None or score(r) > score(fixed[1])):
             fixed = (A["PR0"], r, prm)
@@ -1308,6 +1313,16 @@ def finish(r):
     clean["hx"] = hx
     clean["parts"] = pa
     clean["exergy"] = exa
+    clean["T41_for_G_cap_C"] = None
+    if not r["limits"]["G_ok"]:
+        def fG(T):
+            rr = _safe(r["topo"], r["PR"], dict(r["prm"], T41_C=T))
+            return (rr["W_air"] - A["G_cap"]) if rr.get("ok") else 1.0
+        try:
+            if fG(1250.0) < 0:
+                clean["T41_for_G_cap_C"] = brentq(fG, A["T41_C"], 1250.0, xtol=0.5)
+        except Exception:  # noqa: BLE001
+            pass
     return clean
 
 
@@ -1370,6 +1385,27 @@ def study_reformer():
         W95 = float(np.interp(target, Xc, W)) if Xc[-1] >= target else None
         kin.append(dict(P_bar=P_bar, T_C=T_C, sc=sc, X_eq=Xeq, X_end=float(Xc[-1]), W95_kg_per_molCH4_s=W95))
     return dict(equilibrium=rows, kinetics=kin)
+
+
+def _opt_trec800(t):
+    return optimize_topo(t, extra=dict(T_rec_max=800.0))
+
+
+def study_wall(res_best):
+    """чувствительность печатной сердцевины рекуператора к стенке и каналу (LPBF): объём, масса, модули"""
+    rows = []
+    o = res_best
+    rr = _safe(o["topo"], o["opt"]["PR"], o["opt"]["prm"], detail=True)
+    keep = dict(HX_TECH["lpbf"])
+    for Dh, t in ((2.0e-3, 0.35e-3), (2.0e-3, 0.25e-3), (1.5e-3, 0.25e-3), (1.5e-3, 0.20e-3), (3.0e-3, 0.5e-3)):
+        HX_TECH["lpbf"].update(Dh=Dh, t=t)
+        h = [x for x in hx_list(rr, "lpbf") if x["name"] == "рекуператор"][0]
+        rows.append(dict(Dh_mm=Dh * 1e3, t_mm=t * 1e3, V_core_m3=h["V_core_m3"], mass_kg=h["mass_kg"], modules=h["modules"],
+                         L_m=h["L_m"], A_front_m2=h["A_front_m2"]))
+    HX_TECH["lpbf"].clear()
+    HX_TECH["lpbf"].update(keep)
+    foil = [x for x in hx_list(rr, "foil") if x["name"] == "рекуператор"][0]
+    return dict(key=o["key"], lpbf=rows, foil=dict(V_core_m3=foil["V_core_m3"], mass_kg=foil["mass_kg"], L_m=foil["L_m"]))
 
 
 def crosscheck_gtu_cycle():
@@ -1477,7 +1513,10 @@ def main():
     print("ламинарные постоянные:", lamc)
     with ProcessPoolExecutor(max_workers=4) as exe:
         res = list(exe.map(optimize_topo, L, chunksize=2))
-    print(f"перебор: {time.time() - t0:.0f} с")
+        print(f"перебор: {time.time() - t0:.0f} с")
+        L8 = [t for t in L if t["rec"] and t["pgc"] == "none" and not t["ibc"] and t["tcr"] in ("none", "fh")]
+        res800 = list(exe.map(_opt_trec800, L8, chunksize=2))
+    print(f"T_rec_max 800 °C: {time.time() - t0:.0f} с")
     tech = "lpbf"
     rows = []
     for o in res:
@@ -1513,6 +1552,11 @@ def main():
         murray = dict(key=rec_best["key"], gas_lam=murray_tree(gin.m * W1, rho, mu, HX_TECH[tech]["Dh"], Afree, exponent=3.0),
                       gas_turb=murray_tree(gin.m * W1, rho, mu, HX_TECH[tech]["Dh"], Afree, exponent=7.0 / 3.0),
                       dP_budget_gas_Pa=(1 - A["dp_core_share"]) * A["dp_rg"] * gin.P)
+    rows800 = [f for o in res800 for f in [flat(o, "opt", tech)] if f]
+    sel800 = [r for r in rows800 if r["limits_ok"]]
+    front800 = sorted([sel800[i] for i in pareto(sel800, [("eff_el", 1), ("added", -1), ("V_added_m3", -1)])],
+                      key=lambda r: (r["added"], -r["eff_el"])) if sel800 else []
+    wall = study_wall([x for x in res if x["key"] == rec_best["key"]][0]) if rec_best else None
     # Plug&Play реперы: пакеты Taurus 60 GS и Mercury 50 (тот же класс мощности, с рекуператором)
     m50 = IN["m50"]
     v_t60 = IN["pkg"][0] * IN["pkg"][1] * IN["pkg"][2]
@@ -1538,11 +1582,14 @@ def main():
         trl=TRL, trl_note=TRL_NOTE, pack_reference=pack_ref,
         n_topologies=len(L), base=dict(key=base["key"], pr135=base["pr135"], opt=base["opt"]),
         results=res, pareto_lpbf=front, pareto_lpbf_pnp=front_p, recup_tradeoff=trade, reformer=refm, murray=murray,
+        trec800=dict(note="газ на входе в печатный рекуператор из Inconel 625 до 800 °C вместо LIM 700 °C — оценка, нужна "
+                          "проверка ползучести (навык calculix-rotor: *CREEP)", rows=rows800, pareto=front800),
+        hx_wall_sensitivity=wall,
         runtime_s=time.time() - t0,
     )
     out["feed_to_funnels"] = feed(out, rows, front, front_p)
     json.dump(out, open(os.path.join(HERE, "cycles_results.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1,
-              default=lambda x: float(x) if isinstance(x, (np.floating,)) else (x.tolist() if isinstance(x, np.ndarray) else str(x)))
+              default=_jdef)
     cols = list(rows[0].keys())
     with open(os.path.join(HERE, "cycles.csv"), "w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=cols)
@@ -1550,11 +1597,23 @@ def main():
         for r in rows:
             w.writerow({k: (round(v, 5) if isinstance(v, float) else v) for k, v in r.items()})
     plots(sel + [r for r in rows if r["point"] == "opt" and r["tech"] == tech and (not r["limits_ok"]) and not r["bound"]],
-          list(range(len(sel)))[:0] + front_i, ref_eff)
+          front_i, ref_eff)
     print(f"готово за {time.time() - t0:.0f} с; фронт Парето: {len(front)}")
     for r in front:
         print(f"  {r['added']:3d} дет. {100 * r['eff_el']:5.1f} % V {r['V_added_m3']:5.2f} м³ π {r['PR']:5.2f} TRL {r['TRL']} "
               f"P&P {r['pnp']:8s} | {r['name']}")
+
+
+def _jdef(x):
+    if isinstance(x, np.bool_):
+        return bool(x)
+    if isinstance(x, np.integer):
+        return int(x)
+    if isinstance(x, np.floating):
+        return float(x)
+    if isinstance(x, np.ndarray):
+        return x.tolist()
+    return str(x)
 
 
 def feed(out, rows, front, front_p):

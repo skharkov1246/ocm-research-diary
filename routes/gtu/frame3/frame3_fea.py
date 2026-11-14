@@ -239,7 +239,7 @@ def turbine_stage_geometry(k, tin, rho):
     M = sum(m for m, _ in parts.values())
     r_cg = sum(m * r for m, r in parts.values()) / M
     sig_root = blade_root_stress(rho, omega, r_h, h, tau)
-    sig_untap = blade_root_stress(rho, omega, r_h, st["h_exit_m"], 1.0)
+    sig_untap = blade_root_stress(rho, omega, rm - st["h_exit_m"] / 2, st["h_exit_m"], 1.0)   # = ρω²·AN²-кольцо/(2π)
     return dict(stage=k + 1, N_blades=N, pitch_m=s, s_over_cax=s_cax, c_ax_m=c_ax, chord_m=chord,
                 stagger_deg=math.degrees(stagger), beta_in_deg=math.degrees(math.atan(tan_in)),
                 beta_out_deg=math.degrees(math.atan(tan_out)), h_airfoil_m=h, r_hub_m=r_h,
