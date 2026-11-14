@@ -701,7 +701,7 @@ def evaluate(topo, PR, prm=None, detail=False):
         outs, cin, cout, Qic, Wf_ic = cool_with_air(a1, A["eps_ic"], A["dp_ic"])
         a1c = outs[0]
         comps.append(("Промохладитель воздух-воздух", [a1, cin], [a1c, cout], 0.0, 0.0))
-        comps.append(("Вентилятор промохладителя", [], [], -Wf_ic, 0.0))
+        comps.append(("Вентилятор промохладителя", [], [], -Wf_ic, Wf_ic))
         a2 = a1c.cp()
         w2 = poly(a2, a1c.P * PR / PR1, eta_stage(PR / PR1), True)
         comps.append(("Компрессор, ступень 2", [a1c], [a2.cp()], -w2, 0.0))
@@ -850,7 +850,7 @@ def evaluate(topo, PR, prm=None, detail=False):
             ibc_info = dict(useless=True)
     W_rc = mf * fuel.get("w_rc", 0.0)
     W_mech = (1 - A["eta_m"]) * (W_t + W_ibc_t)
-    comps.append(("Механические потери", [], [], -W_mech, 0.0))
+    comps.append(("Механические потери", [], [], -W_mech, W_mech))
     if ibc_info and not ibc_info.get("useless"):
         pass
     w_net = A["eta_m"] * (W_t + W_ibc_t) - w_c - W_ibc_c - W_rc - Wf_ic - Wf_ibc - w_pump
@@ -899,7 +899,7 @@ def ibc_run(exh, plow):
     w_net = A["eta_m"] * W_t - W_c - Wfan
     comps = [("Турбина IBC", [s.cp()], [t_out.cp()], W_t, 0.0),
              ("Охладитель IBC (воздух, с конденсацией)", [t_out.cp(), cin], outs + [cout], 0.0, 0.0),
-             ("Вентилятор охладителя IBC", [], [], -Wfan, 0.0),
+             ("Вентилятор охладителя IBC", [], [], -Wfan, Wfan),
              ("Компрессор IBC", [vap.cp()], [c_out.cp()], -W_c, 0.0)]
     lost = [cout] + ([outs[1]] if len(outs) > 1 else [])
     # коэффициент расхода колеса компрессора IBC на общем валу 14 950 об/мин
@@ -930,7 +930,7 @@ def exergy_account(res):
         Hin = sum(s.m * hs(s)[0] for s in ins)
         Hout = sum(s.m * hs(s)[0] for s in outs)
         dH = Hin - Hout - W - Qloss
-        Xb = T0 * Sgen if (ins or outs) else -W
+        Xb = T0 * Sgen
         rows.append(dict(node=name, X_A_kW=Xa * W1 / 1e3, X_B_kW=Xb * W1 / 1e3, energy_residual_kW=dH * W1 / 1e3))
     st = res["_streams"]
     E_fuel = sum(f[1] * res["mf"] * ex(f[2] if f[0] == "CH4" else f[2].cp(P=P0)) for f in st["fuel"]["feeds"] if f[0] != "RC")

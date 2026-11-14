@@ -1036,15 +1036,28 @@ def software():
     return f"python {platform.python_version()}, numpy {np.__version__}, scipy {scipy.__version__}, cantera {cantera.__version__}"
 
 
-def run_shard(kv, n, shard, shards, out, seed=SEED, detail=False):
+def _eval_many(args):
+    idx, n, kv, seed, detail = args
+    return [evaluate(i, n, kv, seed, detail) for i in idx]
+
+
+def run_shard(kv, n, shard, shards, out, seed=SEED, detail=False, workers=1):
+    """часть shard из shards: концепции i % shards == shard; workers - процессы внутри части (на AWS - nproc)"""
     t0 = time.time()
     idx = shard_indices(n, shard, shards)
-    recs = [evaluate(i, n, kv, seed, detail) for i in idx]
+    if workers > 1 and len(idx) > 1:
+        from concurrent.futures import ProcessPoolExecutor
+        chunks = [idx[k::workers] for k in range(workers)]
+        with ProcessPoolExecutor(workers) as ex:
+            got = {r["idx"]: r for part in ex.map(_eval_many, [(ch, n, kv, seed, detail) for ch in chunks if ch]) for r in part}
+        recs = [got[i] for i in idx]
+    else:
+        recs = _eval_many((idx, n, kv, seed, detail))
     doc = dict(method="воронка, уровень 0, часть пространства: концепции по индексу из последовательности Соболя, быстрый цикл "
                       "на таблицах gtu_explore (Cantera), геометрия и правила допустимости funnel_space, баллы parts/plugplay/"
                       "service/make; всё - оценка (README узла)",
                software=software(), date=DATE, kv=kv, target=target(kv), n=n, seed=seed, shard=shard, shards=shards,
-               fingerprint=fingerprint(n, seed), indices=idx, elapsed_s=round(time.time() - t0, 2),
+               fingerprint=fingerprint(n, seed), indices=idx, workers=workers, elapsed_s=round(time.time() - t0, 2),
                inputs=inputs(), records=recs)
     os.makedirs(out, exist_ok=True)
     path = os.path.join(out, f"funnel_space_{kv}_n{n}_s{shard:03d}of{shards:03d}.json")
@@ -1121,6 +1134,10 @@ def cross_check():
     return rows
 
 
+SELF_N = {"KV-3": 1024, "KV-1": 256, "KV-6": 512}
+SELF_WORKERS = 4
+
+
 def selfcheck(out_path=RESULTS):
     t0 = time.time()
     lineup = json.load(open(os.path.join(GTU, "gtu_lineup_results.json"), encoding="utf-8"))["lineup"]
@@ -1148,18 +1165,24 @@ def selfcheck(out_path=RESULTS):
     # сверка цикла двумя способами
     res["cross_check_cycle"] = cross_check()
     # разбиение на части: KV-3, n=256, 4 части - объединение = все индексы, пересечений нет, запись не зависит от части
-    n, S = 256, 4
+    from concurrent.futures import ProcessPoolExecutor
+    n, S = SELF_N["KV-3"], 8
     parts = [shard_indices(n, k, S) for k in range(S)]
     flat = sorted(i for p in parts for i in p)
     tt = time.time()
-    recs = [evaluate(i, n, "KV-3") for i in range(n)]
+    with ProcessPoolExecutor(SELF_WORKERS) as ex:
+        got = [r for part in ex.map(_eval_many, [(p, n, "KV-3", SEED, False) for p in parts]) for r in part]
     dt = time.time() - tt
-    by_shard = [evaluate(i, n, "KV-3") for i in parts[1][:8]]
-    same = all(json.dumps(a, sort_keys=True) == json.dumps(recs[a["idx"]], sort_keys=True) for a in by_shard)
+    recs = sorted(got, key=lambda r: r["idx"])
+    by_order = [evaluate(i, n, "KV-3") for i in reversed(parts[3][:16])]
+    same = all(json.dumps(a, sort_keys=True, default=float) == json.dumps(recs[a["idx"]], sort_keys=True, default=float) for a in by_order)
     res["sharding_check"] = dict(n=n, shards=S, union_ok=flat == list(range(n)), duplicates=len(flat) - len(set(flat)),
-                                 record_independent_of_shard=same, fingerprint=fingerprint(n))
-    res["timing"] = dict(seconds_per_concept=round(dt / n, 4), cores_used=1, note="оценка времени на одном ядре этой машины")
+                                 record_independent_of_shard_and_order=same, fingerprint=fingerprint(n))
+    res["timing"] = dict(seconds_per_concept_per_core=round(dt * SELF_WORKERS / n, 4), workers=SELF_WORKERS,
+                         note="оценка на этой машине (4 ядра); на c7a.16xlarge - 64 vCPU")
     res["debug_KV-3"] = summarize(recs)
+    near = sorted([r for r in recs if not r["feasible"]], key=lambda r: r["violation"])[:10]
+    res["debug_KV-3"]["nearest_infeasible"] = [dict(idx=r["idx"], arch=r["arch"], violation=r["violation"], reject=r["reject"]) for r in near]
     ex = {}
     for a in ARCH_KEYS:
         ok = [r for r in recs if r["arch"] == a and r["feasible"]]
@@ -1169,7 +1192,12 @@ def selfcheck(out_path=RESULTS):
             ex[a]["note"] = "пример: допустимая концепция архетипа с наибольшим баллом деталей в отладочной выборке"
     res["examples_KV-3"] = ex
     for kv in ("KV-1", "KV-6"):
-        res[f"debug_{kv}"] = summarize([evaluate(i, 64, kv) for i in range(64)])
+        m = SELF_N[kv]
+        with ProcessPoolExecutor(SELF_WORKERS) as ex:
+            rk = [r for part in ex.map(_eval_many, [(shard_indices(m, k, S), m, kv, SEED, False) for k in range(S)]) for r in part]
+        res[f"debug_{kv}"] = summarize(rk)
+        near = sorted([r for r in rk if not r["feasible"]], key=lambda r: r["violation"])[:10]
+        res[f"debug_{kv}"]["nearest_infeasible"] = [dict(idx=r["idx"], arch=r["arch"], violation=r["violation"], reject=r["reject"]) for r in near]
     res["elapsed_s"] = round(time.time() - t0, 1)
     with open(out_path, "w", encoding="utf-8") as fh:
         json.dump(res, fh, ensure_ascii=False, indent=1)
@@ -1185,6 +1213,7 @@ def main(argv=None):
     ap.add_argument("--seed", type=int, default=SEED)
     ap.add_argument("--out", default=os.environ.get("GTU_OUT", "."))
     ap.add_argument("--detail", action="store_true", help="полные разборы моделей в каждой записи")
+    ap.add_argument("--workers", type=int, default=int(os.environ.get("GTU_WORKERS", "1")), help="процессов внутри части (на AWS - nproc)")
     ap.add_argument("--selfcheck", action="store_true", help="отладка на малой выборке -> gtu_funnel_space_results.json")
     a = ap.parse_args(argv)
     if a.selfcheck:
@@ -1192,7 +1221,7 @@ def main(argv=None):
         print(json.dumps(dict(sharding=r["sharding_check"], timing=r["timing"], kv3=dict(n=r["debug_KV-3"]["n"], feasible=r["debug_KV-3"]["feasible"]),
                               cross=r["cross_check_cycle"]), ensure_ascii=False, indent=1))
         return 0
-    path, doc = run_shard(a.kv, a.n, a.shard, a.shards, a.out, a.seed, a.detail)
+    path, doc = run_shard(a.kv, a.n, a.shard, a.shards, a.out, a.seed, a.detail, max(1, a.workers))
     print(f"{path}: {len(doc['records'])} концепций, допустимых {sum(r['feasible'] for r in doc['records'])}, {doc['elapsed_s']} с, "
           f"отпечаток {doc['fingerprint']}")
     return 0

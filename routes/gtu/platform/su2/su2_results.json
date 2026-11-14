@@ -160,11 +160,20 @@
     }
    ],
    "smoke_checks": {
+    "statuses": [
+     "finished",
+     "finished",
+     "terminated"
+    ],
+    "all_stages_finished": false,
+    "iterations_in_run": 388,
     "no_divergence": true,
     "rms_rho_first_stage_start": -3.80172438,
     "rms_rho_last": -4.742389568,
     "rms_rho_drop_over_run": 0.9406651880000001,
+    "rms_rho_last_stage_drop_from_max": 0.16337825899999991,
     "rms_rho_slope_last_half_per_100": null,
+    "slope_max_per_100": -0.1,
     "mass_imbalance": 0.8835763577749003,
     "mass_sign_ok": true,
     "residuals_falling": false,
@@ -292,11 +301,19 @@
     }
    ],
    "smoke_checks": {
+    "statuses": [
+     "finished",
+     "finished"
+    ],
+    "all_stages_finished": true,
+    "iterations_in_run": 350,
     "no_divergence": true,
     "rms_rho_first_stage_start": -5.794149223,
     "rms_rho_last": -5.075217279,
-    "rms_rho_drop_over_run": 0.2989598220000005,
+    "rms_rho_drop_over_run": -0.7189319439999995,
+    "rms_rho_last_stage_drop_from_max": 0.46776049099999994,
     "rms_rho_slope_last_half_per_100": -0.9712630236472262,
+    "slope_max_per_100": -0.1,
     "mass_imbalance": 0.013715165151741199,
     "mass_sign_ok": true,
     "residuals_falling": true,
@@ -375,17 +392,24 @@
     }
    ],
    "smoke_checks": {
+    "statuses": [
+     "terminated"
+    ],
+    "all_stages_finished": false,
+    "iterations_in_run": 101,
     "no_divergence": true,
     "rms_rho_first_stage_start": -5.063591227,
     "rms_rho_last": -4.72594817,
-    "rms_rho_drop_over_run": 0.011824285999999518,
+    "rms_rho_drop_over_run": -0.3376430570000002,
+    "rms_rho_last_stage_drop_from_max": 0.011824285999999518,
     "rms_rho_slope_last_half_per_100": -0.022774588633484028,
+    "slope_max_per_100": -0.1,
     "mass_imbalance": 0.00033768927580686965,
     "mass_sign_ok": true,
-    "residuals_falling": true,
+    "residuals_falling": false,
     "mass_within_tol": true,
     "mass_tol": 0.05,
-    "passed": true
+    "passed": false
    },
    "d1_reference": {
     "m_wheel": 9.95,
@@ -467,5 +491,6 @@
    }
   },
   "conclusion": "Расхождение — в ячейках, где неподвижная стенка примыкает к вращающейся: зазор над вершиной лопатки (одна ячейка по высоте, сетка geom coarse), линия касания вершины и покрышки (зазор 0), стык вращающейся и неподвижной стенок на r2. Перед NaN там температура падает до единиц-десятков К и растёт до 1200–1860 К, M до 4–9 при средних по входу и выходу без особенностей. Покрышка вращается с колесом (стенки за колесом тоже) — расхождения нет, но это закрытое колесо со стенками, вращающимися до 1,3 r2 (давление на выходе в разы выше физического), прогон остановлен вручную на 131-й итерации второй стадии."
- }
+ },
+ "smoke_checks_note": "14.11.2026, независимая проверка: smoke_checks всех трёх прогонов пересчитаны run_case.py --parse с исправленными критериями (все стадии finished; наклон rms[Rho] второй половины последней стадии <= -0,1 порядка на 100 итераций и конец ниже максимума стадии; дисбаланс расхода <= 5 %). Прогон В (core130_coarse_cont_p075) прежде значился прошедшим, хотя остановлен вручную и невязка за прогон выросла."
 }
