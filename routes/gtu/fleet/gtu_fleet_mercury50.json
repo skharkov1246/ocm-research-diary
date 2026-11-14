@@ -1,0 +1,110 @@
+{
+ "model": "Mercury 50",
+ "records": [
+  {
+   "variant": "GS",
+   "power_kW": 4600,
+   "heat_rate_kJ_kWh": 9350,
+   "eff_pct": 38.5,
+   "exh_flow_kg_s": 17.69,
+   "exh_temp_C": 365,
+   "PR": 9.9,
+   "comp_stages": "10 (axial)",
+   "turb_stages": "2 (reaction)",
+   "shafts": "single",
+   "out_rpm": null,
+   "pkg_L_m": 11.1,
+   "pkg_W_m": 3.2,
+   "pkg_H_m": 3.7,
+   "pkg_kg": 45700,
+   "engine_kg": null,
+   "engine_L_m": null,
+   "engine_D_m": null,
+   "extra": {
+    "power_hp": null,
+    "exh_flow_kg_h": 63700,
+    "exh_flow_lb_h": 140400,
+    "inlet_airflow_kg_s": 17.9,
+    "inlet_airflow_lb_s": 39.2,
+    "inlet_airflow_note": "UNRESOLVED. DSM50PG/1118 and /0113 print 'Inlet Airflow: 39.2 lb/sec (17.9 kg/sec)': kg and lb disagree - 39.2 lb/s = 17.78 kg/s, 17.9 kg/s = 39.46 lb/s. 17.9 kept as the printed kg figure (same convention as taurus70). Both figures exceed the same sheet's exhaust flow 63 700 kg/h = 17.69 kg/s (and BPGPH/0525 17.8 kg/s), although fuel adds ~0.25 kg/s (11.95 MJ/s LHV); mass balance would give ~17.4-17.6 kg/s. Not used by gtu_family.py (air = exhaust/(1+FAR)). Confirm with Solar before sizing the inlet.",
+    "turbine_type_code": "T-6401 (Turbomach handbook BPHBTBM/512)",
+    "turbine_max_rpm": null,
+    "out_rpm_unverified": "14179 rpm (50 Hz) / 14186 rpm (60 Hz) - Modern Power Systems articles, seen only as search-index extracts; host not allowed in this session, not opened. Not in any opened Solar document.",
+    "gen_rpm": "1500 or 1800 (50 or 60 Hz)",
+    "main_reduction_drive": "Epicyclic; vibration monitoring: acceleration transducer",
+    "recuperator": "Primary Surface Type",
+    "combustor": "Annular type, Ultra-Lean-Premix combustion system, 8 fuel injectors, single torch ignitor system",
+    "compressor_case": "Vertically Split Case",
+    "turbine_rotation": "Clockwise",
+    "starter": {
+     "type": "electric: 'Start System – Direct Drive AC Motor with VFD Control' (DSM50PG/1118, /0113); Turbomach 2012: 'Start system: AC'",
+     "power_kW": null
+    },
+    "fuel_gas_kPa": null,
+    "fuel": "Natural gas (standard); landfill gas*, digester gas* (options). Turbomach 2012: NG/LBTU. Gas only - no liquid fuel listed.",
+    "lube": {
+     "description": "Integrated Lube Oil System: Main/Pre/Post Lube Pump, Backup Lube Pump; Air/Oil Cooler; Water/Oil Lube Oil Cooler (option); Integral Lube Oil Tank; Lube Oil Tank Heater; Simplex Lube Oil Filter (Duplex option); Oil Mist Eliminator; Vent Flame Trap",
+     "tank_L": null,
+     "oil_flow": null,
+     "heat_rejection_kW": null
+    },
+    "variable_geometry": {
+     "description": "'10-Stage Axial Compressor – Variable Inlet Guide Vanes and Stators'",
+     "vigv": true,
+     "variable_stator_rows": null
+    },
+    "bleed_valves": null,
+    "accessory_gearbox": null,
+    "bearings": {
+     "type": "Engine: '2 Radial: Viscous Damped Roller Bearings' + '1 Thrust/Radial: Viscous Damped Split Inner Race Ball Bearing' (rolling-element bearings). Generator: Sleeve Bearings.",
+     "count": 3
+    },
+    "engine_removal": {
+     "method": "axial, out of the package end opposite the generator (which equipment sits at that end is not labelled on the drawing; 'axial' is read from the clearance strip lying along the package axis - the removal method is not described in text): drawing DSM50PG-003C shows a 4.9 m (16'0\") long x 4.0 m (13'0\") wide area beyond the 11.1 m package end labelled 'MINIMUM CLEARANCE REQUIRED FOR ENGINE REMOVAL'; generator removal area 3.4 m (11'3\") x 3.4 m (11'0\") at the side of the generator end",
+     "time_h": null
+    },
+    "inlet_dp_kPa": 0,
+    "exhaust_dp_kPa": 0,
+    "dp_note": "0 = rating basis 'No inlet/exhaust losses' (DSM50PG/1118), not a package duct loss. For steam-production figures Solar assumes: BPGPSG/116 (2016) inlet 100 mm H2O, exhaust 254 mm H2O, 'Mercury 50 175 mm (7 in.)'; BPGPH/0525 (2025) 100 mm / 254 mm H2O (no Mercury exception printed); Turbomach 2012: 75 / 250 mmH2O.",
+    "generator": "4 pole, 3 phase, 6 wire, wye connected, synchronous with permanent magnet exciter; open drip-proof; sleeve bearings; 3300/6600/11000 V (50 Hz), 4160/6900/12470/13800 V (60 Hz)",
+    "control": "Turbotronic on-skid gas turbine control system (Turbotronic 4 in /0113 edition)",
+    "nox_ppm": "5 ppm (BPGPH/0525, minimum engine capability on natural gas)",
+    "rating_basis": "ISO 15 C (59 F), sea level, RH 60%, no inlet/exhaust losses, natural gas LHV 35 MJ/Nm3 (940 Btu/scf), no accessory losses, efficiency measured at generator terminals",
+    "pkg_basis": "DSM50PG/1118: package height 3.7 m and weight 45 700 kg; the height basis is NOT printed on the Mercury sheet (unlike DS70PG/1118, which says 'enclosed height'); read as the enclosed package because the enclosure is standard scope ('Enclosure – Complete Package', no option mark) and the drawing is titled 'Enclosure Access and Maintenance Space'; dry/wet not stated on the sheet (BPGPSG/116 heads the same 3.7 m / 45 660 kg row 'Dry Weight'). BPGPH/0525 handbook: 3.5 m 'unenclosed height', 45,700 kg 'Dry weight'.",
+    "md_variant": "not offered: Mercury 50 is absent from the 'Compressor Set/Mechanical Drive Specifications' table of BIL/0622 (2022); MD/compressor-set rows list Saturn 20, Centaur 40/50, Taurus 60/70, Mars 90/100, Titan 130/250/350 only."
+   },
+   "notes": "Primary documents (opened): Solar data sheet DSM50PG/1118 (2018, scene7 CM20150710-52396-21070) - technically identical to DSM50PG/0113 (2013, scene7 C10553041) except control-system naming; cross-checked with BPGPH/0525 handbook (2025), BIL/0622 (2022), BPGPSG/116 (2016), Turbomach BPHBTBM/512 (2012). Manufacturer product page solarturbines.com not openable (Akamai 'Access Denied' 403 / empty reply to curl, DNS refused for WebFetch); its values seen only in search-index extracts: 4600 kWe, 8865 Btu/kWh (9350 kJ), 140,400 lb/hr (63,700 kg/hr), 690 F (365 C) - identical to DSM50PG/1118, which is the 'Power Generation Data Sheet' the page links. eff_pct 38.5 is PUBLISHED ('Engine efficiency: 38.5% (measured at generator terminals)'); 3600/9350 = 38.50 agrees. Exhaust flow editions: DSM50PG/1118 + product page 63 700 kg/hr (140,400 lb/hr) = 17.69 kg/s (unit conversion) - TAKEN per priority of the current manufacturer page; BPGPH/0525 handbook (2025) 17.8 kg/s (39.3 lb/s); BPGPSG/116 (2016) 64.1 thousand kg/hr (141.4 thousand lb/hr); Turbomach 2012 17.82 kg/s. Spread 17.69-17.82 kg/s (0.7%). Inconsistency as published: the same data sheet gives inlet airflow 39.2 lb/sec (17.9 kg/sec) - larger than its exhaust flow 17.69 kg/s, although fuel is added; check with Solar before sizing exhaust/recuperator interfaces. Exhaust temperature: 365 C (690 F) in DSM50PG, product page, BPGPSG/116; 365 C (689 F) in BPGPH/0525; 374 C in Turbomach 2012 (older, not taken). out_rpm: no opened document publishes the turbine/gearbox-input speed; only gearbox output 1500/1800 rpm. Earlier value 14179 (50 Hz) / 14186 (60 Hz) rpm came from Modern Power Systems search extracts (host not reachable) - moved to extra.out_rpm_unverified, field set to null. Package editions: DSM50PG/1118 and /0113: L 11.1 m (36'6\"), W 3.2 m (10'5\"), H 3.7 m (12'3\"), 45 700 kg (100,700 lb) - TAKEN (package data sheet, enclosed); BIL/0622 and BPGPSG/116: 11.2 m (36'6\"), 3.2 m, 3.7 m (12'3\"), 45 660 kg (100,700 lb) - same imperial figures, different metric rounding; BPGPH/0525 handbook: 11.1 m (36'3\"), 3.2 m (10'5\"), 3.5 m (11'6\") 'unenclosed height', 45,700 kg dry; Turbomach 2012: L 13.7, W 2.9, H 6.7 m, 52 t (H and weight incl. filter system, outdoor). Engine (bare core) weight and dimensions, fuel gas pressure, starter power, lube tank volume/flow/heat rejection, number of variable stator rows, bleed valves, accessory gearbox, engine change time: not published in any opened document - null. No Mercury 50 Turbomachinery Package Specification found on manualsdir.com or scene7; siemens-energy.com and centraxgt.com not consulted (other manufacturers' sites, no Solar documents expected). Mercury 50 is GS only (no MD record).",
+   "sources": {
+    "power_kW": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150710-52396-21070 (DSM50PG/1118: 'Output Power 4600 kWe'); also https://s7d2.scene7.com/is/content/Caterpillar/C10553041, https://s7d2.scene7.com/is/content/Caterpillar/CM20190218-53670-53247 ('ISO1 Output Power MW 4.6'), https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-28113 ('Mercury 50 4600'); product page https://www.solarturbines.com/en_US/products/power-generation-packages/mercury-50.html (search extract only, not opened)",
+    "heat_rate_kJ_kWh": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150710-52396-21070 ('Heat Rate 9350 kJ/kWe-hr (8865 Btu/kWe-hr)'); also https://s7d2.scene7.com/is/content/Caterpillar/CM20190218-53670-53247 ('9,350'), https://s7d2.scene7.com/is/content/Caterpillar/C10550166 ('9350 kJ/kWe-hr')",
+    "eff_pct": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150710-52396-21070 ('Engine efficiency: 38.5% (measured at generator terminals)'); also https://s7d2.scene7.com/is/content/Caterpillar/CM20190218-53670-53247 ('Electrical Efficiency % 38.5'), https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-28113; 3600/9350 = 38.50 agrees",
+    "exh_flow_kg_s": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150710-52396-21070 ('Exhaust Flow 63 700 kg/hr (140,400 lb/hr)' -> /3600 = 17.69 kg/s); alt. https://s7d2.scene7.com/is/content/Caterpillar/CM20190218-53670-53247 ('Exhaust Gas Flow kg/s 17.8'), https://s7d2.scene7.com/is/content/Caterpillar/C10550166 ('64.1' thousand kg/hr), https://s7d2.scene7.com/is/content/Caterpillar/C10518078 ('Exhaust gas flow: kg/s 17.82')",
+    "exh_temp_C": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150710-52396-21070 ('Exhaust Temperature 365°C (690°F)'); also https://s7d2.scene7.com/is/content/Caterpillar/CM20190218-53670-53247 ('deg C 365'), https://s7d2.scene7.com/is/content/Caterpillar/C10550166 ('365 (690)')",
+    "PR": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150710-52396-21070 ('Compression Ratio: 9.9:1')",
+    "comp_stages": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150710-52396-21070 ('10-Stage Axial Compressor')",
+    "turb_stages": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150710-52396-21070 ('Turbine – 2-Stage, Reaction')",
+    "shafts": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150710-52396-21070 ('Industrial, Single-Shaft')",
+    "out_rpm": "not published in opened documents; https://s7d2.scene7.com/is/content/Caterpillar/CM20150710-52396-21070 gives only 'Main Reduction Drive • Epicyclic – 1500 or 1800 rpm (50 or 60 Hz)'; unverified extract: https://www.modernpowersystems.com/analysis/mercury-50-introduces-high-efficiency-recuperation-to-stationary-gas-turbines/",
+    "pkg_L_m": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150710-52396-21070 (drawing DSM50PG-003C: '11.1 m (36' 6\")'); alt. https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-28113 and https://s7d2.scene7.com/is/content/Caterpillar/C10550166 ('11.2 (36' 6\")'), https://s7d2.scene7.com/is/content/Caterpillar/CM20190218-53670-53247 ('11.1 36' 3\"')",
+    "pkg_W_m": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150710-52396-21070 (drawing: '3.2 m (10' 5\")'); also https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-28113, https://s7d2.scene7.com/is/content/Caterpillar/C10550166, https://s7d2.scene7.com/is/content/Caterpillar/CM20190218-53670-53247",
+    "pkg_H_m": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150710-52396-21070 ('Package Height: 3.7m (12’ 3”)'); also https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-28113 ('3.7 12' 3\"'), https://s7d2.scene7.com/is/content/Caterpillar/C10550166; alt. https://s7d2.scene7.com/is/content/Caterpillar/CM20190218-53670-53247 ('3.5 11' 6\"', unenclosed height)",
+    "pkg_kg": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150710-52396-21070 ('Package Weight:  45 700 kg (100,700 lb)'); also https://s7d2.scene7.com/is/content/Caterpillar/CM20190218-53670-53247 ('45,700 100,700', dry); https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-28113 and https://s7d2.scene7.com/is/content/Caterpillar/C10550166 ('45 660 (100,700)')",
+    "engine_kg": "not published in opened documents",
+    "engine_L_m": "not published in opened documents",
+    "engine_D_m": "not published in opened documents",
+    "starter": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150710-52396-21070 ('Start System – Direct Drive AC Motor with VFD Control'); https://s7d2.scene7.com/is/content/Caterpillar/C10518078 ('Start system: AC')",
+    "fuel_gas_kPa": "not published in opened documents",
+    "lube": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150710-52396-21070 ('Integrated Lube Oil System – Main/Pre/Post Lube PumpBackupLube Pump – Air and Oil Cooler … – Integral Lube Oil Tank …'); volumes/flows not published",
+    "variable_geometry": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150710-52396-21070 ('Variable Inlet Guide Vanes and Stators'); number of variable rows not published",
+    "bleed_valves": "not published in opened documents",
+    "accessory_gearbox": "not published in opened documents",
+    "bearings": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150710-52396-21070 ('2 Radial: Viscous Damped Roller Bearings'; '1 Thrust/Radial: Viscous Damped Split Inner Race Ball Bearing'; generator 'Sleeve Bearings')",
+    "engine_removal": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150710-52396-21070 (drawing DSM50PG-003C: 'MINIMUM CLEARANCE REQUIRED FOR ENGINE REMOVAL', '4.9 m (16' 0\")', '4.0 m (13' 0\")'); also https://s7d2.scene7.com/is/content/Caterpillar/C10553041",
+    "inlet_dp_kPa": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150710-52396-21070 ('No inlet/exhaust losses' - rating basis); CHP assumption https://s7d2.scene7.com/is/content/Caterpillar/C10550166 ('Inlet Pressure Loss, H2O 100 mm (4 in.)')",
+    "exhaust_dp_kPa": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150710-52396-21070 ('No inlet/exhaust losses' - rating basis); CHP assumption https://s7d2.scene7.com/is/content/Caterpillar/C10550166 ('Exhaust Pressure Loss, H2O 254 mm (10 in.) Mercury 50 175 mm (7 in.)')",
+    "inlet_airflow_kg_s": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150710-52396-21070 ('Inlet Airflow: 39.2 lb/sec (17.9 kg/sec)')",
+    "md_variant": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-28113 ('Compressor Set/Mechanical Drive Specifications' table has no Mercury 50 row)"
+   }
+  }
+ ]
+}

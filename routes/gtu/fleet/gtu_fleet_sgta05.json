@@ -1,0 +1,929 @@
+{
+ "model": "SGT-A05",
+ "maker": "Siemens Energy (engine: Industrial 501-K); third-party package data: Centrax Gas Turbines",
+ "collected": "2026-11-14",
+ "common": {
+  "rating_editions": "All opened 2026-11-14. (C) current global and US pages, identical; portfolio PDF Jan 2026 (p. 20 data sheet, p. 24 PG table) - KB5S 4.0 MW(e), 29.7 %, 12,137 kJ/kWh, 14,200 rpm, PR 10.3, 15.4 kg/s, 560 C; KB7S 5.4 MW(e), 32.3 %, 11,146, 14,600 rpm, PR 14.2, 21.3 kg/s, 495 C; KB7HE 5.8 MW(e), 33.2 %, 10,889, 14,600 rpm, PR 14.4, 21.4 kg/s, 520 C. Portfolio imperial layer prints KB7HE PR '14.1 : 1' (metric layer 14.4). (B) poster (PDF 2021-08, linked from the page): same except KB7HE exhaust '508 °C (972 °F)' and KB7S '495 °C (921 °F)'. (B') brochure at the page's link (PDF 2021-09, file name '2018-v8'): same as C except KB7HE exhaust '508 °C (946 °F)'. (A) CN and BR pages: same as C except KB7HE efficiency 32.7 % and °F pairs 925 / 965 °F. The prelim record's '2018 brochure: 11,152 kJ/kWh, PR 13.9' (KB7S) and '10,848 kJ/kWh, PR 14.0' (KB7HE) were not found in any opened document: the document at the cited assets URL prints 11,146 / 14.2 and 10,889 / 14.4; 11,152 and 10,848 equal the Btu figures 10,570 and 10,281 Btu/kWh converted; PR 13.9 / 14.0 stay unverified (the etn.global copy is outside the allowed network). Rule: current manufacturer page (C) for power, heat rate, efficiency, flow, temperature, PR, speed; package dimensions from the same page; package systems from the Centrax package datasheets (third party, Siemens-authorised packager).",
+  "rating_basis": "Brochure p. 5 footnote: 'Nominal uninstalled new engine performance with no inlet or exhaust ducting losses, ISO conditions, 0% relative humidity, gaseous fuel with lower heating value of 20,400 BTU/lb (47,496 kJ/kg). Assumes 98.5% generator efficiency and 60 kw shaft gearbox power loss. Power, efficiency and heat rate all based on electrical power output measured at generator terminals.' Portfolio p. 3: 'All simple cycle and mechanical drive performance data in this document are gross values at ISO ambient conditions.' Page: conditions not printed ('Gross efficiency'). Centrax (other basis): 15 °C, 0 m, 1013 mbar, 60 % RH, LHV 47497 kJ/kg, '* Inlet losses, exhaust losses & package auxiliary losses are excluded' - Centrax KB5 3903 kWe / 12,557 kJ/kWh / 15.7 kg/s / 555 C; KB7HE 5624 kWe / 11,245 / 21.3 / 515 C (not mixed with Siemens ISO values).",
+  "pkg_basis": "Siemens page and portfolio p. 20: 'Power generation package | Approx. weight 35,000 kg (85,980 lb) | Length 9 m (29.5 ft) | Width 2.7 m (8.9 ft) | Height 3.1 m (10.2 ft)'; 'Note: Above dimensions exclude inlet filter housing and exhaust stack. For power generation, the AC generator is included.' One package for all three variants. Centrax CXA05 KB5 and KB7 HE drawings (identical): 11522 mm / 453 in long, 4755 mm / 187 in wide, 7182 mm / 282 in high, 1503 mm / 57 in overhang, 'Approx total weight = 55000 KG / 121254 lbs' - package with acoustic enclosure, air intake and exhaust on top (drawing), other basis, not mixed. Centrax page: 'generator set load of only 40 tonnes'. Centrax CXA05 Mobile drawing (labels read from the vector drawing): trailer 15157 [596.72\"], overall with tractor 16154 [636\"], height 4204 [165.5\"] ± 25.4, width 2611 [102.81\"] door latches, 'CG OF GENSET PACKAGE 44892.8 KG [98970 LBS]'.",
+  "pkg_check": "Length/width/height pairs consistent (29.5 ft = 8.99 m; 8.9 ft = 2.71 m; 10.2 ft = 3.11 m). Weight pair NOT consistent: 85,980 lb = 39,000 kg; 35,000 kg = 77,162 lb; the same pair is printed on global, US, CN, BR pages and in the portfolio. Centrax drawing pairs: 121254 lb = 55,000 kg (ok); 187 in = 4750 mm (4755), 282 in = 7163 mm (7182), 453 in = 11506 mm (11522), 57 in = 1448 mm (1503) - Centrax inch values loose.",
+  "engine_envelope": "Siemens brochure p. 11: 'The SGT-A05 measures less than 2.7 meters (8 feet) long and weighs less than 766 Kg (1,690 pounds).' Upper bounds, not values; 8 ft = 2.44 m does not match 2.7 m (8.86 ft); 1,690 lb = 766.6 kg. Centrax: KB5 'Aero-derivative single shaft design 800kg (1764lb)'; KB7HE '1000kg (2205lb)' (both above the Siemens bound - Centrax mass likely with boost module/accessories; basis not stated). Diameter not published. engine_kg left null in all PG records (skeptic 2026-11-14): Siemens bound and Centrax values exclude each other, basis of neither stated.",
+  "fuel_gas": "Supply pressure not published (Siemens page, brochure, poster, portfolio; Centrax datasheets). Published: 'On-skid fuel system includes all components needed to control fuel during start-up and operation' (brochure p. 13); fuels natural gas, liquid (DF-2), dual, mid/low BTU, steam and water injection, DLE; H2: page 'equipped with WLE burners, is capable to burn up to 15 vol% of hydrogen'; brochure 'capable of operating on 30% vol. hydrogen with minimal hardware changes on DLE and WLE systems'; Centrax 'Up to 30% hydrogen fuel mix'.",
+  "combustor": "Centrax: '6 axial flow combustion chambers (cans)', 'Standard ignition system, 2 exciters and 2 ignitors'. Siemens: three combustion systems (standard, WLE, DLE 25 vppm NOx / 50 vppm CO).",
+  "maintenance": "Page: 'A direct core engine exchange is possible and can be executed in as little as 12 hours.'; 'up to seven years baseload duty between full overhaul'. Brochure p. 11 (2021): 'A direct core engine exchange is possible and can be executed in a single 8 hr work shift.'; 'up to 32,000 hours baseload duty between full overhaul'. Start: page 'full power available within 60 seconds'; portfolio p. 20 'Full engine power available within 60-90 seconds in all conditions, pending local and package requirements.'",
+  "interface": "Output flange, coupling, mounting feet, inlet/exhaust flanges, rotation: not published. Published: single shaft, cold end (compressor end) power take-off ('Single shaft cold end drive', brochure p. 8; Centrax 'Power take-off shaft assembly (cold end drive)'); package epicyclic gearbox to 1500/1800 rpm, 4-pole generator, 'Close-coupled generator/gearbox' (Centrax); exhaust 'Axial exhaust exit' (Centrax). Centrax general CXA05 page says 'Package not bolted down' while the datasheets say 'Transmits all package loads to the foundation via anchor bolts' - conflicting, not resolved.",
+  "md_offer": "No mechanical-drive rating is published for SGT-A05: the page has only 'Simple cycle power generation'; the portfolio Jan 2026 mechanical-drive tables (p. 24, metric and imperial layers) list no SGT-A05; the brochure covers power generation only. Historical two-shaft industrial 501-K drive versions were not found in any opened document.",
+  "track_note": "gtu-fleet skill (ocm-research-diary, section 2): 'SGT-A05 есть в предварительном файле, но в перечне трека не назван - без решения владельца не заводить'. This file is a scratchpad verification result only; it was not added to routes/gtu/fleet.",
+  "code_note": "eff_pct values are the published 'Gross efficiency'; 3600/heat_rate is given in check. No value here is computed except unit conversions in check/derived."
+ },
+ "records": [
+  {
+   "model": "SGT-A05 KB5S",
+   "variant": "PG",
+   "power_kW": 4000,
+   "heat_rate_kJ_kWh": 12137,
+   "eff_pct": 29.7,
+   "exh_flow_kg_s": 15.4,
+   "exh_temp_C": 560,
+   "PR": 10.3,
+   "comp_stages": "14",
+   "turb_stages": "4",
+   "shafts": "single (single-shaft, cold end drive)",
+   "out_rpm": "14200 rpm - engine (single shaft) 'Turbine speed' = input of the package epicyclic gearbox; generator 1500 (50 Hz) / 1800 (60 Hz) rpm (Centrax)",
+   "pkg_L_m": 9.0,
+   "pkg_W_m": 2.7,
+   "pkg_H_m": 3.1,
+   "pkg_kg": null,
+   "engine_kg": null,
+   "engine_L_m": null,
+   "engine_D_m": null,
+   "extra": {
+    "power_at": "generator terminals, gross ISO ('Power output | 4.0 MW(e) | 5.4 MW(e) | 5.8 MW(e)', 'Gross efficiency'; brochure: 'based on electrical power output measured at generator terminals', 98.5 % generator efficiency and 60 kW gearbox loss assumed)",
+    "out_rpm_at": "engine (single shaft) speed = input speed of the package epicyclic reduction gearbox",
+    "driven_rpm": "1500 (50 Hz) / 1800 (60 Hz) - third party Centrax: 'Reduce engine speed down to 1500rpm (50Hz) or 1800rpm (60Hz)', generator '4 poles'",
+    "gearbox": "package epicyclic speed reduction gearbox (Centrax 'Epicyclic speed reduction gearbox'); Siemens brochure rating assumes '60 kw shaft gearbox power loss'",
+    "power_take_off": "cold end (compressor end) drive: Siemens brochure KB5S 'Single shaft cold end drive'; Centrax 'Power take-off shaft assembly (cold end drive)'",
+    "fuel_gas_kPa": null,
+    "inlet_dp_kPa": 0.0,
+    "exhaust_dp_kPa": 0.0,
+    "inlet_exhaust_dp_note": "0 = rating basis, not package dp: brochure 'Nominal uninstalled new engine performance with no inlet or exhaust ducting losses'; brochure curves 'excluding package inlet and outlet losses but including gearbox and generator losses'; Centrax '* Inlet losses, exhaust losses & package auxiliary losses are excluded'. Actual package inlet and exhaust pressure losses are not published.",
+    "variable_geometry": {
+     "vigv": null,
+     "variable_stator_rows": null,
+     "text": "Not mentioned in any opened document (Siemens page, poster, brochure, portfolio; Centrax datasheets). Surge protection is by blow-off valves (Centrax)."
+    },
+    "accessory_gearbox": true,
+    "accessory_gearbox_note": "Siemens brochure p. 14 cutaway 'SGT-A05 KB7S gas turbine' labels 'Accessory Drive Housing'; Centrax: 'Gearbox driven main lube oil pump' (which gearbox not stated).",
+    "engine_removal": "Centrax package: 'Integral engine removal jib beam and gearbox maintenance beam.', 'Baseplate designed for single point lift'; Siemens brochure p. 13: 'Jib boom provides easy installation or removal of gas turbine.'; page: 'A direct core engine exchange is possible and can be executed in as little as 12 hours.' (brochure 2021: 'in a single 8 hr work shift'). Removal direction, lift weight and clearances not published.",
+    "exhaust": "Centrax: 'Axial exhaust exit', 'Thermal expansion compensator', 'Thermal / Acoustic shroud'",
+    "gg_rpm": null,
+    "inlet_air_flow_kg_s": null,
+    "see_common": "rating_editions, rating_basis, pkg_basis, pkg_check, engine_envelope, fuel_gas, combustor, maintenance, interface, md_offer, track_note",
+    "starter": {
+     "type": "electro-hydraulic",
+     "kW": 132,
+     "basis": "third party Centrax CXA05 package: 'Electro-hydraulic start system, 132kW 3 phase AC motor' (Mobile: 'Start system incoprorating 132kW 3 phase AC motor' + 'Diesel generator to provide black start capability'). Siemens page: 'Several types of start systems are available depending on your requirements' - starter is package-specific."
+    },
+    "lube": {
+     "tank_L": 1000,
+     "oil_flow": null,
+     "heat_rejection_kW": null,
+     "basis": "third party Centrax CXA05 package (KB5 and KB7 HE datasheets): '1000ltr integral oil tank is incorporated within the baseplate'; 'Gearbox driven main lube oil pump', 'AC driven priming pump', 'No requirement for a lube oil supply after package shutdown due to the type of engine bearings utilised, no emergency lube oil pumps or associated power supplies needed'; 'Oil to air heat exchanger with safe area axial fans'. Siemens brochure p. 13: 'Common synthetic lube oil system for both engine and package'. Oil flow and heat rejection not published. Option on KB5 datasheet: 'Water to oil heat exchanger*'."
+    },
+    "bleed_valves": {
+     "count": 8,
+     "text": "Centrax KB5: 'Pressure ratio 10.3:1, 8 blow-off valves to prevent compressor surge'"
+    },
+    "bearings": {
+     "type": "rolling element",
+     "count": 5,
+     "text": "Centrax KB5: '5 main rolling element bearings – no DC standby rundown pump required'"
+    },
+    "engine_L_upper_bound_m": 2.7,
+    "engine_kg_siemens_bound": "< 766 kg (1,690 lb), brochure p. 11, whole SGT-A05 family",
+    "conflicts": [
+     {
+      "field": "pkg_kg",
+      "values": [
+       "35,000 kg (page metric; portfolio p. 20 metric; CN/BR pages)",
+       "39,000 kg (the same line's '85,980 lb' = 38,999.9 kg; non-round, i.e. converted from 39,000 kg)",
+       "~40,000 kg (third party Centrax: 'generator set load of only 40 tonnes')",
+       "55,000 kg (Centrax drawing 'Approx total weight = 55000 KG / 121254 lbs' - with enclosure and air intake, other basis)"
+      ],
+      "source": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+      "taken": null,
+      "why": "the manufacturer line contradicts itself (35,000 kg vs 85,980 lb = 39,000 kg) and no second Siemens document gives an independent value; the imperial figure and Centrax 40 t point to 39-40 t - size lifting and foundation for >= 40 t, package with enclosure and intake 55 t"
+     },
+     {
+      "field": "engine_kg",
+      "values": [
+       "800 kg (1764 lb) - Centrax KB5 datasheet",
+       "< 766 kg (1,690 lb) - Siemens brochure p. 11, family statement"
+      ],
+      "source": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB5-web.pdf",
+      "taken": null,
+      "why": "skeptic 2026-11-14: unresolved - OEM Siemens brochure (2021-09, p. 11) bounds the SGT-A05 engine at 'less than 766 Kg (1,690 pounds)' (1,690 lb = 766.6 kg), the Siemens-listed packager Centrax prints 'Aero-derivative single shaft design 800kg (1764lb)' (1764 lb = 800.1 kg) for KB5; the two exclude each other unless the mass bases differ, and neither document states its basis (bare engine vs with accessories / PTO shaft). Third-party value is for cross-check only (gtu-fleet skill, section 3); no second source - taken null. Size lifting for >= 800 kg."
+     },
+     {
+      "field": "rating (third party)",
+      "values": [
+       "Siemens 4.0 MW(e), 12,137 kJ/kWh, 15.4 kg/s, 560 C (0 % RH)",
+       "Centrax 3903 kWe, 12,557 kJ/kWh, 15.7 kg/s, 555 C, '29%' (60 % RH)"
+      ],
+      "source": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB5-web.pdf",
+      "taken": "Siemens",
+      "why": "manufacturer page; Centrax on another basis (60 % RH)"
+     }
+    ],
+    "check": "Second document: page = US page = poster = brochure p. 5 = portfolio p. 24 (metric and imperial layers) for power, efficiency, heat rate, speed, PR, flow, temperature. Internal: 11,504 Btu/kWh x 1.05506 = 12,137 kJ/kWh; 3600/12,137 = 29.66 % vs 29.7 %; 34.0 lb/s = 15.42 kg/s; 1,040 F = 560.0 C. Energy balance q = G*1.10*(T-15)/(P*(100/eta-1)) = 0.975 (band 0.88-1.06). Third party Centrax KB5: 3903 kWe, 15.7 kg/s, 555 C, q = 0.96."
+   },
+   "sources": {
+    "pkg_L_m": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Physical dimensions and weight'",
+     "quote": "Length | 9 m (29.5 ft)"
+    },
+    "pkg_W_m": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Physical dimensions and weight'",
+     "quote": "Width | 2.7 m (8.9 ft)"
+    },
+    "pkg_H_m": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Physical dimensions and weight'",
+     "quote": "Height | 3.1 m (10.2 ft)"
+    },
+    "pkg_basis": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Physical dimensions and weight'",
+     "quote": "Note: Above dimensions exclude inlet filter housing and exhaust stack. For power generation, the AC generator is included."
+    },
+    "pkg_kg_conflict": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Physical dimensions and weight'",
+     "quote": "Approx. weight | 35,000 kg (85,980 lb)"
+    },
+    "pkg_alt_centrax": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB5-web.pdf",
+     "doc": "third party: Centrax CXA05 KB5 datasheet p. 1 drawing",
+     "quote": "11522mm / 453in | 4755mm / 187in | 7182mm / 282in | Approx total weight = 55000 KG / 121254 lbs"
+    },
+    "gen_set_load": {
+     "url": "https://centraxgt.com/products/generator-set-cxa05/",
+     "doc": "third party: Centrax CXA05 product page",
+     "quote": "generator set load of only 40 tonnes"
+    },
+    "shafts": {
+     "url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf",
+     "doc": "Siemens brochure p. 8 (KB5S) + SGT-A05 page (https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html), 'SGT-A05 oil and gas power generation package'",
+     "quote": "Single shaft cold end drive | A single-shaft version is available for constant speed operations in onshore and offshore configurations"
+    },
+    "driven_rpm": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB5-web.pdf",
+     "doc": "third party: Centrax CXA05 KB5 3.9MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB5'",
+     "quote": "Epicyclic speed reduction gearbox | Reduce engine speed down to 1500rpm (50Hz) or 1800rpm (60Hz)"
+    },
+    "rating_basis": {
+     "url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf",
+     "doc": "Siemens brochure p. 5 footnote (PDF text layer splits the first word as '*N ominal')",
+     "quote": "Nominal uninstalled new engine performance with no inlet or exhaust ducting losses, ISO conditions, 0% relative humidity, gaseous fuel with lower heating value of 20,400 BTU/lb (47,496 kJ/kg). Assumes 98.5% generator efficiency and 60 kw shaft gearbox power loss."
+    },
+    "inlet_dp_kPa": {
+     "url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf",
+     "doc": "Siemens brochure p. 5 footnote",
+     "quote": "no inlet or exhaust ducting losses"
+    },
+    "exhaust_dp_kPa": {
+     "url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf",
+     "doc": "Siemens brochure p. 5 footnote",
+     "quote": "no inlet or exhaust ducting losses"
+    },
+    "starter": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB5-web.pdf",
+     "doc": "third party: Centrax CXA05 KB5 3.9MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB5'",
+     "quote": "Electro-hydraulic start system, 132kW 3 phase AC motor"
+    },
+    "lube": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB5-web.pdf",
+     "doc": "third party: Centrax CXA05 KB5 3.9MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB5'",
+     "quote": "1000ltr integral oil tank is incorporated within the baseplate"
+    },
+    "accessory_gearbox": {
+     "url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf",
+     "doc": "Siemens brochure p. 14, cutaway 'SGT-A05 KB7S gas turbine'",
+     "quote": "Accessory Drive Housing"
+    },
+    "engine_removal": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB5-web.pdf",
+     "doc": "third party: Centrax CXA05 KB5 3.9MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB5'",
+     "quote": "Integral engine removal jib beam and gearbox maintenance beam."
+    },
+    "engine_removal_time": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page, 'Service'",
+     "quote": "A direct core engine exchange is possible and can be executed in as little as 12 hours."
+    },
+    "power_take_off": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB5-web.pdf",
+     "doc": "third party: Centrax CXA05 KB5 3.9MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB5'",
+     "quote": "Power take-off shaft assembly (cold end drive)"
+    },
+    "power_kW": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Performance data for simple cycle power generation'",
+     "quote": "Power output | 4.0 MW(e)"
+    },
+    "heat_rate_kJ_kWh": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Performance data for simple cycle power generation'",
+     "quote": "Heat rate | 12,137 kJ/kWh (11,504 Btu/kWh)"
+    },
+    "eff_pct": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Performance data for simple cycle power generation'",
+     "quote": "Gross efficiency | 29.7%"
+    },
+    "exh_flow_kg_s": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Performance data for simple cycle power generation'",
+     "quote": "Exhaust mass flow | 15.4 kg/s (34.0 lb/s)"
+    },
+    "exh_temp_C": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Performance data for simple cycle power generation'",
+     "quote": "Exhaust temperature | 560 °C (1,040 °F)"
+    },
+    "PR": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Performance data for simple cycle power generation'",
+     "quote": "Pressure ratio | 10.3 : 1"
+    },
+    "out_rpm": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Performance data for simple cycle power generation'",
+     "quote": "Turbine speed | 14,200 rpm"
+    },
+    "comp_stages": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB5-web.pdf",
+     "doc": "third party: Centrax CXA05 KB5 3.9MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB5'",
+     "quote": "14 Stage axial compressor"
+    },
+    "turb_stages": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB5-web.pdf",
+     "doc": "third party: Centrax CXA05 KB5 3.9MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB5'",
+     "quote": "4 Stage turbine"
+    },
+    "engine_L_upper_bound_m": {
+     "url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf",
+     "doc": "Siemens brochure p. 11",
+     "quote": "The SGT-A05 measures less than 2.7 meters (8 feet) long and weighs less than 766 Kg (1,690 pounds)."
+    },
+    "bleed_valves": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB5-web.pdf",
+     "doc": "third party: Centrax CXA05 KB5 3.9MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB5'",
+     "quote": "Pressure ratio 10.3:1, 8 blow-off valves to prevent compressor surge"
+    },
+    "bearings": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB5-web.pdf",
+     "doc": "third party: Centrax CXA05 KB5 3.9MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB5'",
+     "quote": "5 main rolling element bearings – no DC standby rundown pump required"
+    },
+    "second_doc": {
+     "url": "https://assets.siemens-energy.com/dam/7a5f8e67-fe86-4ca9-9fae-b08100f632aa/Poster-SGTA05-PRINT-3mmAnschnitt-210818-pdf_Original%20file.pdf",
+     "doc": "Siemens SGT-A05 poster (PDF 2021-08)",
+     "quote": "SGT-A05 KB5S | 4.0 MW(e) | 29.7% | 12,137 kJ / kWh / 11,504 btu / kWh | 14,200 rpm | 10.3:1 | 15.4 kg / s (34.0 lb / s) | 560 °C (1,040 °F)"
+    },
+    "third_doc": {
+     "url": "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "doc": "Siemens GT portfolio PDF (2026-01-21), p. 24 performance overview (metric layer / imperial layer)",
+     "quote": "SGT-A05 (KB5S) 4.0 MW(e) 50/60 Hz 29.7% 12,137 kJ/kWh 14,200 rpm 10.3 : 1 15.4 kg/s 560 °C"
+    },
+    "engine_kg_alt_centrax": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB5-web.pdf",
+     "doc": "third party: Centrax CXA05 KB5 3.9MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB5'",
+     "quote": "Aero-derivative single shaft design 800kg (1764lb)"
+    }
+   },
+   "notes": "Aeroderivative (Industrial 501-K, from the T56 turboprop), single shaft, cold end drive. All rating fields confirmed on the current Siemens page (global = US) and on poster, brochure and portfolio Jan 2026. eff_pct is the published 'Gross efficiency' (3600/HR = 29.66 %). Stages, bleed valves, bearings, starter, lube tank from the Centrax KB5 package datasheet (third party, Siemens-listed packager). engine_kg null (skeptic 2026-11-14): Centrax 800 kg vs Siemens '< 766 kg' - unresolved, see conflicts. pkg_kg left null: page prints '35,000 kg (85,980 lb)' and 85,980 lb = 39,000 kg (see conflicts). engine_L_m null: Siemens gives only '< 2.7 m (8 feet)' (8 ft = 2.44 m). inlet/exhaust dp 0 = rating basis (losses excluded), not the package values."
+  },
+  {
+   "model": "SGT-A05 KB7S",
+   "variant": "PG",
+   "power_kW": 5400,
+   "heat_rate_kJ_kWh": 11146,
+   "eff_pct": 32.3,
+   "exh_flow_kg_s": 21.3,
+   "exh_temp_C": 495,
+   "PR": 14.2,
+   "comp_stages": "15 (14-stage core + 1 zero-stage boost) - composite of two published statements, see notes",
+   "turb_stages": "4 (core engine commonality; count published for KB5 and KB7HE)",
+   "shafts": "single (single-shaft, cold end drive)",
+   "out_rpm": "14600 rpm - engine (single shaft) 'Turbine speed' = input of the package epicyclic gearbox; generator 1500 (50 Hz) / 1800 (60 Hz) rpm (Centrax)",
+   "pkg_L_m": 9.0,
+   "pkg_W_m": 2.7,
+   "pkg_H_m": 3.1,
+   "pkg_kg": null,
+   "engine_kg": null,
+   "engine_L_m": null,
+   "engine_D_m": null,
+   "extra": {
+    "power_at": "generator terminals, gross ISO ('Power output | 4.0 MW(e) | 5.4 MW(e) | 5.8 MW(e)', 'Gross efficiency'; brochure: 'based on electrical power output measured at generator terminals', 98.5 % generator efficiency and 60 kW gearbox loss assumed)",
+    "out_rpm_at": "engine (single shaft) speed = input speed of the package epicyclic reduction gearbox",
+    "driven_rpm": "1500 (50 Hz) / 1800 (60 Hz) - third party Centrax: 'Reduce engine speed down to 1500rpm (50Hz) or 1800rpm (60Hz)', generator '4 poles'",
+    "gearbox": "package epicyclic speed reduction gearbox (Centrax 'Epicyclic speed reduction gearbox'); Siemens brochure rating assumes '60 kw shaft gearbox power loss'",
+    "power_take_off": "cold end (compressor end) drive: Siemens brochure KB5S 'Single shaft cold end drive'; Centrax 'Power take-off shaft assembly (cold end drive)'",
+    "fuel_gas_kPa": null,
+    "inlet_dp_kPa": 0.0,
+    "exhaust_dp_kPa": 0.0,
+    "inlet_exhaust_dp_note": "0 = rating basis, not package dp: brochure 'Nominal uninstalled new engine performance with no inlet or exhaust ducting losses'; brochure curves 'excluding package inlet and outlet losses but including gearbox and generator losses'; Centrax '* Inlet losses, exhaust losses & package auxiliary losses are excluded'. Actual package inlet and exhaust pressure losses are not published.",
+    "variable_geometry": {
+     "vigv": null,
+     "variable_stator_rows": null,
+     "text": "Not mentioned in any opened document (Siemens page, poster, brochure, portfolio; Centrax datasheets). Surge protection is by blow-off valves (Centrax)."
+    },
+    "accessory_gearbox": true,
+    "accessory_gearbox_note": "Siemens brochure p. 14 cutaway 'SGT-A05 KB7S gas turbine' labels 'Accessory Drive Housing'; Centrax: 'Gearbox driven main lube oil pump' (which gearbox not stated).",
+    "engine_removal": "Centrax package: 'Integral engine removal jib beam and gearbox maintenance beam.', 'Baseplate designed for single point lift'; Siemens brochure p. 13: 'Jib boom provides easy installation or removal of gas turbine.'; page: 'A direct core engine exchange is possible and can be executed in as little as 12 hours.' (brochure 2021: 'in a single 8 hr work shift'). Removal direction, lift weight and clearances not published.",
+    "exhaust": "Centrax: 'Axial exhaust exit', 'Thermal expansion compensator', 'Thermal / Acoustic shroud'",
+    "gg_rpm": null,
+    "inlet_air_flow_kg_s": null,
+    "see_common": "rating_editions, rating_basis, pkg_basis, pkg_check, engine_envelope, fuel_gas, combustor, maintenance, interface, md_offer, track_note",
+    "starter": {
+     "type": "electro-hydraulic",
+     "kW": 132,
+     "basis": "third party Centrax CXA05 package: 'Electro-hydraulic start system, 132kW 3 phase AC motor' (Mobile: 'Start system incoprorating 132kW 3 phase AC motor' + 'Diesel generator to provide black start capability'). Siemens page: 'Several types of start systems are available depending on your requirements' - starter is package-specific. Centrax's KB7 package page links the 'KB7 HE' datasheet; no separate KB7S package datasheet."
+    },
+    "lube": {
+     "tank_L": 1000,
+     "oil_flow": null,
+     "heat_rejection_kW": null,
+     "basis": "third party Centrax CXA05 package (KB5 and KB7 HE datasheets): '1000ltr integral oil tank is incorporated within the baseplate'; 'Gearbox driven main lube oil pump', 'AC driven priming pump', 'No requirement for a lube oil supply after package shutdown due to the type of engine bearings utilised, no emergency lube oil pumps or associated power supplies needed'; 'Oil to air heat exchanger with safe area axial fans'. Siemens brochure p. 13: 'Common synthetic lube oil system for both engine and package'. Oil flow and heat rejection not published. Centrax KB7 package (datasheet titled KB7 HE); no separate KB7S datasheet."
+    },
+    "bleed_valves": {
+     "count": null,
+     "text": "Not published for KB7S. Centrax: KB5 8, KB7HE 9 blow-off valves."
+    },
+    "bearings": {
+     "type": "rolling element (family)",
+     "count": null,
+     "text": "Not published for KB7S. Centrax: KB5 '5 main rolling element bearings', KB7HE (with the same zero-stage boost module) '6 main rolling element bearings'."
+    },
+    "engine_L_upper_bound_m": 2.7,
+    "engine_kg_siemens_bound": "< 766 kg (1,690 lb), brochure p. 11, whole SGT-A05 family; KB7HE 1000 kg (Centrax); KB7S not published",
+    "kb7he_retrofit": "Siemens brochure p. 6: 'Existing SGT-A05 KB7S can easily retrofit to SGT-A05 KB7HE'; KB7HE = KB7S + 'High Efficiency Compressor upgrade'",
+    "conflicts": [
+     {
+      "field": "pkg_kg",
+      "values": [
+       "35,000 kg (page metric; portfolio p. 20 metric; CN/BR pages)",
+       "39,000 kg (the same line's '85,980 lb' = 38,999.9 kg; non-round, i.e. converted from 39,000 kg)",
+       "~40,000 kg (third party Centrax: 'generator set load of only 40 tonnes')",
+       "55,000 kg (Centrax drawing 'Approx total weight = 55000 KG / 121254 lbs' - with enclosure and air intake, other basis)"
+      ],
+      "source": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+      "taken": null,
+      "why": "the manufacturer line contradicts itself (35,000 kg vs 85,980 lb = 39,000 kg) and no second Siemens document gives an independent value; the imperial figure and Centrax 40 t point to 39-40 t - size lifting and foundation for >= 40 t, package with enclosure and intake 55 t"
+     },
+     {
+      "field": "heat_rate_kJ_kWh",
+      "values": [
+       "11,146 kJ/kWh (page, poster, brochure, portfolio metric)",
+       "11,152 kJ/kWh (= the same line's 10,570 Btu/kWh converted; also the prelim's '2018 brochure' figure, document not found)"
+      ],
+      "source": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+      "taken": 11146,
+      "why": "metric value of every Siemens document; difference 0.05 %"
+     },
+     {
+      "field": "exh_temp_C",
+      "values": [
+       "495 °C (923 °F) page, brochure, portfolio",
+       "poster '495 °C (921 °F)' (921 F = 493.9 C)",
+       "CN/BR pages '(925 °F)' (= 496.1 C)"
+      ],
+      "source": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+      "taken": 495,
+      "why": "metric value identical everywhere; only the °F pair varies"
+     },
+     {
+      "field": "PR",
+      "values": [
+       "14.2 (all opened Siemens documents)",
+       "13.9 (prelim record, '2018 brochure' - not found in the document at the cited URL; etn.global copy unreachable)"
+      ],
+      "source": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+      "taken": 14.2,
+      "why": "current page, poster, brochure, portfolio"
+     }
+    ],
+    "check": "Second document: page = US page = poster = brochure p. 5 = portfolio p. 24 (metric and imperial layers) for power, efficiency, heat rate, speed, PR, flow, temperature. Internal: 10,570 Btu/kWh x 1.05506 = 11,152 kJ/kWh (vs 11,146); 3600/11,146 = 32.30 % = 32.3 %; 47.0 lb/s = 21.32 kg/s; 923 F = 495.0 C. Energy balance q = 0.994 (band 0.88-1.06). No third-party KB7S rating found (Centrax publishes KB7HE only)."
+   },
+   "sources": {
+    "pkg_L_m": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Physical dimensions and weight'",
+     "quote": "Length | 9 m (29.5 ft)"
+    },
+    "pkg_W_m": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Physical dimensions and weight'",
+     "quote": "Width | 2.7 m (8.9 ft)"
+    },
+    "pkg_H_m": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Physical dimensions and weight'",
+     "quote": "Height | 3.1 m (10.2 ft)"
+    },
+    "pkg_basis": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Physical dimensions and weight'",
+     "quote": "Note: Above dimensions exclude inlet filter housing and exhaust stack. For power generation, the AC generator is included."
+    },
+    "pkg_kg_conflict": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Physical dimensions and weight'",
+     "quote": "Approx. weight | 35,000 kg (85,980 lb)"
+    },
+    "pkg_alt_centrax": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB5-web.pdf",
+     "doc": "third party: Centrax CXA05 KB5 datasheet p. 1 drawing",
+     "quote": "11522mm / 453in | 4755mm / 187in | 7182mm / 282in | Approx total weight = 55000 KG / 121254 lbs"
+    },
+    "gen_set_load": {
+     "url": "https://centraxgt.com/products/generator-set-cxa05/",
+     "doc": "third party: Centrax CXA05 product page",
+     "quote": "generator set load of only 40 tonnes"
+    },
+    "shafts": {
+     "url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf",
+     "doc": "Siemens brochure p. 8 (KB5S) + SGT-A05 page (https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html), 'SGT-A05 oil and gas power generation package'",
+     "quote": "Single shaft cold end drive | A single-shaft version is available for constant speed operations in onshore and offshore configurations"
+    },
+    "driven_rpm": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB5-web.pdf",
+     "doc": "third party: Centrax CXA05 KB5 3.9MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB5'",
+     "quote": "Epicyclic speed reduction gearbox | Reduce engine speed down to 1500rpm (50Hz) or 1800rpm (60Hz)"
+    },
+    "rating_basis": {
+     "url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf",
+     "doc": "Siemens brochure p. 5 footnote (PDF text layer splits the first word as '*N ominal')",
+     "quote": "Nominal uninstalled new engine performance with no inlet or exhaust ducting losses, ISO conditions, 0% relative humidity, gaseous fuel with lower heating value of 20,400 BTU/lb (47,496 kJ/kg). Assumes 98.5% generator efficiency and 60 kw shaft gearbox power loss."
+    },
+    "inlet_dp_kPa": {
+     "url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf",
+     "doc": "Siemens brochure p. 5 footnote",
+     "quote": "no inlet or exhaust ducting losses"
+    },
+    "exhaust_dp_kPa": {
+     "url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf",
+     "doc": "Siemens brochure p. 5 footnote",
+     "quote": "no inlet or exhaust ducting losses"
+    },
+    "starter": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB7-web.pdf",
+     "doc": "third party: Centrax CXA05 KB7 HE 5.7MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB7HE'",
+     "quote": "Electro-hydraulic start system, 132kW 3 phase AC motor"
+    },
+    "lube": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB7-web.pdf",
+     "doc": "third party: Centrax CXA05 KB7 HE 5.7MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB7HE'",
+     "quote": "1000ltr integral oil tank is incorporated within the baseplate"
+    },
+    "accessory_gearbox": {
+     "url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf",
+     "doc": "Siemens brochure p. 14, cutaway 'SGT-A05 KB7S gas turbine'",
+     "quote": "Accessory Drive Housing"
+    },
+    "engine_removal": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB7-web.pdf",
+     "doc": "third party: Centrax CXA05 KB7 HE 5.7MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB7HE'",
+     "quote": "Integral engine removal jib beam and gearbox maintenance beam."
+    },
+    "engine_removal_time": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page, 'Service'",
+     "quote": "A direct core engine exchange is possible and can be executed in as little as 12 hours."
+    },
+    "power_take_off": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB5-web.pdf",
+     "doc": "third party: Centrax CXA05 KB5 3.9MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB5'",
+     "quote": "Power take-off shaft assembly (cold end drive)"
+    },
+    "power_kW": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Performance data for simple cycle power generation'",
+     "quote": "Power output | 5.4 MW(e)"
+    },
+    "heat_rate_kJ_kWh": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Performance data for simple cycle power generation'",
+     "quote": "Heat rate | 11,146 kJ/kWh (10,570 Btu/kWh)"
+    },
+    "eff_pct": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Performance data for simple cycle power generation'",
+     "quote": "Gross efficiency | 32.3%"
+    },
+    "exh_flow_kg_s": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Performance data for simple cycle power generation'",
+     "quote": "Exhaust mass flow | 21.3 kg/s (47.0 lb/s)"
+    },
+    "exh_temp_C": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Performance data for simple cycle power generation'",
+     "quote": "Exhaust temperature | 495 °C (923 °F)"
+    },
+    "PR": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Performance data for simple cycle power generation'",
+     "quote": "Pressure ratio | 14.2 : 1"
+    },
+    "out_rpm": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Performance data for simple cycle power generation'",
+     "quote": "Turbine speed | 14,600 rpm"
+    },
+    "comp_stages": {
+     "url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf",
+     "doc": "Siemens brochure p. 7 (KB7S) + Centrax KB5 datasheet",
+     "quote": "A single stage boost compressor, improved vane cooling, higher strength turbine blades | Addition of single stage compressor boost module | Core engine commonality with SGT-A05 family || Centrax KB5: 14 Stage axial compressor"
+    },
+    "turb_stages": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB5-web.pdf",
+     "doc": "third party: Centrax CXA05 KB5 3.9MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB5' (KB7HE datasheet identical: '4 Stage turbine'); Siemens brochure p. 7 KB7S: 'Core engine commonality with SGT-A05 family'",
+     "quote": "4 Stage turbine"
+    },
+    "engine_L_upper_bound_m": {
+     "url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf",
+     "doc": "Siemens brochure p. 11",
+     "quote": "The SGT-A05 measures less than 2.7 meters (8 feet) long and weighs less than 766 Kg (1,690 pounds)."
+    },
+    "second_doc": {
+     "url": "https://assets.siemens-energy.com/dam/7a5f8e67-fe86-4ca9-9fae-b08100f632aa/Poster-SGTA05-PRINT-3mmAnschnitt-210818-pdf_Original%20file.pdf",
+     "doc": "Siemens SGT-A05 poster (PDF 2021-08)",
+     "quote": "SGT-A05 KB7S | 5.4 MW(e) | 32.3% | 11,146 kJ / kWh / 10,570 (btu / kWh) | 14,600 rpm | 14.2:1 | 21.3 kg / s (47.0 lb / s) | 495 °C (921 °F)"
+    },
+    "third_doc": {
+     "url": "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "doc": "Siemens GT portfolio PDF (2026-01-21), p. 24 performance overview (metric layer / imperial layer)",
+     "quote": "SGT-A05 (KB7S) 5.4 MW(e) 50/60 Hz 32.3% 11,146 kJ/kWh 14,600 rpm 14.2 : 1 21.3 kg/s 495 °C"
+    }
+   },
+   "notes": "Efficiency is now published on the Siemens page ('Gross efficiency 32.3%'; prelim said not stated) and equals 3600/HR. All rating fields confirmed on page, poster, brochure, portfolio. comp_stages is a composite of published statements, not a published count: Siemens brochure KB7S 'Addition of single stage compressor boost module' + 'Core engine commonality with SGT-A05 family', Centrax KB5 core '14 Stage axial compressor' and KB7HE '14 Stage axial compressor with additional zero stage boost module'. turb_stages 4 on the same commonality basis. engine_kg, bearing count and bleed-valve count are not published for KB7S (KB7HE values 6, 9 and the unresolved Centrax 1000 kg not transferred). Starter and lube tank are of the Centrax KB7 package (its datasheet is titled KB7 HE). pkg_kg null - see conflicts."
+  },
+  {
+   "model": "SGT-A05 KB7HE",
+   "variant": "PG",
+   "power_kW": 5800,
+   "heat_rate_kJ_kWh": 10889,
+   "eff_pct": 33.2,
+   "exh_flow_kg_s": 21.4,
+   "exh_temp_C": 520,
+   "PR": 14.4,
+   "comp_stages": "15 (14-stage axial compressor + additional zero-stage boost module)",
+   "turb_stages": "4",
+   "shafts": "single (single-shaft, cold end drive)",
+   "out_rpm": "14600 rpm - engine (single shaft) 'Turbine speed' = input of the package epicyclic gearbox; generator 1500 (50 Hz) / 1800 (60 Hz) rpm (Centrax)",
+   "pkg_L_m": 9.0,
+   "pkg_W_m": 2.7,
+   "pkg_H_m": 3.1,
+   "pkg_kg": null,
+   "engine_kg": null,
+   "engine_L_m": null,
+   "engine_D_m": null,
+   "extra": {
+    "power_at": "generator terminals, gross ISO ('Power output | 4.0 MW(e) | 5.4 MW(e) | 5.8 MW(e)', 'Gross efficiency'; brochure: 'based on electrical power output measured at generator terminals', 98.5 % generator efficiency and 60 kW gearbox loss assumed)",
+    "out_rpm_at": "engine (single shaft) speed = input speed of the package epicyclic reduction gearbox",
+    "driven_rpm": "1500 (50 Hz) / 1800 (60 Hz) - third party Centrax: 'Reduce engine speed down to 1500rpm (50Hz) or 1800rpm (60Hz)', generator '4 poles'",
+    "gearbox": "package epicyclic speed reduction gearbox (Centrax 'Epicyclic speed reduction gearbox'); Siemens brochure rating assumes '60 kw shaft gearbox power loss'",
+    "power_take_off": "cold end (compressor end) drive: Siemens brochure KB5S 'Single shaft cold end drive'; Centrax 'Power take-off shaft assembly (cold end drive)'",
+    "fuel_gas_kPa": null,
+    "inlet_dp_kPa": 0.0,
+    "exhaust_dp_kPa": 0.0,
+    "inlet_exhaust_dp_note": "0 = rating basis, not package dp: brochure 'Nominal uninstalled new engine performance with no inlet or exhaust ducting losses'; brochure curves 'excluding package inlet and outlet losses but including gearbox and generator losses'; Centrax '* Inlet losses, exhaust losses & package auxiliary losses are excluded'. Actual package inlet and exhaust pressure losses are not published.",
+    "variable_geometry": {
+     "vigv": null,
+     "variable_stator_rows": null,
+     "text": "Not mentioned in any opened document (Siemens page, poster, brochure, portfolio; Centrax datasheets). Surge protection is by blow-off valves (Centrax)."
+    },
+    "accessory_gearbox": true,
+    "accessory_gearbox_note": "Siemens brochure p. 14 cutaway 'SGT-A05 KB7S gas turbine' labels 'Accessory Drive Housing'; Centrax: 'Gearbox driven main lube oil pump' (which gearbox not stated).",
+    "engine_removal": "Centrax package: 'Integral engine removal jib beam and gearbox maintenance beam.', 'Baseplate designed for single point lift'; Siemens brochure p. 13: 'Jib boom provides easy installation or removal of gas turbine.'; page: 'A direct core engine exchange is possible and can be executed in as little as 12 hours.' (brochure 2021: 'in a single 8 hr work shift'). Removal direction, lift weight and clearances not published.",
+    "exhaust": "Centrax: 'Axial exhaust exit', 'Thermal expansion compensator', 'Thermal / Acoustic shroud'",
+    "gg_rpm": null,
+    "inlet_air_flow_kg_s": null,
+    "see_common": "rating_editions, rating_basis, pkg_basis, pkg_check, engine_envelope, fuel_gas, combustor, maintenance, interface, md_offer, track_note",
+    "starter": {
+     "type": "electro-hydraulic",
+     "kW": 132,
+     "basis": "third party Centrax CXA05 package: 'Electro-hydraulic start system, 132kW 3 phase AC motor' (Mobile: 'Start system incoprorating 132kW 3 phase AC motor' + 'Diesel generator to provide black start capability'). Siemens page: 'Several types of start systems are available depending on your requirements' - starter is package-specific."
+    },
+    "lube": {
+     "tank_L": 1000,
+     "oil_flow": null,
+     "heat_rejection_kW": null,
+     "basis": "third party Centrax CXA05 package (KB5 and KB7 HE datasheets): '1000ltr integral oil tank is incorporated within the baseplate'; 'Gearbox driven main lube oil pump', 'AC driven priming pump', 'No requirement for a lube oil supply after package shutdown due to the type of engine bearings utilised, no emergency lube oil pumps or associated power supplies needed'; 'Oil to air heat exchanger with safe area axial fans'. Siemens brochure p. 13: 'Common synthetic lube oil system for both engine and package'. Oil flow and heat rejection not published."
+    },
+    "bleed_valves": {
+     "count": 9,
+     "text": "Centrax KB7HE: 'Pressure ratio 14.4:1, 9 blow-off valves to prevent compressor surge'"
+    },
+    "bearings": {
+     "type": "rolling element",
+     "count": 6,
+     "text": "Centrax KB7HE: '6 main rolling element bearings – no DC standby rundown pump required'"
+    },
+    "engine_L_upper_bound_m": 2.7,
+    "engine_kg_siemens_bound": "< 766 kg (1,690 lb), brochure p. 11, whole SGT-A05 family",
+    "engine_shaft_power": "Siemens brochure p. 6: 'Higher Power – 8% power increase (8000 SHP) at ISO conditions*' (*compared with KB7S); 8000 shp = 5966 kW",
+    "conflicts": [
+     {
+      "field": "pkg_kg",
+      "values": [
+       "35,000 kg (page metric; portfolio p. 20 metric; CN/BR pages)",
+       "39,000 kg (the same line's '85,980 lb' = 38,999.9 kg; non-round, i.e. converted from 39,000 kg)",
+       "~40,000 kg (third party Centrax: 'generator set load of only 40 tonnes')",
+       "55,000 kg (Centrax drawing 'Approx total weight = 55000 KG / 121254 lbs' - with enclosure and air intake, other basis)"
+      ],
+      "source": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+      "taken": null,
+      "why": "the manufacturer line contradicts itself (35,000 kg vs 85,980 lb = 39,000 kg) and no second Siemens document gives an independent value; the imperial figure and Centrax 40 t point to 39-40 t - size lifting and foundation for >= 40 t, package with enclosure and intake 55 t"
+     },
+     {
+      "field": "eff_pct",
+      "values": [
+       "33.2 % published (page, poster, brochure, portfolio)",
+       "33.06 % = 3600/10,889 (the published metric heat rate)",
+       "32.7 % (CN and BR pages)",
+       "33.19 % = 3600/10,847 (the same line's '10,281 Btu/kWh' converted; poster 10,282)"
+      ],
+      "source": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+      "taken": 33.2,
+      "why": "published figure of the current page kept as printed; it is consistent with the Btu heat rate, not with the metric heat rate. Brochure 'Heat Rate – 2.3 % improvement' vs KB7S: 11,146 x 0.977 = 10,890, which supports 10,889 kJ/kWh (33.1 %); design on 10,889 kJ/kWh / 33.1 %"
+     },
+     {
+      "field": "heat_rate_kJ_kWh",
+      "values": [
+       "10,889 kJ/kWh (all Siemens metric figures)",
+       "10,847-10,848 kJ/kWh (= 10,281 / 10,282 Btu/kWh on page, poster, portfolio imperial; prelim '2018 brochure 10,848' - not found in the document at the cited URL)"
+      ],
+      "source": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+      "taken": 10889,
+      "why": "metric figure of every Siemens document, confirmed by the brochure's '2.3 % improvement' over KB7S"
+     },
+     {
+      "field": "exh_temp_C",
+      "values": [
+       "520 °C (968 °F) - page, US page, portfolio Jan 2026 metric '520 °C' and imperial '968 °F', CN/BR '520 °C (965 °F)'",
+       "508 °C (946 °F) - brochure (PDF 2021-09) p. 5",
+       "poster (2021-08) '508 °C (972 °F)' (972 F = 522 C, pair inconsistent)",
+       "515 °C (959 °F) - Centrax KB7HE at 5624 kWe, 60 % RH (other basis)"
+      ],
+      "source": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+      "taken": 520,
+      "why": "current page, confirmed by portfolio Jan 2026 in both unit layers; 508 °C is the 2021 edition. Energy balance: 520 °C q = 1.019, 508 °C q = 0.994 - both inside the band, size the exhaust/HRSG side for 508-520 °C"
+     },
+     {
+      "field": "PR",
+      "values": [
+       "14.4 (page, poster, brochure, portfolio metric, Centrax 'Pressure ratio 14.4:1')",
+       "14.1 (portfolio p. 24 imperial layer)",
+       "14.0 (prelim, '2018 brochure' - not found)"
+      ],
+      "source": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+      "taken": 14.4,
+      "why": "current page plus Centrax"
+     },
+     {
+      "field": "engine_kg",
+      "values": [
+       "1000 kg (2205 lb) - Centrax KB7HE datasheet (and Mobile)",
+       "< 766 kg (1,690 lb) - Siemens brochure p. 11, family statement"
+      ],
+      "source": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB7-web.pdf",
+      "taken": null,
+      "why": "skeptic 2026-11-14: unresolved - OEM Siemens brochure (2021-09, p. 11) bounds the SGT-A05 engine at 'less than 766 Kg (1,690 pounds)' (1,690 lb = 766.6 kg), the Siemens-listed packager Centrax prints 'Aero-derivative single shaft design 1000kg (2205lb)' (2205 lb = 1000.2 kg) for KB7HE; the two exclude each other unless the mass bases differ, and neither document states its basis (bare engine vs with accessories / PTO shaft). Third-party value is for cross-check only (gtu-fleet skill, section 3); no second source - taken null. Size lifting for >= 1000 kg."
+     },
+     {
+      "field": "rating (third party)",
+      "values": [
+       "Siemens 5.8 MW(e), 10,889 kJ/kWh, 21.4 kg/s, 520 C",
+       "Centrax 'KB7 HE 5.7MW': 5624 kWe, 11,245 kJ/kWh, 21.3 kg/s, 515 C, '32%' (60 % RH)"
+      ],
+      "source": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB7-web.pdf",
+      "taken": "Siemens",
+      "why": "manufacturer page; Centrax on another basis"
+     }
+    ],
+    "check": "Second document: page = US page = brochure p. 5 = portfolio p. 24 metric for power, efficiency, heat rate, speed, PR, flow; temperature 520 °C on page and portfolio (both layers), 508 °C in brochure 2021 and poster (see conflicts). Internal: 10,281 Btu/kWh x 1.05506 = 10,847 kJ/kWh (vs 10,889, -0.4 %); 3600/10,889 = 33.06 % vs printed 33.2 % (0.14 pp); 47.1 lb/s = 21.36 kg/s; 968 F = 520.0 C. 5.8/5.4 = +7.4 % vs brochure '8% power increase'; 1 - 10,889/11,146 = 2.31 % vs brochure '2.3 % improvement'. Energy balance q = 1.019 at 520 °C (0.994 at 508 °C), band 0.88-1.06. Centrax KB7HE: 5624 kWe, 21.3 kg/s, 515 °C, PR 14.4, q = 0.98."
+   },
+   "sources": {
+    "pkg_L_m": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Physical dimensions and weight'",
+     "quote": "Length | 9 m (29.5 ft)"
+    },
+    "pkg_W_m": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Physical dimensions and weight'",
+     "quote": "Width | 2.7 m (8.9 ft)"
+    },
+    "pkg_H_m": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Physical dimensions and weight'",
+     "quote": "Height | 3.1 m (10.2 ft)"
+    },
+    "pkg_basis": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Physical dimensions and weight'",
+     "quote": "Note: Above dimensions exclude inlet filter housing and exhaust stack. For power generation, the AC generator is included."
+    },
+    "pkg_kg_conflict": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Physical dimensions and weight'",
+     "quote": "Approx. weight | 35,000 kg (85,980 lb)"
+    },
+    "pkg_alt_centrax": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB5-web.pdf",
+     "doc": "third party: Centrax CXA05 KB5 datasheet p. 1 drawing",
+     "quote": "11522mm / 453in | 4755mm / 187in | 7182mm / 282in | Approx total weight = 55000 KG / 121254 lbs"
+    },
+    "gen_set_load": {
+     "url": "https://centraxgt.com/products/generator-set-cxa05/",
+     "doc": "third party: Centrax CXA05 product page",
+     "quote": "generator set load of only 40 tonnes"
+    },
+    "shafts": {
+     "url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf",
+     "doc": "Siemens brochure p. 8 (KB5S) + SGT-A05 page (https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html), 'SGT-A05 oil and gas power generation package'",
+     "quote": "Single shaft cold end drive | A single-shaft version is available for constant speed operations in onshore and offshore configurations"
+    },
+    "driven_rpm": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB5-web.pdf",
+     "doc": "third party: Centrax CXA05 KB5 3.9MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB5'",
+     "quote": "Epicyclic speed reduction gearbox | Reduce engine speed down to 1500rpm (50Hz) or 1800rpm (60Hz)"
+    },
+    "rating_basis": {
+     "url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf",
+     "doc": "Siemens brochure p. 5 footnote (PDF text layer splits the first word as '*N ominal')",
+     "quote": "Nominal uninstalled new engine performance with no inlet or exhaust ducting losses, ISO conditions, 0% relative humidity, gaseous fuel with lower heating value of 20,400 BTU/lb (47,496 kJ/kg). Assumes 98.5% generator efficiency and 60 kw shaft gearbox power loss."
+    },
+    "inlet_dp_kPa": {
+     "url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf",
+     "doc": "Siemens brochure p. 5 footnote",
+     "quote": "no inlet or exhaust ducting losses"
+    },
+    "exhaust_dp_kPa": {
+     "url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf",
+     "doc": "Siemens brochure p. 5 footnote",
+     "quote": "no inlet or exhaust ducting losses"
+    },
+    "starter": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB7-web.pdf",
+     "doc": "third party: Centrax CXA05 KB7 HE 5.7MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB7HE'",
+     "quote": "Electro-hydraulic start system, 132kW 3 phase AC motor"
+    },
+    "lube": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB7-web.pdf",
+     "doc": "third party: Centrax CXA05 KB7 HE 5.7MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB7HE'",
+     "quote": "1000ltr integral oil tank is incorporated within the baseplate"
+    },
+    "accessory_gearbox": {
+     "url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf",
+     "doc": "Siemens brochure p. 14, cutaway 'SGT-A05 KB7S gas turbine'",
+     "quote": "Accessory Drive Housing"
+    },
+    "engine_removal": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB7-web.pdf",
+     "doc": "third party: Centrax CXA05 KB7 HE 5.7MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB7HE'",
+     "quote": "Integral engine removal jib beam and gearbox maintenance beam."
+    },
+    "engine_removal_time": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page, 'Service'",
+     "quote": "A direct core engine exchange is possible and can be executed in as little as 12 hours."
+    },
+    "power_take_off": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB5-web.pdf",
+     "doc": "third party: Centrax CXA05 KB5 3.9MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB5'",
+     "quote": "Power take-off shaft assembly (cold end drive)"
+    },
+    "power_kW": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Performance data for simple cycle power generation'",
+     "quote": "Power output | 5.8 MW(e)"
+    },
+    "heat_rate_kJ_kWh": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Performance data for simple cycle power generation'",
+     "quote": "Heat rate | 10,889 kJ/kWh (10,281 Btu/kWh)"
+    },
+    "eff_pct": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Performance data for simple cycle power generation'",
+     "quote": "Gross efficiency | 33.2%"
+    },
+    "exh_flow_kg_s": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Performance data for simple cycle power generation'",
+     "quote": "Exhaust mass flow | 21.4 kg/s (47.1 lb/s)"
+    },
+    "exh_temp_C": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Performance data for simple cycle power generation'",
+     "quote": "Exhaust temperature | 520 °C (968 °F)"
+    },
+    "exh_temp_alt": {
+     "url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf",
+     "doc": "SGT-A05 brochure (Siemens Energy, article OGSV-B40001-00-7600, PDF of 2021-09, URL name '2018-v8'), p. 5 spec table",
+     "quote": "Exhaust Temperature 560 °C (1,040 °F) 495 °C (923 °F) 508 °C (946 °F)"
+    },
+    "PR": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Performance data for simple cycle power generation'",
+     "quote": "Pressure ratio | 14.4 : 1"
+    },
+    "out_rpm": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page (global; US page identical), 'Performance data for simple cycle power generation'",
+     "quote": "Turbine speed | 14,600 rpm"
+    },
+    "comp_stages": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB7-web.pdf",
+     "doc": "third party: Centrax CXA05 KB7 HE 5.7MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB7HE'",
+     "quote": "14 Stage axial compressor with additional zero stage boost module"
+    },
+    "turb_stages": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB7-web.pdf",
+     "doc": "third party: Centrax CXA05 KB7 HE 5.7MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB7HE'",
+     "quote": "4 Stage turbine"
+    },
+    "engine_L_upper_bound_m": {
+     "url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf",
+     "doc": "Siemens brochure p. 11",
+     "quote": "The SGT-A05 measures less than 2.7 meters (8 feet) long and weighs less than 766 Kg (1,690 pounds)."
+    },
+    "bleed_valves": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB7-web.pdf",
+     "doc": "third party: Centrax CXA05 KB7 HE 5.7MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB7HE'",
+     "quote": "Pressure ratio 14.4:1, 9 blow-off valves to prevent compressor surge"
+    },
+    "bearings": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB7-web.pdf",
+     "doc": "third party: Centrax CXA05 KB7 HE 5.7MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB7HE'",
+     "quote": "6 main rolling element bearings – no DC standby rundown pump required"
+    },
+    "engine_shaft_power": {
+     "url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf",
+     "doc": "Siemens brochure p. 6",
+     "quote": "Higher Power – 8% power increase (8000 SHP) at ISO conditions*"
+    },
+    "mobile_package": {
+     "url": "https://centraxgt.com/wp-content/uploads/2026/04/103693-CXA05-KB7-Mobile-v3.pdf",
+     "doc": "third party: Centrax CXA05 Mobile datasheet (103693 v3, 2026-05), 'General specifications - Siemens SGT-A05 Mobile', drawing labels",
+     "quote": "CG OF GENSET PACKAGE 44892.8 KG [98970 LBS] | 15157 [596.72\"] | 4204 [165.5\"] ± 25.4 | 2611 [102.81\"] DOOR LATCHES"
+    },
+    "second_doc": {
+     "url": "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "doc": "Siemens GT portfolio PDF (2026-01-21), p. 24 performance overview (metric layer / imperial layer)",
+     "quote": "metric: SGT-A05 (KB7HE) 5.8 MW(e) 50/60 Hz 33.2% 10,889 kJ/kWh 14,600 rpm 14.4 : 1 21.4 kg/s 520 °C | imperial: SGT-A05 (KB7HE) 5.8 MW(e) 50/60 Hz 33.2% 10,281 Btu/kWh 14,600 rpm 14.1 : 1 47.1 lb/s 968 °F"
+    },
+    "poster": {
+     "url": "https://assets.siemens-energy.com/dam/7a5f8e67-fe86-4ca9-9fae-b08100f632aa/Poster-SGTA05-PRINT-3mmAnschnitt-210818-pdf_Original%20file.pdf",
+     "doc": "Siemens SGT-A05 poster (PDF 2021-08)",
+     "quote": "SGT-A05 KB7HE | 5.8 MW(e) | 33.2% | 10,889 kJ / kWh / 10,282 btu / kWh | 14,600 rpm | 14.4:1 | 21.4 kg / s (47.1 lb / s) | 508 °C (972 °F)"
+    },
+    "cn_br_pages": {
+     "url": "https://www.siemens-energy.com/cn/zh/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 CN page (BR page identical: https://www.siemens-energy.com/br/pt/home/products-services/product/sgt-a05-ae.html)",
+     "quote": "总效率 29.7% 32.3% 32.7% | 520 摄氏度 （965 华氏度）"
+    },
+    "engine_kg_alt_centrax": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB7-web.pdf",
+     "doc": "third party: Centrax CXA05 KB7 HE 5.7MW datasheet (2025-07), 'General specifications - Siemens SGT-A05 KB7HE'",
+     "quote": "Aero-derivative single shaft design 1000kg (2205lb)"
+    }
+   },
+   "notes": "Highest-power variant: KB7S + High Efficiency Compressor upgrade (KB7S retrofittable). Power, heat rate, flow, PR, speed confirmed on page, brochure, poster, portfolio; exhaust temperature 520 °C on current page and portfolio Jan 2026, 508 °C in brochure 2021 (both kept in conflicts). eff_pct 33.2 is printed but 3600/10,889 = 33.06 % - see conflicts. Stages, bleed valves, bearings, starter, lube tank from the Centrax KB7 HE package datasheet. engine_kg null (skeptic 2026-11-14): Centrax 1000 kg vs Siemens family '< 766 kg' - unresolved, see conflicts. pkg_kg null - see conflicts."
+  },
+  {
+   "model": "SGT-A05 (mechanical drive)",
+   "variant": "MD",
+   "power_kW": null,
+   "heat_rate_kJ_kWh": null,
+   "eff_pct": null,
+   "exh_flow_kg_s": null,
+   "exh_temp_C": null,
+   "PR": null,
+   "comp_stages": null,
+   "turb_stages": null,
+   "shafts": null,
+   "out_rpm": null,
+   "pkg_L_m": null,
+   "pkg_W_m": null,
+   "pkg_H_m": null,
+   "pkg_kg": null,
+   "engine_kg": null,
+   "engine_L_m": null,
+   "engine_D_m": null,
+   "extra": {
+    "offered": false,
+    "text": "No mechanical-drive rating is published for SGT-A05: the page has only 'Simple cycle power generation'; the portfolio Jan 2026 mechanical-drive tables (p. 24, metric and imperial layers) list no SGT-A05; the brochure covers power generation only. Historical two-shaft industrial 501-K drive versions were not found in any opened document."
+   },
+   "sources": {
+    "md_absent_page": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-a05-ae.html",
+     "doc": "SGT-A05 page, technical specifications (only power generation tables)",
+     "quote": "SGT-A05 technical specifications and performance benchmarks | Simple cycle power generation | Physical dimensions"
+    },
+    "md_absent_portfolio": {
+     "url": "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "doc": "Siemens GT portfolio PDF (2026-01-21), p. 24 'Performance data overview: Mechanical drive applications' (both layers) - SGT-A05 not listed; data sheet p. 20",
+     "quote": "SGT-A05 | Power generation: 4.0 – 5.8 MW(e)"
+    }
+   },
+   "notes": "Siemens publishes no mechanical-drive rating or package for SGT-A05; every field null. The SGT-A05 offer is generator sets only (single shaft, constant speed)."
+  }
+ ]
+}

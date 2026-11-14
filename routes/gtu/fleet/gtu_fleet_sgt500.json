@@ -1,0 +1,551 @@
+{
+ "model": "SGT-500",
+ "maker": "Siemens Energy",
+ "collected": "2026-11-14",
+ "records": [
+  {
+   "model": "SGT-500",
+   "variant": "PG",
+   "power_kW": 19100,
+   "heat_rate_kJ_kWh": 10651,
+   "eff_pct": 33.8,
+   "exh_flow_kg_s": 97.9,
+   "exh_temp_C": 376,
+   "PR": 13.0,
+   "comp_stages": "18 (LP 10 + HP 8)",
+   "turb_stages": "1 HP + 2 LP + 3 PT (HP compressor turbine 1, LP compressor turbine 2, free power turbine 3)",
+   "shafts": "three (LP spool, HP spool, free power turbine) - from the page description, the word 'three-shaft' is not printed",
+   "out_rpm": "3600 rpm - free power turbine nominal speed = high-speed shaft of the parallel-shaft reduction gearbox; generator 1500 rpm (50 Hz) / 1800 rpm (60 Hz)",
+   "pkg_L_m": null,
+   "pkg_W_m": null,
+   "pkg_H_m": null,
+   "pkg_kg": null,
+   "engine_kg": null,
+   "engine_L_m": null,
+   "engine_D_m": null,
+   "extra": {
+    "status": "Legacy fleet, sold today only as service / 'New Gas Turbine Supply / Spare Core' (service page). Not in the current Siemens Energy portfolio (GT-Portfolio-Brochure PDF 2026-01-21: industrial 0-15 MW = SGT-50, SGT-A05, SGT-100, SGT-300, SGT-400; 15-100 MW = SGT-600, SGT-A35, SGT-700, SGT-750, SGT-800). The product URLs .../product/sgt-500.html (global, US) return 404.",
+    "fleet_variants": "'SGT-500 fleet consists of several variants with an output of 11 to over 19MW.' The page gives data for one rating only (19.1 MW(e)); an existing package may carry an older, lower variant - its nameplate rating governs a replacement.",
+    "rating_basis": "Ambient conditions, inlet/exhaust losses and fuel LHV are not stated on the page; ISO 15 C / 101.3 kPa / 60 % RH is an assumption, not confirmed.",
+    "starter": {
+     "type": "start and barring motor on the LP rotor through a ratchet coupling; motor drive type (electric / hydraulic / pneumatic) not stated",
+     "power_kW": "< 160 ('Low starting power (<160 kW)')",
+     "start_time": "~3 min ('Fast start capability (~3 minutes)')"
+    },
+    "fuel_gas_kPa": 1800,
+    "fuel_gas_note": "18.0 bar(a) +/- 0.5 bar = 1800 +/- 50 kPa ABSOLUTE (1 bar = 100 kPa). The line is printed under the 'Bearings' heading after the word 'Vibration' (page layout fault); the page also has stray characters '}' after each '+/-'. 'Low fuel-gas pressure requirement' is listed as a feature. A replacement engine with a higher pressure ratio than 13:1 may need more than the 18 bar(a) this package supplies - a fuel-gas booster would add moving parts.",
+    "fuels": "'Natural gas - Liquid fuel - Dual fuel - Heavy fuel', 'Fuel-changeover capability at any load', 'Load-rejection capability'; high-hydrogen refinery gas: '10 SGT-500 units in the field have gathered more than 800,000 combined operating hours on high-hydrogen fuels using non-DLE systems since 1979' (Siemens Energy hydrogen white paper 2025).",
+    "combustor": "'7 can-annular combustion chambers'; 'Conventional combustion system - Steam or water injection for emissions control and power augmentation'; 'Dry Low Emissions (DLE) combustion system option (gas only)'; NOx with DLE on natural gas <= 42 ppmV at 15 % O2 dry.",
+    "lube": null,
+    "lube_note": "Oil tank volume, oil flow and heat rejection: not published.",
+    "variable_geometry": null,
+    "variable_geometry_note": "Variable inlet guide vanes / variable stators: not mentioned on the page.",
+    "bleed_valves": null,
+    "bleed_valves_note": "Not published.",
+    "accessory_gearbox": null,
+    "accessory_gearbox_note": "Not published (the page names only the starter on the LP rotor).",
+    "bearings": {
+     "engine_type": "hydrodynamic tilting-pad radial and thrust bearings",
+     "engine_count": null,
+     "text": "'Hydrodynamic radial- and thrust bearings of tilting pad type'. Number of engine bearings not published."
+    },
+    "engine_removal": "'Easy on-site maintenance possible - complete modules can be swiftly exchanged'; 'Direct exchange of gas generator possible - Core can be air-freighted'; 'Lease-engine availability for planned overhauls'; 'Availability of Engine exchange pool'. Removal direction, lift weight, clearances and change-out time: not published.",
+    "maintenance": "'First overhaul after 40,000 hours (80,000 hours between major overhauls)'; 'Online wash available'.",
+    "fleet_experience": "'Over 180 turbines have been installed worldwide'; 'More than 10 million Equivalent Operating Hours (EOH)'; 'More than 225,000 Starts'; 'Introduced to the market in the 1950s ... (formerly known as GT35)'.",
+    "reliability_features_published": "'Robust design - long engine life'; 'High availability/reliability'; 'No advanced sealings, resulting in minimal deterioration and maintained efficiency'; 'Compressor rotors of bolted design'.",
+    "rotor_count_note": "Three rotors in the original engine (LP spool, HP spool, free power turbine) with 18 compressor stages and 6 turbine stages - relevant to the user's aim of fewer moving parts in the replacement.",
+    "inlet_dp_kPa": null,
+    "exhaust_dp_kPa": null,
+    "inlet_exhaust_dp_note": "Not published; the page does not say whether the rating includes inlet and exhaust losses.",
+    "interface": "Output flange, coupling, mounting, inlet and exhaust connections: not published.",
+    "engine_kg_note": "Core / gas-generator mass and dimensions not published ('Core can be air-freighted' only).",
+    "power_at": "generator terminals ('19.1 MW(e)')",
+    "eff_printed_pct": 33.6,
+    "gearbox": "'Parallel-shaft gear of double helical design'; 'High-speed shaft 3,600 rpm (nominal speed for PG)'; 'Low-speed shaft 1,500 rpm (50 Hz) or 1,800 rpm (60Hz)'; '4 radial bearings of sleeve type'.",
+    "driven_rpm": "1500 (50 Hz) / 1800 (60 Hz) - generator, 4-pole",
+    "generator": "'4-pole design'; 'Rated voltage: 10.5 kV/11.0 kV/13.8 kV'; '50 Hz or 60 Hz'; 'Protection IP54'; 'PMG for excitation power supply'.",
+    "check": {
+     "heat_rate_units": "10,095 Btu/kWh x 1.05505585 = 10,650.8 kJ/kWh - pair consistent",
+     "heat_rate_attribution": "The page prints one heat rate without PG/MD label; assigned to PG because it is given per kWh (electric) under 'Power generation: 19.1 MW(e)' and 3600/10,651 = 33.80 % sits near the PG 33.6 %, not the MD 34.8 % (which would need 10,345 kJ/kWh).",
+     "exh_flow_units": "215.9 lb/s x 0.45359237 = 97.93 kg/s - pair consistent",
+     "exh_temp_units": "(709 - 32) / 1.8 = 376.1 C - pair consistent",
+     "fuel_pressure_units": "261 psi(a) x 0.0689476 = 17.99 bar(a) - pair consistent",
+     "efficiency": "3600 / 10,651 = 33.80 % vs printed 33.6 % (PG): differ by 0.20 p.p. > 0.15 - see conflicts",
+     "energy_balance": "q = G*1.10*(T-15)/(P*(100/eta-1)) = 1.039 with eta 33.80 %, 1.030 with printed 33.6 % - both inside 0.88-1.06",
+     "second_document": "Only one Siemens document (the service page, three locales with identical text) is reachable; the brochure used by the prelim (oilindustry.ir copy) and third-party sheets are outside the allowed network. Second-source check of power, flow and package not possible."
+    },
+    "conflicts": [
+     {
+      "field": "eff_pct",
+      "values": [
+       "33.6 % printed for PG on the page",
+       "33.80 % = 3600 / 10,651 kJ/kWh (same page)",
+       "33.8 % prelim (brochure copy, search extract, not opened)"
+      ],
+      "source": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+      "taken": 33.8,
+      "why": "Page contradicts itself; the heat rate is confirmed by its own Btu pair (10,095 Btu/kWh), the 33.6 % has no pair. eff_pct taken as 3600/heat_rate per task rule; the printed 33.6 % kept in extra.eff_printed_pct.",
+      "skeptic": "UNRESOLVED (skeptic check 2026-11-14). The global page (dateModified 2023-10-05) and the US page (dateModified 2026-08-05) both print 'Electrical efficiency: 34.8 % (MD) / 33.6 % (PG)' and 'Heat rate: 10,651 kJ/kWh (10,095 Btu/kWh)'; 3600/10,651 = 33.80 %, 0.20 p.p. from 33.6 (> 0.15). For HR: its Btu pair agrees (10,095 x 1.05505585 = 10,650.8). For 33.6: it is printed with the PG label. Which line is the misprint is not settled by any reachable document (47 locale sitemaps of siemens-energy.com list only the global/US/BR service page; centraxgt.com has no SGT-500). 33.8 kept as the house rule eta = 3600/HR (same as SGT-100 MD 33.3 vs printed 33.1); energy balance q = 1.039 with 33.8, 1.030 with 33.6 - does not decide."
+     },
+     {
+      "field": "exh_temp_C",
+      "values": [
+       "376 C (709 F) - current page",
+       "369 C - prelim, brochure copy (search extract)"
+      ],
+      "source": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+      "taken": 376,
+      "why": "Current manufacturer page has priority; its C/F pair is consistent. Older brochure edition not reachable for comparison."
+     },
+     {
+      "field": "heat_rate_kJ_kWh",
+      "values": [
+       "10,651 kJ/kWh - current page",
+       "10,664 kJ/kWh - prelim note, brochure copy (search extract)"
+      ],
+      "source": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+      "taken": 10651,
+      "why": "Current manufacturer page."
+     }
+    ],
+    "prelim_unverified": {
+     "pkg_L_m": 21.3,
+     "pkg_W_m": 4.0,
+     "pkg_H_m": 5.1,
+     "source": "https://www.oilindustry.ir/Upload/587RO-011-SGT-500%20Gas%20Turbine.pdf (brochure copy; host outside allowed network, not opened)"
+    }
+   },
+   "sources": {
+    "power_kW": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "Power generation: 19.1 MW(e)"
+    },
+    "heat_rate_kJ_kWh": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "Heat rate: 10,651 kJ/kWh (10,095 Btu/kWh)"
+    },
+    "eff_pct": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications' - eff_pct derived 3600/10,651 = 33.80 %; printed 33.6 % (PG) in conflicts",
+     "quote": "Heat rate: 10,651 kJ/kWh (10,095 Btu/kWh) ... Electrical efficiency: 34.8 % (MD) / 33.6 % (PG)"
+    },
+    "exh_flow_kg_s": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "Exhaust gas flow: 97.9 kg/s (215.9 lb/s)"
+    },
+    "exh_temp_C": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "Exhaust temperature: 376° C (709° F)"
+    },
+    "PR": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "Compressor pressure ratio: 13:1"
+    },
+    "comp_stages": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "Two multi-stage (10 + 8 LP/HP) axial flow compressors"
+    },
+    "turb_stages": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "Two compressor turbines (1 + 2 HP/LP) ... Free power turbine of axial-flow design ... 3-stage 3,600 rpm turbine"
+    },
+    "shafts": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "Two compressor turbines (1 + 2 HP/LP) ... Free power turbine of axial-flow design ... Start and barring motor connected to the LP rotor via a ratchet coupling"
+    },
+    "out_rpm": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "Power turbine speed: 3,600 rpm ... High-speed shaft 3,600 rpm (nominal speed for PG) ... Low-speed shaft 1,500 rpm (50 Hz) or 1,800 rpm (60Hz)"
+    },
+    "starter": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "Start and barring motor connected to the LP rotor via a ratchet coupling"
+    },
+    "starter_power": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global; US and BR identical), 'Features'",
+     "quote": "Low starting power (<160 kW)"
+    },
+    "fuel_gas_kPa": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "Fuel-supply pressure requirement: 18.0 bar(a) ± }0.5 bar (261 ± }7 psi(a))"
+    },
+    "bearings": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "Hydrodynamic radial- and thrust bearings of tilting pad type"
+    },
+    "gearbox": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "Parallel-shaft gear of double helical design ... 4 radial bearings of sleeve type"
+    },
+    "engine_removal": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "Easy on-site maintenance possible - complete modules can be swiftly exchanged ... Direct exchange of gas generator possible - Core can be air-freighted"
+    },
+    "maintenance": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "First overhaul after 40,000 hours (80,000 hours between major overhauls)"
+    },
+    "combustor": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "7 can-annular combustion chambers"
+    },
+    "fleet_variants": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global; US and BR identical), introduction",
+     "quote": "SGT-500 fleet consists of several variants with an output of 11 to over 19MW."
+    },
+    "reliability_features": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global; US and BR identical), 'Features'",
+     "quote": "No advanced sealings, resulting in minimal deterioration and maintained efficiency"
+    },
+    "check_us_page": {
+     "url": "https://www.siemens-energy.com/us/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (US, dateModified 2026-08-05), 'Specifications' - same text as global (same publisher, not an independent check)",
+     "quote": "Power generation: 19.1 MW(e) ... Exhaust gas flow: 97.9 kg/s (215.9 lb/s) ... Exhaust temperature: 376° C (709° F)"
+    },
+    "check_br_page": {
+     "url": "https://www.siemens-energy.com/br/pt/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (BR, Portuguese), 'Especificações' - same publisher, not an independent check",
+     "quote": "Geração de energia: 19,1 MW(e) ... Fluxo de gases de escape: 97,9 kg/s (215,9 lb/s) ... Temperatura de exaustão: 376 ° C (709 ° F)"
+    },
+    "status_portfolio": {
+     "url": "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "doc": "Siemens Energy GT-Portfolio-Brochure PDF (2026-01-21), p. 2 'Siemens Energy gas turbines overview' - SGT-500 absent between SGT-400 [10 to 14 / 11 to 15 MW] and SGT-600",
+     "quote": "SGT-600 [24 / 25 MW]"
+    },
+    "fuels_hydrogen": {
+     "url": "https://assets.siemens-energy.com/dam/246c6ce6-853f-4aff-8d28-b44900b0c002/hydrogen-gt-white-paper-pdf_Original%20file.pdf",
+     "doc": "Siemens Energy hydrogen power white paper (PDF created 2026-05-13), 'Non-DLE technology'",
+     "quote": "10 SGT-500 units in the field have gathered more than 800,000 combined operating hours on high-hydrogen fuels using non-DLE systems since 1979."
+    }
+   },
+   "notes": "PG confirmed on the current Siemens Energy SGT-500 service page (global; US and BR identical; the product page is 404 - SGT-500 is a legacy model, absent from the 2026 portfolio). Kept: 19.1 MW(e), 10,651 kJ/kWh, 97.9 kg/s, PR 13:1, 18 compressor stages (LP 10 + HP 8), turbines 1 HP + 2 LP + 3 PT, free power turbine 3,600 rpm. Corrected: exhaust 369 -> 376 C (709 F) per current page. eff_pct 33.8 = 3600/heat rate (derived, task rule): the page prints 33.6 % (PG), which contradicts its own heat rate by 0.2 p.p. - see extra.conflicts. Package dimensions set to null: prelim 21.3 x 4.0 x 5.1 m came from a brochure copy on a host outside the allowed network and are not on the Siemens page; package and engine mass not published. Shafts 'three' read from the page structure (two compressor turbines driving LP and HP compressors + free power turbine; starter on the LP rotor), not printed as a word. Rating conditions not printed (ISO assumed). Added for the replacement: fuel gas 18.0 +/- 0.5 bar(a) at supply, starter <160 kW on the LP rotor via ratchet coupling, tilting-pad bearings, parallel-shaft double helical gearbox 3,600 -> 1,500/1,800 rpm with 4 sleeve bearings, gas generator exchange as a module. Only one manufacturer document reachable: no independent second source for any number. Skeptic check 14.11.2026: exhaust 376 C, package dimensions null and the eff_pct provenance re-read on the global and US pages; eff_pct 33.8 (3600/HR) vs printed 33.6 left UNRESOLVED (extra.conflicts[eff_pct].skeptic). Exhaust 376 C: q = 1.039 is inside 0.88-1.06 but above the 1.029 maximum of the prelim records (369 C would give 1.019); 369 C came from a search extract only."
+  },
+  {
+   "model": "SGT-500",
+   "variant": "MD",
+   "power_kW": null,
+   "heat_rate_kJ_kWh": null,
+   "eff_pct": 34.8,
+   "exh_flow_kg_s": null,
+   "exh_temp_C": null,
+   "PR": 13.0,
+   "comp_stages": "18 (LP 10 + HP 8)",
+   "turb_stages": "1 HP + 2 LP + 3 PT (HP compressor turbine 1, LP compressor turbine 2, free power turbine 3)",
+   "shafts": "three (LP spool, HP spool, free power turbine) - from the page description, the word 'three-shaft' is not printed",
+   "out_rpm": null,
+   "pkg_L_m": null,
+   "pkg_W_m": null,
+   "pkg_H_m": null,
+   "pkg_kg": null,
+   "engine_kg": null,
+   "engine_L_m": null,
+   "engine_D_m": null,
+   "extra": {
+    "status": "Legacy fleet, sold today only as service / 'New Gas Turbine Supply / Spare Core' (service page). Not in the current Siemens Energy portfolio (GT-Portfolio-Brochure PDF 2026-01-21: industrial 0-15 MW = SGT-50, SGT-A05, SGT-100, SGT-300, SGT-400; 15-100 MW = SGT-600, SGT-A35, SGT-700, SGT-750, SGT-800). The product URLs .../product/sgt-500.html (global, US) return 404.",
+    "fleet_variants": "'SGT-500 fleet consists of several variants with an output of 11 to over 19MW.' The page gives data for one rating only (19.1 MW(e)); an existing package may carry an older, lower variant - its nameplate rating governs a replacement.",
+    "rating_basis": "Ambient conditions, inlet/exhaust losses and fuel LHV are not stated on the page; ISO 15 C / 101.3 kPa / 60 % RH is an assumption, not confirmed.",
+    "starter": {
+     "type": "start and barring motor on the LP rotor through a ratchet coupling; motor drive type (electric / hydraulic / pneumatic) not stated",
+     "power_kW": "< 160 ('Low starting power (<160 kW)')",
+     "start_time": "~3 min ('Fast start capability (~3 minutes)')"
+    },
+    "fuel_gas_kPa": 1800,
+    "fuel_gas_note": "18.0 bar(a) +/- 0.5 bar = 1800 +/- 50 kPa ABSOLUTE (1 bar = 100 kPa). The line is printed under the 'Bearings' heading after the word 'Vibration' (page layout fault); the page also has stray characters '}' after each '+/-'. 'Low fuel-gas pressure requirement' is listed as a feature. A replacement engine with a higher pressure ratio than 13:1 may need more than the 18 bar(a) this package supplies - a fuel-gas booster would add moving parts.",
+    "fuels": "'Natural gas - Liquid fuel - Dual fuel - Heavy fuel', 'Fuel-changeover capability at any load', 'Load-rejection capability'; high-hydrogen refinery gas: '10 SGT-500 units in the field have gathered more than 800,000 combined operating hours on high-hydrogen fuels using non-DLE systems since 1979' (Siemens Energy hydrogen white paper 2025).",
+    "combustor": "'7 can-annular combustion chambers'; 'Conventional combustion system - Steam or water injection for emissions control and power augmentation'; 'Dry Low Emissions (DLE) combustion system option (gas only)'; NOx with DLE on natural gas <= 42 ppmV at 15 % O2 dry.",
+    "lube": null,
+    "lube_note": "Oil tank volume, oil flow and heat rejection: not published.",
+    "variable_geometry": null,
+    "variable_geometry_note": "Variable inlet guide vanes / variable stators: not mentioned on the page.",
+    "bleed_valves": null,
+    "bleed_valves_note": "Not published.",
+    "accessory_gearbox": null,
+    "accessory_gearbox_note": "Not published (the page names only the starter on the LP rotor).",
+    "bearings": {
+     "engine_type": "hydrodynamic tilting-pad radial and thrust bearings",
+     "engine_count": null,
+     "text": "'Hydrodynamic radial- and thrust bearings of tilting pad type'. Number of engine bearings not published."
+    },
+    "engine_removal": "'Easy on-site maintenance possible - complete modules can be swiftly exchanged'; 'Direct exchange of gas generator possible - Core can be air-freighted'; 'Lease-engine availability for planned overhauls'; 'Availability of Engine exchange pool'. Removal direction, lift weight, clearances and change-out time: not published.",
+    "maintenance": "'First overhaul after 40,000 hours (80,000 hours between major overhauls)'; 'Online wash available'.",
+    "fleet_experience": "'Over 180 turbines have been installed worldwide'; 'More than 10 million Equivalent Operating Hours (EOH)'; 'More than 225,000 Starts'; 'Introduced to the market in the 1950s ... (formerly known as GT35)'.",
+    "reliability_features_published": "'Robust design - long engine life'; 'High availability/reliability'; 'No advanced sealings, resulting in minimal deterioration and maintained efficiency'; 'Compressor rotors of bolted design'.",
+    "rotor_count_note": "Three rotors in the original engine (LP spool, HP spool, free power turbine) with 18 compressor stages and 6 turbine stages - relevant to the user's aim of fewer moving parts in the replacement.",
+    "inlet_dp_kPa": null,
+    "exhaust_dp_kPa": null,
+    "inlet_exhaust_dp_note": "Not published; the page does not say whether the rating includes inlet and exhaust losses.",
+    "interface": "Output flange, coupling, mounting, inlet and exhaust connections: not published.",
+    "engine_kg_note": "Core / gas-generator mass and dimensions not published ('Core can be air-freighted' only).",
+    "power_at": "power-turbine shaft (MD) - MD power not published on the page",
+    "page_unlabeled_exhaust": "The page prints one exhaust flow 97.9 kg/s (215.9 lb/s) and one exhaust temperature 376 C (709 F) in an overview headed by 'Power generation: 19.1 MW(e)', without PG/MD label; not assigned to MD.",
+    "out_rpm_note": "The page gives only the PG speed: 'High-speed shaft 3,600 rpm (nominal speed for PG)' - the qualifier implies a different MD nominal speed. The prelim 3,450 rpm (third-party listing) is seen only in search extracts of an older Siemens brochure copy (slideshare, not opened); MD speed range not published.",
+    "check": {
+     "efficiency": "34.8 % (MD) printed without an MD heat rate - no 3600/HR cross-check possible; labelled 'Electrical efficiency' on the page although MD is shaft output.",
+     "second_document": "No second manufacturer document reachable for MD."
+    },
+    "conflicts": [
+     {
+      "field": "eff_pct",
+      "values": [
+       "34.8 % (MD) - current page",
+       "34.5 % - prelim, third-party listing (amasenergy, not opened)",
+       "34.2 % - prelim note, older Siemens overview (not opened)",
+       "10,530 kJ/kWh (= 34.19 %) - search extract of older Siemens brochure copy (slideshare, not opened)"
+      ],
+      "source": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+      "taken": 34.8,
+      "why": "Current manufacturer page has priority; other values not opened.",
+      "skeptic": "UNRESOLVED (skeptic check 2026-11-14). 34.8 % is printed once, on the same line as the PG 33.6 % that contradicts the page's own heat rate; it is labelled 'Electrical efficiency' although MD output is shaft power; no MD heat rate is printed, so 3600/HR cannot check it. Other values seen only in search extracts (not sources, hosts outside the allowed network): 34.5 % (third-party listing, 10,432 kJ/kWh = 34.51 %) and 34.19 % (older Siemens brochure copy, 10,530 kJ/kWh). 34.8 kept: the only manufacturer printing; plausible (PG 33.8/34.8 = 0.971, i.e. 2.9 % generator+gear loss), not confirmed."
+     },
+     {
+      "field": "power_kW",
+      "values": [
+       "19,520 kW - prelim, third-party listing (amasenergy, not opened)",
+       "19.3 MW - prelim note, older Siemens overview (not opened)",
+       "19.52 MW (26,177 bhp) - search extract of older Siemens brochure copy (not opened)"
+      ],
+      "source": "none reachable",
+      "taken": null,
+      "why": "No MD power on the Siemens page; candidate sources outside the allowed network."
+     },
+     {
+      "field": "heat_rate_kJ_kWh",
+      "values": [
+       "10,432 kJ/kWh - prelim, third-party listing (not opened)",
+       "10,530 kJ/kWh (7,443 Btu/bhph) - search extract of older Siemens brochure copy (not opened)"
+      ],
+      "source": "none reachable",
+      "taken": null,
+      "why": "Not on the Siemens page; candidates disagree by 1 %."
+     }
+    ],
+    "prelim_unverified": {
+     "power_kW": 19520,
+     "heat_rate_kJ_kWh": 10432,
+     "eff_pct": 34.5,
+     "exh_flow_kg_s": 97.9,
+     "exh_temp_C": 369,
+     "out_rpm": 3450,
+     "source": "https://www.amasenergy.com/3097-equipment-materials-mechanical-drive-gas-turbine-sgt-500 (third party; host outside allowed network, not opened)"
+    }
+   },
+   "sources": {
+    "eff_pct": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "Electrical efficiency: 34.8 % (MD) / 33.6 % (PG)"
+    },
+    "PR": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications' - one value for the engine, applies to both variants",
+     "quote": "Compressor pressure ratio: 13:1"
+    },
+    "comp_stages": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "Two multi-stage (10 + 8 LP/HP) axial flow compressors"
+    },
+    "turb_stages": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "Two compressor turbines (1 + 2 HP/LP) ... Free power turbine of axial-flow design ... 3-stage 3,600 rpm turbine"
+    },
+    "shafts": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "Two compressor turbines (1 + 2 HP/LP) ... Free power turbine of axial-flow design ... Start and barring motor connected to the LP rotor via a ratchet coupling"
+    },
+    "out_rpm_note": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "High-speed shaft 3,600 rpm (nominal speed for PG)"
+    },
+    "page_unlabeled_exhaust": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "Exhaust gas flow: 97.9 kg/s (215.9 lb/s) ... Exhaust temperature: 376° C (709° F)"
+    },
+    "starter": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "Start and barring motor connected to the LP rotor via a ratchet coupling"
+    },
+    "starter_power": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global; US and BR identical), 'Features'",
+     "quote": "Low starting power (<160 kW)"
+    },
+    "fuel_gas_kPa": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "Fuel-supply pressure requirement: 18.0 bar(a) ± }0.5 bar (261 ± }7 psi(a))"
+    },
+    "bearings": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "Hydrodynamic radial- and thrust bearings of tilting pad type"
+    },
+    "engine_removal": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "Easy on-site maintenance possible - complete modules can be swiftly exchanged ... Direct exchange of gas generator possible - Core can be air-freighted"
+    },
+    "maintenance": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "First overhaul after 40,000 hours (80,000 hours between major overhauls)"
+    },
+    "combustor": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global, dateModified 2023-10-05; US page dateModified 2026-08-05 and BR page carry the same text), 'Specifications'",
+     "quote": "7 can-annular combustion chambers"
+    },
+    "fleet_variants": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global; US and BR identical), introduction",
+     "quote": "SGT-500 fleet consists of several variants with an output of 11 to over 19MW."
+    },
+    "application": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+     "doc": "Siemens Energy SGT-500 service page (global; US and BR identical), introduction",
+     "quote": "applications in power generation/cogeneration, and the mechanical drive of compressors and pumps"
+    },
+    "status_portfolio": {
+     "url": "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "doc": "Siemens Energy GT-Portfolio-Brochure PDF (2026-01-21), p. 2 'Siemens Energy gas turbines overview' - SGT-500 absent between SGT-400 [10 to 14 / 11 to 15 MW] and SGT-600",
+     "quote": "SGT-600 [24 / 25 MW]"
+    }
+   },
+   "notes": "MD: the only MD number on the current Siemens page is the efficiency, 34.8 % (labelled 'Electrical efficiency ... (MD)'); corrected from prelim 34.5 %. MD power, heat rate, exhaust flow and temperature, power-turbine speed and range, package dimensions and mass are not published on any reachable manufacturer document: set to null (prelim 19,520 kW, 10,432 kJ/kWh, 97.9 kg/s, 369 C, 3,450 rpm came from a third-party listing outside the allowed network - kept in extra.prelim_unverified). The page's single exhaust flow/temperature (97.9 kg/s, 376 C) is not labelled PG/MD and is not assigned to MD (extra.page_unlabeled_exhaust). PR 13:1, 18 compressor stages, turbines 1 HP + 2 LP + 3 PT and three rotors are engine properties printed once for the SGT-500. The page says 3,600 rpm is the 'nominal speed for PG', so the MD nominal differs and is unknown. Systems (starter, fuel pressure, bearings, module exchange) are printed for the SGT-500 without variant label and are given for both. Skeptic check 14.11.2026: eff_pct 34.8 left UNRESOLVED (extra.conflicts[eff_pct].skeptic); power, heat rate, exhaust flow and temperature and out_rpm = null confirmed (no MD value on any reachable manufacturer document)."
+  }
+ ],
+ "changes": [
+  {
+   "variant": "PG",
+   "field": "exh_temp_C",
+   "old": 369,
+   "new": 376,
+   "source": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+   "quote": "Exhaust temperature: 376° C (709° F)"
+  },
+  {
+   "variant": "PG",
+   "field": "pkg_L_m",
+   "old": 21.3,
+   "new": null,
+   "source": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+   "quote": "Not on the current Siemens SGT-500 page (no 'Physical dimensions and weight' block); prelim source oilindustry.ir brochure copy is outside the allowed network and was never opened"
+  },
+  {
+   "variant": "PG",
+   "field": "pkg_W_m",
+   "old": 4.0,
+   "new": null,
+   "source": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+   "quote": "Not on the current Siemens SGT-500 page (no 'Physical dimensions and weight' block); prelim source oilindustry.ir brochure copy is outside the allowed network and was never opened"
+  },
+  {
+   "variant": "PG",
+   "field": "pkg_H_m",
+   "old": 5.1,
+   "new": null,
+   "source": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+   "quote": "Not on the current Siemens SGT-500 page (no 'Physical dimensions and weight' block); prelim source oilindustry.ir brochure copy is outside the allowed network and was never opened"
+  },
+  {
+   "variant": "PG",
+   "field": "eff_pct (source)",
+   "old": "33.8 from brochure copy (search extract)",
+   "new": "33.8 = 3600/10,651 (derived); page prints 33.6 % (PG)",
+   "source": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+   "quote": "Electrical efficiency: 34.8 % (MD) / 33.6 % (PG) | Heat rate: 10,651 kJ/kWh (10,095 Btu/kWh)"
+  },
+  {
+   "variant": "MD",
+   "field": "eff_pct",
+   "old": 34.5,
+   "new": 34.8,
+   "source": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+   "quote": "Electrical efficiency: 34.8 % (MD) / 33.6 % (PG)"
+  },
+  {
+   "variant": "MD",
+   "field": "power_kW",
+   "old": 19520,
+   "new": null,
+   "source": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+   "quote": "Not on the current Siemens SGT-500 page; prelim source amasenergy.com (third party) is outside the allowed network and was never opened"
+  },
+  {
+   "variant": "MD",
+   "field": "heat_rate_kJ_kWh",
+   "old": 10432,
+   "new": null,
+   "source": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+   "quote": "Not on the current Siemens SGT-500 page; prelim source amasenergy.com (third party) is outside the allowed network and was never opened"
+  },
+  {
+   "variant": "MD",
+   "field": "exh_flow_kg_s",
+   "old": 97.9,
+   "new": null,
+   "source": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+   "quote": "Not on the current Siemens SGT-500 page; prelim source amasenergy.com (third party) is outside the allowed network and was never opened; the page's single 97.9 kg/s is not labelled PG/MD (kept in extra.page_unlabeled_exhaust)"
+  },
+  {
+   "variant": "MD",
+   "field": "exh_temp_C",
+   "old": 369,
+   "new": null,
+   "source": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+   "quote": "Not on the current Siemens SGT-500 page; prelim source amasenergy.com (third party) is outside the allowed network and was never opened; the page's single 376 C is not labelled PG/MD"
+  },
+  {
+   "variant": "MD",
+   "field": "out_rpm",
+   "old": 3450,
+   "new": null,
+   "source": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-500-gas-turbine.html",
+   "quote": "High-speed shaft 3,600 rpm (nominal speed for PG) - MD speed not printed"
+  }
+ ],
+ "unverified": [
+  "PG pkg_L_m, pkg_W_m, pkg_H_m, pkg_kg (no package data on any reachable Siemens document)",
+  "PG/MD engine_kg, engine_L_m, engine_D_m (core mass and size not published)",
+  "MD power_kW, heat_rate_kJ_kWh, exh_flow_kg_s, exh_temp_C",
+  "MD out_rpm nominal and range (page: 3,600 rpm is 'nominal speed for PG')",
+  "MD pkg_L_m, pkg_W_m, pkg_H_m, pkg_kg",
+  "PG eff_pct printed 33.6 % vs 3600/HR 33.80 % (taken 33.8, conflict open)",
+  "MD eff_pct 34.8 % - single printing on the line whose PG half contradicts the page heat rate; no MD heat rate to check (skeptic: UNRESOLVED)",
+  "rating conditions (ISO assumed, not printed)",
+  "starter motor drive type (electric / hydraulic / pneumatic) - only 'start and barring motor', <160 kW",
+  "lube: tank volume, oil flow, heat rejection",
+  "variable_geometry (VIGV, variable stator rows)",
+  "bleed_valves count",
+  "accessory_gearbox",
+  "engine bearing count",
+  "engine_removal direction, lift weight, change-out time",
+  "inlet_dp_kPa, exhaust_dp_kPa",
+  "interface: output flange, coupling, mounting, inlet/exhaust connections",
+  "no independent second source for any SGT-500 number (only Siemens service page in 3 locales reachable)"
+ ]
+}

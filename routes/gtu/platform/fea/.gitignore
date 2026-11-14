@@ -1,0 +1,4 @@
+# входы/выходы ccx (десятки МБ), пересоздаются командой python3 disk.py --examples
+runs/
+__pycache__/
+.pytest_cache/

@@ -12,7 +12,7 @@
       "catalog": "data/catalog.json"
     }
   ],
-  "start_here": ["CLAUDE.md", ".agent/README.md", "data/catalog.json", "data/known_gaps.json"],
+  "start_here": ["CLAUDE.md", ".agent/README.md", ".agent/LESSONS.md", "data/catalog.json", "data/known_gaps.json"],
   "commands": {
     "validate": "node tools/validate.mjs",
     "smoke": "node tools/smoke.mjs",

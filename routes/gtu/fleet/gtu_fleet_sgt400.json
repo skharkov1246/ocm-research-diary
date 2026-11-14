@@ -1,0 +1,1030 @@
+{
+ "model": "SGT-400",
+ "maker": "Siemens Energy",
+ "collected": "2026-11-14",
+ "common": {
+  "rating_editions": "All opened 2026-11-14. (C) current global and US pages: PG 13 MW 12.9 MW(e), 35.00 %, 10,294 kJ/kWh, PR 17.1, 40.0 kg/s, 555 C; PG 15 MW 14.3 MW(e), 35.6 %, 10,103, PR 19.5, 44.5, 529; MD 13 MW 13.4 MW, 36.4 %, 9,886, PR 17.1, 39.1, 543; MD 15 MW 14.9 MW, 37.0 %, 9,702, PR 19.5, 44.5, 529. (B) portfolio PDF Jan 2026 (linked from the page) and BR page: same power, heat rate, flow, temperature; PR in the portfolio is self-contradictory - PG metric 16.9/18.5, PG imperial 17.1/19.5, MD metric 17.1/19.5, MD imperial 16.9/18.5; BR page 16.9/18.5; MD 15 MW efficiency 37.0 % (MD metric) vs 37.1 % (MD imperial; data-sheet range '36.4 - 37.1%'). (A) SGT-400 poster (PDF of 2021, still linked from the page) and CN page: PG 13 MW 12.9 MW, 34.8 %, 10,354, PR 16.9, 40.0, 555; PG 15 MW as C but PR 18.5; MD 13 MW 13.8 MW (18,544 hp), 36.8 %, 9,790, PR 16.9, 40.6 kg/s, 543 C; MD 15 MW 14.9 MW (20,024 hp), 37.1 %, 9,702, PR 18.5, 44.5, 529. Rule: edition C (current manufacturer page) for power, heat rate, flow, temperature and PR; package from the same page (Siemens publishes no package specification). The prelim record noted US-page PR 16.9/18.5; on 2026-11-14 the US page prints 17.1/19.5 like the global page.",
+  "rating_basis": "'All simple cycle and mechanical drive performance data in this document are gross values at ISO ambient conditions.' (portfolio p. 3); conditions not printed on the page. PG power = gross at generator terminals, MD power = power-turbine shaft. Third party Centrax CX400 (same engine): ISO 15 C, 0 m, 1013 mbar, 60 % RH, natural gas LHV 47889 kJ/kg, '* Inlet losses, exhaust losses & package auxiliary losses are excluded'.",
+  "pkg_basis": "'Dimensions exclude inlet filter housing and exhaust stack. For power generation, the AC generator is included. For mechanical drive, the driven equipment is excluded.' (page). 'Approx. weight'; enclosure and oil content not stated. PG and MD packages are each common to the 13 and 15 MW versions.",
+  "pkg_check": "Unit pairs on the page consistent: 184,800 lb = 83,824 kg; 88,000 lb = 39,916 kg (rounded 40,000); 46 ft = 14.02 m; 24 ft = 7.32 m; 10 ft = 3.05 m; 14 ft = 4.27 m. Same figures on US, CN, BR pages; CN prints widths '3.1 米（9.4 英尺）' (PG) and '3.1 米（9.0 英尺）' (MD) - 9.4 ft = 2.87 m, 9.0 ft = 2.74 m; metric 3.1 m kept. Centrax CX400 drawing (11,877 / 9,932 / 8,093 mm, 'Approx total weight = 117000 KG') includes enclosure and air intake - other basis, not used. An 11 MW MD package (6.9 x 2.9 x 3.5 m, 30,409 kg) is on CN/BR pages - outside this task.",
+  "fuel_gas": "Supply pressure not published (Siemens page, poster, portfolio; Centrax). Published: 'Fuel* | Natural gas, liquid fuel, dual fuel', '*Other fuels on request'; 'covering a Wobbe fuel range from approximately 50 MJ/m3 to 17.5 MJ/m3'; 'hydrogen (H2) capability of up to 30 vol% with DLE burners or up to 65% with diffusion burners with unabated NOx emissions' (page; CN and BR pages still say 10 vol% with DLE).",
+  "combustor": "'robust can-annular combustion system with six reverse-flow tubular chambers and a high energy igniter in each combustor' (page); Centrax: '6 reverse flow combustion chambers (cans)'.",
+  "fluid_modules": "'fluid system modules, common for all SGT-400 gas turbine packages ... include: Auto drains module, Gas fuel module, Lube oil module, Liquid fuel module (optional)' (page)",
+  "maintenance": "'Extended 32,000-hour hot gas path service intervals, up from 24,000 hours.' '64,000 hours before first major overhaul, up from 48,000 hours.' (page). Fleet: 'more than 450 units have been sold, collectively achieving over 11.7 million hours of operation' (page; FAQ on the same page: 'over 390 units ... more than 5 million operating hours').",
+  "interface": "Output flange, coupling, mounting feet, inlet/exhaust connections: not published. Centrax package: 'Radial exhaust exit (Left/Right/Vertical)'.",
+  "code_note": "Track code not changed here: routes/gtu/gtu_study.py calibrates 'SGT-400 13 MW, mechanical drive' on PR 16.8, 39.4 kg/s, 13.4 MW, 36.2 %; routes/gtu/gtu_dropin.py SLOT S400 uses P 13.4, G 39.4, EGT 555, eta 36.2 - older-datasheet figures that mix MD power with the PG exhaust temperature. Current MD 13 MW: 13.4 MW, 36.4 %, 39.1 kg/s, 543 C, PR 17.1.",
+  "sources": {
+   "fuel_gas": {
+    "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+    "doc": "SGT-400 page (global; US identical), 'Fuels'",
+    "quote": "covering a Wobbe fuel range from approximately 50 MJ/m3 to 17.5 MJ/m3"
+   },
+   "combustor": {
+    "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+    "doc": "SGT-400 page (global; US identical), 'Fuels'",
+    "quote": "robust can-annular combustion system with six reverse-flow tubular chambers and a high energy igniter in each combustor"
+   },
+   "rating_basis": {
+    "url": "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+    "doc": "Siemens GT portfolio PDF (2026-01-21), p. 3",
+    "quote": "All simple cycle and mechanical drive performance data in this document are gross values at ISO ambient conditions."
+   },
+   "pkg_basis": {
+    "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+    "doc": "SGT-400 page (global; US identical), 'Physical dimensions and weight'",
+    "quote": "Dimensions exclude inlet filter housing and exhaust stack. For power generation, the AC generator is included. For mechanical drive, the driven equipment is excluded."
+   },
+   "maintenance": {
+    "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+    "doc": "SGT-400 page (global; US identical), 'Key benefits'",
+    "quote": "Extended 32,000-hour hot gas path service intervals, up from 24,000 hours."
+   },
+   "interface": {
+    "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX400-12.9MW-web.pdf",
+    "doc": "Centrax CX400 12.9MW data sheet 2025 (THIRD PARTY package of the SGT-400)",
+    "quote": "Radial exhaust exit (Left/Right/Vertical)"
+   }
+  }
+ },
+ "records": [
+  {
+   "model": "SGT-400 (13 MW version)",
+   "variant": "PG 13 MW",
+   "power_kW": 12900,
+   "heat_rate_kJ_kWh": 10294,
+   "eff_pct": 35.0,
+   "exh_flow_kg_s": 40.0,
+   "exh_temp_C": 555,
+   "PR": 17.1,
+   "shafts": "two (twin-shaft: gas generator + free power turbine; also in the generator set)",
+   "out_rpm": "9500 rpm - free power turbine speed ('Turbine speed') = input of the package reduction gearbox; generator 1500/1800 rpm (third party Centrax)",
+   "pkg_L_m": 14.0,
+   "pkg_W_m": 3.1,
+   "pkg_H_m": 4.3,
+   "pkg_kg": 83825,
+   "comp_stages": "11",
+   "turb_stages": "2 CT + 2 PT (two-stage overhung compressor turbine + two-stage overhung free power turbine)",
+   "engine_kg": null,
+   "engine_L_m": null,
+   "engine_D_m": null,
+   "extra": {
+    "fuel_gas_kPa": null,
+    "variable_geometry": {
+     "vigv": true,
+     "variable_stator_rows": null,
+     "text": "Siemens: 'Variable guide vanes optimize performance' - no row count. Third party Centrax: '11 Stage axial compressor with variable guide vanes on stages 1 to 5' - whether the IGV row is counted inside 'stages 1 to 5' is not stated, so the row count is null (4 or 5)."
+    },
+    "bleed_valves": {
+     "count": null,
+     "text": "Third party Centrax: 'blow-off valves to prevent compressor surge' (plural, number not stated). Siemens: not published."
+    },
+    "accessory_gearbox": null,
+    "accessory_gearbox_note": "Not published. Centrax: 'Gearbox driven main lube oil pump', 'AC driven auxiliary pump', 'DC driven emergency pump' - which gearbox is not stated.",
+    "bearings": {
+     "type": "tilting pad journal and thrust (third party Centrax)",
+     "count": "gas generator rotor: 2 (Siemens); power turbine: not published",
+     "text": "Siemens: 'two-bearing gas generator rotor', compressor turbine and power turbine 'overhung'. Centrax: 'Tilting pad journal & thrust bearings'."
+    },
+    "power_take_off": "Hot end (exhaust end) drive - third party Centrax: 'Power take-off through exhaust end (hot end drive)'. Not stated by Siemens.",
+    "engine_removal": "Siemens: 'Easy core engine exchange'; 'Core engine maintenance can be performed on-site or off-site'; 'Heavy-duty casings, horizontally and vertically split, enable on-site maintenance'; 'First-stage rotor blades can be axially removed' (page). 'The 15MW core engine can be retrofitted into existing 13MW package as it retains common interfaces. (service exchange)' (power-upgrade page and PDF). Centrax package: 'Integral engine and auxiliary maintenance beams', 'Each baseplate designed for single point lift'. Removal direction, lift weight, clearances and change-out time not published.",
+    "inlet_dp_kPa": null,
+    "exhaust_dp_kPa": null,
+    "inlet_exhaust_dp_note": "Siemens: 'gross values at ISO ambient conditions' - losses not stated. Centrax rating of the same engine excludes inlet and exhaust losses. No nominal dp published.",
+    "gg_rpm": null,
+    "inlet_air_flow_kg_s": null,
+    "see_common": "rating_editions, rating_basis, pkg_basis, pkg_check, fuel_gas, combustor, fluid_modules, maintenance, interface, code_note",
+    "power_at": "generator terminals, gross ISO ('Power output | 12.9 MW(e) | 14.3 MW(e)', 'Gross efficiency')",
+    "gearbox": "Siemens: 'gearbox (if needed)'. Centrax: 'Epicyclic speed reduction gearbox', 'Reduce power turbine speed down to 1500rpm (50Hz) or 1800rpm (60Hz)', generator '4 poles'.",
+    "driven_rpm": "1500 (50 Hz) / 1800 (60 Hz) - third party Centrax",
+    "starter": {
+     "type": "electro-hydraulic",
+     "kW": 110,
+     "basis": "third party Centrax CX400 package: 'Electro-hydraulic start system, 110kW 3 phase AC motor'. Siemens package starter not published."
+    },
+    "lube": {
+     "tank_L": 5500,
+     "oil_flow": null,
+     "heat_rejection_kW": null,
+     "basis": "third party Centrax CX400 package: '5500ltr integral oil tank is incorporated within the turbine baseplate'; external oil-to-air cooler. Siemens: 'Lube oil module', no figures."
+    },
+    "nox": "'NOx emissions** | < 10 ppmvd', '**NOx emissions at 15% O2 on fuel gas (with DLE)' (page table); page text: 'NOx emissions of ≤ 15 ppmvd'",
+    "conflicts": [
+     {
+      "field": "PR",
+      "values": [
+       "17.1 (global + US page; portfolio PG imperial)",
+       "16.9 (portfolio PG metric; poster 2021; CN, BR pages)",
+       "16.7 (Centrax)"
+      ],
+      "taken": 17.1,
+      "why": "current manufacturer page"
+     },
+     {
+      "field": "exh_flow_kg_s",
+      "values": [
+       "40.0 kg/s (page metric; portfolio metric; poster '40.0 kg / s (88.2 lb / s)'; CN; BR)",
+       "39.1-39.2 kg/s (page's own '(86.3 lb/s)' = 39.15 kg/s; portfolio imperial '86.4 lb/s' = 39.19; Centrax '39.2 kg/s')"
+      ],
+      "taken": 40.0,
+      "why": "metric value of the current page, confirmed by portfolio metric and the self-consistent poster pair; the 2 % lower edition is also live - size the package for 39.2-40.0 kg/s"
+     },
+     {
+      "field": "exh_temp_C",
+      "values": [
+       "555 °C (page metric; portfolio metric; poster '555°C (1,031°F)'; CN)",
+       "548-549 °C (page's own '(1,019 °F)' = 548.3 °C; BR; portfolio imperial '1,020 °F'; Centrax '549ºc')"
+      ],
+      "taken": 555,
+      "why": "goes with 40.0 kg/s; the 549 °C value goes with 39.2 kg/s"
+     },
+     {
+      "field": "heat_rate_kJ_kWh",
+      "values": [
+       "10,294 / 35.0 % (page; portfolio; BR)",
+       "10,354 / 34.8 % (poster 2021; CN)",
+       "10,176 / '35%' (Centrax; 3600/10,176 = 35.38 %)"
+      ],
+      "taken": 10294,
+      "why": "current page, confirmed by portfolio Jan 2026"
+     }
+    ],
+    "check": "Second document: power, heat rate, efficiency, speed, flow, temperature identical in page, US page, BR page and portfolio metric table; power, flow, temperature, speed also in poster and CN page. Internal: 9,756 Btu/kWh x 1.05506 = 10,293 kJ/kWh; 3600/10,294 = 34.97 % vs 35.00 %; page pairs 86.3 lb/s (= 39.15 kg/s) and 1,019 °F (= 548.3 °C) do not match 40.0 kg/s and 555 °C (see conflicts); poster pairs 88.2 lb/s = 40.01 kg/s and 555 °C = 1,031 °F match. Energy balance q = 0.99 (alternative 39.2 kg/s / 549 °C: 0.96), band 0.88-1.06."
+   },
+   "sources": {
+    "comp_stages": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Core engine'",
+     "quote": "SGT-400's twin-shaft design includes a two-bearing gas generator rotor with an 11-stage axial flow transonic compressor and a two-stage, overhung compressor turbine"
+    },
+    "turb_stages": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Core engine'",
+     "quote": "a two-stage, overhung compressor turbine | Robust free power turbine features a two-stage, overhung design"
+    },
+    "shafts": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), intro",
+     "quote": "The Siemens Energy SGT-400 is a durable twin-shaft gas turbine suitable for power generation and mechanical drive applications"
+    },
+    "bearings": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Core engine'",
+     "quote": "a two-bearing gas generator rotor"
+    },
+    "variable_geometry": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Core engine'",
+     "quote": "Variable guide vanes optimize performance, and high-chrome blades are available for high-corrosive environments"
+    },
+    "engine_removal": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-400-power-upgrade.html",
+     "doc": "Siemens 'SGT-400 Power Upgrade' service page",
+     "quote": "The 15MW core engine can be retrofitted into existing 13MW package as it retains common interfaces. (service exchange)"
+    },
+    "engine_removal_2": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Maintenance'",
+     "quote": "SGT-400 maintenance features: | Easy core engine exchange"
+    },
+    "power_kW": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Simple cycle power generation'",
+     "quote": "Power output | 12.9 MW(e) | 14.3 MW(e)"
+    },
+    "heat_rate_kJ_kWh": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Simple cycle power generation'",
+     "quote": "Heat rate | 10,294 kJ/kWh (9,756 Btu/kWh)"
+    },
+    "eff_pct": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Simple cycle power generation'",
+     "quote": "Gross efficiency | 35,00 % | 35.6%"
+    },
+    "exh_flow_kg_s": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Simple cycle power generation'",
+     "quote": "Exhaust mass flow | 40.0 kg/s (86.3 lb/s)"
+    },
+    "exh_temp_C": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Simple cycle power generation'",
+     "quote": "Exhaust temperature | 555 °C (1,019 °F)"
+    },
+    "PR": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Simple cycle power generation'",
+     "quote": "Pressure ratio | 17.1 : 1 | 19.5 : 1"
+    },
+    "out_rpm": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Simple cycle power generation'",
+     "quote": "Turbine speed | 9,500 rpm | 9,500 rpm"
+    },
+    "check_portfolio": {
+     "url": "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "doc": "Siemens GT portfolio PDF (2026-01-21), p. 24 'POWER GENERATION (METRIC UNITS)'",
+     "quote": "SGT-400 (13 MW) 12.9 MW(e) 50/60 Hz 35.0% 10,294 kJ/kWh 9,500 rpm 16.9 : 1 40.0 kg/s 555 °C"
+    },
+    "check_portfolio_imperial": {
+     "url": "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "doc": "Siemens GT portfolio PDF (2026-01-21), p. 24 'POWER GENERATION (IMPERIAL UNITS)'",
+     "quote": "SGT-400 (13 MW) 12.9 MW(e) 50/60 Hz 35.0% 9,751 Btu/kWh 9,500 rpm 17.1 : 1 86.4 lb/s 1,020 °F"
+    },
+    "check_poster": {
+     "url": "https://assets.siemens-energy.com/dam/8d8180d1-00a7-471a-b710-b059000af69f/Poster-SGT-400-pdf_Original%20file.pdf",
+     "doc": "SGT-400 poster (PDF 2021)",
+     "quote": "12.9 MW | 34.8% | 10,354 kJ / kWh | (9,810 Btu / kWh) | 16.9:1 | 40.0 kg / s (88.2 lb / s) | 555°C (1,031°F)"
+    },
+    "check_third_party": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX400-12.9MW-web.pdf",
+     "doc": "Centrax CX400 12.9MW data sheet 2025 (THIRD PARTY package of the SGT-400)",
+     "quote": "Power Output 12904 kWe | Heat Rate 10176 kJ/kWh | Exhaust Flow 39.2 kg/s | 86.4 Ib/s | Exhaust Temperature 549ºc | 1020.2ºF"
+    },
+    "pkg_L_m": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Physical dimensions and weight'",
+     "quote": "Power generation package | 13 MW and 15 MW | Length | 14.0 m (46 ft)"
+    },
+    "pkg_W_m": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Physical dimensions and weight'",
+     "quote": "Width | 3.1 m (10 ft)"
+    },
+    "pkg_H_m": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Physical dimensions and weight'",
+     "quote": "Height | 4.3 m (14 ft)"
+    },
+    "pkg_kg": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Physical dimensions and weight'",
+     "quote": "Approx. weight | 83,825 kg (184,800 lb)"
+    },
+    "starter": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX400-12.9MW-web.pdf",
+     "doc": "Centrax CX400 12.9MW data sheet 2025 (THIRD PARTY package of the SGT-400)",
+     "quote": "Start system | Electro-hydraulic start system, 110kW 3 phase | AC motor"
+    },
+    "lube": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX400-12.9MW-web.pdf",
+     "doc": "Centrax CX400 12.9MW data sheet 2025 (THIRD PARTY package of the SGT-400)",
+     "quote": "5500ltr integral oil tank is incorporated within | the turbine baseplate"
+    },
+    "variable_geometry_2": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX400-12.9MW-web.pdf",
+     "doc": "Centrax CX400 12.9MW data sheet 2025 (THIRD PARTY package of the SGT-400)",
+     "quote": "11 Stage axial compressor with variable guide | vanes on stages 1 to 5"
+    },
+    "bleed_valves": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX400-12.9MW-web.pdf",
+     "doc": "Centrax CX400 12.9MW data sheet 2025 (THIRD PARTY package of the SGT-400)",
+     "quote": "Pressure ratio 16.7:1, blow-off valves to | prevent compressor surge"
+    },
+    "bearings_2": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX400-12.9MW-web.pdf",
+     "doc": "Centrax CX400 12.9MW data sheet 2025 (THIRD PARTY package of the SGT-400)",
+     "quote": "Tilting pad journal & thrust bearings"
+    },
+    "power_take_off": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX400-12.9MW-web.pdf",
+     "doc": "Centrax CX400 12.9MW data sheet 2025 (THIRD PARTY package of the SGT-400)",
+     "quote": "Power take-off through exhaust end | (hot end drive)"
+    },
+    "driven_rpm": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX400-12.9MW-web.pdf",
+     "doc": "Centrax CX400 12.9MW data sheet 2025 (THIRD PARTY package of the SGT-400)",
+     "quote": "Epicyclic speed reduction gearbox | Reduce power turbine speed down to | 1500rpm (50Hz) or 1800rpm (60Hz)"
+    }
+   },
+   "notes": "Confirmed on the current Siemens page (global = US) and in the portfolio Jan 2026; prelim numbers unchanged. eff_pct as printed ('35,00 %'; 3600/10,294 = 34.97 %). out_rpm = free power turbine speed at the reduction-gearbox input. Exhaust has two live editions (40.0 kg/s / 555 °C vs 39.2 kg/s / 549 °C) - extra.conflicts. PR 17.1 on the page vs 16.9 in other Siemens tables. Package 14.0 x 3.1 x 4.3 m, 83,825 kg incl. AC generator, excl. inlet filter house and exhaust stack. Starter, lube tank, bearing type, VGV stages, blow-off valves and hot-end drive come only from the third-party Centrax CX400 data sheet (another package of the same engine). The 15 MW core engine fits the 13 MW package. See common.code_note.",
+   "unverified": [
+    "engine_kg",
+    "engine_L_m",
+    "engine_D_m",
+    "fuel_gas_kPa",
+    "accessory_gearbox",
+    "bleed_valves count",
+    "variable stator row count (4 or 5)",
+    "inlet_dp_kPa",
+    "exhaust_dp_kPa",
+    "engine_removal direction/time",
+    "gg_rpm",
+    "inlet air flow",
+    "interface (flange, coupling, mounting)",
+    "lube oil flow / heat rejection",
+    "starter of the Siemens package (Centrax value only)"
+   ]
+  },
+  {
+   "model": "SGT-400 (15 MW version)",
+   "variant": "PG 15 MW",
+   "power_kW": 14300,
+   "heat_rate_kJ_kWh": 10103,
+   "eff_pct": 35.6,
+   "exh_flow_kg_s": 44.5,
+   "exh_temp_C": 529,
+   "PR": 19.5,
+   "shafts": "two (twin-shaft: gas generator + free power turbine; also in the generator set)",
+   "out_rpm": "9500 rpm - free power turbine speed ('Turbine speed') = input of the package reduction gearbox; generator 1500/1800 rpm (third party Centrax)",
+   "pkg_L_m": 14.0,
+   "pkg_W_m": 3.1,
+   "pkg_H_m": 4.3,
+   "pkg_kg": 83825,
+   "comp_stages": "11",
+   "turb_stages": "2 CT + 2 PT (two-stage overhung compressor turbine + two-stage overhung free power turbine)",
+   "engine_kg": null,
+   "engine_L_m": null,
+   "engine_D_m": null,
+   "extra": {
+    "fuel_gas_kPa": null,
+    "variable_geometry": {
+     "vigv": true,
+     "variable_stator_rows": null,
+     "text": "Siemens: 'Variable guide vanes optimize performance' - no row count. Third party Centrax: '11 Stage axial compressor with variable guide vanes on stages 1 to 5' - whether the IGV row is counted inside 'stages 1 to 5' is not stated, so the row count is null (4 or 5)."
+    },
+    "bleed_valves": {
+     "count": null,
+     "text": "Third party Centrax: 'blow-off valves to prevent compressor surge' (plural, number not stated). Siemens: not published."
+    },
+    "accessory_gearbox": null,
+    "accessory_gearbox_note": "Not published. Centrax: 'Gearbox driven main lube oil pump', 'AC driven auxiliary pump', 'DC driven emergency pump' - which gearbox is not stated.",
+    "bearings": {
+     "type": "tilting pad journal and thrust (third party Centrax)",
+     "count": "gas generator rotor: 2 (Siemens); power turbine: not published",
+     "text": "Siemens: 'two-bearing gas generator rotor', compressor turbine and power turbine 'overhung'. Centrax: 'Tilting pad journal & thrust bearings'."
+    },
+    "power_take_off": "Hot end (exhaust end) drive - third party Centrax: 'Power take-off through exhaust end (hot end drive)'. Not stated by Siemens.",
+    "engine_removal": "Siemens: 'Easy core engine exchange'; 'Core engine maintenance can be performed on-site or off-site'; 'Heavy-duty casings, horizontally and vertically split, enable on-site maintenance'; 'First-stage rotor blades can be axially removed' (page). 'The 15MW core engine can be retrofitted into existing 13MW package as it retains common interfaces. (service exchange)' (power-upgrade page and PDF). Centrax package: 'Integral engine and auxiliary maintenance beams', 'Each baseplate designed for single point lift'. Removal direction, lift weight, clearances and change-out time not published.",
+    "inlet_dp_kPa": null,
+    "exhaust_dp_kPa": null,
+    "inlet_exhaust_dp_note": "Siemens: 'gross values at ISO ambient conditions' - losses not stated. Centrax rating of the same engine excludes inlet and exhaust losses. No nominal dp published.",
+    "gg_rpm": null,
+    "inlet_air_flow_kg_s": null,
+    "see_common": "rating_editions, rating_basis, pkg_basis, pkg_check, fuel_gas, combustor, fluid_modules, maintenance, interface, code_note",
+    "power_at": "generator terminals, gross ISO ('Power output | 12.9 MW(e) | 14.3 MW(e)', 'Gross efficiency')",
+    "gearbox": "Siemens: 'gearbox (if needed)'. Centrax: 'Epicyclic speed reduction gearbox', 'Reduce power turbine speed down to 1500rpm (50Hz) or 1800rpm (60Hz)', generator '4 poles'.",
+    "driven_rpm": "1500 (50 Hz) / 1800 (60 Hz) - third party Centrax",
+    "starter": {
+     "type": "electro-hydraulic",
+     "kW": 110,
+     "basis": "third party Centrax CX400 package: 'Electro-hydraulic start system, 110kW 3 phase AC motor'. Siemens package starter not published."
+    },
+    "lube": {
+     "tank_L": 5500,
+     "oil_flow": null,
+     "heat_rejection_kW": null,
+     "basis": "third party Centrax CX400 package: '5500ltr integral oil tank is incorporated within the turbine baseplate'; external oil-to-air cooler. Siemens: 'Lube oil module', no figures."
+    },
+    "nox": "'NOx emissions** | < 10 ppmvd', '**NOx emissions at 15% O2 on fuel gas (with DLE)' (page table); page text: 'NOx emissions of ≤ 15 ppmvd'",
+    "conflicts": [
+     {
+      "field": "PR",
+      "values": [
+       "19.5 (global + US page; portfolio PG imperial)",
+       "18.5 (portfolio PG metric; poster 2021; CN, BR pages)",
+       "16.7 (Centrax, generic text)"
+      ],
+      "taken": 19.5,
+      "why": "current manufacturer page"
+     },
+     {
+      "field": "power_kW",
+      "values": [
+       "14,300 kW / 10,103 kJ/kWh / 35.6 % (Siemens page, portfolio, poster)",
+       "14,501 kWe / 9,989 kJ/kWh / 36 % (third party Centrax 'CX400 14.4MW', same 44.5 kg/s and 529 °C)"
+      ],
+      "taken": 14300,
+      "why": "manufacturer rating"
+     }
+    ],
+    "check": "Second document: power, efficiency, heat rate, speed, flow, temperature identical in page, US page, portfolio, poster, CN and BR pages; flow and temperature also in Centrax 14.4 MW. Internal: 9,572 Btu/kWh x 1.05506 = 10,099 kJ/kWh (rounding); 3600/10,103 = 35.63 %; 98.1 lb/s = 44.50 kg/s; 529 °C = 984 °F. Energy balance q = 0.97. Exhaust identical to MD 15 MW at 14.9 MW shaft: 14.3/14.9 = 0.96 = gearbox x generator - consistent."
+   },
+   "sources": {
+    "comp_stages": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Core engine'",
+     "quote": "SGT-400's twin-shaft design includes a two-bearing gas generator rotor with an 11-stage axial flow transonic compressor and a two-stage, overhung compressor turbine"
+    },
+    "turb_stages": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Core engine'",
+     "quote": "a two-stage, overhung compressor turbine | Robust free power turbine features a two-stage, overhung design"
+    },
+    "shafts": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), intro",
+     "quote": "The Siemens Energy SGT-400 is a durable twin-shaft gas turbine suitable for power generation and mechanical drive applications"
+    },
+    "bearings": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Core engine'",
+     "quote": "a two-bearing gas generator rotor"
+    },
+    "variable_geometry": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Core engine'",
+     "quote": "Variable guide vanes optimize performance, and high-chrome blades are available for high-corrosive environments"
+    },
+    "engine_removal": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-400-power-upgrade.html",
+     "doc": "Siemens 'SGT-400 Power Upgrade' service page",
+     "quote": "The 15MW core engine can be retrofitted into existing 13MW package as it retains common interfaces. (service exchange)"
+    },
+    "engine_removal_2": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Maintenance'",
+     "quote": "SGT-400 maintenance features: | Easy core engine exchange"
+    },
+    "power_kW": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Simple cycle power generation'",
+     "quote": "Power output | 12.9 MW(e) | 14.3 MW(e)"
+    },
+    "heat_rate_kJ_kWh": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Simple cycle power generation'",
+     "quote": "Heat rate | 10,103 kJ/kWh (9,572Btu/kWh)"
+    },
+    "eff_pct": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Simple cycle power generation'",
+     "quote": "Gross efficiency | 35,00 % | 35.6%"
+    },
+    "exh_flow_kg_s": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Simple cycle power generation'",
+     "quote": "Exhaust mass flow | 44.5 kg/s (98.1 lb/s)"
+    },
+    "exh_temp_C": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Simple cycle power generation'",
+     "quote": "Exhaust temperature | 529 °C (984 °F)"
+    },
+    "PR": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Simple cycle power generation'",
+     "quote": "Pressure ratio | 17.1 : 1 | 19.5 : 1"
+    },
+    "out_rpm": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Simple cycle power generation'",
+     "quote": "Turbine speed | 9,500 rpm | 9,500 rpm"
+    },
+    "engine_removal_3": {
+     "url": "https://assets.siemens-energy.com/dam/d62dd7a9-124b-468a-836f-b05800841bee/SGT-400-Power-Upgrade-v3-pdf_Original%20file.pdf",
+     "doc": "Siemens 'SGT-400 Power Upgrade' PDF (2022)",
+     "quote": "The 15MW gas turbine can be retrofitted into existing | 13MW package as it retains common interfaces."
+    },
+    "check_portfolio": {
+     "url": "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "doc": "Siemens GT portfolio PDF (2026-01-21), p. 24 'POWER GENERATION (METRIC UNITS)'",
+     "quote": "SGT-400 (15 MW) 14.3 MW(e) 50/60 Hz 35.6% 10,103 kJ/kWh 9,500 rpm 18.5 : 1 44.5 kg/s 529 °C"
+    },
+    "check_portfolio_imperial": {
+     "url": "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "doc": "Siemens GT portfolio PDF (2026-01-21), p. 24 'POWER GENERATION (IMPERIAL UNITS)'",
+     "quote": "SGT-400 (15 MW) 14.3 MW(e) 50/60 Hz 35.6% 9,582 Btu/kWh 9,500 rpm 19.5 : 1 97.8 lb/s 984 °F"
+    },
+    "check_poster": {
+     "url": "https://assets.siemens-energy.com/dam/8d8180d1-00a7-471a-b710-b059000af69f/Poster-SGT-400-pdf_Original%20file.pdf",
+     "doc": "SGT-400 poster (PDF 2021)",
+     "quote": "14.3 MW | 35.6% | 10,103 kJ / kWh | (9,572 Btu / kWh) | 18.5:1 | 44.5 kg / s (98.1 lb / s) | 529°C (984°F)"
+    },
+    "check_third_party": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX400-14.4MW-web.pdf",
+     "doc": "Centrax CX400 14.4MW data sheet 2025 (THIRD PARTY package of the SGT-400)",
+     "quote": "Power Output 14501 kWe | Heat Rate 9989 kJ/kWh | Exhaust Flow 44.5 kg/s | Exhaust Temperature 529ºc"
+    },
+    "pkg_L_m": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Physical dimensions and weight'",
+     "quote": "Power generation package | 13 MW and 15 MW | Length | 14.0 m (46 ft)"
+    },
+    "pkg_W_m": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Physical dimensions and weight'",
+     "quote": "Width | 3.1 m (10 ft)"
+    },
+    "pkg_H_m": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Physical dimensions and weight'",
+     "quote": "Height | 4.3 m (14 ft)"
+    },
+    "pkg_kg": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Physical dimensions and weight'",
+     "quote": "Approx. weight | 83,825 kg (184,800 lb)"
+    },
+    "starter": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX400-14.4MW-web.pdf",
+     "doc": "Centrax CX400 14.4MW data sheet 2025 (THIRD PARTY package of the SGT-400)",
+     "quote": "Start system | Electro-hydraulic start system, 110kW 3 phase | AC motor"
+    },
+    "lube": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX400-14.4MW-web.pdf",
+     "doc": "Centrax CX400 14.4MW data sheet 2025 (THIRD PARTY package of the SGT-400)",
+     "quote": "5500ltr integral oil tank is incorporated within | the turbine baseplate"
+    },
+    "variable_geometry_2": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX400-14.4MW-web.pdf",
+     "doc": "Centrax CX400 14.4MW data sheet 2025 (THIRD PARTY package of the SGT-400)",
+     "quote": "11 Stage axial compressor with variable guide | vanes on stages 1 to 5"
+    },
+    "bleed_valves": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX400-14.4MW-web.pdf",
+     "doc": "Centrax CX400 14.4MW data sheet 2025 (THIRD PARTY package of the SGT-400)",
+     "quote": "Pressure ratio 16.7:1, blow-off valves to | prevent compressor surge"
+    },
+    "bearings_2": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX400-14.4MW-web.pdf",
+     "doc": "Centrax CX400 14.4MW data sheet 2025 (THIRD PARTY package of the SGT-400)",
+     "quote": "Tilting pad journal & thrust bearings"
+    },
+    "power_take_off": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX400-14.4MW-web.pdf",
+     "doc": "Centrax CX400 14.4MW data sheet 2025 (THIRD PARTY package of the SGT-400)",
+     "quote": "Power take-off through exhaust end | (hot end drive)"
+    },
+    "driven_rpm": {
+     "url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX400-14.4MW-web.pdf",
+     "doc": "Centrax CX400 14.4MW data sheet 2025 (THIRD PARTY package of the SGT-400)",
+     "quote": "Epicyclic speed reduction gearbox | Reduce power turbine speed down to | 1500rpm (50Hz) or 1800rpm (60Hz)"
+    }
+   },
+   "notes": "Confirmed on the current Siemens page (global = US); power, heat rate, flow, temperature identical in portfolio Jan 2026 and poster 2021; prelim numbers unchanged. eff_pct as printed (3600/10,103 = 35.63 %). PR 19.5 on the page vs 18.5 in the poster, CN/BR pages and portfolio metric table. out_rpm = free power turbine speed at the reduction-gearbox input. Package as PG 13 MW. Centrax rates the same engine 'CX400 14.4MW' (14,501 kWe, 36 %) - third party, not used. See common.code_note.",
+   "unverified": [
+    "engine_kg",
+    "engine_L_m",
+    "engine_D_m",
+    "fuel_gas_kPa",
+    "accessory_gearbox",
+    "bleed_valves count",
+    "variable stator row count (4 or 5)",
+    "inlet_dp_kPa",
+    "exhaust_dp_kPa",
+    "engine_removal direction/time",
+    "gg_rpm",
+    "inlet air flow",
+    "interface (flange, coupling, mounting)",
+    "lube oil flow / heat rejection",
+    "starter of the Siemens package (Centrax value only)"
+   ]
+  },
+  {
+   "model": "SGT-400 (13 MW version)",
+   "variant": "MD 13 MW",
+   "power_kW": 13400,
+   "heat_rate_kJ_kWh": 9886,
+   "eff_pct": 36.4,
+   "exh_flow_kg_s": 39.1,
+   "exh_temp_C": 543,
+   "PR": 17.1,
+   "shafts": "two (twin-shaft: gas generator + free power turbine)",
+   "out_rpm": "9500 rpm nominal power-turbine (drive shaft) speed; range 4750 - 9975 rpm ('4,750 - 9,500 – 9,975 rpm')",
+   "pkg_L_m": 7.3,
+   "pkg_W_m": 3.1,
+   "pkg_H_m": 4.3,
+   "pkg_kg": 40000,
+   "comp_stages": "11",
+   "turb_stages": "2 CT + 2 PT (two-stage overhung compressor turbine + two-stage overhung free power turbine)",
+   "engine_kg": null,
+   "engine_L_m": null,
+   "engine_D_m": null,
+   "extra": {
+    "fuel_gas_kPa": null,
+    "variable_geometry": {
+     "vigv": true,
+     "variable_stator_rows": null,
+     "text": "Siemens: 'Variable guide vanes optimize performance' - no row count. Third party Centrax: '11 Stage axial compressor with variable guide vanes on stages 1 to 5' - whether the IGV row is counted inside 'stages 1 to 5' is not stated, so the row count is null (4 or 5)."
+    },
+    "bleed_valves": {
+     "count": null,
+     "text": "Third party Centrax: 'blow-off valves to prevent compressor surge' (plural, number not stated). Siemens: not published."
+    },
+    "accessory_gearbox": null,
+    "accessory_gearbox_note": "Not published. Centrax: 'Gearbox driven main lube oil pump', 'AC driven auxiliary pump', 'DC driven emergency pump' - which gearbox is not stated.",
+    "bearings": {
+     "type": "tilting pad journal and thrust (third party Centrax)",
+     "count": "gas generator rotor: 2 (Siemens); power turbine: not published",
+     "text": "Siemens: 'two-bearing gas generator rotor', compressor turbine and power turbine 'overhung'. Centrax: 'Tilting pad journal & thrust bearings'."
+    },
+    "power_take_off": "Hot end (exhaust end) drive - third party Centrax: 'Power take-off through exhaust end (hot end drive)'. Not stated by Siemens.",
+    "engine_removal": "Siemens: 'Easy core engine exchange'; 'Core engine maintenance can be performed on-site or off-site'; 'Heavy-duty casings, horizontally and vertically split, enable on-site maintenance'; 'First-stage rotor blades can be axially removed' (page). 'The 15MW core engine can be retrofitted into existing 13MW package as it retains common interfaces. (service exchange)' (power-upgrade page and PDF). Centrax package: 'Integral engine and auxiliary maintenance beams', 'Each baseplate designed for single point lift'. Removal direction, lift weight, clearances and change-out time not published.",
+    "inlet_dp_kPa": null,
+    "exhaust_dp_kPa": null,
+    "inlet_exhaust_dp_note": "Siemens: 'gross values at ISO ambient conditions' - losses not stated. Centrax rating of the same engine excludes inlet and exhaust losses. No nominal dp published.",
+    "gg_rpm": null,
+    "inlet_air_flow_kg_s": null,
+    "see_common": "rating_editions, rating_basis, pkg_basis, pkg_check, fuel_gas, combustor, fluid_modules, maintenance, interface, code_note",
+    "power_at": "power-turbine shaft, gross ISO ('Power output | 13.4 MW | 14.9 MW')",
+    "gearbox": "'Can be used as direct drive for compressors or pumps' (page); 'gearbox (if needed)'.",
+    "out_rpm_range": "4750 - 9500 - 9975 rpm (min - nominal - max); page text 'output speeds up to 10,000 rpm'",
+    "starter": null,
+    "starter_note": "Not published for the Siemens MD package (Centrax packages generator sets only).",
+    "lube": null,
+    "lube_note": "Siemens: 'Lube oil module' only - no tank, flow or heat rejection.",
+    "conflicts": [
+     {
+      "field": "PR",
+      "values": [
+       "17.1 (global + US page; portfolio MD metric)",
+       "16.9 (portfolio MD imperial; BR; poster 2021; CN)"
+      ],
+      "taken": 17.1,
+      "why": "current manufacturer page"
+     },
+     {
+      "field": "power_kW",
+      "values": [
+       "13.4 MW / 36.4 % / 9,886 / 39.1 kg/s (page, portfolio, BR)",
+       "13.8 MW (18,544 hp) / 36.8 % / 9,790 / 40.6 kg/s (poster 2021, CN)"
+      ],
+      "taken": 13400,
+      "why": "current page and portfolio Jan 2026; 543 °C in both"
+     },
+     {
+      "field": "exh_temp_C",
+      "values": [
+       "543 °C (all Siemens documents)",
+       "page pair '(1,020 °F)' = 548.9 °C; poster, CN, portfolio imperial print 1,009 °F = 543 °C"
+      ],
+      "taken": 543,
+      "why": "°F on the page is wrong"
+     },
+     {
+      "field": "heat_rate_kJ_kWh",
+      "values": [
+       "page '9,886 kJ/kWh (6,987 Btu/kWh)'",
+       "6,987 is Btu/(hp·h); portfolio imperial '9,366 Btu/kWh 6,987 Btu/hph'"
+      ],
+      "taken": 9886,
+      "why": "only the bracket unit label is wrong"
+     }
+    ],
+    "check": "Second document: power, efficiency, heat rate, speed range, flow, temperature identical in page, US page, portfolio MD metric table and BR page. Internal: 3600/9,886 = 36.42 %; 9,366 Btu/kWh x 1.05506 = 9,882 kJ/kWh; 86.3 lb/s = 39.15 kg/s. Energy balance q = 0.97. MD 13 MW exhaust (39.1 kg/s, 543 °C) differs from PG 13 MW (40.0 kg/s, 555 °C), whereas the 15 MW PG and MD exhaust are identical - published as such."
+   },
+   "sources": {
+    "comp_stages": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Core engine'",
+     "quote": "SGT-400's twin-shaft design includes a two-bearing gas generator rotor with an 11-stage axial flow transonic compressor and a two-stage, overhung compressor turbine"
+    },
+    "turb_stages": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Core engine'",
+     "quote": "a two-stage, overhung compressor turbine | Robust free power turbine features a two-stage, overhung design"
+    },
+    "shafts": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), intro",
+     "quote": "The Siemens Energy SGT-400 is a durable twin-shaft gas turbine suitable for power generation and mechanical drive applications"
+    },
+    "bearings": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Core engine'",
+     "quote": "a two-bearing gas generator rotor"
+    },
+    "variable_geometry": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Core engine'",
+     "quote": "Variable guide vanes optimize performance, and high-chrome blades are available for high-corrosive environments"
+    },
+    "engine_removal": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-400-power-upgrade.html",
+     "doc": "Siemens 'SGT-400 Power Upgrade' service page",
+     "quote": "The 15MW core engine can be retrofitted into existing 13MW package as it retains common interfaces. (service exchange)"
+    },
+    "engine_removal_2": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Maintenance'",
+     "quote": "SGT-400 maintenance features: | Easy core engine exchange"
+    },
+    "power_kW": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Mechanical drive'",
+     "quote": "Power output | 13.4 MW | 14.9 MW"
+    },
+    "heat_rate_kJ_kWh": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Mechanical drive'",
+     "quote": "Heat rate | 9,886 kJ/kWh (6,987 Btu/kWh)"
+    },
+    "eff_pct": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Mechanical drive'",
+     "quote": "Efficiency | 36.4% | 37.0%"
+    },
+    "exh_flow_kg_s": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Mechanical drive'",
+     "quote": "Exhaust mass flow | 39.1 kg/s (86.3 lb/s)"
+    },
+    "exh_temp_C": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Mechanical drive'",
+     "quote": "Exhaust temperature | 543 °C (1,020 °F)"
+    },
+    "PR": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Mechanical drive'",
+     "quote": "Pressure ratio | 17.1 : 1 | 19.5 : 1"
+    },
+    "out_rpm": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Mechanical drive'",
+     "quote": "Turbine speed | 4,750 - 9,500 – 9,975 rpm | 4,750 - 9,500 – 9,975 rpm"
+    },
+    "check_portfolio": {
+     "url": "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "doc": "Siemens GT portfolio PDF (2026-01-21), p. 24 'MECHANICAL DRIVE (METRIC UNITS)'",
+     "quote": "SGT-400 (13 MW) 13.4 MW 36.4% 9,886 kJ/kWh 4,750 – 9,500 – 9,975 rpm 17.1 : 1 39.1 kg/s 543 °C"
+    },
+    "check_portfolio_imperial": {
+     "url": "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "doc": "Siemens GT portfolio PDF (2026-01-21), p. 24 'MECHANICAL DRIVE (IMPERIAL UNITS)'",
+     "quote": "SGT-400 (13 MW) 13.4 MW 36.4% 9,366 Btu/kWh 6,987 Btu/hph 4,750 – 9,500 – 9,975 rpm 16.9 : 1 86.3 lb/s 1,009 °F"
+    },
+    "check_br": {
+     "url": "https://www.siemens-energy.com/br/pt/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (br/pt), 'Acionamento mecânico'",
+     "quote": "13,4 SM | 36.4% | 9.886 kJ/kWh (9.366 Btu/kWh) | 4.750 - 9.500 – 9.975 rpm | 16.9 : 1 | 39,1 kg/s (86,3 lb/s) | 543 °C (1,019 °F)"
+    },
+    "older_edition_poster": {
+     "url": "https://assets.siemens-energy.com/dam/8d8180d1-00a7-471a-b710-b059000af69f/Poster-SGT-400-pdf_Original%20file.pdf",
+     "doc": "SGT-400 poster (PDF 2021), MD column 2",
+     "quote": "13.8 MW (18,544 hp) | 36.8% | 9,790 kJ / kWh | (6,919 Btu / hph) | 4,750 / 9,975 rpm | 16.9:1 | 40.6 kg / s (89.5 lb / s) | 543°C (1,009°F)"
+    },
+    "pkg_L_m": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Physical dimensions and weight'",
+     "quote": "Mechanical drive package | 13 and 15 MW | Length | 7.3 m (24 ft)"
+    },
+    "pkg_W_m": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Physical dimensions and weight'",
+     "quote": "Width | 3.1 m (10 ft)"
+    },
+    "pkg_H_m": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Physical dimensions and weight'",
+     "quote": "Height | 4.3 m (14 ft)"
+    },
+    "pkg_kg": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Physical dimensions and weight'",
+     "quote": "Approx. weight | 40,000 kg (88,000 lb)"
+    },
+    "gearbox": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Key benefits'",
+     "quote": "Can be used as direct drive for compressors or pumps"
+    },
+    "out_rpm_range": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Core engine'",
+     "quote": "enabling output speeds up to 10,000 rpm (12,075 rpm for the 11 MW configuration)"
+    }
+   },
+   "notes": "Confirmed on the current Siemens page (global = US), portfolio Jan 2026 MD metric table and BR page; prelim numbers unchanged, out_rpm now carries the range. Power = free power turbine shaft, gross ISO. Older edition (poster 2021, CN page): 13.8 MW, 36.8 %, 9,790 kJ/kWh, PR 16.9, 40.6 kg/s, 543 °C. Package 7.3 x 3.1 x 4.3 m, 40,000 kg excl. driven equipment, inlet filter house and exhaust stack (common for 13 and 15 MW). Starter and lube figures not published for the Siemens MD package. See common.code_note.",
+   "unverified": [
+    "engine_kg",
+    "engine_L_m",
+    "engine_D_m",
+    "fuel_gas_kPa",
+    "accessory_gearbox",
+    "bleed_valves count",
+    "variable stator row count (4 or 5)",
+    "inlet_dp_kPa",
+    "exhaust_dp_kPa",
+    "engine_removal direction/time",
+    "gg_rpm",
+    "inlet air flow",
+    "interface (flange, coupling, mounting)",
+    "starter",
+    "lube (tank, oil flow, heat rejection)"
+   ]
+  },
+  {
+   "model": "SGT-400 (15 MW version)",
+   "variant": "MD 15 MW",
+   "power_kW": 14900,
+   "heat_rate_kJ_kWh": 9702,
+   "eff_pct": 37.0,
+   "exh_flow_kg_s": 44.5,
+   "exh_temp_C": 529,
+   "PR": 19.5,
+   "shafts": "two (twin-shaft: gas generator + free power turbine)",
+   "out_rpm": "9500 rpm nominal power-turbine (drive shaft) speed; range 4750 - 9975 rpm ('4,750 - 9,500 – 9,975 rpm')",
+   "pkg_L_m": 7.3,
+   "pkg_W_m": 3.1,
+   "pkg_H_m": 4.3,
+   "pkg_kg": 40000,
+   "comp_stages": "11",
+   "turb_stages": "2 CT + 2 PT (two-stage overhung compressor turbine + two-stage overhung free power turbine)",
+   "engine_kg": null,
+   "engine_L_m": null,
+   "engine_D_m": null,
+   "extra": {
+    "fuel_gas_kPa": null,
+    "variable_geometry": {
+     "vigv": true,
+     "variable_stator_rows": null,
+     "text": "Siemens: 'Variable guide vanes optimize performance' - no row count. Third party Centrax: '11 Stage axial compressor with variable guide vanes on stages 1 to 5' - whether the IGV row is counted inside 'stages 1 to 5' is not stated, so the row count is null (4 or 5)."
+    },
+    "bleed_valves": {
+     "count": null,
+     "text": "Third party Centrax: 'blow-off valves to prevent compressor surge' (plural, number not stated). Siemens: not published."
+    },
+    "accessory_gearbox": null,
+    "accessory_gearbox_note": "Not published. Centrax: 'Gearbox driven main lube oil pump', 'AC driven auxiliary pump', 'DC driven emergency pump' - which gearbox is not stated.",
+    "bearings": {
+     "type": "tilting pad journal and thrust (third party Centrax)",
+     "count": "gas generator rotor: 2 (Siemens); power turbine: not published",
+     "text": "Siemens: 'two-bearing gas generator rotor', compressor turbine and power turbine 'overhung'. Centrax: 'Tilting pad journal & thrust bearings'."
+    },
+    "power_take_off": "Hot end (exhaust end) drive - third party Centrax: 'Power take-off through exhaust end (hot end drive)'. Not stated by Siemens.",
+    "engine_removal": "Siemens: 'Easy core engine exchange'; 'Core engine maintenance can be performed on-site or off-site'; 'Heavy-duty casings, horizontally and vertically split, enable on-site maintenance'; 'First-stage rotor blades can be axially removed' (page). 'The 15MW core engine can be retrofitted into existing 13MW package as it retains common interfaces. (service exchange)' (power-upgrade page and PDF). Centrax package: 'Integral engine and auxiliary maintenance beams', 'Each baseplate designed for single point lift'. Removal direction, lift weight, clearances and change-out time not published.",
+    "inlet_dp_kPa": null,
+    "exhaust_dp_kPa": null,
+    "inlet_exhaust_dp_note": "Siemens: 'gross values at ISO ambient conditions' - losses not stated. Centrax rating of the same engine excludes inlet and exhaust losses. No nominal dp published.",
+    "gg_rpm": null,
+    "inlet_air_flow_kg_s": null,
+    "see_common": "rating_editions, rating_basis, pkg_basis, pkg_check, fuel_gas, combustor, fluid_modules, maintenance, interface, code_note",
+    "power_at": "power-turbine shaft, gross ISO ('Power output | 13.4 MW | 14.9 MW')",
+    "gearbox": "'Can be used as direct drive for compressors or pumps' (page); 'gearbox (if needed)'.",
+    "out_rpm_range": "4750 - 9500 - 9975 rpm (min - nominal - max); page text 'output speeds up to 10,000 rpm'",
+    "starter": null,
+    "starter_note": "Not published for the Siemens MD package (Centrax packages generator sets only).",
+    "lube": null,
+    "lube_note": "Siemens: 'Lube oil module' only - no tank, flow or heat rejection.",
+    "conflicts": [
+     {
+      "field": "eff_pct",
+      "values": [
+       "37.0 % (page; portfolio MD metric)",
+       "37.1 % (poster 2021; CN, BR; portfolio MD imperial; portfolio data sheet '36.4 – 37.1%')",
+       "3600/9,702 = 37.11 %"
+      ],
+      "taken": 37.0,
+      "why": "printed by the current page; 0.11 p.p. from 3600/HR (inside the 0.15 p.p. tolerance) - use 37.1 % when consistency with the heat rate matters"
+     },
+     {
+      "field": "PR",
+      "values": [
+       "19.5 (global + US page; portfolio MD metric)",
+       "18.5 (portfolio MD imperial; poster 2021; CN, BR)"
+      ],
+      "taken": 19.5,
+      "why": "current manufacturer page"
+     },
+     {
+      "field": "exh_temp_C",
+      "values": [
+       "529 °C (all documents)",
+       "page pair '(986 °F)' vs 529 °C = 984 °F"
+      ],
+      "taken": 529,
+      "why": "°F rounding on the page"
+     }
+    ],
+    "check": "Second document: power, heat rate, speed range, flow, temperature identical in page, US page, portfolio, poster (20,024 hp = 14,932 kW), CN and BR pages. Internal: 3600/9,702 = 37.11 % vs 37.0 % printed; 9,702 kJ/kWh = 6,857 Btu/hph (the page's 'Btu/kWh' label is wrong); 98.1 lb/s = 44.50 kg/s. Energy balance q = 0.99. Exhaust identical to PG 15 MW - consistent with gearbox and generator losses."
+   },
+   "sources": {
+    "comp_stages": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Core engine'",
+     "quote": "SGT-400's twin-shaft design includes a two-bearing gas generator rotor with an 11-stage axial flow transonic compressor and a two-stage, overhung compressor turbine"
+    },
+    "turb_stages": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Core engine'",
+     "quote": "a two-stage, overhung compressor turbine | Robust free power turbine features a two-stage, overhung design"
+    },
+    "shafts": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), intro",
+     "quote": "The Siemens Energy SGT-400 is a durable twin-shaft gas turbine suitable for power generation and mechanical drive applications"
+    },
+    "bearings": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Core engine'",
+     "quote": "a two-bearing gas generator rotor"
+    },
+    "variable_geometry": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Core engine'",
+     "quote": "Variable guide vanes optimize performance, and high-chrome blades are available for high-corrosive environments"
+    },
+    "engine_removal": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/service/sgt-400-power-upgrade.html",
+     "doc": "Siemens 'SGT-400 Power Upgrade' service page",
+     "quote": "The 15MW core engine can be retrofitted into existing 13MW package as it retains common interfaces. (service exchange)"
+    },
+    "engine_removal_2": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Maintenance'",
+     "quote": "SGT-400 maintenance features: | Easy core engine exchange"
+    },
+    "power_kW": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Mechanical drive'",
+     "quote": "Power output | 13.4 MW | 14.9 MW"
+    },
+    "heat_rate_kJ_kWh": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Mechanical drive'",
+     "quote": "Heat rate | 9,702 kJ/kWh (6,857 Btu/kWh)"
+    },
+    "eff_pct": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Mechanical drive'",
+     "quote": "Efficiency | 36.4% | 37.0%"
+    },
+    "exh_flow_kg_s": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Mechanical drive'",
+     "quote": "Exhaust mass flow | 44.5 kg/s (98.1 lb/s)"
+    },
+    "exh_temp_C": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Mechanical drive'",
+     "quote": "Exhaust temperature | 529 °C (986 °F)"
+    },
+    "PR": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Mechanical drive'",
+     "quote": "Pressure ratio | 17.1 : 1 | 19.5 : 1"
+    },
+    "out_rpm": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Mechanical drive'",
+     "quote": "Turbine speed | 4,750 - 9,500 – 9,975 rpm | 4,750 - 9,500 – 9,975 rpm"
+    },
+    "check_portfolio": {
+     "url": "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "doc": "Siemens GT portfolio PDF (2026-01-21), p. 24 'MECHANICAL DRIVE (METRIC UNITS)'",
+     "quote": "SGT-400 (15 MW) 14.9 MW 37.0% 9,702 kJ/kWh 4,750 – 9,500 – 9,975 rpm 19.5 : 1 44.5 kg/s 529 °C"
+    },
+    "check_portfolio_imperial": {
+     "url": "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "doc": "Siemens GT portfolio PDF (2026-01-21), p. 24 'MECHANICAL DRIVE (IMPERIAL UNITS)'",
+     "quote": "SGT-400 (15 MW) 14.9 MW 37.1% 9,191 Btu/kWh 6,857 Btu/hph 4,750 – 9,500 – 9,975 rpm 18.5 : 1 98.1 lb/s 984 °F"
+    },
+    "check_poster": {
+     "url": "https://assets.siemens-energy.com/dam/8d8180d1-00a7-471a-b710-b059000af69f/Poster-SGT-400-pdf_Original%20file.pdf",
+     "doc": "SGT-400 poster (PDF 2021), MD column 3",
+     "quote": "14.9 MW (20,024 hp) | 37.1% | 9,702 kJ / kWh | (6,857 Btu / hph) | 4,750 / 9,975 rpm | 18.5:1 | 44.5 kg / s (98.1 lb / s) | 529°C (984°F)"
+    },
+    "pkg_L_m": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Physical dimensions and weight'",
+     "quote": "Mechanical drive package | 13 and 15 MW | Length | 7.3 m (24 ft)"
+    },
+    "pkg_W_m": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Physical dimensions and weight'",
+     "quote": "Width | 3.1 m (10 ft)"
+    },
+    "pkg_H_m": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Physical dimensions and weight'",
+     "quote": "Height | 4.3 m (14 ft)"
+    },
+    "pkg_kg": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Physical dimensions and weight'",
+     "quote": "Approx. weight | 40,000 kg (88,000 lb)"
+    },
+    "gearbox": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Key benefits'",
+     "quote": "Can be used as direct drive for compressors or pumps"
+    },
+    "out_rpm_range": {
+     "url": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-400.html",
+     "doc": "SGT-400 page (global; US identical), 'Core engine'",
+     "quote": "enabling output speeds up to 10,000 rpm (12,075 rpm for the 11 MW configuration)"
+    }
+   },
+   "notes": "Confirmed on the current Siemens page (global = US), portfolio Jan 2026 and poster 2021; prelim numbers unchanged, out_rpm now carries the range. eff_pct 37.0 % as printed by the page; 3600/9,702 = 37.11 % and four other Siemens tables print 37.1 % (conflict recorded). PR 19.5 on the page vs 18.5 elsewhere. Exhaust flow and temperature identical to PG 15 MW - confirmed by the page (prelim 'CHECK' resolved). Package as MD 13 MW. Starter and lube figures not published for the Siemens MD package. See common.code_note.",
+   "unverified": [
+    "engine_kg",
+    "engine_L_m",
+    "engine_D_m",
+    "fuel_gas_kPa",
+    "accessory_gearbox",
+    "bleed_valves count",
+    "variable stator row count (4 or 5)",
+    "inlet_dp_kPa",
+    "exhaust_dp_kPa",
+    "engine_removal direction/time",
+    "gg_rpm",
+    "inlet air flow",
+    "interface (flange, coupling, mounting)",
+    "starter",
+    "lube (tank, oil flow, heat rejection)"
+   ]
+  }
+ ]
+}
