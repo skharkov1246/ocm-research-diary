@@ -53,16 +53,20 @@
     "eta_pc_family": 0.86,
     "eta_gen": 0.972,
     "eta_gearbox": 0.985,
-    "x_leak": 0.015
+    "x_leak": 0.015,
+    "eta_pt_gg": 0.865,
+    "eta_pt_pt": 0.885
    }
   },
   {
    "file": "routes/gtu/gtu_explore.py",
-   "field": "LIM['U_ti'], LIM['U_ax'], LIM['T_ax_max'], comp_stage, eta_axial",
+   "field": "LIM['U_ti'], LIM['U_ax'], LIM['T_ax_max'], T0, P0, comp_stage, eta_axial",
    "used": {
     "U_ti": 620.0,
     "U_ax": 420.0,
-    "T_ax_max": 1050.0
+    "T_ax_max": 1050.0,
+    "T0": 288.15,
+    "P0": 101325.0
    }
   },
   {
@@ -95,6 +99,40 @@
      "vm": 475.012,
      "U_tip": 617.759
     }
+   }
+  },
+  {
+   "file": "routes/gtu/gtu_cycle.py",
+   "field": "T0, P0, LHV; значения cycle(...) по умолчанию: dp_comb, p_exh_ratio, eta_b, eta_m; poly_process(n)",
+   "used": {
+    "T0": 288.15,
+    "P0": 101325.0,
+    "LHV": 50030000.0,
+    "dp_comb": 0.04,
+    "p_exh_ratio": 1.02,
+    "eta_b": 0.995,
+    "eta_m": 0.99,
+    "poly_process_steps": 40
+   }
+  },
+  {
+   "file": "routes/gtu/gtu_family_results.json",
+   "field": "slots[исполнения типоразмера № 3, сценарий «мягкий»]: G, arch, cool, T41, n_out, P_shaft_kW, G_air, EGT0 (раздел members)",
+   "used": {
+    "n": 11,
+    "members": [
+     "Centaur 40 / генератор",
+     "Centaur 50 / генератор",
+     "Centaur 50 / привод",
+     "SGT-100 (5.1 MW) / генератор",
+     "SGT-100 (5.4 MW) / генератор",
+     "SGT-100 (5.7 MW) / привод",
+     "SGT-A05 KB7S / генератор",
+     "SGT-A05 KB7HE / генератор",
+     "Taurus 60 / генератор",
+     "Taurus 60 / привод",
+     "Taurus 65 / генератор"
+    ]
    }
   }
  ],

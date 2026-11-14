@@ -1,0 +1,16 @@
+{
+  "defaults": {"image": "ubuntu2404", "disk_gb": 60, "fallback_types": [],
+               "apt": ["build-essential", "git", "pkg-config", "openmpi-bin", "libopenmpi-dev", "libglu1-mesa"],
+               "pip": ["numpy", "scipy", "gmsh", "cantera"]},
+  "jobs": [
+    {"name": "bench-c7a16",
+     "instance_type": "c7a.16xlarge",
+     "max_min": 150,
+     "command": "lscpu > \"$GTU_OUT/lscpu.txt\"; nproc > \"$GTU_OUT/nproc.txt\"; git rev-parse HEAD > \"$GTU_OUT/commit.txt\"\nT0=$(date +%s); bash routes/gtu/platform/su2/install_su2.sh \"$HOME/su2\" \"$HOME/SU2-src\" > \"$GTU_OUT/su2_build.log\" 2>&1; echo $(( $(date +%s) - T0 )) > \"$GTU_OUT/su2_build_s.txt\"\nexport SU2_RUN=\"$HOME/su2/bin\"\npython routes/gtu/platform/su2/run_case.py --case taurus60 --level medium --plan design --np \"$(nproc)\" --mpi-args \"\" --time-limit 7200 --su2-src \"$HOME/SU2-src\" --out \"$GTU_OUT/taurus60_medium\""},
+    {"name": "bench-c8i8",
+     "instance_type": "c8i.8xlarge",
+     "vcpu": 32,
+     "max_min": 210,
+     "command": "lscpu > \"$GTU_OUT/lscpu.txt\"; nproc > \"$GTU_OUT/nproc.txt\"; git rev-parse HEAD > \"$GTU_OUT/commit.txt\"\nT0=$(date +%s); bash routes/gtu/platform/su2/install_su2.sh \"$HOME/su2\" \"$HOME/SU2-src\" > \"$GTU_OUT/su2_build.log\" 2>&1; echo $(( $(date +%s) - T0 )) > \"$GTU_OUT/su2_build_s.txt\"\nexport SU2_RUN=\"$HOME/su2/bin\"\npython routes/gtu/platform/su2/run_case.py --case taurus60 --level medium --plan design --np \"$(nproc)\" --mpi-args \"\" --time-limit 10500 --su2-src \"$HOME/SU2-src\" --out \"$GTU_OUT/taurus60_medium\""}
+  ]
+}

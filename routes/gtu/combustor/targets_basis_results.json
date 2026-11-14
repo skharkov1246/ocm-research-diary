@@ -1,0 +1,1083 @@
+{
+ "title": "Камера сгорания KV-3: расчётное обоснование целей (0D, Cantera)",
+ "method": "0D: повтор расчётной точки KV-3 через gtu_cycle.cycle; адиабатическое равновесие (HP); сеть реакторов «реактор идеального смешения (зона пламени, tau_psr) + лагранжев реактор вытеснения при постоянном давлении (догорание до tau_hot)», GRI-Mech 3.0, NOx = NO + NO2, приведение к 15 % O2 сухого газа C15 = C·(20,9−15)/(20,9−O2); срыв — бисекция phi до погасания реактора идеального смешения; ламинарная скорость — FreeFlame (mixture-averaged); задержка самовоспламенения — максимум dT/dt в реакторе постоянного давления; неравномерность смешения — нормальная плотность phi (13 узлов ±3σ), струйки независимы, среднее с весом phi; дизель — н-додекан, механизм Reitz (без азота)",
+ "software": "python 3.13.18, cantera 3.2.0, numpy 2.5.3, scipy 1.18.1; механизмы gri30.yaml (53/325), nDodecane_Reitz.yaml (100/553)",
+ "date": "2026-11-14",
+ "status": "оценка уровня облика (0D): геометрии, течения и неравномерности по реальной камере нет; числа — ориентир для целей и для воронки, не прогноз выбросов конкретной конструкции",
+ "runtime_s": 206.5,
+ "inputs": [
+  {
+   "file": "routes/gtu/frame3/frame3_point_results.json",
+   "field": "inputs[field=slots[model=Taurus 60, variant=генератор].мягкий].used (PR, T41_C, G)",
+   "used": {
+    "PR": 13.5,
+    "T41_C": 1000.0,
+    "G": 25.55
+   }
+  },
+  {
+   "file": "routes/gtu/frame3/frame3_point_results.json",
+   "field": "cycle.frame3 (eta_pc, eta_t, P_shaft_kW, T3_C, Wf)",
+   "used": {
+    "eta_pc": 0.841259,
+    "eta_t": 0.884623,
+    "P_shaft_kW": 5780.87,
+    "T3_C": 410.37,
+    "Wf": 0.365323
+   }
+  },
+  {
+   "file": "routes/gtu/frame3/frame3_point.py",
+   "field": "X_LEAK, DP_COMB, P_EXH",
+   "used": {
+    "X_LEAK": 0.015,
+    "DP_COMB": 0.04,
+    "P_EXH": 1.02
+   }
+  },
+  {
+   "file": "routes/gtu/gtu_cycle.py",
+   "field": "cycle(), AIR, T0, P0, LHV",
+   "used": {
+    "AIR": "O2:0.2095,N2:0.7808,AR:0.0093,CO2:0.0004",
+    "T0": 288.15,
+    "P0": 101325.0,
+    "LHV": 50030000.0
+   }
+  },
+  {
+   "file": "routes/gtu/gtu_explore.py",
+   "field": "LIM['T_ax_max']",
+   "used": {
+    "T_ax_max": 1050.0
+   }
+  }
+ ],
+ "assumptions": {
+  "tau_psr_ms": 0.5,
+  "tau_psr_note": "время зоны пламени 0,5 мс — оценка; чувствительность 0,2 и 1,0 мс в tau_psr_sensitivity",
+  "tau_hot_ms": [
+   3.0,
+   5.0,
+   10.0,
+   20.0,
+   30.0
+  ],
+  "fuel_T_K": 288.15,
+  "fuel": "метан (как gtu_cycle); водородные смеси — CH4/H2 по объёму",
+  "part_load": "постоянная частота вала, постоянный расход воздуха, T3 как в цикле при меньшем PR, PR и p3 пропорциональны sqrt(T41) (запертое сопло), КПД узлов как в расчётной точке — оценка",
+  "unmixedness": "S = sigma(phi)/phi_mean; без догорания между струйками — оценка сверху для NOx; погасшие в своём реакторе бедные струйки исключены из среднего, их вес — unlit_weight (в камере это недожог: CO и UHC)",
+  "ign_delay": "null — самовоспламенения нет за t_end (газ — 1 с, дизель — 0,2 с); время — максимум dT/dt",
+  "flame_speed": "ламинарная S_L; турбулентное ускорение пламени водорода (числа Льюиса < 1) не учтено",
+  "diesel": "н-додекан в газовой фазе при T3 (испарение и его охлаждение не учтены); азотной химии в механизме нет — NOx дизеля здесь не считается",
+  "o2_ref": {
+   "O2_air": 20.9,
+   "O2_ref": 15.0
+  }
+ },
+ "inlet": {
+  "p3_kPa": 1367.89,
+  "T3_K": 683.521,
+  "T3_C": 410.371,
+  "W_air_comb_kg_s": 25.1668,
+  "W_fuel_kg_s": 0.365323,
+  "FAR": 0.0145161,
+  "FAR_stoich": 0.0580163,
+  "phi_overall": 0.250207,
+  "T4_C": 1000.0,
+  "T41_C": 1000.0,
+  "P_shaft_kW": 5780.86,
+  "eff_shaft": 0.31629,
+  "dp_comb": 0.04,
+  "heat_input_MW": 18.2771,
+  "note": "T4 = T41: класс U, охлаждения соплового аппарата нет (x_ngv = 0)"
+ },
+ "cycle_check": {
+  "P_shaft_kW_repro": 5780.86,
+  "P_shaft_kW_frame3": 5780.87,
+  "rel_diff": -1.41717e-06
+ },
+ "dp_sensitivity": {
+  "rows": [
+   {
+    "dp_comb": 0.02,
+    "P_shaft_kW": 5878.45,
+    "eff_shaft": 0.321629,
+    "EGT_C": 454.721,
+    "dP_kW_vs_4pct": 97.591,
+    "d_eff_pt_vs_4pct": 0.533952
+   },
+   {
+    "dp_comb": 0.03,
+    "P_shaft_kW": 5829.97,
+    "eff_shaft": 0.318976,
+    "EGT_C": 456.438,
+    "dP_kW_vs_4pct": 49.1053,
+    "d_eff_pt_vs_4pct": 0.268671
+   },
+   {
+    "dp_comb": 0.04,
+    "P_shaft_kW": 5780.86,
+    "eff_shaft": 0.31629,
+    "EGT_C": 458.175,
+    "dP_kW_vs_4pct": 0.0,
+    "d_eff_pt_vs_4pct": 0.0
+   },
+   {
+    "dp_comb": 0.05,
+    "P_shaft_kW": 5731.12,
+    "eff_shaft": 0.313568,
+    "EGT_C": 459.935,
+    "dP_kW_vs_4pct": -49.7388,
+    "d_eff_pt_vs_4pct": -0.272137
+   },
+   {
+    "dp_comb": 0.06,
+    "P_shaft_kW": 5680.74,
+    "eff_shaft": 0.310811,
+    "EGT_C": 461.716,
+    "dP_kW_vs_4pct": -100.126,
+    "d_eff_pt_vs_4pct": -0.547821
+   }
+  ],
+  "dP_kW_per_pct": -49.4292,
+  "d_eff_pt_per_pct": -0.270443
+ },
+ "flame_temperature": {
+  "rows": [
+   {
+    "phi": 0.4,
+    "T_mix_K": 660.68,
+    "T_ad_K": 1578.38,
+    "premix_air_share": 0.625518
+   },
+   {
+    "phi": 0.45,
+    "T_mix_K": 658.044,
+    "T_ad_K": 1672.59,
+    "premix_air_share": 0.556016
+   },
+   {
+    "phi": 0.5,
+    "T_mix_K": 655.452,
+    "T_ad_K": 1763.6,
+    "premix_air_share": 0.500414
+   },
+   {
+    "phi": 0.55,
+    "T_mix_K": 652.903,
+    "T_ad_K": 1851.51,
+    "premix_air_share": 0.454922
+   },
+   {
+    "phi": 0.6,
+    "T_mix_K": 650.396,
+    "T_ad_K": 1936.4,
+    "premix_air_share": 0.417012
+   },
+   {
+    "phi": 0.65,
+    "T_mix_K": 647.929,
+    "T_ad_K": 2018.3,
+    "premix_air_share": 0.384934
+   },
+   {
+    "phi": 0.7,
+    "T_mix_K": 645.502,
+    "T_ad_K": 2097.15,
+    "premix_air_share": 0.357439
+   },
+   {
+    "phi": 0.8,
+    "T_mix_K": 640.762,
+    "T_ad_K": 2244.7,
+    "premix_air_share": 0.312759
+   },
+   {
+    "phi": 1.0,
+    "T_mix_K": 631.712,
+    "T_ad_K": 2460.24,
+    "premix_air_share": 0.250207
+   }
+  ],
+  "phi_for_Tad_1700K": 0.464877,
+  "phi_for_Tad_1800K": 0.520495,
+  "phi_for_Tad_1900K": 0.578345,
+  "premix_share_at_1800K": 0.48071
+ },
+ "crn_grid": [
+  {
+   "phi": 0.45,
+   "T_mix_K": 658.044,
+   "T_ad_K": 1672.59,
+   "lit": false,
+   "T_psr_K": 658.044
+  },
+  {
+   "phi": 0.5,
+   "T_mix_K": 655.452,
+   "T_ad_K": 1763.6,
+   "lit": true,
+   "T_psr_K": 1730.51,
+   "psr": {
+    "NOx_ppm15": 1.2108,
+    "CO_ppm15": 2541.91
+   },
+   "hot": [
+    {
+     "tau_ms": 3.0,
+     "T_K": 1769.4,
+     "NOx_ppm15": 1.53366,
+     "CO_ppm15": 4.28386,
+     "O2_dry_pct": 11.0446
+    },
+    {
+     "tau_ms": 5.0,
+     "T_K": 1769.4,
+     "NOx_ppm15": 1.65514,
+     "CO_ppm15": 4.28367,
+     "O2_dry_pct": 11.0445
+    },
+    {
+     "tau_ms": 10.0,
+     "T_K": 1769.4,
+     "NOx_ppm15": 1.95782,
+     "CO_ppm15": 4.28357,
+     "O2_dry_pct": 11.0445
+    },
+    {
+     "tau_ms": 20.0,
+     "T_K": 1769.4,
+     "NOx_ppm15": 2.56135,
+     "CO_ppm15": 4.28345,
+     "O2_dry_pct": 11.0445
+    },
+    {
+     "tau_ms": 30.0,
+     "T_K": 1769.39,
+     "NOx_ppm15": 3.16371,
+     "CO_ppm15": 4.28334,
+     "O2_dry_pct": 11.0444
+    }
+   ],
+   "eq": {
+    "NOx_ppm15": 1610.54,
+    "CO_ppm15": 3.99423
+   }
+  },
+  {
+   "phi": 0.55,
+   "T_mix_K": 652.903,
+   "T_ad_K": 1851.51,
+   "lit": true,
+   "T_psr_K": 1831.07,
+   "psr": {
+    "NOx_ppm15": 2.89752,
+    "CO_ppm15": 1577.47
+   },
+   "hot": [
+    {
+     "tau_ms": 3.0,
+     "T_K": 1858.71,
+     "NOx_ppm15": 3.82205,
+     "CO_ppm15": 11.2333,
+     "O2_dry_pct": 9.98801
+    },
+    {
+     "tau_ms": 5.0,
+     "T_K": 1858.7,
+     "NOx_ppm15": 4.38377,
+     "CO_ppm15": 11.2331,
+     "O2_dry_pct": 9.98796
+    },
+    {
+     "tau_ms": 10.0,
+     "T_K": 1858.7,
+     "NOx_ppm15": 5.78228,
+     "CO_ppm15": 11.2324,
+     "O2_dry_pct": 9.98783
+    },
+    {
+     "tau_ms": 20.0,
+     "T_K": 1858.69,
+     "NOx_ppm15": 8.57189,
+     "CO_ppm15": 11.2311,
+     "O2_dry_pct": 9.98757
+    },
+    {
+     "tau_ms": 30.0,
+     "T_K": 1858.68,
+     "NOx_ppm15": 11.3588,
+     "CO_ppm15": 11.2298,
+     "O2_dry_pct": 9.98731
+    }
+   ],
+   "eq": {
+    "NOx_ppm15": 1853.34,
+    "CO_ppm15": 10.3999
+   }
+  },
+  {
+   "phi": 0.6,
+   "T_mix_K": 650.396,
+   "T_ad_K": 1936.4,
+   "lit": true,
+   "T_psr_K": 1921.06,
+   "psr": {
+    "NOx_ppm15": 5.83185,
+    "CO_ppm15": 1217.49
+   },
+   "hot": [
+    {
+     "tau_ms": 3.0,
+     "T_K": 1944.93,
+     "NOx_ppm15": 8.88185,
+     "CO_ppm15": 26.4976,
+     "O2_dry_pct": 8.91748
+    },
+    {
+     "tau_ms": 5.0,
+     "T_K": 1944.92,
+     "NOx_ppm15": 11.0687,
+     "CO_ppm15": 26.4953,
+     "O2_dry_pct": 8.91726
+    },
+    {
+     "tau_ms": 10.0,
+     "T_K": 1944.9,
+     "NOx_ppm15": 16.5235,
+     "CO_ppm15": 26.4897,
+     "O2_dry_pct": 8.91671
+    },
+    {
+     "tau_ms": 20.0,
+     "T_K": 1944.86,
+     "NOx_ppm15": 27.4107,
+     "CO_ppm15": 26.4785,
+     "O2_dry_pct": 8.9156
+    },
+    {
+     "tau_ms": 30.0,
+     "T_K": 1944.81,
+     "NOx_ppm15": 38.2695,
+     "CO_ppm15": 26.4673,
+     "O2_dry_pct": 8.9145
+    }
+   ],
+   "eq": {
+    "NOx_ppm15": 2061.71,
+    "CO_ppm15": 24.4308
+   }
+  },
+  {
+   "phi": 0.65,
+   "T_mix_K": 647.929,
+   "T_ad_K": 2018.3,
+   "lit": true,
+   "T_psr_K": 2005.63,
+   "psr": {
+    "NOx_ppm15": 11.2333,
+    "CO_ppm15": 1063.29
+   },
+   "hot": [
+    {
+     "tau_ms": 3.0,
+     "T_K": 2027.98,
+     "NOx_ppm15": 20.8121,
+     "CO_ppm15": 57.2848,
+     "O2_dry_pct": 7.83314
+    },
+    {
+     "tau_ms": 5.0,
+     "T_K": 2027.95,
+     "NOx_ppm15": 28.0954,
+     "CO_ppm15": 57.2696,
+     "O2_dry_pct": 7.83234
+    },
+    {
+     "tau_ms": 10.0,
+     "T_K": 2027.87,
+     "NOx_ppm15": 46.2446,
+     "CO_ppm15": 57.2319,
+     "O2_dry_pct": 7.83034
+    },
+    {
+     "tau_ms": 20.0,
+     "T_K": 2027.71,
+     "NOx_ppm15": 82.2882,
+     "CO_ppm15": 57.157,
+     "O2_dry_pct": 7.82636
+    },
+    {
+     "tau_ms": 30.0,
+     "T_K": 2027.56,
+     "NOx_ppm15": 117.984,
+     "CO_ppm15": 57.0829,
+     "O2_dry_pct": 7.82241
+    }
+   ],
+   "eq": {
+    "NOx_ppm15": 2222.89,
+    "CO_ppm15": 52.8014
+   }
+  },
+  {
+   "phi": 0.7,
+   "T_mix_K": 645.502,
+   "T_ad_K": 2097.15,
+   "lit": true,
+   "T_psr_K": 2085.78,
+   "psr": {
+    "NOx_ppm15": 21.2494,
+    "CO_ppm15": 1029.13
+   },
+   "hot": [
+    {
+     "tau_ms": 3.0,
+     "T_K": 2107.62,
+     "NOx_ppm15": 48.1389,
+     "CO_ppm15": 115.225,
+     "O2_dry_pct": 6.7359
+    },
+    {
+     "tau_ms": 5.0,
+     "T_K": 2107.53,
+     "NOx_ppm15": 68.9989,
+     "CO_ppm15": 115.145,
+     "O2_dry_pct": 6.73341
+    },
+    {
+     "tau_ms": 10.0,
+     "T_K": 2107.29,
+     "NOx_ppm15": 120.622,
+     "CO_ppm15": 114.947,
+     "O2_dry_pct": 6.72724
+    },
+    {
+     "tau_ms": 20.0,
+     "T_K": 2106.84,
+     "NOx_ppm15": 221.543,
+     "CO_ppm15": 114.561,
+     "O2_dry_pct": 6.71517
+    },
+    {
+     "tau_ms": 30.0,
+     "T_K": 2106.4,
+     "NOx_ppm15": 319.26,
+     "CO_ppm15": 114.188,
+     "O2_dry_pct": 6.70347
+    }
+   ],
+   "eq": {
+    "NOx_ppm15": 2324.91,
+    "CO_ppm15": 106.676
+   }
+  }
+ ],
+ "tau_psr_sensitivity": [
+  {
+   "phi": 0.55,
+   "T_mix_K": 652.903,
+   "T_ad_K": 1851.51,
+   "lit": true,
+   "T_psr_K": 1799.99,
+   "psr": {
+    "NOx_ppm15": 1.89599,
+    "CO_ppm15": 3549.86
+   },
+   "hot": [
+    {
+     "tau_ms": 3.0,
+     "T_K": 1858.71,
+     "NOx_ppm15": 3.00963,
+     "CO_ppm15": 11.2337,
+     "O2_dry_pct": 9.98808
+    },
+    {
+     "tau_ms": 5.0,
+     "T_K": 1858.71,
+     "NOx_ppm15": 3.56967,
+     "CO_ppm15": 11.2334,
+     "O2_dry_pct": 9.98803
+    },
+    {
+     "tau_ms": 10.0,
+     "T_K": 1858.7,
+     "NOx_ppm15": 4.96666,
+     "CO_ppm15": 11.2328,
+     "O2_dry_pct": 9.9879
+    },
+    {
+     "tau_ms": 20.0,
+     "T_K": 1858.69,
+     "NOx_ppm15": 7.75622,
+     "CO_ppm15": 11.2315,
+     "O2_dry_pct": 9.98764
+    },
+    {
+     "tau_ms": 30.0,
+     "T_K": 1858.68,
+     "NOx_ppm15": 10.5436,
+     "CO_ppm15": 11.2302,
+     "O2_dry_pct": 9.98739
+    }
+   ],
+   "eq": {
+    "NOx_ppm15": 1853.34,
+    "CO_ppm15": 10.3999
+   },
+   "tau_psr_ms": 0.2
+  },
+  {
+   "phi": 0.55,
+   "T_mix_K": 652.903,
+   "T_ad_K": 1851.51,
+   "lit": true,
+   "T_psr_K": 1831.07,
+   "psr": {
+    "NOx_ppm15": 2.89752,
+    "CO_ppm15": 1577.47
+   },
+   "hot": [
+    {
+     "tau_ms": 3.0,
+     "T_K": 1858.71,
+     "NOx_ppm15": 3.82205,
+     "CO_ppm15": 11.2333,
+     "O2_dry_pct": 9.98801
+    },
+    {
+     "tau_ms": 5.0,
+     "T_K": 1858.7,
+     "NOx_ppm15": 4.38377,
+     "CO_ppm15": 11.2331,
+     "O2_dry_pct": 9.98796
+    },
+    {
+     "tau_ms": 10.0,
+     "T_K": 1858.7,
+     "NOx_ppm15": 5.78228,
+     "CO_ppm15": 11.2324,
+     "O2_dry_pct": 9.98783
+    },
+    {
+     "tau_ms": 20.0,
+     "T_K": 1858.69,
+     "NOx_ppm15": 8.57189,
+     "CO_ppm15": 11.2311,
+     "O2_dry_pct": 9.98757
+    },
+    {
+     "tau_ms": 30.0,
+     "T_K": 1858.68,
+     "NOx_ppm15": 11.3588,
+     "CO_ppm15": 11.2298,
+     "O2_dry_pct": 9.98731
+    }
+   ],
+   "eq": {
+    "NOx_ppm15": 1853.34,
+    "CO_ppm15": 10.3999
+   },
+   "tau_psr_ms": 0.5
+  },
+  {
+   "phi": 0.55,
+   "T_mix_K": 652.903,
+   "T_ad_K": 1851.51,
+   "lit": true,
+   "T_psr_K": 1842.2,
+   "psr": {
+    "NOx_ppm15": 3.41929,
+    "CO_ppm15": 907.893
+   },
+   "hot": [
+    {
+     "tau_ms": 3.0,
+     "T_K": 1858.7,
+     "NOx_ppm15": 4.1419,
+     "CO_ppm15": 11.2332,
+     "O2_dry_pct": 9.98798
+    },
+    {
+     "tau_ms": 5.0,
+     "T_K": 1858.7,
+     "NOx_ppm15": 4.70519,
+     "CO_ppm15": 11.2329,
+     "O2_dry_pct": 9.98793
+    },
+    {
+     "tau_ms": 10.0,
+     "T_K": 1858.7,
+     "NOx_ppm15": 6.10517,
+     "CO_ppm15": 11.2323,
+     "O2_dry_pct": 9.9878
+    },
+    {
+     "tau_ms": 20.0,
+     "T_K": 1858.69,
+     "NOx_ppm15": 8.89507,
+     "CO_ppm15": 11.231,
+     "O2_dry_pct": 9.98754
+    },
+    {
+     "tau_ms": 30.0,
+     "T_K": 1858.68,
+     "NOx_ppm15": 11.6818,
+     "CO_ppm15": 11.2297,
+     "O2_dry_pct": 9.98728
+    }
+   ],
+   "eq": {
+    "NOx_ppm15": 1853.34,
+    "CO_ppm15": 10.3999
+   },
+   "tau_psr_ms": 1.0
+  }
+ ],
+ "psr_lbo": [
+  {
+   "tau_ms": 0.2,
+   "phi_lbo": 0.514227,
+   "T_ad_at_lbo_K": 1788.92
+  },
+  {
+   "tau_ms": 0.5,
+   "phi_lbo": 0.453735,
+   "T_ad_at_lbo_K": 1679.5
+  },
+  {
+   "tau_ms": 1.0,
+   "phi_lbo": 0.413452,
+   "T_ad_at_lbo_K": 1604.05
+  }
+ ],
+ "unmixedness": [
+  {
+   "S": 0.0,
+   "phi_mean": 0.55,
+   "by_tau": [
+    {
+     "tau_ms": 3.0,
+     "NOx_ppm15": 3.82205,
+     "CO_ppm15": 11.2333,
+     "unlit_weight": 0.0
+    },
+    {
+     "tau_ms": 5.0,
+     "NOx_ppm15": 4.38377,
+     "CO_ppm15": 11.2331,
+     "unlit_weight": 0.0
+    },
+    {
+     "tau_ms": 10.0,
+     "NOx_ppm15": 5.78228,
+     "CO_ppm15": 11.2324,
+     "unlit_weight": 0.0
+    },
+    {
+     "tau_ms": 20.0,
+     "NOx_ppm15": 8.57189,
+     "CO_ppm15": 11.2311,
+     "unlit_weight": 0.0
+    },
+    {
+     "tau_ms": 30.0,
+     "NOx_ppm15": 11.3588,
+     "CO_ppm15": 11.2298,
+     "unlit_weight": 0.0
+    }
+   ]
+  },
+  {
+   "S": 0.05,
+   "phi_mean": 0.55,
+   "by_tau": [
+    {
+     "tau_ms": 3.0,
+     "NOx_ppm15": 4.33167,
+     "CO_ppm15": 12.7722,
+     "unlit_weight": 0.0
+    },
+    {
+     "tau_ms": 5.0,
+     "NOx_ppm15": 5.0959,
+     "CO_ppm15": 12.7716,
+     "unlit_weight": 0.0
+    },
+    {
+     "tau_ms": 10.0,
+     "NOx_ppm15": 7.0002,
+     "CO_ppm15": 12.7702,
+     "unlit_weight": 0.0
+    },
+    {
+     "tau_ms": 20.0,
+     "NOx_ppm15": 10.8,
+     "CO_ppm15": 12.7675,
+     "unlit_weight": 0.0
+    },
+    {
+     "tau_ms": 30.0,
+     "NOx_ppm15": 14.5932,
+     "CO_ppm15": 12.7648,
+     "unlit_weight": 0.0
+    }
+   ]
+  },
+  {
+   "S": 0.1,
+   "phi_mean": 0.55,
+   "by_tau": [
+    {
+     "tau_ms": 3.0,
+     "NOx_ppm15": 6.51093,
+     "CO_ppm15": 18.5655,
+     "unlit_weight": 0.0380145
+    },
+    {
+     "tau_ms": 5.0,
+     "NOx_ppm15": 8.19903,
+     "CO_ppm15": 18.5625,
+     "unlit_weight": 0.0380145
+    },
+    {
+     "tau_ms": 10.0,
+     "NOx_ppm15": 12.4023,
+     "CO_ppm15": 18.5552,
+     "unlit_weight": 0.0380145
+    },
+    {
+     "tau_ms": 20.0,
+     "NOx_ppm15": 20.7502,
+     "CO_ppm15": 18.5408,
+     "unlit_weight": 0.0380145
+    },
+    {
+     "tau_ms": 30.0,
+     "NOx_ppm15": 29.0215,
+     "CO_ppm15": 18.5267,
+     "unlit_weight": 0.0380145
+    }
+   ]
+  },
+  {
+   "S": 0.15,
+   "phi_mean": 0.55,
+   "by_tau": [
+    {
+     "tau_ms": 3.0,
+     "NOx_ppm15": 12.3505,
+     "CO_ppm15": 31.5996,
+     "unlit_weight": 0.10284
+    },
+    {
+     "tau_ms": 5.0,
+     "NOx_ppm15": 16.809,
+     "CO_ppm15": 31.5817,
+     "unlit_weight": 0.10284
+    },
+    {
+     "tau_ms": 10.0,
+     "NOx_ppm15": 27.7754,
+     "CO_ppm15": 31.5385,
+     "unlit_weight": 0.10284
+    },
+    {
+     "tau_ms": 20.0,
+     "NOx_ppm15": 48.9423,
+     "CO_ppm15": 31.4574,
+     "unlit_weight": 0.10284
+    },
+    {
+     "tau_ms": 30.0,
+     "NOx_ppm15": 69.1118,
+     "CO_ppm15": 31.3831,
+     "unlit_weight": 0.10284
+    }
+   ]
+  },
+  {
+   "S": 0.2,
+   "phi_mean": 0.55,
+   "by_tau": [
+    {
+     "tau_ms": 3.0,
+     "NOx_ppm15": 26.7832,
+     "CO_ppm15": 60.5742,
+     "unlit_weight": 0.223949
+    },
+    {
+     "tau_ms": 5.0,
+     "NOx_ppm15": 38.3661,
+     "CO_ppm15": 60.497,
+     "unlit_weight": 0.223949
+    },
+    {
+     "tau_ms": 10.0,
+     "NOx_ppm15": 65.7048,
+     "CO_ppm15": 60.321,
+     "unlit_weight": 0.223949
+    },
+    {
+     "tau_ms": 20.0,
+     "NOx_ppm15": 114.331,
+     "CO_ppm15": 60.0282,
+     "unlit_weight": 0.223949
+    },
+    {
+     "tau_ms": 30.0,
+     "NOx_ppm15": 156.623,
+     "CO_ppm15": 59.7934,
+     "unlit_weight": 0.223949
+    }
+   ]
+  }
+ ],
+ "hydrogen": [
+  {
+   "H2_vol": 0.0,
+   "fuel": "CH4:1",
+   "phi": 0.520495,
+   "T_ad_K": 1800.01,
+   "S_L_m_s": 0.13271,
+   "flame_points": 145,
+   "ign_delay_ms": null,
+   "T_mix_K": 654.402,
+   "NOx_ppm15_10ms": 3.09049,
+   "CO_ppm15_10ms": 6.45107
+  },
+  {
+   "H2_vol": 0.3,
+   "fuel": "CH4:0.70,H2:0.30",
+   "phi": 0.512226,
+   "T_ad_K": 1800.01,
+   "S_L_m_s": 0.149513,
+   "flame_points": 141,
+   "ign_delay_ms": null,
+   "T_mix_K": 650.811,
+   "NOx_ppm15_10ms": 3.43809,
+   "CO_ppm15_10ms": 5.86254
+  },
+  {
+   "H2_vol": 0.5,
+   "fuel": "CH4:0.50,H2:0.50",
+   "phi": 0.503689,
+   "T_ad_K": 1800.0,
+   "S_L_m_s": 0.167113,
+   "flame_points": 145,
+   "ign_delay_ms": null,
+   "T_mix_K": 647.159,
+   "NOx_ppm15_10ms": 3.77868,
+   "CO_ppm15_10ms": 5.23012
+  },
+  {
+   "H2_vol": 0.7,
+   "fuel": "CH4:0.30,H2:0.70",
+   "phi": 0.490353,
+   "T_ad_K": 1799.99,
+   "S_L_m_s": 0.195474,
+   "flame_points": 143,
+   "ign_delay_ms": null,
+   "T_mix_K": 641.566,
+   "NOx_ppm15_10ms": 4.28268,
+   "CO_ppm15_10ms": 4.1858
+  },
+  {
+   "H2_vol": 1.0,
+   "fuel": "H2:1",
+   "phi": 0.446055,
+   "T_ad_K": 1800.01,
+   "S_L_m_s": 0.323431,
+   "flame_points": 132,
+   "ign_delay_ms": null,
+   "T_mix_K": 623.931,
+   "NOx_ppm15_10ms": 5.86905,
+   "CO_ppm15_10ms": 0.0589923
+  }
+ ],
+ "part_load_fixed_split": [
+  {
+   "T41_C": 1000.0,
+   "PR": 13.5,
+   "p3_kPa": 1367.89,
+   "T3_C": 410.371,
+   "P_shaft_kW": 5780.86,
+   "load_frac": 1.0,
+   "phi_overall": 0.250207,
+   "phi_pz_fixed_split": 0.520495,
+   "T_ad_pz_K": 1800.0,
+   "above_psr_lbo_0p5ms": true,
+   "premix_share_needed_for_1800K": 0.48071
+  },
+  {
+   "T41_C": 950.0,
+   "PR": 13.2323,
+   "p3_kPa": 1340.76,
+   "T3_C": 406.027,
+   "P_shaft_kW": 5102.46,
+   "load_frac": 0.882647,
+   "phi_overall": 0.228706,
+   "phi_pz_fixed_split": 0.475768,
+   "T_ad_pz_K": 1716.59,
+   "above_psr_lbo_0p5ms": true,
+   "premix_share_needed_for_1800K": 0.437861
+  },
+  {
+   "T41_C": 900.0,
+   "PR": 12.959,
+   "p3_kPa": 1313.07,
+   "T3_C": 401.527,
+   "P_shaft_kW": 4438.09,
+   "load_frac": 0.767722,
+   "phi_overall": 0.207625,
+   "phi_pz_fixed_split": 0.431913,
+   "T_ad_pz_K": 1632.03,
+   "above_psr_lbo_0p5ms": false,
+   "premix_share_needed_for_1800K": 0.396064
+  },
+  {
+   "T41_C": 850.0,
+   "PR": 12.6798,
+   "p3_kPa": 1284.78,
+   "T3_C": 396.858,
+   "P_shaft_kW": 3788.08,
+   "load_frac": 0.655279,
+   "phi_overall": 0.186962,
+   "phi_pz_fixed_split": 0.388929,
+   "T_ad_pz_K": 1546.37,
+   "above_psr_lbo_0p5ms": false,
+   "premix_share_needed_for_1800K": 0.355316
+  },
+  {
+   "T41_C": 800.0,
+   "PR": 12.3944,
+   "p3_kPa": 1255.86,
+   "T3_C": 392.006,
+   "P_shaft_kW": 3152.87,
+   "load_frac": 0.545398,
+   "phi_overall": 0.166719,
+   "phi_pz_fixed_split": 0.346819,
+   "T_ad_pz_K": 1459.64,
+   "above_psr_lbo_0p5ms": false,
+   "premix_share_needed_for_1800K": 0.315622
+  },
+  {
+   "T41_C": 750.0,
+   "PR": 12.1022,
+   "p3_kPa": 1226.25,
+   "T3_C": 386.955,
+   "P_shaft_kW": 2532.96,
+   "load_frac": 0.438162,
+   "phi_overall": 0.146898,
+   "phi_pz_fixed_split": 0.305586,
+   "T_ad_pz_K": 1371.86,
+   "above_psr_lbo_0p5ms": false,
+   "premix_share_needed_for_1800K": 0.276986
+  },
+  {
+   "T41_C": 700.0,
+   "PR": 11.8028,
+   "p3_kPa": 1195.92,
+   "T3_C": 381.685,
+   "P_shaft_kW": 1929.01,
+   "load_frac": 0.333689,
+   "phi_overall": 0.127505,
+   "phi_pz_fixed_split": 0.265242,
+   "T_ad_pz_K": 1283.07,
+   "above_psr_lbo_0p5ms": false,
+   "premix_share_needed_for_1800K": 0.239421
+  },
+  {
+   "T41_C": 650.0,
+   "PR": 11.4956,
+   "p3_kPa": 1164.79,
+   "T3_C": 376.177,
+   "P_shaft_kW": 1342.22,
+   "load_frac": 0.232184,
+   "phi_overall": 0.108558,
+   "phi_pz_fixed_split": 0.225829,
+   "T_ad_pz_K": 1193.38,
+   "above_psr_lbo_0p5ms": false,
+   "premix_share_needed_for_1800K": 0.202965
+  },
+  {
+   "T41_C": 600.0,
+   "PR": 11.1799,
+   "p3_kPa": 1132.8,
+   "T3_C": 370.404,
+   "P_shaft_kW": 773.981,
+   "load_frac": 0.133887,
+   "phi_overall": 0.0900813,
+   "phi_pz_fixed_split": 0.187392,
+   "T_ad_pz_K": 1102.89,
+   "above_psr_lbo_0p5ms": false,
+   "premix_share_needed_for_1800K": 0.167663
+  }
+ ],
+ "diesel": {
+  "rows": [
+   {
+    "phi": 0.5,
+    "T_mix_K": 683.521,
+    "T_ad_K": 1828.8,
+    "ign_delay_ms": 15.7064
+   },
+   {
+    "phi": 0.6,
+    "T_mix_K": 683.521,
+    "T_ad_K": 2016.8,
+    "ign_delay_ms": 12.7733
+   },
+   {
+    "phi": 1.0,
+    "T_mix_K": 683.521,
+    "T_ad_K": 2556.61,
+    "ign_delay_ms": 8.80971
+   }
+  ],
+  "T_ad_stoich_CH4_K": 2460.24,
+  "ign_delay_CH4_phi055_ms": null,
+  "T_air_K": 683.521,
+  "p_kPa": 1367.89
+ },
+ "hot_zone_volume": {
+  "phi": 0.520495,
+  "m_hot_kg_s": 12.4632,
+  "rho_hot_kg_m3": 2.58621,
+  "T_hot_K": 1800.0,
+  "rows": [
+   {
+    "tau_ms": 3.0,
+    "V_hot_L": 14.4573
+   },
+   {
+    "tau_ms": 5.0,
+    "V_hot_L": 24.0955
+   },
+   {
+    "tau_ms": 10.0,
+    "V_hot_L": 48.1911
+   },
+   {
+    "tau_ms": 20.0,
+    "V_hot_L": 96.3822
+   },
+   {
+    "tau_ms": 30.0,
+    "V_hot_L": 144.573
+   }
+  ]
+ },
+ "exit_uniformity": {
+  "T_ax_max_C": 1050.0,
+  "T41_C": 1000.0,
+  "T3_C": 410.371,
+  "pattern_factor_max": 0.084799,
+  "note": "PF = (Tmax − T41)/(T41 − T3): предел местного максимума на входе в сопловой аппарат, чтобы газ не превысил предел неохлаждаемой лопатки (оценка)"
+ },
+ "units": {
+  "mg_Nm3_per_ppm_NO2": 2.05253,
+  "note": "1 ppm NOx (как NO2) при 15 % O2 = 2,053 мг/нм3 при 0 °C, 101,325 кПа, сухой газ"
+ }
+}

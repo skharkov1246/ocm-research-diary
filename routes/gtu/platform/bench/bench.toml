@@ -1,0 +1,183 @@
+# Протокол сравнения CPU и GPU для одного межлопаточного канала (PROTOCOL.md).
+# Читают: bench_parse.py (разбор журналов SU2) и break_even.py (порог окупаемости).
+# Значения со словом EXAMPLE или с полем example = true — тестовые: до прогона заменить данными
+# установки или прогона. Единицы — СИ; деньги — доллары США в час.
+
+[meta]
+date = "2026-11-14"
+region = "us-east-1"                 # решение владельца 14.11.2026
+fallback_region = "eu-north-1"       # только запасной вариант в конфигурации
+tariffs = "tariffs_us-east-1.json"   # break_even.py tariffs (Price List AWS + Spot Instance Advisor)
+mesh_stats = "mesh_stats.json"       # break_even.py mesh (число узлов и рёбер сеток узла geom)
+reference = "cpu_c8i_mpi"            # эталонная конфигурация точности и времени
+
+# ---------------------------------------------------------------- задача (одна на все конфигурации)
+[case]
+# Сетка и начальное поле фиксируются хэшем: другая сетка — другой бенчмарк.
+mesh = "EXAMPLE: ../geom/out/<case>_<level>/passage_<case>_<level>.su2"
+mesh_sha256 = "EXAMPLE: sha256 файла сетки"
+restart = "EXAMPLE: restart_warm.dat — общий для всех конфигураций рестарт после разгона"
+restart_sha256 = "EXAMPLE: sha256 рестарта"
+cfg = "EXAMPLE: bench_case.cfg — одна конфигурация SU2, отличаются только ENABLE_CUDA и число потоков"
+# Для момента: частота и число каналов колеса — из JSON сетки (su2.rotation_rate_rad_s, число лопаток).
+omega_rad_s = 2324.46       # EXAMPLE: случай core130 (su2.rotation_rate_rad_s в JSON сетки), не расчётная точка KV-3
+omega_example = true
+n_passages = 9              # EXAMPLE: core130 — 9 каналов (params.Z в JSON сетки)
+n_passages_example = true
+gamma = 1.4                 # как в шаблоне узла su2 (идеальный газ)
+gas_constant_J_kgK = 287.058
+
+# ---------------------------------------------------------------- критерии сходимости (одни для всех)
+# Из навыка su2-turbo, раздел 6 («принято в навыке», не из документации SU2).
+[convergence]
+residual_field = "rms[Rho]"
+residual_ref_rows = 10          # опора падения невязки — максимум по первым строкам истории
+min_drop_orders = 4.0
+mass_imbalance_max = 0.005      # |ṁвх + ṁвых| / ṁвх, нормаль границы SU2 смотрит внутрь области
+window_iters = 500              # π и η за окно меняются меньше, чем на window_rel_change_max
+window_rel_change_max = 0.001
+
+# ---------------------------------------------------------------- допуски совпадения с эталоном
+# Принято в протоколе. Основание: разбиение сетки MPI на 4 и 2 процесса дало расхождение расхода
+# 6,1·10⁻⁵ (0,147413 и 0,147422 кг/с, README узла su2) — допуски ниже в 16–33 раза шире этого шума
+# и уже, чем погрешность отбора схем модели цикла (±2 п. п. по КПД).
+[tolerances]
+massflow_rel = 1.0e-3
+torque_rel = 2.0e-3
+pr_rel = 1.0e-3
+eta_abs = 1.0e-3              # 0,1 п. п.
+imbalance_abs = 1.0e-3        # разность дисбалансов расхода
+iter_conv_ratio_max = 1.5     # больше — сходимость другая: разобрать, а не сравнивать время
+
+# ---------------------------------------------------------------- правила решения
+[decision]
+speedup_margin = 1.2          # GPU окупается, если S ≥ 1,2 · S*: запас на разброс времени и цены спота
+repeats = 2                   # повтор решающих конфигураций; время — медиана
+vram_fill_max = 0.85          # доля видеопамяти, которую может занять задача
+disk_gb = 50                  # диск машины, ГБ (умолчание примера задач runner.py) — в стоимость прогона
+ram_fill_max = 0.80           # доля памяти узла CPU
+gpu_vram_bytes = { "p5.4xlarge" = 80.0e9, "g6e.2xlarge" = 48.0e9 }   # номинал NVIDIA в ГБ (10⁹ байт)
+series_time_limit_h = 12.0    # EXAMPLE: срок серии задаёт владелец
+series_time_limit_example = true
+strong_eff_min = 0.70         # сильное масштабирование: T₁ / (N · T_N)
+weak_eff_min = 0.80           # слабое масштабирование: T₁ / T_N при постоянном числе узлов сетки на процесс
+amdahl_r_host = [1.0, 2.0, 4.0]          # во сколько раз хост-часть медленнее на CPU GPU-машины (сценарии)
+amdahl_kernel_speedup = [5.0, 10.0, 20.0, 0.0]   # 0 — предел, ядро бесконечно быстро
+
+# Пары для порога окупаемости: GPU × CPU × рынок.
+[break_even]
+gpu = ["p5.4xlarge", "g6e.2xlarge"]
+cpu = ["c8i.8xlarge", "c7a.16xlarge", "c7i.16xlarge"]
+markets = [["od", "od"], ["spot", "spot"], ["od", "spot"]]   # [рынок GPU, рынок CPU]
+
+# Модель памяти линейной системы SU2 v8.6.0 на GPU (нижняя граница, PROTOCOL.md §4.3).
+[memory_model]
+nvar_flow = 5                 # сжимаемый RANS в 3D: ρ, ρu, ρv, ρw, ρE
+nvar_turb = 2                 # SST: k, ω
+krylov_restart = 10           # LINEAR_SOLVER_RESTART_FREQUENCY по умолчанию (CConfig.cpp v8.6.0)
+extra_vectors = 4             # решение, правая часть и рабочие векторы — допущение протокола
+index_bytes = 4               # su2uint = uint32_t (code_config.hpp)
+
+# Пиковые характеристики GPU для оценки «упора в память» (источники — PROTOCOL.md §1.4).
+[gpu_specs."p5.4xlarge"]
+name = "NVIDIA H100 SXM 80 GB HBM3"
+fp64_flops = 34.0e12
+fp32_flops = 34.0e12          # не больше FP32; для оценки взято FP64 — нижняя граница
+mem_bw_Bps = 3.35e12
+[gpu_specs."g6e.2xlarge"]
+name = "NVIDIA L40S 48 GB GDDR6"
+fp64_flops = 1.431e12         # 91,6 TFLOPS FP32 / 64 (Ada: FP64 = 1/64 FP32), в паспорте L40S FP64 нет
+fp32_flops = 91.6e12
+mem_bw_Bps = 0.864e12
+
+# ---------------------------------------------------------------- конфигурации
+# build: cpu — SU2 v8.6.0 с MPI и OpenMP; cuda — с -Denable-cuda=true -Dwith-omp=true;
+# precision: fp64 или mixed (-Denable-mixedprec=true: линейный решатель и предобуславливатель в FP32).
+# market: od — по требованию, spot — спот. dir — папка прогона относительно --runs.
+[[config]]
+id = "cpu_c8i_mpi"
+role = "cpu"
+instance = "c8i.8xlarge"
+market = "spot"
+build = "cpu"
+precision = "fp64"
+enable_cuda = false
+mpi_ranks = 32
+omp_threads = 1
+
+[[config]]
+id = "cpu_c8i_omp"
+role = "cpu"
+instance = "c8i.8xlarge"
+market = "spot"
+build = "cpu"
+precision = "fp64"
+enable_cuda = false
+mpi_ranks = 1
+omp_threads = 32
+
+[[config]]
+id = "cpu_c7a_mpi"
+role = "cpu"
+instance = "c7a.16xlarge"
+market = "spot"
+build = "cpu"
+precision = "fp64"
+enable_cuda = false
+mpi_ranks = 64
+omp_threads = 1
+
+[[config]]
+id = "h100_host"
+role = "host"
+instance = "p5.4xlarge"
+market = "od"
+build = "cuda"
+precision = "fp64"
+enable_cuda = false
+mpi_ranks = 1
+omp_threads = 16
+
+[[config]]
+id = "h100_fp64"
+role = "gpu"
+instance = "p5.4xlarge"
+market = "od"
+build = "cuda"
+precision = "fp64"
+enable_cuda = true
+mpi_ranks = 1
+omp_threads = 16
+
+[[config]]
+id = "h100_mixed"
+role = "gpu"
+instance = "p5.4xlarge"
+market = "od"
+build = "cuda"
+precision = "mixed"
+enable_cuda = true
+mpi_ranks = 1
+omp_threads = 16
+
+[[config]]
+id = "l40s_host"
+role = "host"
+instance = "g6e.2xlarge"
+market = "od"
+build = "cuda"
+precision = "mixed"
+enable_cuda = false
+mpi_ranks = 1
+omp_threads = 8
+
+[[config]]
+id = "l40s_mixed"
+role = "gpu"
+instance = "g6e.2xlarge"
+market = "od"
+build = "cuda"
+precision = "mixed"
+enable_cuda = true
+mpi_ranks = 1
+omp_threads = 8

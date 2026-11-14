@@ -232,3 +232,36 @@ def test_wall_lines(shroud, vaneless, heat, still, euler):
     names = [m for m in heat.split(", ") if not m.replace(".", "").isdigit()]
     eu = euler.strip("()").split(", ") if euler else []
     assert not set(names) & set(eu)
+
+
+GEOM_SU2 = os.path.join(HERE, "..", "geom", "out", "core130_coarse", "passage_core130_coarse.su2")
+
+
+@pytest.mark.skipif(not (os.path.isfile(GEOM_JSON) and os.path.isfile(GEOM_SU2)), reason="нет сетки core130 coarse")
+def test_main_dry_chain_without_su2(tmp_path, monkeypatch):
+    """Полный проход main в сухом режиме на настоящей сетке geom: три cfg, цепочка рестартов, стенки, копия
+    сетки с разделёнными маркерами. SU2 не нужен (если его нет — стадии помечаются no_su2)."""
+    monkeypatch.delenv("SU2_RUN", raising=False)
+    out = tmp_path / "run"
+    rc_ = rc.main(["--case", "core130", "--level", "coarse", "--plan", "smoke075", "--dry", "--shroud", "slip",
+                   "--vaneless", "slip", "--out", str(out), "--su2-bin", str(tmp_path / "нет_SU2_CFD")])
+    assert rc_ == 0
+    s = json.load(open(out / "run_summary.json", encoding="utf-8"))
+    names = [st["name"] for st in s["stages"]]
+    assert names == ["s1_ramp60", "s2_ramp100_p075", "s3_point_p075"]
+    cfg = {n: (out / f"case_{n}.cfg").read_text(encoding="utf-8") for n in names}
+    assert "RESTART_SOL= NO" in cfg[names[0]]
+    assert "SOLUTION_FILENAME= restart_s1_ramp60.dat" in cfg[names[1]]
+    assert "SOLUTION_FILENAME= restart_s2_ramp100_p075.dat" in cfg[names[2]]
+    assert "MUSCL_FLOW= YES" in cfg[names[2]] and "MUSCL_FLOW= NO" in cfg[names[0]]
+    for c in cfg.values():
+        assert "MARKER_EULER= (shroud, hub_vaneless, shroud_vaneless)" in c
+        assert "MARKER_HEATFLUX= (hub, 0.0, blade, 0.0)" in c
+    # p_вых последней стадии = 0,75 оценки на номинале
+    assert s["stages"][-1]["p_out"] == pytest.approx(0.75 * s["inputs"]["p_out_estimate_nominal"], rel=1e-9)
+    h = rc.read_mesh_header(str(out / "mesh_vaneless_split.su2"))
+    src = rc.read_mesh_header(GEOM_SU2)
+    assert h["NPOIN"] == src["NPOIN"] and h["NELEM"] == src["NELEM"]
+    assert h["markers"]["hub"] + h["markers"]["hub_vaneless"] == src["markers"]["hub"]
+    assert h["markers"]["shroud"] + h["markers"]["shroud_vaneless"] == src["markers"]["shroud"]
+    assert h["markers"]["hub_vaneless"] > 0 and h["markers"]["shroud_vaneless"] > 0

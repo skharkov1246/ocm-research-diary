@@ -1,0 +1,111 @@
+# Смета первого теста в AWS: «инстанс-часы × тариф» + диск, IPv4, S3, передача данных, CloudWatch Logs, ECR.
+# Тарифы — aws_rates.toml (AWS Price List, fetch_rates.py). Параметры серии (тайм-аут, повторы, типы, план) —
+# из batch.toml, чтобы смета и шаблоны Batch не разошлись. Пометка EXAMPLE — принятое значение, не замер:
+# у каждого — единицы, владелец данных и влияние на смету (README узла, раздел «Входы сметы»).
+
+[meta]
+date = "2026-11-14"
+region = "us-east-1"
+ceiling_usd = 300.0          # потолок задания (решения владельца 14.11.2026 в тексте задания)
+ceiling_runner_usd = 2000.0  # предохранитель runner.py по README трека (вечер 14.11.2026) — для справки
+hours_per_month = 730.0      # месяц = 730 ч — так считает ставку диска runner.py (0,08/730); принятое
+batch_config = "batch.toml"
+rates = "aws_rates.toml"
+
+[su2_time]
+# Время итерации SU2 на машине: t = ref_s × (узлы / ref_nodes) × (ref_procs / процессы) / parallel_eff × cpu_factor.
+# Замер: дымовой прогон узла su2 (14.11.2026, SU2 v8.6.0 «Harrier», core130 coarse), среднее ITER_TIME
+# по 169 итерациям history_s1_ramp60.csv — 1,2255 с; 139 121 узел («grid points before partitioning» журнала);
+# машина 4 ядра, нагружена соседними потоками — замер грубый и, скорее всего, завышенный.
+ref_s_per_iter = 1.2255
+ref_nodes = 139121
+ref_procs = 4                # EXAMPLE: по числу ядер машины; в журнале SU2 число процессов не печатается
+parallel_eff = 0.6           # EXAMPLE, 1: доля идеального ускорения 4 → 32…64 процесса; владелец — замер bench_*
+mesh_nodes = 600000          # EXAMPLE, шт.: порядка core130 medium (584 357 узлов, README узла geom); сетки
+                             # taurus60 medium ещё нет; владелец — узел geom; время и смета ∝ числу узлов
+
+[su2_time.cpu_factor]        # EXAMPLE, 1: скорость на vCPU относительно эталона; владелец — замер bench_*
+"c7a.16xlarge" = 1.0
+"c7i.16xlarge" = 1.0
+"c8i.16xlarge" = 1.0
+"c8i.8xlarge" = 1.0
+
+[storage]
+s3_months = 1.0              # EXAMPLE, мес: сколько результаты лежат в S3 до разбора
+download_fraction = 1.0      # доля результатов, скачиваемых из AWS в интернет (в контейнер сессии)
+free_tier_used = true        # 100 ГБ/мес бесплатного выхода считаем израсходованными (консервативно)
+put_per_point = 30           # EXAMPLE, шт.: файлов на точку (выгрузка) — PUT
+get_per_point = 30           # EXAMPLE, шт.: скачивание тех же файлов — GET
+get_inputs_per_job = 5       # EXAMPLE, шт.: plan.csv, job.json, сетка, конфигурации
+log_bytes_per_iter = 300     # EXAMPLE, байт: строка вывода SU2 на итерацию (с запасом)
+log_bytes_per_job = 51200    # EXAMPLE, байт: шапка SU2, сетка, итоги
+log_months = 1.0
+image_gb = 2.0               # обновляется по docker image inspect локальной сборки (README); в ECR — сжатые слои
+
+[[scenario]]
+name = "bench_c7a16"
+title = "CPU-замер одного межлопаточного канала SU2 на c7a.16xlarge (runner.py, спот)"
+path = "runner"              # первый прогон — runner.py: EC2 спот напрямую, SU2 собирается на машине
+instance_type = "c7a.16xlarge"
+procs = 64
+jobs = 1
+iterations = 6370            # план design узла su2: 170 + 200 + 6000
+setup_min = 15               # EXAMPLE, мин: загрузка машины, пакеты, сборка SU2 install_su2.sh на 64 ядрах
+upload_min = 2               # EXAMPLE, мин
+cap_h = 2.5                  # max_min задачи раннера = 150 мин (сторож гасит машину)
+grace_min = 10               # grace_min раннера (бюджетная формула runner.py)
+attempts_max = 2             # --retries 1
+root_gb = 60                 # disk_gb задачи (как su2/aws_job.example.json)
+outputs_gb_per_job = 0.5     # EXAMPLE, ГБ: рестарт, поле, журналы одной точки
+in_plan = true
+
+[[scenario]]
+name = "bench_c8i8"
+title = "CPU-замер того же канала на c8i.8xlarge (runner.py, спот; поле vcpu = 32 — типа нет в таблице раннера)"
+path = "runner"
+instance_type = "c8i.8xlarge"
+procs = 32
+jobs = 1
+iterations = 6370
+setup_min = 20               # EXAMPLE, мин: сборка SU2 на 32 vCPU дольше
+upload_min = 2
+cap_h = 3.5                  # max_min = 210 мин
+grace_min = 10
+attempts_max = 2
+root_gb = 60
+outputs_gb_per_job = 0.5
+in_plan = true
+
+[[scenario]]
+name = "series_char"
+title = "Серия характеристики: 2 ступени × 5 частот × 8 точек, AWS Batch, массив из 10 линий частоты"
+path = "batch"               # тайм-аут, повторы, типы машин, план, режим — из batch.toml
+mode = "line"
+setup_min = 5                # EXAMPLE, мин: загрузка машины ECS AL2023 и скачивание образа (~2 ГБ) до старта
+upload_min_per_point = 1     # EXAMPLE, мин: выгрузка точки в S3
+tail_min = 10                # EXAMPLE, мин: простой машины до сжатия среды (в документации не указан)
+outputs_gb_per_point = 0.25  # EXAMPLE, ГБ
+in_plan = true
+
+[[scenario]]
+name = "series_char_point_mode"
+title = "Вариант для сравнения: та же серия по точкам (80 заданий, каждая точка с холодного старта)"
+path = "batch"
+mode = "point"
+setup_min = 5
+upload_min_per_point = 1
+tail_min = 10
+outputs_gb_per_point = 0.25
+in_plan = false
+
+[[scenario]]
+name = "series_char_eu-north-1"
+title = "Запасной регион eu-north-1: та же серия; бакет и образ — в us-east-1 (межрегиональная передача)"
+path = "batch"
+mode = "line"
+region = "eu-north-1"
+setup_min = 5
+upload_min_per_point = 1
+tail_min = 10
+outputs_gb_per_point = 0.25
+in_plan = false

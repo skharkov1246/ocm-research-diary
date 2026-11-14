@@ -26,12 +26,17 @@ ARG SU2_TAG=v8.6.0
 ARG SU2_COMMIT=7048fd35f56d4bf52e586429d6746a36a10255f8
 ARG BUILD_JOBS=4
 ENV DEBIAN_FRONTEND=noninteractive
+# Версии apt не закрепляются (DL3008): архив Ubuntu убирает старые сборки после обновлений безопасности, и
+# закреплённая сборка перестанет собираться; фактические версии пишутся в /opt/gtu/PACKAGES.txt образа.
+# hadolint ignore=DL3008
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
       build-essential python3 git pkg-config ca-certificates openmpi-bin libopenmpi-dev \
  && rm -rf /var/lib/apt/lists/*
 # extra_ca — необязательный секрет сборки: набор корневых сертификатов для сети с TLS-прокси.
 # Действует только внутри этой команды и в слой образа не попадает; без него — системные сертификаты.
+# cd внутри одной команды (DL3003): клон, setup и сборке нужен один и тот же необязательный секрет.
+# hadolint ignore=DL3003
 RUN --mount=type=secret,id=extra_ca,required=false \
     set -eu; \
     if [ -s /run/secrets/extra_ca ]; then \
@@ -51,6 +56,7 @@ ARG GIT_SHA=unknown
 ENV DEBIAN_FRONTEND=noninteractive
 # libgl1, libglu1-mesa, libxrender1, libxcursor1, libxfixes3, libxft2, libfontconfig1, libxinerama1 — нужны
 # колесу gmsh (без libgl1 импорт падает: «libGL.so.1: cannot open shared object file», пробная сборка 14.11.2026).
+# hadolint ignore=DL3008
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
       python3 python3-venv ca-certificates openmpi-bin libopenmpi3t64 calculix-ccx \
@@ -64,12 +70,16 @@ RUN --mount=type=secret,id=extra_ca,required=false \
     /opt/venv/bin/pip install --no-cache-dir -r /tmp/requirements.txt; \
     /opt/venv/bin/python -c "import cantera, numpy, scipy, gmsh, boto3; print('ok', cantera.__version__, gmsh.__version__)"
 COPY --from=su2-build /opt/su2 /opt/su2
-COPY routes/gtu /opt/gtu/routes/gtu
+# Код — пользователю 1000: скрипты трека пишут рядом с собой (run_case.py строит сетку в ../geom/out/).
+COPY --chown=1000:1000 routes/gtu /opt/gtu/routes/gtu
 # Непривилегированный пользователь: OpenMPI не запускается от root без особых переменных.
+# ccx -v печатает версию, но выходит с кодом 201 (проверено 14.11.2026) — проверка без пайпа и без кода выхода.
 RUN useradd --create-home --uid 1000 gtu \
- && mkdir -p /work && chown gtu:gtu /work \
- && ccx -v | grep -q "2.21" \
- && printf '%s\n' "$GIT_SHA" > /opt/gtu/GIT_SHA
+ && mkdir -p /work && chown 1000:1000 /work \
+ && v="$(ccx -v || true)" && case "$v" in *"Version 2.21"*) ;; *) echo "ccx: $v" >&2; exit 1 ;; esac \
+ && printf '%s\n' "$GIT_SHA" > /opt/gtu/GIT_SHA \
+ && dpkg-query -W -f '${Package} ${Version}\n' > /opt/gtu/PACKAGES.txt \
+ && /opt/venv/bin/pip freeze > /opt/gtu/PIP_FREEZE.txt
 LABEL org.opencontainers.image.title="gtu-platform" \
       org.opencontainers.image.revision="${GIT_SHA}" \
       org.opencontainers.image.source="https://github.com/skharkov1246/ocm-research-diary"
@@ -81,7 +91,7 @@ ENV PATH=/opt/venv/bin:/opt/su2/bin:$PATH \
     GTU_GIT_SHA=${GIT_SHA} \
     OMPI_MCA_btl_vader_single_copy_mechanism=none \
     PYTHONDONTWRITEBYTECODE=1
-USER gtu
+USER 1000:1000
 WORKDIR /work
 ENTRYPOINT ["python3", "-u", "/opt/gtu/routes/gtu/platform/batch/entrypoint.py"]
 CMD ["--help"]

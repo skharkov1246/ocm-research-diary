@@ -1,0 +1,1697 @@
+{
+ "method": "Порог окупаемости по стоимости прогона до сходимости: GPU выгоден, если ускорение S = T_CPU / T_GPU ≥ speedup_margin · S*, S* = тариф GPU / тариф CPU (тариф — долл./ч машины). Доля ядра — закон Амдала с поправкой на CPU GPU-машины: S = 1 / ((1 − f)·r_host + f/s_k + x). Видеопамять — нижняя граница по структурам линейного решателя SU2 v8.6.0 (матрица LDU, копия ILU(0), векторы FGMRES) для систем течения и турбулентности, рёбра — подсчёт по сеткам узла geom. Упор в полосу памяти — интенсивность блочного SpMV против пиковой производительности.",
+ "software": "python3 3.13.18, break_even.py",
+ "date": "2026-11-14",
+ "inputs": {
+  "bench": {
+   "file": "bench.toml",
+   "sha256": "eeafd1cfc4cd825da8beedf1981d37f16fd375e44db0d6c6d60c3c2b875d4271"
+  },
+  "tariffs": {
+   "file": "tariffs_us-east-1.json",
+   "sha256": "b3c871e4a4a283f35ee56a5b9bf3e84dddc96038ddb7656c6731212cf65b19d1",
+   "price_list": [
+    {
+     "file": "ec2_us-east-1_20261114012926.csv",
+     "region": "us-east-1",
+     "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20261114012926/us-east-1/index.csv",
+     "publication_date": "2026-11-14T01:29:26Z",
+     "version": "20261114012926",
+     "sha256": "b4cca1dbcfce6ecf6fc63a26167d5477943a1a2028bcb874ed1acea151501479"
+    },
+    {
+     "file": "ec2_eu-north-1_20261114012926.csv",
+     "region": "eu-north-1",
+     "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20261114012926/eu-north-1/index.csv",
+     "publication_date": "2026-11-14T01:29:26Z",
+     "version": "20261114012926",
+     "sha256": "f764409fb97fc196bcc8de03f6092c903fac49a251d5d27fb2f984c10dbcf382"
+    },
+    {
+     "file": "spot-advisor-data.json",
+     "url": "https://spot-bid-advisor.s3.amazonaws.com/spot-advisor-data.json",
+     "sha256": "f2bd345cbf48629e9ba32d127dd989aada8db3c099c21f54e941611d034e32be"
+    },
+    {
+     "file": "vpc_us-east-1.json",
+     "region": "us-east-1",
+     "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonVPC/20261105181945/us-east-1/index.json",
+     "publication_date": "2026-11-05T18:19:45Z",
+     "version": "20261105181945",
+     "sha256": "48ff731d5a278c5ba4e0ec1cd3c22336daa8853437c3b6ac458a4163455ac8fa"
+    }
+   ]
+  },
+  "mesh_stats": {
+   "file": "mesh_stats.json",
+   "sha256": "334654b9fc9cca1ff6c8253b629a99efba2dbb2f4ce37b5643cd8a2c0adc75fa"
+  },
+  "region": "us-east-1",
+  "speedup_margin": 1.2,
+  "vram_fill_max": 0.85,
+  "disk_gb": 50,
+  "extras_usd_h": 0.010479,
+  "memory_model": {
+   "nvar_flow": 5,
+   "nvar_turb": 2,
+   "krylov_restart": 10,
+   "extra_vectors": 4,
+   "index_bytes": 4
+  },
+  "gpu_specs": {
+   "p5.4xlarge": {
+    "name": "NVIDIA H100 SXM 80 GB HBM3",
+    "fp64_flops": 34000000000000.0,
+    "fp32_flops": 34000000000000.0,
+    "mem_bw_Bps": 3350000000000.0
+   },
+   "g6e.2xlarge": {
+    "name": "NVIDIA L40S 48 GB GDDR6",
+    "fp64_flops": 1431000000000.0,
+    "fp32_flops": 91600000000000.0,
+    "mem_bw_Bps": 864000000000.0
+   }
+  }
+ },
+ "break_even": [
+  {
+   "gpu": "p5.4xlarge",
+   "gpu_market": "od",
+   "cpu": "c8i.8xlarge",
+   "cpu_market": "od",
+   "gpu_usd_h": 6.88,
+   "cpu_usd_h": 1.49936,
+   "s_star": 4.5886,
+   "s_required": 5.5063,
+   "extras_usd_h": 0.010479,
+   "s_star_with_extras": 4.5637,
+   "amdahl_f_required": [
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 5.0,
+     "f_required": null
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.9093
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.8615
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.8184
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 5.0,
+     "f_required": null
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.957
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.9325
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.9092
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 5.0,
+     "f_required": null
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.9791
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.9667
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.9546
+    }
+   ]
+  },
+  {
+   "gpu": "p5.4xlarge",
+   "gpu_market": "spot",
+   "cpu": "c8i.8xlarge",
+   "cpu_market": "spot",
+   "gpu_usd_h": 6.2608,
+   "cpu_usd_h": 0.58475,
+   "s_star": 10.7068,
+   "s_required": 12.8482,
+   "extras_usd_h": 0.010479,
+   "s_star_with_extras": 10.5359,
+   "amdahl_f_required": [
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 5.0,
+     "f_required": null
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 10.0,
+     "f_required": null
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.9707
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.9222
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 5.0,
+     "f_required": null
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 10.0,
+     "f_required": null
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.9857
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.9611
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 5.0,
+     "f_required": null
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 10.0,
+     "f_required": null
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.993
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.9805
+    }
+   ]
+  },
+  {
+   "gpu": "p5.4xlarge",
+   "gpu_market": "od",
+   "cpu": "c8i.8xlarge",
+   "cpu_market": "spot",
+   "gpu_usd_h": 6.88,
+   "cpu_usd_h": 0.58475,
+   "s_star": 11.7657,
+   "s_required": 14.1189,
+   "extras_usd_h": 0.010479,
+   "s_star_with_extras": 11.5762,
+   "amdahl_f_required": [
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 5.0,
+     "f_required": null
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 10.0,
+     "f_required": null
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.9781
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.9292
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 5.0,
+     "f_required": null
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 10.0,
+     "f_required": null
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.9893
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.9646
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 5.0,
+     "f_required": null
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 10.0,
+     "f_required": null
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.9947
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.9823
+    }
+   ]
+  },
+  {
+   "gpu": "p5.4xlarge",
+   "gpu_market": "od",
+   "cpu": "c7a.16xlarge",
+   "cpu_market": "od",
+   "gpu_usd_h": 6.88,
+   "cpu_usd_h": 3.28448,
+   "s_star": 2.0947,
+   "s_required": 2.5136,
+   "extras_usd_h": 0.010479,
+   "s_star_with_extras": 2.0912,
+   "amdahl_f_required": [
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.7527
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.6691
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.6339
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.6022
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.8901
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.8432
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.8216
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.8011
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.9479
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.9236
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.9119
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.9005
+    }
+   ]
+  },
+  {
+   "gpu": "p5.4xlarge",
+   "gpu_market": "spot",
+   "cpu": "c7a.16xlarge",
+   "cpu_market": "spot",
+   "gpu_usd_h": 6.2608,
+   "cpu_usd_h": 1.478016,
+   "s_star": 4.2359,
+   "s_required": 5.0831,
+   "extras_usd_h": 0.010479,
+   "s_star_with_extras": 4.2132,
+   "amdahl_f_required": [
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 5.0,
+     "f_required": null
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.8925
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.8455
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.8033
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 5.0,
+     "f_required": null
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.9491
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.9248
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.9016
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 5.0,
+     "f_required": null
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.9752
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.9629
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.9508
+    }
+   ]
+  },
+  {
+   "gpu": "p5.4xlarge",
+   "gpu_market": "od",
+   "cpu": "c7a.16xlarge",
+   "cpu_market": "spot",
+   "gpu_usd_h": 6.88,
+   "cpu_usd_h": 1.478016,
+   "s_star": 4.6549,
+   "s_required": 5.5859,
+   "extras_usd_h": 0.010479,
+   "s_star_with_extras": 4.6292,
+   "amdahl_f_required": [
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 5.0,
+     "f_required": null
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.9122
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.8642
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.821
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 5.0,
+     "f_required": null
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.9584
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.9338
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.9105
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 5.0,
+     "f_required": null
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.9797
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.9673
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.9552
+    }
+   ]
+  },
+  {
+   "gpu": "p5.4xlarge",
+   "gpu_market": "od",
+   "cpu": "c7i.16xlarge",
+   "cpu_market": "od",
+   "gpu_usd_h": 6.88,
+   "cpu_usd_h": 2.856,
+   "s_star": 2.409,
+   "s_required": 2.8908,
+   "extras_usd_h": 0.010479,
+   "s_star_with_extras": 2.4038,
+   "amdahl_f_required": [
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.8176
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.7267
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.6885
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.6541
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.9189
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.8706
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.8482
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.827
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.9616
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.9369
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.9251
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.9135
+    }
+   ]
+  },
+  {
+   "gpu": "p5.4xlarge",
+   "gpu_market": "spot",
+   "cpu": "c7i.16xlarge",
+   "cpu_market": "spot",
+   "gpu_usd_h": 6.2608,
+   "cpu_usd_h": 0.94248,
+   "s_star": 6.6429,
+   "s_required": 7.9715,
+   "extras_usd_h": 0.010479,
+   "s_star_with_extras": 6.5808,
+   "amdahl_f_required": [
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 5.0,
+     "f_required": null
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.9717
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.9206
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.8746
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 5.0,
+     "f_required": null
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.9866
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.9613
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.9373
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 5.0,
+     "f_required": null
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.9935
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.9809
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.9686
+    }
+   ]
+  },
+  {
+   "gpu": "p5.4xlarge",
+   "gpu_market": "od",
+   "cpu": "c7i.16xlarge",
+   "cpu_market": "spot",
+   "gpu_usd_h": 6.88,
+   "cpu_usd_h": 0.94248,
+   "s_star": 7.2999,
+   "s_required": 8.7599,
+   "extras_usd_h": 0.010479,
+   "s_star_with_extras": 7.2306,
+   "amdahl_f_required": [
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 5.0,
+     "f_required": null
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.9843
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.9325
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.8858
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 5.0,
+     "f_required": null
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.9925
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.9671
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.9429
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 5.0,
+     "f_required": null
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.9964
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.9838
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.9715
+    }
+   ]
+  },
+  {
+   "gpu": "g6e.2xlarge",
+   "gpu_market": "od",
+   "cpu": "c8i.8xlarge",
+   "cpu_market": "od",
+   "gpu_usd_h": 2.24208,
+   "cpu_usd_h": 1.49936,
+   "s_star": 1.4954,
+   "s_required": 1.7944,
+   "extras_usd_h": 0.010479,
+   "s_star_with_extras": 1.4919,
+   "amdahl_f_required": [
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.5534
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.4919
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.466
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.4427
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.8015
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.7593
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.7399
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.7214
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.906
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.8827
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.8716
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.8607
+    }
+   ]
+  },
+  {
+   "gpu": "g6e.2xlarge",
+   "gpu_market": "spot",
+   "cpu": "c8i.8xlarge",
+   "cpu_market": "spot",
+   "gpu_usd_h": 1.031357,
+   "cpu_usd_h": 0.58475,
+   "s_star": 1.7638,
+   "s_required": 2.1165,
+   "extras_usd_h": 0.010479,
+   "s_star_with_extras": 1.7503,
+   "amdahl_f_required": [
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.6594
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.5861
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.5553
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.5275
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.8486
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.804
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.7833
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.7638
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.9283
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.9045
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.893
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.8819
+    }
+   ]
+  },
+  {
+   "gpu": "g6e.2xlarge",
+   "gpu_market": "od",
+   "cpu": "c8i.8xlarge",
+   "cpu_market": "spot",
+   "gpu_usd_h": 2.24208,
+   "cpu_usd_h": 0.58475,
+   "s_star": 3.8343,
+   "s_required": 4.6011,
+   "extras_usd_h": 0.010479,
+   "s_star_with_extras": 3.7844,
+   "amdahl_f_required": [
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.9783
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.8696
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.8239
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.7827
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.9904
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.9382
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.9142
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.8913
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.9954
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.9699
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.9576
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.9457
+    }
+   ]
+  },
+  {
+   "gpu": "g6e.2xlarge",
+   "gpu_market": "od",
+   "cpu": "c7a.16xlarge",
+   "cpu_market": "od",
+   "gpu_usd_h": 2.24208,
+   "cpu_usd_h": 3.28448,
+   "s_star": 0.6826,
+   "s_required": 0.8192,
+   "extras_usd_h": 0.010479,
+   "s_star_with_extras": 0.6836,
+   "amdahl_f_required": [
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.0
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.0
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.0
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.0
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.4329
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.4101
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.3996
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.3896
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.7314
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.7126
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.7036
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.6948
+    }
+   ]
+  },
+  {
+   "gpu": "g6e.2xlarge",
+   "gpu_market": "spot",
+   "cpu": "c7a.16xlarge",
+   "cpu_market": "spot",
+   "gpu_usd_h": 1.031357,
+   "cpu_usd_h": 1.478016,
+   "s_star": 0.6978,
+   "s_required": 0.8374,
+   "extras_usd_h": 0.010479,
+   "s_star_with_extras": 0.6999,
+   "amdahl_f_required": [
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.0
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.0
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.0
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.0
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.4476
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.4241
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.4132
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.4029
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.7384
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.7194
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.7103
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.7014
+    }
+   ]
+  },
+  {
+   "gpu": "g6e.2xlarge",
+   "gpu_market": "od",
+   "cpu": "c7a.16xlarge",
+   "cpu_market": "spot",
+   "gpu_usd_h": 2.24208,
+   "cpu_usd_h": 1.478016,
+   "s_star": 1.517,
+   "s_required": 1.8203,
+   "extras_usd_h": 0.010479,
+   "s_star_with_extras": 1.5133,
+   "amdahl_f_required": [
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.5633
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.5007
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.4744
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.4507
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.8059
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.7635
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.7439
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.7253
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.9081
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.8848
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.8736
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.8627
+    }
+   ]
+  },
+  {
+   "gpu": "g6e.2xlarge",
+   "gpu_market": "od",
+   "cpu": "c7i.16xlarge",
+   "cpu_market": "od",
+   "gpu_usd_h": 2.24208,
+   "cpu_usd_h": 2.856,
+   "s_star": 0.785,
+   "s_required": 0.9421,
+   "extras_usd_h": 0.010479,
+   "s_star_with_extras": 0.7858,
+   "amdahl_f_required": [
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.0
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.0
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.0
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.0
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.5214
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.4939
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.4813
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.4692
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.7733
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.7535
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.7439
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.7346
+    }
+   ]
+  },
+  {
+   "gpu": "g6e.2xlarge",
+   "gpu_market": "spot",
+   "cpu": "c7i.16xlarge",
+   "cpu_market": "spot",
+   "gpu_usd_h": 1.031357,
+   "cpu_usd_h": 0.94248,
+   "s_star": 1.0943,
+   "s_required": 1.3132,
+   "extras_usd_h": 0.010479,
+   "s_star_with_extras": 1.0933,
+   "amdahl_f_required": [
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.2981
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.265
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.251
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.2385
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.688
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.6518
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.6351
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.6192
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.8522
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.8304
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.8199
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.8096
+    }
+   ]
+  },
+  {
+   "gpu": "g6e.2xlarge",
+   "gpu_market": "od",
+   "cpu": "c7i.16xlarge",
+   "cpu_market": "spot",
+   "gpu_usd_h": 2.24208,
+   "cpu_usd_h": 0.94248,
+   "s_star": 2.3789,
+   "s_required": 2.8547,
+   "extras_usd_h": 0.010479,
+   "s_star_with_extras": 2.3638,
+   "amdahl_f_required": [
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.8121
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.7219
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.6839
+    },
+    {
+     "r_host": 1.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.6497
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.9165
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.8683
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.846
+    },
+    {
+     "r_host": 2.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.8249
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 5.0,
+     "f_required": 0.9604
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 10.0,
+     "f_required": 0.9358
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": 20.0,
+     "f_required": 0.924
+    },
+    {
+     "r_host": 4.0,
+     "kernel_speedup": "inf",
+     "f_required": 0.9124
+    }
+   ]
+  }
+ ],
+ "task_crosscheck": [
+  {
+   "gpu": "p5.4xlarge",
+   "cpu": "c8i.8xlarge",
+   "region": "eu-north-1",
+   "gpu_usd_h": 7.3616,
+   "cpu_usd_h": 1.60528,
+   "s_star": 4.5859,
+   "task_claim": 4.6,
+   "match_1_decimal": true
+  },
+  {
+   "gpu": "g6e.2xlarge",
+   "cpu": "c8i.8xlarge",
+   "region": "eu-north-1",
+   "gpu_usd_h": 2.37822,
+   "cpu_usd_h": 1.60528,
+   "s_star": 1.4815,
+   "task_claim": 1.5,
+   "match_1_decimal": true
+  }
+ ],
+ "missing_in_region": [
+  "hpc7a.96xlarge",
+  "hpc8a.96xlarge"
+ ],
+ "gpu_memory_estimate": [
+  {
+   "mesh": "../geom/out/core130_coarse/passage_core130_coarse.su2",
+   "n_points": 139121,
+   "edges_per_point": 5.996607,
+   "precision": "fp64",
+   "bytes_per_point_flow": 6349.2,
+   "bytes_per_point_turb": 1359.5,
+   "bytes_per_point": 7708.7,
+   "device_GB_this_mesh": 1.0724,
+   "htod_GB_per_iter": 0.435,
+   "dtoh_GB_per_iter": 0.00779,
+   "max_points_p5.4xlarge": 8821153,
+   "max_points_g6e.2xlarge": 5292691
+  },
+  {
+   "mesh": "../geom/out/core130_coarse/passage_core130_coarse.su2",
+   "n_points": 139121,
+   "edges_per_point": 5.996607,
+   "precision": "mixed",
+   "bytes_per_point_flow": 3230.6,
+   "bytes_per_point_turb": 735.7,
+   "bytes_per_point": 3966.3,
+   "device_GB_this_mesh": 0.5518,
+   "htod_GB_per_iter": 0.2175,
+   "dtoh_GB_per_iter": 0.0039,
+   "max_points_p5.4xlarge": 17144368,
+   "max_points_g6e.2xlarge": 10286620
+  },
+  {
+   "mesh": "../geom/out/core130_medium/passage_core130_medium.su2",
+   "n_points": 584357,
+   "edges_per_point": 6.331725,
+   "precision": "fp64",
+   "bytes_per_point_flow": 6622.7,
+   "bytes_per_point_turb": 1407.8,
+   "bytes_per_point": 8030.5,
+   "device_GB_this_mesh": 4.6927,
+   "htod_GB_per_iter": 1.9178,
+   "dtoh_GB_per_iter": 0.03272,
+   "max_points_p5.4xlarge": 8467763,
+   "max_points_g6e.2xlarge": 5080657
+  },
+  {
+   "mesh": "../geom/out/core130_medium/passage_core130_medium.su2",
+   "n_points": 584357,
+   "edges_per_point": 6.331725,
+   "precision": "mixed",
+   "bytes_per_point_flow": 3370.0,
+   "bytes_per_point_turb": 762.5,
+   "bytes_per_point": 4132.5,
+   "device_GB_this_mesh": 2.4149,
+   "htod_GB_per_iter": 0.9589,
+   "dtoh_GB_per_iter": 0.01636,
+   "max_points_p5.4xlarge": 16454788,
+   "max_points_g6e.2xlarge": 9872873
+  },
+  {
+   "mesh": "../geom/out/taurus60_coarse/passage_taurus60_coarse.su2",
+   "n_points": 165236,
+   "edges_per_point": 6.096504,
+   "precision": "fp64",
+   "bytes_per_point_flow": 6430.7,
+   "bytes_per_point_turb": 1373.9,
+   "bytes_per_point": 7804.6,
+   "device_GB_this_mesh": 1.2896,
+   "htod_GB_per_iter": 0.5243,
+   "dtoh_GB_per_iter": 0.00925,
+   "max_points_p5.4xlarge": 8712761,
+   "max_points_g6e.2xlarge": 5227656
+  },
+  {
+   "mesh": "../geom/out/taurus60_coarse/passage_taurus60_coarse.su2",
+   "n_points": 165236,
+   "edges_per_point": 6.096504,
+   "precision": "mixed",
+   "bytes_per_point_flow": 3272.1,
+   "bytes_per_point_turb": 743.7,
+   "bytes_per_point": 4015.9,
+   "device_GB_this_mesh": 0.6636,
+   "htod_GB_per_iter": 0.2621,
+   "dtoh_GB_per_iter": 0.00463,
+   "max_points_p5.4xlarge": 16932835,
+   "max_points_g6e.2xlarge": 10159701
+  }
+ ],
+ "spmv_roofline": [
+  {
+   "mesh": "../geom/out/core130_coarse/passage_core130_coarse.su2",
+   "gpu": "p5.4xlarge",
+   "precision": "fp64",
+   "intensity_flop_per_B": [
+    0.2021,
+    0.2376
+   ],
+   "flops_needed_at_bw": 795.9,
+   "flops_peak_G": 34000.0,
+   "memory_bound": true
+  },
+  {
+   "mesh": "../geom/out/core130_coarse/passage_core130_coarse.su2",
+   "gpu": "p5.4xlarge",
+   "precision": "mixed",
+   "intensity_flop_per_B": [
+    0.3973,
+    0.4656
+   ],
+   "flops_needed_at_bw": 1559.8,
+   "flops_peak_G": 34000.0,
+   "memory_bound": true
+  },
+  {
+   "mesh": "../geom/out/core130_coarse/passage_core130_coarse.su2",
+   "gpu": "g6e.2xlarge",
+   "precision": "fp64",
+   "intensity_flop_per_B": [
+    0.2021,
+    0.2376
+   ],
+   "flops_needed_at_bw": 205.3,
+   "flops_peak_G": 1431.0,
+   "memory_bound": true
+  },
+  {
+   "mesh": "../geom/out/core130_coarse/passage_core130_coarse.su2",
+   "gpu": "g6e.2xlarge",
+   "precision": "mixed",
+   "intensity_flop_per_B": [
+    0.3973,
+    0.4656
+   ],
+   "flops_needed_at_bw": 402.3,
+   "flops_peak_G": 91600.0,
+   "memory_bound": true
+  },
+  {
+   "mesh": "../geom/out/core130_medium/passage_core130_medium.su2",
+   "gpu": "p5.4xlarge",
+   "precision": "fp64",
+   "intensity_flop_per_B": [
+    0.2022,
+    0.2379
+   ],
+   "flops_needed_at_bw": 797.1,
+   "flops_peak_G": 34000.0,
+   "memory_bound": true
+  },
+  {
+   "mesh": "../geom/out/core130_medium/passage_core130_medium.su2",
+   "gpu": "p5.4xlarge",
+   "precision": "mixed",
+   "intensity_flop_per_B": [
+    0.3976,
+    0.4663
+   ],
+   "flops_needed_at_bw": 1562.2,
+   "flops_peak_G": 34000.0,
+   "memory_bound": true
+  },
+  {
+   "mesh": "../geom/out/core130_medium/passage_core130_medium.su2",
+   "gpu": "g6e.2xlarge",
+   "precision": "fp64",
+   "intensity_flop_per_B": [
+    0.2022,
+    0.2379
+   ],
+   "flops_needed_at_bw": 205.6,
+   "flops_peak_G": 1431.0,
+   "memory_bound": true
+  },
+  {
+   "mesh": "../geom/out/core130_medium/passage_core130_medium.su2",
+   "gpu": "g6e.2xlarge",
+   "precision": "mixed",
+   "intensity_flop_per_B": [
+    0.3976,
+    0.4663
+   ],
+   "flops_needed_at_bw": 402.9,
+   "flops_peak_G": 91600.0,
+   "memory_bound": true
+  },
+  {
+   "mesh": "../geom/out/taurus60_coarse/passage_taurus60_coarse.su2",
+   "gpu": "p5.4xlarge",
+   "precision": "fp64",
+   "intensity_flop_per_B": [
+    0.2022,
+    0.2377
+   ],
+   "flops_needed_at_bw": 796.2,
+   "flops_peak_G": 34000.0,
+   "memory_bound": true
+  },
+  {
+   "mesh": "../geom/out/taurus60_coarse/passage_taurus60_coarse.su2",
+   "gpu": "p5.4xlarge",
+   "precision": "mixed",
+   "intensity_flop_per_B": [
+    0.3974,
+    0.4658
+   ],
+   "flops_needed_at_bw": 1560.5,
+   "flops_peak_G": 34000.0,
+   "memory_bound": true
+  },
+  {
+   "mesh": "../geom/out/taurus60_coarse/passage_taurus60_coarse.su2",
+   "gpu": "g6e.2xlarge",
+   "precision": "fp64",
+   "intensity_flop_per_B": [
+    0.2022,
+    0.2377
+   ],
+   "flops_needed_at_bw": 205.4,
+   "flops_peak_G": 1431.0,
+   "memory_bound": true
+  },
+  {
+   "mesh": "../geom/out/taurus60_coarse/passage_taurus60_coarse.su2",
+   "gpu": "g6e.2xlarge",
+   "precision": "mixed",
+   "intensity_flop_per_B": [
+    0.3974,
+    0.4658
+   ],
+   "flops_needed_at_bw": 402.5,
+   "flops_peak_G": 91600.0,
+   "memory_bound": true
+  }
+ ],
+ "bandwidth_per_dollar": [
+  {
+   "gpu": "p5.4xlarge",
+   "market": "od",
+   "usd_h": 6.88,
+   "TBps_per_usd_h": 0.4869
+  },
+  {
+   "gpu": "p5.4xlarge",
+   "market": "spot",
+   "usd_h": 6.2608,
+   "TBps_per_usd_h": 0.5351
+  },
+  {
+   "gpu": "g6e.2xlarge",
+   "market": "od",
+   "usd_h": 2.24208,
+   "TBps_per_usd_h": 0.3854
+  },
+  {
+   "gpu": "g6e.2xlarge",
+   "market": "spot",
+   "usd_h": 1.031357,
+   "TBps_per_usd_h": 0.8377
+  }
+ ],
+ "measured": {
+  "status": "измерений нет: прогонов по протоколу не было (14.11.2026)"
+ }
+}

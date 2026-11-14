@@ -1,0 +1,360 @@
+# Тарифы AWS для сметы прогонов ГТУ. Сгенерировано fetch_rates.py — не править вручную.
+# Источник каждого числа — таблица [sources.*] (адрес файла Price List, дата публикации).
+[meta]
+generated_utc = "2026-11-14T22:08:28Z"
+method = "AWS Price List Bulk API (offers/v1.0, публичные файлы предложений) + Spot Instance Advisor"
+software = "fetch_rates.py, Python 3.13.18"
+note = "Цены без налогов, USD. spot_estimate_usd_h = on_demand × (1 − экономия/100) по файлу советника (средняя экономия, не цена на дату); -1 — нет данных. Страницы aws.amazon.com/*/pricing из контейнера закрыты (403), поэтому источник — Price List."
+
+[sources.AmazonEC2_us-east-1]
+url = "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20261114012926/us-east-1/index.csv"
+publication = "2026-11-14T01:29:26Z"
+version = "20261114012926"
+
+[sources.AmazonVPC_us-east-1]
+url = "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonVPC/20261105181945/us-east-1/index.json"
+publication = "2026-11-05T18:19:45Z"
+version = "20261105181945"
+
+[sources.AmazonS3_us-east-1]
+url = "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/20261109154310/us-east-1/index.json"
+publication = "2026-11-09T15:43:10Z"
+version = "20261109154310"
+
+[sources.AmazonCloudWatch_us-east-1]
+url = "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonCloudWatch/20261104213532/us-east-1/index.json"
+publication = "2026-11-04T21:35:32Z"
+version = "20261104213532"
+
+[sources.AmazonECR_us-east-1]
+url = "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECR/20261113163947/us-east-1/index.json"
+publication = "2026-11-13T16:39:47Z"
+version = "20261113163947"
+
+[sources.AWSDataTransfer_us-east-1]
+url = "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/20261111191941/us-east-1/index.json"
+publication = "2026-11-11T19:19:41Z"
+version = "20261111191941"
+
+[sources.AmazonEC2_eu-north-1]
+url = "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20261114012926/eu-north-1/index.csv"
+publication = "2026-11-14T01:29:26Z"
+version = "20261114012926"
+
+[sources.AmazonVPC_eu-north-1]
+url = "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonVPC/20261105181945/eu-north-1/index.json"
+publication = "2026-11-05T18:19:45Z"
+version = "20261105181945"
+
+[sources.AmazonS3_eu-north-1]
+url = "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/20261109154310/eu-north-1/index.json"
+publication = "2026-11-09T15:43:10Z"
+version = "20261109154310"
+
+[sources.AmazonCloudWatch_eu-north-1]
+url = "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonCloudWatch/20261104213532/eu-north-1/index.json"
+publication = "2026-11-04T21:35:32Z"
+version = "20261104213532"
+
+[sources.AmazonECR_eu-north-1]
+url = "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECR/20261113163947/eu-north-1/index.json"
+publication = "2026-11-13T16:39:47Z"
+version = "20261113163947"
+
+[sources.AWSDataTransfer_eu-north-1]
+url = "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/20261111191941/eu-north-1/index.json"
+publication = "2026-11-11T19:19:41Z"
+version = "20261111191941"
+
+[sources.spot_advisor]
+url = "https://spot-bid-advisor.s3.amazonaws.com/spot-advisor-data.json"
+publication = "Fri, 20 Mar 2026 23:38:55 GMT"
+version = ""
+
+[regions.us-east-1.ec2."c8i.16xlarge"]
+on_demand_usd_h = 2.99872
+vcpu = 64
+memory_gib = 128.0
+processor = "Intel Xeon Scalable (Granite Rapids)"
+sku = "24J2UH92RHSGPVQC"
+effective = "2026-11-01"
+spot_savings_pct = 62
+spot_interrupt_bucket = ">20%"
+spot_estimate_usd_h = 1.139514
+
+[regions.us-east-1.ec2."c7a.16xlarge"]
+on_demand_usd_h = 3.28448
+vcpu = 64
+memory_gib = 128.0
+processor = "AMD EPYC 9R14 Processor"
+sku = "4UQPTQNA6W2TZ4Q8"
+effective = "2026-11-01"
+spot_savings_pct = 55
+spot_interrupt_bucket = "10-15%"
+spot_estimate_usd_h = 1.478016
+
+[regions.us-east-1.ec2."c7a.8xlarge"]
+on_demand_usd_h = 1.64224
+vcpu = 32
+memory_gib = 64.0
+processor = "AMD EPYC 9R14 Processor"
+sku = "6MV5XKZYPVXSQCN4"
+effective = "2026-11-01"
+spot_savings_pct = 56
+spot_interrupt_bucket = "15-20%"
+spot_estimate_usd_h = 0.722586
+
+[regions.us-east-1.ec2."c7i.8xlarge"]
+on_demand_usd_h = 1.428
+vcpu = 32
+memory_gib = 64.0
+processor = "Intel Xeon Scalable (Sapphire Rapids)"
+sku = "7RFUEP9XE7QPFUGE"
+effective = "2026-11-01"
+spot_savings_pct = 66
+spot_interrupt_bucket = ">20%"
+spot_estimate_usd_h = 0.48552
+
+[regions.us-east-1.ec2."c8i.2xlarge"]
+on_demand_usd_h = 0.37484
+vcpu = 8
+memory_gib = 16.0
+processor = "Intel Xeon Scalable (Granite Rapids)"
+sku = "9KEKRSWSE7G6M3S2"
+effective = "2026-11-01"
+spot_savings_pct = 58
+spot_interrupt_bucket = "15-20%"
+spot_estimate_usd_h = 0.157433
+
+[regions.us-east-1.ec2."c7i.16xlarge"]
+on_demand_usd_h = 2.856
+vcpu = 64
+memory_gib = 128.0
+processor = "Intel Xeon Scalable (Sapphire Rapids)"
+sku = "JKB56VZGZSM354HN"
+effective = "2026-11-01"
+spot_savings_pct = 67
+spot_interrupt_bucket = ">20%"
+spot_estimate_usd_h = 0.94248
+
+[regions.us-east-1.ec2."c8i.8xlarge"]
+on_demand_usd_h = 1.49936
+vcpu = 32
+memory_gib = 64.0
+processor = "Intel Xeon Scalable (Granite Rapids)"
+sku = "SBKA47AG7WSZNMTA"
+effective = "2026-11-01"
+spot_savings_pct = 61
+spot_interrupt_bucket = ">20%"
+spot_estimate_usd_h = 0.58475
+
+[regions.us-east-1.ebs_gp3_usd_gb_month]
+usd = 0.08
+unit = "GB-Mo"
+sku = "JG3KUJMBRGHV3N8G"
+description = "$0.08 per GB-month of General Purpose (gp3) provisioned storage - US East (N. Virginia)"
+
+[regions.us-east-1.public_ipv4_usd_h]
+usd = 0.005
+unit = "Hrs"
+sku = "4GQUNXTFWVSGPUZK"
+description = "$0.005 per In-use public IPv4 address per hour"
+
+[regions.us-east-1.s3_standard_usd_gb_month]
+usd = 0.023
+unit = "GB-Mo"
+sku = "WP9ANXZGBYYSGJEA"
+description = "$0.023 per GB - first 50 TB / month of storage used"
+
+[regions.us-east-1.s3_put_usd_request]
+usd = 5e-06
+unit = "Requests"
+sku = "E9YHNFENF4XQBZR6"
+description = "$0.005 per 1,000 PUT, COPY, POST, or LIST requests"
+
+[regions.us-east-1.s3_get_usd_request]
+usd = 4e-07
+unit = "Requests"
+sku = "ZWQ6Q48CRJXX4FXE"
+description = "$0.004 per 10,000 GET and all other requests"
+
+[regions.us-east-1.cw_logs_ingest_usd_gb]
+usd = 0.5
+unit = "GB"
+sku = "S8QGXX5R2BKKMDSJ"
+description = "$0.50 per GB custom log data ingested in Standard log class - US East (Northern Virginia)"
+
+[regions.us-east-1.cw_logs_storage_usd_gb_month]
+usd = 0.03
+unit = "GB-Mo"
+sku = "6K9ADYQAHV5KX9KZ"
+description = "$0.03 per GB-mo of log storage - US East (Northern Virginia)"
+
+[regions.us-east-1.ecr_storage_usd_gb_month]
+usd = 0.1
+unit = "GB-Mo"
+sku = "KJC988R4J65BDMTQ"
+description = "$0.10 per GB-month of data storage"
+
+[regions.us-east-1.transfer_out_internet_usd_gb]
+usd = 0.09
+unit = "GB"
+sku = "HQEH3ZWJVT46JHRG"
+description = "$0.090 per GB - first 10 TB / month data transfer out beyond the global free tier"
+
+[regions.us-east-1.transfer_out_free_gb_month_account]
+usd = 0.0
+unit = "GB"
+gb = 100.0
+sku = "PB257JUQ8U6E6UPM"
+description = "$0 for 100GB of data transfer out to the internet, aggregated globally, each month"
+
+[regions.us-east-1.transfer_inter_region_to_eu-north-1_usd_gb]
+usd = 0.02
+unit = "GB"
+sku = "RCJZ7PSFBQHVM8R8"
+description = "USD 0.02 per GB for EUN1-AWS-Out-Bytes in EU (Stockholm)"
+
+[regions.eu-north-1.ec2."c7i.8xlarge"]
+on_demand_usd_h = 1.5288
+vcpu = 32
+memory_gib = 64.0
+processor = "Intel Xeon Scalable (Sapphire Rapids)"
+sku = "2QBCJ9Q4WCHYMDN4"
+effective = "2026-11-01"
+spot_savings_pct = 78
+spot_interrupt_bucket = "5-10%"
+spot_estimate_usd_h = 0.336336
+
+[regions.eu-north-1.ec2."c7i.16xlarge"]
+on_demand_usd_h = 3.0576
+vcpu = 64
+memory_gib = 128.0
+processor = "Intel Xeon Scalable (Sapphire Rapids)"
+sku = "9EQ8CEC527QDBS2D"
+effective = "2026-11-01"
+spot_savings_pct = 82
+spot_interrupt_bucket = "5-10%"
+spot_estimate_usd_h = 0.550368
+
+[regions.eu-north-1.ec2."c7a.16xlarge"]
+on_demand_usd_h = 3.51616
+vcpu = 64
+memory_gib = 128.0
+processor = "AMD EPYC 9R14 Processor"
+sku = "AXQDAQJFRUE7HJ76"
+effective = "2026-11-01"
+spot_savings_pct = 80
+spot_interrupt_bucket = "5-10%"
+spot_estimate_usd_h = 0.703232
+
+[regions.eu-north-1.ec2."c8i.16xlarge"]
+on_demand_usd_h = 3.21056
+vcpu = 64
+memory_gib = 128.0
+processor = "Intel Xeon Scalable (Granite Rapids)"
+sku = "C66V7C85AGPGFNEZ"
+effective = "2026-11-01"
+spot_savings_pct = -1
+spot_interrupt_bucket = ""
+spot_estimate_usd_h = -1.0
+
+[regions.eu-north-1.ec2."c8i.2xlarge"]
+on_demand_usd_h = 0.40132
+vcpu = 8
+memory_gib = 16.0
+processor = "Intel Xeon Scalable (Granite Rapids)"
+sku = "EVQ75XKSV38PGSWU"
+effective = "2026-11-01"
+spot_savings_pct = -1
+spot_interrupt_bucket = ""
+spot_estimate_usd_h = -1.0
+
+[regions.eu-north-1.ec2."c7a.8xlarge"]
+on_demand_usd_h = 1.75808
+vcpu = 32
+memory_gib = 64.0
+processor = "AMD EPYC 9R14 Processor"
+sku = "GRHGCGDA2BFJ7TPH"
+effective = "2026-11-01"
+spot_savings_pct = 68
+spot_interrupt_bucket = ">20%"
+spot_estimate_usd_h = 0.562586
+
+[regions.eu-north-1.ec2."c8i.8xlarge"]
+on_demand_usd_h = 1.60528
+vcpu = 32
+memory_gib = 64.0
+processor = "Intel Xeon Scalable (Granite Rapids)"
+sku = "YB4ZVVCG6U29EHMF"
+effective = "2026-11-01"
+spot_savings_pct = -1
+spot_interrupt_bucket = ""
+spot_estimate_usd_h = -1.0
+
+[regions.eu-north-1.ebs_gp3_usd_gb_month]
+usd = 0.0836
+unit = "GB-Mo"
+sku = "H33YTQG3Y9XKNSF3"
+description = "$0.0836 per GB-month of General Purpose (gp3) provisioned storage - EU (Stockholm)"
+
+[regions.eu-north-1.public_ipv4_usd_h]
+usd = 0.005
+unit = "Hrs"
+sku = "H24SU884XW7MB5WC"
+description = "$0.005 per In-use public IPv4 address per hour"
+
+[regions.eu-north-1.s3_standard_usd_gb_month]
+usd = 0.023
+unit = "GB-Mo"
+sku = "W3FCBWN4J47P9GU4"
+description = "$0.023 per GB - first 50 TB / month of storage used"
+
+[regions.eu-north-1.s3_put_usd_request]
+usd = 5e-06
+unit = "Requests"
+sku = "GRMX7KKGXZWXWYA7"
+description = "$0.005 per 1,000 PUT, COPY, POST, or LIST requests"
+
+[regions.eu-north-1.s3_get_usd_request]
+usd = 4e-07
+unit = "Requests"
+sku = "78XM3R8BT46YZKTU"
+description = "$0.004 per 10,000 GET and all other requests"
+
+[regions.eu-north-1.cw_logs_ingest_usd_gb]
+usd = 0.54
+unit = "GB"
+sku = "2WXCZPMH3FF7XAAZ"
+description = "$0.54 per GB custom log data ingested in Standard log class - EU (Stockholm)"
+
+[regions.eu-north-1.cw_logs_storage_usd_gb_month]
+usd = 0.028
+unit = "GB-Mo"
+sku = "FC3W9RUMP83VDX52"
+description = "$0.028 per GB-mo of log storage - EU (Stockholm)"
+
+[regions.eu-north-1.ecr_storage_usd_gb_month]
+usd = 0.1
+unit = "GB-Mo"
+sku = "YZ2F5ZZ8QJ8MVBSF"
+description = "USD 0.1 per GB-Mo for TimedStorage-ByteHrs in EU (Stockholm)"
+
+[regions.eu-north-1.transfer_out_internet_usd_gb]
+usd = 0.09
+unit = "GB"
+sku = "DRTM7T5YA7E492Z3"
+description = "USD 0.09 per GB for DataTransfer-Out-Bytes in EU (Stockholm)"
+
+[regions.eu-north-1.transfer_out_free_gb_month_account]
+usd = 0.0
+unit = "GB"
+gb = 100.0
+sku = "PB257JUQ8U6E6UPM"
+description = "$0 for 100GB of data transfer out to the internet, aggregated globally, each month"
+
+[regions.eu-north-1.transfer_inter_region_to_us-east-1_usd_gb]
+usd = 0.02
+unit = "GB"
+sku = "4BXB2UWGB6UEUVY2"
+description = "USD 0.02 per GB for USE1-AWS-Out-Bytes in EU (Stockholm)"

@@ -1,0 +1,26 @@
+{
+  "computeEnvironmentName": "${CE_NAME}",
+  "type": "MANAGED",
+  "state": "ENABLED",
+  "computeResources": {
+    "type": "SPOT",
+    "allocationStrategy": "SPOT_PRICE_CAPACITY_OPTIMIZED",
+    "minvCpus": "${MINV_CPUS}",
+    "maxvCpus": "${MAXV_CPUS}",
+    "instanceTypes": "${INSTANCE_TYPES}",
+    "subnets": "${SUBNETS}",
+    "securityGroupIds": "${SECURITY_GROUP_IDS}",
+    "instanceRole": "${INSTANCE_ROLE}",
+    "spotIamFleetRole": "${SPOT_FLEET_ROLE_ARN}",
+    "ec2Configuration": [{"imageType": "ECS_AL2023"}],
+    "tags": {
+      "Project": "${PROJECT_TAG}",
+      "RunId": "${RUN_ID}",
+      "Name": "gtu-batch-${RUN_ID}"
+    }
+  },
+  "tags": {
+    "Project": "${PROJECT_TAG}",
+    "RunId": "${RUN_ID}"
+  }
+}

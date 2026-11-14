@@ -11,10 +11,16 @@
      по полным параметрам (свой расчёт и столбцы TURBO_PERF SU2), пишет run_summary.json в папку прогона.
 
 Примеры:
-  python run_case.py --case core130 --level coarse --plan smoke           # дымовой прогон, 4 ядра, 20 мин
+  python run_case.py --case core130 --level coarse --plan smoke --shroud slip --vaneless slip --record
+                                                                          # дымовой прогон, 4 ядра, 20 мин
   python run_case.py --case core130 --plan smoke --dry                    # только cfg + SU2_CFD -d
-  python run_case.py --parse runs/core130_coarse_smoke                    # разобрать готовый прогон
+  python run_case.py --parse runs/core130_coarse_smoke_slip               # разобрать готовый прогон
+  python run_case.py --plan plan_smoke_p075.json --restart-from runs/core130_coarse_smoke_slip/restart_s1_ramp60.dat \
+         --restart-state 0.6,145905 --shroud slip --vaneless slip         # продолжение с готового решения
   python run_case.py --case taurus60 --plan design --np 64 --time-limit 7200 --out "$GTU_OUT"   # AWS
+
+Покрышка по умолчанию неподвижна (открытое колесо), но на сетках geom coarse так расчёт расходится на 54-60 %
+частоты (README, «Проверка»); дымовой прогон — со стенками без трения (--shroud slip --vaneless slip).
 
 SU2_CFD ищется так: --su2-bin, затем $SU2_RUN/SU2_CFD, затем PATH. Ключи cfg сверяются с
 Common/src/CConfig.cpp той же версии, если найден исходник (--su2-src или $SU2_HOME).
@@ -64,6 +70,13 @@ PLANS = {
         dict(name="s1_ramp60", frac=0.6, pfrac=0.95, ramp=80, pramp=160, iter=170, muscl=False),
         dict(name="s2_ramp100", frac=1.0, pfrac=1.0, ramp=80, pramp=160, iter=200, muscl=False),
         dict(name="s3_point", frac=1.0, pfrac=1.0, ramp=0, iter=150, muscl=True),
+    ],
+    # то же с давлением на выходе 0,75 оценки в s2, s3 — прошедший дымовую проверку вариант (README, прогон Б:
+    # s1 считался в прогоне А, s2 и s3 — продолжением с его рестарта; одной командой план не запускался)
+    "smoke075": [
+        dict(name="s1_ramp60", frac=0.6, pfrac=0.95, ramp=80, pramp=160, iter=170, muscl=False),
+        dict(name="s2_ramp100_p075", frac=1.0, pfrac=0.75, ramp=80, pramp=160, iter=200, muscl=False),
+        dict(name="s3_point_p075", frac=1.0, pfrac=0.75, ramp=0, iter=150, muscl=True),
     ],
     # одна стадия: разгон и расчёт подряд
     "single": [dict(name="s1", frac=1.0, pfrac=1.0, ramp=300, iter=1000, muscl=False)],
@@ -697,8 +710,9 @@ def main(argv=None):
                "ramp_iter": ramp, "p_ramp_iter": pramp, "iter": st["iter"], "muscl": bool(st.get("muscl")),
                "restart_from": prev_restart, "history_file": f"history_{name}.csv", "log_file": f"su2_{name}.log"}
         summ["stages"].append(rec)
-        if su2 is None:
+        if su2 is None:  # cfg всех стадий всё равно пишутся — цепочка рестартов как при настоящем прогоне
             rec["status"] = "no_su2"
+            prev_frac, prev_p, prev_restart = frac, p_target, f"restart_{name}.dat"
             continue
         if a.dry and prev_restart:
             # SU2_CFD -d читает файл рестарта, а его в сухом прогоне нет: cfg только записан
