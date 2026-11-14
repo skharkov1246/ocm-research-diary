@@ -601,3 +601,42 @@ def test_load_jobs_validation(tmp_path):
 def test_example_jobs_file_is_valid():
     jobs = R.load_jobs(Path(__file__).resolve().parent / "jobs.example.json")
     assert {j.name for j in jobs} == {"smoke", "explore-249"}
+
+
+# ----------------------------------------------------------------------------- маскирование и CLI
+def test_redactor_and_ledger_guard(tmp_path):
+    red = R.Redactor(BUCKET)
+    s = red(f"s3://{BUCKET}/x key={FAKE_SECRET} id={FAKE_AKID} other=AKIA" "QQQQQQQQQQQQQQQQ")
+    assert BUCKET not in s and FAKE_SECRET not in s and FAKE_AKID not in s and "AKIAQ" not in s
+    assert "<BUCKET>" in s
+    led = R.Ledger(tmp_path / "l.jsonl", red)
+    led.append("x", note=f"path s3://{BUCKET}/p", secret=FAKE_SECRET)     # маскируется, не падает
+    text = (tmp_path / "l.jsonl").read_text()
+    assert BUCKET not in text and FAKE_SECRET not in text
+    with pytest.raises(R.RunnerError):                                     # имя переменной ключа — отказ
+        led.append("x", note="aws_secret" "_access_key=...")
+
+
+def test_cli_plan_offline_and_status(tmp_path, capsys, monkeypatch):
+    monkeypatch.setenv("ALPHA_O_S3", f"s3://{BUCKET}/{PREFIX}")
+    jobs = str(Path(__file__).resolve().parent / "jobs.example.json")
+    rc = R.main(["plan", jobs, "--assume-price", "1.5", "--show-userdata", "--run-id", "cli-plan",
+                 "--ledger", str(tmp_path / "ledger.jsonl"), "--out", str(tmp_path / "runs")])
+    out = capsys.readouterr().out
+    assert rc == 0 and "shutdown -P +20" in out and '"MarketType": "spot"' in out
+    assert BUCKET not in out and FAKE_SECRET not in out and FAKE_AKID not in out
+    assert "прогноз пакета 2.41" in out                       # (1.8 + диск) × (20+10 и 40+10 мин)
+    assert not (tmp_path / "ledger.jsonl").exists()           # план не пишет в общий журнал
+    write_ledger(tmp_path / "ledger.jsonl", HIST)
+    assert R.main(["status", "--ledger", str(tmp_path / "ledger.jsonl")]) == 0
+    out = capsys.readouterr().out
+    assert "израсходовано ≈ 1.01" in out and "по ним 2.34" in out and "остаток 296.64" in out   # 2.345 → 2.34 (float)
+
+
+def test_cli_run_refuses_without_env_before_any_aws_call(tmp_path, capsys, monkeypatch):
+    monkeypatch.delenv("ALPHA_O_S3", raising=False)
+    monkeypatch.delenv("ALPHA_O_INSTANCE_PROFILE", raising=False)
+    jobs = str(Path(__file__).resolve().parent / "jobs.example.json")
+    rc = R.main(["run", jobs, "--dryrun", "--ledger", str(tmp_path / "l.jsonl")])
+    err = capsys.readouterr().err
+    assert rc == 2 and "ALPHA_O_S3" in err and FAKE_SECRET not in err and FAKE_AKID not in err
