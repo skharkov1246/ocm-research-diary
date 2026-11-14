@@ -63,6 +63,11 @@ PRODUCT = "Linux/UNIX"
 USERDATA_LIMIT = 16384                 # байт до base64 (ограничение EC2)
 LIVE_STATES = ["pending", "running", "stopping", "stopped"]
 SPOT_REASON = "Server.SpotInstanceTermination"   # код причины гашения при прерывании (по архиву EC2, не сверен)
+# Прерывание спота — причина Server.Spot… (Termination или Shutdown). Причина Client.… — машину погасили
+# изнутри или мы сами (сторож shutdown -P, poweroff после итога, наш terminate): это не прерывание,
+# даже если ловушка TERM успела выгрузить метку с кодом 143.
+SPOT_REASON_PREFIX = "Server.Spot"
+OWN_REASON_PREFIX = "Client."
 
 # vCPU известных типов (квота спота считается в vCPU). Другие типы — поле "vcpu" в задаче.
 VCPU = {f"c7{f}.{s}": n for f in "ai"
@@ -95,6 +100,9 @@ IMAGE_REF_RE = re.compile(
     r"^(?:[a-z0-9][a-z0-9.-]*(?::\d{1,5})?/)?[a-z0-9]+(?:[._-][a-z0-9]+)*(?:/[a-z0-9]+(?:[._-][a-z0-9]+)*)*"
     r"(?::[A-Za-z0-9_][A-Za-z0-9_.-]{0,127})?(?:@sha256:[0-9a-f]{64})?$")
 HEREDOC_MARKS = ("GTU_CMD_EOF", "GTU_SETUP_EOF", "GTU_ENTRY_EOF", "GTU_PY_EOF")
+# apt-get / apt install|update в команде задачи без контейнера на образе al2023 (dnf) — почти наверняка
+# задача написана под прежний образ Ubuntu: предупреждение в plan и run (не отказ — совместимость).
+APT_IN_CMD_RE = re.compile(r"(?:^|[\s;&|(])(?:sudo\s+)?apt(?:-get)?\s+(?:-\S+\s+)*(?:install|update)\b", re.M)
 KEY_ID_RE = re.compile(r"(?<![A-Z0-9])(AKIA|ASIA)[A-Z0-9]{16}(?![A-Z0-9])")
 ARN_ACCOUNT_RE = re.compile(r"(arn:aws[a-z-]*:[a-z0-9-]*:[a-z0-9-]*:)\d{12}(?=:)")   # номер аккаунта в ARN
 SECRET_WORDS = ("aws_secret_access_key", "aws_session_token", "aws_access_key_id")
@@ -281,6 +289,15 @@ def validate_job(job: Job, max_job_min: int = 720) -> None:
     job.vcpu = max([job.vcpu] + [VCPU[t] for t in job.types if t in VCPU])
 
 
+def job_warnings(job: Job) -> list:
+    """Предупреждения по задаче (не отказ): то, что почти наверняка не сработает на машине."""
+    out = []
+    if not job.container and IMAGES[job.image]["pkg"] == "dnf" and APT_IN_CMD_RE.search(job.command):
+        out.append(f"{job.name}: команда вызывает apt-get, а образ машины {job.image} (dnf, apt-get нет) — "
+                   f"задайте \"container\": \"ubuntu:24.04\" и перенесите установку в container_setup")
+    return out
+
+
 # --------------------------------------------------------------------------- user-data
 UPLOAD_PY = r'''import os, sys, boto3
 bucket, prefix, src = sys.argv[1], sys.argv[2].rstrip("/"), sys.argv[3]
@@ -413,6 +430,8 @@ GTU_SETUP_EOF
 cat >"$G/ctr/entry.sh" <<'GTU_ENTRY_EOF'
 #!/bin/bash
 set -u
+# images opencfd/openfoam-*: their entrypoint (replaced by bash here) sources the OpenFOAM environment
+for _rc in /openfoam/bash.rc; do [ -f "$_rc" ] && { set +u; . "$_rc" >/dev/null 2>&1; set -u; }; done
 T=$(date +%s)
 if ! bash -e @@CR@@/ctr/setup.sh >"$GTU_OUT/_container_setup.log" 2>&1; then
   echo "[gtu] container_setup failed - see _container_setup.log"; exit 20
@@ -546,13 +565,16 @@ class Ledger:
                 continue
         return out
 
-    def summary(self) -> dict:
+    def summary(self, now: float | None = None) -> dict:
         """Израсходовано (закрытые машины) и верхняя граница по открытым.
 
         Закрытая: (спот в её зоне на момент запуска + диск + IPv4) × max(60 с, конец − запуск) —
         оценка, не граница: цена спота за время работы может подняться (до MaxPrice).
         Открытая (нет записи end): (MaxPrice + диск + IPv4) × весь отпущенный срок — верхняя
         граница, потому что сторож и сборщик гасят машину не позже этого срока.
+        `now` (живой прогон после сверки): открытая машина старше отпущенного срока — значит, её не
+        погасили ни сторож, ни сборщик, ни сверка — считается по фактическому времени, а не по сроку.
+        Без `now` (status, plan, DryRun — сверки не было) — по сроку, как раньше.
         """
         recs = self.records()
         launches = {r["iid"]: r for r in recs if r.get("ev") == "launch"}
@@ -565,7 +587,10 @@ class Ledger:
                 dur = max(60.0, ends[iid]["t_end"] - L["t_launch"])
                 spent += (L["spot_usd_h"] + extra) * dur / 3600.0
             else:
-                committed += (L["max_usd_h"] + extra) * L["allot_min"] / 60.0
+                hours = L["allot_min"] / 60.0
+                if now is not None:
+                    hours = max(hours, (now - L["t_launch"]) / 3600.0)
+                committed += (L["max_usd_h"] + extra) * hours
                 open_.append(iid)
         return {"spent": spent, "committed": committed, "open": open_,
                 "closed": len(launches) - len(open_)}
@@ -587,6 +612,7 @@ class Config:
     max_parallel: int = 6
     vcpu_quota: int = 384            # --max-vcpu: квота спота в vCPU (6 × c7a.16xlarge)
     quota_wait_polls: int = 15       # квотная ошибка без своих машин в работе: ждать столько опросов
+    capacity_wait_polls: int = 15    # нет ёмкости спота ни в одной зоне ни на одном типе: столько повторов
     price_margin: float = 1.2
     price_window_h: float = 6.0
     ebs_usd_gb_month: float = 0.08
@@ -649,6 +675,7 @@ class Active:
     az_rank: int = -1         # место зоны по цене (0 — самая дешёвая)
     az_cheapest: str = ""     # самая дешёвая зона типа на момент запуска
     spot_usd_h: float = 0.0   # цена спота в фактической зоне на момент запуска
+    t_mark: float = 0.0       # когда впервые увидели метку с кодом 143 при ещё живой машине
 
 
 @dataclass
@@ -686,7 +713,11 @@ class Runner:
         self._avoid: dict = {}      # (тип, зона) -> до какого времени зона в конце очереди
         self._why: dict = {}        # задача -> пояснение к статусу
         self._quota_wait: dict = {}
+        self._cap_wait: dict = {}
         self._budget_wait: dict = {}
+        # Гашение не подтверждено: машина, возможно, жива и занимает квоту — новых машин прогон не запускает.
+        self._unconfirmed: dict = {}
+        self._reconciled = False    # сверка журнала прошла: бюджет считает открытые машины по факту, если дольше срока
         self._closed_n = 0          # счётчик закрытых машин: бюджет пересчитывается, когда он меняется
         self._seq = 0
         # ClientToken уникален в пределах процесса: повторный запуск с тем же --run-id не получит
@@ -753,7 +784,7 @@ class Runner:
 
     def budget_check(self, job: Job, itype: str, info: PriceInfo) -> tuple:
         """(разрешено?, MaxPrice, цифры). Пишет запись budget в журнал."""
-        s = self.ledger.summary()
+        s = self.ledger.summary(now=self.clock() if self._reconciled else None)
         maxp = self.max_price(info)
         new = (maxp + self.ebs_usd_h(job) + self.cfg.ipv4_usd_h) * self.allot_min(job) / 60.0
         spent = s["spent"] + self.cfg.spent_before
@@ -915,13 +946,22 @@ class Runner:
 
     # ---- запуск одной задачи
     def launch(self, job: Job, attempt: int = 1) -> tuple:
-        """('launched', Active) | ('refused'|'defer'|'failed'|'image_unavailable'|'dryrun_ok'|
-        'dryrun_denied'|'planned', None)."""
+        """('launched', Active) | ('refused'|'defer'|'capacity'|'no_price'|'failed'|'image_unavailable'|
+        'dryrun_ok'|'dryrun_denied'|'planned', None).
+
+        'capacity' — ни одна зона ни одного типа не приняла (нет ёмкости спота): очередь повторит позже;
+        'no_price' — ни у одного типа нет истории цены: без цены нет ни MaxPrice, ни бюджета.
+        Причина отказа — в self._why[имя задачи] (уходит в поле detail итога).
+        """
         from botocore.exceptions import ClientError
         refused, ami = False, None
+        no_price, cap, skipped = [], [], []
         for itype in job.types:
             info = self.price(itype)
             if info.window_max <= 0:
+                no_price.append(itype)
+                self.journal.append("launch_error", run_id=self.cfg.run_id, job=job.name, itype=itype,
+                                    attempt=attempt, code="NoSpotPrice")
                 self.say(f"[цена] нет истории цены спота для {itype} — тип пропущен")
                 continue
             ok, maxp, nums = self.budget_check(job, itype, info)
@@ -945,6 +985,9 @@ class Runner:
             for az, _p in (order or [(None, None)]):
                 how, subnet = self.placement(az)
                 if how == "skip":
+                    skipped.append(f"{itype}@{az}")
+                    self.journal.append("zone_skip", run_id=self.cfg.run_id, job=job.name, itype=itype, az=az,
+                                        attempt=attempt, reason="no_default_subnet")
                     self.say(f"[зоны] {job.name}: в {az} нет подсети по умолчанию — зона пропущена")
                     continue
                 params = self.build_params(job, itype, ami, maxp, attempt, az=az, subnet=subnet,
@@ -955,9 +998,7 @@ class Runner:
                     return "planned", None
                 if self.cfg.dryrun:
                     try:
-                        self.ec2.run_instances(DryRun=True, **params)
-                        self.say(f"[dryrun] {job.name}: неожиданный успех без DryRunOperation")
-                        return "dryrun_denied", None
+                        rr = self.ec2.run_instances(DryRun=True, **params)
                     except ClientError as e:
                         code = e.response.get("Error", {}).get("Code", "?")
                         if code == "DryRunOperation":
@@ -970,8 +1011,16 @@ class Runner:
                         self.journal.append("dryrun", run_id=self.cfg.run_id, job=job.name, itype=itype,
                                             az=az or "", ok=False, code=code)
                         if code in CAPACITY_ERRORS:
+                            cap.append(f"{itype}@{az or 'EC2'}:{code}")
                             continue
                         return "dryrun_denied", None
+                    # DryRun проигнорирован и машина создана: в режиме DryRun сборщика в finally нет — гасим здесь
+                    ids = [i.get("InstanceId") for i in (rr or {}).get("Instances", [])]
+                    self.say(f"[dryrun] {job.name}: неожиданный успех без DryRunOperation — гашу созданное {ids}")
+                    self.journal.append("dryrun", run_id=self.cfg.run_id, job=job.name, itype=itype,
+                                        az=az or "", ok=False, code="UnexpectedSuccess")
+                    self._terminate(ids, "DryRun проигнорирован")
+                    return "dryrun_denied", None
                 try:
                     r = self.ec2.run_instances(**params)
                 except ClientError as e:
@@ -980,12 +1029,19 @@ class Runner:
                                         az=az or "", attempt=attempt, code=code)
                     self.say(f"[запуск] {job.name} на {itype} в {az or 'зоне EC2'}: {code}")
                     if code in CAPACITY_ERRORS:
+                        cap.append(f"{itype}@{az or 'EC2'}:{code}")
                         if az:
                             self._avoid[(itype, az)] = self.clock() + self.cfg.avoid_s
                         continue                            # следующая зона, затем следующий тип
                     if code in QUOTA_ERRORS:
                         return "defer", None
-                    return "failed", None
+                    # Иная ошибка (InternalError / Unavailable после повторов botocore): EC2 мог машину
+                    # всё же создать — ищем по ClientToken, чтобы она сразу вошла в учёт, квоту и бюджет.
+                    r = self._find_by_token(params["ClientToken"])
+                    if r is None:
+                        self._why[job.name] = f"RunInstances: {code}"
+                        return "failed", None
+                    self.say(f"[запуск] {job.name}: несмотря на {code} машина создана — беру в учёт")
                 inst = r["Instances"][0]
                 iid = inst["InstanceId"]
                 az_act = inst.get("Placement", {}).get("AvailabilityZone", "") or (az or "")
@@ -1008,7 +1064,34 @@ class Runner:
                 return "launched", act
             if order:
                 self.say(f"[зоны] {job.name}: на {itype} ни одна зона не приняла — следующий тип")
-        return ("refused" if refused else "failed"), None
+        if refused:
+            return "refused", None
+        if len(no_price) == len(job.types):
+            self._why[job.name] = (f"нет истории цены спота за {self.cfg.price_window_h:g} ч для "
+                                   f"{', '.join(no_price)} — без цены машина не запускается "
+                                   f"(MaxPrice и бюджет не посчитать)")
+            return "no_price", None
+        why = []
+        if cap:
+            why.append("нет ёмкости спота: " + ", ".join(cap))
+        if skipped:
+            why.append("нет подсети по умолчанию: " + ", ".join(skipped))
+        if no_price:
+            why.append("нет цены: " + ", ".join(no_price))
+        if why:
+            self._why[job.name] = "; ".join(why)
+        return ("capacity" if cap else "failed"), None
+
+    def _find_by_token(self, token: str):
+        """Машина, созданная запуском с этим ClientToken (не terminated), в виде ответа run_instances; иначе None."""
+        from botocore.exceptions import BotoCoreError, ClientError
+        try:
+            rr = self.ec2.describe_instances(Filters=[{"Name": "client-token", "Values": [token]}])
+        except (ClientError, BotoCoreError):
+            return None
+        found = [i for res in rr.get("Reservations", []) for i in res.get("Instances", [])
+                 if i.get("State", {}).get("Name") != "terminated"]
+        return {"Instances": found[:1]} if found else None
 
     # ---- наблюдение
     def describe(self, iids: list) -> dict:
@@ -1074,8 +1157,13 @@ class Runner:
         TerminateInstances отвергает весь пакет, если хоть один id не годится (например,
         InvalidInstanceID.NotFound у только что запущенной машины). Поэтому при отказе
         пакета — повтор по одной, чтобы один плохой id не оставил живыми остальные.
+        Сетевой сбой (EndpointConnectionError, ReadTimeoutError — BotoCoreError) обрабатывается так же:
+        иначе исключение ушло бы из finally мимо повтора по одной и команды ручного гашения.
         """
-        from botocore.exceptions import ClientError
+        from botocore.exceptions import BotoCoreError, ClientError
+
+        def _code(e):
+            return e.response.get("Error", {}).get("Code", "?") if isinstance(e, ClientError) else type(e).__name__
         iids = sorted(set(i for i in iids if i))
         if not iids:
             return set()
@@ -1083,8 +1171,8 @@ class Runner:
         try:
             self.ec2.terminate_instances(InstanceIds=iids)
             return set(iids)
-        except ClientError as e:
-            code = e.response.get("Error", {}).get("Code", "?")
+        except (ClientError, BotoCoreError) as e:
+            code = _code(e)
             if len(iids) > 1:
                 self.say(f"[гашение] пакет отвергнут ({code}) — гашу по одной")
             else:
@@ -1095,8 +1183,8 @@ class Runner:
             try:
                 self.ec2.terminate_instances(InstanceIds=[iid])
                 ok.add(iid)
-            except ClientError as e:
-                self._manual([iid], e.response.get("Error", {}).get("Code", "?"))
+            except (ClientError, BotoCoreError) as e:
+                self._manual([iid], _code(e))
         return ok
 
     def _manual(self, iids: list, code: str) -> None:
@@ -1114,9 +1202,22 @@ class Runner:
 
         Открытая запись входит в бюджет верхней границей; закроет её сверка (reconcile)
         в начале следующего прогона или после `reap`, когда AWS покажет terminated.
+        Машина, возможно, жива и занимает квоту: она остаётся в self._unconfirmed — очередь
+        новых машин не запускает (иначе живых vCPU станет больше --max-vcpu), сборщик в finally
+        гасит её вместе с остальными.
         """
         self.active.pop(a.iid, None)
-        self.say(f"[журнал] {a.iid} ({a.job.name}): гашение не подтверждено — запись остаётся открытой")
+        self._unconfirmed[a.iid] = a
+        self.say(f"[журнал] {a.iid} ({a.job.name}): гашение не подтверждено — запись остаётся открытой, "
+                 f"новые машины прогона не запускаются")
+
+    def _retry_unconfirmed(self) -> None:
+        """Ещё раз погасить машины с неподтверждённым гашением; принятые — закрыть в журнале."""
+        ids = sorted(self._unconfirmed)
+        done = self._terminate(ids, "повтор: гашение прежде не подтверждено")
+        for iid in ids:
+            if iid in done:
+                self._close(self._unconfirmed.pop(iid), "reaped", reason="повторное гашение")
 
     def find_own(self, run_id: str | None = None) -> list:
         """Машины с тегами Project=<tag> и RunId=<run_id> в живых состояниях (с проверкой тегов на месте)."""
@@ -1159,10 +1260,18 @@ class Runner:
                     self._close(self.active[iid], "reaped", reason=why)
                 else:
                     self._drop(self.active[iid])
+            elif iid in self._unconfirmed and iid in done:
+                self._close(self._unconfirmed.pop(iid), "reaped", reason=why)
         return targets
 
     def reconcile(self) -> None:
-        """Закрыть в журнале машины прошлых прогонов, которые уже погашены (после падения сессии)."""
+        """Сверка журнала с AWS по открытым записям (после падения сессии и т. п.).
+
+        Погашена — закрыть верхней границей срока. Жива, но срок (max_min + запас) истёк — сторож и
+        сборщик не сработали (user-data не стартовал, сессия упала): журнал доказывает, что машина наша, —
+        гасим и закрываем по фактическому времени. Жива в пределах срока — «в работе».
+        """
+        self._reconciled = True
         open_ = self.ledger.summary()["open"]
         if not open_:
             return
@@ -1171,18 +1280,42 @@ class Runner:
         now = self.clock()
         for iid in open_:
             st = info.get(iid, {}).get("state", "not-found")
+            L = launches[iid]
             if st in ("shutting-down", "terminated", "not-found"):
-                L = launches[iid]
                 t_end = min(now, L["t_launch"] + L["allot_min"] * 60)   # верхняя граница
                 self.ledger.append("end", run_id=L["run_id"], job=L["job"], iid=iid, t_end=round(t_end, 1),
                                    outcome="reconciled", state=st, reason="закрыто сверкой")
+            elif now > L["t_launch"] + L["allot_min"] * 60:
+                if iid in self._terminate([iid], f"сверка: {st} после срока {L['allot_min']} мин"):
+                    self.ledger.append("end", run_id=L["run_id"], job=L["job"], iid=iid, t_end=round(now, 1),
+                                       outcome="reaped_overdue", state=st, reason="жива после срока")
+                else:
+                    self.say(f"[сверка] {iid} ({L.get('job', '?')}) жива после срока и не погашена — в бюджете "
+                             f"прогона считается по фактическому времени ({(now - L['t_launch']) / 3600:.1f} ч)")
             else:
-                self.say(f"[сверка] {iid} ({launches[iid].get('job', '?')}) ещё {st} — учитывается как «в работе»")
+                self.say(f"[сверка] {iid} ({L.get('job', '?')}) ещё {st} — учитывается как «в работе»")
 
     # ---- основной цикл
+    def check_userdata(self, jobs: list) -> None:
+        """Собрать user-data всех задач и всех попыток до первого запуска.
+
+        Повтор пишет в префикс _attemptN — user-data длиннее; RunnerError (предел 16 КБ и т. п.)
+        посреди пакета остановил бы прогон, и сборщик в finally погасил бы работающие машины.
+        Зона и тип — самой длинной записи (длина зон региона одинакова).
+        """
+        cfg = self.cfg
+        az = f"{cfg.region}a"
+        for j in jobs:
+            for att in range(1, cfg.retries + 2):
+                build_userdata(j, run_id=cfg.run_id, attempt=att, repo=cfg.repo, branch=cfg.branch,
+                               bucket=cfg.bucket, key_prefix=self.key_prefix(j.name, attempt=att),
+                               region=cfg.region, upload_reserve_min=cfg.upload_reserve_min,
+                               az=az, az_cheapest=az, itype=max(j.types, key=len))
+
     def run(self, jobs: list) -> dict:
         cfg = self.cfg
         mode = "plan" if self.offline else ("dryrun" if cfg.dryrun else "run")
+        self.check_userdata(jobs)              # до первого запуска, а не посреди пакета
         self.journal.append("run_start", run_id=cfg.run_id, mode=mode, branch=cfg.branch,
                             jobs=[j.name for j in jobs], ceiling=cfg.ceiling, max_parallel=cfg.max_parallel,
                             max_vcpu=cfg.vcpu_quota)
@@ -1190,6 +1323,9 @@ class Runner:
         self.say(f"[прогон] {cfg.run_id} режим={mode} задач={len(jobs)} ветка={cfg.branch} "
                  f"параллельно≤{cfg.max_parallel} квота={cfg.vcpu_quota} vCPU потолок={cfg.ceiling} долл."
                  + (f" — очередь: {need} vCPU пакета > квоты, запуск по мере освобождения" if need > cfg.vcpu_quota else ""))
+        for j in jobs:
+            for w in job_warnings(j):
+                self.say(f"[внимание] {w}")
         pending = deque((j, 1) for j in jobs)
         try:
             if mode == "run":
@@ -1204,7 +1340,8 @@ class Runner:
                 self._poll(pending)
         finally:
             if mode == "run":
-                self.reap("finally: конец прогона / ошибка / прерывание", known=list(self.active))
+                self.reap("finally: конец прогона / ошибка / прерывание",
+                          known=list(self.active) + list(self._unconfirmed))
             self.journal.append("run_end", run_id=cfg.run_id, mode=mode, results=self.results)
             summ = cfg.out_dir / cfg.run_id / ("summary.json" if mode == "run" else f"summary.{mode}.json")
             summ.parent.mkdir(parents=True, exist_ok=True)
@@ -1220,8 +1357,21 @@ class Runner:
         цикл делает паузу poll_s); иначе False. Задача, упёршаяся в квоту или бюджет при своих
         машинах в работе, остаётся в очереди: квота освободится, а бюджет пересчитается, когда
         закроется машина (верхняя граница «в работе» сменится фактическим расходом).
+        Нет ёмкости спота ни в одной зоне ни на одном типе — повтор через poll_s, не больше
+        capacity_wait_polls раз (ёмкость обычно возвращается). Есть машина с неподтверждённым
+        гашением — ещё одна попытка погасить, не вышло — очередь снимается со статусом halted.
         """
         cfg = self.cfg
+        if self._unconfirmed and pending:
+            self._retry_unconfirmed()
+            if self._unconfirmed:
+                why = (f"гашение {sorted(self._unconfirmed)} не подтверждено — машина, возможно, жива; "
+                       f"новые машины прогона не запускаются")
+                for job, attempt in pending:
+                    self.results[job.name] = {"status": "halted", "attempts": attempt, "detail": why}
+                self.say(f"[очередь] СТОП: {why}; снято задач: {len(pending)}")
+                pending.clear()
+                return False
         while pending:
             if len(self.active) >= cfg.max_parallel:
                 return False
@@ -1241,6 +1391,7 @@ class Runner:
                 self.active[act.iid] = act
                 self._budget_wait.pop(job.name, None)
                 self._quota_wait.pop(job.name, None)
+                self._cap_wait.pop(job.name, None)
                 pending.popleft()
                 continue
             if status == "defer":
@@ -1252,6 +1403,12 @@ class Runner:
                         self.say(f"[очередь] {job.name}: квота занята (своих машин нет) — повтор через "
                                  f"{cfg.poll_s:.0f} с ({n}/{cfg.quota_wait_polls})")
                         return True
+            if status == "capacity" and not sideline:
+                n = self._cap_wait[job.name] = self._cap_wait.get(job.name, 0) + 1
+                if n <= cfg.capacity_wait_polls:
+                    self.say(f"[очередь] {job.name}: нет ёмкости спота ни в одной зоне ни на одном типе — "
+                             f"повтор через {cfg.poll_s:.0f} с ({n}/{cfg.capacity_wait_polls})")
+                    return not self.active               # без своих машин — пауза poll_s в цикле run
             if status == "refused" and not sideline and self.active:
                 self._budget_wait[job.name] = self._closed_n
                 self.say(f"[очередь] {job.name}: бюджет не пропускает — жду окончания машины прогона")
@@ -1282,10 +1439,21 @@ class Runner:
                 self.say(f"[итог] {a.job.name}: метка попытки {done.get('attempt')} — не этой ({a.attempt}), не принимаю")
                 done = None
             gone = state in ("shutting-down", "terminated")
+            # Метка 143 (TERM) при ещё живой машине: причины гашения EC2 пока не показал — ждём до трёх
+            # опросов, иначе прерванную часть сочли бы окончательным сбоем и не повторили.
+            if (done is not None and done.get("exit_code") == 143 and not gone and now <= a.deadline
+                    and (not a.t_mark or now - a.t_mark < 3 * self.cfg.poll_s)):
+                a.t_mark = a.t_mark or now
+                self.say(f"[ждём] {a.job.name}: метка с кодом 143 (TERM), машина ещё {state} — жду причину гашения")
+                continue
             ok = done is not None and done.get("phase") == "done" and done.get("exit_code") == 0
             # Прерывание спота: машина гаснет не по нашей команде; ловушка TERM могла успеть выгрузить
             # метку с кодом 143 — такая метка не итог, а повод повторить часть в префикс новой попытки.
-            interrupted = gone and not ok and (reason == SPOT_REASON or (done or {}).get("exit_code") == 143)
+            # Причина Client.… (сторож shutdown -P, poweroff, наш terminate) — не прерывание: повтор
+            # зависшей задачи только удвоил бы расход.
+            spot = reason.startswith(SPOT_REASON_PREFIX)
+            own = reason.startswith(OWN_REASON_PREFIX)
+            interrupted = gone and not ok and (spot or (not own and (done or {}).get("exit_code") == 143))
             retry = a.attempt <= self.cfg.retries and (interrupted or (gone and done is None))
             res = self._res(a)
             if done is not None and not retry:
@@ -1370,7 +1538,7 @@ def _config_from_args(a, need_env: bool) -> Config:
     cfg = Config(bucket=bucket, prefix=prefix, instance_profile=profile, run_id=run_id,
                  tag=os.environ.get("ALPHA_O_TAG", DEFAULT_TAG), region=a.region, ceiling=a.ceiling,
                  ledger_path=Path(a.ledger))
-    for name in ("repo", "branch", "max_parallel", "vcpu_quota", "quota_wait_polls", "price_margin",
+    for name in ("repo", "branch", "max_parallel", "vcpu_quota", "quota_wait_polls", "capacity_wait_polls", "price_margin",
                  "price_window_h", "ebs_usd_gb_month", "ipv4_usd_h", "grace_min", "poll_s", "retries",
                  "spent_before"):
         if getattr(a, name, None) is not None:

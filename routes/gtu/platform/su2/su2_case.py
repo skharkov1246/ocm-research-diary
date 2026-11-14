@@ -36,7 +36,6 @@ import json
 import math
 import os
 import platform
-import re
 import shutil
 import signal
 import subprocess
@@ -530,7 +529,9 @@ def analyse_stage(rows: list, gamma: float, n_passages: int, n_sides: int, run_m
             ts = [r[tcol] for r in rows if _fin(r[tcol])]
             # Time(sec) у SU2 v8 — время итерации (WALL_TIME); медиана по стадии устойчива к выбросам загрузки
             if ts:
-                out["sec_per_iter_median"] = sorted(ts)[len(ts) // 2]
+                srt = sorted(ts)
+                out["sec_per_iter_median"] = srt[len(srt) // 2]
+                out["sec_per_iter_p10"] = srt[len(srt) // 10]  # нижний дециль: ближе к времени без чужой нагрузки
                 out["sec_per_iter_mean"] = sum(ts) / len(ts)
             break
     out["convergence"] = verdict(out, conv)
@@ -744,9 +745,12 @@ def run(a) -> int:
                 rec.update(status="dry_ok" if ok else "dry_failed", seconds=round(dt, 1))
             prev = nxt
             continue
+        load0 = os.getloadavg() if hasattr(os, "getloadavg") else None
         rc, status, dt = RC.run_limited(RC.mpi_cmd(a.np, su2, cfg_name, a.mpi_args.split()), out,
                                         os.path.join(out, rec["log_file"]), deadline, env=RC.su2_env(a.np))
-        rec.update(returncode=rc, status=status, seconds=round(dt, 1))
+        # средняя загрузка машины (1, 5, 15 мин) до и после стадии: на общей машине время итерации завышено
+        rec.update(returncode=rc, status=status, seconds=round(dt, 1), loadavg_start=load0,
+                   loadavg_end=os.getloadavg() if hasattr(os, "getloadavg") else None)
         rec["log"] = RC.parse_log(os.path.join(out, rec["log_file"]))
         print(f"[{st['name']}] {status} за {dt:.0f} с", flush=True)
         if status != "finished" or RC._CHILD["signal"]:
@@ -837,7 +841,7 @@ def print_summary(s: dict) -> None:
 def compact_run(summ: dict, out: str) -> dict:
     """Краткий итог прогона для results-JSON (без больших файлов)."""
     keep = ("name", "status", "seconds", "frac", "rpm", "pfrac", "p_out", "p_out_ramp_from", "ramp_rot", "ramp_p",
-            "iter", "muscl", "restart_from")
+            "iter", "muscl", "restart_from", "loadavg_start", "loadavg_end")
     return {
         "created_utc": summ["created_utc"], "run_dir": out, "np": summ["np"], "mpi_args": summ["mpi_args"],
         "mesh": {k: summ["mesh"][k] for k in ("source", "file", "sha256", "sha256_expected", "staged_as",
@@ -848,6 +852,7 @@ def compact_run(summ: dict, out: str) -> dict:
         "stages": [{k: r.get(k) for k in keep}
                    | {"rows": r.get("history", {}).get("rows"),
                       "sec_per_iter_median": r.get("history", {}).get("sec_per_iter_median"),
+                      "sec_per_iter_p10": r.get("history", {}).get("sec_per_iter_p10"),
                       "residuals": r.get("history", {}).get("residuals"),
                       "performance": r.get("history", {}).get("performance"),
                       "stability": r.get("history", {}).get("stability"),
@@ -895,6 +900,8 @@ def parse_cmd(a) -> int:
     analyse_run(summ, a.run_dir)
     write_json(path, summ)
     print_summary(summ)
+    if a.record:
+        record(a.record, summ, os.path.abspath(a.run_dir))
     return 0
 
 
@@ -909,7 +916,13 @@ CONTAINER_SETUP = [
     "python3 -m venv /opt/venv",
     "/opt/venv/bin/pip install -q -r routes/gtu/platform/docker/requirements.txt",
     "bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src",
+    # тот же коммит тега v8.6.0, что собран и проверен в сессии (git describe — v8.6.0)
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
 ]
+# OpenMPI 4.1.6 в контейнере docker без особых прав: без OMPI_MCA_osc=^ucx SU2_CFD под mpirun падает в MPI_Win_create,
+# без btl_vader_single_copy_mechanism=none нет прямого копирования между процессами (../docker/Dockerfile, там же проверка)
+CONTAINER_ENV = "export OMPI_MCA_osc=^ucx OMPI_MCA_btl_vader_single_copy_mechanism=none"
+RUNNER_UPLOAD_MIN = 8  # runner.py оставляет 8 мин срока на выгрузку (README узла aws, «Как идёт прогон», п. 6)
 
 
 def line_points(pfracs: list, first_iter: int, next_iter: int) -> str:
@@ -922,10 +935,15 @@ def aws_plan(a) -> int:
     (процессы_ref/процессы) / эффективность — та же формула, что batch/cost_estimate.toml."""
     tr = json.load(open(a.trial_results, encoding="utf-8"))
     run0 = tr["runs"][-1]
-    stages_t = [s for s in run0["stages"] if s.get("sec_per_iter_median") and s.get("rows")]
-    if not stages_t:
-        raise SystemExit("в пробном прогоне нет замера времени итерации")
-    t_ref = sum(s["sec_per_iter_median"] * s["rows"] for s in stages_t) / sum(s["rows"] for s in stages_t)
+    kcol = f"sec_per_iter_{a.t_ref_kind}"
+    stages_t = [s for s in run0["stages"] if s.get(kcol) and s.get("rows")]
+    if a.t_ref:
+        t_ref, t_src = a.t_ref, "--t-ref (задано)"
+    elif stages_t:
+        t_ref = sum(s[kcol] * s["rows"] for s in stages_t) / sum(s["rows"] for s in stages_t)
+        t_src = f"{kcol} (Time(sec) = ITER_TIME истории) по стадиям пробного прогона, взвешенное по итерациям"
+    else:
+        raise SystemExit("в пробном прогоне нет замера времени итерации (--t-ref)")
     n_ref, np_ref = run0["mesh"]["NPOIN"], run0["np"]
     g = json.load(open(a.geom_results, encoding="utf-8"))
     speeds = [float(x) for x in a.speeds.split(",")]
@@ -938,7 +956,7 @@ def aws_plan(a) -> int:
         t_iter = t_ref * (nodes / n_ref) * (np_ref / a.procs) / a.parallel_eff
         compute_min = iters_line * t_iter / 60.0
         su2_limit_s = int(math.ceil(compute_min * a.time_margin * 60.0))
-        max_min = int(math.ceil(a.setup_min + a.mesh_min + su2_limit_s / 60.0 + a.upload_min))
+        max_min = int(math.ceil(a.setup_min + a.mesh_min + su2_limit_s / 60.0 + RUNNER_UPLOAD_MIN + a.slack_min))
         if max_min > 720:
             raise SystemExit(f"{stage}: линия не помещается в 720 мин ({max_min}) — уменьшите итерации или делите линию")
         for sp in speeds:
@@ -947,6 +965,7 @@ def aws_plan(a) -> int:
             cmd = (
                 "set -e\n"
                 "export PATH=/opt/venv/bin:/opt/su2/bin:$PATH SU2_RUN=/opt/su2/bin SU2_HOME=/opt/SU2-src\n"
+                f"{CONTAINER_ENV}\n"
                 "git rev-parse HEAD > \"$GTU_OUT/commit.txt\"\n"
                 "rc=0\n"
                 f"python3 routes/gtu/frame3/frame3_geom.py --out \"$GTU_OUT/geom\" --levels {a.level} --stages {stage} "
@@ -966,7 +985,7 @@ def aws_plan(a) -> int:
         est.append({"stage": stage, "level": a.level, "nodes": nodes, "jobs": len(speeds),
                     "t_iter_s_estimate": t_iter, "iterations_per_line": iters_line, "compute_min_per_line": compute_min,
                     "su2_time_limit_s": su2_limit_s, "max_min": max_min,
-                    "expected_hours_per_line": a.setup_min / 60 + a.mesh_min / 60 + compute_min / 60 + a.upload_min / 60,
+                    "expected_hours_per_line": (a.setup_min + a.mesh_min + compute_min + a.upload_min) / 60,
                     "cap_hours_per_line": hours})
     doc = {"defaults": {"instance_type": a.instance_type, "fallback_types": ["c7i.16xlarge"], "image": "al2023",
                         "disk_gb": a.disk_gb},
@@ -980,10 +999,15 @@ def aws_plan(a) -> int:
         "jobs_file": rel(a.out), "n_jobs": len(jobs), "speeds": speeds, "pfracs": pfracs,
         "iterations": {"startup": startup_iter, "first_point": a.first_iter, "next_point": a.next_iter,
                        "per_line": iters_line},
-        "t_ref_s_per_iter": t_ref, "t_ref_source": "медиана Time(sec) по стадиям пробного прогона, взвешенная по итерациям",
+        "t_ref_s_per_iter": t_ref, "t_ref_source": t_src,
+        "t_ref_by_kind": {k: (sum(s[f"sec_per_iter_{k}"] * s["rows"] for s in run0["stages"] if s.get(f"sec_per_iter_{k}") and s.get("rows"))
+                              / max(1, sum(s["rows"] for s in run0["stages"] if s.get(f"sec_per_iter_{k}") and s.get("rows"))))
+                          for k in ("median", "p10")},
         "n_ref_nodes": n_ref, "np_ref": np_ref, "procs_aws": a.procs, "parallel_eff": a.parallel_eff,
         "parallel_eff_note": "EXAMPLE: принято (как batch/cost_estimate.toml), не замер — ускорение 4 → 64 процесса не мерилось",
         "setup_min": a.setup_min, "mesh_min": a.mesh_min, "upload_min": a.upload_min, "time_margin": a.time_margin,
+        "max_min_formula": "setup_min + mesh_min + su2_time_limit/60 + 8 (выгрузка runner.py) + slack_min",
+        "slack_min": a.slack_min,
         "assumption_notes": {"setup_min": "оценка: apt + pip + сборка SU2 install_su2.sh на 64 ядрах (на 4 ядрах здесь "
                                           "сборка шла ~8–10 мин, см. software)",
                              "mesh_min": "оценка: frame3_geom.py medium одной ступени с STEP (здесь 115–181 с на 4 ядрах)"},
@@ -1048,6 +1072,7 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("--stab-tol", type=float, default=CONV["stab_tol"])
     p = sub.add_parser("parse", help="разобрать папку прогона")
     p.add_argument("run_dir")
+    p.add_argument("--record", default=None, metavar="RESULTS_JSON", help="дописать итог в results-JSON")
     w = sub.add_parser("aws-plan", help="пакет задач runner.py и оценка стоимости (AWS не вызывается)")
     w.add_argument("--trial-results", default=os.path.join(HERE, "su2_trial_results.json"))
     w.add_argument("--geom-results", default=os.path.join(REPO, "routes", "gtu", "frame3", "frame3_geom_results.json"))
@@ -1061,11 +1086,15 @@ def build_parser() -> argparse.ArgumentParser:
     w.add_argument("--iter-scale", type=float, default=2.0, help="множитель итераций разгона на облаке")
     w.add_argument("--shroud", default="slip")
     w.add_argument("--vaneless", default="slip")
+    w.add_argument("--t-ref-kind", default="median", choices=["median", "p10"],
+                   help="какое время итерации пробного прогона брать: медиану (с чужой нагрузкой, с запасом) или нижний дециль")
+    w.add_argument("--t-ref", type=float, default=None, help="своё время итерации эталона, с (вместо замера)")
     w.add_argument("--procs", type=int, default=64)
     w.add_argument("--parallel-eff", type=float, default=0.6)
     w.add_argument("--setup-min", type=float, default=15.0)
     w.add_argument("--mesh-min", type=float, default=10.0)
-    w.add_argument("--upload-min", type=float, default=5.0)
+    w.add_argument("--upload-min", type=float, default=3.0, help="ожидаемое время выгрузки, мин (в смете)")
+    w.add_argument("--slack-min", type=float, default=5.0, help="запас срока max_min сверх оценки, мин")
     w.add_argument("--time-margin", type=float, default=1.5, help="запас лимита счёта к оценке времени")
     w.add_argument("--price", type=float, default=0.71)
     w.add_argument("--instance-type", default="c7a.16xlarge")
