@@ -5,7 +5,7 @@
  "inputs": {
   "bench": {
    "file": "bench.toml",
-   "sha256": "eeafd1cfc4cd825da8beedf1981d37f16fd375e44db0d6c6d60c3c2b875d4271"
+   "sha256": "564a4b9ef94d9b13e9ae408681e4635917f7d778b6393a62f777ea3f3748eb0f"
   },
   "tariffs": {
    "file": "tariffs_us-east-1.json",

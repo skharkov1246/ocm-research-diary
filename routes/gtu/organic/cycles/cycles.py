@@ -774,6 +774,8 @@ def evaluate(topo, PR, prm=None, detail=False):
         else:
             fuel_new = fuel
         if rec:
+            if g_in.T < air2.T + 10.0:
+                return dict(ok=False, why="рекуператор бесполезен: газ на входе холоднее воздуха за компрессором")
             air_r, g_rec, Qrec = recuperate(air2, g_in, rec, A["dp_ra"], A["dp_rg"])
             T3r_new = air_r.T
             g_out = g_rec
@@ -1048,6 +1050,8 @@ def hx_list(res, tech):
         air2, gin = st["air2"], st["g_in"]
         air_r, g_rec, Q = recuperate(air2, gin, t["rec"], A["dp_ra"], A["dp_rg"])
         ua = ua_counterflow(Q, gin.T, g_rec.T, air2.T, air_r.T)
+        if not ua:
+            raise ValueError("рекуператор: пересечение температур")
         s = size_hx(ua * W1, gin.m * W1, 0.5 * (gin.T + g_rec.T), gin.P, gin.Y, A["dp_rg"] * gin.P,
                     air2.m * W1, 0.5 * (air2.T + air_r.T), air2.P, Y_AIR, A["dp_ra"] * air2.P, tech)
         s.update(name="рекуператор", Q_kW=Q * W1 / 1e3)
@@ -1059,6 +1063,8 @@ def hx_list(res, tech):
                 ho, co = outs
                 Q = hi.m * (hs(hi)[0] - hs(ho)[0])
                 ua = ua_counterflow(Q, hi.T, ho.T, ci.T, co.T)
+                if not ua:
+                    raise ValueError("промохладитель: пересечение температур")
                 s = size_hx(ua * W1, hi.m * W1, 0.5 * (hi.T + ho.T), hi.P, hi.Y, A["dp_ic"] * hi.P,
                             ci.m * W1, 0.5 * (ci.T + co.T), P0, Y_AIR, A["dp_fan"], tech)
                 s.update(name="промохладитель", Q_kW=Q * W1 / 1e3)

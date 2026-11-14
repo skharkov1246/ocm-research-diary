@@ -960,6 +960,22 @@ def check(c, tgt, perf, g):
     return R
 
 
+def violation(bad):
+    """сумма относительных превышений по непройденным правилам (0 - допустима); для ранжирования «почти допустимых»
+    на следующих уровнях. Правило без числа (perf) - 1."""
+    v = 0.0
+    for r in bad:
+        val, lim = r.get("val"), r.get("lim")
+        if isinstance(lim, list) and isinstance(val, (int, float)):
+            lo, hi = lim
+            v += (lo - val) / abs(lo) if val < lo else (val - hi) / abs(hi)
+        elif isinstance(val, (int, float)) and isinstance(lim, (int, float)) and lim:
+            v += abs(val - lim) / abs(lim)
+        else:
+            v += 1.0
+    return round(v, 4)
+
+
 # =========================================================================== одна концепция целиком
 def evaluate(i, n, kv="KV-3", seed=SEED, detail=False):
     c = concept(i, n, kv, seed)
@@ -979,7 +995,7 @@ def evaluate(i, n, kv="KV-3", seed=SEED, detail=False):
     perf = p if g else p1
     rules = check(c, tgt, perf, g) if g else [_rule("perf", False, text=perf.get("fail", "нет решения"))]
     bad = [r for r in rules if not r["ok"]]
-    rec = dict(idx=i, kv=kv, arch=c["arch"], feasible=not bad, reject=[r["code"] for r in bad], concept=c,
+    rec = dict(idx=i, kv=kv, arch=c["arch"], feasible=not bad, reject=[r["code"] for r in bad], violation=violation(bad), concept=c,
                rules=rules if detail else [r for r in rules if not r["ok"]],
                rules_passed=[r["code"] for r in rules if r["ok"]])
     if g:

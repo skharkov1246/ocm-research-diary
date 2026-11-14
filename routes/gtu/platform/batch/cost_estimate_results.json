@@ -45,7 +45,7 @@
    "log_bytes_per_iter": 300,
    "log_bytes_per_job": 51200,
    "log_months": 1.0,
-   "image_gb": 2.0
+   "image_gb": 1.451
   },
   "hours_per_month": 730.0,
   "series_from_batch_toml": {
@@ -244,9 +244,9 @@
    "title": "Вариант для сравнения: та же серия по точкам (80 заданий, каждая точка с холодного старта)",
    "in_plan": false,
    "total": {
-    "spot_estimate": 150.093389,
-    "on_demand": 329.416445,
-    "upper_bound": 1980.569207
+    "spot_estimate": 150.038489,
+    "on_demand": 329.361545,
+    "upper_bound": 1980.514307
    }
   },
   "series_char_eu-north-1": {
@@ -282,9 +282,9 @@
    "title": "Запасной регион eu-north-1: та же серия; бакет и образ — в us-east-1 (межрегиональная передача)",
    "in_plan": false,
    "total": {
-    "spot_estimate": 20.214342,
-    "on_demand": 88.513162,
-    "upper_bound": 269.974688
+    "spot_estimate": 20.148462,
+    "on_demand": 88.447282,
+    "upper_bound": 269.908808
    }
   }
  },
@@ -294,21 +294,21 @@
   "series_char"
  ],
  "plan_shared_total": {
-  "spot_estimate": 2.608297,
-  "on_demand": 2.608297,
-  "upper_bound": 5.016592
+  "spot_estimate": 2.553397,
+  "on_demand": 2.553397,
+  "upper_bound": 4.961692
  },
  "plan_total": {
-  "spot_estimate": 41.950309,
-  "on_demand": 90.200837,
-  "upper_bound": 280.634563
+  "spot_estimate": 41.895409,
+  "on_demand": 90.145937,
+  "upper_bound": 280.579663
  },
  "ceiling_check": {
   "ceiling_usd": 300.0,
   "spot_estimate_ok": true,
   "on_demand_ok": true,
   "upper_bound_ok": true,
-  "headroom_upper_bound_usd": 19.365437,
+  "headroom_upper_bound_usd": 19.420337,
   "ceiling_runner_usd": 2000.0,
   "upper_bound_ok_runner": true
  },
@@ -714,12 +714,12 @@
    "scenario": "plan_shared",
    "level": "spot_estimate",
    "item": "ecr_storage_us-east-1",
-   "quantity": 2.0,
+   "quantity": 1.451,
    "unit": "ГБ·мес",
    "rate_usd": 0.1,
    "rate_unit": "USD/(ГБ·мес)",
-   "cost_usd": 0.2,
-   "formula": "образ 2.0 ГБ × 1 мес",
+   "cost_usd": 0.1451,
+   "formula": "образ 1.451 ГБ × 1 мес",
    "rate_source": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECR/20261113163947/us-east-1/index.json (публикация 2026-11-13T16:39:47Z)"
   },
   {
@@ -798,12 +798,12 @@
    "scenario": "plan_shared",
    "level": "on_demand",
    "item": "ecr_storage_us-east-1",
-   "quantity": 2.0,
+   "quantity": 1.451,
    "unit": "ГБ·мес",
    "rate_usd": 0.1,
    "rate_unit": "USD/(ГБ·мес)",
-   "cost_usd": 0.2,
-   "formula": "образ 2.0 ГБ × 1 мес",
+   "cost_usd": 0.1451,
+   "formula": "образ 1.451 ГБ × 1 мес",
    "rate_source": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECR/20261113163947/us-east-1/index.json (публикация 2026-11-13T16:39:47Z)"
   },
   {
@@ -882,21 +882,21 @@
    "scenario": "plan_shared",
    "level": "upper_bound",
    "item": "ecr_storage_us-east-1",
-   "quantity": 2.0,
+   "quantity": 1.451,
    "unit": "ГБ·мес",
    "rate_usd": 0.1,
    "rate_unit": "USD/(ГБ·мес)",
-   "cost_usd": 0.2,
-   "formula": "образ 2.0 ГБ × 1 мес",
+   "cost_usd": 0.1451,
+   "formula": "образ 1.451 ГБ × 1 мес",
    "rate_source": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECR/20261113163947/us-east-1/index.json (публикация 2026-11-13T16:39:47Z)"
   }
  ],
  "variants": {
   "series_char_point_mode": {
    "total": {
-    "spot_estimate": 150.093389,
-    "on_demand": 329.416445,
-    "upper_bound": 1980.569207
+    "spot_estimate": 150.038489,
+    "on_demand": 329.361545,
+    "upper_bound": 1980.514307
    },
    "lines": [
     {
@@ -1083,12 +1083,12 @@
      "scenario": "series_char_point_mode_shared",
      "level": "spot_estimate",
      "item": "ecr_storage_us-east-1",
-     "quantity": 2.0,
+     "quantity": 1.451,
      "unit": "ГБ·мес",
      "rate_usd": 0.1,
      "rate_unit": "USD/(ГБ·мес)",
-     "cost_usd": 0.2,
-     "formula": "образ 2.0 ГБ × 1 мес",
+     "cost_usd": 0.1451,
+     "formula": "образ 1.451 ГБ × 1 мес",
      "rate_source": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECR/20261113163947/us-east-1/index.json (публикация 2026-11-13T16:39:47Z)"
     },
     {
@@ -1167,12 +1167,12 @@
      "scenario": "series_char_point_mode_shared",
      "level": "on_demand",
      "item": "ecr_storage_us-east-1",
-     "quantity": 2.0,
+     "quantity": 1.451,
      "unit": "ГБ·мес",
      "rate_usd": 0.1,
      "rate_unit": "USD/(ГБ·мес)",
-     "cost_usd": 0.2,
-     "formula": "образ 2.0 ГБ × 1 мес",
+     "cost_usd": 0.1451,
+     "formula": "образ 1.451 ГБ × 1 мес",
      "rate_source": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECR/20261113163947/us-east-1/index.json (публикация 2026-11-13T16:39:47Z)"
     },
     {
@@ -1251,21 +1251,21 @@
      "scenario": "series_char_point_mode_shared",
      "level": "upper_bound",
      "item": "ecr_storage_us-east-1",
-     "quantity": 2.0,
+     "quantity": 1.451,
      "unit": "ГБ·мес",
      "rate_usd": 0.1,
      "rate_unit": "USD/(ГБ·мес)",
-     "cost_usd": 0.2,
-     "formula": "образ 2.0 ГБ × 1 мес",
+     "cost_usd": 0.1451,
+     "formula": "образ 1.451 ГБ × 1 мес",
      "rate_source": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECR/20261113163947/us-east-1/index.json (публикация 2026-11-13T16:39:47Z)"
     }
    ]
   },
   "series_char_eu-north-1": {
    "total": {
-    "spot_estimate": 20.214342,
-    "on_demand": 88.513162,
-    "upper_bound": 269.974688
+    "spot_estimate": 20.148462,
+    "on_demand": 88.447282,
+    "upper_bound": 269.908808
    },
    "lines": [
     {
@@ -1452,12 +1452,12 @@
      "scenario": "series_char_eu-north-1_shared",
      "level": "spot_estimate",
      "item": "ecr_storage_eu-north-1",
-     "quantity": 2.0,
+     "quantity": 1.451,
      "unit": "ГБ·мес",
      "rate_usd": 0.1,
      "rate_unit": "USD/(ГБ·мес)",
-     "cost_usd": 0.2,
-     "formula": "образ 2.0 ГБ × 1 мес",
+     "cost_usd": 0.1451,
+     "formula": "образ 1.451 ГБ × 1 мес",
      "rate_source": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECR/20261113163947/eu-north-1/index.json (публикация 2026-11-13T16:39:47Z)"
     },
     {
@@ -1476,12 +1476,12 @@
      "scenario": "series_char_eu-north-1_shared",
      "level": "spot_estimate",
      "item": "transfer_us-east-1_to_eu-north-1_image",
-     "quantity": 2.0,
+     "quantity": 1.451,
      "unit": "ГБ",
      "rate_usd": 0.02,
      "rate_unit": "USD/ГБ",
-     "cost_usd": 0.04,
-     "formula": "копия образа 2.0 ГБ us-east-1 → eu-north-1",
+     "cost_usd": 0.02902,
+     "formula": "копия образа 1.451 ГБ us-east-1 → eu-north-1",
      "rate_source": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/20261111191941/us-east-1/index.json (публикация 2026-11-11T19:19:41Z)"
     },
     {
@@ -1560,12 +1560,12 @@
      "scenario": "series_char_eu-north-1_shared",
      "level": "on_demand",
      "item": "ecr_storage_eu-north-1",
-     "quantity": 2.0,
+     "quantity": 1.451,
      "unit": "ГБ·мес",
      "rate_usd": 0.1,
      "rate_unit": "USD/(ГБ·мес)",
-     "cost_usd": 0.2,
-     "formula": "образ 2.0 ГБ × 1 мес",
+     "cost_usd": 0.1451,
+     "formula": "образ 1.451 ГБ × 1 мес",
      "rate_source": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECR/20261113163947/eu-north-1/index.json (публикация 2026-11-13T16:39:47Z)"
     },
     {
@@ -1584,12 +1584,12 @@
      "scenario": "series_char_eu-north-1_shared",
      "level": "on_demand",
      "item": "transfer_us-east-1_to_eu-north-1_image",
-     "quantity": 2.0,
+     "quantity": 1.451,
      "unit": "ГБ",
      "rate_usd": 0.02,
      "rate_unit": "USD/ГБ",
-     "cost_usd": 0.04,
-     "formula": "копия образа 2.0 ГБ us-east-1 → eu-north-1",
+     "cost_usd": 0.02902,
+     "formula": "копия образа 1.451 ГБ us-east-1 → eu-north-1",
      "rate_source": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/20261111191941/us-east-1/index.json (публикация 2026-11-11T19:19:41Z)"
     },
     {
@@ -1668,12 +1668,12 @@
      "scenario": "series_char_eu-north-1_shared",
      "level": "upper_bound",
      "item": "ecr_storage_eu-north-1",
-     "quantity": 2.0,
+     "quantity": 1.451,
      "unit": "ГБ·мес",
      "rate_usd": 0.1,
      "rate_unit": "USD/(ГБ·мес)",
-     "cost_usd": 0.2,
-     "formula": "образ 2.0 ГБ × 1 мес",
+     "cost_usd": 0.1451,
+     "formula": "образ 1.451 ГБ × 1 мес",
      "rate_source": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECR/20261113163947/eu-north-1/index.json (публикация 2026-11-13T16:39:47Z)"
     },
     {
@@ -1692,12 +1692,12 @@
      "scenario": "series_char_eu-north-1_shared",
      "level": "upper_bound",
      "item": "transfer_us-east-1_to_eu-north-1_image",
-     "quantity": 2.0,
+     "quantity": 1.451,
      "unit": "ГБ",
      "rate_usd": 0.02,
      "rate_unit": "USD/ГБ",
-     "cost_usd": 0.04,
-     "formula": "копия образа 2.0 ГБ us-east-1 → eu-north-1",
+     "cost_usd": 0.02902,
+     "formula": "копия образа 1.451 ГБ us-east-1 → eu-north-1",
      "rate_source": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/20261111191941/us-east-1/index.json (публикация 2026-11-11T19:19:41Z)"
     }
    ]

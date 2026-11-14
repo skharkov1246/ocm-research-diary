@@ -40,7 +40,7 @@ get_inputs_per_job = 5       # EXAMPLE, шт.: plan.csv, job.json, сетка, �
 log_bytes_per_iter = 300     # EXAMPLE, байт: строка вывода SU2 на итерацию (с запасом)
 log_bytes_per_job = 51200    # EXAMPLE, байт: шапка SU2, сетка, итоги
 log_months = 1.0
-image_gb = 2.0               # обновляется по docker image inspect локальной сборки (README); в ECR — сжатые слои
+image_gb = 1.451             # docker image inspect локальной сборки 14.11.2026: 1 558 026 163 байт = 1,451 ГиБ без сжатия; в ECR — сжатые слои, меньше
 
 [[scenario]]
 name = "bench_c7a16"
