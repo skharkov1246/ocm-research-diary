@@ -5,7 +5,7 @@
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
     "datasets": 377,
-    "total_bytes": 3999486,
+    "total_bytes": 3999572,
     "results_files": 171,
     "results_with_script": 49,
     "results_referenced_in_site": 22,
@@ -6709,7 +6709,7 @@
       "path": "routes/gtu/platform/batch/cost_estimate_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 63330,
+      "bytes": 63416,
       "referenced_in_site": false,
       "produced_by": "routes/cost_estimate.py",
       "shape": "объект",
@@ -6735,7 +6735,7 @@
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "493cb81"
+      "last_commit": "5cb29d0"
     },
     {
       "path": "routes/gtu/platform/batch/templates/compute_environment.json",
@@ -6845,7 +6845,7 @@
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "493cb81"
+      "last_commit": "5cb29d0"
     },
     {
       "path": "routes/gtu/platform/bench/mesh_stats.json",
