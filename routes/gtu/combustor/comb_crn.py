@@ -56,7 +56,7 @@ SIGMA = 5.670374419e-8
 DIESEL_LIQ = dict(rho=840.0, sigma=0.028, mu=3.0e-3, T_b=550.0, L_v=2.5e5,
                   note="типовой дизель: вязкость 1,9-4,1 мм2/с при 40 °C (ASTM D975, по памяти); остальное - оценка")
 DP_FUEL_PS = 3.0e6         # перепад на центробежной форсунке при 100 %, Па; при частичной ~ расход² (простая форсунка)
-K_MIX_D, T_CHEM_K = 3.0, 1.0   # время смешения паров (K·l/u) и множитель химического времени α/S_L²
+K_MIX_D, T_CHEM_K = 1.0, 1.0   # время смешения паров (K·l/u, один пролёт) и множитель химического времени α/S_L²
 H_FUEL_DIESEL = 13.5       # массовая доля водорода дизеля, % (оценка) -> фактор светимости L = 336/H² (Lefebvre, по памяти)
 K_FB = 10.0                # критический градиент турбулентного пограничного слоя / S_L²/α (порядок величины - Eichler,
                            # Sattelmayer 2011-2012, по памяти, не сверено)
@@ -382,7 +382,11 @@ class Kin:
         net = ct.ReactorNet([r]); net.rtol, net.atol = 1e-7, 1e-13
         net.advance_to_steady_state()
         Y = r.phase.Y.copy()
-        lit = (r.T - T_in) > 0.5 * max(T_eq - T_in, 1.0)
+        y_in = s.Y[self.i["CH4"]]
+        if y_in > 1e-5:                      # горит - израсходовано больше половины метана (годится и для горячего входа)
+            lit = Y[self.i["CH4"]] < 0.5 * y_in and (r.T - T_in) > 0.25 * max(T_eq - T_in, 1.0)
+        else:
+            lit = (r.T - T_in) > 0.5 * max(T_eq - T_in, 1.0)
         return Stream(s.m, s.h, Y, s.p), bool(lit), (r.T, r.phase.P, Y)
 
     def pfr(self, s, t):
@@ -399,6 +403,8 @@ class Kin:
         """PFR с поиском времени расхода половины топлива (CH4) - для каталитической схемы"""
         self.GP.HPY = s.h, s.p, s.Y
         y0 = self.GP.Y[self.i["CH4"]]
+        if y0 < 1e-7:                        # всё топливо превращено на катализаторе
+            return self.pfr(s, t), 0.0
         r = ct.IdealGasConstPressureReactor(self.GP, energy="on", clone=False)
         net = ct.ReactorNet([r]); net.rtol, net.atol = 1e-7, 1e-13
         t_half = None
@@ -587,6 +593,8 @@ def gas_network(c, d, bc, li):
                 seg.append(K.pfr(po, F_SEG * tb))
         lit_frac = nodes_chain(m_air_main, m_fuel_main, S_eff, Krec, pre)
         fr = K.fresh(m_air_main, m_fuel_main, T3, Tf, p)
+        if pre is not None:                   # основная зона с горячим газом пилота/полости (средний узел)
+            fr = K.mix(fr, pre)
         _, _, st0, inl0 = K.psr_recirc(fr, tp, Krec)
         margins.append(("основная", K.tau_ext(inl0, tp, Krec, st0)))
         res["phi_main"] = (m_fuel_main / m_air_main) / bc["far_st_CH4"]
@@ -628,7 +636,7 @@ def gas_network(c, d, bc, li):
             seg.append(o); Ts.append((wk, K.T(o)))
         res["catalyst_conversion"] = sum(conv)
         th_mid = t_half[len(t_half) // 2]
-        margins.append(("гомогенное догорание", (tb / th_mid) if th_mid else 0.0))
+        margins.append(("гомогенное догорание", 0.0 if th_mid is None else (1000.0 if th_mid == 0 else tb / th_mid)))
         lit_frac = sum(wk for (wk, _), th in zip(nodes, t_half) if th is not None)
     elif s == "RDC":
         nodes, _ = _node_streams(K, a_pz * W, Wf, S, nn, T3, Tf, p)
@@ -752,7 +760,7 @@ def diesel_network(c, d, bc, li, gas_res):
             parts.append(K.pfr(ln, tp + tb))
         if x_diff > 1e-4:
             df = K.from_dz(1.0, p, T3, T3, air_d + x_diff * Wfd)
-            parts.append(K.pfr(df, min(tp + tb, t_ev_fl + t_mix)))
+            parts.append(K.pfr(df, min(tp + tb, t_mix + t_chem)))   # пар горит у стехиометрии, пока не перемешан
         hot = K.mix(*parts)
         res["phi_lean"] = phi_lean
     T_hot = K.T(hot)

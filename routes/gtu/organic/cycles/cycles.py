@@ -656,7 +656,7 @@ def make_fuel(tcr, gin, mf_guess, prm, p_fuel, stack):
         X = 1 - (Ye[I["CH4"]] / MW[I["CH4"]]) / nC0
         L = lhv(Ye)
         info = dict(T_ref_C=T - 273.15, X_CH4=X, sc=sc, pinch_K=dmin, lhv_gain=L / yC / LHV_CH4_CT - 1,
-                    aC=carbon_activity(Ye, T, Pout), water_per_CH4_kg=(1 - yC) / yC, cold_pts=pts)
+                    aC=carbon_activity(Ye, Teq, p_fuel), water_per_CH4_kg=(1 - yC) / yC, cold_pts=pts)
         feeds = [("CH4", yC, St(1, T0, p_fuel, Y_CH4)), ("H2O_liq", 1 - yC, St(1, T0, p_fuel, Y_of("H2O:1"), liq=True))]
         return dict(Y=Ye, h=h_out, T=T, lhv=L, yC=yC, q=h_out - h_in, info=info, feeds=feeds, Pout=Pout)
     if tcr == "egr":
@@ -686,10 +686,12 @@ def make_fuel(tcr, gin, mf_guess, prm, p_fuel, stack):
         h_in = hs(feed)[0]
         T = max(T_top, feed.T)
         Pout = p_fuel * (1 - A["dp_ref_f"])
-        Ye, _ = equil(feed.Y, max(T - A["approach_eq"], feed.T), p_fuel)
+        Teq = max(T - A["approach_eq"], feed.T)
+        Ye, _ = equil(feed.Y, Teq, p_fuel)
         h_out = hs(St(1, T, Pout, Ye))[0]
         if h_out < h_in:                      # экзотермика (горит кислород рециркулята): реактор адиабатный
-            Ye, T = equil(feed.Y, h_in, Pout, "HP")
+            Ye, T = equil(feed.Y, h_in, p_fuel, "HP")
+            Teq = T
             h_out = h_in
         L = lhv(Ye)
         nC0 = yC / MW[I["CH4"]]
@@ -699,7 +701,7 @@ def make_fuel(tcr, gin, mf_guess, prm, p_fuel, stack):
         Xf = g.X
         info = dict(T_ref_C=T - 273.15, X_CH4=X, R_egr=R, O2_per_CH4=Xf[I["O2"]] / Xf[I["CH4"]],
                     H2O_per_CH4=Xf[I["H2O"]] / Xf[I["CH4"]], CO2_per_CH4=Xf[I["CO2"]] / Xf[I["CH4"]],
-                    lhv_gain=L / yC / LHV_CH4_CT - 1, aC=carbon_activity(Ye, T, Pout), w_rc_per_kg_rc=w_rc,
+                    lhv_gain=L / yC / LHV_CH4_CT - 1, aC=carbon_activity(Ye, Teq, p_fuel), w_rc_per_kg_rc=w_rc,
                     T_rc_C=rc_c.T - 273.15, q_rc_cool_per_kg_rc=q1 + q2)
         feeds = [("CH4", yC, St(1, T0, p_fuel, Y_CH4)), ("RC", 1 - yC, rc_c.cp(m=1.0))]
         return dict(Y=Ye, h=h_out, T=T, lhv=L, yC=yC, q=h_out - h_in, info=info, feeds=feeds, Pout=Pout,
@@ -1697,8 +1699,13 @@ def main():
         runtime_s=time.time() - t0,
     )
     out["feed_to_funnels"] = feed_from(out)
-    json.dump(out, open(os.path.join(OUT_DIR, "cycles_results.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1,
-              default=_jdef)
+    keep = {base["key"]} | {r["key"] for r in front + front_p} | ({rec_best["key"]} if rec_best else set())
+    if OUT_DIR == HERE:          # полный файл (12 МБ) — в scratchpad, в репозиторий — сжатый
+        os.makedirs(SCRATCH, exist_ok=True)
+        json.dump(out, open(os.path.join(SCRATCH, "cycles_results_full.json"), "w", encoding="utf-8"), ensure_ascii=False,
+                  default=_jdef)
+    json.dump(compact(out, keep), open(os.path.join(OUT_DIR, "cycles_results.json"), "w", encoding="utf-8"),
+              ensure_ascii=False, indent=1, default=_jdef)
     cols = list(rows[0].keys())
     with open(os.path.join(OUT_DIR, "cycles.csv"), "w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=cols)
@@ -1718,6 +1725,43 @@ def main():
     for r in front:
         print(f"  {r['added']:3d} дет. {100 * r['eff_el']:5.1f} % V {r['V_added_m3']:5.2f} м³ π {r['PR']:5.2f} TRL {r['TRL']} "
               f"P&P {r['pnp']:8s} | {r['name']}")
+
+
+def _r5(x):
+    """округление до 5 значащих цифр для сжатого файла"""
+    if isinstance(x, (bool, np.bool_)):
+        return bool(x)
+    if isinstance(x, (float, np.floating)):
+        return float(f"{float(x):.5g}")
+    if isinstance(x, np.integer):
+        return int(x)
+    if isinstance(x, dict):
+        return {k: _r5(v) for k, v in x.items()}
+    if isinstance(x, (list, tuple)):
+        return [_r5(v) for v in x]
+    return x
+
+
+def compact(out, keep_keys):
+    """сжатый результат для репозитория: у вариантов вне фронтов и опорных — без построчной эксергии и перечня деталей
+    исполнения foil; числа — 5 значащих цифр. Полный — scratchpad/organic/cycles_results_full.json"""
+    c = dict(out)
+    res = []
+    for o in out["results"]:
+        oo = dict(o)
+        for tag in ("opt", "pr135"):
+            r = dict(o[tag])
+            if r.get("ok") and o["key"] not in keep_keys:
+                ex_ = dict(r["exergy"])
+                ex_.pop("rows", None)
+                r["exergy"] = ex_
+                r["parts"] = {t: {k: v for k, v in p.items() if k != "items" or t == "lpbf"} for t, p in r["parts"].items()}
+            oo[tag] = r
+        res.append(oo)
+    c["results"] = res
+    c["compact_note"] = ("сжатый файл: построчная эксергия — только у опорного варианта, фронтов Парето и рекомендуемого; "
+                         "полный — scratchpad/organic/cycles_results_full.json (не в репозитории)")
+    return _r5(c)
 
 
 def _jdef(x):
@@ -1870,7 +1914,7 @@ def feed_only():
     tech = "lpbf"
     res = out["results"]
     rows = [f for o in res for f in [flat(o, "opt", tech)] if f]
-    sel = [r for r in rows if r["limits_ok"] and not r["bound"]]
+    sel = [r for r in rows if r["limits_ok"] and not r["bound"] and not r["degenerate"]]
     front_i = pareto(sel, [("eff_el", 1), ("added", -1), ("V_added_m3", -1)])
     base = [o for o in res if o["key"] == "R00-ic-rh-ibc-none-none"][0]
     plots(sel + [r for r in rows if not r["limits_ok"] and not r["bound"]], front_i, base["pr135"]["eff_el"])
