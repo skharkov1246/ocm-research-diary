@@ -21,7 +21,7 @@ from botocore.stub import ANY, Stubber
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import runner as R  # noqa: E402
 
-FAKE_AKID = "AKIA" "FAKEFAKEFAKE1234"  # разбито: иначе gate-сканер секретов срабатывает на фикстуру
+FAKE_AKID = "AKIASYNTHETIC0000000"  # выдуманный ключ: пометка SYNTHETIC по правилу gate.yml
 FAKE_SECRET = "fakeSecretValueForTestsOnly/0123456789abcdEF"
 BUCKET = "alpha-o-results-123456789012"
 PREFIX = "alpha-o"
@@ -53,7 +53,7 @@ class Clock:
 
 def client(name):
     return botocore.session.get_session().create_client(
-        name, region_name="us-east-1", aws_access_key_id="testing", **{"aws_secret" "_access_key": "testing"})
+        name, region_name="us-east-1", aws_access_key_id="testing", aws_secret_access_key="testing")
 
 
 class Aws:
@@ -204,7 +204,7 @@ def test_userdata_watchdog_first_and_no_keys():
     assert commands[0] == "shutdown -P +90"
     assert FAKE_AKID not in ud and FAKE_SECRET not in ud
     low = ud.lower()
-    for w in ("aws_secret" "_access_key", "aws_access_key_id", "aws_session_token", "akia"):
+    for w in ("aws_secret_access_key", "aws_access_key_id", "aws_session_token", "akia"):
         assert w not in low
     assert "poweroff" in ud and "trap finish EXIT" in ud
     assert f"s3_key={PREFIX}/gtu/{RUN}/{job.name}".lower() in low.replace("'", "")
@@ -229,7 +229,7 @@ def test_secrets_refused():
     with pytest.raises(R.RunnerError):
         make_job(command=f"echo {FAKE_SECRET}")
     with pytest.raises(R.RunnerError):
-        make_job(command="echo AKIA" "ABCDEFGHIJKLMNOP")
+        make_job(command="echo AKIAEXAMPLE000000000")
     job = R.Job(name="j", command="echo ok", max_min=60)
     R.validate_job(job)
     job.command = f"echo {FAKE_SECRET}"                         # в обход проверки задачи
@@ -606,15 +606,15 @@ def test_example_jobs_file_is_valid():
 # ----------------------------------------------------------------------------- маскирование и CLI
 def test_redactor_and_ledger_guard(tmp_path):
     red = R.Redactor(BUCKET)
-    s = red(f"s3://{BUCKET}/x key={FAKE_SECRET} id={FAKE_AKID} other=AKIA" "QQQQQQQQQQQQQQQQ")
-    assert BUCKET not in s and FAKE_SECRET not in s and FAKE_AKID not in s and "AKIAQ" not in s
+    s = red(f"s3://{BUCKET}/x key={FAKE_SECRET} id={FAKE_AKID} other=AKIAPLACEHOLDER00000")
+    assert BUCKET not in s and FAKE_SECRET not in s and FAKE_AKID not in s and "AKIAPLACEHOLDER" not in s
     assert "<BUCKET>" in s
     led = R.Ledger(tmp_path / "l.jsonl", red)
     led.append("x", note=f"path s3://{BUCKET}/p", secret=FAKE_SECRET)     # маскируется, не падает
     text = (tmp_path / "l.jsonl").read_text()
     assert BUCKET not in text and FAKE_SECRET not in text
     with pytest.raises(R.RunnerError):                                     # имя переменной ключа — отказ
-        led.append("x", note="aws_secret" "_access_key=...")
+        led.append("x", note="aws_secret_access_key=...")
 
 
 def test_cli_plan_offline_and_status(tmp_path, capsys, monkeypatch):

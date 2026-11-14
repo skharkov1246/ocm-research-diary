@@ -72,7 +72,7 @@ REPO_RE = re.compile(r"^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 PKG_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+\-\[\],:=<>!~]{0,127}$")
 RUN_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,47}$")
 KEY_ID_RE = re.compile(r"(?<![A-Z0-9])(AKIA|ASIA)[A-Z0-9]{16}(?![A-Z0-9])")
-SECRET_WORDS = ("aws_secret" "_access_key", "aws_session_token", "aws_access" "_key_id")  # разбито: иначе gate-сканер находит сам себя
+SECRET_WORDS = ("aws_secret_access_key", "aws_session_token", "aws_access_key_id")
 SECRET_ENV = ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN")
 
 
