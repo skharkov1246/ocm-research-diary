@@ -702,6 +702,13 @@ def grassmann_svg(acc, title, subtitle, scale, path):
     if has_rec:
         wrg = max(s * rec_tr + 40, 90); xrg0 = x; x += wrg + 40
     x_end = W - 40
+    # --- вертикальная раскладка сверху вниз: петля работы, охлаждающий воздух, подпись топлива, тракт
+    net = Wt - Wc
+    y_loop = 80 + s * Wc / 2
+    loop_bot = y_loop + s * Wc / 2
+    y_cool = loop_bot + 24 + s * cool / 2
+    fuel_top = (y_cool + s * cool / 2 if has_cool else loop_bot) + 46
+    yr = fuel_top + 36 + (s * max(comb_in, s4) + 16) / 2
     # --- тракт
     el.append(f'<text x="{_f(xc0 - 52)}" y="{_f(yr - 6)}" font-size="11" fill="{COL["ink2"]}">воздух</text>')
     el.append(f'<text x="{_f(xc0 - 52)}" y="{_f(yr + 8)}" font-size="11" fill="{COL["ink2"]}">{_pct(acc["totals"]["air_in_pct"])}</text>')
@@ -726,11 +733,10 @@ def grassmann_svg(acc, title, subtitle, scale, path):
         yt_rg, yb_rg = block(xrg0, wrg, s5, "рекуп.")
     # --- топливо сверху в камеру
     xf = xb0 + wb / 2
-    band_v(xf, yt_b - 70, yt_b, s * Ef, COL["fuel"], f"эксергия топлива: {Ef:.0f} кВт")
-    el.append(f'<text x="{_f(xf)}" y="{_f(yt_b - 92)}" text-anchor="middle" font-size="12" fill="{COL["ink"]}">топливо 100 % = {Ef:.0f} кВт</text>')
-    el.append(f'<text x="{_f(xf)}" y="{_f(yt_b - 78)}" text-anchor="middle" font-size="11" fill="{COL["ink2"]}">(химическая + давление подачи)</text>')
+    band_v(xf, fuel_top, yt_b, s * Ef, COL["fuel"], f"эксергия топлива: {Ef:.0f} кВт")
+    el.append(f'<text x="{_f(xf)}" y="{_f(fuel_top - 22)}" text-anchor="middle" font-size="12" fill="{COL["ink"]}">топливо 100 % = {Ef:.0f} кВт</text>')
+    el.append(f'<text x="{_f(xf)}" y="{_f(fuel_top - 8)}" text-anchor="middle" font-size="11" fill="{COL["ink2"]}">(химическая + давление подачи)</text>')
     # --- работа: из турбины вверх; петля на компрессор (влево) и полезная (вправо)
-    y_loop = yt_c - 150
     xw_l = xt0 + 15 + s * cool + s * Wc / 2
     xw_r = xt0 + 15 + s * cool + s * Wc + s * (Wt - Wc) / 2
     xc_in = xc0 + 15 + s * Wc / 2
@@ -738,8 +744,7 @@ def grassmann_svg(acc, title, subtitle, scale, path):
               f"работа на привод компрессора: {Wc:.0f} кВт")
     el.append(f'<text x="{_f((xw_l + xc_in) / 2)}" y="{_f(y_loop - s * Wc / 2 - 6)}" text-anchor="middle" font-size="11" '
               f'fill="{COL["ink2"]}">работа на компрессор {Wc:.0f} кВт ({_pct(100 * Wc / Ef)})</text>')
-    net = Wt - Wc
-    y_net = y_loop + 40
+    y_net = max(y_loop + 40, 122 + s * net / 2)
     band_poly([(xw_r, yt_t), (xw_r, y_net), (x_end - 10, y_net)], s * net, COL["work"], f"работа турбины сверх компрессора: {net:.0f} кВт")
     # потери на валу вверх с полосы полезной работы
     xs = xw_r + s * net / 2 + 30
@@ -755,28 +760,19 @@ def grassmann_svg(acc, title, subtitle, scale, path):
               f'на клеммах {acc["P_el_kW"]:.0f} кВт = {_pct(100 * acc["ex_eff_el"])}</text>')
     # --- охлаждающий воздух: из компрессора поверх тракта в турбину
     if has_cool:
-        y_cool = yt_c - 40
         x_from = xc0 + 15 + s * Wc + 6 + s * cool / 2
         x_to = xt0 + 15 + s * cool / 2
         band_poly([(x_from, yt_c), (x_from, y_cool), (x_to, y_cool), (x_to, yt_t)], s * cool, COL["flow"],
                   f"охлаждающий воздух: {cool:.0f} кВт")
         el.append(f'<text x="{_f((x_from + x_to) / 2)}" y="{_f(y_cool - s * cool / 2 - 5)}" text-anchor="middle" font-size="10.5" '
                   f'fill="{COL["ink2"]}">охлаждающий воздух {_pct(100 * cool / Ef)}</text>')
-    # --- рекуператор: петля снизу, от горячей стороны к холодной
-    if has_rec:
-        y_low = yb_b + 175
-        xg = xrg0 + 12 + s * rec_tr / 2
-        xcld = xrc0 + wrc / 2
-        band_poly([(xg, yb_rg), (xg, y_low), (xcld, y_low), (xcld, yb_rc)], s * rec_tr, COL["flow"],
-                  f"тепло выхлопа воздуху (эксергия): {rec_tr:.0f} кВт")
-        el.append(f'<text x="{_f((xg + xcld) / 2)}" y="{_f(y_low + s * rec_tr / 2 + 14)}" text-anchor="middle" font-size="10.5" '
-                  f'fill="{COL["ink2"]}">рекуператор возвращает воздуху {rec_tr:.0f} кВт ({_pct(100 * rec_tr / Ef)})</text>')
-        rec_items = [(kw("recup_heat"), "теплообмен", "d"), (kw("recup_dp_air") + kw("recup_dp_gas"), "Δp рекуп.", "d")]
-        drops(xrg0 + 12 + s * rec_tr, wrg - 12 - s * rec_tr, yb_rg, rec_items)
     # --- разрушение вниз
     drops(xc0, wc_blk, yb_c, [(kw("compressor"), "компрессор", "d"), (kw("leakage"), "утечки", "o")])
     drops(xb0, wb, yb_b, comb_items)
     drops(xt0, wt, yb_t, turb_items)
+    if has_rec:
+        rec_items = [(kw("recup_heat"), "теплообмен", "d"), (kw("recup_dp_air") + kw("recup_dp_gas"), "Δp рекуп.", "d")]
+        drops(xrg0 + 12 + s * rec_tr, wrg - 12 - s * rec_tr, yb_rg, rec_items)
     # подписи разрушения: разнести по горизонтали, выноски
     labels.sort(key=lambda t: t[0])
     xs_l, minsp = [], 66.0
@@ -793,6 +789,18 @@ def grassmann_svg(acc, title, subtitle, scale, path):
         el.append(f'<path d="M{_f(xb)},{_f(yb)} L{_f(xl)},{_f(ylab - 12)}" stroke="{COL["grid"]}" stroke-width="1" fill="none"/>')
         el.append(f'<text x="{_f(xl)}" y="{_f(ylab)}" text-anchor="middle" font-size="10.5" fill="{COL["ink"]}">{a}</text>')
         el.append(f'<text x="{_f(xl)}" y="{_f(ylab + 13)}" text-anchor="middle" font-size="10.5" fill="{COL["ink2"]}">{b}</text>')
+    # --- рекуператор: петля снизу (под подписями), от горячей стороны к холодной
+    y_bottom = ylab + 13
+    if has_rec:
+        y_low = ylab + 40 + s * rec_tr / 2
+        xg = xrg0 + 12 + s * rec_tr / 2
+        xcld = xrc0 + wrc / 2
+        band_poly([(xg, yb_rg), (xg, y_low), (xcld, y_low), (xcld, yb_rc)], s * rec_tr, COL["flow"],
+                  f"тепло выхлопа воздуху (эксергия): {rec_tr:.0f} кВт")
+        el.append(f'<text x="{_f((xg + xcld) / 2)}" y="{_f(y_low + 4)}" text-anchor="middle" font-size="11" '
+                  f'fill="{COL["ink"]}">рекуператор возвращает воздуху {rec_tr:.0f} кВт ({_pct(100 * rec_tr / Ef)})</text>')
+        y_bottom = y_low + s * rec_tr / 2
+    Hh = int(y_bottom + 50)
     # легенда
     ly = Hh - 18
     lx = 30

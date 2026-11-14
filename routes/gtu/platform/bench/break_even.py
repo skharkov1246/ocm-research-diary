@@ -153,7 +153,7 @@ def tariffs(args) -> dict:
         out["regions"][region] = reg
         out["missing"][region] = sorted(types - set(found))
     out["inputs"].append({"file": Path(args.spot_advisor).name, "url": SPOT_URL, "sha256": sha256(Path(args.spot_advisor))})
-    for spec in args.vpc_price or []:
+    for spec in getattr(args, "vpc_price", None) or []:
         region, _, p = spec.partition("=")
         d = json.loads(Path(p).read_text(encoding="utf-8"))
         for sku, prod in d.get("products", {}).items():

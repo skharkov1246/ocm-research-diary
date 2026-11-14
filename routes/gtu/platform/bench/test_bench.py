@@ -389,6 +389,18 @@ def test_tariffs_from_synthetic_price_list(tmp_path):
         w.writerow(base)
         w.writerow(dict(base, SKU="SYNTH2", **{"Operating System": "Windows", "PricePerUnit": "9.0"}))
         w.writerow(dict(base, SKU="SYNTH3", **{"CapacityStatus": "UnusedCapacityReservation", "PricePerUnit": "8.0"}))
+    rows = pl.read_text(encoding="utf-8").splitlines()       # + колонки семейства и типа диска, строка gp3
+    rows[5] = rows[5] + ',"Product Family","Volume API Name"'
+    rows[6:] = [r + ',"Compute Instance",""' for r in rows[6:]]
+    rows.append(",".join(f'"{v}"' for v in ["SYNTHGP3", "X", "SYNTHGP3.X.Y", "OnDemand", "SYNTHETIC gp3",
+                                              "2026-11-01", "0", "Inf", "GB-Mo", "0.0800000000", "USD"]
+                         + [""] * (len(cols) - 11) + ["Storage", "gp3"]))
+    pl.write_text("\n".join(rows) + "\n", encoding="utf-8")
+    vpc = tmp_path / "vpc_SYNTHETIC.json"
+    vpc.write_text(json.dumps({"version": "SYNTHETIC", "publicationDate": "2026-11-05T00:00:00Z",
+                               "products": {"SV": {"attributes": {"usagetype": "USE1-PublicIPv4:InUseAddress"}}},
+                               "terms": {"OnDemand": {"SV": {"t": {"priceDimensions": {"d": {
+                                   "unit": "Hrs", "pricePerUnit": {"USD": "0.0050000000"}}}}}}}}), encoding="utf-8")
     adv = tmp_path / "spot_SYNTHETIC.json"
     adv.write_text(json.dumps({"ranges": [{"index": 4, "label": ">20%"}],
                                "spot_advisor": {"us-east-1": {"Linux": {"c8i.8xlarge": {"s": 60, "r": 4}}}}}),
@@ -398,8 +410,12 @@ def test_tariffs_from_synthetic_price_list(tmp_path):
         price_list = [f"us-east-1={pl}"]
         spot_advisor = str(adv)
         types = "c8i.8xlarge,p5.4xlarge"
+        vpc_price = [f"us-east-1={vpc}"]
 
     out = be.tariffs(A)
+    assert out["extras"]["us-east-1"]["ebs_gp3_usd_gb_month"] == pytest.approx(0.08)
+    assert out["extras"]["us-east-1"]["public_ipv4_usd_h"] == pytest.approx(0.005)
+    assert be.extras_usd_h(out, "us-east-1", 50) == pytest.approx(50 * 0.08 / 730 + 0.005)
     rec = out["regions"]["us-east-1"]["c8i.8xlarge"]
     assert rec["od_usd_h"] == 2.0 and rec["spot_est_usd_h"] == pytest.approx(0.8)
     assert rec["spot_interruption"] == ">20%"

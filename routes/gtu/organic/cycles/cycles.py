@@ -953,7 +953,7 @@ def plate_laminar_constants(n=400):
     h = y[1] - y[0]
     u = 1.5 * (1 - y ** 2)                   # средняя скорость 1
     # f·Re: dp/dx = -3 μ um / b² (b — полузазор); τw = 3 μ um / b; f = τw/(ρ um²/2); Re = ρ um 4b/μ -> fRe = 24
-    tau_w = -np.gradient(u, h)[-1]           # μ = 1, um = 1, b = 1
+    tau_w = -np.gradient(u, h, edge_order=2)[-1]   # μ = 1, um = 1, b = 1
     fRe = tau_w / 0.5 * 4                    # f = τw/(0,5 um²) при ρ = 1; Re = 4b um/ν
     # Nu_H: θ'' = u·C, θ(±1) = 0 (симметрия), C из баланса
     N = n - 1
@@ -961,7 +961,7 @@ def plate_laminar_constants(n=400):
     ui = u[1:-1]
     th = np.linalg.solve(D2, ui)             # θ'' = u (масштаб)
     thf = np.concatenate([[0], th, [0]])
-    q_w = np.gradient(thf, h)[-1]            # поток на стенке (масштаб)
+    q_w = np.gradient(thf, h, edge_order=2)[-1]   # поток на стенке (масштаб)
     Tb = np.trapezoid(u * thf, y) / np.trapezoid(u, y)
     NuH = abs(q_w * 4 / (0 - Tb))            # Nu = q Dh/(k (Tw - Tb)), Dh = 4b
     # Nu_T: θ'' = -λ u θ, наименьшее собственное значение
@@ -970,7 +970,7 @@ def plate_laminar_constants(n=400):
     w, v = eigh(-D2, M)
     lam = w[0]
     thv = np.concatenate([[0], v[:, 0], [0]])
-    qv = np.gradient(thv, h)[-1]
+    qv = np.gradient(thv, h, edge_order=2)[-1]
     Tbv = np.trapezoid(u * thv, y) / np.trapezoid(u, y)
     NuT = abs(qv * 4 / Tbv)
     return dict(fRe=float(fRe), NuH=float(NuH), NuT=float(NuT), eigen=float(lam))
