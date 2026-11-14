@@ -99,7 +99,10 @@ A = dict(
     phi_t=0.50,       # турбина: ca/U
     psi_max=2.5,      # турбина: предел нагрузки ступени (gtu_explore.turb_axial)
     m2_max=1.2,       # турбина: предел числа Маха за сопловым аппаратом (трансзвуковая решётка)
+    u_margin=0.10,    # проектный запас по окружной скорости колёс компрессора к пределу 620 м/с (19 % по напряжениям):
+                      # горячая вторая ступень (около 400 °C) и сквозное отверстие (platform/fea/README.md)
 )
+U_DES = U_TI * (1 - A["u_margin"])
 
 
 # ------------------------------------------------------------------ свойства воздуха (таблицы gtu_explore из Cantera)
@@ -291,7 +294,7 @@ def best(T01, p01, m_side, PRs, eta_p, n, dbl, ulim=U_TI):
     return design(T01, p01, m_side, PRs, eta_p, n, bb, k, dbl, ind, z)
 
 
-def stage(T01, p01, m_tot, PRs, n, dbl):
+def stage(T01, p01, m_tot, PRs, n, dbl, ulim=U_DES):
     """КПД ступени = comp_stage (принятая формула трека, коэффициент расхода 0,085) + поправка набора потерь:
     КПД модели при n минус КПД модели той же ступени при частоте, где коэффициент расхода 0,085. Положительная
     поправка не засчитывается."""
@@ -299,7 +302,7 @@ def stage(T01, p01, m_tot, PRs, n, dbl):
     cs = E.comp_stage(T01, p01, PRs, m_tot, "ti", dbl)
     eta = cs["eta"]
     for _ in range(12):
-        act = best(T01, p01, m_side, PRs, eta, n, dbl)
+        act = best(T01, p01, m_side, PRs, eta, n, dbl, ulim)
         if act is None:
             return None
         n0 = n * math.sqrt(A["phi_ref"] / act["phi"])
@@ -311,7 +314,7 @@ def stage(T01, p01, m_tot, PRs, n, dbl):
             eta = new
             break
         eta = new
-    act = best(T01, p01, m_side, PRs, eta, n, dbl)
+    act = best(T01, p01, m_side, PRs, eta, n, dbl, ulim)
     # чувствительность: без трения стенок диффузора (только набор Oh + потеря на форму)
     nf = lambda d: design(T01, p01, m_side, PRs, eta, d["n"], d["beta_deg"], d["kcm"], dbl, d["ind"], d["Zfull"], False)["eta_p_model"]
     d_nofr = nf(act) - nf(ref)
@@ -321,11 +324,11 @@ def stage(T01, p01, m_tot, PRs, n, dbl):
                 k=k, fam_pen=fam_pen, fam_valid=0.84 <= k <= 1.14, shift=eta - act["eta_p_model"])
 
 
-def compressor(pi1, n=N, m=G):
-    s1 = stage(E.T0, E.P0, m, pi1, n, True)
+def compressor(pi1, n=N, m=G, ulim=U_DES):
+    s1 = stage(E.T0, E.P0, m, pi1, n, True, ulim)
     if s1 is None:
         return None
-    s2 = stage(s1["act"]["T02"], E.P0 * pi1, m, PR / pi1, n, False)
+    s2 = stage(s1["act"]["T02"], E.P0 * pi1, m, PR / pi1, n, False, ulim)
     if s2 is None:
         return None
     w = s1["act"]["w0"] + s2["act"]["w0"]
@@ -333,16 +336,16 @@ def compressor(pi1, n=N, m=G):
     return dict(pi1=pi1, pi2=PR / pi1, s1=s1, s2=s2, w=w, T3=T3, eta_eq=R * math.log(PR) / (E.s0(T3) - E.s0(E.T0)))
 
 
-def select_split():
+def select_split(ulim=U_DES):
     grid = [round(x, 2) for x in np.arange(3.4, 5.41, 0.2)]
     scan = []
     for p in grid:
-        c = compressor(p)
+        c = compressor(p, ulim=ulim)
         scan.append(dict(pi1=p, w_kJkg=None if c is None else c["w"] / 1e3, eta_eq=None if c is None else c["eta_eq"],
                          U2_1=None if c is None else c["s1"]["act"]["U2"], U2_2=None if c is None else c["s2"]["act"]["U2"]))
     ok = [s for s in scan if s["w_kJkg"] is not None]
     p0 = min(ok, key=lambda s: s["w_kJkg"])["pi1"]
-    r = minimize_scalar(lambda p: (lambda c: 1e9 if c is None else c["w"])(compressor(p)), bounds=(p0 - 0.2, p0 + 0.2),
+    r = minimize_scalar(lambda p: (lambda c: 1e9 if c is None else c["w"])(compressor(p, ulim=ulim)), bounds=(p0 - 0.2, p0 + 0.2),
                         method="bounded", options={"xatol": 0.01})
     return round(float(r.x), 2), scan
 
@@ -666,7 +669,9 @@ def eta_is_from_p(T01, PRs, eta_p):
 
 
 def run():
-    pi1, scan = select_split()
+    pi1, scan = select_split(U_DES)
+    pi1_620, scan_620 = select_split(U_TI)          # для сравнения: без проектного запаса, только предел материала
+    c620 = compressor(pi1_620, ulim=U_TI)
     dp = design_point(pi1)
     z = dp["z_sel"]
     cyc = dp["opts"][z]["cyc"]
@@ -804,7 +809,12 @@ def run():
         ],
         assumptions=dict(A, note="все — оценка; в JSON — как в коде (A в frame3_point.py)"),
         problem=dict(D2_family=PT["D2"], n_family=PT["n_gg"], U2_family=PT["U2"], U2_at_n_out_same_D2=math.pi * PT["D2"] * N / 60),
-        split=dict(pi1=pi1, pi2=PR / pi1, pi=PR, scan=scan, criterion="наименьшая работа сжатия (наибольший КПД всего компрессора), U2 <= 620 м/с"),
+        split=dict(pi1=pi1, pi2=PR / pi1, pi=PR, scan=scan, U2_design_limit=U_DES,
+                   criterion="наименьшая работа сжатия (наибольший КПД всего компрессора) при U2 <= 0,9*620 = 558 м/с у обоих колёс",
+                   without_margin=dict(pi1=pi1_620, pi2=PR / pi1_620, U2_limit=U_TI, scan=scan_620, eta_p_equiv_tables=c620["eta_eq"],
+                                       w_kJkg=c620["w"] / 1e3, eta_p1=c620["s1"]["eta_p"], eta_p2=c620["s2"]["eta_p"],
+                                       U2_1=c620["s1"]["act"]["U2"], U2_2=c620["s2"]["act"]["U2"], D2_1=c620["s1"]["act"]["D2"],
+                                       D2_2=c620["s2"]["act"]["D2"], beta2_1=c620["s1"]["act"]["beta_deg"], beta2_2=c620["s2"]["act"]["beta_deg"])),
         stage1=s1r, stage2=s2r,
         compressor=dict(eta_p_equiv=dp["eta_pc"], eta_p_equiv_tables=dp["comp"]["eta_eq"], w_cantera_kJkg=sum(dp["w_stage_cantera"]) / 1e3,
                         w_tables_kJkg=dp["comp"]["w"] / 1e3, T3_C=dp["T_stage_cantera"][1] - 273.15),
@@ -846,7 +856,8 @@ if __name__ == "__main__":
               f"φ {s['phi']:.4f} Z {s['blades_full']}+{s['blades_splitter']} β2 {s['beta2_blade_from_radial_deg']:.0f}° "
               f"η_p {s['eta_p']:.4f} (Δ {s['eta_basis']['d_eta_raw']:+.4f}) запас U2 {s['material']['margin_U_pct']:.1f} %")
     for z, t in res["turbine"]["options"].items():
-        print(f"турбина z={z}: Dm {t['Dm']:.3f} ψ {t['psi']:.2f} R {t['stages'][0]['reaction']:.2f} M2 {t['stages'][0]['M2']:.2f} "
+        m2 = [st["M2"] for st in t["stages"]]
+        print(f"турбина z={z}: Dm {t['Dm']:.3f} ψ {t['psi']:.2f} R {t['stages'][0]['reaction']:.2f} M2 {m2} "
               f"η {t['eta_p']:.3f} ER {t['ER_total']:.2f} годна {t['feasible']} P {t['P_shaft_kW']:.0f}")
     print("цикл:", {k: cy["frame3"][k] for k in ("P_shaft_kW", "P_el_kW", "eff_shaft", "eff_el", "EGT_C")})
     print("gtu_family:", cy["gtu_family_repro"], cy["gtu_family_json"])
