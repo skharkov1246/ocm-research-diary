@@ -32,6 +32,7 @@ const TRACKS = [
   [/^cc_|^pyrolysis|^chemloop/, "cc-activation-recycling"],
   [/^fe_zeolite|^alpha_o|^feo_|^fe_ferryl/, "ch4-to-methanol"],
   [/^battery|^cathode/, "battery-cathode"],
+  [/^gtu_/, "gas-turbine"],
   [/^nacn|^msa|^pom_|^urea|^acetic|^dife|^antibep/, "прочее"],
 ];
 const trackOf = (name) => (TRACKS.find(([rx]) => rx.test(name)) || [null, "не определён"])[1];
