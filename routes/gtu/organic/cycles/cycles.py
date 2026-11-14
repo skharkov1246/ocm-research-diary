@@ -1217,7 +1217,7 @@ def parts(res, hx, tech):
     water = t["tcr"] == "steam"
     if water or not res["limits"]["all"]:
         pnp = "нет"
-    elif V == 0 and t["pgc"] == "none" and not t["ibc"]:
+    elif V == 0 and t["pgc"] == "none" and not t["ibc"] and t["tcr"] == "none":
         pnp = "да"
     elif V <= 6.0:
         pnp = "частично"
@@ -1477,6 +1477,49 @@ def study_wall(res_best):
     HX_TECH["lpbf"].update(keep)
     foil = [x for x in hx_list(rr, "foil") if x["name"] == "рекуператор"][0]
     return dict(key=o["key"], lpbf=rows, foil=dict(V_core_m3=foil["V_core_m3"], mass_kg=foil["mass_kg"], L_m=foil["L_m"]))
+
+
+def poly_convergence():
+    """смещение схемы «политропа 40 шагами» (как gtu_cycle) против сошедшегося интеграла: простой цикл, π 13,5"""
+    keep = A["poly_n"]
+    rows = []
+    for n in (40, 80, 160, 320):
+        A["poly_n"] = n
+        r = evaluate(dict(rec=0.0, ic=False, rh=False, ibc=False, pgc="none", tcr="none"), A["PR0"])
+        rows.append(dict(n=n, w_kJkg=r["w_kJkg"], eff=r["eff"], EGT_C=r["EGT_C"]))
+    A["poly_n"] = keep
+    w_inf = rows[-1]["w_kJkg"] - (rows[-2]["w_kJkg"] - rows[-1]["w_kJkg"])      # Ричардсон, ошибка ~1/n
+    return dict(rows=rows, w_extrapolated_kJkg=w_inf, bias_n40_pct=100 * (rows[0]["w_kJkg"] / w_inf - 1),
+                note="схема трека (явная, 40 шагов) завышает работу цикла; знак один для всех вариантов — порядок не меняется")
+
+
+def keq_table():
+    """константы равновесия реакций Xu — Froment: Cantera против эмпирических формул модели (по памяти)"""
+    out = []
+    for T in (700.0, 800.0, 900.0, 1000.0, 1100.0):
+        a, b = K_eq_bar(T), K_eq_xf_empirical(T)
+        out.append(dict(T_K=T, K1_cantera=a[0], K1_emp=b[0], K2_cantera=a[1], K2_emp=b[1], ratio_K1=a[0] / b[0], ratio_K2=a[1] / b[1]))
+    return out
+
+
+def catalyst_estimate(out, key="R90-ic-RH-ibc-none-steam"):
+    """масса катализатора и покрываемая площадь для варианта с паровым риформингом (оценка): кинетика Xu — Froment,
+    95 % равновесного превращения при 650 °C, 17 бар, S/C 2 (ближайшая строка study_reformer)"""
+    o = next((x for x in out["results"] if x["key"] == key), None)
+    if not o or not o["opt"].get("ok"):
+        return None
+    r = o["opt"]
+    kin = next(k for k in out["reformer"]["kinetics"] if k["P_bar"] == 17.0 and k["T_C"] == 650.0 and k["sc"] == 2.0)
+    n_ch4 = r["W_fuel_CH4"] / (MW[I["CH4"]] / 1000.0)
+    W = kin["W95_kg_per_molCH4_s"] * n_ch4
+    ref = [h for h in r["hx"]["lpbf"] if h["name"].startswith("риформер")]
+    A_hx = ref[0].get("A_m2") if ref else None
+    if A_hx is None and ref:
+        A_hx = ref[0]["V_core_m3"] / (HX_TECH["lpbf"]["Dh"] / 2 + HX_TECH["lpbf"]["t"])
+    return dict(key=key, CH4_mol_s=n_ch4, W95_kg_per_mol_s=kin["W95_kg_per_molCH4_s"], catalyst_kg=W,
+                coated_area_m2=W / A["cat_loading"], reformer_wall_area_m2=A_hx, T_ref_C=r["fuel_info"].get("T_ref_C"),
+                note="константы Xu — Froment не сверены с оригиналом; покрытие стенок: фактор эффективности 1 (для гранул ~0,05 — "
+                     "в 20 раз больше катализатора); загрузка 50 г/м² — оценка")
 
 
 def crosscheck_gtu_cycle():
@@ -1745,6 +1788,9 @@ def main():
         hx_wall_sensitivity=wall,
         runtime_s=time.time() - t0,
     )
+    out["crosscheck"]["poly_steps"] = poly_convergence()
+    out["reformer"]["keq_check"] = keq_table()
+    out["reformer"]["catalyst_estimate"] = catalyst_estimate(out)
     out["feed_to_funnels"] = feed_from(out)
     keep = {base["key"]} | {r["key"] for r in front + front_p} | ({rec_best["key"]} if rec_best else set()) | {k for k, _ in CURATED}
     if OUT_DIR == HERE:          # полный файл (12 МБ) — в scratchpad, в репозиторий — сжатый
@@ -1974,6 +2020,9 @@ def rebuild_tables():
     ob = next((o for o in out["results"] if o["key"] == "R90-ic-RH-ibc-none-none"), None)
     if ob:
         out["murray"] = murray_for(ob)
+    out["crosscheck"]["poly_steps"] = poly_convergence()
+    out["reformer"]["keq_check"] = keq_table()
+    out["reformer"]["catalyst_estimate"] = catalyst_estimate(out)
     out["feed_to_funnels"] = feed_from(out)
     json.dump(out, open(path, "w", encoding="utf-8"), ensure_ascii=False, default=_jdef)
     with open(os.path.join(HERE, "cycles.csv"), "w", newline="", encoding="utf-8") as fh:
