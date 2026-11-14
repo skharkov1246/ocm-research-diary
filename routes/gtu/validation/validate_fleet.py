@@ -499,6 +499,16 @@ def main():
         trend(ind, "T41_C", "deta_pp"), trend(ind, "T41_C", "dP_pct"),
         trend(ind, "PR", "deta_pp"), trend(ind, "PR", "dP_pct"),
         trend(ind, "W_exh", "deta_pp", math.log), trend(ind, "W_exh", "dP_pct", math.log)) if t]
+    # устойчивость трендов: те же наклоны без записей с оговорками данных (SGT-500, Titan 130 MD) и без
+    # единственной трёхвальной записи — один выброс с большим плечом не должен задавать вывод
+    def _trends(sample):
+        return [t for t in (
+            trend(sample, "T41_C", "deta_pp"), trend(sample, "T41_C", "dP_pct"),
+            trend(sample, "W_exh", "deta_pp", math.log), trend(sample, "W_exh", "dP_pct", math.log)) if t]
+    trends_robust = dict(
+        no_data_caveat=_trends(rows(P, ("independent",), lambda r: noR(r) and not r["data_caveat"])),
+        one_two_shafts=_trends(rows(P, ("independent",), lambda r: noR(r) and r["shafts"] in ("single", "two"))),
+    )
     # охлаждение: та же выборка, вариант с ростом охлаждения по T41
     ind_c = rows("interp_coolT41", ("independent",), noR)
     trends_cool = [t for t in (trend(ind_c, "T41_C", "deta_pp"), trend(ind_c, "T41_C", "dP_pct")) if t]
@@ -585,7 +595,8 @@ def main():
         model_conversion=cfg["model"]["eta_generator"] * cfg["model"]["eta_gearbox"])
     res = dict(**meta, config=cfg, calibration_sets=calib_out, summary=summary, groups_primary_independent=groups,
                groups_coolT41_independent=groups_cool, generator_drive_pairs_summary=pairs_summary,
-               trends_primary_independent=trends, trends_coolT41_independent=trends_cool,
+               trends_primary_independent=trends, trends_primary_independent_robustness=trends_robust,
+               trends_coolT41_independent=trends_cool,
                single_shaft_duct_effect=duct, generator_drive_pairs=pairs, sensitivity_cycle=sens,
                sensitivity_recup=sens_recup, breaks_primary=breaks, recuperated=recup_rows,
                records=list(by_rec.values()))

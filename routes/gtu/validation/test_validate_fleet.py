@@ -151,3 +151,7 @@ def test_results_file_complete_and_csv_consistent(cfg):
     assert s["n"] == len(ind)
     assert math.isclose(s["dP_pct"]["mean_abs"], sum(abs(r["dP_pct"]) for r in ind) / len(ind), rel_tol=1e-9)
     assert math.isclose(s["deta_pp"]["max_abs"], max(abs(r["deta_pp"]) for r in ind), rel_tol=1e-9)
+    # устойчивость трендов: выборки без оговорок данных (23) и только одно- и двухвальные (24)
+    rob = res["trends_primary_independent_robustness"]
+    assert {t["n"] for t in rob["no_data_caveat"]} == {s["n"] - 2}
+    assert {t["n"] for t in rob["one_two_shafts"]} == {s["n"] - 1}

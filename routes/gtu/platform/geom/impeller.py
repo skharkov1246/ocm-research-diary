@@ -14,6 +14,9 @@
 
 Система координат: ось z - ось вращения, поток входит вдоль +z; колесо вращается в сторону +theta
 (вектор угловой скорости +z); periodic_2 = поворот periodic_1 на +360/Z вокруг z.
+Размеры из внешнего одномерного расчёта можно задать (D1s, nu, b2, Lz, beta1h, beta1s, beta2b, Z, gap), как и
+полные параметры на входе (T01, p01; по умолчанию стандартные). Двустороннее колесо (double_sided): m - расход
+колеса, одна сторона (1D-увязка, канал, сетка) - на m/2, STEP - обе стороны зеркально на общем диске.
 Запуск: python impeller.py --case core130 --level coarse
 """
 import argparse
@@ -1090,6 +1093,8 @@ def main(argv=None):
     res = build(a.case, a.level, a.out, a.m, a.pr, a.rpm, a.d2, step=not a.no_step, mesh=not a.no_mesh,
                 msh=a.msh, threads=a.threads, verbose=a.verbose, T01=a.t01, p01=a.p01, **over)
     d = res["d1"]
+    if d["double_sided"]:
+        print(f"[{res['case']}] двусторонний вход: сторона на {d['m_side']:.3f} кг/с")
     print(f"[{res['case']}] m={d['m']:.2f} кг/с PR={d['PR']:.2f} n={d['rpm']:.0f} об/мин D2={d['D2']:.4f} м "
           f"U2={d['U2']:.0f} м/с b2={d['b2'] * 1e3:.1f} мм D1s/D2={d['D1s_D2']:.3f} M1s,отн={d['M1s_rel']:.2f} "
           f"beta2b={d['beta2b']:.1f} Lz={d['Lz'] * 1e3:.0f} мм зазор={d['gap'] * 1e3:.2f} мм")

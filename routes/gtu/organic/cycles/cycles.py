@@ -1504,7 +1504,7 @@ def plots(rows, front, ref):
     fig, ax = plt.subplots(figsize=(9, 5.6), dpi=110)
     ok = [r for r in rows if r["limits_ok"] and not r["bound"]]
     bad = [r for r in rows if not r["limits_ok"] and not r["bound"]]
-    ax.scatter([r["added"] for r in bad], [100 * r["eff_el"] for r in bad], s=8, c="#c9c9c9", label="вне мягкого допуска")
+    ax.scatter([r["added"] for r in bad], [100 * r["eff_el"] for r in bad], s=8, c="#8c8c8c", label="вне мягкого допуска")
     sc_ = ax.scatter([r["added"] for r in ok], [100 * r["eff_el"] for r in ok], s=[10 + 25 * r["V_added_m3"] for r in ok],
                      c=[r["TRL"] for r in ok], cmap="viridis", vmin=3, vmax=9, alpha=0.75, label="в допуске (размер — объём)")
     fr = [rows[i] for i in front]
@@ -1522,7 +1522,7 @@ def plots(rows, front, ref):
     ax.set_xlabel("добавочные детали и узлы (относительно KV-3 простого)")
     ax.set_ylabel("КПД на клеммах, %")
     ax.set_title("KV-3: перебор циклов (печатные теплообменники LPBF), оптимум π")
-    ax.legend(fontsize=8, loc="lower right")
+    ax.legend(fontsize=8, loc="upper left")
     fig.tight_layout()
     fig.savefig(os.path.join(OUT_DIR, "cycles_pareto.png"), bbox_inches="tight")
     plt.close(fig)
@@ -1540,7 +1540,7 @@ def plots_exergy(items):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    colors = ["#0072B2", "#D55E00", "#009E73", "#CC79A7", "#999999", "#E69F00", "#56B4E9"]   # Okabe — Ito
+    colors = ["#0072B2", "#D55E00", "#009E73", "#CC79A7", "#4D4D4D", "#E69F00", "#56B4E9"]   # Okabe — Ito + тёмно-серый
     labels = [x[0] for x in items]
     fig, ax = plt.subplots(figsize=(10, 0.55 * len(items) + 2.0), dpi=110)
     left = np.zeros(len(items))
@@ -1662,7 +1662,7 @@ def main():
         hx_wall_sensitivity=wall,
         runtime_s=time.time() - t0,
     )
-    out["feed_to_funnels"] = feed(out, rows, front, front_p)
+    out["feed_to_funnels"] = feed_from(out)
     json.dump(out, open(os.path.join(OUT_DIR, "cycles_results.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1,
               default=_jdef)
     cols = list(rows[0].keys())
@@ -1679,6 +1679,7 @@ def main():
         if o["key"] != base["key"]:
             items.append((f"{o['name']} (π {r['PR']:.1f})"[:70], o["opt"]))
     plots_exergy(items)
+    print("feed:", write_feed(out["feed_to_funnels"]))
     print(f"готово за {time.time() - t0:.0f} с; фронт Парето: {len(front)}")
     for r in front:
         print(f"  {r['added']:3d} дет. {100 * r['eff_el']:5.1f} % V {r['V_added_m3']:5.2f} м³ π {r['PR']:5.2f} TRL {r['TRL']} "
@@ -1697,41 +1698,158 @@ def _jdef(x):
     return str(x)
 
 
-def feed(out, rows, front, front_p):
-    """что подать в воронку двигателя (routes/gtu/funnel) и воронку камеры (routes/gtu/combustor)"""
+def _pick(res, pred, tag="opt", need_limits=True):
+    c = [o for o in res if pred(o["topo"]) and o[tag].get("ok") and (o[tag]["limits"]["all"] or not need_limits)]
+    return max(c, key=lambda o: o[tag]["eff_el"]) if c else None
+
+
+def combustor_conditions(o, tag="opt"):
+    """условия на входе и выходе каждой камеры варианта (для воронки камеры)"""
+    r = _safe(o["topo"], o[tag]["PR"], o[tag]["prm"], detail=True)
+    rows = []
+    g = gas()
+    for name, ins, outs, W, Q in r["_comps"]:
+        if name.startswith("Камера"):
+            ox, fu = ins[0], ins[1]
+            g.TPY = ox.T, ox.P, ox.Y
+            Xi = g.X.copy()
+            g.TPY = outs[0].T, outs[0].P, outs[0].Y
+            Xo = g.X.copy()
+            g.TPY = fu.T, fu.P, fu.Y
+            Xf = g.X.copy()
+            rows.append(dict(node=name, T_in_C=ox.T - 273.15, p_in_bar=ox.P / 1e5, O2_in_vol=float(Xi[I["O2"]]),
+                             O2_out_vol=float(Xo[I["O2"]]), T_out_C=outs[0].T - 273.15, fuel_air_mass=fu.m / ox.m,
+                             fuel_T_C=fu.T - 273.15, fuel_H2_vol=float(Xf[I["H2"]]), fuel_CH4_vol=float(Xf[I["CH4"]])))
+    return rows
+
+
+def feed_from(out):
+    """что подать в воронку двигателя (routes/gtu/funnel/funnel_space.py) и воронку камеры (routes/gtu/combustor):
+    новые оси и значения, модели, ограничения — с числами из этого расчёта"""
+    res = out["results"]
+    simple = _pick(res, lambda t: not t["rec"] and not t["ic"] and not t["rh"] and not t["ibc"] and t["pgc"] == "none"
+                   and t["tcr"] == "none")
+    rec_rh = _pick(res, lambda t: t["rec"] and t["rh"] and not t["ic"] and not t["ibc"] and t["pgc"] == "none" and t["tcr"] == "none")
+    rec_rh_fh = _pick(res, lambda t: t["rec"] and t["rh"] and not t["ic"] and not t["ibc"] and t["pgc"] == "none" and t["tcr"] == "fh")
+    rec_only = _pick(res, lambda t: t["rec"] and not t["rh"] and not t["ic"] and not t["ibc"] and t["pgc"] == "none"
+                     and t["tcr"] == "none", need_limits=False)
+    icr = _pick(res, lambda t: t["rec"] and t["ic"] and not t["rh"] and not t["ibc"] and t["pgc"] == "none" and t["tcr"] == "none")
+    fh = _pick(res, lambda t: not t["rec"] and not t["ic"] and not t["rh"] and not t["ibc"] and t["pgc"] == "none" and t["tcr"] == "fh")
+    pg = [o for o in res if o["key"] in ("R00-ic-rh-ibc-real-none", "R00-ic-rh-ibc-ideal-none")]
+    short = lambda o, tag="opt": None if o is None else dict(
+        key=o["key"], name=o["name"], PR=round(o[tag]["PR"], 2), eff_el=round(o[tag]["eff_el"], 4), W_air=round(o[tag]["W_air"], 2),
+        EGT_C=round(o[tag]["EGT_C"], 1), T_rec_in_C=None if o[tag]["T_rec_in_C"] is None else round(o[tag]["T_rec_in_C"], 1),
+        added_lpbf=o[tag]["parts"]["lpbf"]["added"], V_added_m3_lpbf=round(o[tag]["parts"]["lpbf"]["V_added_m3"], 2),
+        mass_hx_kg_lpbf=round(o[tag]["parts"]["lpbf"]["mass_hx_kg"]), mass_hx_kg_foil=round(o[tag]["parts"]["foil"]["mass_hx_kg"]),
+        limits_ok=o[tag]["limits"]["all"], T41_for_G_cap_C=o[tag].get("T41_for_G_cap_C"), prm=o[tag]["prm"])
+    comb = {}
+    for tag_, o in (("рекуператор + подогрев", rec_rh), ("простой", simple), ("рекуператор + промохлаждение", icr)):
+        if o is not None:
+            comb[tag_] = combustor_conditions(o)
+    w_need = A["P_shaft_kW"] / A["G_cap"]
     return dict(
-        source="routes/gtu/organic/cycles/cycles_results.json",
+        source="routes/gtu/organic/cycles/cycles_results.json", date=DATE,
+        status="оценка уровня облика (0D-цикл); числа — из cycles_results.json",
+        key_finding=f"при T41 {A['T41_C']:.0f} °C (класс U) мягкий допуск по расходу требует удельной работы ≥ {w_need:.1f} кДж/кг; "
+                    "простой цикл KV-3 на пределе, рекуператор сам по себе её снижает (потери давления) и не проходит; проходит "
+                    "рекуператор вместе с повторным подогревом (или с промохлаждением) — см. representative",
+        representative=dict(simple=short(simple), recup_only_out_of_limits=short(rec_only), recup_reheat=short(rec_rh),
+                            recup_reheat_fuelheat=short(rec_rh_fh), recup_intercool=short(icr), fuel_heat=short(fh),
+                            pgc=[short(o) for o in pg]),
         engine_funnel=dict(
+            target="routes/gtu/funnel/funnel_space.py (CAT, CONT, ARCH)",
             new_axes=[
-                dict(axis="cycle_topology", values=["простой", "рекуператор 0,85–0,92 при π 4–6", "рекуператор при π 13,5 (как есть)",
-                                                    "подогрев (межтурбинная камера)", "рекуператор + подогрев", "подогрев топлива"],
-                     model="cycles.evaluate(topo, PR, prm) — КПД, расход, выхлоп, температура газа на входе в рекуператор"),
-                dict(axis="recuperator_eps", values=[0.0, 0.80, 0.85, 0.90], model="cycles.size_hx — объём, масса, модули LPBF"),
-                dict(axis="recuperator_dp_total_pct", values=[3.0, 6.0, 9.0], model="cycles.study_recup_tradeoff"),
-                dict(axis="PR_for_recuperated", values=[4.0, 4.5, 5.0, 6.0], model="одна центробежная ступень до π 5"),
-                dict(axis="hx_technology", values=list(HX_TECH.keys()), model="cycles.HX_TECH"),
+                dict(axis="reheat", kind="CAT", values=["нет", "межтурбинная камера"],
+                     note="повторный подогрев на одном валу: газ после первой ступени турбины снова до T41; поднимает удельную работу "
+                          "и температуру газа перед рекуператором — делает рекуператор выполнимым при мягком допуске",
+                     model="cycles.evaluate(topo с rh=True, PR, prm=dict(x_rh=…))"),
+                dict(axis="x_rh", kind="CONT", range=[0.3, 0.7], note="доля ln(p4/p5) до подогрева; оптимум — см. representative.recup_reheat.prm"),
+                dict(axis="fuel_preheat", kind="CAT", values=["нет", "до 400 °C выхлопом"],
+                     note="дешёвый узел (+2 детали), прирост КПД — representative.fuel_heat против simple"),
+                dict(axis="T_rec_max_C", kind="CAT", values=[700, 800],
+                     note="700 — LIM gtu_explore (нержавеющая сталь); 800 — печатный Inconel 625 (оценка, нужна ползучесть) — trec800"),
+                dict(axis="recup_core_tech", kind="CAT", values=list(HX_TECH),
+                     note="масса сердцевины: фольга 0,1 мм против печатной стенки 0,35 мм — hx_wall_sensitivity; печать — для коллекторов "
+                          "и корпуса, сердцевина — фольга или печать тонкой стенкой"),
             ],
-            constraints=["мягкий допуск пакета: расход воздуха ≤ 1,2·21,41 кг/с, выхлоп ≤ 1,2·21,77 кг/с, ≤ 610 °C",
-                         "газ на входе в рекуператор ≤ LIM['T_rec_max'] (700 °C)",
-                         "Plug&Play: без воды; добавочный объём теплообменников (×2 на коллекторы) ≤ 6 м³ — оценка"],
-            drop=["паровой риформинг (вода в пакете)", "риформинг рециркулятом (кислород выхлопа сжигает метан)",
-                  "IBC (колесо не помещается на вал, громоздкий охладитель)", "горение с ростом давления (TRL 3)"],
+            changes=[
+                dict(axis="eps_rec", now="0,75–0,92", proposed="0,80–0,92 только вместе с reheat или промохлаждением; без них при "
+                     "T41 1000 °C вариант вне допуска по расходу (T41_for_G_cap_C)"),
+                dict(axis="pgain", now="RDC 0–0,10", proposed="идеальный предел EAP посчитан (pgc_ideal_PG); при реализации 25 % и "
+                     "штрафе КПД турбины 2 п. п. выигрыш около нуля — весу архетипа RDC снизить", model="cycles.pgc_gain"),
+            ],
+            models=["cycles.evaluate — цикл любой топологии на одном валу (Cantera)", "cycles.size_hx — объём, масса, модули печати",
+                    "cycles.exergy_account — разрушение эксергии по узлам двумя способами"],
+            drop=["паровой риформинг: вода в пакете (Plug&Play — нет), выигрыш в основном от впрыска пара",
+                  "риформинг рециркулятом выхлопа: кислород обеднённого выхлопа сжигает метан, теплотворность не растёт",
+                  "IBC: колесо компрессора IBC не помещается на вал 14 950 об/мин (нужен отдельный вал), охладитель громоздкий",
+                  "горение с ростом давления: TRL 3, реальный выигрыш около нуля"],
+            pgc_ideal_PG={o["key"]: o["opt"].get("PG_ideal") for o in pg},
         ),
         combustor_funnel=dict(
+            target="routes/gtu/combustor (targets.json)",
+            conditions=comb,
             new_axes=[
-                dict(axis="T3_combustor_inlet_C", values=sorted({round(r["T3r_C"], -1) for r in front}),
-                     note="рекуперированный цикл — горячий воздух на входе в камеру; риск обратного проскока и NOx"),
-                dict(axis="reheat_inlet", values=dict(O2_vol_pct="≈ 13–15 (газ после ступени турбины)", T_in_C="≈ 750–850"),
-                     note="межтурбинная камера в обеднённом кислородом газе — новая задача для воронки камеры"),
-                dict(axis="fuel_preheat_C", values=[15, 250, 400], note="подогрев топлива выхлопом; выше 400 °C — сажа на стенках"),
-                dict(axis="fuel_composition", values=["CH4", "синтез-газ парового риформинга (H2 — см. reformer)"],
-                     note="только для справки: вариант с водой в KV не рекомендуется"),
+                dict(axis="T3_combustor_inlet_C", values=sorted({round(r["T_in_C"], -1) for v in comb.values() for r in v
+                                                                 if r["node"] == "Камера сгорания"}),
+                     note="рекуперированный цикл — горячий воздух на входе в камеру: проскок пламени, NOx"),
+                dict(axis="reheat_combustor", values=[r for r in comb.get("рекуператор + подогрев", []) if r["node"] == "Камера подогрева"],
+                     note="межтурбинная камера в обеднённом кислородом газе (вход — после ступени турбины)"),
+                dict(axis="fuel_T_C", values=[15, 400], note="подогрев топлива выхлопом; выше 400 °C — разложение метана на стенках"),
             ],
             models=["cycles.burn — полное сгорание любой смеси CH4/H2/CO/H2O/CO2", "cycles.pgc_gain — предел горения с ростом давления",
-                    "cycles.carbon_activity — сажеобразование в подогретом топливе"],
+                    "cycles.carbon_activity — сажеобразование в подогретом или риформированном топливе"],
         ),
+        aws=dict(jobs="routes/gtu/organic/cycles/aws_jobs_cycles.json",
+                 note="мелкая сетка (CYCLES_FINE): 864 топологии, π через 0,5; проверено командой plan без AWS; выполнимо после "
+                      "попадания файлов в ветку claude/lucid-allen-yvps5d"),
     )
 
 
+def write_feed(fd):
+    """своя копия + слияние под ключом "cycles" в organic/feed_to_funnels.json (чужие ключи не трогаются)"""
+    own = os.path.join(OUT_DIR, "feed_cycles.json")
+    json.dump(fd, open(own, "w", encoding="utf-8"), ensure_ascii=False, indent=1, default=_jdef)
+    if QUICK or OUT_DIR != HERE:
+        return own, None
+    path = os.path.join(os.path.dirname(HERE), "feed_to_funnels.json")
+    d = {}
+    if os.path.exists(path):
+        try:
+            d = json.load(open(path, encoding="utf-8"))
+        except Exception:  # noqa: BLE001  чужая запись не дописана — не затираем
+            return own, "organic/feed_to_funnels.json не читается — записана только своя копия"
+    d["cycles"] = fd
+    tmp = path + ".tmp_cycles"
+    json.dump(d, open(tmp, "w", encoding="utf-8"), ensure_ascii=False, indent=1, default=_jdef)
+    os.replace(tmp, path)
+    return own, path
+
+
+def feed_only():
+    """пересобрать feed_to_funnels и графики из готового cycles_results.json (без перебора)"""
+    path = os.path.join(OUT_DIR, "cycles_results.json")
+    out = json.load(open(path, encoding="utf-8"))
+    out["feed_to_funnels"] = feed_from(out)
+    json.dump(out, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1, default=_jdef)
+    print("feed:", write_feed(out["feed_to_funnels"]))
+    tech = "lpbf"
+    res = out["results"]
+    rows = [f for o in res for f in [flat(o, "opt", tech)] if f]
+    sel = [r for r in rows if r["limits_ok"] and not r["bound"]]
+    front_i = pareto(sel, [("eff_el", 1), ("added", -1), ("V_added_m3", -1)])
+    base = [o for o in res if o["key"] == "R00-ic-rh-ibc-none-none"][0]
+    plots(sel + [r for r in rows if not r["limits_ok"] and not r["bound"]], front_i, base["pr135"]["eff_el"])
+    items = [("KV-3 простой, π опт.", base["opt"])]
+    for r in out["pareto_lpbf"][:8]:
+        o = [x for x in res if x["key"] == r["key"]][0]
+        if o["key"] != base["key"]:
+            items.append((f"{o['name']} (π {r['PR']:.1f})"[:70], o["opt"]))
+    plots_exergy(items)
+
+
 if __name__ == "__main__":
-    main()
+    if "--feed-only" in sys.argv:
+        feed_only()
+    else:
+        main()

@@ -1484,7 +1484,7 @@
   "fingerprint": "f3cac2dbbba93b4f"
  },
  "timing": {
-  "seconds_per_concept_per_core": 0.0216,
+  "seconds_per_concept_per_core": 0.0147,
   "workers": 4,
   "note": "оценка на этой машине (4 ядра); на c7a.16xlarge - 64 vCPU"
  },
@@ -4127,5 +4127,5 @@
    }
   ]
  },
- "elapsed_s": 14.9
+ "elapsed_s": 10.4
 }

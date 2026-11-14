@@ -20,7 +20,7 @@ KV-1 ... KV-7, ../gtu_lineup_results.json). Воронка: 20 000 концеп�
 Запуск:
   python funnel_space.py --kv KV-3 --n 20000 --shard 3 --shards 20 --out "$GTU_OUT"   # одна часть (на AWS)
   python funnel_space.py --selfcheck                                                    # отладка на малой выборке
-Результаты ниже уровня 0 - «оценка»: КПД узлов, пределы и коэффициенты - принятые величины трека и свои оценки (README).
+Все результаты уровня 0 - «оценка»: КПД узлов, пределы и коэффициенты - принятые величины трека и свои оценки (README).
 """
 import argparse, datetime, hashlib, inspect, json, math, os, platform, sys, time, warnings
 

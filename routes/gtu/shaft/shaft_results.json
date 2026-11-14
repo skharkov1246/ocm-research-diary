@@ -5,11 +5,11 @@
  "inputs": [
   {
    "file": "shaft_taurus60_gs.toml",
-   "sha256": "2e2a164e8418f251cdc2617982873b7f1b814f88eefeb9f350e02c06b45611d5"
+   "sha256": "6bc94344ad6a8a0ea48cc512261825c4020247966d98eb67e4f43f5fae46e941"
   },
   {
    "file": "shaft_taurus60_md.toml",
-   "sha256": "29933d1e7f5a021d989cb4f8cd50eaecd5049e9c409457d329621ce1c37ca3b2"
+   "sha256": "a4cc7f723a010a071fd85f08b1187788d93733a18acc8afa965716160ccf22e8"
   },
   {
    "file": "../fleet/gtu_fleet_taurus60.json",
@@ -49,7 +49,7 @@
   },
   {
    "file": "gtu_shaft.py",
-   "sha256": "c9b5a898b54bfffb5b5a2b34b09e41df8633d48dde24a5ce91db879da5ef268f"
+   "sha256": "663fe206d7e015940377e35646857e9aac9e7bce911340e12bf891444a909bcb"
   }
  ],
  "example_note": "все параметры агрегата (редуктор, генератор, техкомпрессор, газ, сеть) — тестовые значения EXAMPLE: example=true в TOML, перечень — data_needed.csv",
@@ -3215,5 +3215,5 @@
   },
   "chosen": "axi-5 в расчётной точке файла: выбор из двух карт по кривой GS без подгонки положения точки; сетка положений — только для прозрачности (лучшее по GS — grid_GS_best)"
  },
- "elapsed_s": 52.614697
+ "elapsed_s": 56.634001
 }

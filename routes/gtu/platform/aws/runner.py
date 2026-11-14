@@ -917,15 +917,7 @@ class Runner:
         """('launched', Active) | ('refused'|'defer'|'failed'|'image_unavailable'|'dryrun_ok'|
         'dryrun_denied'|'planned', None)."""
         from botocore.exceptions import ClientError
-        try:
-            ami = self.ami(job.image)
-        except ImageUnavailable as e:
-            self._why[job.name] = str(e)
-            self.journal.append("launch_error", run_id=self.cfg.run_id, job=job.name, attempt=attempt,
-                                code="ImageUnavailable", detail=str(e))
-            self.say(f"[запуск] {job.name}: {e}")
-            return "image_unavailable", None
-        refused = False
+        refused, ami = False, None
         for itype in job.types:
             info = self.price(itype)
             if info.window_max <= 0:
@@ -935,6 +927,15 @@ class Runner:
             if not ok:
                 refused = True
                 continue
+            if ami is None:                       # образ — после бюджета: отказ по бюджету не зовёт SSM
+                try:
+                    ami = self.ami(job.image)
+                except ImageUnavailable as e:
+                    self._why[job.name] = str(e)
+                    self.journal.append("launch_error", run_id=self.cfg.run_id, job=job.name, attempt=attempt,
+                                        code="ImageUnavailable", detail=str(e))
+                    self.say(f"[запуск] {job.name}: {e}")
+                    return "image_unavailable", None
             by_price = info.by_price()
             rank = {z: i for i, (z, _) in enumerate(by_price)}
             cheapest = by_price[0][0] if by_price else ""

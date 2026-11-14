@@ -78,7 +78,9 @@ A = dict(
     turb_dead_fill=0.9,        # заполнение кольца замка металлом (зубья лопаток + выступы диска)
     turb_w_rim_cax=1.15,       # ширина обода диска (= длина замка) / осевая хорда
     turb_band_w=0.5,           # радиальная высота обода / его ширина
-    turb_fillet_w=0.3,         # радиальная длина перехода полотно -> обод / ширина обода
+    turb_fillet_w=1.0,         # радиальная длина перехода полотно -> обод / ширина обода (пробный перебор
+                               # turb_fillet_study: при 0,3 — концентрация σr на поверхности около 1,5)
+    turb_fillet_study=(0.3, 0.6, 1.5),
     turb_sigma_d_uts=0.5,      # расчётное напряжение равнопрочного полотна / σв(T обода) на 100 %
     turb_t_max_w=2.1,          # наибольшая толщина ступицы / ширина обода (осевой шаг ступени около 2,4·c_ax)
     turb_dT_hub=200.0,         # перепад температуры обод -> центр, К (квадрат радиуса)
@@ -254,7 +256,7 @@ def turbine_stage_geometry(k, tin, rho):
                 T_rel_rotor_C=st["T_rel_rotor_C"], T01_C=st["T01_C"])
 
 
-def turbine_profile(g, rho, omega, sigma_d):
+def turbine_profile(g, rho, omega, sigma_d, fillet_w=None):
     """Равнопрочный диск Стодолы (σr = σθ = σ_d, тонкий диск): t(r) = t_b·exp(ρω²(r_b² − r²)/(2σ_d)) от ступицы
     до низа обода r_b = r_o − band·w; t_b — из радиальной силы на r_b: масса на ободе + кольцо обода,
     Q = (M·ω²·r_cg/(2π) + ρω²·w·(r_o³ − r_b³)/3) / r_b, t_b = Q/σ_d (опора обода по окружности не засчитана —
@@ -266,7 +268,8 @@ def turbine_profile(g, rho, omega, sigma_d):
          + rho * omega ** 2 * w * (r_o ** 3 - r_b ** 3) / 3) / r_b
     t_b = Q / sigma_d
     t_max = A["turb_t_max_w"] * w
-    r_f = r_b - A["turb_fillet_w"] * w
+    fillet_w = A["turb_fillet_w"] if fillet_w is None else fillet_w
+    r_f = r_b - fillet_w * w
     rs = np.linspace(0.0, r_f, 15)
     t_cs = t_b * np.exp(rho * omega ** 2 * (r_b ** 2 - rs ** 2) / (2 * sigma_d))
     t = np.minimum(t_cs, t_max)
@@ -276,12 +279,72 @@ def turbine_profile(g, rho, omega, sigma_d):
     return dict(r=[float(x) for x in r], t=[float(x) for x in tt]), dict(
         r_b_m=r_b, t_b_m=t_b, t_max_m=t_max, sigma_d_MPa=sigma_d / 1e6, Q_N_per_m=Q,
         t_cs_centre_m=float(t_b * math.exp(rho * omega ** 2 * r_b ** 2 / (2 * sigma_d))),
-        capped=bool(t_cs[0] > t_max), band_t_m=band_t)
+        capped=bool(t_cs[0] > t_max), band_t_m=band_t, fillet_w=fillet_w, r_fillet_start_m=r_f)
 
 
 def turb_T_field(r_o, T_rim, dT):
     rs = np.linspace(0.0, r_o, 21)
     return dict(r=rs.tolist(), T=(T_rim - dT * (1 - (rs / r_o) ** 2)).tolist())
+
+
+def blade_bar_ccx(g, mat, rpm, wd, nx=40, ny=4, nz=2):
+    """Проверка напряжения в корне профиля в CalculiX: лопатка — прямой стержень вдоль радиуса от r_hub до r_tip,
+    прямоугольное сечение (ширина 2·sqrt(A_root) с линейным сужением до taper, толщина sqrt(A_root)/2
+    постоянна — площадь линейна, как в blade_root_stress), C3D20R, *DLOAD CENTRIF вокруг оси z, корень закреплён
+    по радиусу. Среднее напряжение в корне = |сумма реакций по радиусу| / A_root. Проверяется формула и единицы,
+    а не форма лопатки и замка (их нет — нужна трёхмерная модель по чертежу)."""
+    import subprocess
+    os.makedirs(wd, exist_ok=True)
+    r_h, h, tau, A_r = g["r_hub_m"], g["h_airfoil_m"], g["taper"], g["A_root_mm2"] * 1e-6
+    b_r, t_z = 2 * math.sqrt(A_r), math.sqrt(A_r) / 2
+    NI, NJ, NK = 2 * nx + 1, 2 * ny + 1, 2 * nz + 1
+    nid = lambda i, j, k: (i * NJ + j) * NK + k + 1  # noqa: E731
+    L = ["*HEADING", "frame3_fea blade bar", "*NODE"]
+    for i in range(NI):
+        x = r_h + h * i / (NI - 1)
+        b = b_r * (1 - (1 - tau) * (x - r_h) / h)
+        for j in range(NJ):
+            for k in range(NK):
+                if (i % 2) + (j % 2) + (k % 2) > 1:
+                    continue
+                L.append(f"{nid(i, j, k)}, {x:.9e}, {b * (j / (NJ - 1) - 0.5):.9e}, {t_z * (k / (NK - 1) - 0.5):.9e}")
+    off = [(0, 0, 0), (2, 0, 0), (2, 2, 0), (0, 2, 0), (0, 0, 2), (2, 0, 2), (2, 2, 2), (0, 2, 2),
+           (1, 0, 0), (2, 1, 0), (1, 2, 0), (0, 1, 0), (1, 0, 2), (2, 1, 2), (1, 2, 2), (0, 1, 2),
+           (0, 0, 1), (2, 0, 1), (2, 2, 1), (0, 2, 1)]
+    L.append("*ELEMENT, TYPE=C3D20R, ELSET=EALL")
+    e = 0
+    for ie in range(nx):
+        for je in range(ny):
+            for ke in range(nz):
+                e += 1
+                c = [nid(2 * ie + a, 2 * je + b_, 2 * ke + c_) for a, b_, c_ in off]
+                L.append(f"{e}, " + ", ".join(str(n) for n in c[:15]) + ",")
+                L.append(", ".join(str(n) for n in c[15:]))
+    root = [nid(0, j, k) for j in range(NJ) for k in range(NK) if (j % 2) + (k % 2) <= 1]
+    L.append("*NSET, NSET=NROOT")
+    L.extend(", ".join(str(n) for n in root[m:m + 16]) + "," for m in range(0, len(root), 16))
+    L.append(f"*NSET, NSET=NC\n{nid(0, ny * 1, nz * 1)},")
+    L.append(f"*NSET, NSET=NE\n{nid(0, 0, nz)},")
+    E20 = mat["E_GPa"][0][1] * 1e9
+    L += ["*MATERIAL, NAME=M", "*ELASTIC", f"{E20:.6e}, {mat['nu']}", "*DENSITY", f"{mat['density']}",
+          "*SOLID SECTION, ELSET=EALL, MATERIAL=M", "*BOUNDARY", "NROOT, 1, 1, 0.", "NC, 2, 3, 0.", "NE, 3, 3, 0.",
+          "*STEP", "*STATIC", "*DLOAD", f"EALL, CENTRIF, {(rpm * math.pi / 30) ** 2:.9e}, 0., 0., 0., 0., 0., 1.",
+          "*NODE PRINT, NSET=NROOT, TOTALS=ONLY", "RF", "*END STEP"]
+    with open(os.path.join(wd, "bar.inp"), "w", encoding="utf-8") as f:
+        f.write("\n".join(L) + "\n")
+    env = dict(os.environ, OMP_NUM_THREADS="1", CCX_NPROC_EQUATION_SOLVER="1", CCX_NPROC_RESULTS="1",
+               CCX_NPROC_STIFFNESS="1")
+    pr = subprocess.run([disk.ccx_path(), "-i", "bar"], cwd=wd, capture_output=True, text=True, timeout=600, env=env)
+    log = pr.stdout + pr.stderr
+    if pr.returncode != 0 or "*ERROR" in log:
+        raise RuntimeError(f"ccx (стержень лопатки): {log[-500:]}")
+    lines = open(os.path.join(wd, "bar.dat"), encoding="utf-8", errors="replace").read().splitlines()
+    i = next(k for k, ln in enumerate(lines) if "total force" in ln)
+    fx = float(next(ln for ln in lines[i + 1:] if ln.strip()).split()[0])
+    sig_fe = abs(fx) / A_r
+    sig_an = blade_root_stress(mat["density"], rpm * math.pi / 30, r_h, h, tau)
+    return dict(rpm=rpm, elements=e, element="C3D20R", sigma_root_fe_MPa=sig_fe / 1e6, sigma_root_formula_MPa=sig_an / 1e6,
+                dev=sig_fe / sig_an - 1, RF_x_N=fx, A_root_mm2=A_r * 1e6, width_root_m=b_r, thickness_m=t_z)
 
 
 # ------------------------------------------------------------------ расчёт и разбор
@@ -337,6 +400,21 @@ def creep_margins(case, wd, res, lmp):
                                 ratio=lmp.sigma(Tm, th) / s_sec if s_sec > 0 else None),
             section_hot_T=dict(T_C=Tx, sigma_MPa=s_sec, sigma_allow_MPa=lmp.sigma(Tx, th),
                                ratio=lmp.sigma(Tx, th) / s_sec if s_sec > 0 else None))
+    return out
+
+
+def hot_zone(case, wd, thresholds=(300.0, 350.0, 400.0)):
+    """наибольшее σ_Мизес среди узлов не холоднее порога (горячая зона колеса компрессора)"""
+    a = node_fields(case, wd)
+    out = {}
+    for th in thresholds:
+        m = a[:, 2] >= th
+        if not m.any():
+            out[f"T_ge_{int(th)}C"] = None
+            continue
+        i = int(np.argmax(np.where(m, a[:, 3], -1.0)))
+        out[f"T_ge_{int(th)}C"] = dict(vm_max_MPa=a[i, 3] / 1e6, r_mm=a[i, 0] * 1e3, z_mm=a[i, 1] * 1e3, T_C=a[i, 2],
+                                      share_of_nodes=float(m.mean()))
     return out
 
 
@@ -445,6 +523,17 @@ def build(pt):
         add((part, "iso", 1.0), dict(name=f"f3_{part}_iso", material="in713c", rpm=n0, profile=prof,
                                      profile_interp="pchip", rim=rim, T_C=A["T_ref_C"], T_ref_C=A["T_ref_C"],
                                      burst_k=1.0), meshes=("fine",))
+        # пробный перебор длины перехода полотно -> обод (обоснование профиля): 100 %, сетка fine
+        if k in (0, 2):
+            for fw in A["turb_fillet_study"]:
+                pf, pfi = turbine_profile(g, rho, om0, sig_d, fillet_w=fw)
+                meta[(part, f"fillet{fw}")] = dict(profile=pf, profile_info=pfi)
+                for tv in (("T_rel", "cooled_750") if k == 0 else ("T_rel",)):
+                    Tf = meta[(part, tv)]["T_C"]
+                    add((part, f"fillet{fw}", 1.0, tv), dict(name=f"f3_{part}_fillet{fw}_{tv}", material="in713c",
+                                                            rpm=n0, profile=pf, profile_interp="pchip", rim=rim,
+                                                            T_C=Tf, T_ref_C=A["T_ref_C"], burst_k=1.0),
+                        meshes=("fine",))
     # --- аналитика: тонкий сплошной диск постоянной толщины, тот же материал, радиус и частота (как test_disk.py)
     for part, mat, R, p in (("comp1", "ti64", tin["stage1"]["D2_m"] / 2, 0.0),
                             ("comp2", "ti64", tin["stage2"]["D2_m"] / 2, 0.0),
@@ -471,6 +560,10 @@ def run_all(work, workers):
     t0 = time.time()
     with ProcessPoolExecutor(max_workers=workers) as ex:
         out = dict(ex.map(_run, full))
+    ni = disk.load_material("in713c")
+    for k in range(3):
+        meta[("blade_bar", k)] = blade_bar_ccx(meta[f"turb{k + 1}"]["geometry"], ni, tin["turbine"]["n"],
+                                               os.path.join(work, f"blade_bar_{k + 1}"))
     wall = time.time() - t0
     cases = {key: (case, wd) for key, case, wd in full}
     return pt, tin, meta, out, cases, wall
@@ -508,6 +601,7 @@ def assemble(pt, tin, meta, out, cases, wall):
                 f, b = get((part, variant, k)), get((part, variant, k), "base")
                 c = summary(f, n0)
                 c["creep"] = "нет данных: в materials.json у ti64 блок lmp = null — ползучесть титана не оценена"
+                c["hot_zone"] = hot_zone(*cases[(part, variant, k, "fine")])
                 c["convergence_fine_vs_base"] = conv(f, b)
                 v["cases"][f"{int(round(k * 100))}"] = c
             e["variants"][variant] = v
@@ -548,6 +642,11 @@ def assemble(pt, tin, meta, out, cases, wall):
         bl["sigma_root_115_MPa"] = g["sigma_root_MPa"] * 1.15 ** 2
         bl["sigma_root_120_MPa"] = g["sigma_root_MPa"] * 1.20 ** 2
         bl["uts_at_T_MPa"] = disk.tab_interp(ni["uts_MPa"], g["T_rel_rotor_C"])[0]
+        bl["sigma_root_over_uts"] = {f"{int(round(sp * 100))}": g["sigma_root_MPa"] * sp ** 2 / bl["uts_at_T_MPa"]
+                                     for sp in SPEEDS}
+        bl["sigma_root_over_ys20C"] = {f"{int(round(sp * 100))}": g["sigma_root_MPa"] * sp ** 2 / ni["ys_MPa"][0][1]
+                                       for sp in SPEEDS}
+        bl["ccx_bar_check"] = meta.get(("blade_bar", k))
         bl["note"] = ("профиль лопатки — линейное убывание площади (оценка); металл профиля — при относительной "
                       "температуре торможения на входе в колесо (неохлаждаемая лопатка, без неравномерности поля "
                       "за камерой); замок и шейка не считались (нужна трёхмерная модель)")
@@ -567,7 +666,8 @@ def assemble(pt, tin, meta, out, cases, wall):
             e["variants"][tv] = v
         sens = {}
         for kk in list(out):
-            if kk[0] == part and kk[1] not in mt["T_variants"] and kk[1] not in ("analytic", "iso"):
+            if (kk[0] == part and kk[1] not in mt["T_variants"] and kk[1] not in ("analytic", "iso")
+                    and not kk[1].startswith("fillet")):
                 f = get(kk[:3])
                 c = summary(f, n0)
                 c["creep_margins"] = creep_margins(cases[kk][0], cases[kk][1], f, lmp)
@@ -578,12 +678,55 @@ def assemble(pt, tin, meta, out, cases, wall):
                 sens[kk[1]] = c
         if sens:
             e["sensitivity_100pct"] = sens
+        # пробный перебор длины перехода полотно -> обод
+        fs = {}
+        for kk in sorted(k2 for k2 in out if k2[0] == part and str(k2[1]).startswith("fillet")):
+            f = get(kk[:4])
+            cm = creep_margins(cases[kk][0], cases[kk][1], f, lmp)
+            fs.setdefault(kk[1], dict(fillet_w=meta[(part, kk[1])]["profile_info"]["fillet_w"],
+                                      profile=meta[(part, kk[1])]["profile"], cases={}))
+            fs[kk[1]]["cases"][kk[3]] = dict(
+                vm_max_node_MPa=f["vm_max_node_MPa"], vm_max_at=f["vm_max_at"], burst_margin=f["burst"]["margin"],
+                hoop_mean_MPa=f["section"]["hoop_mean_ip_MPa"], quality_passed=f["quality"]["passed"],
+                creep_s1_ratio_25000h=cm["25000h"]["s1"]["ratio"], creep_s1_at_25000h=cm["25000h"]["s1"]["at"],
+                creep_vm_ratio_25000h=cm["25000h"]["vm"]["ratio"], creep_s1_ratio_50000h=cm["50000h"]["s1"]["ratio"])
+        if fs:
+            nom = {tv: dict(vm_max_node_MPa=v["cases"]["100"]["vm_max_node_MPa"],
+                            burst_margin=v["cases"]["100"]["burst_margin"],
+                            creep_s1_ratio_25000h=v["cases"]["100"]["creep_margins"]["25000h"]["s1"]["ratio"],
+                            creep_s1_at_25000h=v["cases"]["100"]["creep_margins"]["25000h"]["s1"]["at"],
+                            creep_vm_ratio_25000h=v["cases"]["100"]["creep_margins"]["25000h"]["vm"]["ratio"],
+                            creep_s1_ratio_50000h=v["cases"]["100"]["creep_margins"]["50000h"]["s1"]["ratio"])
+                   for tv, v in e["variants"].items() if tv in ("T_rel", "cooled_750")}
+            fs[f"fillet{A['turb_fillet_w']}"] = dict(fillet_w=A["turb_fillet_w"], accepted=True, cases=nom)
+            e["fillet_study_100pct"] = dict(
+                note=("длина перехода полотно -> обод (доля ширины обода w), 100 %, сетка 160x24; принято "
+                      f"{A['turb_fillet_w']}·w — короче возникает концентрация радиальных напряжений на поверхности "
+                      "перехода, длиннее — без выигрыша"), variants=fs)
+        # толщина полотна у обода, нужная по длительной прочности при номинальном σr (без концентрации)
+        pr = mt["profile_info"]
+        need = {}
+        for tv in mt["T_variants"]:
+            Tf = meta[(part, tv)]["T_C"]
+            T_rb = float(np.interp(pr["r_b_m"], Tf["r"], Tf["T"]))
+            need[tv] = dict(T_at_r_b_C=T_rb)
+            for th in A["creep_hours"]:
+                sa = lmp.sigma(T_rb, th)
+                P = (T_rb + 273.15) * (lmp.C + math.log10(th))
+                need[tv][f"{int(th)}h"] = dict(sigma_allow_MPa=sa, t_web_needed_m=pr["Q_N_per_m"] / (sa * 1e6),
+                                              extrapolated=bool(P < lmp.Pmin or P > lmp.Pmax))
+        e["creep_sized_web"] = dict(
+            r_b_m=pr["r_b_m"], t_b_design_m=pr["t_b_m"], t_rim_m=pr["band_t_m"], t_max_hub_m=pr["t_max_m"],
+            Q_N_per_m=pr["Q_N_per_m"], variants=need,
+            note=("толщина полотна у низа обода r_b, при которой номинальное радиальное напряжение Q/(t·r_b) равно "
+                  "длительной прочности за t часов при температуре в r_b; сравнить с толщиной обода и наибольшей "
+                  "толщиной ступицы (осевой шаг ступени)"))
         # сверка полотна с равнопрочным диском (изотермический расчёт)
         iso = get((part, "iso", 1.0))
         mp = iso["midplane"]
         rr = np.array(mp["r_mm"]) / 1e3
         pr = mt["profile_info"]
-        web = (rr > 0.15 * pr["r_b_m"]) & (rr < pr["r_b_m"] - (A["turb_fillet_w"] + 0.15) * g["w_rim_m"])
+        web = (rr > 0.15 * pr["r_b_m"]) & (rr < pr["r_fillet_start_m"])
         tprof = disk.Profile(mt["profile"], "pchip")
         web &= np.array([tprof.at(x)[0] < 0.98 * pr["t_max_m"] for x in rr])
         sh, sr_ = np.array(mp["hoop_MPa"])[web], np.array(mp["radial_MPa"])[web]
