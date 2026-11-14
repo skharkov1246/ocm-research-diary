@@ -9,6 +9,7 @@ import datetime as dt
 import io
 import json
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -150,7 +151,7 @@ def test_budget_estimate_numbers(tmp_path):
     ok, maxp, nums = r.budget_check(job, "c7a.16xlarge", info)
     assert maxp == pytest.approx(1.56)                      # ceil(1.3 × 1.2, 4 знака)
     ebs_h = 50 * 0.08 / 730
-    new = (1.56 + ebs_h) * 70 / 60                          # max_min 60 + запас 10
+    new = (1.56 + ebs_h + 0.005) * 70 / 60                  # + публичный IPv4; max_min 60 + запас 10
     assert ok
     assert nums["spent"] == pytest.approx(1.01, abs=1e-4)
     assert nums["committed"] == pytest.approx(2.345, abs=1e-4)
@@ -190,6 +191,26 @@ def test_ceiling_counts_open_instances_and_parallel_launches(tmp_path):
     s = R.Ledger(tmp_path / "ledger.jsonl").summary()
     assert s["open"] == ["i-open"] and s["closed"] == 1
     assert s["spent"] == pytest.approx(1.01) and s["committed"] == pytest.approx(2.345)
+
+
+def test_second_parallel_launch_refused_by_first_commitment(tmp_path):
+    """Потолок 3 долл.: первая задача (≈1.83) запущена, вторая с её верхней границей — отказ."""
+    aws, clk = Aws(), Clock()
+    e = aws.st["ec2"]
+    e.add_response("describe_spot_price_history", spot_resp("c7a.16xlarge", PRICES_C7A), spot_params("c7a.16xlarge"))
+    add_ami(aws)
+    e.add_response("run_instances", run_resp("i-a"), expected_run_params(job="a"))
+    e.add_response("describe_spot_price_history", spot_resp("c7i.16xlarge", {"us-east-1a": [(1.4, -60)]}),
+                   spot_params("c7i.16xlarge"))
+    r = R.Runner(make_cfg(tmp_path, ceiling=3.0), aws.ec2, aws.s3, aws.ssm, clock=clk, out=lambda m: None)
+    from collections import deque
+    pending = deque([(make_job(name="a"), 1), (make_job(name="b"), 1)])
+    r._launch_some(pending)
+    assert list(r.active) == ["i-a"] and r.results["b"]["status"] == "refused"
+    budget = [x for x in R.Ledger(tmp_path / "ledger.jsonl").records() if x["ev"] == "budget"]
+    assert [(b["job"], b["ok"]) for b in budget] == [("a", True), ("b", False), ("b", False)]
+    assert budget[1]["committed"] == pytest.approx(budget[0]["new"], abs=1e-3)
+    aws.done()
 
 
 # ----------------------------------------------------------------------------- user-data
@@ -247,6 +268,7 @@ def test_secrets_refused():
 SHIMS = {
     "shutdown": 'echo "shutdown $*" >> "$CALLS"\n',
     "poweroff": 'echo poweroff >> "$CALLS"\n',
+    "timeout": 'echo "timeout $*" >> "$CALLS"\nexec "$REALTIMEOUT" "$@"\n',
     "apt-get": 'echo "apt-get $*" >> "$CALLS"\ncase " $* " in *" failpkg "*) exit 100;; esac\n',
     "git": 'echo "git $*" >> "$CALLS"\nfor last; do :; done\n[ "$1" = clone ] && mkdir -p "$last"\nexit 0\n',
     "python3": ('if [ "$1" = -m ] && [ "$2" = venv ]; then\n'
@@ -284,7 +306,8 @@ def run_box(tmp_path, job):
                           key_prefix=kp, _root=str(tmp_path / "box"), _log=str(tmp_path / "box.log"))
     (tmp_path / "ud.sh").write_text(ud)
     env = {"PATH": f"{shims}:{os.environ['PATH']}", "CALLS": str(calls), "S3DIR": str(s3dir),
-           "FAKEMODS": str(tmp_path / "mods"), "REALPY": sys.executable, "HOME": str(tmp_path)}
+           "FAKEMODS": str(tmp_path / "mods"), "REALPY": sys.executable, "HOME": str(tmp_path),
+           "REALTIMEOUT": shutil.which("timeout")}
     subprocess.run(["bash", str(tmp_path / "ud.sh")], env=env, timeout=120, check=False)
     return calls.read_text().splitlines(), s3dir / "bkt" / kp
 
@@ -305,6 +328,24 @@ def test_userdata_runs_locally_success(tmp_path):
     assert (s3 / "_job.log").exists() and (s3 / "_stdout.log").exists()
     done = json.loads((s3 / "_DONE.json").read_text())
     assert done["phase"] == "done" and done["exit_code"] == 0 and done["run_id"] == "rid1"
+    # выгрузка укладывается до сторожа: результаты — не дольше (срок − прошло − 120 с), метка — 60 с
+    ups = [c.split()[1] for c in calls if c.startswith("timeout ") and "upload.py" in c]
+    assert len(ups) == 2 and ups[1] == "60s"
+    assert 30 * 60 - 120 - 60 <= int(ups[0].rstrip("s")) <= 30 * 60 - 120
+
+
+def test_upload_window_fits_inside_watchdog():
+    """Худший случай: команда снята по timeout -k 60 в последний момент — метка всё равно до сторожа."""
+    for max_min in (20, 60, 720):
+        job = make_job(max_min=max_min)
+        ud = R.build_userdata(job, run_id=RUN, attempt=1, repo=R.DEFAULT_REPO, branch="main",
+                              bucket=BUCKET, key_prefix="p/gtu/r/j")
+        reserve = 8 * 60
+        cmd_end = max_min * 60 - reserve + 60                   # DEADLINE + -k 60 (от T0)
+        left = min(1800, max(30, max_min * 60 - cmd_end - 120))  # как в finish()
+        assert cmd_end + left + 60 <= max_min * 60 - 60         # результаты + метка, минута до сторожа
+        assert 'up "$OUT" "$LEFT"' in ud and 'up "$G/_DONE.json" 60' in ud
+        assert f"WD_END=$((T0 + {max_min} * 60))" in ud
 
 
 def test_userdata_runs_locally_failures(tmp_path):
@@ -436,6 +477,69 @@ def test_reaper_terminates_only_own(tmp_path):
     aws.done()
 
 
+def test_reaper_retries_one_by_one_when_batch_rejected(tmp_path):
+    """Один негодный id (свежая машина, NotFound) не оставляет живыми остальные; её запись — открыта."""
+    aws, clk = Aws(), Clock()
+    e = aws.st["ec2"]
+    e.add_response("describe_instances", {"Reservations": [{"Instances": [
+        inst("i-own1", tags=own_tags()), inst("i-own2", tags=own_tags())]}]}, reap_filters())
+    e.add_client_error("terminate_instances", service_error_code="InvalidInstanceID.NotFound", http_status_code=400,
+                       expected_params={"InstanceIds": ["i-fresh", "i-own1", "i-own2"]})
+    e.add_client_error("terminate_instances", service_error_code="InvalidInstanceID.NotFound", http_status_code=400,
+                       expected_params={"InstanceIds": ["i-fresh"]})
+    e.add_response("terminate_instances", {"TerminatingInstances": []}, {"InstanceIds": ["i-own1"]})
+    e.add_response("terminate_instances", {"TerminatingInstances": []}, {"InstanceIds": ["i-own2"]})
+    out = []
+    r = R.Runner(make_cfg(tmp_path), aws.ec2, aws.s3, aws.ssm, clock=clk, out=out.append)
+    job = make_job()
+    for iid in ("i-fresh", "i-own1"):
+        r.active[iid] = R.Active(job, 1, iid, "c7a.16xlarge", "us-east-1a", T0, T0 + 4200)
+        r.ledger.append("launch", run_id=RUN, job=job.name, attempt=1, iid=iid, itype="c7a.16xlarge",
+                        az="us-east-1a", spot_usd_h=1.0, max_usd_h=1.5, ebs_usd_h=0.0, ip_usd_h=0.0,
+                        t_launch=T0, allot_min=70)
+    r.reap("тест", known=list(r.active))                        # как в finally прогона
+    assert any("погасите вручную" in m and "i-fresh" in m for m in out)
+    s = R.Ledger(tmp_path / "ledger.jsonl").summary()
+    assert s["open"] == ["i-fresh"] and s["closed"] == 1        # неподтверждённое гашение не закрыто
+    aws.done()
+
+
+def test_cli_reap_closes_ledger_records(tmp_path, monkeypatch):
+    monkeypatch.setenv("ALPHA_O_S3", f"s3://{BUCKET}/{PREFIX}")
+    monkeypatch.setenv("ALPHA_O_INSTANCE_PROFILE", "gtu-test-profile")
+    led = tmp_path / "ledger.jsonl"
+    write_ledger(led, [dict(HIST[2], run_id=RUN)])
+    aws = Aws()
+    e = aws.st["ec2"]
+    e.add_response("describe_instances", {"Reservations": [{"Instances": [inst("i-open", tags=own_tags())]}]},
+                   reap_filters())
+    e.add_response("terminate_instances", {"TerminatingInstances": []}, {"InstanceIds": ["i-open"]})
+    e.add_response("describe_instances", {"Reservations": [{"Instances": [
+        inst("i-open", "shutting-down", own_tags())]}]}, {"Filters": [{"Name": "instance-id", "Values": ["i-open"]}]})
+    monkeypatch.setattr(R, "_clients", lambda region: (aws.ec2, aws.s3, aws.ssm, None))
+    assert R.main(["reap", "--run-id", RUN, "--ledger", str(led)]) == 0
+    s = R.Ledger(led).summary()
+    assert s["open"] == [] and s["closed"] == 1
+    aws.done()
+
+
+def test_client_token_differs_between_processes_with_same_run_id(tmp_path):
+    job = make_job()
+    toks = {R.Runner(make_cfg(tmp_path), out=lambda m: None).build_params(job, "c7a.16xlarge", "ami-x", 1.5, 1)
+            ["ClientToken"] for _ in range(2)}
+    assert len(toks) == 2 and all(len(t) <= 64 for t in toks)
+
+
+def test_branch_check_exact_ref(monkeypatch):
+    class P:
+        returncode = 0
+        stdout = "0123abcd\trefs/heads/xy/x\n"
+    monkeypatch.setattr(R.subprocess, "run", lambda *a, **k: P())
+    with pytest.raises(R.RunnerError):                          # ветки x нет, есть xy/x
+        R._check_branch(R.DEFAULT_REPO, "x")
+    R._check_branch(R.DEFAULT_REPO, "xy/x")
+
+
 def test_collector_downloads_and_rejects_traversal(tmp_path):
     aws, clk = Aws(), Clock()
     pfx = f"{PREFIX}/gtu/{RUN}/su2-comp130/"
@@ -484,7 +588,7 @@ def test_full_cycle_launch_poll_collect_reap_no_secrets(tmp_path):
     assert (tmp_path / "runs" / RUN / "su2-comp130" / "a.txt").read_text() == "hi\n"
     s_ = R.Ledger(tmp_path / "ledger.jsonl").summary()
     assert s_["open"] == [] and s_["closed"] == 1
-    assert s_["spent"] == pytest.approx((1.2 + 50 * 0.08 / 730) * 120 / 3600, abs=1e-4)   # 2 опроса по 60 с
+    assert s_["spent"] == pytest.approx((1.2 + 50 * 0.08 / 730 + 0.005) * 120 / 3600, abs=1e-4)   # 2 опроса по 60 с
     aws.done()
     # ключи и имя бакета (в нём номер аккаунта) нигде не напечатаны и не записаны
     texts = ["\n".join(out), (tmp_path / "ledger.jsonl").read_text(),
@@ -528,7 +632,7 @@ def test_lost_instance_is_retried_once(tmp_path):
     s.add_client_error("get_object", service_error_code="NoSuchKey", http_status_code=404,
                        expected_params={"Bucket": BUCKET, "Key": pfx + "_DONE.json"})
     s.add_response("list_objects_v2", {"IsTruncated": False}, {"Bucket": BUCKET, "Prefix": pfx})
-    # повтор: цена из кэша устарела (прошло 60 с < 300 с — берётся кэш), запуск второй машины
+    # повтор: прошло 60 с < 300 с — цена берётся из кэша (без нового запроса), запуск второй машины
     e.add_response("run_instances", run_resp("i-2"), expected_run_params())
     e.add_response("describe_instances", {"Reservations": [{"Instances": [inst("i-2", tags=own_tags())]}]},
                    {"Filters": [{"Name": "instance-id", "Values": ["i-2"]}]})
@@ -598,6 +702,31 @@ def test_load_jobs_validation(tmp_path):
             R.load_jobs(f)
 
 
+def test_job_and_config_guards(tmp_path):
+    """Обходы квоты и потолка отвергаются: заниженный/отрицательный vcpu, отрицательный расход и т. п."""
+    j = make_job(vcpu=1)                                        # c7a.16xlarge = 64 по таблице
+    assert j.vcpu == 64
+    with pytest.raises(R.RunnerError):
+        make_job(vcpu=-1000)
+    with pytest.raises(R.RunnerError):
+        make_job(vcpu="64")
+    assert make_job(instance_type="m7a.large", fallback_types=[], vcpu=2).vcpu == 2
+    f = tmp_path / "j.json"
+    for bad in (["oops"], {"defaults": [], "jobs": [{"name": "a", "command": "true"}]},
+                [{"name": 5, "command": "true"}], "text"):
+        f.write_text(json.dumps(bad))
+        with pytest.raises(R.RunnerError):
+            R.load_jobs(f)
+    f.write_text("{not json")
+    with pytest.raises(R.RunnerError):
+        R.load_jobs(f)
+    for kw in ({"spent_before": -1000.0}, {"grace_min": -30}, {"poll_s": 0.0}, {"retries": -1},
+               {"ebs_usd_gb_month": -1.0}, {"ipv4_usd_h": -1.0}, {"price_margin": 0.5}, {"ceiling": 0.0}):
+        with pytest.raises(R.RunnerError):
+            R.validate_config(make_cfg(tmp_path, **kw))
+    R.validate_config(make_cfg(tmp_path))
+
+
 def test_example_jobs_file_is_valid():
     jobs = R.load_jobs(Path(__file__).resolve().parent / "jobs.example.json")
     assert {j.name for j in jobs} == {"smoke", "explore-249"}
@@ -615,6 +744,10 @@ def test_redactor_and_ledger_guard(tmp_path):
     assert BUCKET not in text and FAKE_SECRET not in text
     with pytest.raises(R.RunnerError):                                     # имя переменной ключа — отказ
         led.append("x", note="aws_secret_access_key=...")
+    # текст AccessDenied от AWS: номер аккаунта в ARN скрыт
+    msg = red("User: arn:aws:iam::123456789012:user/alpha-o-agent is not authorized on "
+              "arn:aws:ec2:us-east-1:123456789012:instance/*")
+    assert "123456789012" not in msg and msg.count("<аккаунт>") == 2
 
 
 def test_cli_plan_offline_and_status(tmp_path, capsys, monkeypatch):

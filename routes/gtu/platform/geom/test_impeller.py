@@ -64,13 +64,15 @@ def face_keys(F, n):
 
 class _CaseTest:
     case = None
+    args = ()        # дополнительные ключи CLI
+    over = {}        # те же переопределения для Impeller
 
     @classmethod
     def setUpClass(cls):
         cls.tmp = tempfile.mkdtemp(prefix=f"impeller_{cls.case}_")
-        cls.res = I.main(["--case", cls.case, "--level", "coarse", "--out", cls.tmp])
+        cls.res = I.main(["--case", cls.case, "--level", "coarse", "--out", cls.tmp, *cls.args])
         cls.su2 = read_su2(cls.res["files"]["passage_su2"])
-        cls.imp = I.Impeller(**I.case_inputs(cls.case))
+        cls.imp = I.Impeller(**I.case_inputs(cls.case), **cls.over)
 
     @classmethod
     def tearDownClass(cls):
@@ -89,10 +91,31 @@ class _CaseTest:
         self.assertAlmostEqual(d["gap"], max(0.3e-3, 0.0007 * d["D2"]), places=12)
         self.assertTrue(0.0 < d["beta2b"] < 60.0)
         self.assertAlmostEqual(d["psi_euler"], d["psi"], places=6)
+        # независимо от кода: Визнер, sigma = 1 - Cслип/U2 = 1 - sqrt(cos b2b)/Z^0,7 (Z - лопатки на выходе),
+        # при входе без закрутки Ctheta2/U2 = sigma - phi2 tg b2b = psi
+        b = math.radians(d["beta2b"])
+        Zex = self.res["params"]["Z"] * (2 if self.res["params"]["splitters"] else 1)
+        sigma = 1.0 - math.sqrt(math.cos(b)) / Zex ** 0.7
+        self.assertAlmostEqual(sigma - d["phi2"] * math.tan(b), d["psi"], places=6)
+
+    def test_hub_volume_pappus(self):
+        """объём втулки (OCC) против теоремы Паппа-Гульдина по меридиональному контуру, без OCC"""
+        if "solid" not in self.res:
+            self.skipTest("твёрдое тело не строилось")
+        d, s, imp = self.res["d1"], self.res["solid"], self.imp
+        hub = I._bez(imp.Ph, np.linspace(0.0, 1.0, 200001))
+        poly = np.vstack([[s["z_nose"], s["r_bore"]], [s["z_nose"], d["r1h"]], hub,
+                          [d["Lz"] + s["t_back"], d["r2"]], [d["Lz"] + s["t_back"], s["r_bore"]],
+                          [s["z_nose"], s["r_bore"]]])
+        z, r = poly[:, 0], poly[:, 1]
+        V = abs(math.pi * np.sum(np.diff(z) * (r[1:] ** 2 + r[1:] * r[:-1] + r[:-1] ** 2) / 3.0))
+        self.assertLess(abs(V / s["volume_parts_m3"]["hub"] - 1.0), 1e-6)
 
     # -------------------------------------------------------------- STEP
     def test_step_solid(self):
         import gmsh
+        if "solid" not in self.res:
+            self.skipTest("твёрдое тело не строилось")
         path = self.res["files"]["impeller_step"]
         self.assertTrue(os.path.getsize(path) > 0)
         gmsh.initialize()
@@ -107,13 +130,22 @@ class _CaseTest:
             V = gmsh.model.occ.getMass(3, vols[0][1])
             self.assertLess(abs(V / self.res["solid"]["volume_m3"] - 1.0), 1e-4)
             gmsh.option.setNumber("Mesh.MeshSizeMax", 0.01)
-            gmsh.option.setNumber("Mesh.MeshSizeFromCurvature", 12)
-            gmsh.model.mesh.generate(2)
-            X = gmsh.model.mesh.getNodes()[1].reshape(-1, 3)
+            gmsh.option.setNumber("Mesh.MeshSizeMin", 0.0004)
+            gmsh.option.setNumber("Mesh.MeshSizeFromCurvature", 16)
+            gmsh.option.setNumber("Mesh.Algorithm3D", 10)
+            gmsh.model.mesh.generate(3)
+            tags, X, _ = gmsh.model.mesh.getNodes()
+            X = X.reshape(-1, 3)
             r = np.hypot(X[:, 0], X[:, 1])
             r2 = self.res["d1"]["r2"]
             self.assertLess(r.max(), r2 * (1 + 1e-6))
             self.assertGreater(r.max(), r2 * (1 - 1e-4))
+            # третий способ: объём тетраэдрической сетки прочитанного STEP (без интегрирования OCC)
+            idx = np.zeros(int(tags.max()) + 1, dtype=np.int64)
+            idx[tags.astype(np.int64)] = np.arange(len(tags))
+            _, _, en = gmsh.model.mesh.getElements(3)
+            Vt = np.abs(tet_volumes(X, idx[np.concatenate(en).astype(np.int64)].reshape(-1, 4))).sum()
+            self.assertLess(abs(Vt / self.res["solid"]["volume_m3"] - 1.0), 2e-3)
         finally:
             gmsh.finalize()
 
@@ -138,7 +170,13 @@ class _CaseTest:
         self.assertTrue(np.all(V > 0), "есть ячейки с неположительным объёмом")
         self.assertGreater(q.min(), 0.0)
         self.assertGreater(self.res["mesh"]["quality"]["minSICN"], 0.0)
-        # сумма объёмов ячеек = объём области (OCC) не проверяется: область в JSON не пишется
+        # сумма объёмов ячеек = объём области OCC (сетка заполняет область; линейные тетраэдры
+        # на кривых стенках дают отклонение порядка 1e-3)
+        Vf = self.res["mesh"]["volume_fluid_occ_m3"]
+        print(f"[{self.case}] объём сетки / объём области OCC - 1 = {V.sum() / Vf - 1.0:.2e}")
+        self.assertLess(abs(V.sum() / Vf - 1.0), 5e-3)
+        # канал до вычитания лопаток = 1/Z тела вращения (проверка выбора объёма и сектора)
+        self.assertLess(abs(self.res["mesh"]["passage_volume_vs_body_over_Z"]), 1e-3)
 
     def test_boundary_closed_and_tagged(self):
         E, X = self.su2["elem"], self.su2["X"]
@@ -199,6 +237,10 @@ class _CaseTest:
         self.assertLess(I._seg_dist(np.stack([P[:, 2], r], 1), imp.sh_poly).max(), tol)
         P, r = nodes("blade")
         self.assertLess(r.max(), d["r2"] + tol)
+        # ни одна грань входного участка не попала в blade (классификация по остатку): лопатка начинается
+        # у z = 0, наклон торца входной кромки - не больше половины наибольшей толщины
+        self.assertGreater(P[:, 2].min(), -0.5 * self.res["params"]["t_hub"] * d["D2"])
+        self.assertGreater(r.min(), d["r1h"] - tol)
         ds = I._seg_dist(np.stack([P[:, 2], r], 1), imp.sh_poly)
         print(f"\n[{self.case}] радиальный зазор по узлам лопатки: min {ds.min() * 1e3:.4f} мм "
               f"(задан {d['gap'] * 1e3:.4f} мм)")
@@ -220,6 +262,28 @@ class TestTaurus60(_CaseTest, unittest.TestCase):
     D2_range = (0.57, 0.63)
     rpm_range = None
     PR = 6.75
+
+
+class TestFewBlades(_CaseTest, unittest.TestCase):
+    """граничный случай: Z = 3 (шаг 120 град). До исправления развёртки угла сектора область строилась
+    не между периодическими поверхностями и падала с «нет граней для маркеров ['blade']»"""
+    case = "core130"
+    args = ("--z", "3", "--no-step")
+    over = dict(Z=3)
+    D2_range = (0.434, 0.436)
+    rpm_range = (22150.0, 22250.0)
+    PR = 4.25
+
+
+class TestInputs(unittest.TestCase):
+    """явный отказ на недопустимых исходных данных (без Gmsh)"""
+
+    def test_rejects(self):
+        for kw in (dict(m=-1.0, PR=3.0), dict(m=5.0, PR=0.9), dict(m=5.0, PR=3.0, Z=2),
+                   dict(m=5.0, PR=3.0, gap=-1e-4), dict(m=5.0, PR=3.0, m_split=1.2),
+                   dict(m=5.0, PR=3.0, beta2b=80.0), dict(m=5.0, PR=3.0, D2=-0.4)):
+            with self.assertRaises(ValueError, msg=str(kw)):
+                I.Impeller(**kw)
 
 
 if __name__ == "__main__":

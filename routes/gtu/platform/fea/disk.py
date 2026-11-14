@@ -235,11 +235,17 @@ class Profile:
 
 
 def radial_grid(prof, nr):
-    """Угловые радиусы узлов: точки излома профиля — узлы сетки; nr элементов
-    распределены по участкам пропорционально длине (не меньше одного на участок)."""
-    L = prof.r[-1] - prof.r[0]
+    """Угловые радиусы узлов: точки излома профиля — узлы сетки. Элементов по радиусу ровно
+    max(nr, число участков): не меньше одного на участок, остальные — пропорционально длине
+    участка (округление методом наибольших остатков). Внутри участка шаг равномерный."""
     seg = np.diff(prof.r)
-    n = np.maximum(1, np.round(nr * seg / L).astype(int))
+    nr = max(int(nr), len(seg))
+    target = nr * seg / seg.sum()
+    n = np.maximum(1, np.floor(target)).astype(int)
+    while n.sum() < nr:
+        n[int(np.argmax(target - n))] += 1
+    while n.sum() > nr:
+        n[int(np.argmin(np.where(n > 1, target - n, np.inf)))] -= 1
     rs = [prof.r[0]]
     for k in range(len(seg)):
         rs.extend(np.linspace(prof.r[k], prof.r[k + 1], n[k] + 1)[1:])
@@ -460,7 +466,7 @@ def run_case(case, workdir=None, keep=True):
         res["flags"].append("ПРОВЕРКА РАВНОВЕСИЯ НЕ ПРОЙДЕНА — результату не доверять")
     res["run"] = dict(dir=os.path.relpath(workdir, HERE) if keep else None,
                       seconds=round(time.time() - t0, 2), elements=len(elems), nodes=len(nodes),
-                      ccx_threads=int(nth))
+                      ccx_threads=int(env["CCX_NPROC_EQUATION_SOLVER"]))
     if not keep:
         shutil.rmtree(workdir, ignore_errors=True)
     return res
@@ -515,15 +521,30 @@ def postprocess(case, mat, prof, mesh, frd, ips, omega, p_rim, dens_fac, r_o, t_
                 Iu += su * 1e6 * dA
     F_eq += p_rim * r_o * t_o
     # ворота качества: невязка равновесия полудиска и расхождение двух способов осреднения,
-    # отнесённые к ∫|σθ|dA (определено и при чисто температурной нагрузке, где F_eq = 0)
-    g_eq = abs(F_ip - F_eq) / F_abs if F_abs > 0 else 0.0
-    g_nd = abs(F_nd - F_ip) / F_abs if F_abs > 0 else 0.0
+    # отнесённые к ∫|σθ|dA (определено и при чисто температурной нагрузке, где F_eq = 0).
+    # Нижний предел знаменателя — 0,1 МПа в среднем по сечению: при свободном равномерном нагреве
+    # напряжений нет, ∫|σθ|dA — численный шум (~100 Па), и отношение шума к шуму ворота не проходило.
+    F_den = max(F_abs, 1e5 * A)
+    g_eq = abs(F_ip - F_eq) / F_den
+    g_nd = abs(F_nd - F_ip) / F_den
     quality = dict(gate_equilibrium=g_eq, gate_nodal_vs_ip=g_nd, limits=[1e-3, 5e-3],
                    passed=bool(g_eq < 1e-3 and g_nd < 5e-3))
     s_avg_ip, s_avg_nd = F_ip / A, F_nd / A
     T_avg = IT / A
     k_b = float(case.get("burst_k", 1.0))
-    burst = math.sqrt(k_b * Iu / F_ip) if F_ip > 0 else math.inf
+    # Запас определён, только когда средние окружные напряжения создаёт вращение (они растут как
+    # ω²). При rpm = 0 ∫σθ dA — численный шум термического поля, и «запас» был бы бессмыслицей.
+    if omega == 0.0:
+        burst = None
+        flags.add("запас по разрушению не определён: нет вращения (rpm = 0)")
+    elif F_ip <= 0:
+        burst = None
+        flags.add("запас по разрушению не определён: средние окружные напряжения не положительны")
+    else:
+        burst = math.sqrt(k_b * Iu / F_ip)
+        if "p_MPa" in (case.get("rim") or {}):
+            flags.add("нагрузка на ободе задана давлением p_MPa: в запасе по разрушению принято, что она "
+                      "растёт как ω² (как от массы лопаток)")
 
     # --- максимумы и характерные точки
     kmax = max(nd, key=lambda k: nd[k]["vm"])
@@ -584,7 +605,7 @@ def postprocess(case, mat, prof, mesh, frd, ips, omega, p_rim, dens_fac, r_o, t_
                   "section_mean — средние окружные при средней температуре сечения; section_hot — "
                   "средние окружные при наибольшей температуре"))
 
-    rel = lambda a, b: (a - b) / b if b else float("nan")  # noqa: E731
+    rel = lambda a, b: (a - b) / b if b else None  # noqa: E731  (None, а не NaN: JSON без NaN)
     res = dict(
         name=case["name"], material=mat.get("name", mat["key"]), rpm=float(case["rpm"]),
         omega=omega, r_in_mm=prof.r[0] * 1e3, r_out_mm=r_o * 1e3, U_tip=omega * r_o,
@@ -606,7 +627,7 @@ def postprocess(case, mat, prof, mesh, frd, ips, omega, p_rim, dens_fac, r_o, t_
                      hoop_mean_equilibrium_MPa=F_eq / A / 1e6,
                      err_ip_vs_equilibrium=rel(F_ip, F_eq), err_nodal_vs_ip=rel(F_nd, F_ip),
                      uts_mean_MPa=Iu / A / 1e6),
-        burst=dict(k=k_b, margin=burst, rpm_burst=burst * float(case["rpm"]),
+        burst=dict(k=k_b, margin=burst, rpm_burst=None if burst is None else burst * float(case["rpm"]),
                    method="n_разр/n = sqrt(k·∫σв(T)dA / ∫σθ dA), σθ — точки интегрирования"),
         yield_ratio_max=y_ratio,
         yield_ratio_at=None if y_loc is None else dict(r_mm=y_loc[0] * 1e3, z_mm=y_loc[1] * 1e3, T_C=y_loc[2]),

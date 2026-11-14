@@ -195,6 +195,65 @@ def test_csv_profile_and_mesh_nodes_on_breakpoints():
     assert len(rc) - 1 == 20
 
 
+def test_radial_grid_exact_count():
+    """Элементов по радиусу ровно nr (раньше округление по участкам давало 119 или 121 вместо 120);
+    при nr меньше числа участков — по одному на участок."""
+    prof = disk.Profile(disk.example_cases()[0]["profile"], "pchip")      # 7 участков разной длины
+    for nr in (8, 60, 120, 240):
+        rc = disk.radial_grid(prof, nr)
+        assert len(rc) - 1 == nr
+        assert np.all(np.diff(rc) > 0)
+        for rb in prof.r:
+            assert np.min(np.abs(rc - rb)) < 1e-12
+    assert len(disk.radial_grid(prof, 3)) - 1 == len(prof.r) - 1
+
+
+def test_expansion_secant_zero():
+    """*EXPANSION, ZERO=T_ref: КТР в таблице — средний (секущий) от T_ref (руководство CalculiX:
+    ε = α(T)(T−T_ref) − α(T0)(T0−T_ref)). Свободный диск, равномерный нагрев до 500 °C, α(T) из таблицы:
+    u_r(b) = α_ср(500)·480·b, напряжений нет. Тест с постоянным α этого не различает."""
+    mat = dict(STEEL, alpha_mean_1e6=[[20, 10.0], [600, 16.0]])
+    a, b = 0.05, 0.2
+    res = _run(dict(name="t_secant", material=mat, rpm=0.0, T_C=500.0, T_ref_C=20.0,
+                    profile=dict(r=[a, b], t=[0.01, 0.01]), mesh=dict(nr=20, nz=2)))
+    ur = (10.0 + 6.0 * 480 / 580) * 1e-6 * 480 * b * 1e3
+    print(f"  секущий КТР: u_r(b) = {res['rim_mid']['ur_mm']:.5f} мм, ожидается {ur:.5f}; "
+          f"Мизес max {res['vm_max_node_MPa']:.2e} МПа")
+    assert _rel(res["rim_mid"]["ur_mm"], ur) < 1e-3
+    assert res["vm_max_node_MPa"] < 0.1
+    assert res["burst"]["margin"] is None          # без вращения запас не определён
+    assert any("нет вращения" in f for f in res["flags"])
+
+
+def test_integration_point_mapping():
+    """Порядок точек интегрирования в .dat: CAX8 развёрнут в C3D20, берётся средний слой (точки
+    10–18, xi меняется быстрее). Проверка: σθ в точках совпадает с интерполяцией узлового поля
+    в ту же точку, а при переставленном xi/eta — нет; в среднем слое σxz = σyz = 0."""
+    case = dict(name="t_ipmap", material=STEEL, rpm=RPM, T_ref_C=20.0,
+                T_C=dict(r=[0.05, 0.2], T=[20.0, 420.0]),
+                profile=dict(r=[0.05, 0.12, 0.2], t=[0.04, 0.015, 0.006]), mesh=dict(nr=12, nz=4))
+    prof = disk.Profile(case["profile"])
+    mesh = disk.build_mesh(prof, 12, 4)
+    with tempfile.TemporaryDirectory() as d:
+        disk.run_case(case, workdir=d, keep=True)
+        frd = disk.parse_frd(os.path.join(d, "disk.frd"))
+        ips = disk.parse_dat_stress(os.path.join(d, "disk.dat"))
+    err = {"принятый": [], "переставленный": []}
+    for eid, conn, col in mesh["elems"]:
+        st_n = np.array([frd["STRESS"][n][2] for n in conn])
+        for jq in range(3):
+            for iq in range(3):
+                N, _, _ = disk.shape8(disk.G3[iq], disk.G3[jq])
+                err["принятый"].append(ips[(eid, 9 + 3 * jq + iq + 1)][2] - N @ st_n)
+                err["переставленный"].append(ips[(eid, 9 + 3 * iq + jq + 1)][2] - N @ st_n)
+    rms = {k: float(np.sqrt(np.mean(np.square(v)))) / 1e6 for k, v in err.items()}
+    shear = max(abs(v[4]) + abs(v[5]) for k, v in ips.items() if 10 <= k[1] <= 18)
+    print(f"  точки интегрирования: СКО {rms['принятый']:.2f} МПа (принятый порядок), "
+          f"{rms['переставленный']:.1f} МПа (переставленный); σxz+σyz в среднем слое {shear:.1e} Па")
+    assert rms["принятый"] < 0.1 * rms["переставленный"]
+    assert shear < 1.0
+
+
 if __name__ == "__main__":
     fails = 0
     for name, fn in list(globals().items()):

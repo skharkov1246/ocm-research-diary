@@ -168,10 +168,36 @@ class Impeller:
         self.p = dict(DEFAULTS)
         self.p.update({k: v for k, v in over.items() if v is not None or k in ("beta2b", "gap")})
         self.case, self.material, self.source = case, material, source
+        self._check_inputs(m, PR, rpm, D2)
         self.warnings = []
         self._size_1d(m, PR, rpm, D2)
         self._contours()
         self._camber()
+
+    def _check_inputs(self, m, PR, rpm, D2):
+        """явный отказ на значениях, при которых построение теряет смысл (иначе - math domain error в comp_stage
+        или невнятный отказ Gmsh)"""
+        p, bad = self.p, []
+        if not (m is not None and m > 0):
+            bad.append(f"расход m = {m} (нужно > 0)")
+        if not (PR is not None and PR > 1):
+            bad.append(f"степень сжатия PR = {PR} (нужно > 1)")
+        if rpm is not None and not rpm > 0:
+            bad.append(f"частота {rpm} (нужно > 0)")
+        if D2 is not None and not D2 > 0:
+            bad.append(f"D2 = {D2} (нужно > 0)")
+        if int(p["Z"]) != p["Z"] or p["Z"] < 3:
+            bad.append(f"Z = {p['Z']} (нужно целое >= 3)")
+        if not 0.0 < p["m_split"] < 1.0:
+            bad.append(f"m_split = {p['m_split']} (нужно 0 < m_split < 1)")
+        if p["gap"] is not None and p["gap"] < 0:
+            bad.append(f"зазор {p['gap']} (нужно >= 0)")
+        if p["beta2b"] is not None and not 0.0 <= p["beta2b"] < 70.0:
+            bad.append(f"beta2b = {p['beta2b']} (нужно 0 <= beta2b < 70 град)")
+        if self.material not in ("ti", "al"):
+            bad.append(f"материал {self.material!r} (ti или al)")
+        if bad:
+            raise ValueError("недопустимые исходные данные: " + "; ".join(bad))
 
     # ------------------------------------------------------------------ 1D
     def _size_1d(self, m, PR, rpm, D2):
@@ -249,10 +275,13 @@ class Impeller:
         b1h = math.degrees(math.atan(Om * r1h / C1)) + p["incidence"]
         b1s = math.degrees(math.atan(Om * r1s / C1)) + p["incidence"]
 
-        # выход: загиб назад по формуле Визнера sigma = 1 - sqrt(cos b)/Z^0.7 под psi = sigma (1 - phi2 tg b)
+        # выход: загиб назад по формуле Визнера. У Визнера коэффициент проскальзывания определён через скорость
+        # проскальзывания: sigma = 1 - Cслип/U2 = 1 - sqrt(cos b)/Z^0.7, поэтому при входе без закрутки
+        # Ctheta2/U2 = sigma - phi2 tg b (а не sigma (1 - phi2 tg b) - это определение Стодолы Ctheta2/Ctheta2_inf).
+        # Подбор b под psi = w/U2^2 (паразитные потери - трение диска, перетечки - не выделены).
         Zex = p["Z"] * (2 if p["splitters"] else 1)
         sig = lambda b: 1 - math.sqrt(math.cos(math.radians(b))) / Zex ** 0.7
-        psi_e = lambda b: sig(b) * (1 - phi2 * math.tan(math.radians(b)))
+        psi_e = lambda b: sig(b) - phi2 * math.tan(math.radians(b))
         if p["beta2b"] is None:
             if psi > psi_e(0.0):
                 self.warnings.append(f"psi = {psi:.3f} больше, чем даёт радиальная лопатка ({psi_e(0):.3f}); загиб 0")
@@ -264,6 +293,12 @@ class Impeller:
                 b2b = brentq(lambda b: psi_e(b) - psi, 0.0, 60.0)
         else:
             b2b = float(p["beta2b"])
+        # предел применимости формулы Визнера: отношение радиусов входа и выхода ниже
+        # eps_lim = exp(-8,16 cos b / Z); сравнивается с D1s/D2 (с запасом)
+        eps_lim = math.exp(-8.16 * math.cos(math.radians(b2b)) / Zex)
+        if r1s / r2 > eps_lim:
+            self.warnings.append(f"D1s/D2 = {r1s / r2:.3f} выше предела формулы Визнера {eps_lim:.3f}: "
+                                 "проскальзывание занижено, загиб назад - проверять расчётом SU2")
 
         # осевая длина: корреляция Аунгира (по вторичным источникам)
         phi = m / (rho01 * math.pi * r2 ** 2 * U2)
@@ -279,9 +314,14 @@ class Impeller:
                        phi=phi, phi2=phi2, rho01=rho01, rho2=rho2, b2=b2, gap=gap,
                        r1s=r1s, r1h=r1h, D1s_D2=r1s / r2, C1=C1, T1=T1, p1=p1, W1s=W1, M1s_rel=W1 / a1,
                        beta1h=b1h, beta1s=b1s, beta2b=b2b, Z_exit=Zex, slip_wiesner=sig(b2b),
-                       psi_euler=psi_e(b2b), Lz=Lz, Ls=Ls)
-        if U2 > 620.0:
-            self.warnings.append(f"U2 = {U2:.0f} м/с выше принятого предела титанового колеса 620 м/с")
+                       wiesner_eps_lim=eps_lim, psi_euler=psi_e(b2b), Lz=Lz, Ls=Ls)
+        # пределы окружной скорости и температуры - из gtu_explore.LIM по материалу колеса
+        ulim = E.LIM["U_ti"] if self.material == "ti" else E.LIM["U_al"]
+        mat = "титанового" if self.material == "ti" else "алюминиевого"
+        if U2 > ulim:
+            self.warnings.append(f"U2 = {U2:.0f} м/с выше принятого предела {mat} колеса {ulim:.0f} м/с")
+        if self.material == "al" and T2 > E.LIM["T_al"]:
+            self.warnings.append(f"T2 = {T2:.0f} К выше принятого предела алюминиевого колеса {E.LIM['T_al']:.0f} К")
 
     # ------------------------------------------------------------------ контуры
     def _contours(self):
@@ -637,7 +677,6 @@ def _classify(gmsh, imp, vol, refs):
     gap = d["gap"]
     groups = {k: [] for k in MARKERS}
     tips, les, tes = [], [], []
-    diag = {}
     for _, f in gmsh.model.getBoundary([(3, vol)], oriented=False):
         f = abs(f)
         P = _edge_points(gmsh, f)
@@ -691,12 +730,14 @@ def build_passage(imp, level, path_su2, path_step=None, path_msh=None, threads=4
         gmsh.model.add("passage")
         # 1) тело вращения проточной части на угловом секторе, перекрывающем канал
         lines1 = imp.sheet_lines(phi1)
-        allp = np.vstack(lines1 + imp.sheet_lines(phi2))
-        th = np.unwrap(np.arctan2(allp[:, 1], allp[:, 0]))
-        lo, hi = th.min() - 0.3, th.max() + 0.3
+        # угловой охват - по первой поверхности (развёртка по её точкам), вторая - та же, повёрнутая на pitch.
+        # Развёртка общего списка точек двух поверхностей ломалась на скачке между ними > 180 град (Z = 3).
+        P1 = np.vstack(lines1)
+        th = np.unwrap(np.arctan2(P1[:, 1], P1[:, 0]))
+        lo, hi = th.min() - 0.3, th.max() + pitch + 0.3
         if hi - lo >= 2 * math.pi - 0.05:
             raise RuntimeError("канал охватывает больше полного оборота; уменьшите L_in")
-        A, B = _merid_pt(occ, imp.z_in, d["r1h"]), _merid_pt(occ, 0.0, d["r1h"])
+        A = _merid_pt(occ, imp.z_in, d["r1h"])
         hb = _bezier_curve(occ, imp.Ph)
         sb = _bezier_curve(occ, imp.Ps, reverse=True)
         occ.synchronize()
@@ -707,23 +748,31 @@ def build_passage(imp, level, path_su2, path_step=None, path_msh=None, threads=4
         cs = [occ.addLine(A, hb0), hb, occ.addLine(hb1, D), occ.addLine(D, Ee), occ.addLine(Ee, sb0), sb,
               occ.addLine(sb1, Hh), occ.addLine(Hh, A)]
         body = _revolve_face(occ, cs, lo, hi - lo)
+        V_body = occ.getMass(3, body)
         # 2) периодические поверхности: средняя линия, повёрнутая на phi1, и её копия на +360/Z
         s1 = _loft_sheet(occ, lines1)
         s2 = occ.copy([(2, s1)])[0][1]
         occ.rotate([(2, s2)], 0, 0, 0, 0, 0, 1, pitch)
-        refs = [t for _, t in occ.copy([(2, s1), (2, s2)])]
         out, omap = occ.fragment([(3, body)], [(2, s1), (2, s2)])
         occ.synchronize()
         vols = [t for dd, t in out if dd == 3]
         m1 = {t for dd, t in omap[1]}
         m2 = {t for dd, t in omap[2]}
-        mid = None
+        both = []
         for v in vols:
             bf = {abs(t) for _, t in gmsh.model.getBoundary([(3, v)], oriented=False)}
             if bf & m1 and bf & m2:
-                mid = v
-        if mid is None:
-            raise RuntimeError(f"не найден объём между периодическими поверхностями ({len(vols)} объёмов)")
+                both.append(v)
+        if len(vols) != 3 or len(both) != 1:
+            raise RuntimeError(f"периодические поверхности не делят сектор на 3 объёма с одним средним "
+                               f"({len(vols)} объёмов, касаются обеих: {len(both)})")
+        mid = both[0]
+        # объём между поверхностью и её копией, повёрнутой на 360/Z, - ровно 1/Z тела вращения:
+        # V_mid = V_body * pitch / (hi - lo). Ловит неверно выбранный объём или сектор (ошибка - десятки %);
+        # допуск 1e-3 - точность getMass OCC на таких телах (на прогонах 14.11.2026 до 2e-4)
+        V_mid_rel = occ.getMass(3, mid) / (V_body * pitch / (hi - lo)) - 1.0
+        if abs(V_mid_rel) > 1e-3:
+            raise RuntimeError(f"объём канала не равен 1/Z тела вращения (отклонение {V_mid_rel:.2e})")
         # 3) вычесть лопатки
         blades = _blade_solids(occ, imp)
         out, _ = occ.cut([(3, mid)], [(3, b) for b in blades])
@@ -731,6 +780,7 @@ def build_passage(imp, level, path_su2, path_step=None, path_msh=None, threads=4
         if len(pv) != 1:
             raise RuntimeError(f"после вычитания лопаток {len(pv)} объёмов вместо 1")
         vol = pv[0]
+        V_fluid = occ.getMass(3, vol)
         _keep_only(gmsh, [vol] + [])
         # опорные поверхности для классификации: снова строим копии (удалены _keep_only)
         rs1 = _loft_sheet(occ, lines1)
@@ -809,6 +859,7 @@ def build_passage(imp, level, path_su2, path_step=None, path_msh=None, threads=4
         stats = dict(level=level, h0=h0, h_blade=hb, h_gap=h_gap, h_edge=h_le, tol_classify=tol,
                      faces={k: groups[k] for k in MARKERS}, tip_faces=special["tip"], le_faces=special["le"],
                      te_faces=special["te"], quality=q, periodic_snap=snap,
+                     volume_fluid_occ_m3=V_fluid, passage_volume_vs_body_over_Z=V_mid_rel,
                      t_geometry_s=round(t_geo, 1), t_mesh_s=round(t_mesh, 1),
                      phi1_rad=phi1, phi2_rad=phi2, sector_lo_hi_rad=[lo, hi],
                      gmsh_warnings=[w for w in gmsh.logger.get() if "Warning" in w][:50])
@@ -917,6 +968,11 @@ def record(res, path=os.path.join(HERE, "impeller_results.json")):
                             "тетраэдрическая сетка одного межлопаточного канала; см. README.md")
     db.setdefault("runs", {})
     key = f"{res['case']}_{res['mesh']['level'] if 'mesh' in res else 'solid'}"
+    # прогон с переопределёнными параметрами не затирает опорную запись случая
+    changed = sorted(k for k, v in DEFAULTS.items()
+                     if res["params"].get(k) != (list(v) if isinstance(v, tuple) else v))
+    if changed or "переопределён" in res["source"]:
+        key += "_mod_" + "_".join(changed or ["inputs"])
     keep = {k: v for k, v in res.items() if k not in ("files",)}
     if "mesh" in keep:
         keep["mesh"] = {k: v for k, v in keep["mesh"].items() if k != "gmsh_warnings"}

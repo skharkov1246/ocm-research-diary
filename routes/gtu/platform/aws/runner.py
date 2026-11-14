@@ -72,6 +72,7 @@ REPO_RE = re.compile(r"^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 PKG_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+\-\[\],:=<>!~]{0,127}$")
 RUN_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,47}$")
 KEY_ID_RE = re.compile(r"(?<![A-Z0-9])(AKIA|ASIA)[A-Z0-9]{16}(?![A-Z0-9])")
+ARN_ACCOUNT_RE = re.compile(r"(arn:aws[a-z-]*:[a-z0-9-]*:[a-z0-9-]*:)\d{12}(?=:)")   # номер аккаунта в ARN
 SECRET_WORDS = ("aws_secret_access_key", "aws_session_token", "aws_access_key_id")
 SECRET_ENV = ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN")
 
@@ -117,6 +118,7 @@ class Redactor:
     def __call__(self, text: str) -> str:
         for s, r in self.pairs:
             text = text.replace(s, r)
+        text = ARN_ACCOUNT_RE.sub(r"\1<аккаунт>", text)    # в тексте ошибок AWS (AccessDenied и т. п.)
         return KEY_ID_RE.sub("<скрыто>", text)
 
 
@@ -145,12 +147,24 @@ JOB_KEYS = {f for f in Job.__dataclass_fields__}
 
 def load_jobs(path, max_job_min: int = 720) -> list:
     """Прочитать задачи: {"defaults": {...}, "jobs": [...]} или просто [...]."""
-    data = json.loads(Path(path).read_text(encoding="utf-8"))
-    defaults, items = ({}, data) if isinstance(data, list) else (data.get("defaults", {}), data.get("jobs"))
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        raise RunnerError(f"файл задач не прочитан: {type(e).__name__}") from None
+    if isinstance(data, list):
+        defaults, items = {}, data
+    elif isinstance(data, dict):
+        defaults, items = data.get("defaults", {}), data.get("jobs")
+    else:
+        raise RunnerError("файл задач: ожидается список задач или объект {defaults, jobs}")
+    if not isinstance(defaults, dict):
+        raise RunnerError("defaults — объект")
     if not isinstance(items, list) or not items:
         raise RunnerError("в файле задач нет непустого списка jobs")
     jobs, seen = [], set()
     for raw in items:
+        if not isinstance(raw, dict):
+            raise RunnerError(f"задача — объект, а не {type(raw).__name__}")
         merged = {**defaults, **raw}
         unknown = set(merged) - JOB_KEYS
         if unknown:
@@ -167,7 +181,7 @@ def load_jobs(path, max_job_min: int = 720) -> list:
 
 
 def validate_job(job: Job, max_job_min: int = 720) -> None:
-    if not NAME_RE.match(job.name):
+    if not isinstance(job.name, str) or not NAME_RE.match(job.name):
         raise RunnerError(f"имя задачи {job.name!r}: только [A-Za-z0-9._-], до 64 знаков")
     if not isinstance(job.command, str) or not job.command.strip():
         raise RunnerError(f"{job.name}: пустая команда")
@@ -192,13 +206,15 @@ def validate_job(job: Job, max_job_min: int = 720) -> None:
         if not isinstance(p, str) or not PKG_RE.match(p):
             raise RunnerError(f"{job.name}: недопустимое имя пакета {p!r}")
     for t in job.types:
-        if not re.match(r"^[a-z0-9]+\.[a-z0-9]+$", t):
+        if not isinstance(t, str) or not re.match(r"^[a-z0-9]+\.[a-z0-9]+$", t):
             raise RunnerError(f"{job.name}: недопустимый тип машины {t!r}")
-    if not job.vcpu:
-        missing = [t for t in job.types if t not in VCPU]
-        if missing:
-            raise RunnerError(f"{job.name}: нет числа vCPU для {missing} — задайте поле vcpu")
-        job.vcpu = max(VCPU[t] for t in job.types)
+    if isinstance(job.vcpu, bool) or not isinstance(job.vcpu, int) or not 0 <= job.vcpu <= 1024:
+        raise RunnerError(f"{job.name}: vcpu — целое в [0, 1024] (0 — по таблице типов)")
+    missing = [t for t in job.types if t not in VCPU]
+    if missing and not job.vcpu:
+        raise RunnerError(f"{job.name}: нет числа vCPU для {missing} — задайте поле vcpu")
+    # Для типов из таблицы число vCPU берётся из неё: заниженное поле vcpu не обходит квоту.
+    job.vcpu = max([job.vcpu] + [VCPU[t] for t in job.types if t in VCPU])
 
 
 # --------------------------------------------------------------------------- user-data
@@ -221,29 +237,31 @@ shutdown -P +@@MAX_MIN@@
 exec >@@LOG@@ 2>&1
 set -u
 export DEBIAN_FRONTEND=noninteractive AWS_DEFAULT_REGION=@@REGION@@
-T0=$(date +%s); DEADLINE=$((T0 + @@BUDGET_S@@))
+T0=$(date +%s); DEADLINE=$((T0 + @@BUDGET_S@@)); WD_END=$((T0 + @@MAX_MIN@@ * 60))
 G=@@ROOT@@; OUT=$G/out; PHASE=setup
 mkdir -p "$OUT"
 export GTU_OUT="$OUT" GTU_RUN_ID=@@RUN_ID_Q@@ GTU_JOB=@@JOB_Q@@ GTU_ATTEMPT=@@ATTEMPT@@
 S3_BUCKET=@@BUCKET_Q@@; S3_KEY=@@KEY_Q@@
 cat >"$G/upload.py" <<'GTU_PY_EOF'
 @@UPLOAD_PY@@GTU_PY_EOF
-up() {
+up() {  # $1 - path, $2 - time limit in seconds
   if [ -x "$G/venv/bin/python" ] && "$G/venv/bin/python" -c 'import boto3' 2>/dev/null; then
-    timeout 10m "$G/venv/bin/python" "$G/upload.py" "$S3_BUCKET" "$S3_KEY" "$1"
+    timeout "$2s" "$G/venv/bin/python" "$G/upload.py" "$S3_BUCKET" "$S3_KEY" "$1"
   elif command -v aws >/dev/null 2>&1; then
-    if [ -d "$1" ]; then timeout 10m aws s3 cp --recursive --only-show-errors "$1" "s3://$S3_BUCKET/$S3_KEY/"
-    else timeout 5m aws s3 cp --only-show-errors "$1" "s3://$S3_BUCKET/$S3_KEY/"; fi
+    if [ -d "$1" ]; then timeout "$2s" aws s3 cp --recursive --only-show-errors "$1" "s3://$S3_BUCKET/$S3_KEY/"
+    else timeout "$2s" aws s3 cp --only-show-errors "$1" "s3://$S3_BUCKET/$S3_KEY/"; fi
   else echo "UPLOAD-UNAVAILABLE"; fi
 }
 finish() {
   RC=$?; set +e; trap - EXIT
   echo "finish phase=$PHASE rc=$RC"
   cp @@LOG@@ "$OUT/_job.log"
-  up "$OUT"
+  # results must finish before the watchdog: keep 120 s for the marker and poweroff
+  LEFT=$((WD_END - $(date +%s) - 120)); [ "$LEFT" -gt 1800 ] && LEFT=1800; [ "$LEFT" -lt 30 ] && LEFT=30
+  up "$OUT" "$LEFT"
   printf '{"run_id":"%s","job":"%s","attempt":%s,"phase":"%s","exit_code":%d,"t_start":%d,"t_end":%d,"nproc":%d}\n' \
     "$GTU_RUN_ID" "$GTU_JOB" "$GTU_ATTEMPT" "$PHASE" "$RC" "$T0" "$(date +%s)" "$(nproc)" >"$G/_DONE.json"
-  up "$G/_DONE.json"
+  up "$G/_DONE.json" 60
   poweroff
 }
 trap finish EXIT
@@ -352,8 +370,9 @@ class Ledger:
     def summary(self) -> dict:
         """Израсходовано (закрытые машины) и верхняя граница по открытым.
 
-        Закрытая: (спот в её зоне на момент запуска + диск) × max(60 с, конец − запуск).
-        Открытая (нет записи end): (MaxPrice + диск) × весь отпущенный срок — верхняя
+        Закрытая: (спот в её зоне на момент запуска + диск + IPv4) × max(60 с, конец − запуск) —
+        оценка, не граница: цена спота за время работы может подняться (до MaxPrice).
+        Открытая (нет записи end): (MaxPrice + диск + IPv4) × весь отпущенный срок — верхняя
         граница, потому что сторож и сборщик гасят машину не позже этого срока.
         """
         recs = self.records()
@@ -362,11 +381,12 @@ class Ledger:
         spent = committed = 0.0
         open_ = []
         for iid, L in launches.items():
+            extra = L["ebs_usd_h"] + L.get("ip_usd_h", 0.0)
             if iid in ends:
                 dur = max(60.0, ends[iid]["t_end"] - L["t_launch"])
-                spent += (L["spot_usd_h"] + L["ebs_usd_h"]) * dur / 3600.0
+                spent += (L["spot_usd_h"] + extra) * dur / 3600.0
             else:
-                committed += (L["max_usd_h"] + L["ebs_usd_h"]) * L["allot_min"] / 60.0
+                committed += (L["max_usd_h"] + extra) * L["allot_min"] / 60.0
                 open_.append(iid)
         return {"spent": spent, "committed": committed, "open": open_,
                 "closed": len(launches) - len(open_)}
@@ -389,6 +409,7 @@ class Config:
     price_margin: float = 1.2
     price_window_h: float = 6.0
     ebs_usd_gb_month: float = 0.08
+    ipv4_usd_h: float = 0.005            # публичный IPv4 подсети по умолчанию (ставка — допущение)
     grace_min: int = 10
     upload_reserve_min: int = 8
     poll_s: float = 60.0
@@ -451,6 +472,9 @@ class Runner:
         self._prices: dict = {}
         self._ami: dict = {}
         self._seq = 0
+        # ClientToken уникален в пределах процесса: повторный запуск с тем же --run-id не получит
+        # чужой (старый) экземпляр или IdempotentParameterMismatch по совпавшему токену.
+        self._nonce = _secrets.token_hex(4)
 
     # ---- вывод
     def say(self, msg: str) -> None:
@@ -507,7 +531,7 @@ class Runner:
         """(разрешено?, MaxPrice, цифры). Пишет запись budget в журнал."""
         s = self.ledger.summary()
         maxp = self.max_price(info)
-        new = (maxp + self.ebs_usd_h(job)) * self.allot_min(job) / 60.0
+        new = (maxp + self.ebs_usd_h(job) + self.cfg.ipv4_usd_h) * self.allot_min(job) / 60.0
         spent = s["spent"] + self.cfg.spent_before
         total = spent + s["committed"] + self.virtual + new
         ok = info.window_max > 0 and total <= self.cfg.ceiling + 1e-9
@@ -540,7 +564,7 @@ class Runner:
                 {"Key": "Job", "Value": job.name}, {"Key": "Name", "Value": f"gtu-{job.name}"}]
         self._seq += 1
         token = "gtu-" + hashlib.sha256(
-            f"{cfg.run_id}|{job.name}|{attempt}|{itype}|{self._seq}".encode()).hexdigest()[:40]
+            f"{cfg.run_id}|{job.name}|{attempt}|{itype}|{self._seq}|{self._nonce}".encode()).hexdigest()[:40]
         return dict(
             ImageId=ami, InstanceType=itype, MinCount=1, MaxCount=1,
             IamInstanceProfile={"Name": cfg.instance_profile},
@@ -616,8 +640,8 @@ class Runner:
             act = Active(job, attempt, iid, itype, az, now, now + self.allot_min(job) * 60)
             self.ledger.append("launch", run_id=self.cfg.run_id, job=job.name, attempt=attempt, iid=iid,
                                itype=itype, az=az, spot_usd_h=round(info.az_price(az), 4), max_usd_h=maxp,
-                               ebs_usd_h=round(self.ebs_usd_h(job), 5), t_launch=round(now, 1),
-                               allot_min=self.allot_min(job))
+                               ebs_usd_h=round(self.ebs_usd_h(job), 5), ip_usd_h=self.cfg.ipv4_usd_h,
+                               t_launch=round(now, 1), allot_min=self.allot_min(job))
             self.say(f"[запуск] {job.name} (попытка {attempt}): {iid} {itype} {az}, "
                      f"сторож {job.max_min} мин, сборщик через {self.allot_min(job)} мин")
             return "launched", act
@@ -680,25 +704,54 @@ class Runner:
         return got
 
     # ---- гашение
-    def _terminate(self, iids: list, why: str) -> bool:
+    def _terminate(self, iids: list, why: str) -> set:
+        """Погасить машины; вернуть множество id, гашение которых AWS принял.
+
+        TerminateInstances отвергает весь пакет, если хоть один id не годится (например,
+        InvalidInstanceID.NotFound у только что запущенной машины). Поэтому при отказе
+        пакета — повтор по одной, чтобы один плохой id не оставил живыми остальные.
+        """
         from botocore.exceptions import ClientError
         iids = sorted(set(i for i in iids if i))
         if not iids:
-            return True
+            return set()
         self.say(f"[гашение] {iids} ({why})")
         try:
             self.ec2.terminate_instances(InstanceIds=iids)
-            return True
+            return set(iids)
         except ClientError as e:
             code = e.response.get("Error", {}).get("Code", "?")
-            self.say(f"[гашение][ОШИБКА] {code} — погасите вручную: "
-                     f"aws ec2 terminate-instances --region {self.cfg.region} --instance-ids {' '.join(iids)}")
-            return False
+            if len(iids) > 1:
+                self.say(f"[гашение] пакет отвергнут ({code}) — гашу по одной")
+            else:
+                self._manual(iids, code)
+                return set()
+        ok = set()
+        for iid in iids:
+            try:
+                self.ec2.terminate_instances(InstanceIds=[iid])
+                ok.add(iid)
+            except ClientError as e:
+                self._manual([iid], e.response.get("Error", {}).get("Code", "?"))
+        return ok
+
+    def _manual(self, iids: list, code: str) -> None:
+        self.say(f"[гашение][ОШИБКА] {code} — погасите вручную: "
+                 f"aws ec2 terminate-instances --region {self.cfg.region} --instance-ids {' '.join(iids)}")
 
     def _close(self, a: Active, outcome: str, state: str = "", reason: str = "") -> None:
         self.active.pop(a.iid, None)
         self.ledger.append("end", run_id=self.cfg.run_id, job=a.job.name, iid=a.iid,
                            t_end=round(self.clock(), 1), outcome=outcome, state=state, reason=reason)
+
+    def _drop(self, a: Active) -> None:
+        """Гашение не подтверждено: снять с наблюдения, но запись в журнале оставить открытой.
+
+        Открытая запись входит в бюджет верхней границей; закроет её сверка (reconcile)
+        в начале следующего прогона или после `reap`, когда AWS покажет terminated.
+        """
+        self.active.pop(a.iid, None)
+        self.say(f"[журнал] {a.iid} ({a.job.name}): гашение не подтверждено — запись остаётся открытой")
 
     def find_own(self, run_id: str | None = None) -> list:
         """Машины с тегами Project=<tag> и RunId=<run_id> в живых состояниях (с проверкой тегов на месте)."""
@@ -734,10 +787,13 @@ class Runner:
         if list_only:
             self.say(f"[сборщик] найдены (не гашу): {targets}")
             return targets
-        self._terminate(targets, why)
+        done = self._terminate(targets, why)
         for iid in targets:
             if iid in self.active:
-                self._close(self.active[iid], "reaped", reason=why)
+                if iid in done:
+                    self._close(self.active[iid], "reaped", reason=why)
+                else:
+                    self._drop(self.active[iid])
         return targets
 
     def reconcile(self) -> None:
@@ -822,8 +878,10 @@ class Runner:
             res = {"attempts": a.attempt, "itype": a.itype, "iid": iid}
             if done is not None:
                 files = self.collect(a.job.name)
-                self._terminate([iid], "задача завершена")
-                self._close(a, "done", state)
+                if iid in self._terminate([iid], "задача завершена"):
+                    self._close(a, "done", state)
+                else:
+                    self._drop(a)
                 ok = done.get("phase") == "done" and done.get("exit_code") == 0
                 res.update(status="ok" if ok else "failed", phase=done.get("phase"),
                            exit_code=done.get("exit_code"), files=len(files))
@@ -840,9 +898,12 @@ class Runner:
                     self.results[a.job.name] = res
                     self.say(f"[итог] {a.job.name}: машина {state} без метки завершения ({reason})")
             elif now > a.deadline:
-                self._terminate([iid], "срок сборщика истёк")
+                gone = iid in self._terminate([iid], "срок сборщика истёк")
                 files = self.collect(a.job.name)
-                self._close(a, "deadline", state)
+                if gone:
+                    self._close(a, "deadline", state)
+                else:
+                    self._drop(a)
                 res.update(status="deadline", files=len(files))
                 self.results[a.job.name] = res
             else:
@@ -864,7 +925,9 @@ def _check_branch(repo: str, branch: str) -> None:
                            text=True, timeout=60)
     except Exception as e:
         raise RunnerError(f"проверка ветки не удалась: {type(e).__name__}") from None
-    if r.returncode != 0 or f"refs/heads/{branch}" not in r.stdout:
+    # Точное совпадение ссылки: шаблон ls-remote «x» находит и refs/heads/xy/x.
+    refs = {ln.split("\t", 1)[1].strip() for ln in r.stdout.splitlines() if "\t" in ln}
+    if r.returncode != 0 or f"refs/heads/{branch}" not in refs:
         raise RunnerError(f"ветки {branch!r} нет в {repo} — машина не сможет её клонировать")
 
 
@@ -887,14 +950,32 @@ def _config_from_args(a, need_env: bool) -> Config:
                  tag=os.environ.get("ALPHA_O_TAG", DEFAULT_TAG), region=a.region, ceiling=a.ceiling,
                  ledger_path=Path(a.ledger))
     for name in ("repo", "branch", "max_parallel", "vcpu_quota", "price_margin", "price_window_h",
-                 "ebs_usd_gb_month", "grace_min", "poll_s", "retries", "spent_before"):
+                 "ebs_usd_gb_month", "ipv4_usd_h", "grace_min", "poll_s", "retries", "spent_before"):
         if getattr(a, name, None) is not None:
             setattr(cfg, name, getattr(a, name))
     if getattr(a, "out", None):
         cfg.out_dir = Path(a.out)
-    if cfg.max_parallel < 1 or cfg.vcpu_quota < 1 or cfg.price_margin < 1.0 or cfg.ceiling <= 0:
-        raise RunnerError("max_parallel, vcpu_quota ≥ 1; price_margin ≥ 1.0; ceiling > 0")
+    validate_config(cfg)
     return cfg
+
+
+def validate_config(cfg: Config) -> None:
+    """Пороги, на которых держится бюджетный предохранитель и верхняя граница «в работе»."""
+    bad = []
+    if cfg.max_parallel < 1 or cfg.vcpu_quota < 1:
+        bad.append("max_parallel, vcpu_quota ≥ 1")
+    if not cfg.ceiling > 0:
+        bad.append("ceiling > 0")
+    if not cfg.price_margin >= 1.0 or not cfg.price_window_h > 0:
+        bad.append("price_margin ≥ 1.0, price_window_h > 0")
+    if not (cfg.spent_before >= 0 and cfg.ebs_usd_gb_month >= 0 and cfg.ipv4_usd_h >= 0):
+        bad.append("spent_before, ebs_usd_gb_month, ipv4_usd_h ≥ 0 (иначе потолок обходится)")
+    if cfg.grace_min < 5:
+        bad.append("grace_min ≥ 5 (запас на загрузку машины до старта сторожа)")
+    if not cfg.poll_s >= 5 or cfg.retries < 0:
+        bad.append("poll_s ≥ 5, retries ≥ 0")
+    if bad:
+        raise RunnerError("; ".join(bad))
 
 
 def main(argv=None) -> int:
@@ -916,6 +997,7 @@ def main(argv=None) -> int:
         sp.add_argument("--price-margin", type=float, default=1.2, help="MaxPrice = макс. цена за окно × запас")
         sp.add_argument("--price-window-h", type=float, default=6.0)
         sp.add_argument("--ebs-usd-gb-month", type=float, default=0.08)
+        sp.add_argument("--ipv4-usd-h", type=float, default=0.005, help="публичный IPv4, долл./ч (допущение)")
         sp.add_argument("--grace-min", type=int, default=10, help="запас сборщика сверх сторожа, мин")
         sp.add_argument("--poll-s", type=float, default=60.0)
         sp.add_argument("--retries", type=int, default=1, help="повторов при потере машины (прерывание спота)")
@@ -1009,6 +1091,8 @@ def main(argv=None) -> int:
         r = Runner(cfg, ec2, s3, ssm, sts)
         if a.cmd == "reap":
             r.reap("ручной сборщик", run_id=a.run_id, list_only=a.list_only)
+            if not a.list_only:
+                r.reconcile()     # закрыть в журнале погашенные машины (верхней границей срока)
             return 0
         if a.cmd == "collect":
             r.collect(a.job, run_id=a.run_id, dest=Path(a.out) if a.out else None)
