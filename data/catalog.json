@@ -5,7 +5,7 @@
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
     "datasets": 381,
-    "total_bytes": 4227753,
+    "total_bytes": 4228327,
     "results_files": 173,
     "results_with_script": 50,
     "results_referenced_in_site": 22,
@@ -6754,7 +6754,7 @@
       "path": "routes/gtu/platform/aws/iam_policy_addendum.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 1157,
+      "bytes": 1711,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -6764,13 +6764,13 @@
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "1c1983b"
+      "last_commit": "8c32295"
     },
     {
       "path": "routes/gtu/platform/aws/jobs.example.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 627,
+      "bytes": 647,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -6779,7 +6779,7 @@
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "1c1983b"
+      "last_commit": "8c32295"
     },
     {
       "path": "routes/gtu/platform/aws/jobs.smoke2.json",
