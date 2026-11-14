@@ -4,8 +4,8 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 401,
-    "total_bytes": 13675609,
+    "datasets": 405,
+    "total_bytes": 13723177,
     "results_files": 179,
     "results_with_script": 54,
     "results_referenced_in_site": 22,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 81,
+      "не определён": 85,
       "прочее": 25
     }
   },
@@ -6669,6 +6669,24 @@
       "last_commit": "8321dd4"
     },
     {
+      "path": "routes/gtu/combustor/jobs_aws_comb_l0.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 10164,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "_comment",
+        "defaults",
+        "jobs",
+        "merge",
+        "estimate"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "130ca04"
+    },
+    {
       "path": "routes/gtu/combustor/jobs_l0.json",
       "track": "не определён",
       "kind": "данные",
@@ -7403,6 +7421,25 @@
       "last_commit": "8321dd4"
     },
     {
+      "path": "routes/gtu/organic/jobs_aws_organic.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 8921,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "_comment",
+        "defaults",
+        "jobs",
+        "collect",
+        "estimate",
+        "pending"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "130ca04"
+    },
+    {
       "path": "routes/gtu/platform/aws/iam_policy_addendum.json",
       "track": "не определён",
       "kind": "данные",
@@ -7727,6 +7764,46 @@
       "last_change": "2026-11-14",
       "last_author": "Claude",
       "last_commit": "55d1e8c"
+    },
+    {
+      "path": "routes/gtu/platform/su2/jobs_aws_su2_kv3_fine.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 15545,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "_comment",
+        "defaults",
+        "jobs",
+        "lines",
+        "setup",
+        "merge",
+        "estimate"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "130ca04"
+    },
+    {
+      "path": "routes/gtu/platform/su2/jobs_aws_su2_kv3.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 12938,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "_comment",
+        "defaults",
+        "jobs",
+        "lines",
+        "setup",
+        "merge",
+        "estimate"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "130ca04"
     },
     {
       "path": "routes/gtu/platform/su2/plan_cont_p075.json",
