@@ -5,7 +5,7 @@
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
     "datasets": 401,
-    "total_bytes": 13673951,
+    "total_bytes": 13675609,
     "results_files": 179,
     "results_with_script": 54,
     "results_referenced_in_site": 22,
@@ -7288,7 +7288,7 @@
       "path": "routes/gtu/organic/cycles/cycles_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 3722745,
+      "bytes": 3724403,
       "referenced_in_site": false,
       "produced_by": "routes/cycles.py",
       "shape": "объект",
@@ -7326,7 +7326,7 @@
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "8321dd4"
+      "last_commit": "2993e24"
     },
     {
       "path": "routes/gtu/organic/cycles/feed_cycles.json",
