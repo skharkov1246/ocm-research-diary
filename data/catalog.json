@@ -4,8 +4,8 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 336,
-    "total_bytes": 2770650,
+    "datasets": 338,
+    "total_bytes": 2772434,
     "results_files": 162,
     "results_with_script": 43,
     "results_referenced_in_site": 22,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 33,
+      "не определён": 35,
       "прочее": 25
     }
   },
@@ -6280,6 +6280,37 @@
       "last_change": "2026-07-05",
       "last_author": "Claude",
       "last_commit": "5d7e73f"
+    },
+    {
+      "path": "routes/gtu/platform/aws/iam_policy_addendum.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 1157,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "_comment",
+        "Version",
+        "Statement"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "1c1983b"
+    },
+    {
+      "path": "routes/gtu/platform/aws/jobs.example.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 627,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "defaults",
+        "jobs"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "1c1983b"
     },
     {
       "path": "routes/gtu/platform/fea/disk_results.json",
