@@ -4,23 +4,23 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 356,
-    "total_bytes": 3325355,
-    "results_files": 165,
-    "results_with_script": 45,
+    "datasets": 359,
+    "total_bytes": 3358205,
+    "results_files": 166,
+    "results_with_script": 46,
     "results_referenced_in_site": 22,
-    "results_with_provenance_fields": 17,
+    "results_with_provenance_fields": 18,
     "by_track": {
       "ammonia": 91,
       "battery-cathode": 1,
       "cc-activation-recycling": 36,
       "ch4-to-methanol": 9,
       "co2-to-fuels": 5,
-      "gas-turbine": 26,
+      "gas-turbine": 27,
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 38,
+      "не определён": 40,
       "прочее": 25
     }
   },
@@ -3517,6 +3517,31 @@
       "last_commit": "7dbea9b"
     },
     {
+      "path": "routes/gtu/gtu_lineup_results.json",
+      "track": "gas-turbine",
+      "kind": "результат расчёта",
+      "bytes": 7941,
+      "referenced_in_site": false,
+      "produced_by": "routes/gtu_lineup.py",
+      "shape": "объект",
+      "top_keys": [
+        "method",
+        "software",
+        "date",
+        "inputs",
+        "scenario",
+        "lineup"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "0aa29fd"
+    },
+    {
       "path": "routes/gtu/gtu_point_results.json",
       "track": "gas-turbine",
       "kind": "результат расчёта",
@@ -6531,7 +6556,7 @@
       "path": "routes/gtu/frame3/frame3_point_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 29671,
+      "bytes": 31369,
       "referenced_in_site": false,
       "produced_by": "routes/frame3_point.py",
       "shape": "объект",
@@ -6560,7 +6585,7 @@
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "0847bb3"
+      "last_commit": "0aa29fd"
     },
     {
       "path": "routes/gtu/platform/aws/iam_policy_addendum.json",
@@ -6679,6 +6704,62 @@
       "last_change": "2026-11-14",
       "last_author": "Claude",
       "last_commit": "4ba862b"
+    },
+    {
+      "path": "routes/gtu/shaft/maps/npss_axi5.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 9206,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "name",
+        "description",
+        "map_variable",
+        "source",
+        "license",
+        "axes",
+        "units",
+        "defaults",
+        "RlineStall",
+        "NcMap",
+        "RlineMap",
+        "alphaMap",
+        "WcMap",
+        "effMap",
+        "PRmap"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "0aa29fd"
+    },
+    {
+      "path": "routes/gtu/shaft/maps/npss_hbtf_hpc.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 14005,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "name",
+        "description",
+        "map_variable",
+        "source",
+        "license",
+        "axes",
+        "units",
+        "defaults",
+        "RlineStall",
+        "NcMap",
+        "RlineMap",
+        "alphaMap",
+        "WcMap",
+        "effMap",
+        "PRmap"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "0aa29fd"
     },
     {
       "path": "routes/gtu/validation/validation_balances_results.json",
