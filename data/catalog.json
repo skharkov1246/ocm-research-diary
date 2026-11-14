@@ -4,12 +4,12 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 362,
-    "total_bytes": 3688547,
-    "results_files": 167,
+    "datasets": 363,
+    "total_bytes": 3793180,
+    "results_files": 168,
     "results_with_script": 47,
     "results_referenced_in_site": 22,
-    "results_with_provenance_fields": 19,
+    "results_with_provenance_fields": 20,
     "by_track": {
       "ammonia": 91,
       "battery-cathode": 1,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 43,
+      "не определён": 44,
       "прочее": 25
     }
   },
@@ -6798,6 +6798,35 @@
       "last_change": "2026-11-14",
       "last_author": "Claude",
       "last_commit": "0aa29fd"
+    },
+    {
+      "path": "routes/gtu/shaft/shaft_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 104633,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "method",
+        "software",
+        "date",
+        "inputs",
+        "example_note",
+        "assumptions",
+        "identity_check",
+        "units",
+        "stage_link",
+        "map_selection",
+        "elapsed_s"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "89dbdcc"
     },
     {
       "path": "routes/gtu/validation/balances_results.json",
