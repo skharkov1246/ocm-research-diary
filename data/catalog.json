@@ -4,8 +4,8 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 337,
-    "total_bytes": 2762902,
+    "datasets": 335,
+    "total_bytes": 2752296,
     "results_files": 161,
     "results_with_script": 42,
     "results_referenced_in_site": 22,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 34,
+      "не определён": 32,
       "прочее": 25
     }
   },
@@ -6321,67 +6321,6 @@
       "last_change": "2026-11-14",
       "last_author": "Claude",
       "last_commit": "98bd6ff"
-    },
-    {
-      "path": "routes/gtu/platform/geom/out/core130_coarse/impeller_core130_coarse.json",
-      "track": "не определён",
-      "kind": "данные",
-      "bytes": 4959,
-      "referenced_in_site": false,
-      "shape": "объект",
-      "top_keys": [
-        "case",
-        "source",
-        "material",
-        "params",
-        "d1",
-        "area",
-        "geometry",
-        "contours",
-        "warnings",
-        "software",
-        "files",
-        "mesh",
-        "su2",
-        "t_total_s"
-      ],
-      "provenance_fields": [
-        "software"
-      ],
-      "last_change": null,
-      "last_author": null,
-      "last_commit": null
-    },
-    {
-      "path": "routes/gtu/platform/geom/out/taurus60_coarse/impeller_taurus60_coarse.json",
-      "track": "не определён",
-      "kind": "данные",
-      "bytes": 5647,
-      "referenced_in_site": false,
-      "shape": "объект",
-      "top_keys": [
-        "case",
-        "source",
-        "material",
-        "params",
-        "d1",
-        "area",
-        "geometry",
-        "contours",
-        "warnings",
-        "software",
-        "files",
-        "solid",
-        "mesh",
-        "su2",
-        "t_total_s"
-      ],
-      "provenance_fields": [
-        "software"
-      ],
-      "last_change": null,
-      "last_author": null,
-      "last_commit": null
     },
     {
       "path": "routes/halogen_Br.json",
