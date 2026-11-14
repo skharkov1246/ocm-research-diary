@@ -12,13 +12,14 @@ RESTART_SOL= ${RESTART}
 SOLUTION_FILENAME= ${SOLUTION_FILENAME}
 %
 % ---- начальное поле и набегающий поток (размерный расчёт) ----
-% начальная скорость: MACH_NUMBER по направлению AOA (AOA= 90 -> вдоль +z, оси машины; код CEulerSolver.cpp)
+% начальное поле: число Маха MACH_NUMBER по направлению AOA (AOA= 90 -> вдоль +z, оси машины; код CEulerSolver.cpp),
+% статические p и T набегающего потока посчитаны из p01, T01 входа при этом числе Маха (run_case.py)
 MACH_NUMBER= ${INIT_MACH}
 AOA= ${AOA}
 SIDESLIP_ANGLE= 0.0
 FREESTREAM_OPTION= TEMPERATURE_FS
-FREESTREAM_PRESSURE= ${P01}
-FREESTREAM_TEMPERATURE= ${T01}
+FREESTREAM_PRESSURE= ${FS_P}
+FREESTREAM_TEMPERATURE= ${FS_T}
 FREESTREAM_TURBULENCEINTENSITY= ${TU}
 FREESTREAM_TURB2LAMVISCRATIO= ${MUT_RATIO}
 INIT_OPTION= TD_CONDITIONS
@@ -108,3 +109,6 @@ RESTART_FILENAME= ${RESTART_NAME}
 VOLUME_FILENAME= ${VOLUME_NAME}
 MESH_FILENAME= ${MESH}
 MESH_FORMAT= SU2
+%
+% ---- дополнительные строки (run_case.py --extra) ----
+${EXTRA}

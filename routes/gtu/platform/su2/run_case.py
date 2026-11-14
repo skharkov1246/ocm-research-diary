@@ -47,8 +47,8 @@ NUMERICS = dict(
     TURB="SST", SA_OPTIONS="", INIT_MACH=0.4, AOA=90.0, TU=0.03, MUT_RATIO=10.0,
     GAMMA=1.4, R_GAS=287.058, RELAX_IN=0.3, RELAX_OUT=0.3, NSPAN=10,
     FLOW_SCHEME="ROE", MUSCL="NO", LIMITER="VENKATAKRISHNAN", VENKAT=0.05, ENTROPY_FIX=0.05,
-    CFL=5.0, CFL_ADAPT="YES", CFL_ADAPT_PARAM="0.5, 1.1, 1.0, 20.0", LIN_PREC="ILU", LIN_ITER=10,
-    RES_MIN=-10, OUTPUT_FILES="RESTART, PARAVIEW", WRT_FREQ=500,
+    CFL=5.0, CFL_ADAPT="YES", CFL_ADAPT_PARAM="0.5, 1.1, 1.0, 20.0, 0.1", LIN_PREC="ILU", LIN_ITER=10,
+    RES_MIN=-10, OUTPUT_FILES="RESTART, PARAVIEW", WRT_FREQ=500, EXTRA="",
 )
 
 # Планы стадий. frac — доля номинальной частоты в конце стадии, pfrac — доля оценки статического давления
@@ -57,8 +57,9 @@ NUMERICS = dict(
 PLANS = {
     # дымовой прогон: разгон до номинала с первым порядком, затем второй порядок на рабочей точке
     "smoke": [
-        dict(name="s1_ramp", frac=1.0, pfrac=1.0, ramp=300, iter=400, muscl=False),
-        dict(name="s2_point", frac=1.0, pfrac=1.0, ramp=0, iter=300, muscl=True),
+        dict(name="s1_ramp60", frac=0.6, pfrac=1.0, ramp=150, iter=200, muscl=False),
+        dict(name="s2_ramp100", frac=1.0, pfrac=1.0, ramp=150, iter=250, muscl=False),
+        dict(name="s3_point", frac=1.0, pfrac=1.0, ramp=0, iter=300, muscl=True),
     ],
     # одна стадия: разгон и расчёт подряд
     "single": [dict(name="s1", frac=1.0, pfrac=1.0, ramp=300, iter=1000, muscl=False)],
@@ -197,14 +198,23 @@ def mpi_cmd(np_: int, exe: str, cfg: str):
     return cmd + [exe, cfg]
 
 
-def run_limited(cmd, cwd, log_path, deadline):
+def su2_env(np_: int):
+    """Окружение запуска. Сборка SU2 с OpenMPI 4.1 на одном процессе (без mpirun или -np 1) падает в
+    MPI_Win_create («MPI_ERR_WIN: invalid window»); с компонентом osc pt2pt идёт (проверено 14.11.2026)."""
+    env = os.environ.copy()
+    if np_ <= 1:
+        env.setdefault("OMPI_MCA_osc", "pt2pt")
+    return env
+
+
+def run_limited(cmd, cwd, log_path, deadline, env=None):
     """Запуск с лимитом до deadline (time.monotonic). Возвращает (код, статус, секунды)."""
     t0 = time.monotonic()
     budget = deadline - t0
     if budget <= 5:
         return None, "no_time", 0.0
     with open(log_path, "w", encoding="utf-8") as lf:
-        p = subprocess.Popen(cmd, cwd=cwd, stdout=lf, stderr=subprocess.STDOUT, start_new_session=True)
+        p = subprocess.Popen(cmd, cwd=cwd, stdout=lf, stderr=subprocess.STDOUT, start_new_session=True, env=env)
         try:
             rc = p.wait(timeout=budget)
             status = "finished" if rc == 0 else "error"
@@ -399,7 +409,9 @@ def main(argv=None):
     ap.add_argument("--turb", default=None, choices=["SST", "SA"])
     ap.add_argument("--cfl", type=float, default=None)
     ap.add_argument("--set", action="append", default=[], metavar="KEY=VAL",
-                    help="переопределить параметр шаблона (имя ${...}), можно несколько раз")
+                    help="переопределить параметр шаблона (имя поля $ИМЯ), можно несколько раз")
+    ap.add_argument("--extra", action="append", default=[], metavar="'KEY= VAL'",
+                    help="дописать строку в конец cfg (ключ SU2 вне шаблона), можно несколько раз")
     ap.add_argument("--np", type=int, default=4, help="число процессов MPI (1 — без mpirun)")
     ap.add_argument("--time-limit", type=float, default=1200.0, help="общий лимит, с (по умолчанию 20 мин)")
     ap.add_argument("--su2-bin", default=None)
@@ -458,9 +470,16 @@ def main(argv=None):
     for kv in a.set:
         k, v = kv.split("=", 1)
         params[k.strip()] = v.strip()
+    if a.extra:
+        params["EXTRA"] = "\n".join(a.extra)
     if params["TURB"] == "SA" and not params["SA_OPTIONS"]:
         params["SA_OPTIONS"] = "SA_OPTIONS= NONE"
     gamma, R = float(params["GAMMA"]), float(params["R_GAS"])
+    # статические p, T начального поля — из полных параметров входа при INIT_MACH
+    m0 = float(params["INIT_MACH"])
+    fs_t = d1["T01"] / (1 + 0.5 * (gamma - 1) * m0 ** 2)
+    fs_p = d1["p01"] * (fs_t / d1["T01"]) ** (gamma / (gamma - 1))
+    params.update(FS_P=f"{fs_p:.6g}", FS_T=f"{fs_t:.6g}")
     r_out = 1.3 * d1["r2"]  # длина безлопаточного участка в impeller.py: до 1,3 r2
     p_out_est = estimate_p_out(d1, 1.0, r_out, d1["b2"], gamma, R)
 
@@ -530,12 +549,14 @@ def main(argv=None):
             rec["status"] = "no_su2"
             continue
         if a.dry:
-            rc, status, dt = run_limited([su2, "-d", cfg_name], out, os.path.join(out, f"dry_{name}.log"), deadline)
+            rc, status, dt = run_limited([su2, "-d", cfg_name], out, os.path.join(out, f"dry_{name}.log"), deadline,
+                                         env=su2_env(1))
             txt = open(os.path.join(out, f"dry_{name}.log"), encoding="utf-8", errors="replace").read()
             rec.update(status="dry_ok" if "Exit Success" in txt else "dry_failed", seconds=round(dt, 1))
             prev_frac, prev_p, prev_restart = frac, p_target, f"restart_{name}.dat"  # цепочка стадий для просмотра cfg
             continue
-        rc, status, dt = run_limited(mpi_cmd(a.np, su2, cfg_name), out, os.path.join(out, rec["log_file"]), deadline)
+        rc, status, dt = run_limited(mpi_cmd(a.np, su2, cfg_name), out, os.path.join(out, rec["log_file"]), deadline,
+                                     env=su2_env(a.np))
         rec.update(returncode=rc, status=status, seconds=round(dt, 1))
         hp = os.path.join(out, rec["history_file"])
         if os.path.isfile(hp):
