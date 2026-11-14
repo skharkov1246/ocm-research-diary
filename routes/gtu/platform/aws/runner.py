@@ -995,8 +995,12 @@ def main(argv=None) -> int:
             print("вызов от имени:", re.sub(r"::\d{12}:", "::<аккаунт>:", arn))
             r = Runner(cfg, ec2, s3, ssm, sts)
             if dry:   # чтение префикса результатов — проверка s3:ListBucket
-                s3.list_objects_v2(Bucket=cfg.bucket, Prefix=f"{cfg.prefix}/gtu/", MaxKeys=1)
-                r.say("[dryrun] чтение префикса результатов: OK")
+                from botocore.exceptions import ClientError
+                try:
+                    s3.list_objects_v2(Bucket=cfg.bucket, Prefix=f"{cfg.prefix}/gtu/", MaxKeys=1)
+                    r.say("[dryrun] чтение префикса результатов: OK")
+                except ClientError as e:
+                    r.say(f"[dryrun] чтение префикса результатов: {e.response.get('Error', {}).get('Code', '?')}")
             res = r.run(jobs)
             print(json.dumps(res, ensure_ascii=False, indent=1))
             bad = [k for k, v in res.items() if v.get("status") not in ("ok", "dryrun_ok")]
@@ -1013,6 +1017,12 @@ def main(argv=None) -> int:
     except RunnerError as e:
         print("ОТКАЗ:", e, file=sys.stderr)
         return 2
+    except Exception as e:   # ошибки AWS: код и текст без бакета и ключей, машины уже погашены в finally
+        if type(e).__module__.startswith("botocore"):
+            red = Redactor(parse_s3_uri(os.environ["ALPHA_O_S3"])[0] if os.environ.get("ALPHA_O_S3") else None)
+            print("ОШИБКА AWS:", red(f"{type(e).__name__}: {e}"), file=sys.stderr)
+            return 3
+        raise
     return 0
 
 
