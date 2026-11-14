@@ -5,7 +5,7 @@
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
     "datasets": 405,
-    "total_bytes": 13723793,
+    "total_bytes": 13739287,
     "results_files": 179,
     "results_with_script": 54,
     "results_referenced_in_site": 22,
@@ -6672,7 +6672,7 @@
       "path": "routes/gtu/combustor/jobs_aws_comb_l0.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 10164,
+      "bytes": 17748,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -6680,11 +6680,13 @@
         "defaults",
         "jobs",
         "merge",
-        "estimate"
+        "estimate",
+        "mini_check",
+        "plan_check"
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "130ca04"
+      "last_commit": "460a5cb"
     },
     {
       "path": "routes/gtu/combustor/jobs_l0.json",
@@ -7424,7 +7426,7 @@
       "path": "routes/gtu/organic/jobs_aws_organic.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 9537,
+      "bytes": 17447,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -7433,11 +7435,14 @@
         "jobs",
         "collect",
         "estimate",
-        "pending"
+        "pending",
+        "pending_jobs",
+        "mini_check",
+        "plan_check"
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "ef0c673"
+      "last_commit": "460a5cb"
     },
     {
       "path": "routes/gtu/platform/aws/iam_policy_addendum.json",
