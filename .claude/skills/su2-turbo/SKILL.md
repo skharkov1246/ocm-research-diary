@@ -80,12 +80,13 @@ grep -n "NDIME\|NMARK\|MARKER_TAG" out/core130_coarse/passage_core130_coarse.su2
 - **С турбомашинными маркерами** (нужны для Giles и `TURBO_PERF`): `MARKER_TURBOMACHINERY= (inlet, outlet)`,
   `TURBOMACHINERY_KIND= AXIAL_CENTRIFUGAL`, `TURBO_PERF_KIND= COMPRESSOR`; вместо `MARKER_INLET/OUTLET` —
   `MARKER_GILES= (inlet, TOTAL_CONDITIONS_PT, <p01>, <T01>, 1.0, 0.0, 0.0, 1.0, 0.0, outlet, STATIC_PRESSURE_1D, <p>, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0)`
-  (9 значений: маркер, тип, два значения, три направления, релаксация среднего и Фурье — док.);
+  (9 значений: маркер, тип, два значения, три направления, релаксация среднего и Фурье — док.; направление у Giles
+  в осях решётки — нормаль, окружное, по высоте: 1, 0, 0 — вход без закрутки, угол = atan(d₂/d₁), код `BC_Giles`);
   `AVERAGE_PROCESS_KIND= MIXEDOUT`, `PERFORMANCE_AVERAGE_PROCESS_KIND= MIXEDOUT`, `TURBO_PERF` в `HISTORY_OUTPUT`.
   На тетраэдрах — `SPANWISE_KIND= EQUISPACED` и `NUM_SPANWISE_SECTIONS`: `AUTOMATIC` считает узлы на стыке входа и
   периодической грани (док., «to be reviewed»). До запуска — `mkdir TURBOMACHINERY`, иначе профили по высоте не
-  пишутся (док.). Большие π и ω — рампы `RAMP_OUTLET`, `RAMP_MOTION_FRAME` с `*_COEFF` = (начало, шаг, длина),
-  задавать всегда (док.); рампа ω работает только с `MARKER_TURBOMACHINERY` (док.).
+  пишутся (док.; в коде папка не создаётся). Большие π и ω — рампы `RAMP_OUTLET`, `RAMP_MOTION_FRAME` с `*_COEFF` = (начало, шаг, длина),
+  задавать всегда (док.); рампа ω работает только с `MARKER_TURBOMACHINERY` (док., код `CFluidIteration.cpp`).
 - **`TURBOMACHINERY_KIND` по коду** (`CPhysicalGeometry.cpp`: по какой координате мерится высота): колесо с осевым
   входом и радиальным выходом — `AXIAL_CENTRIFUGAL`; радиальный диффузор — `CENTRIFUGAL`; рабочее колесо
   радиальной турбины — `CENTRIPETAL_AXIAL`; её сопловой аппарат — `CENTRIPETAL`; осевой венец — `AXIAL`.
@@ -114,7 +115,8 @@ grep -n "NDIME\|NMARK\|MARKER_TAG" out/core130_coarse/passage_core130_coarse.su2
   то есть дисбаланс; `Avg_TotalPress` без скобок — сумма давлений, не среднее (код `CFlowOutput.cpp`).
 - Принято в этом навыке (не из документации): точка сошлась, если невязки упали не меньше чем на 4 порядка,
   дисбаланс расхода ≤ 0,5 %, π и η за последние 500 итераций меняются меньше чем на 0,1 %.
-- Giles и осреднённый Riemann работают только на самой мелкой сетке; неустойчиво с многосеточным — `MGLEVEL= 0` (док.).
+- Giles и осреднённый Riemann работают только на самой мелкой сетке (код); если с многосеточным неустойчиво —
+  `MGLEVEL= 0` (док., с пометкой «to be reviewed»).
 
 ## 7. Степень сжатия и КПД
 
@@ -124,7 +126,8 @@ grep -n "NDIME\|NMARK\|MARKER_TAG" out/core130_coarse/passage_core130_coarse.su2
 γ (как `IDEAL_GAS`). Разбор проверен на искусственном файле в формате писателя SU2 (по коду: заголовки в
 кавычках, столбцы выровнены пробелами), на настоящем `history.csv` — нет.
 
-- `TURBO_PERF` (код `CTurboOutput.cpp`): `PressureRatioTT`, `TotalTotalEfficiency` (в процентах); изоэнтропическая
+- `TURBO_PERF` (код `CTurboOutput.cpp`, `CFlowOutput.cpp`): в `SCREEN_OUTPUT` — `PressureRatioTT`, `TotalTotalEfficiency`
+  (в процентах), а в `history.csv` те же столбцы называются `PRTT`, `TotTotEff` (и `PRTS`, `TotStaticEff`); изоэнтропическая
   полная энтальпия там — h(s₁, p₂) + V₂²/2, а не h(s₁, p₀₂). В отчёт — оба КПД, каждый со своим определением.
 - Приведённый расход характеристики — ṁ·√(T₀₁/288,15)/(p₀₁/101 325).
 - С одномерной оценкой (`d1.PR`, `d1.eta_comp_stage`) — сравнение, не проверка: расхождение записать, одномерную
@@ -133,13 +136,14 @@ grep -n "NDIME\|NMARK\|MARKER_TAG" out/core130_coarse/passage_core130_coarse.su2
 ## 8. Характеристика и граница устойчивости
 
 - Линия частоты: давление на выходе от низкого (запирание: расход перестаёт расти) вверх; каждая точка — с решения
-  предыдущей: `RESTART_SOL= YES`, `SOLUTION_FILENAME=` её `restart` без расширения (SU2 добавляет расширение, в
+  предыдущей: `RESTART_SOL= YES`, `SOLUTION_FILENAME=` её `restart` (расширение SU2 отбрасывает и добавляет сам, в
   мультизоне — и номер зоны; код `CConfig::GetFilename`).
-- У вершины характеристики, где π почти не зависит от давления, — Giles `MASS_FLOW_OUTLET` (значение 1 — расход,
-  значение 2 — релаксация; док.).
+- У вершины характеристики линия пологая: малый шаг давления на выходе сильно меняет расход — там задавать расход,
+  Giles `MASS_FLOW_OUTLET` (значение 1 — расход, значение 2 — релаксация; док.; выбор — практика, не из документации).
 - Последняя сошедшаяся стационарная точка — граница устойчивости стационарного расчёта, а не помпаж: помпаж
   зависит от системы (объёмы, сеть) и требует нестационарного расчёта, которого в навыке нет. Так и подписывать.
-- Другая частота — пересчёт `ROTATION_RATE`; каждая точка — отдельная задача `runner.py`.
+- Другая частота — пересчёт `ROTATION_RATE`. Точки одной линии идут подряд (рестарт с предыдущей), поэтому
+  отдельная задача `runner.py` — линия частоты, а не точка.
 
 ## 9. Проверка на открытых эталонах
 
@@ -161,10 +165,11 @@ grep -n "NDIME\|NMARK\|MARKER_TAG" out/core130_coarse/passage_core130_coarse.su2
 
 - Ключи — только из `Common/src/CConfig.cpp` той же версии; `config_template.cfg` неполон (нет, например,
   `MULTIZONE`). Неизвестный ключ останавливает SU2: «invalid option name. Check current SU2 options in
-  config_template.cfg» (код). Проверка имён до запуска (значения — `SU2_CFD -d case.cfg`):
+  config_template.cfg» (код). Проверка имён до запуска (значения — `SU2_CFD -d case.cfg`); искать надо регистрацию
+  `add…Option("KEY"`: простой поиск `"KEY"` находит и устаревшие имена из сообщений об ошибках (`RAMP_OUTLET_PRESSURE` и др.):
   ```bash
   curl -sS https://raw.githubusercontent.com/su2code/SU2/v8.6.0/Common/src/CConfig.cpp -o /tmp/CConfig.cpp
-  grep -oE '^[A-Z][A-Z0-9_]*' case.cfg | sort -u | while read k; do grep -q "\"$k\"" /tmp/CConfig.cpp || echo "нет ключа: $k"; done
+  grep -oE '^[A-Z][A-Z0-9_]*' case.cfg | sort -u | while read k; do grep -qE "add[A-Za-z]+Option\(\"$k\"" /tmp/CConfig.cpp || echo "нет ключа: $k"; done
   ```
 - Публикуемое число — из results-JSON рядом со скриптом (навык `gtu-cycle`), вместе с конфигурацией, журналом и
   версией SU2; «SU2 показал» без журнала прогона не писать.
@@ -174,11 +179,12 @@ grep -n "NDIME\|NMARK\|MARKER_TAG" out/core130_coarse/passage_core130_coarse.su2
 ## 11. Типовые ошибки
 
 - Скопированы `TestCases/turbomachinery/centrifugal_blade` и `centrifugal_stage`: в них удалённые ключи
-  `MARKER_NRBC`, `GRID_MOVEMENT_KIND`, `ROTATION_RATE_Z`, `MARKER_TURBO_PERFORMANCE`, `MIXING_PROCESS_TYPE`,
+  `MARKER_NRBC`, `GRID_MOVEMENT_KIND`, `ROTATION_RATE_X/Y/Z`, `MARKER_TURBO_PERFORMANCE`, `MIXING_PROCESS_TYPE`,
   `MARKER_MIXINGPLANE` (поймано проверкой выше); в регрессионных тестах их нет.
 - Старые имена `RAMP_OUTLET_PRESSURE`, `RAMP_ROTATION_FRAME` — ошибка «… is deprectaed» (код); нужны `RAMP_OUTLET`,
   `RAMP_MOTION_FRAME`. Рампа давления с выходом Riemann — «Outlet pressure ramp only implemented for NRBC» (док.).
 - Перепутан порядок: `MARKER_INLET` — T₀, затем p₀; Giles и Riemann `TOTAL_CONDITIONS_PT` — p₀, затем T₀.
+- В Giles вписано декартово направление `0.0, 0.0, 1.0`, как в `MARKER_INLET`: d₁ = 0, угол atan(0/0) не определён — нужно `1.0, 0.0, 0.0`.
 - Пары `MARKER_PERIODIC` в обратном порядке или угол со знаком «минус»: SU2 не останавливается, печатает «Bad match».
 - `TURBOMACHINERY_KIND= CENTRIFUGAL` у колеса с осевым входом: высота на входе мерится по `z` — нужно `AXIAL_CENTRIFUGAL`.
 - `MARKER_GILES` без `MARKER_TURBOMACHINERY` — «Giles Boundary conditions can only be used with turbomachinery markers» (док.).
