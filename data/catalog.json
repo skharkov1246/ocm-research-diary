@@ -4,18 +4,19 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 322,
-    "total_bytes": 2275909,
-    "results_files": 151,
-    "results_with_script": 32,
+    "datasets": 330,
+    "total_bytes": 2478515,
+    "results_files": 159,
+    "results_with_script": 40,
     "results_referenced_in_site": 22,
-    "results_with_provenance_fields": 3,
+    "results_with_provenance_fields": 11,
     "by_track": {
       "ammonia": 91,
       "battery-cathode": 1,
       "cc-activation-recycling": 36,
       "ch4-to-methanol": 9,
       "co2-to-fuels": 5,
+      "gas-turbine": 8,
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
@@ -1776,7 +1777,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/chemloop_Cr.json",
@@ -1810,7 +1811,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/chemloop_Cu.json",
@@ -1844,7 +1845,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/chemloop_Fe.json",
@@ -1878,7 +1879,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/chemloop_Mn.json",
@@ -1912,7 +1913,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/chemloop_Mo.json",
@@ -1946,7 +1947,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/chemloop_Nb.json",
@@ -1974,7 +1975,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/chemloop_Ni.json",
@@ -2008,7 +2009,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/chemloop_Pb.json",
@@ -2042,7 +2043,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/chemloop_Sn.json",
@@ -2076,7 +2077,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/chemloop_Ti.json",
@@ -2110,7 +2111,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/chemloop_V.json",
@@ -2144,7 +2145,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/chemloop_vacancy_results.json",
@@ -2161,7 +2162,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/chemloop_W.json",
@@ -2195,7 +2196,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/chemloop_Zr.json",
@@ -2223,7 +2224,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/pyrolysis_Co-Bi.json",
@@ -2299,7 +2300,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/pyrolysis_Cu-Bi.json",
@@ -2337,7 +2338,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/pyrolysis_Cu-In.json",
@@ -2506,7 +2507,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/pyrolysis_Ni-Bi.json",
@@ -2544,7 +2545,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/pyrolysis_Ni-Ga.json",
@@ -2620,7 +2621,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/pyrolysis_Ni-Sn.json",
@@ -2658,7 +2659,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/pyrolysis_Pd-Bi.json",
@@ -2696,7 +2697,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/pyrolysis_Pd-In.json",
@@ -2810,7 +2811,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/pyrolysis_Pt-Sn.json",
@@ -2923,8 +2924,8 @@
         "verdict"
       ],
       "last_change": "2026-06-09",
-      "last_author": "Claude",
-      "last_commit": "e177c85"
+      "last_author": "Stepan Kharkov",
+      "last_commit": "c30b54f"
     },
     {
       "path": "calc/fe_zeolite_alpha_o_nevpt2_minimal_results.json",
@@ -2941,8 +2942,8 @@
         "verdict_nevpt2"
       ],
       "last_change": "2026-06-09",
-      "last_author": "Claude",
-      "last_commit": "889572a"
+      "last_author": "Stepan Kharkov",
+      "last_commit": "c30b54f"
     },
     {
       "path": "calc/fe_zeolite_alpha_o_nevpt2_results.json",
@@ -2960,8 +2961,8 @@
         "verdict_nevpt2"
       ],
       "last_change": "2026-06-09",
-      "last_author": "Claude",
-      "last_commit": "7d34ab0"
+      "last_author": "Stepan Kharkov",
+      "last_commit": "c30b54f"
     },
     {
       "path": "calc/fe_zeolite_alpha_o_results.json",
@@ -2979,8 +2980,8 @@
         "vqe_gate"
       ],
       "last_change": "2026-06-09",
-      "last_author": "Claude",
-      "last_commit": "319f1db"
+      "last_author": "Stepan Kharkov",
+      "last_commit": "c30b54f"
     },
     {
       "path": "calc/fe_zeolite_cha_fast_results.json",
@@ -3031,8 +3032,8 @@
         "verdict"
       ],
       "last_change": "2026-06-09",
-      "last_author": "skharkov1246",
-      "last_commit": "be3aa57"
+      "last_author": "Stepan Kharkov",
+      "last_commit": "c30b54f"
     },
     {
       "path": "routes/co2_to_fuels_casscf_mo.npz",
@@ -3111,6 +3112,228 @@
       "last_change": "2026-07-03",
       "last_author": "Claude",
       "last_commit": "a4b6e07"
+    },
+    {
+      "path": "routes/gtu/gtu_cycle_results.json",
+      "track": "gas-turbine",
+      "kind": "результат расчёта",
+      "bytes": 1186,
+      "referenced_in_site": false,
+      "produced_by": "routes/gtu_cycle.py",
+      "shape": "объект",
+      "top_keys": [
+        "SGT400",
+        "T60",
+        "method",
+        "software",
+        "date"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "d989606"
+    },
+    {
+      "path": "routes/gtu/gtu_dropin_results.json",
+      "track": "gas-turbine",
+      "kind": "результат расчёта",
+      "bytes": 7448,
+      "referenced_in_site": false,
+      "produced_by": "routes/gtu_dropin.py",
+      "shape": "объект",
+      "top_keys": [
+        "method",
+        "software",
+        "date",
+        "arch",
+        "cool",
+        "slot",
+        "res"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "d989606"
+    },
+    {
+      "path": "routes/gtu/gtu_exotic_results.json",
+      "track": "gas-turbine",
+      "kind": "результат расчёта",
+      "bytes": 1025,
+      "referenced_in_site": false,
+      "produced_by": "routes/gtu_exotic.py",
+      "shape": "объект",
+      "top_keys": [
+        "method",
+        "software",
+        "date",
+        "res"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "d989606"
+    },
+    {
+      "path": "routes/gtu/gtu_explore_results.json",
+      "track": "gas-turbine",
+      "kind": "результат расчёта",
+      "bytes": 161563,
+      "referenced_in_site": false,
+      "produced_by": "routes/gtu_explore.py",
+      "shape": "объект",
+      "top_keys": [
+        "method",
+        "software",
+        "date",
+        "lim",
+        "res"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "d989606"
+    },
+    {
+      "path": "routes/gtu/gtu_point_results.json",
+      "track": "gas-turbine",
+      "kind": "результат расчёта",
+      "bytes": 5316,
+      "referenced_in_site": false,
+      "produced_by": "routes/gtu_point.py",
+      "shape": "объект",
+      "top_keys": [
+        "A:номинал",
+        "A:форс",
+        "A:1150",
+        "B:номинал",
+        "B:форс",
+        "B:1150",
+        "A:как аналог",
+        "B:как аналог",
+        "method",
+        "software",
+        "date"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "d989606"
+    },
+    {
+      "path": "routes/gtu/gtu_simple_results.json",
+      "track": "gas-turbine",
+      "kind": "результат расчёта",
+      "bytes": 13312,
+      "referenced_in_site": false,
+      "produced_by": "routes/gtu_simple.py",
+      "shape": "объект",
+      "top_keys": [
+        "OP16-подобный одновальный T41=950",
+        "OP16-подобный одновальный T41=1000",
+        "OP16-подобный одновальный T41=1050",
+        "простой π=5.5 T41=1000",
+        "простой π=5.5 T41=1050",
+        "простой π=5.5 T41=1100",
+        "простой π=6.5 T41=1000",
+        "простой π=6.5 T41=1050",
+        "простой π=6.5 T41=1100",
+        "простой π=7.5 T41=1000",
+        "простой π=7.5 T41=1050",
+        "простой π=7.5 T41=1100",
+        "простой+рекуп π=4.5 T41=1000 ε=0.85",
+        "простой+рекуп π=4.5 T41=1050 ε=0.85",
+        "простой+рекуп π=5.5 T41=1000 ε=0.85",
+        "простой+рекуп π=5.5 T41=1050 ε=0.85",
+        "простой+рекуп π=6.5 T41=1000 ε=0.85",
+        "простой+рекуп π=6.5 T41=1050 ε=0.85",
+        "2 центробежных π=11 T41=1100",
+        "2 центробежных π=11 T41=1150",
+        "2 центробежных π=13 T41=1100",
+        "2 центробежных π=13 T41=1150",
+        "method",
+        "software",
+        "date"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "d989606"
+    },
+    {
+      "path": "routes/gtu/gtu_study_results.json",
+      "track": "gas-turbine",
+      "kind": "результат расчёта",
+      "bytes": 11575,
+      "referenced_in_site": false,
+      "produced_by": "routes/gtu_study.py",
+      "shape": "объект",
+      "top_keys": [
+        "SGT400",
+        "T60",
+        "grid",
+        "method",
+        "software",
+        "date"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "d989606"
+    },
+    {
+      "path": "routes/gtu/gtu_upstream_results.json",
+      "track": "gas-turbine",
+      "kind": "результат расчёта",
+      "bytes": 1181,
+      "referenced_in_site": false,
+      "produced_by": "routes/gtu_upstream.py",
+      "shape": "объект",
+      "top_keys": [
+        "fuel",
+        "modes",
+        "apg_year_mln",
+        "apg_year_mln_bypass",
+        "method",
+        "software",
+        "date"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "d989606"
     },
     {
       "path": "routes/h2_electrocatalysis_oer_results.json",
@@ -3400,7 +3623,7 @@
       ],
       "last_change": "2026-07-03",
       "last_author": "Claude",
-      "last_commit": "6cf7291"
+      "last_commit": "4338193"
     },
     {
       "path": "routes/ocm_mnw_c2h6_geom.json",
@@ -3422,7 +3645,7 @@
       ],
       "last_change": "2026-07-03",
       "last_author": "Claude",
-      "last_commit": "6cf7291"
+      "last_commit": "4338193"
     },
     {
       "path": "routes/ocm_mnw_c2h6_profile.json",
@@ -3475,7 +3698,7 @@
       ],
       "last_change": "2026-07-03",
       "last_author": "Claude",
-      "last_commit": "6cf7291"
+      "last_commit": "4338193"
     },
     {
       "path": "routes/ocm_mnw_ch4_geom.json",
@@ -3497,7 +3720,7 @@
       ],
       "last_change": "2026-07-03",
       "last_author": "Claude",
-      "last_commit": "6cf7291"
+      "last_commit": "4338193"
     },
     {
       "path": "routes/ocm_mnw_ch4_profile.json",
@@ -4283,7 +4506,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/ocm_mnw_emb_spins.json",
@@ -4301,7 +4524,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/ocm_mnw_emb_ti_c2h6_geom.json",
@@ -5637,7 +5860,7 @@
       "referenced_in_site": false,
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "57999b5"
+      "last_commit": "cc16787"
     },
     {
       "path": "routes/polyolefins_chiral_nevpt2_results.json",
@@ -5685,7 +5908,7 @@
       "referenced_in_site": false,
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "57999b5"
+      "last_commit": "cc16787"
     },
     {
       "path": "routes/polyolefins_chiral_ts_si.xyz",
@@ -5695,7 +5918,7 @@
       "referenced_in_site": false,
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "57999b5"
+      "last_commit": "cc16787"
     },
     {
       "path": "calc/aws_setup/instance_role_policy.json",
@@ -5996,7 +6219,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/halogen_Br.json",
@@ -6016,7 +6239,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/halogen_Cl.json",
@@ -6036,7 +6259,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/halogen_descriptor_results.json",
@@ -6053,7 +6276,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/halogen_descriptor_tzvp_results.json",
@@ -6069,7 +6292,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/halogen_I.json",
@@ -6089,7 +6312,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/halogen_tzvp_Br.json",
@@ -6109,7 +6332,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/halogen_tzvp_Cl.json",
@@ -6129,7 +6352,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/halogen_tzvp_F.json",
@@ -6149,7 +6372,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/halogen_tzvp_I.json",
@@ -6169,7 +6392,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/o_pump_screen_results.json",
@@ -6187,7 +6410,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/ocm_vol_results_tzvp.json",
@@ -6259,7 +6482,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/acetic_cc.json",
@@ -6279,7 +6502,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/acetic_hat.json",
@@ -6299,7 +6522,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/acetic_results.json",
@@ -6317,7 +6540,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/antibep_carbene_results.json",
@@ -6337,7 +6560,7 @@
       ],
       "last_change": "2026-07-05",
       "last_author": "Claude",
-      "last_commit": "9188a10"
+      "last_commit": "5d7e73f"
     },
     {
       "path": "routes/msa_add.json",
