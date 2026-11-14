@@ -4,12 +4,12 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 381,
-    "total_bytes": 4228327,
-    "results_files": 173,
-    "results_with_script": 50,
+    "datasets": 389,
+    "total_bytes": 4605398,
+    "results_files": 176,
+    "results_with_script": 52,
     "results_referenced_in_site": 22,
-    "results_with_provenance_fields": 24,
+    "results_with_provenance_fields": 27,
     "by_track": {
       "ammonia": 91,
       "battery-cathode": 1,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 61,
+      "не определён": 69,
       "прочее": 25
     }
   },
@@ -6594,6 +6594,42 @@
       "last_commit": "5d7e73f"
     },
     {
+      "path": "routes/gtu/combustor/comb_bc_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 10181,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "status",
+        "key",
+        "runtime_s",
+        "inputs",
+        "D2_m",
+        "far_st_CH4",
+        "far_st_diesel",
+        "LHV_J_kg",
+        "LHV_diesel_J_kg",
+        "loads",
+        "eq_table",
+        "flame_table",
+        "ign_table",
+        "check"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "c4a6fd7"
+    },
+    {
       "path": "routes/gtu/combustor/targets_basis_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
@@ -6666,6 +6702,40 @@
       "last_commit": "493cb81"
     },
     {
+      "path": "routes/gtu/frame3/frame3_fea_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 250460,
+      "referenced_in_site": false,
+      "produced_by": "routes/frame3_fea.py",
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "status",
+        "inputs",
+        "assumptions",
+        "speeds",
+        "mesh",
+        "checks",
+        "conclusions",
+        "limitations",
+        "parts",
+        "table",
+        "run"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "c4a6fd7"
+    },
+    {
       "path": "routes/gtu/frame3/frame3_point_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
@@ -6701,6 +6771,120 @@
       "last_commit": "493cb81"
     },
     {
+      "path": "routes/gtu/funnel/funnel_l0_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 72391,
+      "referenced_in_site": false,
+      "produced_by": "routes/funnel_l0.py",
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "status",
+        "kv",
+        "target",
+        "n",
+        "seed",
+        "shards",
+        "inputs",
+        "calib_ns",
+        "merge_checks",
+        "timing",
+        "weights",
+        "normalization",
+        "summary",
+        "top",
+        "pareto",
+        "sensitivity",
+        "niches",
+        "selection",
+        "convergence",
+        "cycle_check",
+        "files"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "c4a6fd7"
+    },
+    {
+      "path": "routes/gtu/funnel/funnel_l0_select.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 6256,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "kv",
+        "n",
+        "seed",
+        "fingerprint",
+        "code_sha",
+        "weights",
+        "params",
+        "how_to_rebuild",
+        "summary",
+        "selected"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "c4a6fd7"
+    },
+    {
+      "path": "routes/gtu/funnel/jobs_l0_debug.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 5488,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "_comment",
+        "defaults",
+        "jobs",
+        "merge",
+        "estimate",
+        "plan_check"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "c4a6fd7"
+    },
+    {
+      "path": "routes/gtu/funnel/jobs_l0.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 7802,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "_comment",
+        "defaults",
+        "jobs",
+        "merge",
+        "estimate",
+        "plan_check"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "c4a6fd7"
+    },
+    {
       "path": "routes/gtu/organic/cycles/aws_jobs_cycles.json",
       "track": "не определён",
       "kind": "данные",
@@ -6714,6 +6898,30 @@
       "last_change": "2026-11-14",
       "last_author": "Claude",
       "last_commit": "6821db5"
+    },
+    {
+      "path": "routes/gtu/organic/cycles/feed_cycles.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 11308,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "source",
+        "date",
+        "status",
+        "key_finding",
+        "representative",
+        "engine_funnel",
+        "combustor_funnel",
+        "aws"
+      ],
+      "provenance_fields": [
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "c4a6fd7"
     },
     {
       "path": "routes/gtu/organic/exergy/exergy_results.json",
@@ -6749,6 +6957,20 @@
       "last_change": "2026-11-14",
       "last_author": "Claude",
       "last_commit": "aadf663"
+    },
+    {
+      "path": "routes/gtu/organic/feed_to_funnels.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 11676,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "cycles"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "c4a6fd7"
     },
     {
       "path": "routes/gtu/platform/aws/iam_policy_addendum.json",
@@ -6815,7 +7037,7 @@
       "path": "routes/gtu/platform/batch/cost_estimate_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 63416,
+      "bytes": 63424,
       "referenced_in_site": false,
       "produced_by": "routes/cost_estimate.py",
       "shape": "объект",
@@ -6841,7 +7063,7 @@
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "5cb29d0"
+      "last_commit": "c4a6fd7"
     },
     {
       "path": "routes/gtu/platform/batch/templates/compute_environment.json",
@@ -7282,7 +7504,7 @@
       "path": "routes/gtu/validation/validation_fleet_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 325280,
+      "bytes": 326781,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -7301,6 +7523,7 @@
         "groups_coolT41_independent",
         "generator_drive_pairs_summary",
         "trends_primary_independent",
+        "trends_primary_independent_robustness",
         "trends_coolT41_independent",
         "single_shaft_duct_effect",
         "generator_drive_pairs",
@@ -7317,7 +7540,7 @@
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "55d1e8c"
+      "last_commit": "c4a6fd7"
     },
     {
       "path": "routes/halogen_Br.json",
