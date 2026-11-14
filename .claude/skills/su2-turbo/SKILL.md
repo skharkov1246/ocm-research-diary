@@ -7,7 +7,8 @@ description: Аэродинамика ступеней трека «Проста
 
 Узел платформы трека (issue #59): одномерные размеры (`gtu_explore.comp_stage`, навык `gtu-cycle`) → сетка
 канала (`platform/geom/impeller.py`) → SU2 → степень сжатия, КПД, характеристика. Состояние на 14.11.2026:
-**SU2 в контейнере не установлен, ни одного прогона SU2 не было.** Ключи и поведение сверены с исходником
+**SU2 v8.6.0 собран в контейнере (в scratchpad, не сохранён); были только пробные прогоны постановки на coarse-сетке
+`core130` (раздел 4), сошедшихся расчётов нет.** Ключи и поведение сверены с исходником
 SU2 v8.6.0 и исходником документации (раздел «Источники»). Пометки: «(код)» — по исходнику, «(док.)» — по
 документации, «(пример)» — по учебной конфигурации SU2, «не проверено» — как есть.
 
@@ -18,7 +19,7 @@ SU2 v8.6.0 и исходником документации (раздел «Ис
 | геометрия и сетка колеса | `routes/gtu/platform/geom/impeller.py`; описание и ограничения — `platform/geom/README.md` |
 | вход случаев `core130`, `taurus60` | `gtu_explore_results.json` (схема 130), `gtu_dropin_results.json` (1Ц, класс N) |
 | числа для SU2 после сетки | `out/<case>_<level>/impeller_<case>_<level>.json` → `su2.periodic.angle_deg`, `su2.rotation_rate_rad_s`, `d1.p01`, `d1.T01`, `d1.PR`, `d1.eta_comp_stage` |
-| шаблон конфигурации колеса | `.claude/skills/su2-turbo/templates/impeller_rans.cfg` (58 ключей, все есть в v8.6.0) |
+| шаблон конфигурации колеса | `.claude/skills/su2-turbo/templates/impeller_rans.cfg` (64 ключа, все есть в v8.6.0; пуск проверен, раздел 4) |
 | π, η и расход из `history.csv` | `.claude/skills/su2-turbo/scripts/su2_pr_eta.py` |
 | облачные прогоны | `platform/aws/runner.py` (DryRun по умолчанию, живой запуск — `--live`), README там же |
 | узел SU2 трека | `routes/gtu/platform/su2/` — папки ещё нет; имя из примера задачи в `platform/aws/README.md` |
@@ -37,12 +38,14 @@ SU2 v8.6.0 и исходником документации (раздел «Ис
   ./ninja -C build -j4 install
   export SU2_RUN=$HOME/su2/bin PATH=$HOME/su2/bin:$PATH PYTHONPATH=$HOME/su2/bin:$PYTHONPATH
   ```
-  Здесь сборка не запускалась (отклонена системой разрешений сессии): время, пакеты apt для MPI и папка
-  `bin` под `--prefix` не проверены.
-- **Готовые архивы:** страница загрузки берёт из последнего выпуска GitHub файлы `*linux64-omp.zip` и
-  `*linux64-mpi.zip` (код `download.html`); есть ли они у v8.6.0 — не проверено (API GitHub из сессии закрыт).
+  Проверено 14.11.2026 (Ubuntu 24.04, g++ 13.3, 4 ядра, без MPI): `setup` — 2 мин (подмодули клонируются git'ом с
+  GitHub), сборка с установкой — 6 мин, код 0, пакеты apt не понадобились; `SU2_RUN` = `<prefix>/bin` (так же в
+  `meson.build`). Сборка с MPI и пакеты для неё не проверены.
+- **Готовые архивы:** `download.html` берёт из последнего выпуска GitHub `*linux64-omp.zip`, `*linux64-mpi.zip`; есть
+  ли они у v8.6.0 — не проверено (страница выпусков и API GitHub из сессии — 403).
 - Запуск (док. Execution, код `SU2_CFD.cpp`): `SU2_CFD case.cfg`; `mpirun -n 4 SU2_CFD case.cfg`; сборка с
-  OpenMP — `SU2_CFD -t 4 case.cfg`; `SU2_CFD -d case.cfg` — сухой прогон: разбор конфигурации на фиктивной геометрии.
+  OpenMP — `SU2_CFD -t 4 case.cfg`; `SU2_CFD -d case.cfg` — сухой прогон: разбор конфигурации на фиктивной геометрии
+  (на заполненном шаблоне — «Exit Success»).
 
 ## 3. Сетка одного канала
 
@@ -59,15 +62,21 @@ grep -n "NDIME\|NMARK\|MARKER_TAG" out/core130_coarse/passage_core130_coarse.su2
   дальше («Computation will continue, but be cautious»). В журнале нужна строка «Matched N points with a max
   distance of: …» без «Bad match». У `impeller.py` `periodic_2` = поворот `periodic_1` на +360/Z вокруг +z,
   значит порядок `(periodic_1, periodic_2, …, угол > 0)`.
-- Пристенных призм нет (README узла geom): для RANS — пристенные функции или доработка сетки. В Gmsh
-  `extrudeBoundaryLayer` есть только у встроенного ядра (`gmsh.model.geo`), у `gmsh.model.occ` нет (проверено
-  `dir()`); как совместить с областью OCC из `impeller.py` — не проверено.
+- Пристенных призм нет (README узла geom), а пристенные функции на этой сетке расходятся (раздел 4): для RANS
+  нужна доработка сетки. В Gmsh `extrudeBoundaryLayer` есть только у встроенного ядра (`gmsh.model.geo`), у
+  `gmsh.model.occ` нет (проверено `hasattr`); как совместить с областью OCC из `impeller.py` — не проверено.
 - Маркер `hub` идёт от носка входа через колесо до r = 1,3·r2 (`impeller.py`, `hub_poly`): во вращающейся системе
   вращается и стенка безлопаточного диффузора. Пока маркер не разделён (не сделано), числа по диффузору — с оговоркой.
 
 ## 4. Конфигурация: одна решётка (колесо)
 
-Основа — `templates/impeller_rans.cfg`: `<…>` заменить числами из JSON сетки (раздел 1).
+Основа — `templates/impeller_rans.cfg`: `<…>` заменить числами из JSON сетки (раздел 1), `mkdir TURBOMACHINERY`.
+
+- **Пробные прогоны 14.11.2026** (`core130` coarse, 139 тыс. узлов, без MPI, ~2 с на итерацию; только пуск):
+  «Matched 6270 points with a max distance of: 1.70109e-16». NaN на 1-й итерации: `MARKER_INLET/OUTLET` при полной
+  частоте (с пристенными функциями и без, CFL 0,5 первого порядка — тоже) и Giles без рампы. С `STANDARD_WALL_FUNCTION`
+  — «T_Wall < 0» и NaN, когда частота доходит до ~10 % номинала (рампа 100, 200 и 500 итераций). Без пристенных
+  функций, Giles + рампа 200 итераций — шаблон в таком виде; итог разгона — в отчёте PR, не здесь.
 
 - `GRID_MOVEMENT= ROTATING_FRAME`: сетка неподвижна, `ROTATION_RATE` — вектор в рад/с, `MACH_MOTION` во всех
   примерах 0,35 (док.). Источник вращения в коде — ω×ρu от консервативных переменных, то есть скорость в решении
@@ -77,11 +86,10 @@ grep -n "NDIME\|NMARK\|MARKER_TAG" out/core130_coarse/passage_core130_coarse.su2
   нужна, как в Aachen (пример).
 - `INIT_OPTION= TD_CONDITIONS` с малым `MACH_NUMBER`: умолчание `REYNOLDS` пересчитывает давление из числа
   Рейнольдса (док.). Модели: SST по умолчанию — `V2003m`, SA — SA-noft2, есть `SA_OPTIONS= ROTATION` (док., код).
-- **С турбомашинными маркерами** (нужны для Giles и `TURBO_PERF`): `MARKER_TURBOMACHINERY= (inlet, outlet)`,
-  `TURBOMACHINERY_KIND= AXIAL_CENTRIFUGAL`, `TURBO_PERF_KIND= COMPRESSOR`; вместо `MARKER_INLET/OUTLET` —
-  `MARKER_GILES= (inlet, TOTAL_CONDITIONS_PT, <p01>, <T01>, 1.0, 0.0, 0.0, 1.0, 0.0, outlet, STATIC_PRESSURE_1D, <p>, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0)`
-  (9 значений: маркер, тип, два значения, три направления, релаксация среднего и Фурье — док.; направление у Giles
-  в осях решётки — нормаль, окружное, по высоте: 1, 0, 0 — вход без закрутки, угол = atan(d₂/d₁), код `BC_Giles`);
+- **Турбомашинные маркеры** (нужны для Giles, рампы частоты и `TURBO_PERF`): `MARKER_TURBOMACHINERY= (inlet, outlet)`,
+  `TURBOMACHINERY_KIND= AXIAL_CENTRIFUGAL`, `TURBO_PERF_KIND= COMPRESSOR`; `MARKER_GILES` — 9 значений на маркер:
+  маркер, тип, два значения, три направления, релаксация среднего и Фурье (док.); направление у Giles в осях
+  решётки — нормаль, окружное, по высоте: 1, 0, 0 — вход без закрутки, угол = atan(d₂/d₁) (код `BC_Giles`);
   `AVERAGE_PROCESS_KIND= MIXEDOUT`, `PERFORMANCE_AVERAGE_PROCESS_KIND= MIXEDOUT`, `TURBO_PERF` в `HISTORY_OUTPUT`.
   На тетраэдрах — `SPANWISE_KIND= EQUISPACED` и `NUM_SPANWISE_SECTIONS`: `AUTOMATIC` считает узлы на стыке входа и
   периодической грани (док., «to be reviewed»). До запуска — `mkdir TURBOMACHINERY`, иначе профили по высоте не
@@ -110,9 +118,10 @@ grep -n "NDIME\|NMARK\|MARKER_TAG" out/core130_coarse/passage_core130_coarse.su2
 
 - Останов — невязки (`CONV_FIELD= RMS_DENSITY`, `CONV_RESIDUAL_MINVAL`) или Коши по полям `MARKER_ANALYZE`
   (`CONV_CAUCHY_ELEMS`, `CONV_CAUCHY_EPS`); поля `TURBO_PERF` в `CONV_FIELD` не работают (док.).
-- Расход — столбцы `Avg_Massflow(inlet)`, `Avg_Massflow(outlet)` в `history.csv`, знаки противоположны: нормаль
-  границы в SU2 смотрит внутрь области (код `CEulerSolver.cpp`). `Avg_Massflow` без скобок — сумма со знаком,
-  то есть дисбаланс; `Avg_TotalPress` без скобок — сумма давлений, не среднее (код `CFlowOutput.cpp`).
+- Расход — столбцы `Avg_Massflow(inlet)`, `Avg_Massflow(outlet)` в `history.csv`; нормаль границы в SU2 смотрит
+  внутрь области (код `CEulerSolver.cpp`): при прямом течении вход > 0, выход < 0; оба > 0 — обратное течение на
+  выходе (так было в пробном прогоне при недоразогнанном колесе). `Avg_Massflow` без скобок — сумма со знаком,
+  то есть дисбаланс; `Avg_TotalPress` без скобок — сумма давлений, не среднее (код `CFlowOutput.cpp`, прогон).
 - Принято в этом навыке (не из документации): точка сошлась, если невязки упали не меньше чем на 4 порядка,
   дисбаланс расхода ≤ 0,5 %, π и η за последние 500 итераций меняются меньше чем на 0,1 %.
 - Giles и осреднённый Riemann работают только на самой мелкой сетке (код); если с многосеточным неустойчиво —
@@ -122,9 +131,9 @@ grep -n "NDIME\|NMARK\|MARKER_TAG" out/core130_coarse/passage_core130_coarse.su2
 
 `python3 .claude/skills/su2-turbo/scripts/su2_pr_eta.py history.csv 1.4` — последняя строка файла:
 π₀ = p₀₂/p₀₁ и η = (π₀^((γ−1)/γ) − 1)/(T₀₂/T₀₁ − 1) по столбцам со скобками (осреднение по расходу —
-умолчание `MARKER_ANALYZE_AVERAGE`, код), модули расходов и дисбаланс. Формула — для идеального газа с постоянным
-γ (как `IDEAL_GAS`). Разбор проверен на искусственном файле в формате писателя SU2 (по коду: заголовки в
-кавычках, столбцы выровнены пробелами), на настоящем `history.csv` — нет.
+умолчание `MARKER_ANALYZE_AVERAGE`, код), расходы со знаком и дисбаланс; при знаках не «вход > 0, выход < 0» —
+предупреждение. Формула — для идеального газа с постоянным γ (как `IDEAL_GAS`). Разбор проверен на `history.csv`
+пробного прогона SU2 v8.6.0 (числа там не сошедшиеся, проверялся только разбор).
 
 - `TURBO_PERF` (код `CTurboOutput.cpp`, `CFlowOutput.cpp`): в `SCREEN_OUTPUT` — `PressureRatioTT`, `TotalTotalEfficiency`
   (в процентах), а в `history.csv` те же столбцы называются `PRTT`, `TotTotEff` (и `PRTS`, `TotStaticEff`); изоэнтропическая
@@ -173,7 +182,7 @@ grep -n "NDIME\|NMARK\|MARKER_TAG" out/core130_coarse/passage_core130_coarse.su2
   ```
 - Публикуемое число — из results-JSON рядом со скриптом (навык `gtu-cycle`), вместе с конфигурацией, журналом и
   версией SU2; «SU2 показал» без журнала прогона не писать.
-- Локально — не дольше 20 минут; дольше — `runner.py` (us-east-1, спот, потолок 300 долл., запись только в
+- Локально — не дольше 20 минут; дольше — `runner.py`, навык `aws-gtu-runs` (us-east-1, спот, потолок 300 долл., запись только в
   `s3://$ALPHA_O_S3/<префикс>/gtu/…`), живой запуск только флагом `--live`. Ключей и секретов в файлах нет.
 
 ## 11. Типовые ошибки
@@ -188,7 +197,8 @@ grep -n "NDIME\|NMARK\|MARKER_TAG" out/core130_coarse/passage_core130_coarse.su2
 - Пары `MARKER_PERIODIC` в обратном порядке или угол со знаком «минус»: SU2 не останавливается, печатает «Bad match».
 - `TURBOMACHINERY_KIND= CENTRIFUGAL` у колеса с осевым входом: высота на входе мерится по `z` — нужно `AXIAL_CENTRIFUGAL`.
 - `MARKER_GILES` без `MARKER_TURBOMACHINERY` — «Giles Boundary conditions can only be used with turbomachinery markers» (док.).
-- y⁺ не проверен на сетке без призм: поле `Y_PLUS` (группа `PRIMITIVE`) — в `VOLUME_OUTPUT`.
+- `STANDARD_WALL_FUNCTION` на тетраэдрах без призм — «T_Wall < 0» и NaN при разгоне (прогон, раздел 4); y⁺ — поле
+  `Y_PLUS` (группа `PRIMITIVE`) в `VOLUME_OUTPUT`.
 
 ## 12. Проверка результата
 
@@ -203,14 +213,13 @@ grep -n "NDIME\|NMARK\|MARKER_TAG" out/core130_coarse/passage_core130_coarse.su2
 - Исходник SU2 v8.6.0 «Harrier» (клон тега): https://github.com/su2code/SU2/tree/v8.6.0 — `Common/src/CConfig.cpp`,
   `Common/include/option_structure.hpp` и `.inl`, `Common/src/geometry/CGeometry.cpp`, `CPhysicalGeometry.cpp`,
   `SU2_CFD/src/output/CTurboOutput.cpp`, `CFlowOutput.cpp`, `COutput.cpp`, `SU2_CFD/include/output/COutput.hpp`,
-  `SU2_CFD/src/numerics/flow/flow_sources.cpp`, `SU2_CFD/src/solvers/CEulerSolver.cpp`, `SU2_CFD/src/SU2_CFD.cpp`,
-  `config_template.cfg`, `meson.build`, `meson_options.txt`, `TestCases/turbomachinery/*`, `TestCases/serial_regression.py`.
-- Документация — исходник сайта https://github.com/su2code/su2code.github.io (коммит 67d0f94, 11.11.2026); сам
-  сайт из контейнера не открылся (DNS): https://su2code.github.io/docs_v7/Setup-Guide-Turbomachinery/ ,
-  https://su2code.github.io/docs_v7/Markers-and-BC/ , https://su2code.github.io/docs_v7/Build-SU2-Linux-MacOS/ ,
-  https://su2code.github.io/docs_v7/SU2-Linux-MacOS/ , https://su2code.github.io/docs_v7/Execution/ ,
-  https://su2code.github.io/docs_v7/Turbulence-Models/ , https://su2code.github.io/tutorials/Aachen_Turbine/ ,
-  https://su2code.github.io/download.html ; сетки примеров — https://github.com/su2code/TestCases (список `turbomachinery/`).
+  `flow_sources.cpp`, `CEulerSolver.cpp`, `CFluidIteration.cpp`, `SU2_CFD.cpp`, `printing_toolbox.hpp`,
+  `config_template.cfg`, `meson.build`, `meson_options.txt`, `TestCases/turbomachinery/*`, `TestCases/serial_regression.py`;
+  сборка и пробные прогоны в контейнере 14.11.2026.
+- Документация — исходник сайта https://github.com/su2code/su2code.github.io (коммит 67d0f94, 11.11.2026; сам
+  сайт из контейнера не открылся): https://su2code.github.io/docs_v7/ + `Setup-Guide-Turbomachinery/`, `Markers-and-BC/`,
+  `Build-SU2-Linux-MacOS/`, `SU2-Linux-MacOS/`, `Execution/`, `Turbulence-Models/`; https://su2code.github.io/tutorials/Aachen_Turbine/ ,
+  https://su2code.github.io/download.html ; сетки примеров — https://github.com/su2code/TestCases (`turbomachinery/`).
 - Gmsh 4.15.2: справка API установленного пакета; запись `.su2` проверена на кубе.
 - NASA TMR, Rotor 37: https://github.com/tmbwg/turbmodels/blob/main/Other_exp_Data/rotor37_exp.html
   (страница https://tmbwg.github.io/turbmodels/Other_exp_Data/rotor37_exp.html).
