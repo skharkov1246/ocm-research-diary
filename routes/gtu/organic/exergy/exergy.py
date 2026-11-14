@@ -607,7 +607,7 @@ def eq_eta_pc(pi1, e1, pi2, e2):
 
 
 # ---------------------------------------------------------------- SVG: диаграмма Грассмана и сравнение узлов
-COL = dict(flow="#6da7ec", fuel="#2a78d6", work="#6250d6", destr="#eb6834", out="#8a8985", block="#ecebe7",
+COL = dict(flow="#3987e5", fuel="#0d366b", work="#6250d6", destr="#eb6834", out="#7d7c78", block="#ecebe7",
            ink="#0b0b0b", ink2="#52514e", grid="#d6d5d0")
 
 
@@ -812,8 +812,15 @@ def grassmann_svg(acc, title, subtitle, scale, path):
         el.append(f'<rect x="{lx}" y="{ly - 9}" width="14" height="10" fill="{col}"/>')
         el.append(f'<text x="{lx + 19}" y="{ly}" font-size="11" fill="{COL["ink2"]}">{txt}</text>')
         lx += 19 + 5.8 * len(txt) + 26
-    svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {Hh}" width="{W}" height="{Hh}" '
-           f'font-family="Times New Roman, Times, serif">\n<rect width="{W}" height="{Hh}" fill="#ffffff"/>\n'
+    g = {k: n[k]["pct_fuel_ex"] if k in n else 0.0 for k in n}
+    desc = (f"Диаграмма Грассмана, ширина полосы пропорциональна потоку эксергии. Топливо 100 % ({Ef:.0f} кВт). "
+            f"Разрушение: горение {_pct(g['comb_reaction'])}, смешение {_pct(g['comb_mixing'])}, компрессор {_pct(g['compressor'])}, "
+            f"турбина {_pct(g['turbine_gg'] + g['turbine_pt'])}, механика, редуктор и генератор "
+            f"{_pct(g['mech'] + g['gearbox'] + g['generator'])}" + (f", рекуператор {_pct(g['recup_heat'] + g['recup_dp_air'] + g['recup_dp_gas'])}" if has_rec else "")
+            + f". Уходит с выхлопом {_pct(g['exhaust'])}, с утечками {_pct(g['leakage'])}. На клеммах {_pct(100 * acc['ex_eff_el'])}.")
+    svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {Hh}" width="{W}" height="{Hh}" role="img" '
+           f'aria-labelledby="gt gd" font-family="Times New Roman, Times, serif">\n<title id="gt">{title}</title>\n'
+           f'<desc id="gd">{desc}</desc>\n<rect width="{W}" height="{Hh}" fill="#ffffff"/>\n'
            f'<text x="30" y="28" font-size="16" fill="{COL["ink"]}">{title}</text>\n'
            f'<text x="30" y="47" font-size="12" fill="{COL["ink2"]}">{subtitle}</text>\n' + "\n".join(el) + "\n</svg>\n")
     open(path, "w", encoding="utf-8").write(svg)
@@ -821,7 +828,7 @@ def grassmann_svg(acc, title, subtitle, scale, path):
 
 def bars_svg(variants, path):
     """Сравнение исполнений по группам узлов: доля эксергии топлива, %; три ряда на группу."""
-    cols = ["#2a78d6", "#eb6834", "#1baf7a"]
+    cols = ["#2a78d6", "#eb6834", "#199e70"]
     keys = [g["key"] for g in variants[0][1]["groups"]] + ["product"]
     labs = [g["label"] for g in variants[0][1]["groups"]] + ["на клеммах (полезно)"]
     vals = []
@@ -854,9 +861,14 @@ def bars_svg(variants, path):
         el.append(f'<rect x="{lx}" y="46" width="14" height="10" fill="{cols[j]}"/>')
         el.append(f'<text x="{lx + 19}" y="55" font-size="12" fill="#0b0b0b">{name}</text>')
         lx += 19 + 6.6 * len(name) + 30
-    svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {Hh}" width="{W}" height="{Hh}" '
-           f'font-family="Times New Roman, Times, serif">\n<rect width="{W}" height="{Hh}" fill="#ffffff"/>\n'
-           f'<text x="30" y="28" font-size="16" fill="#0b0b0b">KV-3: куда уходит эксергия топлива — три исполнения</text>\n'
+    ce = [d["comb_reaction"] + d["exhaust"] for d in vals]
+    title = (f"KV-3: горение и выхлоп — {_pct(min(ce))[:-2]}–{_pct(max(ce))} эксергии топлива во всех трёх исполнениях")
+    desc = "Группы узлов, доля эксергии топлива: " + "; ".join(
+        f"{lab}: " + ", ".join(f"{variants[j][0]} {_pct(vals[j].get(k, 0.0))}" for j in range(len(vals))) for k, lab in zip(keys, labs))
+    svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {Hh}" width="{W}" height="{Hh}" role="img" '
+           f'aria-labelledby="bt bd" font-family="Times New Roman, Times, serif">\n<title id="bt">{title}</title>\n'
+           f'<desc id="bd">{desc}</desc>\n<rect width="{W}" height="{Hh}" fill="#ffffff"/>\n'
+           f'<text x="30" y="28" font-size="16" fill="#0b0b0b">{title}</text>\n'
            + "\n".join(el) + "\n</svg>\n")
     open(path, "w", encoding="utf-8").write(svg)
 
@@ -1047,10 +1059,12 @@ def main():
                      f"доли — от эксергии топлива; ISO 15 °C, 60 %")
     svgs = dict(base="grassmann_kv3_base.svg", recup="grassmann_kv3_recup.svg", hot="grassmann_kv3_hot_printed.svg",
                 bars="exergy_groups_kv3.svg")
-    grassmann_svg(base, "KV-3 (Taurus 60 GS, 5670 кВт): поток эксергии, расчётная точка frame3", sub(base), scale,
+    tl = lambda a: (f"горение {_pct(a['nodes']['comb_reaction']['pct_fuel_ex'])}, выхлоп {_pct(a['nodes']['exhaust']['pct_fuel_ex'])}, "  # noqa: E731
+                    f"на клеммах {_pct(100 * a['ex_eff_el'])} эксергии топлива")
+    grassmann_svg(base, "KV-3 (Taurus 60 GS), расчётная точка: " + tl(base), sub(base), scale,
                   os.path.join(HERE, svgs["base"]))
-    grassmann_svg(recB, f"KV-3 с рекуператором (ε {eps}): поток эксергии", sub(recB), scale, os.path.join(HERE, svgs["recup"]))
-    grassmann_svg(hotC, f"KV-3, T41 {T_hot:.0f} °C, печатное охлаждение: поток эксергии", sub(hotC), scale,
+    grassmann_svg(recB, f"KV-3 с рекуператором (ε {eps}): " + tl(recB), sub(recB), scale, os.path.join(HERE, svgs["recup"]))
+    grassmann_svg(hotC, f"KV-3, T41 {T_hot:.0f} °C, печатное охлаждение: " + tl(hotC), sub(hotC), scale,
                   os.path.join(HERE, svgs["hot"]))
     bars_svg(variants, os.path.join(HERE, svgs["bars"]))
 

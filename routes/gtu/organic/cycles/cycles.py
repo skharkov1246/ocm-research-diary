@@ -381,7 +381,6 @@ def pgc_gain(air, fuel_Y, fuel_h, mf, lhv_f):
     hm = (air.m * h_a + mf * fuel_h) / m
     g.HPY = hm, air.P, Ym
     u_r, v_r = g.int_energy_mass, 1.0 / g.density
-    _, prod = burn(air.cp(), fuel_Y, fuel_h, 1500.0, air.P, lhv_f) if False else (None, None)
     # продукты того же расхода топлива (полное сгорание)
     n = (air.m * air.Y + mf * fuel_Y) / MW
     C = n[I["CO2"]] + n[I["CH4"]] + n[I["CO"]]
@@ -802,7 +801,7 @@ def evaluate(topo, PR, prm=None, detail=False):
         if tcr == "steam":
             w_pump = mf * (1 - fuel["yC"]) * (p_fuel - P0) / 999.1 / A["eta_pump"]
             comps.append(("Насос питательной воды", [St(mf * (1 - fuel["yC"]), T0, P0, Y_of("H2O:1"), liq=True)], [feeds[1]],
-                          -w_pump, 0.0))
+                          -w_pump, w_pump * (1 - A["eta_pump"])))
         else:
             w_pump = 0.0
         name = {"fh": "Подогреватель топлива", "steam": "Риформер паровой (с парогенератором)",
@@ -928,7 +927,7 @@ def exergy_account(res):
         Xb = T0 * Sgen if (ins or outs) else -W
         rows.append(dict(node=name, X_A_kW=Xa * W1 / 1e3, X_B_kW=Xb * W1 / 1e3, energy_residual_kW=dH * W1 / 1e3))
     st = res["_streams"]
-    E_fuel = sum(f[1] * res["mf"] * ex(f[2]) for f in st["fuel"]["feeds"] if f[0] != "RC")
+    E_fuel = sum(f[1] * res["mf"] * ex(f[2] if f[0] == "CH4" else f[2].cp(P=P0)) for f in st["fuel"]["feeds"] if f[0] != "RC")
     E_air = ex(St(1.0, T0, P0, Y_AIR))
     E_cool_in = 0.0
     for name, ins, outs, W, Q in res["_comps"]:

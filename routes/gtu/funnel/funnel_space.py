@@ -109,7 +109,8 @@ CONT = {   # непрерывные оси: доля 0..1 переводится
     "kUt": "окружная скорость турбины в долях предела материала: 0,75-1,00",
     "zt": "лопаток рабочего колеса турбины: радиальная 9-17, осевая 30-80 на ступень",
     "zn": "лопаток соплового аппарата: радиальная 12-24, осевая 20-60 на ступень",
-    "kUpt": "окружная скорость силовой турбины в долях 380 м/с: 0,75-1,00",
+    "kUpt": "окружная скорость силовой турбины в долях 380 м/с: 0,85-1,00 (ниже - лопатки последней ступени слишком длинные при частоте пакета)",
+    "phit": "ca/U на выходе осевой турбины и СТ: 0,45-0,80 (frame3 - 0,5); выше 0,5 - потеря с выходной скоростью: половина прироста c²/2 (оценка)",
     "eps_rec": "эффективность рекуператора: 0,75-0,92",
     "pgain": "прирост полного давления в камере: RDC 0-0,10, волновой ротор 0-0,15 (оценка; модели обещают +3-5 % КПД у RDC - по выдержке поиска)",
     "kD_case": "диаметр корпуса / наибольший D2: 1,7-2,1 (gtu_family - 1,9)",
@@ -271,7 +272,8 @@ def concept(i, n, kv="KV-3", seed=SEED):
     c["kUt"] = _lerp(u["kUt"], 0.75, 1.00)
     c["zt"] = int(round(_lerp(u["zt"], *((9, 17) if c["turb"] == "Р" else (30, 80)))))
     c["zn"] = int(round(_lerp(u["zn"], *((12, 24) if c["turb"] == "Р" else (20, 60)))))
-    c["kUpt"] = _lerp(u["kUpt"], 0.75, 1.00) if c["rotors"] == 2 else 0.0
+    c["kUpt"] = _lerp(u["kUpt"], 0.85, 1.00) if c["rotors"] == 2 else 0.0
+    c["phit"] = _lerp(u["phit"], 0.45, 0.80)
     c["eps_rec"] = _lerp(u["eps_rec"], 0.75, 0.92) if c["recup"] == "печатный" else 0.0
     c["pgain"] = _lerp(u["pgain"], 0.0, {"RDC": 0.10, "ВР": 0.15}.get(c["comb"], 0.0))
     c["kD_case"] = _lerp(u["kD_case"], 1.7, 2.1)
@@ -307,9 +309,7 @@ def pi_max_by_speed(c):
     выборка не тратилась на заведомо превышенную окружную скорость; правило U_comp всё равно проверяется."""
     E = _E()
     typ = stage_types(c)
-    mus = [c["mu1"]] * (len(typ) - 1) + [c["mu2"]] if len(typ) > 1 else [c["mu1"]]
-    if c["comp"] == "ОЦ":
-        mus = [c["mu1"]] * c["n_ax"] + [c["mu2"]]
+    mus = stage_mus(c)
     T = E.T0; pmax = []
     for k, (t, mu) in enumerate(zip(typ, mus)):
         mat = c["mat_cw"] if not (c["mat_cw"] == "Al" and k > 0) else "Ti64"
@@ -317,7 +317,7 @@ def pi_max_by_speed(c):
         T2 = E.T_h(E.h(T) + mu * Ul ** 2)
         pis = 3.0
         for _ in range(3):
-            eta = eta_comp(t, pis, mat, k, c["inlet"]) - ETA_MARGIN
+            eta = eta_comp(t, pis, mat, k, c["inlet"], mu) - ETA_MARGIN
             pis = math.exp(eta * (E.s0(T2) - E.s0(T)) / E.RA)
         if t == "О":
             pis = min(pis, AX_PI_MAX)
@@ -333,6 +333,13 @@ def pi_max_by_speed(c):
     return min(min(pmax[:na]) ** (na / s), pmax[-1] ** (1 / (1 - s)))
 
 
+def stage_mus(c):
+    typ = stage_types(c)
+    if c["comp"] == "ОЦ":
+        return [c["mu1"]] * c["n_ax"] + [c["mu2"]]
+    return [c["mu1"]] if len(typ) == 1 else [c["mu1"], c["mu2"]]
+
+
 def stages_pi(c):
     st, pi, s = stage_types(c), c["pi"], c["split"]
     if c["comp"] in ("1Ц", "Д"):
@@ -343,12 +350,17 @@ def stages_pi(c):
     return [pi ** (s / na)] * na + [pi ** (1 - s)]
 
 
-def eta_comp(typ, pis, mat, k, inlet):
+MU_ETA = 0.10     # ΔКПД = -0,10·(mu - 0,70): меньше загнутость назад - больше работа, но ниже КПД (оценка; comp_stage - mu 0,70)
+
+
+def eta_comp(typ, pis, mat, k, inlet, mu=None):
     """политропный КПД ступени: формула comp_stage (gtu_explore) для центробежной; поправки - оценка"""
     if typ == "О":
         e = 0.885 - 0.04 * max(0.0, pis - 1.6)
     else:
         e = 0.880 - 0.010 * (pis - 2.5) - (0.02 if mat == "Ni" else 0.0) - (0.01 if typ == "Д" else 0.0)
+        if mu is not None:
+            e -= MU_ETA * (mu - 0.70)
     if k == 0 and inlet == "двух":
         e -= 0.01
     return max(0.70, e)
@@ -453,6 +465,14 @@ def _radial_stage(t, nt, U):
     return 0.86 * max(0.05, 1 - ((nu - 0.70) / 0.70) ** 2), nu, dhs
 
 
+LEAVE_K = 0.5      # не восстановленная диффузором доля прироста выходной кинетической энергии (оценка)
+
+
+def leaving_loss(phit, U, dhs):
+    """снижение КПД осевой турбины при ca/U выше 0,5 (eta_axial отвечает 0,5): LEAVE_K·((phit·U)² - (0,5·U)²)/2 / Δh_s"""
+    return LEAVE_K * max(0.0, (phit * U) ** 2 - (CX_T * U) ** 2) / 2.0 / max(dhs, 1.0)
+
+
 def quick_perf(c, tgt, d_eta=None):
     """быстрый цикл концепции: КПД турбин - по нагрузке ступеней при окружной скорости концепции (итерации).
     d_eta - поправки КПД ступеней компрессора от геометрии (коэффициент расхода, зазор), из derive."""
@@ -460,7 +480,9 @@ def quick_perf(c, tgt, d_eta=None):
     pis = stages_pi(c); typ = stage_types(c)
     d_eta = d_eta or [0.0] * len(pis)
     mats = [c["mat_cw"] if not (c["mat_cw"] == "Al" and k > 0) else "Ti64" for k in range(len(pis))]
-    comp = _comp([(p, max(0.60, eta_comp(t, p, m, k, c["inlet"]) + de)) for k, (p, t, m, de) in enumerate(zip(pis, typ, mats, d_eta))])
+    mus = stage_mus(c)
+    comp = _comp([(p, max(0.60, eta_comp(t, p, m, k, c["inlet"], mu) + de))
+                  for k, (p, t, m, de, mu) in enumerate(zip(pis, typ, mats, d_eta, mus))])
     Ut, Ulim, _ = turb_speed(c)
     Upt = c["kUpt"] * 380.0
     eg, ep = 0.86, 0.88
@@ -470,12 +492,14 @@ def quick_perf(c, tgt, d_eta=None):
         if "fail" in r:
             break
         if c["turb"] == "О":
-            psi = r["t"]["w"] / (c["nt"] * Ut ** 2); eg_n = E.eta_axial(psi); load = dict(psi=psi)
+            psi = r["t"]["w"] / (c["nt"] * Ut ** 2); eg_n = E.eta_axial(psi) - leaving_loss(c["phit"], Ut, r["t"]["w"] / eg)
+            load = dict(psi=psi)
         else:
             eg_n, nu, dhs = _radial_stage(r["t"], c["nt"], Ut); load = dict(nu=nu, dhs=dhs)
         ep_n = ep
         if r["pt"]:
-            psi_pt = r["pt"]["w"] / (c["npt"] * Upt ** 2); ep_n = E.eta_axial(psi_pt); load["psi_pt"] = psi_pt
+            psi_pt = r["pt"]["w"] / (c["npt"] * Upt ** 2)
+            ep_n = E.eta_axial(psi_pt) - leaving_loss(c["phit"], Upt, r["pt"]["w"] / ep); load["psi_pt"] = psi_pt
         eg_n, ep_n = max(0.40, eg_n), max(0.40, ep_n)
         if abs(eg_n - eg) < 1e-4 and abs(ep_n - ep) < 1e-4:
             break
@@ -507,9 +531,7 @@ def derive(c, tgt, perf):
     G = perf["G"]; Gc = G / c["cores"]
     comp = perf["comp"]
     mats = [c["mat_cw"] if not (c["mat_cw"] == "Al" and k > 0) else "Ti64" for k in range(len(pis))]
-    mus = [c["mu1"] if k == 0 else c["mu2"] for k in range(len(pis))]
-    if c["comp"] == "ОЦ":
-        mus = [c["mu1"]] * c["n_ax"] + [c["mu2"]]
+    mus = stage_mus(c)
     st = []
     for k, (s, t, m, mu) in enumerate(zip(comp, typ, mats, mus)):
         Gs = Gc / 2 if (k == 0 and c["inlet"] == "двух") else Gc
@@ -545,7 +567,7 @@ def derive(c, tgt, perf):
     Q5 = t["m"] * Gc / rho5
     tg = dict(type=c["turb"], nt=c["nt"], U=Ut, Ulim=perf["Ulim_t"], D=Dt, Q5=Q5)
     if c["turb"] == "О":
-        h = Q5 / (math.pi * Dt * CX_T * Ut)
+        h = Q5 / (math.pi * Dt * c["phit"] * Ut)
         tg.update(h=h, htr=(Dt - h) / (Dt + h), Dtip=Dt + h, AN2=math.pi * Dt * h * n ** 2, psi=perf["load"].get("psi"))
     else:
         dhs = perf["load"].get("dhs", 1.0)
@@ -555,7 +577,7 @@ def derive(c, tgt, perf):
     if c["rotors"] == 2:
         p = r["pt"]; Upt = perf["Upt"]; Dpt = 60 * Upt / (math.pi * tgt["n_pkg"])
         rho = p["p_out"] / (E.Rg(p["b"]) * p["T_out"]); Q = p["m"] * G / rho
-        hp = Q / (math.pi * Dpt * CX_T * Upt)
+        hp = Q / (math.pi * Dpt * c["phit"] * Upt)
         pt = dict(U=Upt, D=Dpt, h=hp, htr=(Dpt - hp) / (Dpt + hp), Dtip=Dpt + hp, psi=perf["load"].get("psi_pt"), npt=c["npt"])
     # габарит и длины (оценка)
     L_rot = sum(0.35 * s["D"] if s["type"] != "О" else 0.12 * s["D"] for s in st) + \
