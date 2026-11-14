@@ -137,7 +137,7 @@ A = dict(
     # горение с ростом давления
     pgc_f_real=0.25, pgc_deta_t=0.02,
     # химическая рекуперация
-    p_fuel_k=1.25, dT_app=40.0, approach_eq=15.0, T_ref_max=850.0, T_fh_max=400.0, dp_ref_g=0.02, dp_ref_f=0.05,
+    p_fuel_k=1.25, dT_app=40.0, approach_eq=15.0, T_ref_max=850.0, T_fh_max=400.0, dp_ref_g=0.02, dp_fh_g=0.002, dp_ref_f=0.05,
     pinch=20.0, sc=(1.5, 2.0, 3.0), R_egr=(0.5, 1.0, 2.0, 4.0), eta_rc=0.78, eta_pump=0.6,
     cat_loading=0.05,                   # кг катализатора (с носителем) на м² стенки — покрытие стенок риформера, оценка
     eta_eff_cat=1.0,                    # фактор эффективности тонкого покрытия (для гранул ~0,05 — оценка)
@@ -552,23 +552,23 @@ def xf_pfr(X_in, F_tot, T, P, W_max, eta_eff=1.0, n_out=200):
 
 
 # ---------------------------------------------------------------- топливо: подогрев, паровой риформинг, рециркуляция
-def feed_steam(sc):
-    """смесь CH4 + вода (жидкая при T0) на кг смеси: состав, энтальпия, массовая доля CH4"""
+def feed_steam(sc, P=P0):
+    """смесь CH4 + вода (жидкая при T0, после насоса при давлении P) на кг смеси: состав, энтальпия, доля CH4"""
     mC, mW = MW[I["CH4"]], sc * MW[I["H2O"]]
     yC = mC / (mC + mW)
     Y = np.zeros(len(SP))
     Y[I["CH4"]], Y[I["H2O"]] = yC, 1 - yC
-    h = yC * hs(St(1, T0, P0, Y_CH4))[0] + (1 - yC) * hs(St(1, T0, P_SAT0, Y_of("H2O:1"), liq=True))[0]
+    h = yC * hs(St(1, T0, P, Y_CH4))[0] + (1 - yC) * hs(St(1, T0, P, Y_of("H2O:1"), liq=True))[0]
     return Y, h, yC
 
 
 def cold_curve_steam(sc, P, T_ref):
     """составная кривая холодной стороны парового риформинга на кг смеси: [(T, Q от входа)]; равновесие с подходом"""
-    Y, h_in, yC = feed_steam(sc)
+    Y, h_in, yC = feed_steam(sc, P)
     Ts = T_sat(P)
     yW = 1 - yC
     hC = lambda T: hs(St(1, T, P, Y_CH4))[0]
-    hW_liq = lambda T: hs(St(1, T0, P_SAT0, Y_of("H2O:1"), liq=True))[0] + 4180.0 * (T - T0) * (1 + 0.0007 * (T - T0))
+    hW_liq = lambda T: hs(St(1, T0, P, Y_of("H2O:1"), liq=True))[0] + 4180.0 * (T - T0) * (1 + 0.0007 * (T - T0))
     pts = []
     for T in np.linspace(T0, Ts, 8):
         pts.append((T, yC * hC(T) + yW * hW_liq(T) - h_in))
@@ -613,16 +613,16 @@ def make_fuel(tcr, gin, mf_guess, prm, p_fuel, stack):
     if tcr == "none":
         h = hs(St(1, T0, p_fuel, Y_CH4))[0]
         return dict(Y=Y_CH4, h=h, T=T0, lhv=LHV_CH4, yC=1.0, q=0.0, info={}, feeds=[("CH4", 1.0, St(1, T0, p_fuel, Y_CH4))])
-    T_top = min(gin.T - A["dT_app"], A["T_ref_max"])
+    T_top = min(gin.T - A["dT_app"], A["T_ref_max"] + 273.15)
     if tcr == "fh":
-        T = max(min(T_top, A["T_fh_max"]), T0)
+        T = max(min(T_top, A["T_fh_max"] + 273.15), T0)
         h0 = hs(St(1, T0, p_fuel, Y_CH4))[0]
         h1 = hs(St(1, T, p_fuel * (1 - A["dp_ref_f"]), Y_CH4))[0]
         return dict(Y=Y_CH4, h=h1, T=T, lhv=LHV_CH4, yC=1.0, q=h1 - h0, info=dict(T_fuel_C=T - 273.15),
                     feeds=[("CH4", 1.0, St(1, T0, p_fuel, Y_CH4))], Pout=p_fuel * (1 - A["dp_ref_f"]))
     if tcr == "steam":
         sc = prm["sc"]
-        Yf, h_in, yC = feed_steam(sc)
+        Yf, h_in, yC = feed_steam(sc, p_fuel)
         T = T_top
         info = {}
         while True:
@@ -717,7 +717,8 @@ def evaluate(topo, PR, prm=None, detail=False):
     comps.append(("Утечки (уходят из цикла)", [a2.cp()], [air2, leak], 0.0, 0.0))
     p3 = air2.P * (1 - A["dp_ra"]) if rec else air2.P
     p_fuel = p3 * A["p_fuel_k"]
-    chain = (1 + A["dp_ref_g"] if tcr != "none" else 1.0) * (1 + A["dp_rg"] if rec else 1.0)
+    dpg_t = {"none": 0.0, "fh": A["dp_fh_g"]}.get(tcr, A["dp_ref_g"])
+    chain = (1 + dpg_t) * (1 + A["dp_rg"] if rec else 1.0)
     p5 = P0 * A["p_exh"] * chain
 
     fuel = make_fuel("none", None, None, prm, p_fuel, None)
@@ -767,7 +768,7 @@ def evaluate(topo, PR, prm=None, detail=False):
         if tcr != "none":
             fuel_new = make_fuel(tcr, st5, mf, prm, p_fuel, stack if stack is not None else st5.cp(T=500.0, P=P0 * A["p_exh"]))
             hg = hs(st5)[0]
-            Pg = st5.P / (1 + A["dp_ref_g"])
+            Pg = st5.P / (1 + dpg_t)
             g_ref = St(st5.m, T_of_h(hg - mf * fuel_new["q"] / st5.m, Pg, st5.Y), Pg, st5.Y)
             g_in = g_ref
         else:
@@ -824,6 +825,12 @@ def evaluate(topo, PR, prm=None, detail=False):
     ibc_info = None
     exh = stack
     lost = [leak] + lost_cool
+    # --- рециркуляция: часть газа из-за рекуператора (до IBC) уходит назад в риформер
+    if tcr == "egr":
+        m_rc = mf * (1 - fuel["yC"])
+        out = exh.cp(m=exh.m - m_rc)
+        comps.append(("Отбор рециркулята", [exh.cp()], [out, fuel["rc_in"].cp(m=m_rc)], 0.0, 0.0))
+        exh = out
     if ibc:
         best = None
         for pl in A["plow"]:
@@ -838,12 +845,6 @@ def evaluate(topo, PR, prm=None, detail=False):
             lost += best["lost"]
         else:
             ibc_info = dict(useless=True)
-    # --- рециркуляция: часть газа из трубы уходит назад в риформер
-    if tcr == "egr":
-        m_rc = mf * (1 - fuel["yC"])
-        out = exh.cp(m=exh.m - m_rc)
-        comps.append(("Отбор рециркулята", [exh.cp()], [out, exh.cp(m=m_rc)], 0.0, 0.0))
-        exh = out
     W_rc = mf * fuel.get("w_rc", 0.0)
     W_mech = (1 - A["eta_m"]) * (W_t + W_ibc_t)
     comps.append(("Механические потери", [], [], -W_mech, 0.0))
@@ -1267,7 +1268,10 @@ def optimize_topo(t):
         else:
             lo = max(lo, A["PRs_1stage"] + 0.01)
         if hi - lo > 0.05:
-            ref = minimize_scalar(lambda x: -score(_safe(t, x, prm))[1] - 10 * score(_safe(t, x, prm))[0],
+            def obj(x):
+                sc_ = score(_safe(t, x, prm))
+                return -sc_[1] - 10 * sc_[0]
+            ref = minimize_scalar(obj,
                                   bounds=(lo, hi), method="bounded", options=dict(xatol=0.05, maxiter=12))
             rr = _safe(t, float(ref.x), prm)
             if score(rr) > score(rb):

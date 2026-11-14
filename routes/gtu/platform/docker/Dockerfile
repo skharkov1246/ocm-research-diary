@@ -74,7 +74,8 @@ COPY --from=su2-build /opt/su2 /opt/su2
 COPY --chown=1000:1000 routes/gtu /opt/gtu/routes/gtu
 # Непривилегированный пользователь: OpenMPI не запускается от root без особых переменных.
 # ccx -v печатает версию, но выходит с кодом 201 (проверено 14.11.2026) — проверка без пайпа и без кода выхода.
-RUN useradd --create-home --uid 1000 gtu \
+# В ubuntu:24.04 uid 1000 уже занят пользователем ubuntu — тогда он и работает; иначе создаётся gtu.
+RUN if ! getent passwd 1000 >/dev/null; then useradd --create-home --uid 1000 gtu; fi \
  && mkdir -p /work && chown 1000:1000 /work \
  && v="$(ccx -v || true)" && case "$v" in *"Version 2.21"*) ;; *) echo "ccx: $v" >&2; exit 1 ;; esac \
  && printf '%s\n' "$GIT_SHA" > /opt/gtu/GIT_SHA \

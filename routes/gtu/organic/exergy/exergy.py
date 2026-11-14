@@ -267,7 +267,7 @@ GROUPS = [  # ключ группы, подпись, узлы
     ("comb_mixing", "камера: смешение", ("comb_mixing",)),
     ("comb_reaction", "камера: горение", ("comb_reaction",)),
     ("comb_dp", "камера: потеря давления", ("comb_dp",)),
-    ("comb_heat_loss", "камера: недожог (η_b)", ("comb_heat_loss",)),
+    ("comb_heat_loss", "камера: недожог", ("comb_heat_loss",)),
     ("turbine", "турбина", ("turbine_gg", "turbine_pt", "duct_dp")),
     ("leak_cool", "утечки и охлаждение", ("leakage", "cool_throttle_ngv", "cool_mix_ngv", "cool_throttle_rotor", "cool_mix_rotor")),
     ("recuperator", "рекуператор", ("recup_heat", "recup_dp_air", "recup_dp_gas")),
