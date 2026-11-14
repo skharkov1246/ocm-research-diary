@@ -4,12 +4,12 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 389,
-    "total_bytes": 4605398,
-    "results_files": 176,
-    "results_with_script": 52,
+    "datasets": 390,
+    "total_bytes": 4638245,
+    "results_files": 177,
+    "results_with_script": 53,
     "results_referenced_in_site": 22,
-    "results_with_provenance_fields": 27,
+    "results_with_provenance_fields": 28,
     "by_track": {
       "ammonia": 91,
       "battery-cathode": 1,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 69,
+      "не определён": 70,
       "прочее": 25
     }
   },
@@ -6734,6 +6734,36 @@
       "last_change": "2026-11-14",
       "last_author": "Claude",
       "last_commit": "c4a6fd7"
+    },
+    {
+      "path": "routes/gtu/frame3/frame3_geom_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 32847,
+      "referenced_in_site": false,
+      "produced_by": "routes/frame3_geom.py",
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "status",
+        "inputs",
+        "assumptions",
+        "stages",
+        "checks",
+        "t_total_s",
+        "not_done"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "a0150b9"
     },
     {
       "path": "routes/gtu/frame3/frame3_point_results.json",
