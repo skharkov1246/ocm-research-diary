@@ -91,6 +91,13 @@ def test_validate_plan():
         assert len(rc.validate_plan(plan)) == len(plan), name
 
 
+def test_restart_state_validated():
+    with pytest.raises(SystemExit):  # одно число вместо двух — раньше ValueError с трассировкой
+        rc.main(["--plan", "smoke", "--restart-from", "x.dat", "--restart-state", "0.6", "--dry"])
+    with pytest.raises(SystemExit):  # без --restart-from
+        rc.main(["--plan", "smoke", "--restart-state", "0.6,145905", "--dry"])
+
+
 def test_stop_su2_signals_su2_processes_not_parent(tmp_path):
     """_stop_su2 находит процессы с именем SU2_CFD среди потомков и шлёт SIGTERM им, а родитель (как mpirun)
     живёт до их выхода. Вместо SU2 — sleep под именем SU2_CFD (FIXTURE)."""

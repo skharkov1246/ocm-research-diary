@@ -646,14 +646,7 @@ def table_rows(parts):
     return rows
 
 
-def main():
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--work", default=os.path.join(tempfile.gettempdir(), "frame3_fea"),
-                    help="папка рабочих файлов ccx (не в репозитории)")
-    ap.add_argument("--workers", type=int, default=4)
-    ap.add_argument("--out", default=OUT)
-    a = ap.parse_args()
-    pt, tin, meta, out, cases, wall = run_all(a.work, a.workers)
+def make_doc(pt, tin, meta, out, cases, wall, workers):
     parts, analytic, gates = assemble(pt, tin, meta, out, cases, wall)
     ver = disk.ccx_version()
     n0 = tin["stage1"]["n_rpm"]
@@ -705,12 +698,15 @@ def main():
                            "14.11.2026)")),
         parts=parts,
         table=table_rows(parts),
-        run=dict(cases=len(out), wall_s=round(wall, 1), workers=a.workers, ccx_threads=1,
+        run=dict(cases=len(out), wall_s=round(wall, 1), workers=workers, ccx_threads=1,
                  workdir="вне репозитория (--work); .inp/.frd/.dat не сохраняются в git"),
     )
-    with open(a.out, "w", encoding="utf-8") as f:
-        json.dump(doc, f, ensure_ascii=False, indent=1, default=disk._json_default)
-    print(f"расчётов {len(out)}, {wall:.0f} с; наибольшая невязка равновесия {max(gates):.1e}")
+    return doc
+
+
+def print_table(doc):
+    print(f"расчётов {doc['run']['cases']}, {doc['run']['wall_s']:.0f} с; наибольшая невязка равновесия "
+          f"{doc['checks']['equilibrium_gate_max']:.1e}")
     for r in doc["table"]:
         cr = ""
         if "creep_s1_ratio_25000h" in r:
@@ -719,6 +715,20 @@ def main():
         ym = "—" if r["yield_margin"] is None else f"{r['yield_margin']:.2f}"
         print(f"{r['part']:6s} {r['variant']:10s} {r['speed_pct']:3d}% U={r['U_tip']:.0f} vm={r['vm_max_MPa']:.0f} "
               f"(r={r['vm_at_r_mm']:.0f}) hoop={r['hoop_max_MPa']:.0f} yield×{ym} burst×{r['burst_margin']:.3f}{cr}")
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--work", default=os.path.join(tempfile.gettempdir(), "frame3_fea"),
+                    help="папка рабочих файлов ccx (не в репозитории)")
+    ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--out", default=OUT)
+    a = ap.parse_args()
+    pt, tin, meta, out, cases, wall = run_all(a.work, a.workers)
+    doc = make_doc(pt, tin, meta, out, cases, wall, a.workers)
+    with open(a.out, "w", encoding="utf-8") as f:
+        json.dump(doc, f, ensure_ascii=False, indent=1, default=disk._json_default)
+    print_table(doc)
     print("записано:", a.out)
 
 

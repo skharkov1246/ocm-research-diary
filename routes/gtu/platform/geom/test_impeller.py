@@ -66,13 +66,14 @@ class _CaseTest:
     case = None
     args = ()        # дополнительные ключи CLI
     over = {}        # те же переопределения для Impeller
+    inputs = None    # исходные данные Impeller для case custom (у именованных случаев - case_inputs)
 
     @classmethod
     def setUpClass(cls):
         cls.tmp = tempfile.mkdtemp(prefix=f"impeller_{cls.case}_")
         cls.res = I.main(["--case", cls.case, "--level", "coarse", "--out", cls.tmp, *cls.args])
         cls.su2 = read_su2(cls.res["files"]["passage_su2"])
-        cls.imp = I.Impeller(**I.case_inputs(cls.case), **cls.over)
+        cls.imp = I.Impeller(**(cls.inputs or I.case_inputs(cls.case)), **cls.over)
 
     @classmethod
     def tearDownClass(cls):
@@ -90,6 +91,9 @@ class _CaseTest:
         self.assertLessEqual(d["U2"], 620.0 + 1.0)
         self.assertAlmostEqual(d["gap"], max(0.3e-3, 0.0007 * d["D2"]), places=12)
         self.assertTrue(0.0 < d["beta2b"] < 60.0)
+        if self.res["params"]["beta2b"] is not None:  # загиб задан: подбора под psi нет
+            self.assertEqual(d["beta2b"], self.res["params"]["beta2b"])
+            return
         self.assertAlmostEqual(d["psi_euler"], d["psi"], places=6)
         # независимо от кода: Визнер, sigma = 1 - Cслип/U2 = 1 - sqrt(cos b2b)/Z^0,7 (Z - лопатки на выходе),
         # при входе без закрутки Ctheta2/U2 = sigma - phi2 tg b2b = psi
@@ -275,15 +279,124 @@ class TestFewBlades(_CaseTest, unittest.TestCase):
     PR = 4.25
 
 
+# SYNTHETIC: придуманное двустороннее колесо с горячим входом (как у второй ступени) и заданными размерами -
+# проверка ключей --double-sided, --t01/--p01, --d1s/--nu/--b2/--lz/--beta1h/--beta1s/--beta2b, --r-bore 0.
+# Значения не из расчёта трека, подобраны только для дешёвой сетки (b2/D2 около 0,045).
+SYNTH_DBL = dict(m=12.0, PR=3.0, rpm=30000.0, D2=0.36, T01=400.0, p01=1.5e5)        # SYNTHETIC
+SYNTH_DBL_OVER = dict(Z=8, double_sided=True, D1s=0.20, nu=0.36, b2=0.016, Lz=0.095,  # SYNTHETIC
+                      beta1h=30.0, beta1s=58.0, beta2b=45.0, r_bore=0.0)
+
+
+class TestDoubleSided(_CaseTest, unittest.TestCase):
+    """двусторонний вход: канал и сетка - одной стороны на половину расхода, STEP - обе стороны зеркально;
+    полные параметры на входе и размеры заданы извне (SYNTHETIC)"""
+    case = "custom"
+    s, o = SYNTH_DBL, SYNTH_DBL_OVER
+    args = ("--m", str(s["m"]), "--pr", str(s["PR"]), "--rpm", str(s["rpm"]), "--d2", str(s["D2"]),
+            "--t01", str(s["T01"]), "--p01", str(s["p01"]), "--double-sided", "--z", str(o["Z"]),
+            "--d1s", str(o["D1s"]), "--nu", str(o["nu"]), "--b2", str(o["b2"]), "--lz", str(o["Lz"]),
+            "--beta1h", str(o["beta1h"]), "--beta1s", str(o["beta1s"]), "--beta2b", str(o["beta2b"]),
+            "--r-bore", str(o["r_bore"]))
+    inputs = dict(SYNTH_DBL)
+    over = dict(SYNTH_DBL_OVER)
+    D2_range = (0.36, 0.36)
+    rpm_range = (30000.0, 30000.0)
+    PR = 3.0
+    del s, o
+
+    def test_given_inputs(self):
+        """заданные величины дошли до 1D-данных без изменений; сторона - на половину расхода"""
+        d, s, o = self.res["d1"], SYNTH_DBL, SYNTH_DBL_OVER
+        self.assertTrue(d["double_sided"])
+        self.assertEqual(d["m"], s["m"])
+        self.assertEqual(d["m_side"], 0.5 * s["m"])
+        self.assertAlmostEqual(self.res["su2"]["mass_flow_passage_kg_s"], 0.5 * s["m"] / o["Z"], places=12)
+        self.assertEqual((d["T01"], d["p01"]), (s["T01"], s["p01"]))
+        self.assertEqual(self.res["su2"]["inlet_total"], dict(p01_Pa=s["p01"], T01_K=s["T01"]))
+        self.assertAlmostEqual(2 * d["r1s"], o["D1s"], places=12)
+        self.assertAlmostEqual(d["r1h"], o["nu"] * o["D1s"] / 2, places=12)
+        for k in ("b2", "Lz", "beta1h", "beta1s", "beta2b"):
+            self.assertAlmostEqual(d[k], o[k], places=12, msg=k)
+        self.assertAlmostEqual(d["Ls"], o["Lz"] - o["b2"], places=12)
+
+    def test_mesh_sizes_from_file(self):
+        """размеры прочитаны из самого файла SU2, не из JSON: вход r1h..r1s, высота выхода b2, D2 по лопатке,
+        шаг периодичности 360/Z"""
+        X, o, d = self.su2["X"], SYNTH_DBL_OVER, self.res["d1"]
+        tol = 1e-5 * d["D2"]
+
+        def nodes(k):
+            return X[np.unique(self.su2["markers"][k][:, 1:4])]
+        P = nodes("inlet")
+        r = np.hypot(P[:, 0], P[:, 1])
+        self.assertLess(abs(r.min() - o["nu"] * o["D1s"] / 2), tol)
+        self.assertLess(abs(r.max() - o["D1s"] / 2), tol)
+        P = nodes("outlet")
+        self.assertLess(abs((P[:, 2].max() - P[:, 2].min()) - o["b2"]), tol)
+        P = nodes("blade")
+        self.assertLess(abs(2 * np.hypot(P[:, 0], P[:, 1]).max() - SYNTH_DBL["D2"]), 2 * tol)
+        # угол между соответственными узлами periodic_1 и periodic_2 - по их среднему углу
+        a1 = np.unwrap(np.arctan2(nodes("periodic_1")[:, 1], nodes("periodic_1")[:, 0])).mean()
+        a2 = np.unwrap(np.arctan2(nodes("periodic_2")[:, 1], nodes("periodic_2")[:, 0])).mean()
+        self.assertAlmostEqual(math.degrees(a2 - a1) % 360.0, 360.0 / o["Z"], places=6)
+
+    def test_mirror_solid(self):
+        """STEP двустороннего колеса: две стороны, зеркальные относительно средней плоскости общего диска"""
+        import gmsh
+        s = self.res["solid"]
+        self.assertEqual(s["sides"], 2)
+        self.assertAlmostEqual(s["z_mid_plane"], SYNTH_DBL_OVER["Lz"] + s["t_back"], places=12)
+        self.assertEqual(s["r_bore"], 0.0)
+        gmsh.initialize()
+        try:
+            gmsh.option.setNumber("General.Terminal", 0)
+            gmsh.model.occ.importShapes(self.res["files"]["impeller_step"])
+            gmsh.model.occ.synchronize()
+            gmsh.option.setNumber("Mesh.MeshSizeMax", 0.01)
+            gmsh.model.mesh.generate(1)  # узлы на рёбрах: z-размах тела без грубой оценки рамки OCC
+            X = gmsh.model.mesh.getNodes()[1].reshape(-1, 3)
+        finally:
+            gmsh.finalize()
+        zc = s["z_mid_plane"]
+        self.assertLess(abs((X[:, 2].min() + X[:, 2].max()) - 2 * zc), 1e-6)
+        self.assertLess(abs(X[:, 2].min() - s["z_nose"]), 1e-6)
+        # отражение узлов рёбер относительно средней плоскости ложится на узлы рёбер (с точностью до шага)
+        from scipy.spatial import cKDTree
+        Y = X.copy(); Y[:, 2] = 2 * zc - Y[:, 2]
+        dist, _ = cKDTree(X).query(Y)
+        self.assertLess(np.median(dist), 1e-9)
+
+
 class TestInputs(unittest.TestCase):
     """явный отказ на недопустимых исходных данных (без Gmsh)"""
 
     def test_rejects(self):
         for kw in (dict(m=-1.0, PR=3.0), dict(m=5.0, PR=0.9), dict(m=5.0, PR=3.0, Z=2),
                    dict(m=5.0, PR=3.0, gap=-1e-4), dict(m=5.0, PR=3.0, m_split=1.2),
-                   dict(m=5.0, PR=3.0, beta2b=80.0), dict(m=5.0, PR=3.0, D2=-0.4)):
+                   dict(m=5.0, PR=3.0, beta2b=80.0), dict(m=5.0, PR=3.0, D2=-0.4),
+                   dict(m=5.0, PR=3.0, T01=-10.0), dict(m=5.0, PR=3.0, p01=0.0),
+                   dict(m=5.0, PR=3.0, D2=0.4, D1s=0.45), dict(m=5.0, PR=3.0, b2=0.02, Lz=0.015),
+                   dict(m=5.0, PR=3.0, beta1s=95.0),
+                   dict(m=50.0, PR=3.0, rpm=30000.0, D2=0.36, D1s=0.05)):  # вход запирается
             with self.assertRaises(ValueError, msg=str(kw)):
                 I.Impeller(**kw)
+
+    def test_double_sided_equals_half_flow(self):
+        """двустороннее колесо с расходом 2m - сторона та же, что одностороннее с m (D2 и частота заданы)"""
+        a = I.Impeller(m=10.0, PR=4.0, rpm=15000.0, D2=0.6, double_sided=True)   # SYNTHETIC
+        b = I.Impeller(m=5.0, PR=4.0, rpm=15000.0, D2=0.6)                       # SYNTHETIC
+        for k in ("b2", "r1s", "r1h", "beta1h", "beta1s", "beta2b", "Lz", "phi", "C1", "M1s_rel", "psi"):
+            self.assertAlmostEqual(a.d1[k], b.d1[k], places=12, msg=k)
+        self.assertEqual(a.d1["m_side"], 5.0)
+
+    def test_defaults_unchanged(self):
+        """без новых ключей вход стандартный (gtu_explore.T0, P0) и одна сторона на весь расход"""
+        E = I.load_explore()
+        imp = I.Impeller(m=5.0, PR=3.0)                                          # SYNTHETIC
+        self.assertEqual((imp.d1["T01"], imp.d1["p01"]), (E.T0, E.P0))
+        self.assertEqual(imp.d1["m_side"], 5.0)
+        self.assertFalse(imp.d1["double_sided"])
+        self.assertEqual(imp.d1["given"], [])
 
 
 if __name__ == "__main__":

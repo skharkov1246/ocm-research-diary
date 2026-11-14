@@ -689,7 +689,7 @@ def build_solid(imp, path, threads=4, verbose=False):
         vols = [t for dd, t in out if dd == 3]
         if dbl and len(vols) == 1:
             # вторая сторона - зеркало готовой стороны относительно z = z_bk (средняя плоскость общего диска);
-            # сплавить два тела быстрее, чем общее сплавление 2 + 4Z тел (на ступени 1 KV-3: в 4,6 раза)
+            # два тела сплавляются быстрее, чем 2 + 4Z тел сразу
             mir = occ.copy([(3, vols[0])])
             occ.mirror(mir, 0, 0, 1, -z_bk)
             out, _ = occ.fuse([(3, vols[0])], mir)

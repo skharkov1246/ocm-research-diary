@@ -1504,14 +1504,68 @@ def plots(rows, front, ref):
     ax.scatter([r["added"] for r in fr], [100 * r["eff_el"] for r in fr], s=60, facecolors="none", edgecolors="#d62728",
                linewidths=1.4, label="фронт Парето")
     ax.axhline(100 * ref, color="#555", lw=0.8, ls="--")
-    ax.text(ax.get_xlim()[0] + 0.3, 100 * ref + 0.3, "KV-3 простой, π 13,5", fontsize=8, color="#555")
+    ax.annotate("KV-3 простой, π 13,5 (вне допуска по расходу)", xy=(ax.get_xlim()[1], 100 * ref), xytext=(-4, -11),
+                textcoords="offset points", ha="right", fontsize=8, color="#444")
+    for r in fr:
+        ax.annotate(r["name"].replace("рекуператор", "рек.").replace("подогрев топлива", "подогр. топлива")[:38],
+                    xy=(r["added"], 100 * r["eff_el"]), xytext=(6, 3), textcoords="offset points", fontsize=7, color="#222")
+    from matplotlib.ticker import MaxNLocator
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     plt.colorbar(sc_, ax=ax, label="TRL (оценка)")
     ax.set_xlabel("добавочные детали и узлы (относительно KV-3 простого)")
     ax.set_ylabel("КПД на клеммах, %")
     ax.set_title("KV-3: перебор циклов (печатные теплообменники LPBF), оптимум π")
     ax.legend(fontsize=8, loc="lower right")
     fig.tight_layout()
-    fig.savefig(os.path.join(OUT_DIR, "cycles_pareto.png"))
+    fig.savefig(os.path.join(OUT_DIR, "cycles_pareto.png"), bbox_inches="tight")
+    plt.close(fig)
+
+
+EX_GROUPS = [("Компрессор и промохлаждение", ("Компрессор", "Промохладитель", "Вентилятор промо")),
+             ("Камеры сгорания", ("Камера",)),
+             ("Турбины", ("Турбина",)),
+             ("Теплообменники и риформер", ("Рекуператор", "Риформер", "Подогреватель", "Охладитель", "Вентилятор охл", "Насос")),
+             ("Прочее (мех. потери, каналы, утечки)", ("Механические", "Канал", "Утечки", "Отбор", "Разделение"))]
+
+
+def plots_exergy(items):
+    """разрушение и потери эксергии по группам узлов, % эксергии топлива; items: [(подпись, результат opt)]"""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    colors = ["#0072B2", "#D55E00", "#009E73", "#CC79A7", "#999999", "#E69F00", "#56B4E9"]   # Okabe — Ito
+    labels = [x[0] for x in items]
+    fig, ax = plt.subplots(figsize=(10, 0.55 * len(items) + 2.0), dpi=110)
+    left = np.zeros(len(items))
+    cats = [g[0] for g in EX_GROUPS] + ["Уходящие потоки (выхлоп, воздух охладителей)", "Мощность на валу"]
+    for ci, cat in enumerate(cats):
+        vals = []
+        for _, r in items:
+            e = r["exergy"]
+            Ef = e["E_fuel_kW"]
+            if ci < len(EX_GROUPS):
+                v = sum(x["X_A_kW"] for x in e["rows"] if x["node"].startswith(EX_GROUPS[ci][1]))
+            elif ci == len(EX_GROUPS):
+                v = e["E_lost_kW"]
+            else:
+                v = r["w_kJkg"] * r["W_air"]
+            vals.append(100 * v / Ef)
+        vals = np.array(vals)
+        ax.barh(range(len(items)), vals, left=left, color=colors[ci], edgecolor="white", linewidth=0.6, label=cat)
+        for i, v in enumerate(vals):
+            if v > 4:
+                ax.text(left[i] + v / 2, i, f"{v:.0f}", ha="center", va="center", fontsize=7,
+                        color="white" if ci in (0, 1, 2, 4) else "black")
+        left += vals
+    ax.set_yticks(range(len(items)))
+    ax.set_yticklabels(labels, fontsize=8)
+    ax.invert_yaxis()
+    ax.set_xlim(0, 101)
+    ax.set_xlabel("% эксергии топлива (метан + вода, если есть)")
+    ax.set_title("KV-3: куда уходит эксергия топлива (фронт Парето)")
+    ax.legend(fontsize=7, ncol=2, loc="upper center", bbox_to_anchor=(0.45, -0.14), frameon=False)
+    fig.tight_layout()
+    fig.savefig(os.path.join(OUT_DIR, "cycles_exergy.png"), bbox_inches="tight")
     plt.close(fig)
 
 
@@ -1612,6 +1666,12 @@ def main():
             w.writerow({k: (round(v, 5) if isinstance(v, float) else v) for k, v in r.items()})
     plots(sel + [r for r in rows if r["point"] == "opt" and r["tech"] == tech and (not r["limits_ok"]) and not r["bound"]],
           front_i, ref_eff)
+    items = [("KV-3 простой, π опт.", base["opt"])]
+    for r in front[:8]:
+        o = [x for x in res if x["key"] == r["key"]][0]
+        if o["key"] != base["key"]:
+            items.append((f"{o['name']} (π {r['PR']:.1f})"[:70], o["opt"]))
+    plots_exergy(items)
     print(f"готово за {time.time() - t0:.0f} с; фронт Парето: {len(front)}")
     for r in front:
         print(f"  {r['added']:3d} дет. {100 * r['eff_el']:5.1f} % V {r['V_added_m3']:5.2f} м³ π {r['PR']:5.2f} TRL {r['TRL']} "

@@ -675,7 +675,7 @@ def _blisk(method, mat, Dtip, Dm):
     if method == "печать":
         return bool(MK.printers_for(Dtip, 0.15 * Dm, True))
     if method == "литьё":
-        return Dtip <= MK.CAST["turb_axial_blisk"]["max"]
+        return bool(Dtip <= MK.CAST["turb_axial_blisk"]["max"])
     return False
 
 
@@ -1062,8 +1062,17 @@ def run_shard(kv, n, shard, shards, out, seed=SEED, detail=False, workers=1):
     os.makedirs(out, exist_ok=True)
     path = os.path.join(out, f"funnel_space_{kv}_n{n}_s{shard:03d}of{shards:03d}.json")
     with open(path, "w", encoding="utf-8") as fh:
-        json.dump(doc, fh, ensure_ascii=False, separators=(",", ":"))
+        json.dump(doc, fh, ensure_ascii=False, separators=(",", ":"), default=_jd)
     return path, doc
+
+
+def _jd(o):
+    """numpy-типы -> обычные числа для json"""
+    if isinstance(o, np.generic):
+        return o.item()
+    if isinstance(o, (set, tuple)):
+        return list(o)
+    raise TypeError(type(o))
 
 
 def _sha(p):
@@ -1200,7 +1209,7 @@ def selfcheck(out_path=RESULTS):
         res[f"debug_{kv}"]["nearest_infeasible"] = [dict(idx=r["idx"], arch=r["arch"], violation=r["violation"], reject=r["reject"]) for r in near]
     res["elapsed_s"] = round(time.time() - t0, 1)
     with open(out_path, "w", encoding="utf-8") as fh:
-        json.dump(res, fh, ensure_ascii=False, indent=1)
+        json.dump(res, fh, ensure_ascii=False, indent=1, default=_jd)
     return res
 
 
@@ -1219,7 +1228,7 @@ def main(argv=None):
     if a.selfcheck:
         r = selfcheck()
         print(json.dumps(dict(sharding=r["sharding_check"], timing=r["timing"], kv3=dict(n=r["debug_KV-3"]["n"], feasible=r["debug_KV-3"]["feasible"]),
-                              cross=r["cross_check_cycle"]), ensure_ascii=False, indent=1))
+                              cross=r["cross_check_cycle"]), ensure_ascii=False, indent=1, default=_jd))
         return 0
     path, doc = run_shard(a.kv, a.n, a.shard, a.shards, a.out, a.seed, a.detail, max(1, a.workers))
     print(f"{path}: {len(doc['records'])} концепций, допустимых {sum(r['feasible'] for r in doc['records'])}, {doc['elapsed_s']} с, "

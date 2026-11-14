@@ -639,6 +639,13 @@ def main(argv=None):
     ap.add_argument("--mass-tol", type=float, default=0.05, help="допуск дисбаланса расхода (0,05 = 5 %%)")
     ap.add_argument("--record", action="store_true", help="дописать краткий итог в su2_results.json")
     a = ap.parse_args(argv)
+    if a.restart_state:
+        try:
+            f0, p0 = (float(x) for x in a.restart_state.split(","))
+        except ValueError:
+            ap.error("--restart-state: ДОЛЯ,ДАВЛЕНИЕ — два числа через запятую, например 0.6,145905")
+        if a.restart_from is None:
+            ap.error("--restart-state имеет смысл только с --restart-from")
     for sig in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
         signal.signal(sig, _kill_child)
 

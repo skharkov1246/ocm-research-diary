@@ -901,6 +901,33 @@ def delta_nodes(a, b, thr=0.05):
     return sorted(up, key=lambda x: -x["d_pp"]), sorted(down, key=lambda x: x["d_pp"])
 
 
+def _num(x, nd=2):
+    return f"{x:.{nd}f}".replace(".", ",")
+
+
+def make_svgs(res):
+    """Диаграммы из exergy_results.json (тот же словарь, что записан в файл): `python3 exergy.py --svg` перерисовывает
+    их без пересчёта."""
+    V = res["variants"]
+    base, recB, hotC = V["base"], V["recup"], V["hot_printed"]
+    eps, T_hot = res["recup_scan"]["eps"], res["hot_sweep"]["chosen_T41_C"]
+    variants = [("KV-3 расчётная точка", base), (f"рекуператор ε {_num(eps)}, π {_num(recB['inputs']['PR'], 1)}", recB),
+                (f"T41 {T_hot:.0f} °C, печатное охлаждение", hotC)]
+    smax = max(max(a["Ex_kW"]["air_comb_in"] + a["Ex_kW"]["fuel"], a["Ex_kW"]["s41"]) for _, a in variants)
+    scale = 175.0 / smax
+    sub = lambda a: (f"π {_num(a['inputs']['PR'], 1)}, T41 {a['inputs']['T41_C']:.0f} °C, расход {_num(a['inputs']['W1'])} кг/с; "  # noqa: E731
+                     f"КПД на клеммах {_pct(100 * a['eff_el'])} (по LHV), эксергетический {_pct(100 * a['ex_eff_el'])}; "
+                     f"доли — от эксергии топлива; ISO 15 °C, 60 %")
+    tl = lambda a: (f"горение {_pct(a['nodes']['comb_reaction']['pct_fuel_ex'])}, выхлоп {_pct(a['nodes']['exhaust']['pct_fuel_ex'])}, "  # noqa: E731
+                    f"на клеммах {_pct(100 * a['ex_eff_el'])} эксергии топлива")
+    svgs = res["svg"]
+    grassmann_svg(base, "KV-3 (Taurus 60 GS), расчётная точка: " + tl(base), sub(base), scale, os.path.join(HERE, svgs["base"]))
+    grassmann_svg(recB, f"KV-3 с рекуператором (ε {_num(eps)}): " + tl(recB), sub(recB), scale, os.path.join(HERE, svgs["recup"]))
+    grassmann_svg(hotC, f"KV-3, T41 {T_hot:.0f} °C, печатное охлаждение: " + tl(hotC), sub(hotC), scale,
+                  os.path.join(HERE, svgs["hot"]))
+    bars_svg(variants, os.path.join(HERE, svgs["bars"]))
+
+
 def main():
     t_start = time.time()
     f3 = load_frame3()
@@ -1040,8 +1067,6 @@ def main():
                         technique="резерв не снимается двигателем", group_pct_base=base["nodes"]["gearbox"]["pct_fuel_ex"] + base["nodes"]["generator"]["pct_fuel_ex"],
                         d_eff_shaft_pp=0.0, d_eff_el_pp=0.0, d_P_shaft_kW_same_W1=0.0, nodes_worse=[], nodes_better=[]))
 
-    variants = [("KV-3 расчётная точка", base), (f"рекуператор ε {eps}, π {kwB['PR']}", recB),
-                (f"T41 {T_hot:.0f} °C, печатное охлаждение", hotC)]
     for v in (base, recB, recB1, hotC, hotK, hotCc, recBC):
         v["plug_and_play"] = pnp(v, f3)
         b = v["balance"]
@@ -1051,22 +1076,8 @@ def main():
         if mc and (mc["P"] > 1e-6 or mc["Wf"] > 1e-6 or mc["EGT_K"] > 1e-3):
             raise SystemExit(f"цепочка не совпала с gtu_cycle: {mc}")
 
-    # SVG
-    smax = max(max(a["Ex_kW"]["air_comb_in"] + a["Ex_kW"]["fuel"], a["Ex_kW"]["s41"]) for _, a in variants)
-    scale = 175.0 / smax
-    sub = lambda a: (f"π {a['inputs']['PR']}, T41 {a['inputs']['T41_C']:.0f} °C, расход {a['inputs']['W1']:.2f} кг/с; "  # noqa: E731
-                     f"КПД на клеммах {_pct(100 * a['eff_el'])} (по LHV), эксергетический {_pct(100 * a['ex_eff_el'])}; "
-                     f"доли — от эксергии топлива; ISO 15 °C, 60 %")
     svgs = dict(base="grassmann_kv3_base.svg", recup="grassmann_kv3_recup.svg", hot="grassmann_kv3_hot_printed.svg",
                 bars="exergy_groups_kv3.svg")
-    tl = lambda a: (f"горение {_pct(a['nodes']['comb_reaction']['pct_fuel_ex'])}, выхлоп {_pct(a['nodes']['exhaust']['pct_fuel_ex'])}, "  # noqa: E731
-                    f"на клеммах {_pct(100 * a['ex_eff_el'])} эксергии топлива")
-    grassmann_svg(base, "KV-3 (Taurus 60 GS), расчётная точка: " + tl(base), sub(base), scale,
-                  os.path.join(HERE, svgs["base"]))
-    grassmann_svg(recB, f"KV-3 с рекуператором (ε {eps}): " + tl(recB), sub(recB), scale, os.path.join(HERE, svgs["recup"]))
-    grassmann_svg(hotC, f"KV-3, T41 {T_hot:.0f} °C, печатное охлаждение: " + tl(hotC), sub(hotC), scale,
-                  os.path.join(HERE, svgs["hot"]))
-    bars_svg(variants, os.path.join(HERE, svgs["bars"]))
 
     out = dict(
         title="KV-3: эксергетический анализ — разрушение эксергии по узлам, три исполнения, где резерв КПД",
@@ -1139,9 +1150,14 @@ def main():
         runtime_s=None,
     )
     out["runtime_s"] = round(time.time() - t_start, 1)
-    json.dump(r6(out), open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    res = r6(out)
+    json.dump(res, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    make_svgs(res)
     print(f"готово за {out['runtime_s']} с -> {OUT}")
 
 
 if __name__ == "__main__":
-    main()
+    if "--svg" in sys.argv[1:]:
+        make_svgs(json.load(open(OUT, encoding="utf-8")))
+    else:
+        main()
