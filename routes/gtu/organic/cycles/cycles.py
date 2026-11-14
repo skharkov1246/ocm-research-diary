@@ -196,9 +196,15 @@ def p_sat(T):
     return _W.P
 
 
+_TS = {}
+
+
 def T_sat(P):
-    _W.PQ = P, 0.0
-    return _W.T
+    k = round(P, -2)
+    if k not in _TS:
+        _W.PQ = k, 0.0
+        _TS[k] = _W.T
+    return _TS[k]
 
 
 class St:
@@ -562,8 +568,19 @@ def feed_steam(sc, P=P0):
     return Y, h, yC
 
 
+_CC = {}
+
+
 def cold_curve_steam(sc, P, T_ref):
-    """составная кривая холодной стороны парового риформинга на кг смеси: [(T, Q от входа)]; равновесие с подходом"""
+    """составная кривая холодной стороны парового риформинга на кг смеси: [(T, Q от входа)]; равновесие с подходом.
+    Запоминается по (S/C, P с шагом 100 Па, T с шагом 0,01 К): зависит только от них."""
+    key = (sc, round(P, -2), round(T_ref, 2))
+    if key not in _CC:
+        _CC[key] = _cold_curve_steam(sc, key[1], T_ref)
+    return _CC[key]
+
+
+def _cold_curve_steam(sc, P, T_ref):
     Y, h_in, yC = feed_steam(sc, P)
     Ts = T_sat(P)
     yW = 1 - yC
@@ -572,7 +589,7 @@ def cold_curve_steam(sc, P, T_ref):
     pts = []
     for T in np.linspace(T0, Ts, 8):
         pts.append((T, yC * hC(T) + yW * hW_liq(T) - h_in))
-    for T in np.linspace(Ts + 0.01, T_ref, 25):
+    for T in np.linspace(Ts + 0.01, T_ref, 14):
         Teq = max(T - A["approach_eq"], Ts)
         Ye, _ = equil(Y, Teq, P)
         pts.append((T, hs(St(1, T, P, Ye))[0] - h_in))
@@ -1297,7 +1314,7 @@ def optimize_topo(t, extra=None):
                 sc_ = score(_safe(t, x, prm))
                 return -sc_[1] - 10 * sc_[0]
             ref = minimize_scalar(obj,
-                                  bounds=(lo, hi), method="bounded", options=dict(xatol=0.05, maxiter=12))
+                                  bounds=(lo, hi), method="bounded", options=dict(xatol=0.05, maxiter=8))
             rr = _safe(t, float(ref.x), prm)
             if score(rr) > score(rb):
                 PRb, rb = float(ref.x), rr

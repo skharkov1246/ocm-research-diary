@@ -34,11 +34,13 @@ IMG=gtu-platform:<sha12>
 docker run --rm $IMG                                    # справка entrypoint.py
 docker run --rm --entrypoint bash $IMG -c 'cat /opt/su2/VERSION /opt/gtu/GIT_SHA; ccx -v || true;
   python -c "import cantera, numpy, scipy, gmsh, boto3; print(cantera.__version__, gmsh.__version__)";
-  mpirun -np 2 SU2_CFD --help | head -3'
+  cd /tmp && printf "SOLVER= EULER\nMESH_FILENAME= none.su2\n" > a.cfg && mpirun -np 2 SU2_CFD a.cfg 2>&1 | grep -E "ERR_WIN|was not found"'
 ```
 
 Ожидается: `v8.6.0 7048fd35…`, `Version 2.21` (ccx при этом выходит с кодом 201 — так у ccx 2.21), версии пакетов
-из `docker/requirements.txt`, заставка SU2 «Release 8.6.0 "Harrier"» без ошибок OpenMPI.
+из `docker/requirements.txt` и строка SU2 «The SU2 mesh file named none.su2 was not found» — MPI запустился и SU2
+дошёл до чтения сетки. «MPI_ERR_WIN: invalid window» — в образе нет `OMPI_MCA_osc=^ucx`. `SU2_CFD --help` для этой
+проверки не годится: выходит до `MPI_Init`.
 
 ## 3. Сетка одного межлопаточного канала
 

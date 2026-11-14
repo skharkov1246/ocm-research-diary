@@ -130,9 +130,13 @@ class _CaseTest:
             vols = gmsh.model.getEntities(3)
             self.assertEqual(len(vols), 1, "колесо должно быть одним телом")
             # объём прочитанного STEP (OCC) против объёма по частям при построении:
-            # втулка + Z (лопатки - их часть внутри втулки)
+            # втулка + Z (лопатки - их часть внутри втулки). У двустороннего колеса getMass OCC сплавленного тела
+            # точнее 1e-4 не бывает: на ступени 1 KV-3 сплавленная сторона давала +0,49 %, её зеркальная копия
+            # (та же геометрия) +0,36 %, обе стороны вместе -0,01 % - ошибка интегрирования по граням втулки с
+            # вырезами (README); там допуск как у объёма сетки ниже - 2e-3, он и есть независимая проверка
             V = gmsh.model.occ.getMass(3, vols[0][1])
-            self.assertLess(abs(V / self.res["solid"]["volume_m3"] - 1.0), 1e-4)
+            tol_occ = 2e-3 if self.res["d1"].get("double_sided") else 1e-4
+            self.assertLess(abs(V / self.res["solid"]["volume_m3"] - 1.0), tol_occ)
             gmsh.option.setNumber("Mesh.MeshSizeMax", 0.01)
             gmsh.option.setNumber("Mesh.MeshSizeMin", 0.0004)
             gmsh.option.setNumber("Mesh.MeshSizeFromCurvature", 16)

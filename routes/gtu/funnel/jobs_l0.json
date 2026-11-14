@@ -1,0 +1,98 @@
+{
+ "_comment": "Уровень 0 воронки (README узла funnel, раздел «Уровень 0»). Раннер берёт только defaults и jobs; блоки merge, estimate, plan_check - для сессии с ключами. Код - ветка claude/lucid-allen-yvps5d (PR #62). Сгенерировано make_jobs_l0.py; правки - в нём.",
+ "defaults": {
+  "instance_type": "c7a.16xlarge",
+  "fallback_types": [
+   "c7i.16xlarge"
+  ],
+  "image": "al2023",
+  "disk_gb": 30,
+  "python": "3.12",
+  "pip": [
+   "cantera==3.2.0",
+   "scipy==1.18.1",
+   "numpy==2.5.3"
+  ]
+ },
+ "jobs": [
+  {
+   "name": "l0-full-m0",
+   "command": "python routes/gtu/funnel/funnel_l0.py --kv KV-3 --n 200000 --shards 30 --shard 0,3,6,9,12,15,18,21,24,27 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\npython routes/gtu/funnel/funnel_l0.py --kv KV-1 --n 50000 --shards 30 --shard 0,3,6,9,12,15,18,21,24,27 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\npython routes/gtu/funnel/funnel_l0.py --kv KV-6 --n 50000 --shards 30 --shard 0,3,6,9,12,15,18,21,24,27 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 30
+  },
+  {
+   "name": "l0-full-m1",
+   "command": "python routes/gtu/funnel/funnel_l0.py --kv KV-3 --n 200000 --shards 30 --shard 1,4,7,10,13,16,19,22,25,28 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\npython routes/gtu/funnel/funnel_l0.py --kv KV-1 --n 50000 --shards 30 --shard 1,4,7,10,13,16,19,22,25,28 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\npython routes/gtu/funnel/funnel_l0.py --kv KV-6 --n 50000 --shards 30 --shard 1,4,7,10,13,16,19,22,25,28 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 30
+  },
+  {
+   "name": "l0-full-m2",
+   "command": "python routes/gtu/funnel/funnel_l0.py --kv KV-3 --n 200000 --shards 30 --shard 2,5,8,11,14,17,20,23,26,29 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\npython routes/gtu/funnel/funnel_l0.py --kv KV-1 --n 50000 --shards 30 --shard 2,5,8,11,14,17,20,23,26,29 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\npython routes/gtu/funnel/funnel_l0.py --kv KV-6 --n 50000 --shards 30 --shard 2,5,8,11,14,17,20,23,26,29 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 30
+  }
+ ],
+ "merge": {
+  "where": "сессия с ключами после run: результаты уже в routes/gtu/platform/aws/runs/<run_id>/<задача>/ (или collect --run-id <run_id> --job <задача> по каждой); Python с теми же версиями пакетов (pip install cantera==3.2.0 scipy==1.18.1 numpy==2.5.3) - иначе отпечаток выборки не совпадёт",
+  "commands": [
+   "python3 routes/gtu/funnel/merge_l0.py --kv KV-3 --n 200000 --shards 30 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/l0_aws_full --suffix _KV-3_n200000 --top 1000 --target 4000 --k-near 1 --near-max 0.25 --csv-gz",
+   "python3 routes/gtu/funnel/merge_l0.py --kv KV-1 --n 50000 --shards 30 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/l0_aws_full --suffix _KV-1_n50000 --top 1000 --target 4000 --k-near 1 --near-max 0.25 --csv-gz",
+   "python3 routes/gtu/funnel/merge_l0.py --kv KV-6 --n 50000 --shards 30 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/l0_aws_full --suffix _KV-6_n50000 --top 1000 --target 4000 --k-near 1 --near-max 0.25 --csv-gz"
+  ],
+  "profile_why": "полный уровень 0 (приоритет владельца 14.11.2026: KV-3 200 000, KV-1 и KV-6 по 50 000; отбор 3000-5000)",
+  "checks": "слияние откажет (код 2), если потеряна или задвоена хоть одна часть или индекс, или у частей разные отпечатки выборки и кода"
+ },
+ "estimate": {
+  "concepts": 300000,
+  "s_per_concept_core_measured": 0.00523,
+  "safety": 3.0,
+  "core_hours": 1.308,
+  "machines": 3,
+  "shards": 30,
+  "vcpu_per_machine": 64,
+  "compute_min_per_machine": 0.41,
+  "setup_min": 5.0,
+  "upload_min": 1.0,
+  "machine_min": 6.41,
+  "machine_hours": 0.32,
+  "parts_gb_gz": 0.1369,
+  "usd": {
+   "spot_expected": 0.226,
+   "spot_alt": 0.24,
+   "disk_ipv4": 0.0027,
+   "s3_month": 0.008,
+   "transfer": 0.0123,
+   "total_expected": 0.263
+  },
+  "upper_bound_usd": 2.86,
+  "upper_bound_rule": "раннер: (MaxPrice + диск + IPv4) × (max_min + 10) / 60 на машину",
+  "price": {
+   "expected": 0.706,
+   "alt": 0.748,
+   "upper": 1.4206,
+   "basis": "ожидаемая: спот c7a.16xlarge us-east-1c 0,706 долл./ч, us-east-1b 0,748 (замер сессии с ключами 22:08 14.11.2026, задача владельца); верхняя граница: MaxPrice раннера 1,4206 долл./ч (максимум по зонам × 1,2, ledger.jsonl живого прогона smoke 22:14 14.11.2026)"
+  },
+  "assumptions": {
+   "setup": "оценка: smoke 14.11.2026 - 61 с без пакетов; uv, Python 3.12, пакеты, клон - сверху",
+   "s3": "0.023 долл./ГБ-мес, передача 0.09 долл./ГБ - допущения",
+   "disk_ipv4": "ставки раннера, допущения кода"
+  },
+  "cap_300_usd_ok": true
+ },
+ "plan_check": {
+  "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/funnel/jobs_l0.json --assume-price 0.748 --assume-zone-prices us-east-1a=0.955,us-east-1b=0.748,us-east-1c=0.706",
+  "exit_code": 0,
+  "lines": [
+   "[задача] l0-full-m0: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 30 мин",
+   "[бюджет] l0-full-m0 на c7a.16xlarge: израсходовано 0.02 + в работе 0.00 + пакет 0.00 + новая 0.77 = 0.79 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] l0-full-m0 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] l0-full-m1: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 30 мин",
+   "[бюджет] l0-full-m1 на c7a.16xlarge: израсходовано 0.02 + в работе 0.00 + пакет 0.77 + новая 0.77 = 1.56 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] l0-full-m1 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] l0-full-m2: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 30 мин",
+   "[бюджет] l0-full-m2 на c7a.16xlarge: израсходовано 0.02 + в работе 0.00 + пакет 1.54 + новая 0.77 = 2.32 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] l0-full-m2 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[план] прогноз пакета 2.31 долл. (цена спота — допущение 0.748/ч)"
+  ],
+  "runner_note": "раннер v2 в рабочей копии (поля python, pip, NPROC, самая дешёвая зона); если v2 ещё не влит в ветку - перепроверить plan после влития"
+ }
+}

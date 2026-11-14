@@ -122,9 +122,23 @@ def ns_comp(stage_out, Gs, n):
     return (2 * math.pi * n / 60) * math.sqrt(Q) / max(dhs, 1.0) ** 0.75
 
 
+def _clip(x, lo, hi):
+    return min(hi, max(lo, x))
+
+
+def ns_window_c():
+    """окно ns/ns_opt центробежной и диагональной ступени, в котором действует поправка: из диапазона коэффициента
+    расхода правила phi (funnel_space.PHI_RANGE) при ns ∝ √φ; за окном концепцию отсекает само правило phi"""
+    lo, hi = FS.PHI_RANGE["Ц"]
+    return math.sqrt(lo / FS.PHI_OPT["Ц"]), math.sqrt(hi / FS.PHI_OPT["Ц"])
+
+
 def corrections(c, perf, g):
-    """поправки КПД ступеней компрессора (зазор comp_stage + быстроходность) и радиальной турбины (быстроходность)"""
+    """поправки КПД ступеней компрессора (зазор comp_stage + быстроходность) и радиальной турбины (быстроходность).
+    Быстроходность в поправке ограничена окном правил (ns_window_c, NS_RANGE funnel_space): формула -K·ln² вне подобранной
+    области не продолжается, такие концепции отсекают правила phi и turb_ns"""
     cal = calib_ns()
+    wlo, whi = ns_window_c()
     dc, nsc = [], []
     for s, so in zip(g["stages"], perf["comp"]):
         if s["type"] == "О":
@@ -133,12 +147,12 @@ def corrections(c, perf, g):
         ns = ns_comp(so, s["Gs"], g["n"])
         opt = cal["ns_opt_c"] if s["type"] == "Ц" else cal["ns_opt_d"]
         cl = max(0.3e-3, 0.0007 * s["D"])
-        dc.append(-0.3 * cl / s["b2"] - cal["k_ns_c"] * math.log(ns / opt) ** 2)
+        dc.append(-0.3 * cl / s["b2"] - cal["k_ns_c"] * math.log(_clip(ns / opt, wlo, whi)) ** 2)
         nsc.append(ns)
     dt, nst = 0.0, None
     if c["turb"] == "Р" and g["tg"].get("ns"):
         nst = g["tg"]["ns"]
-        dt = -cal["k_ns_t"] * math.log(nst / cal["ns_opt_t"]) ** 2
+        dt = -cal["k_ns_t"] * math.log(_clip(nst, *FS.NS_RANGE) / cal["ns_opt_t"]) ** 2
     return dc, dt, nsc, nst
 
 

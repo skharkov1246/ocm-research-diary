@@ -103,16 +103,20 @@ SCH = {
 }
 AUX_KIND = {"LPP": "pilot", "MM": "pilot", "FLOX": "pilot", "TVC": "cavity", "RQL": "quench", "CAT": None, "RDC": None}
 # пористость (доля открытой площади стенки) по типу охлаждения - оценка
-POROSITY = {"плёночное": (0.010, 0.040), "отверстия": (0.005, 0.030), "решётка": (0.001, 0.010), "керамика": (0.0, 0.005)}
+POROSITY = {"плёночное": (0.003, 0.015), "отверстия": (0.002, 0.012), "решётка": (0.0005, 0.004), "керамика": (0.0, 0.002)}
+# (при перепаде 3 % p3 у KV-3 доля воздуха охлаждения 0,05-0,4 получается при открытой площади 0,2-1,5 % стенки)
 CONT = {
     "n_el": "число смесительных элементов на камеру (лог-равномерно в диапазоне INJ[форсунка])",
     "k_je": "топливных струй на элемент (INJ); число струй n_jet = n_el·k_je",
-    "d_jet": "диаметр топливной струи, мм (лог-равномерно, INJ)",
+    "d_jet": "диаметр топливной струи: положение (лог) в окне, где давление топливного газа 1,03-2,5·p3 при данном "
+             "числе струй, пересечённом с диапазоном типа форсунки INJ и наименьшим отверстием способа изготовления; "
+             "диаметр в мм - derive (d_jet_mm)",
     "swirl": "число крутки (закрутка 0,4-1,2; струи - наклон/крутка 0-0,4; микросмесители 0-0,2)",
     "a_pz": "доля воздуха через зону горения (SCH; у RQL - богатая зона)",
     "a_aux": "вспомогательная доля воздуха: пилот (доля воздуха зоны горения), полость TVC, воздух гашения RQL (SCH)",
-    "k_pass": "сила пассивного деления: гидравлика - доля топлива пилота на 100 % (0,05-0,40); струи - показатель "
-              "самостратификации k (0,2-1,0); TVC - доля топлива полости на 100 % (0,05-0,30)",
+    "k_pass": "пассивное деление: гидравлика - отношение phi пилота к phi основной зоны на 100 % (0,8-1,6), доля "
+              "топлива пилота - из него; струи - показатель самостратификации k (0,2-1,0); TVC - phi полости на 100 % "
+              "(0,6-1,4), доля топлива полости не больше 0,6",
     "tau_pz": "время пребывания в зоне пламени, мс (лог, SCH)",
     "tau_bo": "время догорания до разбавления, мс (лог 2-20; targets.json guides - 10-20 мс)",
     "tau_dil": "время в зоне разбавления, мс (1-8)",
@@ -199,14 +203,14 @@ def concept(i, n, kv="KV-3", seed=SEED):
     I, S = INJ[c["injector"]], SCH[s]
     c["n_el"] = int(round(_loglerp(u["n_el"], *I["n_el"])))
     c["k_je"] = int(round(_lerp(u["k_je"], *I["k_je"])))
-    c["d_jet_mm"] = _loglerp(u["d_jet"], *I["d_jet"])
+    c["d_jet_u"] = float(u["d_jet"])
     c["swirl"] = _lerp(u["swirl"], *I["swirl"])
     c["a_pz"] = _lerp(u["a_pz"], *S["a_pz"])
     c["a_aux"] = _lerp(u["a_aux"], *S["a_aux"]) if AUX_KIND[s] else 0.0
     if s == "TVC":
-        c["k_pass"] = _lerp(u["k_pass"], 0.05, 0.30)
+        c["k_pass"] = _lerp(u["k_pass"], 0.6, 1.4)
     elif c["passive"] == "гидравлика":
-        c["k_pass"] = _lerp(u["k_pass"], 0.05, 0.40)
+        c["k_pass"] = _lerp(u["k_pass"], 0.8, 1.6)
     elif c["passive"] == "струи":
         c["k_pass"] = _lerp(u["k_pass"], 0.2, 1.0)
     else:
@@ -223,6 +227,16 @@ def concept(i, n, kv="KV-3", seed=SEED):
         if isinstance(v, float):
             c[k] = round(v, 6)
     return c
+
+
+def fuel_split100(c, phi_ov):
+    """доля топлива пилота (гидравлика) или полости (TVC) на 100 %; 0 - если зоны нет"""
+    if c["scheme"] == "TVC":
+        return min(0.6, c["k_pass"] * c["a_aux"] / phi_ov)
+    if c["passive"] == "гидравлика":
+        a, r = c["a_aux"], c["k_pass"]
+        return a * r / (1 - a + a * r)
+    return 0.0
 
 
 # =========================================================================== геометрия и гидравлика (без кинетики)
@@ -272,6 +286,18 @@ def _orifice_p0(mdot, A, p_down, R=GAS_R_CH4, g=GAS_G_CH4, T0=T_FUEL, Cd=CD_FUEL
     return p0, u, p_down / (R * Te)
 
 
+def _orifice_flux(p0, p_down, R=GAS_R_CH4, g=GAS_G_CH4, T0=T_FUEL, Cd=CD_FUEL):
+    """расход газа на единицу площади отверстия при давлении перед ним p0, кг/(с·м2)"""
+    crit = (2 / (g + 1)) ** (g / (g - 1))
+    r = p_down / p0
+    if r <= crit:
+        return Cd * p0 * math.sqrt(g / (R * T0)) * (2 / (g + 1)) ** ((g + 1) / (2 * (g - 1)))
+    return Cd * p0 * math.sqrt(2 * g / ((g - 1) * R * T0) * (r ** (2 / g) - r ** ((g + 1) / g)))
+
+
+P_FUEL_WIN = (1.03, 2.5)   # окно давления топливного газа перед струями, доли p3 (оценка; давление пакетов не опубликовано)
+
+
 def derive(c, bc):
     """геометрия, воздух, смеситель, топливные струи, неравномерность - по точке 100 % (bc['loads'][0])."""
     L0 = bc["loads"][0]
@@ -287,11 +313,20 @@ def derive(c, bc):
     n_el = c["n_el"]
     d_air = math.sqrt(4 * A_air / (math.pi * n_el))
     d.update(u_a=u_a, A_air_m2=A_air, d_air_mm=1e3 * d_air, tau_mix_ms=1e3 * c["l_mix"] * d_air / u_a)
-    # --- топливные струи: давление топлива, импульс, критерий Холдемана
+    # --- топливные струи: окно диаметра по давлению топлива, импульс, критерий Холдемана
+    x100 = fuel_split100(c, phi_ov)
+    Wf_main = Wf * (1 - x100)
     n_jet = n_el * c["k_je"]
-    A_f = n_jet * math.pi * (1e-3 * c["d_jet_mm"]) ** 2 / 4
     p_down = p3 * (1 - c["dp_inj"])
-    p0, u_f, rho_f = _orifice_p0(Wf if s != "TVC" else Wf * (1 - c["k_pass"]), A_f, p_down)
+    d_of = lambda pr: 1e3 * math.sqrt(4 * Wf_main / _orifice_flux(pr * p3, p_down) / (math.pi * n_jet))
+    I = INJ[c["injector"]]
+    d_lo = max(d_of(P_FUEL_WIN[1]), I["d_jet"][0], D_JET_MIN[c["make"]])
+    d_hi = min(d_of(P_FUEL_WIN[0]), I["d_jet"][1])
+    d.update(d_jet_window_mm=[d_lo, d_hi], fuel_split100=x100)
+    d_jet = _loglerp(c["d_jet_u"], d_lo, d_hi) if d_hi >= d_lo else (d_lo if d_of(P_FUEL_WIN[1]) > I["d_jet"][0] else d_hi)
+    d["d_jet_mm"] = d_jet
+    A_f = n_jet * math.pi * (1e-3 * d_jet) ** 2 / 4
+    p0, u_f, rho_f = _orifice_p0(Wf_main, A_f, p_down)
     J = rho_f * u_f ** 2 / (rho3 * u_a ** 2) if u_f > 0 else 0.0
     SH = 2 * math.pi / c["k_je"]                              # шаг струй / полувысота канала (струи по окружности канала)
     C = SH * math.sqrt(J) if J > 0 else 0.0
@@ -318,7 +353,7 @@ def derive(c, bc):
     # --- отношение перепада на жаровой трубе к скоростному напору по эталонному сечению (корреляция PF)
     q_ref = 0.5 * rho3 * (W / N_CAN[c["chamber"]] / (rho3 * geo["A_ref"])) ** 2
     d["dpL_qref"] = dpL / q_ref
-    d["phi_pz_100"] = phi_ov / c["a_pz"] if s not in ("TVC",) else phi_ov * (1 - c["k_pass"]) / c["a_pz"]
+    d["phi_pz_100"] = phi_ov / c["a_pz"] if s not in ("TVC",) else phi_ov * (1 - x100) / c["a_pz"]
     return d
 
 
@@ -341,7 +376,7 @@ def zone_masses(c, bc):
         Z.append(dict(name="гашение", m=m_q, tau=1e-3 * quench_time_ms(c, bc), T=Tq, rho=rq))
         Z.append(dict(name="бедная", m=m_q, tau=tb, T=Tq, rho=rq))
     elif s == "TVC":
-        f_cav = c["k_pass"]
+        f_cav = fuel_split100(c, L0["phi_ov"])
         phi_c = f_cav * Wf / W / c["a_aux"] / far_st
         Tc, rc = eqT(phi_c)
         Z.append(dict(name="полость", m=c["a_aux"] * W + f_cav * Wf, tau=tp, T=Tc, rho=rc))
@@ -417,10 +452,11 @@ def check(c, d, bc):
         bad.append(("ОХЛАЖДЕНИЕ", d["a_cool"], 0.45, "на охлаждение уходит больше 45 % воздуха"))
     if not I["d_air"][0] <= d["d_air_mm"] <= I["d_air"][1]:
         bad.append(("ЭЛЕМЕНТ", d["d_air_mm"], I["d_air"], "канал элемента вне диапазона типа форсунки, мм"))
-    if c["d_jet_mm"] < D_JET_MIN[c["make"]]:
-        bad.append(("СТРУЯ", c["d_jet_mm"], D_JET_MIN[c["make"]], "топливное отверстие мельче предела способа изготовления, мм"))
-    if d["p_fuel_ratio"] > 3.0:
-        bad.append(("ТОПЛИВО", d["p_fuel_ratio"], 3.0, "давление топливного газа выше 3·p3"))
+    lo, hi = d["d_jet_window_mm"]
+    if hi < lo:
+        bad.append(("ТОПЛИВО", [round(lo, 3), round(hi, 3)], list(P_FUEL_WIN),
+                    "нет диаметра струй: при этом числе струй давление топлива вне окна 1,03-2,5·p3 или отверстие вне "
+                    "диапазона типа форсунки и способа изготовления (окно диаметра, мм)"))
     if c["diesel"] == "центробежная" and c["n_el"] > 48:
         bad.append(("ДИЗЕЛЬ_ФОРСУНКИ", c["n_el"], 48, "центробежных форсунок больше 48 - малый расход на форсунку"))
     if c["chamber"] == "трубчатые" and c["n_el"] < N_CAN["трубчатые"]:

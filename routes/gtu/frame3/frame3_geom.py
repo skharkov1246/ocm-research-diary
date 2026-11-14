@@ -14,11 +14,13 @@ AWS не вызывается.
 Запуск:  python3 frame3_geom.py --out <папка> --levels coarse medium
 """
 import argparse
+import gzip
 import hashlib
 import json
 import math
 import os
 import platform
+import shutil
 import sys
 import time
 from itertools import islice
@@ -218,7 +220,7 @@ def check_step(path, solid, double_sided, threads=4):
 
 
 # ----------------------------------------------------------------------------- расчёт
-def run_stage(key, s, levels, out, threads):
+def run_stage(key, s, levels, out, threads, msh=False, gzip_levels=()):
     kw = stage_kwargs(s)
     res_st = dict(label=s["label"], inlet=s["inlet"], params_from_point={k: kw[k] for k in FIELDS},
                   accepted=dict(ACCEPTED), levels={})
@@ -226,7 +228,7 @@ def run_stage(key, s, levels, out, threads):
     for i, level in enumerate(levels):
         od = os.path.join(out, f"{key}_{level}")
         t0 = time.time()
-        res = I.build("custom", level, out_dir=od, step=(i == 0), mesh=True, msh=(level == "coarse"), threads=threads,
+        res = I.build("custom", level, out_dir=od, step=(i == 0), mesh=True, msh=msh, threads=threads,
                       source=f"frame3_point_results.json → {key}", **kw)
         t_build = time.time() - t0
         if i == 0:
@@ -251,6 +253,12 @@ def run_stage(key, s, levels, out, threads):
         mesh = {k: v for k, v in res["mesh"].items() if k not in ("gmsh_warnings", "faces")}
         files = {k: file_info(v) for k, v in res["files"].items() if k != "json" and k != "impeller_step"}
         files["impeller_json"] = file_info(res["files"]["json"])
+        if level in gzip_levels:  # диск среды общий и почти полон: большой файл хранится сжатым (gunzip -k)
+            src = res["files"]["passage_su2"]
+            with open(src, "rb") as fi, gzip.open(src + ".gz", "wb", compresslevel=6) as fo:
+                shutil.copyfileobj(fi, fo, 1 << 20)
+            os.remove(src)
+            files["passage_su2"]["stored_as"] = file_info(src + ".gz")
         res_st["levels"][level] = dict(
             n_cells=mesh["quality"]["n_cells"], n_nodes=mesh["quality"]["n_nodes"], minSICN=mesh["quality"]["minSICN"],
             min_gamma=mesh["quality"]["min_gamma"], mesh=mesh, n_gmsh_warnings=len(res["mesh"]["gmsh_warnings"]),
@@ -287,11 +295,12 @@ def verdicts(st, s):
                     and abs(c["gap_min_from_blade_nodes_m"] / s["tip_clearance_m"] - 1) < 0.02
                     and L["minSICN"] > 0 and c["mean_ratio_min"] > 0))
     sc = st["solid_check"]
-    # допуски: getMass OCC - 1e-3 (точность интегрирования по сложным граням, README узла geom), объём сетки -
-    # 2e-3 (линейные тетраэдры на кривых гранях, как test_impeller.py)
+    # допуски - как test_impeller.py: getMass OCC 1e-4, у двустороннего колеса 2e-3 (ошибка интегрирования
+    # getMass по граням сплавленного тела, см. там); объём сетки - 2e-3 (линейные тетраэдры на кривых гранях)
+    tol_occ = 2e-3 if st["d1"]["double_sided"] else 1e-4
     v["solid"] = dict(one_body=sc["n_volumes"] == 1, volume_occ_rel_diff=sc["volume_rel_diff"],
                       volume_tet_rel_diff=sc["volume_tet_rel_diff"], r_max_over_r2=sc["r_max_edge_nodes_m"] / (D2 / 2),
-                      ok=bool(sc["n_volumes"] == 1 and abs(sc["volume_rel_diff"]) < 1e-3
+                      ok=bool(sc["n_volumes"] == 1 and abs(sc["volume_rel_diff"]) < tol_occ
                               and abs(sc["volume_tet_rel_diff"]) < 2e-3
                               and abs(sc["r_max_edge_nodes_m"] / (D2 / 2) - 1) < 1e-5
                               and sc["r_max_tet_nodes_m"] < (D2 / 2) * (1 + 1e-6)
@@ -306,6 +315,9 @@ def main(argv=None):
     ap.add_argument("--levels", nargs="+", default=["coarse"], choices=list(I.LEVELS))
     ap.add_argument("--stages", nargs="+", default=list(STAGES), choices=list(STAGES))
     ap.add_argument("--threads", type=int, default=4)
+    ap.add_argument("--msh", action="store_true", help="также записать .msh (Gmsh)")
+    ap.add_argument("--gzip-levels", nargs="*", default=["medium", "fine"],
+                    help="уровни, чей .su2 после проверки хранится сжатым .su2.gz (SHA-256 - у обоих)")
     ap.add_argument("--results", default=RESULTS)
     a = ap.parse_args(argv)
     os.makedirs(a.out, exist_ok=True)
@@ -358,7 +370,7 @@ def main(argv=None):
     )
     t0 = time.time()
     for key in a.stages:
-        st = run_stage(key, point[key], a.levels, a.out, a.threads)
+        st = run_stage(key, point[key], a.levels, a.out, a.threads, a.msh, tuple(a.gzip_levels))
         res["stages"][key] = st
         res["checks"][key] = verdicts(st, point[key])
     res["t_total_s"] = round(time.time() - t0, 1)

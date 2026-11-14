@@ -63,6 +63,7 @@ K_FB = 10.0                # критический градиент турбу�
 K_CRZ = 0.5                # рециркуляция закрутки: K = K_CRZ·(крутка - 0,4)+
 KV_MAX = 3.0               # предел степени рециркуляции FLOX (стеснение струи)
 T_LO_CAT, T_CAT_MAX = 723.0, 1173.0   # зажигание катализатора и предел его температуры, K (оценка)
+PHI_PB = 0.5               # phi бедной предгорелки каталитической схемы (оценка)
 ETA_PG = 0.05              # доля идеального прироста давления постоянного объёма, реализуемая RDC (оценка)
 EPS_W = {"металл": 0.7, "керамика": 0.85}   # излучательная способность стенки: 0,7 Nimonic (по выдержке поиска), CMC - оценка
 EPS_C = 0.4                # кожуха
@@ -116,12 +117,12 @@ def _flame(args):
     fuel = "CH4:1" if xh == 0 else ("H2:1" if xh == 1 else f"CH4:{1 - xh:.2f},H2:{xh:.2f}")
     phi = _phi_for_Tad(fuel, p, T3, Tf, Tad)
     g, _ = _mixed(phi, fuel, p, T3, Tf)
-    alpha = g.thermal_conductivity / (g.density * g.cp_mass)
+    alpha, Tu = g.thermal_conductivity / (g.density * g.cp_mass), g.T
     f = ct.FreeFlame(g, width=0.01)
     f.set_refine_criteria(ratio=3, slope=0.07, curve=0.14)
     f.transport_model = "mixture-averaged"
     f.solve(loglevel=0, auto=True)
-    return dict(H2_vol=xh, T_ad_K=Tad, phi=phi, S_L=float(f.velocity[0]), alpha_u=alpha, T_u=g.T, points=len(f.grid))
+    return dict(H2_vol=xh, T_ad_K=Tad, phi=phi, S_L=float(f.velocity[0]), alpha_u=alpha, T_u=Tu, points=len(f.grid))
 
 
 def _ign(args):
@@ -184,7 +185,7 @@ def compute_boundary(workers=4):
     gst = ct.Solution("gri30.yaml"); gst.set_equivalence_ratio(1.0, "CH4:1", AIR)
     far_st = gst.Y[gst.species_index("CH4")] / (1 - gst.Y[gst.species_index("CH4")])
     for lf in LOADS:
-        T41p = T41 if lf == 1.0 else brentq(lambda t: at(t)[0]["P_MW"] * 1e3 / P100 - lf, 300.0, T41, xtol=1e-4)
+        T41p = T41 if lf == 1.0 else brentq(lambda t: at(t)[0]["P_MW"] * 1e3 / P100 - lf, 640.0, T41, xtol=1e-4)
         r, PRp = at(T41p)
         p3, T3, W, Wf = C.P0 * PRp, r["T3_C"] + 273.15, inp["G"] * (1 - X_LEAK), r["Wf"]
         air.TPX = T3, p3, AIR
@@ -546,12 +547,13 @@ def gas_network(c, d, bc, li):
         res["K_recirc"] = Krec
         # пассивное деление
         pilot = None
+        x100 = CS.fuel_split100(c, bc["loads"][0]["phi_ov"])
         if s == "TVC":
-            x = pilot_share(c["k_pass"], m_rel) if c["passive"] == "гидравлика" else c["k_pass"]
+            x = pilot_share(x100, m_rel) if c["passive"] == "гидравлика" else x100
             pilot = dict(m_air=a_aux * W, m_fuel=x * Wf, kind="полость")
             m_air_main, m_fuel_main = a_pz * W, (1 - x) * Wf
         elif c["passive"] == "гидравлика":
-            x = pilot_share(c["k_pass"], m_rel)
+            x = pilot_share(x100, m_rel)
             pilot = dict(m_air=a_aux * a_pz * W, m_fuel=x * Wf, kind="пилот")
             m_air_main, m_fuel_main = (1 - a_aux) * a_pz * W, (1 - x) * Wf
         else:
@@ -601,14 +603,14 @@ def gas_network(c, d, bc, li):
         m_air, Tin = a_pz * W, T3
         pre = None
         f_pb = 0.0
-        if T3 < T_LO_CAT:
+        a_pb = 0.0
+        if T3 < T_LO_CAT:                     # бедная предгорелка phi 0,5 поднимает вход катализатора до T_LO_CAT
             f_pb = min(0.5, L["cp3"] * (T_LO_CAT - T3) * m_air / (bc["LHV_J_kg"]["CH4"] * Wf))
-            a_pb = f_pb * Wf / bc["far_st_CH4"]
+            a_pb = f_pb * Wf / (PHI_PB * bc["far_st_CH4"])
             pb, plit, pst = K.psr(K.fresh(a_pb, f_pb * Wf, T3, Tf, p), 1e-3)
             pre = pb
         res["preburner_fuel_share"] = f_pb
-        nodes, _ = _node_streams(K, m_air - (f_pb * Wf / bc["far_st_CH4"] if f_pb else 0.0), (1 - f_pb) * Wf, S, nn, T3,
-                                 Tf, p)
+        nodes, _ = _node_streams(K, m_air - a_pb, (1 - f_pb) * Wf, S, nn, T3, Tf, p)
         Ts, t_halves, conv = [], [], []
         for wk, fr in nodes:
             inlet = fr if pre is None else K.mix(fr, Stream(pre.m * wk, pre.h, pre.Y, pre.p))
@@ -632,15 +634,22 @@ def gas_network(c, d, bc, li):
         nodes, _ = _node_streams(K, a_pz * W, Wf, S, nn, T3, Tf, p)
         Ts, pcv = [], []
         for wk, fr in nodes:
+            # сгорание при постоянном объёме вместо волны (цикл Хамфри, оценка): равновесие UV основных веществ,
+            # NO/NO2/N2O обнулены; образование NOx - закрытый реактор на время tau_pz; затем изоэнтропическое
+            # расширение (замороженный состав) до p3 и догорание PFR
             K.GP.HPY = fr.h, fr.p, fr.Y
-            K.GP.TP = max(1500.0, K.GP.T), p           # нагрев ударной волной до 1500 K при постоянном объёме (оценка)
+            K.GP.equilibrate("UV")
+            Y = K.GP.Y.copy()
+            for sp in ("NO", "NO2", "N2O"):
+                Y[K.i[sp]] = 0.0
+            K.GP.TDY = K.GP.T, K.GP.density, Y / Y.sum()
             r = ct.IdealGasReactor(K.GP, energy="on", clone=False)
             net = ct.ReactorNet([r]); net.rtol, net.atol = 1e-7, 1e-13
             net.advance(tp)
             pcv.append(r.phase.P / p)
             K.GM.TPY = r.T, r.phase.P, r.phase.Y
             sent = K.GM.entropy_mass
-            K.GM.SP = sent, p * (1 + 0.0)               # расширение до p3 (замороженный состав)
+            K.GM.SP = sent, p
             o = Stream(fr.m, K.GM.enthalpy_mass, K.GM.Y.copy(), p)
             o = K.pfr(o, tb)
             hot_parts.append(o); Ts.append((wk, K.T(o)))
@@ -734,7 +743,7 @@ def diesel_network(c, d, bc, li, gas_res):
         hot = K.pfr(cur, tb)
         res["phi_rich"] = phi_r
     else:
-        a_zone = c["a_pz"] * W * (1 + (c["a_aux"] if c["scheme"] == "TVC" else 0.0))
+        a_zone = (c["a_pz"] + (c["a_aux"] if c["scheme"] == "TVC" else 0.0)) * W
         air_d = x_diff * Wfd / far_d
         m_lean_air = max(a_zone - air_d, 0.05 * a_zone)
         phi_lean = (1 - x_diff) * Wfd / m_lean_air / far_d
@@ -1008,7 +1017,7 @@ def module_models(c, d, bc, fb, pl, wall_gas):
     trl = min(CS.TRL_SCHEME[c["scheme"]], CS.TRL_DIESEL[c["diesel"]], CS.TRL_COOL[c["cooling"]], CS.TRL_MAKE[mk])
     if mk in ("печатный картридж", "гибрид"):
         s_fit = 1.0 / (seg[0] if seg else 1)
-        s_proc = MK.MAT["HastX"]["print"] * (0.8 if c["d_jet_mm"] < 0.5 else 1.0)
+        s_proc = MK.MAT["HastX"]["print"] * (0.8 if d["d_jet_mm"] < 0.5 else 1.0)
         vol_metal = mass / 8220.0
         rate = 900.0                                   # см3/ч: BLT-S1500 (make_model.PRINTERS, по выдержке поиска)
         weeks = 1e6 * vol_metal / rate / (24 * 7) + 4.0

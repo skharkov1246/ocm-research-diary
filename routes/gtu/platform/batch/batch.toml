@@ -53,6 +53,9 @@ case_by_stage = ["taurus60", "taurus60"]  # EXAMPLE: сетки второго �
 # EXAMPLE: расчётное статическое давление на выходе ступени, Па: π ступени ≈ √13,5 ≈ 3,67 при π 13,5 (README
 # трека), выход ступени 1 ≈ 0,8 × 3,67 × 101 325 ≈ 3,0·10⁵ Па, ступени 2 ≈ 0,8 × 13,5 × 101 325 ≈ 1,1·10⁶ Па.
 # Владелец данных — узел gtu-cycle/su2 (одномерная оценка d1 из JSON сетки); влияет на положение точек линии.
+# ВНИМАНИЕ (скептик 14.11.2026): давление одно для всех частот, а случай taurus60 — одно колесо PR 6,75 с входом
+# 101 325 Па: оценка estimate_p_out — 2,2·10⁵…5,2·10⁵ Па при доле частоты 0,70…1,05. Ступень 2 при 1,1·10⁶ Па
+# этим колесом недостижима. До живой серии — давление линии от оценки на её частоте (README, «План-заготовка»).
 p_out_design_pa = [300000.0, 1100000.0]
 speed_frac = [0.70, 0.80, 0.90, 1.00, 1.05]   # EXAMPLE: доля номинальной частоты вращения, 1
 points_per_line = 8
@@ -60,8 +63,8 @@ p_out_frac_first = 0.85                   # EXAMPLE: давление на вы�
 p_out_frac_last = 1.12                    # EXAMPLE: …до границы устойчивости стационарного расчёта
 level = "medium"                          # уровень сетки узла geom (impeller.py --level)
 plan = "design"                           # план стадий run_case.py
-iters_first = 6370                        # итераций плана design: 170 + 200 разгона + 6000 (README узла su2)
-iters_next = 1000                         # EXAMPLE: точка линии с рестарта от соседней (--iter-scale = 1000/6370)
+iters_first = 6800                        # итераций плана design: 800 (разгон, рампа 400) + 6000 (PLANS["design"] в run_case.py)
+iters_next = 1000                         # EXAMPLE: точка линии с рестарта от соседней (--iter-scale = 1000/6800)
 # Ключи — из run_case.py узла su2 на 14.11.2026 (--case --level --plan --iter-scale --frac --p-out --np
 # --time-limit --out --restart-from --restart-state). Поля {…} — из строки плана; $GTU_* задаёт entrypoint.py.
 command = "python routes/gtu/platform/su2/run_case.py --case {case} --level {level} --plan {plan} --iter-scale {iter_scale} --frac {speed_frac} --p-out {p_out_pa} --np \"$GTU_NP\" --time-limit \"$GTU_TIME_LEFT\" --out \"$GTU_OUT\" ${GTU_PREV_RESTART:+--restart-from \"$GTU_PREV_RESTART\" --restart-state \"$GTU_PREV_STATE\"}"
@@ -72,6 +75,6 @@ name = "SU2"
 version = "v8.6.0"
 commit = "7048fd35f56d4bf52e586429d6746a36a10255f8"
 build = "meson -Dwith-mpi=enabled -Dbuildtype=release; OpenMPI 4.1.6 (Ubuntu 24.04)"
-plan = "design"                           # стадии run_case.py: 170 + 200 итераций разгона, 6000 второго порядка
+plan = "design"                           # стадии run_case.py: 800 итераций разгона (рампа 400), 6000 второго порядка
 convergence = "невязки −4 порядка, дисбаланс расхода ≤ 0,5 %, π и η за 500 итераций < 0,1 % (навык su2-turbo, разд. 6)"
 turbulence = "SST"

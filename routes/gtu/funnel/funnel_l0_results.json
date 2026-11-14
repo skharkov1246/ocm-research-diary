@@ -1,0 +1,2733 @@
+{
+ "title": "Воронка двигателя-заменителя, уровень 0: рейтинг, ниши, отбор на уровень 1 - KV-3, N = 256",
+ "method": "воронка, уровень 0: концепции по индексу из последовательности Соболя (funnel_space, зерно SEED); быстрый цикл на таблицах gtu_explore (Cantera GRI-Mech 3.0, метан, ISO) с КПД ступеней comp_stage, поправками за зазор и удельную быстроходность (подбор по frame3) и КПД турбин по нагрузке и U/C0; геометрия derive, габарит и масса (оценка); правила допустимости funnel_space.check; баллы parts/service/plugplay/make, s_eta, s_size; взвешенная оценка по весам владельца 14.11.2026. Всё - оценка (README узла).",
+ "software": "python 3.13.18, numpy 2.5.3, scipy 1.18.1, cantera 3.2.0",
+ "date": "2026-11-14",
+ "status": "короткая локальная проба (4 общих ядра): KV-3, N = 256, 10 частей; отладочный (N = 2000) и полный прогоны - задачи AWS jobs_l0_debug.json и jobs_l0.json",
+ "kv": "KV-3",
+ "target": {
+  "kv": "KV-3",
+  "model": "Taurus 60",
+  "variant": "генератор",
+  "P_shaft_kW": 5922.0,
+  "P_kW": 5670.0,
+  "G0": 21.41,
+  "EGT0": 510.0,
+  "eta0": 31.5,
+  "n_pkg": 14950.0,
+  "pi0": 12.2,
+  "pkg_L": 9.8,
+  "pkg_W": 2.6,
+  "pkg_H": 3.2,
+  "rotors0": 1,
+  "engine_kg0": 3290.0,
+  "engine_kg0_note": "масса двигателя другого исполнения той же модели (паспорт fleet)"
+ },
+ "n": 256,
+ "seed": 20261114,
+ "shards": 10,
+ "inputs": [
+  {
+   "file": "routes/gtu/funnel/funnel_l0.py",
+   "field": "код расчёта",
+   "sha256": "fe510fb9778d2e1f1881af5f2d5fd83da350233ad53cf87a245f5b57e6d58734"
+  },
+  {
+   "file": "routes/gtu/funnel/merge_l0.py",
+   "field": "код расчёта",
+   "sha256": "1b7320caa7597ba076bf9817700930c10665d5fa51168113207e6df91594bdb4"
+  },
+  {
+   "file": "routes/gtu/funnel/funnel_space.py",
+   "field": "код расчёта",
+   "sha256": "a29ea85ca5d225962174bc29b8535af3241178c90e1d114555a59d2b7e6f9493"
+  },
+  {
+   "file": "routes/gtu/funnel/parts_model.py",
+   "field": "код расчёта",
+   "sha256": "38367df94b3e1c2ceb5f56da38dc13326c0763bfa3042f213012dd4b63a3ea3e"
+  },
+  {
+   "file": "routes/gtu/funnel/service_model.py",
+   "field": "код расчёта",
+   "sha256": "55df75270294becc9ed34e69c16bcf09928b29c51e41426e38c3887e4211b05f"
+  },
+  {
+   "file": "routes/gtu/funnel/plugplay_model.py",
+   "field": "код расчёта",
+   "sha256": "71ff0ff950d94c2bf5703534c58421383a9e5e5f3f8d5359d2e01b35ec37a4a4"
+  },
+  {
+   "file": "routes/gtu/funnel/make_model.py",
+   "field": "код расчёта",
+   "sha256": "571ae752f9f813435718308158c477a0a53c9f54e5f29c442ec813964b60b149"
+  },
+  {
+   "file": "routes/gtu/gtu_cycle.py",
+   "field": "cycle() - выборочная сверка ядра цикла",
+   "sha256": "44b9b08059ef3a0c3344cfa7c949ba0bc98523d230fa8828c17e53e616dc585e"
+  },
+  {
+   "file": "routes/gtu/gtu_explore.py",
+   "field": "код расчёта",
+   "sha256": "98493d2c281c06b35701a68713951715f959f856330d48d644ab85b1b3533a3b"
+  },
+  {
+   "file": "routes/gtu/gtu_family_results.json",
+   "field": "slots: расчётные точки KV (P, G0, EGT0, eta0, частота, пакет)",
+   "sha256": "ad356f199b04542714a41881c92718a5c89d9872673b4266c0802d1e3fac49e8"
+  },
+  {
+   "file": "routes/gtu/frame3/frame3_point_results.json",
+   "field": "stage1/stage2: m_per_side, T01, p01, w, eta_is, eta_basis.n_ref_rpm, k_speed, d_eta_used -> ns_opt и K поправки по быстроходности",
+   "sha256": "0440ba7e4a7a290b7ebbba371c7f3d7140007f5bf928119c6bfeddbfd905069f"
+  },
+  {
+   "file": "routes/gtu/fleet/gtu_fleet_taurus60.json",
+   "field": "engine_kg Taurus 60 MD - сопоставление массы (только для справки)",
+   "sha256": "bac47532c019093108c8ed6ec22dd11c06b874841def0c5966ee03f50df9eaba"
+  },
+  {
+   "file": "части уровня 0",
+   "field": "10 файлов, отпечаток выборки 472697a7fb5c7f83, код 3ae8efb057b3ed8e"
+  }
+ ],
+ "calib_ns": {
+  "ns_opt_c": 0.9721427898381308,
+  "k_ns_c": 0.07465994492107635,
+  "ns_opt_d": 1.2966456632599948,
+  "ns_opt_t": 0.6,
+  "k_ns_t": 0.15,
+  "points": [
+   {
+    "stage": "stage1",
+    "ns_ref": 0.97236,
+    "k_speed": 0.66549,
+    "d_eta": -0.01207,
+    "phi": 0.03976,
+    "fit": -0.01238
+   },
+   {
+    "stage": "stage2",
+    "ns_ref": 0.97193,
+    "k_speed": 0.51929,
+    "d_eta": -0.03218,
+    "phi": 0.02834,
+    "fit": -0.03206
+   }
+  ],
+  "basis": {
+   "c": "подбор по frame3 (две ступени): ns_opt = ns при n_ref модели потерь frame3, K - МНК по d_eta_used",
+   "d": "оценка: ns_opt центробежной × √(φ_opt Д / φ_opt Ц) × (μ Ц / μ Д)^0,75 по funnel_space.PHI_OPT и серединам MU_RANGE",
+   "t": "оценка: форма -K·ln²(ns/ns_opt), ns_opt 0,60 и K 0,15 - по памяти о кривых КПД радиальных турбин (Rohlik, NASA TN D-4384, 1968 - отчёт существует по выдержке поиска ntrs.nasa.gov/citations/19680006474; значение оптимума в выдержке не найдено, документ не открывался); проверить по SU2 на уровне 2",
+   "axial": "осевые ступени компрессора и турбины - без поправки по ns (формулы funnel_space)"
+  }
+ },
+ "merge_checks": {
+  "files": 10,
+  "shards_expected": 10,
+  "missing": [],
+  "duplicate_same": [],
+  "duplicate_conflict": [],
+  "meta_mismatch": [],
+  "index_errors": [],
+  "unreadable": [],
+  "indices_ok": true,
+  "n_rows": 256,
+  "duplicates": 0,
+  "fingerprint": "472697a7fb5c7f83",
+  "code_sha": "3ae8efb057b3ed8e",
+  "fingerprint_local": {
+   "value": "472697a7fb5c7f83",
+   "match": true,
+   "note": "отпечаток матрицы выборки в окружении слияния; несовпадение - другие версии scipy/numpy: уровень 1 обязан считать с закреплёнными версиями задач (подробности - вне слияния)"
+  }
+ },
+ "timing": {
+  "calls": [
+   {
+    "shards": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ],
+    "concepts": 256,
+    "elapsed_s": 1.52,
+    "s_per_concept_core": 0.02377,
+    "workers": 4,
+    "host_cpus": 4
+   }
+  ],
+  "merge_s": 8.96,
+  "s_per_concept_core": 0.02377
+ },
+ "weights": {
+  "owner": {
+   "parts": 0.35,
+   "plugplay": 0.25,
+   "service": 0.2,
+   "effmake": 0.2
+  },
+  "names": {
+   "parts": "минимум отдельных деталей и узлов",
+   "plugplay": "Plug&Play в существующий пакет",
+   "service": "монтаж и ремонт «хоть уборщиком»",
+   "effmake": "КПД при минимальном размере и изготовимость"
+  },
+  "split_effmake": {
+   "etasize": 0.5,
+   "make": 0.5
+  },
+  "split_etasize": {
+   "eta": 0.5,
+   "size": 0.5
+  },
+  "sum": 1.0,
+  "basis": "веса - решение владельца 14.11.2026; деление 4-го критерия - оценка"
+ },
+ "normalization": {
+  "method": "постоянные шкалы 0-10, нормировка - деление на 10 (в оценке - сумма w·s, w с суммой 1)",
+  "why": "оценка концепции не зависит от выборки: слияние частей = расчёт целиком, место концепции сравнимо при любом N; нормировка по размаху выборки сделала бы оценку зависимой от N и состава частей",
+  "scales": {
+   "parts": "parts_model: 10·N_HALF/(N_HALF + N_eff), опорная ведомость frame3 = 5",
+   "plugplay": "plugplay_model: 10·Σ w_i·s_i по 10 интерфейсам gtu-dropin",
+   "service": "service_model: модули, шаги, инструмент, защита от ошибок, самодиагностика",
+   "effmake": "0.5·(0,5·s_eta + 0,5·s_size) + 0.5·s_make; s_eta = 5 + 5·(КПД - КПД исходной)/5 п. п.; s_size = 10·(1 - V/V_отсека), V_отсека = min(ш, в)²·L_пакета/3; s_make - make_model (оценка)"
+  },
+  "feasible_stats": {
+   "parts": {
+    "n": 2,
+    "min": 4.94,
+    "p10": 5.056,
+    "p50": 5.521,
+    "p90": 5.987,
+    "max": 6.103,
+    "std": 0.581
+   },
+   "plugplay": {
+    "n": 2,
+    "min": 7.553,
+    "p10": 7.583,
+    "p50": 7.705,
+    "p90": 7.827,
+    "max": 7.858,
+    "std": 0.152
+   },
+   "service": {
+    "n": 2,
+    "min": 2.97,
+    "p10": 2.993,
+    "p50": 3.085,
+    "p90": 3.176,
+    "max": 3.199,
+    "std": 0.114
+   },
+   "effmake": {
+    "n": 2,
+    "min": 6.276,
+    "p10": 6.333,
+    "p50": 6.559,
+    "p90": 6.786,
+    "max": 6.843,
+    "std": 0.284
+   }
+  },
+  "effective_weights": {
+   "parts": 0.6336,
+   "plugplay": 0.1184,
+   "service": 0.071,
+   "effmake": 0.177
+  },
+  "effective_note": "доля разброса взвешенной оценки от каждого критерия: w·σ / Σ w·σ по допустимым - критерий с малым разбросом влияет на выбор меньше своего веса"
+ },
+ "summary": {
+  "n": 256,
+  "feasible": 2,
+  "feasible_share": 0.00781,
+  "reject_reasons": {
+   "soft_G": 244,
+   "phi": 111,
+   "soft_EGT": 107,
+   "pt_htr": 106,
+   "size": 106,
+   "turb_ns": 98,
+   "turb_nu": 65,
+   "turb_htr": 56,
+   "envelope": 37,
+   "recup_T": 33,
+   "mono_blisk": 21,
+   "T41_class": 19,
+   "U_comp": 16,
+   "turb_psi": 8,
+   "htr_ax": 4,
+   "perf": 2,
+   "pt_psi": 1,
+   "pi_ax": 1
+  },
+  "by_arch": {
+   "традиционная": {
+    "n": 23,
+    "feasible": 2,
+    "first_reject": {
+     "soft_G": 9,
+     "turb_htr": 7,
+     "phi1": 5
+    },
+    "best_idx": 14,
+    "best_score": 5.9193,
+    "eta_el": {
+     "n": 2,
+     "min": 26.316,
+     "p10": 26.578,
+     "p50": 27.627,
+     "p90": 28.675,
+     "max": 28.937,
+     "std": 1.311
+    },
+    "n_parts": {
+     "n": 2,
+     "min": 196.0,
+     "p10": 207.5,
+     "p50": 253.5,
+     "p90": 299.5,
+     "max": 311.0,
+     "std": 57.5
+    }
+   },
+   "печатный монолит": {
+    "n": 24,
+    "feasible": 0,
+    "first_reject": {
+     "phi1": 10,
+     "pt_htr": 3,
+     "T41_class": 2,
+     "turb_htr": 2
+    },
+    "nearest_idx": 94,
+    "nearest_violation": 0.0698,
+    "nearest_reject": "U_comp2|pt_htr|soft_G|soft_EGT"
+   },
+   "литой монолит": {
+    "n": 23,
+    "feasible": 0,
+    "first_reject": {
+     "phi1": 10,
+     "turb_nu": 4,
+     "turb_ns": 4,
+     "U_comp2": 3
+    },
+    "nearest_idx": 73,
+    "nearest_violation": 0.519,
+    "nearest_reject": "turb_ns|soft_G"
+   },
+   "гибрид": {
+    "n": 23,
+    "feasible": 0,
+    "first_reject": {
+     "turb_ns": 5,
+     "turb_htr": 4,
+     "pt_htr": 4,
+     "phi1": 3
+    },
+    "nearest_idx": 250,
+    "nearest_violation": 0.2245,
+    "nearest_reject": "soft_G"
+   },
+   "печатный рекуператор": {
+    "n": 24,
+    "feasible": 0,
+    "first_reject": {
+     "phi1": 8,
+     "turb_htr": 3,
+     "T41_class": 3,
+     "turb_ns": 2
+    },
+    "nearest_idx": 141,
+    "nearest_violation": 0.2174,
+    "nearest_reject": "soft_G"
+   },
+   "керамика": {
+    "n": 22,
+    "feasible": 0,
+    "first_reject": {
+     "phi1": 9,
+     "turb_ns": 4,
+     "pt_htr": 3,
+     "size:колесо турбины": 2
+    },
+    "nearest_idx": 50,
+    "nearest_violation": 0.5432,
+    "nearest_reject": "size:колесо турбины|recup_T"
+   },
+   "кластер": {
+    "n": 24,
+    "feasible": 0,
+    "first_reject": {
+     "pt_htr": 8,
+     "turb_nu": 5,
+     "T41_class": 3,
+     "U_comp2": 3
+    },
+    "nearest_idx": 131,
+    "nearest_violation": 0.1694,
+    "nearest_reject": "soft_G|soft_EGT"
+   },
+   "простой ротор": {
+    "n": 24,
+    "feasible": 0,
+    "first_reject": {
+     "phi1": 17,
+     "turb_nu": 2,
+     "turb_htr": 2,
+     "turb_psi": 2
+    },
+    "nearest_idx": 59,
+    "nearest_violation": 0.8903,
+    "nearest_reject": "turb_htr|soft_G|soft_EGT"
+   },
+   "безмасляный": {
+    "n": 22,
+    "feasible": 0,
+    "first_reject": {
+     "pt_htr": 6,
+     "phi1": 6,
+     "htr_ax1": 2,
+     "turb_htr": 2
+    },
+    "nearest_idx": 135,
+    "nearest_violation": 0.2203,
+    "nearest_reject": "turb_ns|soft_G"
+   },
+   "RDC": {
+    "n": 24,
+    "feasible": 0,
+    "first_reject": {
+     "phi1": 7,
+     "turb_ns": 3,
+     "turb_htr": 3,
+     "pt_htr": 2
+    },
+    "nearest_idx": 80,
+    "nearest_violation": 0.0263,
+    "nearest_reject": "soft_G"
+   },
+   "волновой ротор": {
+    "n": 23,
+    "feasible": 0,
+    "first_reject": {
+     "turb_nu": 5,
+     "turb_ns": 4,
+     "pt_htr": 3,
+     "phi1": 3
+    },
+    "nearest_idx": 224,
+    "nearest_violation": 0.2467,
+    "nearest_reject": "size:колесо компрессора 1|soft_G|soft_EGT"
+   }
+  }
+ },
+ "top": [
+  {
+   "rank": 1,
+   "idx": 14,
+   "score": 5.9193,
+   "pareto_layer": 1,
+   "arch": "традиционная",
+   "niche": "традиционная|1р|2Ц|О|U|нет|сборный:поковка/литьё",
+   "comp": "2Ц",
+   "turb": "О",
+   "nt": 3,
+   "cool": "U",
+   "recup": "нет",
+   "comb": "кольцевая",
+   "bear": "масло",
+   "cores": 1,
+   "rotor_join": "сборный",
+   "m_cw": "поковка",
+   "m_tw": "литьё",
+   "pi": 6.558149,
+   "t41": 992.622258,
+   "eta_th_shaft": 27.486,
+   "eta_el": 26.316,
+   "w_kJkg": 240.7,
+   "dG_pct": 14.92,
+   "dEGT": 74.2,
+   "n_rpm": 14950.0,
+   "D2": "0.4546/0.6099",
+   "D_env": 1.748,
+   "L_env": 1.268,
+   "W_env": 1.748,
+   "H_env": 1.748,
+   "V_env": 3.877,
+   "mass_kg": 1052.0,
+   "s_parts": 6.103,
+   "s_plugplay": 7.553,
+   "s_service": 3.199,
+   "s_make": 8.429,
+   "s_eta": 0.0,
+   "s_size": 8.244,
+   "s_effmake": 6.276,
+   "n_parts": 196,
+   "n_assemblies": 10,
+   "n_modules": 4,
+   "heaviest_kg": 381.2,
+   "steps": 27.2,
+   "n_tools": 3,
+   "trl_min": 9,
+   "techs": "лопатки_SC|традиция",
+   "stability": {
+    "random_share": 1.0,
+    "oat_in_top": 10,
+    "oat_n": 10,
+    "rank_min": 1,
+    "rank_max": 1
+   },
+   "detail": {
+    "geometry": {
+     "inlet": {
+      "type": "двусторонний"
+     },
+     "compressor": [
+      {
+       "type": "Ц",
+       "D2": 0.4546,
+       "b2": 0.0544,
+       "U2": 355.8,
+       "phi": 0.1366
+      },
+      {
+       "type": "Ц",
+       "D2": 0.6099,
+       "b2": 0.0281,
+       "U2": 477.4,
+       "phi": 0.0685
+      }
+     ],
+     "D_case": 1.248,
+     "L_case": 0.541,
+     "L_rotor": 0.902,
+     "combustor": {
+      "type": "кольцевая",
+      "D": 0.671,
+      "L": 0.403,
+      "n_injectors": 14
+     },
+     "turbine": {
+      "type": "О",
+      "stages": 3,
+      "D": 0.4994,
+      "Dtip": 0.7059,
+      "h_last": 0.2065,
+      "D_hot": 0.882,
+      "L_hot": 0.529
+     },
+     "power_turbine": null,
+     "recuperator": null,
+     "cores": 1,
+     "shaft_rpm": 14950,
+     "output_rpm": 14950.0,
+     "envelope": {
+      "L": 1.268,
+      "W": 1.748,
+      "H": 1.748
+     },
+     "mass_kg_estimate": 1052,
+     "note": "оценка уровня 0: формулы derive/envelope (README узла)"
+    },
+    "modules": [
+     {
+      "name": "ротор",
+      "mass_kg": 381.2,
+      "steps": 25.7
+     },
+     {
+      "name": "горячая часть",
+      "mass_kg": 188.7,
+      "steps": 17.6
+     },
+     {
+      "name": "камера",
+      "mass_kg": 22.3,
+      "steps": 19.2
+     },
+     {
+      "name": "блок датчиков и жгут",
+      "mass_kg": 10.0,
+      "steps": 1.0
+     }
+    ],
+    "tools": [
+     "балансировка на месте",
+     "гидравлический натяжитель стяжного болта",
+     "центровка (лазерный прибор, проставки)"
+    ],
+    "plugplay": {
+     "вал и муфта": {
+      "state": "сохраняется",
+      "note": "частота и фланец как у исходного; крутильный расчёт валопровода - заново (gtu-dropin)"
+     },
+     "опоры и рама": {
+      "state": "переходник",
+      "note": "переходная рама под новые точки опор"
+     },
+     "вход": {
+      "state": "переходник",
+      "note": "расход x1.149, потери входа x1.321"
+     },
+     "выхлоп": {
+      "state": "переходник",
+      "note": "выхлоп 584 против 510 °C; потери выхлопа x1.446"
+     },
+     "масло": {
+      "state": "сохраняется",
+      "note": "столько же роторов, масло пакета"
+     },
+     "топливо": {
+      "state": "переходник",
+      "note": "π x0.54, расход топлива +20 %: пересчёт клапанов"
+     },
+     "пуск": {
+      "state": "нет данных",
+      "note": "момент инерции исходного ротора неизвестен: момент стартёра проверить"
+     },
+     "САУ": {
+      "state": "переходник",
+      "note": "новые уставки и законы в штатной системе"
+     },
+     "укрытие": {
+      "state": "сохраняется",
+      "note": ""
+     },
+     "подъём и выкатка": {
+      "state": "сохраняется",
+      "note": "самый тяжёлый модуль 381 кг (оценка)"
+     }
+    },
+    "trl_by": {
+     "лопатки_SC": 9,
+     "традиция": 9
+    }
+   }
+  },
+  {
+   "rank": 2,
+   "idx": 177,
+   "score": 5.6561,
+   "pareto_layer": 1,
+   "arch": "традиционная",
+   "niche": "традиционная|1р|2Ц|О|U|нет|сборный:поковка/литьё",
+   "comp": "2Ц",
+   "turb": "О",
+   "nt": 3,
+   "cool": "U",
+   "recup": "нет",
+   "comb": "кольцевая",
+   "bear": "масло",
+   "cores": 1,
+   "rotor_join": "сборный",
+   "m_cw": "поковка",
+   "m_tw": "литьё",
+   "pi": 10.447959,
+   "t41": 998.07532,
+   "eta_th_shaft": 30.224,
+   "eta_el": 28.937,
+   "w_kJkg": 234.29,
+   "dG_pct": 18.06,
+   "dEGT": -6.4,
+   "n_rpm": 14950.0,
+   "D2": "0.6041/0.6763",
+   "D_env": 1.727,
+   "L_env": 1.425,
+   "W_env": 1.727,
+   "H_env": 1.727,
+   "V_env": 4.249,
+   "mass_kg": 1216.0,
+   "s_parts": 4.94,
+   "s_plugplay": 7.858,
+   "s_service": 2.97,
+   "s_make": 8.429,
+   "s_eta": 2.437,
+   "s_size": 8.076,
+   "s_effmake": 6.843,
+   "n_parts": 311,
+   "n_assemblies": 10,
+   "n_modules": 4,
+   "heaviest_kg": 498.9,
+   "steps": 29.1,
+   "n_tools": 3,
+   "trl_min": 9,
+   "techs": "лопатки_SC|традиция",
+   "stability": {
+    "random_share": 1.0,
+    "oat_in_top": 10,
+    "oat_n": 10,
+    "rank_min": 2,
+    "rank_max": 2
+   },
+   "detail": {
+    "geometry": {
+     "inlet": {
+      "type": "двусторонний"
+     },
+     "compressor": [
+      {
+       "type": "Ц",
+       "D2": 0.6041,
+       "b2": 0.0219,
+       "U2": 472.9,
+       "phi": 0.0598
+      },
+      {
+       "type": "Ц",
+       "D2": 0.6763,
+       "b2": 0.0181,
+       "U2": 529.4,
+       "phi": 0.0344
+      }
+     ],
+     "D_case": 1.227,
+     "L_case": 0.612,
+     "L_rotor": 1.019,
+     "combustor": {
+      "type": "кольцевая",
+      "D": 0.744,
+      "L": 0.446,
+      "n_injectors": 16
+     },
+     "turbine": {
+      "type": "О",
+      "stages": 3,
+      "D": 0.5176,
+      "Dtip": 0.6635,
+      "h_last": 0.1459,
+      "D_hot": 0.829,
+      "L_hot": 0.498
+     },
+     "power_turbine": null,
+     "recuperator": null,
+     "cores": 1,
+     "shaft_rpm": 14950,
+     "output_rpm": 14950.0,
+     "envelope": {
+      "L": 1.425,
+      "W": 1.727,
+      "H": 1.727
+     },
+     "mass_kg_estimate": 1216,
+     "note": "оценка уровня 0: формулы derive/envelope (README узла)"
+    },
+    "modules": [
+     {
+      "name": "ротор",
+      "mass_kg": 498.9,
+      "steps": 26.0
+     },
+     {
+      "name": "горячая часть",
+      "mass_kg": 174.1,
+      "steps": 17.4
+     },
+     {
+      "name": "камера",
+      "mass_kg": 27.4,
+      "steps": 23.4
+     },
+     {
+      "name": "блок датчиков и жгут",
+      "mass_kg": 10.0,
+      "steps": 1.0
+     }
+    ],
+    "tools": [
+     "балансировка на месте",
+     "гидравлический натяжитель стяжного болта",
+     "центровка (лазерный прибор, проставки)"
+    ],
+    "plugplay": {
+     "вал и муфта": {
+      "state": "сохраняется",
+      "note": "частота и фланец как у исходного; крутильный расчёт валопровода - заново (gtu-dropin)"
+     },
+     "опоры и рама": {
+      "state": "переходник",
+      "note": "переходная рама под новые точки опор"
+     },
+     "вход": {
+      "state": "переходник",
+      "note": "расход x1.181, потери входа x1.394"
+     },
+     "выхлоп": {
+      "state": "переходник",
+      "note": "выхлоп 504 против 510 °C; потери выхлопа x1.382"
+     },
+     "масло": {
+      "state": "сохраняется",
+      "note": "столько же роторов, масло пакета"
+     },
+     "топливо": {
+      "state": "сохраняется",
+      "note": "π x0.86, расход топлива +9 %"
+     },
+     "пуск": {
+      "state": "нет данных",
+      "note": "момент инерции исходного ротора неизвестен: момент стартёра проверить"
+     },
+     "САУ": {
+      "state": "переходник",
+      "note": "новые уставки и законы в штатной системе"
+     },
+     "укрытие": {
+      "state": "сохраняется",
+      "note": ""
+     },
+     "подъём и выкатка": {
+      "state": "сохраняется",
+      "note": "самый тяжёлый модуль 499 кг (оценка)"
+     }
+    },
+    "trl_by": {
+     "лопатки_SC": 9,
+     "традиция": 9
+    }
+   }
+  }
+ ],
+ "pareto": {
+  "criteria": [
+   "parts",
+   "plugplay",
+   "service",
+   "effmake"
+  ],
+  "n_front": 2,
+  "layers": {
+   "1": 2,
+   "2": 0,
+   "3": 0
+  },
+  "top_on_front": 2,
+  "front": [
+   {
+    "idx": 14,
+    "arch": "традиционная",
+    "niche": "традиционная|1р|2Ц|О|U|нет|сборный:поковка/литьё",
+    "rank": 1,
+    "score": 5.9193,
+    "s_parts": 6.103,
+    "s_plugplay": 7.553,
+    "s_service": 3.199,
+    "s_effmake": 6.276,
+    "eta_el": 26.316
+   },
+   {
+    "idx": 177,
+    "arch": "традиционная",
+    "niche": "традиционная|1р|2Ц|О|U|нет|сборный:поковка/литьё",
+    "rank": 2,
+    "score": 5.6561,
+    "s_parts": 4.94,
+    "s_plugplay": 7.858,
+    "s_service": 2.97,
+    "s_effmake": 6.843,
+    "eta_el": 28.937
+   }
+  ]
+ },
+ "sensitivity": {
+  "oat": [
+   {
+    "scenario": "базовые веса",
+    "weights": {
+     "parts": 0.35,
+     "plugplay": 0.25,
+     "service": 0.2,
+     "effmake": 0.2
+    },
+    "split_effmake": {
+     "etasize": 0.5,
+     "make": 0.5
+    },
+    "top1_idx": 14,
+    "top1_same": true,
+    "top_overlap": 2,
+    "top_n": 2,
+    "select_jaccard": 1.0
+   },
+   {
+    "scenario": "parts ×0.5",
+    "weights": {
+     "parts": 0.2121,
+     "plugplay": 0.303,
+     "service": 0.2424,
+     "effmake": 0.2424
+    },
+    "split_effmake": {
+     "etasize": 0.5,
+     "make": 0.5
+    },
+    "top1_idx": 14,
+    "top1_same": true,
+    "top_overlap": 2,
+    "top_n": 2,
+    "select_jaccard": 1.0
+   },
+   {
+    "scenario": "parts ×1.5",
+    "weights": {
+     "parts": 0.4468,
+     "plugplay": 0.2128,
+     "service": 0.1702,
+     "effmake": 0.1702
+    },
+    "split_effmake": {
+     "etasize": 0.5,
+     "make": 0.5
+    },
+    "top1_idx": 14,
+    "top1_same": true,
+    "top_overlap": 2,
+    "top_n": 2,
+    "select_jaccard": 1.0
+   },
+   {
+    "scenario": "plugplay ×0.5",
+    "weights": {
+     "parts": 0.4,
+     "plugplay": 0.1429,
+     "service": 0.2286,
+     "effmake": 0.2286
+    },
+    "split_effmake": {
+     "etasize": 0.5,
+     "make": 0.5
+    },
+    "top1_idx": 14,
+    "top1_same": true,
+    "top_overlap": 2,
+    "top_n": 2,
+    "select_jaccard": 1.0
+   },
+   {
+    "scenario": "plugplay ×1.5",
+    "weights": {
+     "parts": 0.3111,
+     "plugplay": 0.3333,
+     "service": 0.1778,
+     "effmake": 0.1778
+    },
+    "split_effmake": {
+     "etasize": 0.5,
+     "make": 0.5
+    },
+    "top1_idx": 14,
+    "top1_same": true,
+    "top_overlap": 2,
+    "top_n": 2,
+    "select_jaccard": 1.0
+   },
+   {
+    "scenario": "service ×0.5",
+    "weights": {
+     "parts": 0.3889,
+     "plugplay": 0.2778,
+     "service": 0.1111,
+     "effmake": 0.2222
+    },
+    "split_effmake": {
+     "etasize": 0.5,
+     "make": 0.5
+    },
+    "top1_idx": 14,
+    "top1_same": true,
+    "top_overlap": 2,
+    "top_n": 2,
+    "select_jaccard": 1.0
+   },
+   {
+    "scenario": "service ×1.5",
+    "weights": {
+     "parts": 0.3182,
+     "plugplay": 0.2273,
+     "service": 0.2727,
+     "effmake": 0.1818
+    },
+    "split_effmake": {
+     "etasize": 0.5,
+     "make": 0.5
+    },
+    "top1_idx": 14,
+    "top1_same": true,
+    "top_overlap": 2,
+    "top_n": 2,
+    "select_jaccard": 1.0
+   },
+   {
+    "scenario": "effmake ×0.5",
+    "weights": {
+     "parts": 0.3889,
+     "plugplay": 0.2778,
+     "service": 0.2222,
+     "effmake": 0.1111
+    },
+    "split_effmake": {
+     "etasize": 0.5,
+     "make": 0.5
+    },
+    "top1_idx": 14,
+    "top1_same": true,
+    "top_overlap": 2,
+    "top_n": 2,
+    "select_jaccard": 1.0
+   },
+   {
+    "scenario": "effmake ×1.5",
+    "weights": {
+     "parts": 0.3182,
+     "plugplay": 0.2273,
+     "service": 0.1818,
+     "effmake": 0.2727
+    },
+    "split_effmake": {
+     "etasize": 0.5,
+     "make": 0.5
+    },
+    "top1_idx": 14,
+    "top1_same": true,
+    "top_overlap": 2,
+    "top_n": 2,
+    "select_jaccard": 1.0
+   },
+   {
+    "scenario": "внутри 4-го: КПД и размер ×0.5",
+    "weights": {
+     "parts": 0.35,
+     "plugplay": 0.25,
+     "service": 0.2,
+     "effmake": 0.2
+    },
+    "split_effmake": {
+     "etasize": 0.3333,
+     "make": 0.6667
+    },
+    "top1_idx": 14,
+    "top1_same": true,
+    "top_overlap": 2,
+    "top_n": 2,
+    "select_jaccard": 1.0
+   },
+   {
+    "scenario": "внутри 4-го: КПД и размер ×1.5",
+    "weights": {
+     "parts": 0.35,
+     "plugplay": 0.25,
+     "service": 0.2,
+     "effmake": 0.2
+    },
+    "split_effmake": {
+     "etasize": 0.6,
+     "make": 0.4
+    },
+    "top1_idx": 14,
+    "top1_same": true,
+    "top_overlap": 2,
+    "top_n": 2,
+    "select_jaccard": 1.0
+   }
+  ],
+  "random": {
+   "n": 200,
+   "seed": 20261114,
+   "rule": "каждый вес × U(0,5; 1,5), затем сумма = 1",
+   "top1_counts": {
+    "14": 199,
+    "177": 1
+   },
+   "base_top_always": 2,
+   "base_top_share_ge_0_8": 2,
+   "outsiders_entering": 0
+  },
+  "top_stable": [
+   {
+    "idx": 14,
+    "rank": 1,
+    "random_share": 1.0,
+    "oat_in_top": 10,
+    "oat_n": 10,
+    "rank_min": 1,
+    "rank_max": 1
+   },
+   {
+    "idx": 177,
+    "rank": 2,
+    "random_share": 1.0,
+    "oat_in_top": 10,
+    "oat_n": 10,
+    "rank_min": 2,
+    "rank_max": 2
+   }
+  ]
+ },
+ "niches": {
+  "axes": [
+   "arch",
+   "rotors",
+   "comp",
+   "turb",
+   "cool",
+   "recup",
+   "rotor_make"
+  ],
+  "n_seen": 205,
+  "n_feasible": 1,
+  "archive": [
+   {
+    "niche": "традиционная|1р|2Ц|О|U|нет|сборный:поковка/литьё",
+    "n": 23,
+    "feasible": 2,
+    "best_idx": 14,
+    "best_score": 5.9193,
+    "best_eta_el": 26.316
+   },
+   {
+    "niche": "RDC|2р|2Ц|Р|N|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 80,
+    "nearest_violation": 0.0263
+   },
+   {
+    "niche": "печатный монолит|2р|2Ц|О|P|нет|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 94,
+    "nearest_violation": 0.0698
+   },
+   {
+    "niche": "кластер|2р|2Ц|Р|P|нет|заодно:печать",
+    "n": 2,
+    "feasible": 0,
+    "nearest_idx": 131,
+    "nearest_violation": 0.1694
+   },
+   {
+    "niche": "печатный рекуператор|1р|2Ц|О|N|печатный|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 141,
+    "nearest_violation": 0.2174
+   },
+   {
+    "niche": "безмасляный|1р|2Ц|Р|N|нет|сборный:поковка/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 135,
+    "nearest_violation": 0.2203
+   },
+   {
+    "niche": "гибрид|2р|ОЦ|О|N|нет|сборный:поковка/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 250,
+    "nearest_violation": 0.2245
+   },
+   {
+    "niche": "волновой ротор|2р|1Ц|О|P|нет|сборный:литьё/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 224,
+    "nearest_violation": 0.2467
+   },
+   {
+    "niche": "RDC|1р|2Ц|Р|N|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 47,
+    "nearest_violation": 0.3354
+   },
+   {
+    "niche": "безмасляный|1р|2Ц|О|N|нет|сборный:печать/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 123,
+    "nearest_violation": 0.4469
+   },
+   {
+    "niche": "RDC|2р|2Ц|О|P|нет|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 72,
+    "nearest_violation": 0.4672
+   },
+   {
+    "niche": "безмасляный|2р|2Ц|О|P|нет|сборный:поковка/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 56,
+    "nearest_violation": 0.4697
+   },
+   {
+    "niche": "литой монолит|1р|2Ц|Р|U|печатный|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 73,
+    "nearest_violation": 0.519
+   },
+   {
+    "niche": "керамика|2р|2Ц|Р|C|печатный|сборный:поковка/керамика",
+    "n": 4,
+    "feasible": 0,
+    "nearest_idx": 50,
+    "nearest_violation": 0.5432
+   },
+   {
+    "niche": "гибрид|1р|ОЦ|Р|P|нет|сборный:поковка/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 69,
+    "nearest_violation": 0.5682
+   },
+   {
+    "niche": "безмасляный|2р|ОЦ|О|U|нет|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 120,
+    "nearest_violation": 0.5822
+   },
+   {
+    "niche": "RDC|2р|1Ц|О|K|нет|сборный:поковка/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 168,
+    "nearest_violation": 0.6089
+   },
+   {
+    "niche": "печатный монолит|1р|2Ц|О|P|печатный|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 33,
+    "nearest_violation": 0.6222
+   },
+   {
+    "niche": "RDC|1р|1Ц|О|K|нет|сборный:поковка/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 119,
+    "nearest_violation": 0.6486
+   },
+   {
+    "niche": "печатный рекуператор|1р|1Ц|О|N|печатный|сборный:печать/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 205,
+    "nearest_violation": 0.678
+   },
+   {
+    "niche": "волновой ротор|1р|Д|О|P|нет|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 127,
+    "nearest_violation": 0.7159
+   },
+   {
+    "niche": "волновой ротор|2р|Д|О|N|нет|сборный:печать/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 64,
+    "nearest_violation": 0.7219
+   },
+   {
+    "niche": "керамика|2р|2Ц|Р|C|нет|сборный:поковка/керамика",
+    "n": 4,
+    "feasible": 0,
+    "nearest_idx": 188,
+    "nearest_violation": 0.7892
+   },
+   {
+    "niche": "кластер|2р|2Ц|Р|U|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 172,
+    "nearest_violation": 0.7922
+   },
+   {
+    "niche": "гибрид|2р|ОЦ|О|N|печатный|сборный:поковка/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 106,
+    "nearest_violation": 0.8395
+   },
+   {
+    "niche": "кластер|2р|2Ц|Р|N|нет|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 204,
+    "nearest_violation": 0.8443
+   },
+   {
+    "niche": "печатный монолит|2р|2Ц|Р|U|печатный|заодно:печать",
+    "n": 2,
+    "feasible": 0,
+    "nearest_idx": 158,
+    "nearest_violation": 0.865
+   },
+   {
+    "niche": "безмасляный|1р|Д|О|K|печатный|сборный:печать/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 71,
+    "nearest_violation": 0.8853
+   },
+   {
+    "niche": "гибрид|1р|1Ц|О|N|нет|сборный:литьё/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 21,
+    "nearest_violation": 0.886
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|О|K|нет|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 59,
+    "nearest_violation": 0.8903
+   },
+   {
+    "niche": "печатный рекуператор|2р|2Ц|Р|N|печатный|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 122,
+    "nearest_violation": 0.8946
+   },
+   {
+    "niche": "печатный монолит|1р|1Ц|О|P|печатный|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 25,
+    "nearest_violation": 0.8994
+   },
+   {
+    "niche": "волновой ротор|1р|1Ц|О|U|нет|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 79,
+    "nearest_violation": 0.9903
+   },
+   {
+    "niche": "RDC|1р|Д|О|P|нет|сборный:литьё/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 215,
+    "nearest_violation": 1.0141
+   },
+   {
+    "niche": "волновой ротор|1р|Д|Р|P|нет|сборный:литьё/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 255,
+    "nearest_violation": 1.0192
+   },
+   {
+    "niche": "RDC|2р|2Ц|Р|K|нет|сборный:печать/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 104,
+    "nearest_violation": 1.0571
+   },
+   {
+    "niche": "волновой ротор|1р|1Ц|Р|U|нет|сборный:литьё/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 207,
+    "nearest_violation": 1.0789
+   },
+   {
+    "niche": "литой монолит|1р|2Ц|Р|U|нет|заодно:литьё",
+    "n": 2,
+    "feasible": 0,
+    "nearest_idx": 53,
+    "nearest_violation": 1.1063
+   },
+   {
+    "niche": "гибрид|1р|ОЦ|Р|P|печатный|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 165,
+    "nearest_violation": 1.1171
+   },
+   {
+    "niche": "волновой ротор|1р|Д|О|P|нет|сборный:печать/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 15,
+    "nearest_violation": 1.1681
+   },
+   {
+    "niche": "гибрид|1р|2Ц|Р|N|печатный|сборный:литьё/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 229,
+    "nearest_violation": 1.1721
+   },
+   {
+    "niche": "RDC|1р|2Ц|О|K|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 239,
+    "nearest_violation": 1.1821
+   },
+   {
+    "niche": "литой монолит|2р|2Ц|Р|N|печатный|сварка:литьё",
+    "n": 2,
+    "feasible": 0,
+    "nearest_idx": 246,
+    "nearest_violation": 1.1917
+   },
+   {
+    "niche": "волновой ротор|2р|Д|Р|U|нет|сборный:печать/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 32,
+    "nearest_violation": 1.1946
+   },
+   {
+    "niche": "волновой ротор|2р|1Ц|О|K|нет|сборный:поковка/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 112,
+    "nearest_violation": 1.1965
+   },
+   {
+    "niche": "печатный рекуператор|2р|Д|О|P|печатный|сборный:поковка/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 34,
+    "nearest_violation": 1.2161
+   },
+   {
+    "niche": "литой монолит|1р|2Ц|Р|N|печатный|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 41,
+    "nearest_violation": 1.2166
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|Р|U|нет|сборный:печать/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 27,
+    "nearest_violation": 1.2312
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|Р|P|нет|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 180,
+    "nearest_violation": 1.2321
+   },
+   {
+    "niche": "кластер|2р|2Ц|Р|U|нет|сборный:литьё/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 244,
+    "nearest_violation": 1.2444
+   },
+   {
+    "niche": "безмасляный|2р|ОЦ|Р|U|нет|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 132,
+    "nearest_violation": 1.2762
+   },
+   {
+    "niche": "волновой ротор|2р|1Ц|Р|K|нет|сборный:литьё/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 128,
+    "nearest_violation": 1.2888
+   },
+   {
+    "niche": "печатный рекуператор|1р|1Ц|О|P|печатный|сборный:печать/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 93,
+    "nearest_violation": 1.2988
+   },
+   {
+    "niche": "печатный монолит|1р|2Ц|Р|U|нет|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 225,
+    "nearest_violation": 1.3026
+   },
+   {
+    "niche": "кластер|2р|1Ц|Р|P|нет|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 236,
+    "nearest_violation": 1.3235
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|О|N|нет|сборный:поковка/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 148,
+    "nearest_violation": 1.3285
+   },
+   {
+    "niche": "волновой ротор|1р|1Ц|О|U|нет|сборный:поковка/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 63,
+    "nearest_violation": 1.3373
+   },
+   {
+    "niche": "кластер|2р|2Ц|Р|K|нет|сборный:литьё/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 147,
+    "nearest_violation": 1.3449
+   },
+   {
+    "niche": "волновой ротор|2р|1Ц|Р|K|нет|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 240,
+    "nearest_violation": 1.3473
+   },
+   {
+    "niche": "волновой ротор|2р|Д|О|N|нет|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 48,
+    "nearest_violation": 1.3587
+   },
+   {
+    "niche": "волновой ротор|1р|1Ц|О|N|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 223,
+    "nearest_violation": 1.3634
+   },
+   {
+    "niche": "литой монолит|2р|2Ц|Р|K|нет|заодно:литьё",
+    "n": 2,
+    "feasible": 0,
+    "nearest_idx": 138,
+    "nearest_violation": 1.3779
+   },
+   {
+    "niche": "гибрид|1р|2Ц|Р|N|печатный|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 149,
+    "nearest_violation": 1.3799
+   },
+   {
+    "niche": "печатный монолит|1р|Д|О|U|нет|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 185,
+    "nearest_violation": 1.3804
+   },
+   {
+    "niche": "печатный монолит|2р|1Ц|О|U|печатный|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 198,
+    "nearest_violation": 1.3853
+   },
+   {
+    "niche": "кластер|2р|1Ц|Р|K|нет|сборный:печать/литьё",
+    "n": 2,
+    "feasible": 0,
+    "nearest_idx": 124,
+    "nearest_violation": 1.3857
+   },
+   {
+    "niche": "гибрид|1р|Д|О|P|нет|сборный:поковка/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 37,
+    "nearest_violation": 1.392
+   },
+   {
+    "niche": "волновой ротор|2р|1Ц|О|K|нет|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 0,
+    "nearest_violation": 1.4155
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|О|U|печатный|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 116,
+    "nearest_violation": 1.4285
+   },
+   {
+    "niche": "кластер|2р|2Ц|Р|K|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 19,
+    "nearest_violation": 1.4331
+   },
+   {
+    "niche": "волновой ротор|1р|Д|О|K|нет|сборный:печать/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 159,
+    "nearest_violation": 1.4432
+   },
+   {
+    "niche": "безмасляный|1р|ОЦ|Р|P|печатный|сборный:печать/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 39,
+    "nearest_violation": 1.457
+   },
+   {
+    "niche": "печатный рекуператор|2р|1Ц|О|U|печатный|сборный:печать/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 130,
+    "nearest_violation": 1.4805
+   },
+   {
+    "niche": "RDC|2р|1Ц|Р|K|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 40,
+    "nearest_violation": 1.492
+   },
+   {
+    "niche": "гибрид|1р|Д|О|P|печатный|сборный:поковка/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 181,
+    "nearest_violation": 1.4922
+   },
+   {
+    "niche": "кластер|2р|2Ц|Р|P|нет|сварка:литьё",
+    "n": 2,
+    "feasible": 0,
+    "nearest_idx": 3,
+    "nearest_violation": 1.4946
+   },
+   {
+    "niche": "безмасляный|2р|1Ц|О|P|печатный|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 68,
+    "nearest_violation": 1.5154
+   },
+   {
+    "niche": "RDC|2р|2Ц|О|P|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 144,
+    "nearest_violation": 1.5232
+   },
+   {
+    "niche": "кластер|2р|2Ц|Р|N|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 76,
+    "nearest_violation": 1.5357
+   },
+   {
+    "niche": "печатный монолит|2р|1Ц|О|U|нет|заодно:печать",
+    "n": 2,
+    "feasible": 0,
+    "nearest_idx": 38,
+    "nearest_violation": 1.5802
+   },
+   {
+    "niche": "безмасляный|2р|Д|О|U|печатный|сборный:поковка/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 4,
+    "nearest_violation": 1.6249
+   },
+   {
+    "niche": "RDC|1р|Д|Р|P|нет|сборный:литьё/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 183,
+    "nearest_violation": 1.6359
+   },
+   {
+    "niche": "печатный рекуператор|2р|1Ц|Р|U|печатный|сборный:печать/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 114,
+    "nearest_violation": 1.6627
+   },
+   {
+    "niche": "печатный рекуператор|1р|Д|О|U|печатный|сборный:поковка/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 253,
+    "nearest_violation": 1.6645
+   },
+   {
+    "niche": "литой монолит|1р|2Ц|Р|U|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 217,
+    "nearest_violation": 1.6686
+   },
+   {
+    "niche": "кластер|2р|1Ц|Р|U|нет|сборный:печать/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 51,
+    "nearest_violation": 1.6806
+   },
+   {
+    "niche": "RDC|2р|1Ц|Р|P|нет|сборный:поковка/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 16,
+    "nearest_violation": 1.6941
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|О|K|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 212,
+    "nearest_violation": 1.7125
+   },
+   {
+    "niche": "литой монолит|1р|1Ц|Р|K|нет|сварка:литьё",
+    "n": 3,
+    "feasible": 0,
+    "nearest_idx": 137,
+    "nearest_violation": 1.7189
+   },
+   {
+    "niche": "литой монолит|1р|1Ц|Р|K|печатный|заодно:литьё",
+    "n": 2,
+    "feasible": 0,
+    "nearest_idx": 245,
+    "nearest_violation": 1.7467
+   },
+   {
+    "niche": "печатный монолит|2р|Д|О|P|нет|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 102,
+    "nearest_violation": 1.7472
+   },
+   {
+    "niche": "безмасляный|2р|1Ц|Р|P|печатный|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 184,
+    "nearest_violation": 1.7516
+   },
+   {
+    "niche": "печатный рекуператор|1р|2Ц|О|U|печатный|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 29,
+    "nearest_violation": 1.7573
+   },
+   {
+    "niche": "гибрид|2р|2Ц|О|P|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 186,
+    "nearest_violation": 1.758
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|О|P|печатный|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 219,
+    "nearest_violation": 1.7702
+   },
+   {
+    "niche": "гибрид|2р|Д|Р|N|нет|сборный:поковка/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 154,
+    "nearest_violation": 1.8127
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|Р|U|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 107,
+    "nearest_violation": 1.8346
+   },
+   {
+    "niche": "RDC|2р|Д|О|N|нет|сборный:печать/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 8,
+    "nearest_violation": 1.8366
+   },
+   {
+    "niche": "печатный рекуператор|1р|2Ц|Р|N|печатный|сборный:литьё/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 61,
+    "nearest_violation": 1.8484
+   },
+   {
+    "niche": "RDC|1р|Д|Р|K|нет|сборный:печать/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 111,
+    "nearest_violation": 1.86
+   },
+   {
+    "niche": "безмасляный|1р|1Ц|О|U|нет|сборный:литьё/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 231,
+    "nearest_violation": 1.8982
+   },
+   {
+    "niche": "безмасляный|2р|ОЦ|О|N|печатный|сборный:литьё/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 152,
+    "nearest_violation": 1.9078
+   },
+   {
+    "niche": "волновой ротор|1р|1Ц|Р|U|нет|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 191,
+    "nearest_violation": 1.9132
+   },
+   {
+    "niche": "печатный рекуператор|2р|2Ц|О|N|печатный|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 98,
+    "nearest_violation": 1.9436
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|Р|K|печатный|сборный:печать/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 84,
+    "nearest_violation": 1.9728
+   },
+   {
+    "niche": "кластер|2р|1Ц|Р|N|нет|сборный:печать/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 83,
+    "nearest_violation": 2.0015
+   },
+   {
+    "niche": "RDC|1р|1Ц|О|N|нет|сборный:литьё/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 175,
+    "nearest_violation": 2.0095
+   },
+   {
+    "niche": "керамика|2р|1Ц|Р|C|нет|сборный:литьё/керамика",
+    "n": 2,
+    "feasible": 0,
+    "nearest_idx": 156,
+    "nearest_violation": 2.0211
+   },
+   {
+    "niche": "гибрид|2р|1Ц|Р|P|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 218,
+    "nearest_violation": 2.0572
+   },
+   {
+    "niche": "керамика|2р|1Ц|Р|C|печатный|сборный:литьё/керамика",
+    "n": 2,
+    "feasible": 0,
+    "nearest_idx": 28,
+    "nearest_violation": 2.0807
+   },
+   {
+    "niche": "кластер|2р|1Ц|Р|N|нет|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 11,
+    "nearest_violation": 2.0886
+   },
+   {
+    "niche": "печатный монолит|2р|Д|Р|P|печатный|заодно:печать",
+    "n": 2,
+    "feasible": 0,
+    "nearest_idx": 222,
+    "nearest_violation": 2.0897
+   },
+   {
+    "niche": "RDC|1р|1Ц|О|N|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 151,
+    "nearest_violation": 2.1043
+   },
+   {
+    "niche": "печатный рекуператор|2р|1Ц|Р|N|печатный|сборный:печать/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 226,
+    "nearest_violation": 2.1097
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|Р|P|нет|заодно:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 91,
+    "nearest_violation": 2.1234
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|О|K|нет|сборный:литьё/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 164,
+    "nearest_violation": 2.127
+   },
+   {
+    "niche": "волновой ротор|1р|Д|Р|K|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 31,
+    "nearest_violation": 2.1291
+   },
+   {
+    "niche": "волновой ротор|2р|Д|Р|N|нет|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 192,
+    "nearest_violation": 2.162
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|О|K|нет|сборный:поковка/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 75,
+    "nearest_violation": 2.1748
+   },
+   {
+    "niche": "безмасляный|1р|1Ц|Р|N|печатный|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 251,
+    "nearest_violation": 2.1939
+   },
+   {
+    "niche": "безмасляный|2р|1Ц|Р|K|нет|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 88,
+    "nearest_violation": 2.2143
+   },
+   {
+    "niche": "RDC|1р|Д|Р|P|нет|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 143,
+    "nearest_violation": 2.2224
+   },
+   {
+    "niche": "безмасляный|2р|2Ц|О|K|печатный|заодно:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 216,
+    "nearest_violation": 2.2288
+   },
+   {
+    "niche": "гибрид|1р|1Ц|О|N|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 101,
+    "nearest_violation": 2.2513
+   },
+   {
+    "niche": "печатный монолит|2р|2Ц|О|P|печатный|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 134,
+    "nearest_violation": 2.2552
+   },
+   {
+    "niche": "печатный рекуператор|1р|2Ц|Р|P|печатный|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 221,
+    "nearest_violation": 2.2979
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|Р|N|печатный|заодно:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 20,
+    "nearest_violation": 2.4293
+   },
+   {
+    "niche": "печатный рекуператор|2р|Д|О|P|печатный|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 194,
+    "nearest_violation": 2.4728
+   },
+   {
+    "niche": "печатный рекуператор|2р|1Ц|О|U|печатный|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 242,
+    "nearest_violation": 2.4988
+   },
+   {
+    "niche": "гибрид|2р|ОЦ|О|N|печатный|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 26,
+    "nearest_violation": 2.5261
+   },
+   {
+    "niche": "печатный рекуператор|1р|Д|Р|N|печатный|сборный:литьё/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 13,
+    "nearest_violation": 2.5489
+   },
+   {
+    "niche": "литой монолит|2р|1Ц|Р|U|печатный|заодно:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 214,
+    "nearest_violation": 2.5493
+   },
+   {
+    "niche": "кластер|2р|1Ц|Р|U|нет|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 179,
+    "nearest_violation": 2.5495
+   },
+   {
+    "niche": "печатный монолит|2р|2Ц|Р|U|нет|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 70,
+    "nearest_violation": 2.5501
+   },
+   {
+    "niche": "гибрид|2р|1Ц|Р|P|печатный|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 74,
+    "nearest_violation": 2.5608
+   },
+   {
+    "niche": "кластер|2р|1Ц|Р|P|нет|заодно:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 108,
+    "nearest_violation": 2.5679
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|О|U|печатный|сборный:печать/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 235,
+    "nearest_violation": 2.5953
+   },
+   {
+    "niche": "безмасляный|1р|ОЦ|Р|P|печатный|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 87,
+    "nearest_violation": 2.5965
+   },
+   {
+    "niche": "литой монолит|1р|1Ц|Р|N|печатный|заодно:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 105,
+    "nearest_violation": 2.6002
+   },
+   {
+    "niche": "кластер|2р|1Ц|Р|N|нет|заодно:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 211,
+    "nearest_violation": 2.6141
+   },
+   {
+    "niche": "RDC|2р|2Ц|Р|N|нет|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 136,
+    "nearest_violation": 2.6146
+   },
+   {
+    "niche": "RDC|1р|2Ц|О|P|нет|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 55,
+    "nearest_violation": 2.6288
+   },
+   {
+    "niche": "волновой ротор|2р|Д|Р|N|нет|сборный:печать/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 176,
+    "nearest_violation": 2.6291
+   },
+   {
+    "niche": "керамика|1р|1Ц|Р|C|нет|сборный:литьё/керамика",
+    "n": 3,
+    "feasible": 0,
+    "nearest_idx": 77,
+    "nearest_violation": 2.6305
+   },
+   {
+    "niche": "RDC|2р|Д|О|N|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 232,
+    "nearest_violation": 2.6354
+   },
+   {
+    "niche": "гибрид|1р|ОЦ|Р|P|печатный|сборный:поковка/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 213,
+    "nearest_violation": 2.6611
+   },
+   {
+    "niche": "печатный рекуператор|1р|1Ц|О|N|печатный|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 189,
+    "nearest_violation": 2.677
+   },
+   {
+    "niche": "печатный рекуператор|1р|1Ц|О|P|печатный|сборный:печать/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 133,
+    "nearest_violation": 2.6887
+   },
+   {
+    "niche": "гибрид|1р|Д|О|P|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 85,
+    "nearest_violation": 2.7032
+   },
+   {
+    "niche": "RDC|1р|2Ц|Р|N|нет|сборный:поковка/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 23,
+    "nearest_violation": 2.7191
+   },
+   {
+    "niche": "литой монолит|1р|2Ц|Р|N|нет|заодно:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 169,
+    "nearest_violation": 2.7208
+   },
+   {
+    "niche": "волновой ротор|2р|1Ц|Р|P|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 96,
+    "nearest_violation": 2.7235
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|О|P|печатный|заодно:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 171,
+    "nearest_violation": 2.8106
+   },
+   {
+    "niche": "печатный рекуператор|1р|Д|Р|U|печатный|сборный:поковка/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 157,
+    "nearest_violation": 2.8625
+   },
+   {
+    "niche": "литой монолит|2р|1Ц|Р|N|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 202,
+    "nearest_violation": 2.863
+   },
+   {
+    "niche": "кластер|2р|1Ц|Р|K|нет|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 252,
+    "nearest_violation": 2.8684
+   },
+   {
+    "niche": "волновой ротор|2р|Д|О|U|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 160,
+    "nearest_violation": 2.8792
+   },
+   {
+    "niche": "печатный монолит|1р|Д|Р|U|печатный|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 1,
+    "nearest_violation": 2.8797
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|Р|K|печатный|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 36,
+    "nearest_violation": 2.9163
+   },
+   {
+    "niche": "литой монолит|2р|1Ц|Р|N|печатный|заодно:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 182,
+    "nearest_violation": 2.9355
+   },
+   {
+    "niche": "печатный монолит|1р|1Ц|Р|P|печатный|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 121,
+    "nearest_violation": 2.9683
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|Р|P|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 196,
+    "nearest_violation": 2.9917
+   },
+   {
+    "niche": "печатный монолит|1р|Д|О|U|печатный|заодно:печать",
+    "n": 2,
+    "feasible": 0,
+    "nearest_idx": 89,
+    "nearest_violation": 2.9953
+   },
+   {
+    "niche": "кластер|2р|1Ц|Р|U|нет|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 67,
+    "nearest_violation": 2.9971
+   },
+   {
+    "niche": "безмасляный|2р|Д|Р|N|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 24,
+    "nearest_violation": 3.0204
+   },
+   {
+    "niche": "кластер|2р|1Ц|Р|N|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 139,
+    "nearest_violation": 3.0323
+   },
+   {
+    "niche": "RDC|2р|1Ц|Р|P|нет|сборный:литьё/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 200,
+    "nearest_violation": 3.1028
+   },
+   {
+    "niche": "гибрид|2р|1Ц|Р|P|печатный|сборный:литьё/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 58,
+    "nearest_violation": 3.1334
+   },
+   {
+    "niche": "кластер|2р|1Ц|Р|K|нет|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 12,
+    "nearest_violation": 3.1365
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|О|N|нет|заодно:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 228,
+    "nearest_violation": 3.15
+   },
+   {
+    "niche": "гибрид|1р|Д|О|P|печатный|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 197,
+    "nearest_violation": 3.198
+   },
+   {
+    "niche": "литой монолит|2р|1Ц|Р|U|нет|сварка:литьё",
+    "n": 2,
+    "feasible": 0,
+    "nearest_idx": 54,
+    "nearest_violation": 3.2137
+   },
+   {
+    "niche": "безмасляный|1р|1Ц|О|N|печатный|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 7,
+    "nearest_violation": 3.2165
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|О|U|печатный|заодно:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 155,
+    "nearest_violation": 3.2952
+   },
+   {
+    "niche": "RDC|2р|Д|О|N|нет|сборный:литьё/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 208,
+    "nearest_violation": 3.3172
+   },
+   {
+    "niche": "печатный рекуператор|2р|2Ц|Р|P|печатный|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 162,
+    "nearest_violation": 3.3754
+   },
+   {
+    "niche": "гибрид|2р|2Ц|О|P|печатный|сборный:литьё/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 90,
+    "nearest_violation": 3.3882
+   },
+   {
+    "niche": "печатный монолит|1р|1Ц|Р|P|нет|заодно:печать",
+    "n": 2,
+    "feasible": 0,
+    "nearest_idx": 161,
+    "nearest_violation": 3.4211
+   },
+   {
+    "niche": "гибрид|2р|Д|Р|N|нет|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 234,
+    "nearest_violation": 3.5994
+   },
+   {
+    "niche": "керамика|1р|1Ц|Р|C|печатный|сборный:литьё/керамика",
+    "n": 3,
+    "feasible": 0,
+    "nearest_idx": 195,
+    "nearest_violation": 3.6921
+   },
+   {
+    "niche": "безмасляный|1р|Д|О|P|нет|заодно:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 167,
+    "nearest_violation": 3.7178
+   },
+   {
+    "niche": "гибрид|2р|1Ц|Р|P|нет|сборный:литьё/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 170,
+    "nearest_violation": 3.7309
+   },
+   {
+    "niche": "кластер|2р|2Ц|Р|U|нет|сборный:поковка/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 44,
+    "nearest_violation": 3.7473
+   },
+   {
+    "niche": "печатный рекуператор|1р|Д|Р|U|печатный|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 125,
+    "nearest_violation": 3.7478
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|Р|P|нет|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 43,
+    "nearest_violation": 3.7949
+   },
+   {
+    "niche": "волновой ротор|1р|1Ц|Р|N|нет|сборный:поковка/печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 95,
+    "nearest_violation": 3.876
+   },
+   {
+    "niche": "печатный рекуператор|2р|1Ц|Р|U|печатный|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 2,
+    "nearest_violation": 3.8891
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|Р|K|печатный|сборный:литьё/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 187,
+    "nearest_violation": 4.2437
+   },
+   {
+    "niche": "печатный монолит|1р|2Ц|О|P|нет|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 249,
+    "nearest_violation": 4.4361
+   },
+   {
+    "niche": "гибрид|2р|2Ц|О|P|печатный|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 42,
+    "nearest_violation": 4.4441
+   },
+   {
+    "niche": "безмасляный|1р|2Ц|Р|U|печатный|заодно:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 103,
+    "nearest_violation": 4.4915
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|Р|K|печатный|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 203,
+    "nearest_violation": 4.6711
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|О|P|печатный|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 52,
+    "nearest_violation": 4.8053
+   },
+   {
+    "niche": "литой монолит|2р|2Ц|Р|N|нет|заодно:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 118,
+    "nearest_violation": 5.2912
+   },
+   {
+    "niche": "литой монолит|2р|2Ц|Р|K|печатный|сварка:литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 150,
+    "nearest_violation": 5.481
+   },
+   {
+    "niche": "печатный рекуператор|1р|2Ц|Р|P|печатный|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 5,
+    "nearest_violation": 5.6307
+   },
+   {
+    "niche": "простой ротор|1р|1Ц|Р|N|печатный|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 100,
+    "nearest_violation": 5.6773
+   },
+   {
+    "niche": "печатный монолит|1р|2Ц|Р|U|печатный|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 57,
+    "nearest_violation": 6.9024
+   },
+   {
+    "niche": "керамика|1р|2Ц|Р|C|печатный|сборный:поковка/керамика",
+    "n": 2,
+    "feasible": 0,
+    "nearest_idx": 237,
+    "nearest_violation": 7.6217
+   },
+   {
+    "niche": "RDC|1р|2Ц|Р|K|нет|сварка:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 247,
+    "nearest_violation": 9.1796
+   },
+   {
+    "niche": "печатный рекуператор|2р|2Ц|Р|P|печатный|сборный:литьё/литьё",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 66,
+    "nearest_violation": 11.3528
+   },
+   {
+    "niche": "керамика|1р|2Ц|Р|C|нет|сборный:поковка/керамика",
+    "n": 2,
+    "feasible": 0,
+    "nearest_idx": 99,
+    "nearest_violation": 13.8393
+   },
+   {
+    "niche": "безмасляный|1р|ОЦ|Р|K|нет|заодно:печать",
+    "n": 1,
+    "feasible": 0,
+    "nearest_idx": 199,
+    "nearest_violation": 91.2968
+   },
+   {
+    "niche": "безмасляный|2р|Д|Р|U|печатный|сварка:литьё",
+    "n": 1,
+    "feasible": 0
+   },
+   {
+    "niche": "печатный монолит|2р|Д|Р|P|нет|заодно:печать",
+    "n": 1,
+    "feasible": 0
+   }
+  ]
+ },
+ "selection": {
+  "file": "funnel_l0_select.json",
+  "n_selected": 9,
+  "n_feasible": 2,
+  "n_near": 7,
+  "K_per_niche": 2,
+  "K_max_in_niche": 2,
+  "target": 150,
+  "target_exceeded": false,
+  "feasible_niches": 1,
+  "feasible_niches_covered": 1,
+  "lost_feasible_niches": [],
+  "near_candidates": 7,
+  "archetypes": {
+   "традиционная": 2,
+   "RDC": 1,
+   "печатный монолит": 1,
+   "кластер": 1,
+   "печатный рекуператор": 1,
+   "безмасляный": 1,
+   "гибрид": 1,
+   "волновой ротор": 1
+  },
+  "reasons": {
+   "ниша без допустимых": 7,
+   "ниша": 2,
+   "общий топ": 2,
+   "фронт Парето": 2
+  }
+ },
+ "convergence": {
+  "rule": "топ-50 и допустимые ниши на первых N/4, N/2, N концепциях; концепция i одна и та же при любом N (префикс последовательности Соболя), поэтому первые N/2 - это выборка объёма N/2",
+  "rows": [
+   {
+    "N": 64,
+    "feasible": 1,
+    "feasible_niches": 1,
+    "archetypes_feasible": 1,
+    "top_n": 1,
+    "best_score": 5.9193,
+    "mean_top": 5.9193,
+    "top_overlap_with_full": 1
+   },
+   {
+    "N": 128,
+    "feasible": 1,
+    "feasible_niches": 1,
+    "archetypes_feasible": 1,
+    "top_n": 1,
+    "best_score": 5.9193,
+    "mean_top": 5.9193,
+    "top_overlap_with_full": 1,
+    "new_in_top_vs_half": 0,
+    "new_feasible_niches_vs_half": 0
+   },
+   {
+    "N": 256,
+    "feasible": 2,
+    "feasible_niches": 1,
+    "archetypes_feasible": 1,
+    "top_n": 2,
+    "best_score": 5.9193,
+    "mean_top": 5.7877,
+    "top_overlap_with_full": 2,
+    "new_in_top_vs_half": 1,
+    "new_feasible_niches_vs_half": 0
+   }
+  ]
+ },
+ "cycle_check": {
+  "method": "ядро уровня 0 (таблицы gtu_explore) против gtu_cycle.cycle (Cantera) при одинаковых КПД узлов",
+  "n": 6,
+  "max_abs_d_eta_pp": 0.047,
+  "rows": [
+   {
+    "idx": 188,
+    "arch": "керамика",
+    "feasible": false,
+    "pi": 15.911,
+    "t41": 1280.1,
+    "eta_l0": 25.267,
+    "eta_cycle": 25.313,
+    "d_eta_pp": -0.047,
+    "w_l0": 267.83,
+    "w_cycle": 268.83,
+    "EGT_l0": 704.6,
+    "EGT_cycle": 705.1
+   },
+   {
+    "idx": 38,
+    "arch": "печатный монолит",
+    "feasible": false,
+    "pi": 3.04,
+    "t41": 953.2,
+    "eta_l0": 15.565,
+    "eta_cycle": 15.571,
+    "d_eta_pp": -0.006,
+    "w_l0": 146.7,
+    "w_cycle": 146.83,
+    "EGT_l0": 720.4,
+    "EGT_cycle": 720.5
+   },
+   {
+    "idx": 94,
+    "arch": "печатный монолит",
+    "feasible": false,
+    "pi": 6.0,
+    "t41": 1028.2,
+    "eta_l0": 24.868,
+    "eta_cycle": 24.884,
+    "d_eta_pp": -0.016,
+    "w_l0": 225.1,
+    "w_cycle": 225.43,
+    "EGT_l0": 621.9,
+    "EGT_cycle": 622.1
+   },
+   {
+    "idx": 138,
+    "arch": "литой монолит",
+    "feasible": false,
+    "pi": 6.48,
+    "t41": 1026.1,
+    "eta_l0": 19.636,
+    "eta_cycle": 19.659,
+    "d_eta_pp": -0.022,
+    "w_l0": 168.97,
+    "w_cycle": 169.32,
+    "EGT_l0": 633.5,
+    "EGT_cycle": 633.7
+   },
+   {
+    "idx": 156,
+    "arch": "керамика",
+    "feasible": false,
+    "pi": 4.562,
+    "t41": 1029.4,
+    "eta_l0": 20.527,
+    "eta_cycle": 20.536,
+    "d_eta_pp": -0.009,
+    "w_l0": 201.93,
+    "w_cycle": 202.16,
+    "EGT_l0": 705.3,
+    "EGT_cycle": 705.4
+   },
+   {
+    "idx": 30,
+    "arch": "печатный монолит",
+    "feasible": false,
+    "pi": 3.187,
+    "t41": 850.0,
+    "eta_l0": 16.145,
+    "eta_cycle": 16.15,
+    "d_eta_pp": -0.005,
+    "w_l0": 129.82,
+    "w_cycle": 129.92,
+    "EGT_l0": 623.9,
+    "EGT_cycle": 624.0
+   }
+  ]
+ },
+ "files": {
+  "csv": "funnel_l0.csv",
+  "select": "funnel_l0_select.json"
+ },
+ "mass_reference": {
+  "model_traditional_median_kg": 1134,
+  "engine_kg0": 3290.0,
+  "ratio": 0.345,
+  "note": "масса двигателя другого исполнения той же модели (паспорт fleet); масса модели - оценка по оболочкам и колёсам без вспомогательных систем, только для сравнения концепций между собой (в баллы не входит)"
+ },
+ "probe": {
+  "params": {
+   "kv": "KV-3",
+   "n": 256,
+   "shards": 10,
+   "workers": 4,
+   "top": 40,
+   "target": 150,
+   "k": 3,
+   "k_near": 1,
+   "near_max": 0.25
+  },
+  "sharding_check": {
+   "parts_union_equals_whole": true,
+   "n": 256,
+   "shards": 10,
+   "workers_parts": 4,
+   "workers_whole": 1
+  },
+  "timing": {
+   "parts_wall_s": 1.59,
+   "whole_serial_wall_s": 1.34,
+   "s_per_concept_serial": 0.00523,
+   "parts_bytes_gz": 116861,
+   "whole_bytes_json": 397212,
+   "note": "whole_serial - один процесс, включая запись файла; это и есть время на вариант"
+  },
+  "part_bytes_per_concept": 456.5
+ },
+ "merge_scale_check": {
+  "n": 200000,
+  "shards": 30,
+  "exit_code": 0,
+  "parts_gz_MB": 59.8,
+  "csv_gz_MB": 58.8,
+  "merge_wall_s": 54.3,
+  "merge_maxrss_MB": 902.6,
+  "note": "синтетические части из строк пробы (SYNTHETIC): проверка механики, памяти и времени слияния, не результат"
+ }
+}

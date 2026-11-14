@@ -49,7 +49,7 @@ path = "runner"              # первый прогон — runner.py: EC2 сп
 instance_type = "c7a.16xlarge"
 procs = 64
 jobs = 1
-iterations = 6370            # план design узла su2: 170 + 200 + 6000
+iterations = 6800            # план design узла su2: 800 + 6000 (PLANS["design"] в run_case.py)
 setup_min = 15               # EXAMPLE, мин: загрузка машины, пакеты, сборка SU2 install_su2.sh на 64 ядрах
 upload_min = 2               # EXAMPLE, мин
 cap_h = 2.5                  # max_min задачи раннера = 150 мин (сторож гасит машину)
@@ -66,7 +66,7 @@ path = "runner"
 instance_type = "c8i.8xlarge"
 procs = 32
 jobs = 1
-iterations = 6370
+iterations = 6800
 setup_min = 20               # EXAMPLE, мин: сборка SU2 на 32 vCPU дольше
 upload_min = 2
 cap_h = 3.5                  # max_min = 210 мин

@@ -86,11 +86,15 @@ LABEL org.opencontainers.image.title="gtu-platform" \
       org.opencontainers.image.source="https://github.com/skharkov1246/ocm-research-diary"
 # OMPI_MCA_btl_vader_single_copy_mechanism=none: в контейнере без CAP_SYS_PTRACE прямое копирование между
 # процессами (CMA) запрещено, обмен идёт через общую память /dev/shm (её размер — sharedMemorySize задания).
+# OMPI_MCA_osc=^ucx: без него в контейнере (docker run без особых прав) SU2_CFD с конфигурацией под
+# mpirun -np 2 и -np 4 падает в SU2_MPI::Init — «MPI_Win_create … MPI_ERR_WIN: invalid window» (компонент osc ucx);
+# с ним прогон идёт (проверка 14.11.2026; `SU2_CFD --help` выходит до MPI_Init и этого не ловит).
 ENV PATH=/opt/venv/bin:/opt/su2/bin:$PATH \
     SU2_RUN=/opt/su2/bin \
     GTU_HOME=/opt/gtu \
     GTU_GIT_SHA=${GIT_SHA} \
     OMPI_MCA_btl_vader_single_copy_mechanism=none \
+    OMPI_MCA_osc=^ucx \
     PYTHONDONTWRITEBYTECODE=1
 USER 1000:1000
 WORKDIR /work

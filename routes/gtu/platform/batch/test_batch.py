@@ -90,7 +90,7 @@ def test_plan_index_to_row():
     assert len({r["row_id"] for r in rows}) == 80
     line3 = [r for r in rows if r["line"] == 3]
     assert len(line3) == 8 and {r["stage"] for r in line3} == {"kv3-c1"} and {r["speed_frac"] for r in line3} == {"1.00"}
-    assert line3[0]["iter_scale"] == "1.0" and line3[1]["iter_scale"] == str(round(1000 / 6370, 4))
+    assert line3[0]["iter_scale"] == "1.0" and line3[1]["iter_scale"] == str(round(1000 / 6800, 4))
     assert float(line3[0]["p_out_frac"]) == pytest.approx(0.85) and float(line3[-1]["p_out_frac"]) == pytest.approx(1.12)
     assert all(r["example"] == "true" for r in rows)
     assert {r["iter_scale"] for r in render.build_plan(cfg(), "point")} == {"1.0"}
@@ -256,7 +256,7 @@ def test_rendered_job_runs_through_entrypoint_dry(tmp_path):
     rows = entrypoint.select_rows(entrypoint.read_plan(files["s3/inputs/plan.csv"]), "line", 9)
     assert [r["row_id"] for r in rows][0] == "kv3-c2-n1.05-p1" and len(rows) == 8
     cmd = entrypoint.render_command(job["command"], rows[1])
-    assert "--iter-scale 0.157" in cmd and "--frac 1.05" in cmd and "--p-out" in cmd
+    assert f"--iter-scale {round(1000 / 6800, 4)}" in cmd and "--frac 1.05" in cmd and "--p-out" in cmd
 
 
 # ================================================================ смета
@@ -297,7 +297,7 @@ def test_estimate_arithmetic_and_ceiling():
     pt = res["plan_total"]
     assert pt["spot_estimate"] < pt["on_demand"] < pt["upper_bound"]
     assert res["ceiling_check"]["upper_bound_ok"] is (pt["upper_bound"] <= 300.0) is True
-    assert s["iterations_per_job"] == 6370 + 7 * 1000 and s["jobs"] == 10 and s["points"] == 80
+    assert s["iterations_per_job"] == 6800 + 7 * 1000 and s["jobs"] == 10 and s["points"] == 80
 
 
 def test_estimate_has_all_line_kinds_with_sources():
@@ -312,6 +312,18 @@ def test_estimate_has_all_line_kinds_with_sources():
     for k in ("method", "software", "date", "inputs"):
         assert k in res
     assert res["date"] == "2026-11-14" and res["inputs"]["example"] is True
+
+
+def test_iterations_match_su2_design_plan():
+    """Итерации плана design в batch.toml и в смете — те же, что PLANS["design"] в run_case.py узла su2."""
+    import importlib.util  # noqa: PLC0415
+    spec = importlib.util.spec_from_file_location("run_case", HERE.parent / "su2" / "run_case.py")
+    rc = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(rc)
+    n = sum(int(s["iter"]) for s in rc.PLANS["design"])
+    assert cfg()["plan"]["iters_first"] == n
+    c, _ = load_estimate()
+    assert {s["iterations"] for s in c["scenario"] if s["path"] == "runner"} == {n}
 
 
 def test_estimate_bench_matches_runner_jobs_file():
@@ -377,6 +389,7 @@ def test_dockerfile_static():
     assert "ARG SU2_TAG=v8.6.0" in d and f"ARG SU2_COMMIT={b['solver']['commit']}" in d
     assert '"/opt/gtu/routes/gtu/platform/batch/entrypoint.py"' in d and (HERE / "entrypoint.py").exists()
     assert "calculix-ccx" in d and "-Dwith-mpi=enabled" in d and "USER 1000:1000" in d
+    assert "OMPI_MCA_osc=^ucx" in d   # без него SU2_CFD под mpirun в контейнере падает в MPI_Win_create
     req = (HERE.parent / "docker/requirements.txt").read_text().split("\n")
     pkgs = [x for x in req if x and not x.startswith("#")]
     assert {p.split("==")[0] for p in pkgs} == {"cantera", "numpy", "scipy", "gmsh", "boto3"}
