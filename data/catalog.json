@@ -4,9 +4,9 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 363,
-    "total_bytes": 3793706,
-    "results_files": 168,
+    "datasets": 365,
+    "total_bytes": 3802844,
+    "results_files": 169,
     "results_with_script": 47,
     "results_referenced_in_site": 22,
     "results_with_provenance_fields": 20,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 44,
+      "не определён": 46,
       "прочее": 25
     }
   },
@@ -6694,6 +6694,34 @@
       "last_commit": "55d1e8c"
     },
     {
+      "path": "routes/gtu/platform/su2/plan_smoke_p075.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 208,
+      "referenced_in_site": false,
+      "shape": "список",
+      "records": 2,
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "4def261"
+    },
+    {
+      "path": "routes/gtu/platform/su2/su2_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 8930,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "about",
+        "runs",
+        "diagnostics_2026_11_14"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "4def261"
+    },
+    {
       "path": "routes/gtu/platform/surrogate/test_surrogate_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
@@ -6826,7 +6854,7 @@
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "3f6dd21"
+      "last_commit": "4def261"
     },
     {
       "path": "routes/gtu/validation/balances_results.json",
