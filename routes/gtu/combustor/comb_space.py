@@ -302,6 +302,7 @@ def derive(c, bc):
     zones = zone_masses(c, bc)
     V = sum(z["m"] * z["tau"] / z["rho"] for z in zones)
     geo = geometry(c, bc, V)
+    geo["L_mod"] += c["l_mix"] * d_air                       # длина смесительных каналов
     dpL = c["dp_inj"] * p3
     m_cool = CD_AIR * c["porosity"] * geo["A_wall"] * math.sqrt(2 * rho3 * dpL)
     a_cool = m_cool / W
@@ -402,8 +403,7 @@ def geometry(c, bc, V, quick=False):
                  D_case=Dm + H + 2 * h_an + 2 * 0.01, D_env=Dm + H + 2 * h_an + 2 * 0.01)
     if quick:
         return g
-    L_mixer = c["l_mix"] * 1e-3 * 0 + 0.0
-    g["L_mod"] = g["L_L"] + 0.10 + L_mixer + (0.25 if ch == "выносная" else 0.0)   # купол со смесителем и фланцы (оценка)
+    g["L_mod"] = g["L_L"] + 0.10 + (0.25 if ch == "выносная" else 0.0)   # купол и фланцы (оценка); + смеситель в derive
     return g
 
 

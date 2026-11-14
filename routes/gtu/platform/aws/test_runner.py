@@ -517,7 +517,7 @@ def test_userdata_container_mode_lines(tmp_path):
     for s in ("timeout 20m dnf -q install -y git python3-pip docker || exit 11",
               "timeout 5m systemctl start docker || exit 21",
               "timeout 30m docker pull -q ubuntu:24.04 || exit 22",
-              "docker run --rm --init --name gtu-job --user 0:0 --entrypoint /bin/bash",
+              "docker run --rm --name gtu-job --user 0:0 --entrypoint /bin/bash",
               '--cpus "$NPROC" --shm-size "$((MEM_KB / 2))k"',
               '-v "$G/repo:/gtu/repo" -v "$OUT:/gtu/out"', "-e GTU_OUT=/gtu/out", "-e NPROC",
               "ubuntu:24.04 /gtu/ctr/entry.sh", "apt-get install -y -q calculix-ccx",

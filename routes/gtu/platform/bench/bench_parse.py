@@ -18,7 +18,7 @@
 = часы × тариф (tariffs_us-east-1.json), сверка точности с эталонной конфигурацией.
 
   python3 bench_parse.py --bench bench.toml --runs runs --out bench_summary.csv --compare bench_compare.csv
-  python3 bench_parse.py --history history.csv --log su2.log          # одна папка → JSON на экран
+  python3 bench_parse.py --run-dir runs/<id> [--time-kind iter|avg]    # одна папка → JSON на экран
 """
 from __future__ import annotations
 
@@ -133,7 +133,9 @@ def elapsed_at(rows: list[dict], idx: int) -> float | None:
 
 
 def performance(row: dict, gamma: float) -> dict:
-    """π, τ, η по средним по расходу (MARKER_ANALYZE) и расход со знаком (вход > 0, выход < 0)."""
+    """π, τ, η по средним по расходу (MARKER_ANALYZE) и расход со знаком (вход > 0, выход < 0).
+    η — для сжатия (π > 1): (π^k − 1)/(τ − 1); для расширения (канал турбины, π < 1 и τ < 1) —
+    обратная величина (τ − 1)/(π^k − 1), иначе формула сжатия дала бы 1/η турбины."""
     out = {}
     mi, mo = _f(row, "Avg_Massflow(inlet)"), _f(row, "Avg_Massflow(outlet)")
     if mi is not None and mo is not None:
@@ -145,7 +147,11 @@ def performance(row: dict, gamma: float) -> dict:
         pr, tau = p2 / p1, t2 / t1
         out.update(pr=pr, tau=tau, t01=t1, t02=t2)
         if tau != 1.0 and pr > 0:
-            out["eta"] = (pr ** ((gamma - 1.0) / gamma) - 1.0) / (tau - 1.0)
+            ideal = pr ** ((gamma - 1.0) / gamma) - 1.0
+            if pr < 1.0 and tau < 1.0 and ideal != 0.0:
+                out["eta"] = (tau - 1.0) / ideal                 # расширение: действительная / идеальная
+            else:
+                out["eta"] = ideal / (tau - 1.0)                 # сжатие: идеальная / действительная
     for k_su2, k in (("PRTT", "prtt_su2"), ("TotTotEff", "eta_su2"), ("EulerianWork", "euler_work"),
                      ("MassFlowIn_1", "mdot_turbo_in")):
         v = _f(row, k_su2)

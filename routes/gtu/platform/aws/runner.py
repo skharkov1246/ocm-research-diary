@@ -429,8 +429,9 @@ RC=$?'''
 # Контейнер: все ядра (--cpus), /dev/shm — половина памяти (MPI), клон и $GTU_OUT примонтированы,
 # пользователь root (container_setup ставит пакеты), OpenMPI под root разрешён переменными.
 # IMDS из контейнера недоступен (hop limit 1): ключей роли у команды нет, зона — из GTU_AZ_MACHINE.
+# Без --init: есть ли docker-init в пакете docker al2023 — не проверено; контейнер снимает docker kill в finish.
 RUN_CONTAINER = r'''read -r _ MEM_KB _ </proc/meminfo
-timeout -k 60 "${REMAIN}s" docker run --rm --init --name gtu-job --user 0:0 --entrypoint /bin/bash \
+timeout -k 60 "${REMAIN}s" docker run --rm --name gtu-job --user 0:0 --entrypoint /bin/bash \
   --cpus "$NPROC" --shm-size "$((MEM_KB / 2))k" -w @@CR@@/repo \
   -v "$G/repo:@@CR@@/repo" -v "$OUT:@@CR@@/out" -v "$G/ctr:@@CR@@/ctr:ro" -v "$G/meta:@@CR@@/meta" \
   -e GTU_OUT=@@CR@@/out -e GTU_RUN_ID -e GTU_JOB -e GTU_ATTEMPT -e GTU_AZ -e GTU_AZ_CHEAPEST -e GTU_AZ_MACHINE \

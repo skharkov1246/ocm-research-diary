@@ -156,6 +156,18 @@ def test_eta_and_torque_two_methods(tmp_path):
     assert r["mdot_wheel_kg_s"] == pytest.approx(9.0)
 
 
+def test_eta_expansion_turbine():
+    """SYNTHETIC: канал турбины, π = 0,25, η_t = 0,85 — КПД расширения, а не 1/η формулы сжатия."""
+    pr, eta_t = 0.25, 0.85
+    tau = 1.0 - eta_t * (1.0 - pr ** (0.4 / 1.4))
+    row = {"Avg_TotalPress(inlet)": P01, "Avg_TotalPress(outlet)": P01 * pr,
+           "Avg_TotalTemp(inlet)": 1200.0, "Avg_TotalTemp(outlet)": 1200.0 * tau}
+    assert bp.performance(row, GAMMA)["eta"] == pytest.approx(eta_t, rel=1e-12)
+    row_c = {"Avg_TotalPress(inlet)": P01, "Avg_TotalPress(outlet)": P01 * 4.0,
+             "Avg_TotalTemp(inlet)": T01, "Avg_TotalTemp(outlet)": T01 * (1.0 + (4.0 ** (0.4 / 1.4) - 1.0) / ETA)}
+    assert bp.performance(row_c, GAMMA)["eta"] == pytest.approx(ETA, rel=1e-12)
+
+
 def test_log_and_aux_files(tmp_path):
     d = make_run(tmp_path / "run")
     (d / "gpu_mem_SYNTHETIC.csv").write_text(

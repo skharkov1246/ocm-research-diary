@@ -1,6 +1,6 @@
 ---
 name: aws-gtu-runs
-description: Прогоны трека «Простая литая ГТУ-заменитель» на AWS через доступ MatterForge скриптом routes/gtu/platform/aws/runner.py — где действуют ключи (окружение Coldun, дочерняя сессия), us-east-1, квоты 384 vCPU, спот c7a.16xlarge с запасным c7i.16xlarge, бакет из ALPHA_O_S3 с подпапкой gtu/, IMDSv2, автогашение тремя способами, бюджетный предохранитель 2000 долл. (решение владельца 14.11.2026; отчёт после каждых 500) и журнал ledger.jsonl, пакет задач, сбор и проверка результатов, прерывание спота, запрет ключей в файлах и выводе. Используй, когда ставишь расчёт SU2, OpenFOAM, CalculiX или скрипт трека на облачные машины, проверяешь права и бюджет, гасишь машины прогона, забираешь результаты или разбираешь сбой прогона. Триггеры — «прогон на AWS», «запусти на споте», «runner.py», «облачный расчёт ГТУ», «Coldun», «ALPHA_O_S3», «погаси машины», «бюджет AWS», «прерывание спота», «ledger.jsonl».
+description: Прогоны трека «Простая литая ГТУ-заменитель» на AWS через доступ MatterForge скриптом routes/gtu/platform/aws/runner.py — где действуют ключи (окружение Coldun, дочерняя сессия), us-east-1, квоты 384 vCPU и очередь под них, спот c7a.16xlarge с запасным c7i.16xlarge в самой дешёвой зоне (подсеть по умолчанию зоны), образ al2023 с Python нужной версии через uv, контейнеры Docker (SU2, OpenFOAM, CalculiX), NPROC на машине, бакет из ALPHA_O_S3 с подпапкой gtu/, IMDSv2, автогашение тремя способами, бюджетный предохранитель 2000 долл. (решение владельца 14.11.2026; отчёт после каждых 500) и журнал ledger.jsonl, пакет задач, сбор и проверка результатов, прерывание спота, запрет ключей в файлах и выводе. Используй, когда ставишь расчёт SU2, OpenFOAM, CalculiX или скрипт трека на облачные машины, проверяешь права и бюджет, гасишь машины прогона, забираешь результаты или разбираешь сбой прогона. Триггеры — «прогон на AWS», «запусти на споте», «runner.py», «облачный расчёт ГТУ», «Coldun», «ALPHA_O_S3», «погаси машины», «бюджет AWS», «прерывание спота», «ledger.jsonl», «дешёвая зона», «контейнер на AWS», «Python 3.12 на машине», «очередь под квоту», «smoke2».
 ---
 
 # Прогоны трека ГТУ на AWS
@@ -8,14 +8,18 @@ description: Прогоны трека «Простая литая ГТУ-зам
 Дорогие расчёты платформы (SU2 — ступени, OpenFOAM — камера, CalculiX — диски, `gtu_explore.py` и любой
 скрипт репозитория) идут пакетом независимых задач на спотовых машинах us-east-1. Исполнитель —
 `routes/gtu/platform/aws/runner.py`; основа — `calc/aws_orchestrate.py` и `calc/aws_setup/`. Состояние на
-14.11.2026: боевых запусков не было (README узла), тесты на заглушках — 32 passed (прогнано 14.11.2026).
+14.11.2026: первый живой пробный прогон версии 1 (`smoke`, 22:14) прошёл весь путь до гашения и журнала; по его
+находкам сделана версия 2 — самая дешёвая зона, al2023 + uv, контейнеры, очередь, `NPROC` (README узла, раздел
+«Состояние»). Версия 2 проверена тестами на заглушках — 73 passed (прогнано 14.11.2026) — и `plan`; живого запуска
+v2 ещё не было, первый — `jobs.smoke2.json`.
 
 ## 1. Что где лежит
 
 | что | где |
 |---|---|
 | исполнитель: `plan`, `run` (DryRun по умолчанию, `--live`), `status`, `reap`, `collect` | `routes/gtu/platform/aws/runner.py` |
-| тесты без сети (botocore Stubber), пример пакета `smoke` + `explore-249` | `test_runner.py`, `jobs.example.json` там же |
+| тесты без сети (botocore Stubber и свои заглушки), пример пакета `smoke` + `explore-249` | `test_runner.py`, `jobs.example.json` там же |
+| второй пробный прогон: `smoke-py` (al2023 + Python 3.12) и `smoke-ccx` (контейнер ubuntu:24.04 + CalculiX), проверки | `jobs.smoke2.json`, `smoke2.py` там же |
 | порядок проверки, формат задач, формула бюджета, откат | `routes/gtu/platform/aws/README.md` |
 | права спота (дополнение, применяет владелец) | `routes/gtu/platform/aws/iam_policy_addendum.json` |
 | журнал расходов (появится после первого боевого прогона; коммитить) | `routes/gtu/platform/aws/ledger.jsonl` |
@@ -54,8 +58,10 @@ description: Прогоны трека «Простая литая ГТУ-зам
 |---|---|---|
 | регион | us-east-1 | `REGION` в коде; eu-central-1 занят флотом `fleet_status.py` |
 | регион ручных команд | всегда `--region us-east-1` | значение `AWS_DEFAULT_REGION` в Coldun не читалось |
-| квоты | 384 vCPU on-demand и спот (данные владельца) | `--vcpu-quota 384` = 6 машин × 64; `--max-parallel 6` |
+| квоты | 384 vCPU on-demand и спот (данные владельца) | `--max-vcpu 384` (= `--vcpu-quota`) = 6 машин × 64; `--max-parallel 6`; сверх — очередь |
 | типы | `c7a.16xlarge`, запас `c7i.16xlarge` (по 64 vCPU) | `DEFAULT_TYPE`, `DEFAULT_FALLBACK`, `VCPU` |
+| зона | самая дешёвая по последней цене спота; сбой ёмкости — следующая зона, затем запасной тип | `zone_order`, подсеть по умолчанию (`describe_subnets`), без прав — `Placement` |
+| образ | `al2023` по умолчанию; `ubuntu2404` — только старые задачи с `apt` (SSM Canonical агенту запрещён) | `DEFAULT_IMAGE`, `IMAGES` |
 | спот | `MarketType=spot`, `SpotInstanceType=one-time`, `InstanceInterruptionBehavior=terminate`, `MaxPrice` | `build_params` |
 | IMDSv2 | `HttpTokens=required`, `HttpPutResponseHopLimit=1`, `HttpEndpoint=enabled` | на машине нет ключей, S3 — роль |
 | запись | `s3://<бакет>/<префикс>/gtu/<run_id>/<job>/` | роль машины: только `s3:PutObject` в `<префикс>/*` |
@@ -76,17 +82,27 @@ Instance Requests (по выдержкам поиска, не сверено). �
 
 **Шаг 1. Пакет задач.** JSON `{"defaults": {...}, "jobs": [...]}`; поля задачи: `name` (`[A-Za-z0-9._-]`),
 `command` (bash, из корня клона), `instance_type`, `fallback_types`, `max_min` (20…720 — срок сторожа),
-`image` (`ubuntu2404` или `al2023`), `disk_gb`, `apt`/`dnf`, `pip`, `vcpu`. Неизвестное поле — отказ. Команда
-пишет всё в `$GTU_OUT`; доступны `GTU_RUN_ID`, `GTU_JOB`, `GTU_ATTEMPT`, `OMP_NUM_THREADS=$(nproc)`, `python` из
-venv машины.
+`image` (`al2023` по умолчанию; `ubuntu2404` — старые задачи с `apt`), `disk_gb`, `apt`/`dnf`, `pip`, `vcpu`,
+`python` (`"3.12"` строкой — venv через uv), `requirements` (файл в репозитории), `container` (образ Docker) и
+`container_setup` (команды внутри контейнера). Неизвестное поле — отказ. Какой режим брать:
+- счёт на Python (Cantera, numpy, scipy, `gtu_explore.py`, суррогат) — `"python": "3.12"` + `pip`;
+- решатели из apt (CalculiX, OpenMPI, Gmsh) — `"container": "ubuntu:24.04"` + `container_setup`
+  (`apt-get update -q`, `apt-get install -y -q --no-install-recommends …`); OpenFOAM — образ `opencfd/openfoam-*`
+  или Ubuntu; SU2 — сборка `install_su2.sh` в контейнере или образ из `routes/gtu/platform/docker/Dockerfile`, когда
+  он опубликован; окружение образа (bashrc OpenFOAM) команда подключает сама;
+- пакет из десятков частей — по задаче на часть, имя `part01…`; раннер сам держит очередь под квоту.
+Команда пишет всё в `$GTU_OUT`; доступны `GTU_RUN_ID`, `GTU_JOB`, `GTU_ATTEMPT`, `NPROC` (ядра — для пула
+процессов), `OMP_NUM_THREADS=$NPROC`, `GTU_AZ`, `GTU_AZ_CHEAPEST`, `GTU_AZ_MACHINE`, `GTU_ITYPE`, `python` из venv
+машины. В контейнере `GTU_OUT=/gtu/out`, клон — `/gtu/repo`, пользователь root, IMDS недоступен.
 
 **Шаг 2. Офлайн-проверка (любой контейнер).**
 ```bash
-python3 -m pytest -q -p no:cacheprovider routes/gtu/platform/aws/test_runner.py   # 32 passed
+python3 -m pytest -q -p no:cacheprovider routes/gtu/platform/aws/test_runner.py   # 73 passed
 python3 routes/gtu/platform/aws/runner.py plan <jobs.json> --assume-price 1.5 --show-userdata \
-        --out <scratchpad>/runs                                                    # цена — допущение
+        [--assume-zone-prices us-east-1a=0.955,us-east-1b=0.748,us-east-1c=0.706] \
+        --out <scratchpad>/runs                                                    # цены — допущение
 ```
-Прочитать user-data и параметры `run_instances`. `plan` в `ledger.jsonl` не пишет (проверки бюджета — в
+Прочитать user-data, параметры `run_instances` и строку `[зоны]` (порядок зон, ожидаемая цена). `plan` в `ledger.jsonl` не пишет (проверки бюджета — в
 `<out>/<run_id>/journal.dryrun.jsonl`); прогноз при допущенной цене — не число для отчёта.
 
 **Шаг 3. Ветка запушена.** Машина клонирует публичный репозиторий (`git clone --depth 1 -b <ветка>`);
@@ -95,10 +111,12 @@ python3 routes/gtu/platform/aws/runner.py plan <jobs.json> --assume-price 1.5 --
 **Шаг 4. Проверка прав (Coldun).** `python3 -c 'import boto3'` (нет — `pip install boto3`), затем
 `python3 routes/gtu/platform/aws/runner.py run <jobs.json> --branch <ветка>` без `--live`. Ожидается
 `запуск разрешён (DryRunOperation)` по каждой задаче и `чтение префикса результатов: OK`; код выхода 1, если
-хоть одна задача не `dryrun_ok`. Цена спота и образ из SSM при этом читаются настоящими вызовами.
+хоть одна задача не `dryrun_ok`. Цена спота по зонам, подсети по умолчанию (`[подсети]`; отказ `describe_subnets` —
+не ошибка, зона пойдёт через `Placement`) и образ из SSM при этом читаются настоящими вызовами.
 
-**Шаг 5. Живой прогон** — только с явного разрешения владельца (п. 2). Первый — один `smoke` в отдельном
-файле задач (`max_min` 20), затем рабочий пакет:
+**Шаг 5. Живой прогон** — только с явного разрешения владельца (п. 2). Для версии 2 первый — `jobs.smoke2.json`
+(две задачи по 25 мин сторожа, прогноз 1,35 долл. по максимуму, расход — центы; что смотреть — README узла,
+раздел «Второй пробный прогон»), затем рабочий пакет:
 ```bash
 RUN=gtu-$(date -u +%Y%m%dT%H%M%SZ)-smoke          # run_id: [A-Za-z0-9._-], до 48 знаков
 setsid python3 -u routes/gtu/platform/aws/runner.py run <jobs.json> --branch <ветка> \
@@ -151,7 +169,10 @@ MaxPrice = максимум цены спота за 6 ч по всем зона
 диск     = disk_gb × 0,08 / 730 долл./ч;   IPv4 = 0,005 долл./ч   (обе ставки — допущения кода, не сверены)
 ```
 Открытые машины — по верхней границе `(MaxPrice + диск + IPv4) × весь срок`; закрытые — по цене спота в своей
-зоне на момент запуска и фактическому времени (не меньше 60 с) — это оценка, не граница. Трафик и запросы S3
+фактической зоне на момент запуска и фактическому времени (не меньше 60 с) — это оценка, не граница. Самая
+дешёвая зона снижает фактический расход (прогон 14.11.2026: 0,706 в 1c против 0,955 в 1a), но проверка бюджета
+и `MaxPrice` остаются по максимуму цены по зонам — не менять. В очереди задача, которой не хватило бюджета при
+своих машинах в работе, ждёт: бюджет пересчитывается, когда закрывается машина. Трафик и запросы S3
 не учтены. Сверка формулы: `plan` `jobs.example.json` при допущенной цене 1,5 даёт 0,91 (`smoke`) + 1,51
 (`explore-249`) = 2,41 долл. Отказ пишется в журнал (`ev=budget`, `ok=false`), машина не создаётся. Расход вне
 журнала — `run --spent-before`.
@@ -169,9 +190,13 @@ aws budgets create-budget --account-id <аккаунт> \
 - AWS предупреждает примерно за 2 минуты: на машине появляется `/latest/meta-data/spot/instance-action`
   (до этого — 404), в EventBridge — событие «EC2 Spot Instance Interruption Warning»; раньше может прийти
   рекомендация `events/recommendations/rebalance`.
-- Исполнитель: машина `shutting-down`/`terminated` без `_DONE.json` → скачать, что успело лечь в S3, → один
-  повтор (`--retries 1`) в тот же префикс, номер попытки — в `_DONE.json`; дальше итог `lost`. Файлы первой
-  попытки не удаляются (у ключа нет `DeleteObject`) и лежат вперемешку со второй.
+- Исполнитель: машина `shutting-down`/`terminated` без итога — нет `_DONE.json`, код причины
+  `Server.SpotInstanceTermination` или метка с кодом 143 (ловушка `TERM` успела выгрузить) → частичные файлы
+  скачиваются в `runs/<run>/_lost/a<N>/<job>/` → один повтор (`--retries 1`) **в префикс новой попытки**
+  `…/gtu/<run>/_attemptN/<job>/` и в другую зону (прерванная — в конце очереди на 30 мин); дальше итог `lost`.
+  Итог задачи — только из одной попытки (`runs/<run>/<job>/`), метка чужой попытки не принимается: результаты не
+  смешиваются и не задваиваются. Файлы прерванной попытки в S3 не удаляются (у ключа нет `DeleteObject`).
+  Вручную — `runner.py collect --run-id <id> --job <имя> --attempt N`.
 - Выгрузка при прерывании не гарантирована: ловушка `TERM` запускает выгрузку, успеет ли она — не проверено.
   Ранней выгрузки из команды нет: `S3_BUCKET` и `S3_KEY` в user-data не экспортируются. Длинную задачу — делить
   на части или писать контрольные точки в `$GTU_OUT`. Сторож уведомления внутри команды (в `runner.py` не
@@ -211,10 +236,15 @@ aws budgets create-budget --account-id <аккаунт> \
 |---|---|
 | `UnauthorizedOperation` в DryRun | не применено дополнение политики: владелец — шаг 3 порядка проверки README |
 | «ветки … нет» | ветка не запушена; машина клонирует только публичный репозиторий |
-| `MaxSpotInstanceCountExceeded`, `VcpuLimitExceeded`, `InstanceLimitExceeded` | квота: задача ждёт, пока освободится машина прогона; своих машин нет — итог `quota`; поднять квоту — владелец |
-| `InsufficientInstanceCapacity`, `Unsupported` | нет ёмкости или конфигурации в зоне: исполнитель берёт `c7i.16xlarge` |
-| `SpotMaxPriceTooLow` | цена выше `MaxPrice`: тоже переход на запасной тип (код по документации не сверен) |
+| `MaxSpotInstanceCountExceeded`, `VcpuLimitExceeded`, `InstanceLimitExceeded` | квота: задача ждёт, пока освободится машина прогона; своих машин нет (квоту держат чужие) — пауза и повтор до `--quota-wait-polls` (15), затем итог `quota`; поднять квоту — владелец |
+| `InsufficientInstanceCapacity`, `Unsupported` | нет ёмкости или конфигурации в зоне: следующая зона по цене, затем `c7i.16xlarge` |
+| `SpotMaxPriceTooLow` | цена выше `MaxPrice`: тоже следующая зона, затем запасной тип (код по документации не сверен) |
+| `image_unavailable` | образ `ubuntu2404` не разрешён ключу (SSM Canonical, `DescribeImages`): `image: al2023` или `container: ubuntu:24.04` с `apt-get` в `container_setup` |
+| `[подсети] describe_subnets: UnauthorizedOperation` | нет прав — зона задаётся `Placement`; не ошибка |
+| `cheapest_zone: false` в итоге | в дешёвой зоне не было ёмкости (`launch_error` с зоной) или зона после прерывания |
 | фаза в `_DONE.json`: `base`/`venv`/`packages`/`clone` | сбой подготовки, коды 10–17; читать `_job.log` |
+| фаза `venv`, код 18 / 19; `requirements`, 23 | uv не поставился / Python не скачан; файла зависимостей нет в ветке |
+| фаза `docker` 21, `pull` 22, `container` 20 | docker не запустился / образ не скачан (429 Docker Hub — зеркало `public.ecr.aws/docker/library/…`) / упала команда `container_setup` (`_container_setup.log`) |
 | `no_time` (код 124), `command` с кодом 124 или 137 | не хватило `max_min` (137 — `timeout` добил KILL): поднять срок или делить задачу |
 | user-data больше 16 КБ | длинную команду — в скрипт репозитория, в задаче — его вызов |
 | в журнале прогона нет строк | вывод в файл буферизован: запускать `python3 -u` |
@@ -226,7 +256,11 @@ aws budgets create-budget --account-id <аккаунт> \
 
 - Итог `run`: у каждой задачи `status: ok`; в `_DONE.json` `phase: done`, `exit_code: 0`.
 - `smoke`: `nproc.txt` = 64, `commit.txt` совпадает с последним коммитом запушенной ветки, в `_job.log` время
-  подготовки.
+  подготовки (строки `[gtu-time] <фаза> <с>s`).
+- `jobs.smoke2.json`: у обеих задач `cheapest_zone: true`, `az` = `az_cheapest` = `az_machine` в `summary.json`,
+  `"ok": true` в `az_check.json`; `smoke_py.json` — Python 3.12.x, версии cantera/numpy/scipy, точка цикла и
+  `cycle_ref_rel_diff`, пул на `NPROC`; `smoke_ccx.json` — `ccx_version` (код 201 у `ccx -v` — норма) и диск. Код 3 —
+  счёт прошёл, машина не в самой дешёвой зоне (разбор — `az_check.json`, `launch_error` в журнале).
 - После прогона: `runner.py status` — открытых машин 0; `runner.py reap --run-id <id> --list-only` — живых нет.
 - Повторяемость: `explore-249` сравнить с `routes/gtu/gtu_explore_results.json`; расхождение — разбор, не публикация.
 
@@ -266,5 +300,8 @@ docs.aws.amazon.com из контейнера не открывается; па�
 по архиву 2023 г. проверяется, только если запрос спота помечается тегом при создании (`runner.py` его не
 помечает), по текущей документации не сверено; есть ли в аккаунте `AWSServiceRoleForEC2Spot` (по архиву для
 запуска спота через API она должна существовать); ставки gp3 и IPv4; успевает ли выгрузка при прерывании;
-установка пакетов и `venv` на реальных образах; `curl` в образе Ubuntu; не даёт ли фоновый процесс уснуть ВМ
-сессии; пуш из дочерней сессии.
+установка пакетов и `venv` на Ubuntu; не даёт ли фоновый процесс уснуть ВМ сессии; пуш из дочерней сессии.
+Версия 2 вживую: uv и Python 3.12 на al2023; docker из `dnf` на al2023, скачивание образа с Docker Hub,
+`--shm-size` в половину памяти; `Placement` без `SubnetId` (подсеть по умолчанию зоны — по модели API botocore);
+права ключа на `DescribeSubnets` и `DescribeImages`; метка 143 при прерывании; квотные коды при очереди. На
+al2023 (живой прогон 14.11.2026) работали `dnf`, `python3 -m venv`, boto3 и выгрузка.

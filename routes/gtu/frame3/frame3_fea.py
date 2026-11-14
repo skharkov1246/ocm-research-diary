@@ -21,14 +21,15 @@
 (где есть σ0,2(T)), запас по разрушающей частоте (средние окружные напряжения, k = 1), для турбины — длительная
 прочность по Ларсону — Миллеру на 25 000 и 50 000 ч (блок lmp материала IN-713C в materials.json). Проверки:
 ворота равновесия disk.py, две сетки, сверка с аналитическим вращающимся диском постоянной толщины (как в
-test_disk.py), сверка полотна с равнопрочным диском на изотермическом расчёте, напряжение в корне лопатки — с AN².
+test_disk.py), сверка полотна с равнопрочным диском на изотермическом расчёте, напряжение в корне лопатки — с AN²
+и трёхмерным стержнем C3D20R в ccx. Длина перехода полотно -> обод дисков турбины выбрана пробным перебором
+(turb_fillet_study, результаты — в fillet_study_100pct).
 
 Все профили, поля температур и масса лопаток — оценка уровня облика (принятые величины — словарь A).
 AWS не вызывается. Запуск:
-  python3 frame3_fea.py [--work ПАПКА] [--workers 4]   -> frame3_fea_results.json (около 2 мин на 4 ядрах)
+  python3 frame3_fea.py [--work ПАПКА] [--workers 4]   -> frame3_fea_results.json (около 5 мин на 4 ядрах, 73 расчёта)
 Рабочие файлы ccx (.inp, .frd, .dat) — в ПАПКЕ (по умолчанию <tmp>/frame3_fea), не в репозитории."""
 import argparse
-import datetime
 import json
 import math
 import os
@@ -279,7 +280,8 @@ def turbine_profile(g, rho, omega, sigma_d, fillet_w=None):
     return dict(r=[float(x) for x in r], t=[float(x) for x in tt]), dict(
         r_b_m=r_b, t_b_m=t_b, t_max_m=t_max, sigma_d_MPa=sigma_d / 1e6, Q_N_per_m=Q,
         t_cs_centre_m=float(t_b * math.exp(rho * omega ** 2 * r_b ** 2 / (2 * sigma_d))),
-        capped=bool(t_cs[0] > t_max), band_t_m=band_t, fillet_w=fillet_w, r_fillet_start_m=r_f)
+        capped=bool(t_cs[0] > t_max), band_t_m=band_t, fillet_w=fillet_w, r_fillet_start_m=r_f,
+        rim_wider_than_root=bool(band_t > w + 1e-9))
 
 
 def turb_T_field(r_o, T_rim, dT):
@@ -396,35 +398,43 @@ def sigma_allow(lmp, uts_tab, T_C, hours):
 
 
 def creep_margins(case, wd, res, lmp, uts_tab):
-    """Длительная прочность (Ларсон — Миллер, типовые свойства отдельно отлитых образцов, разрыв):
-    допускаемое σ_доп(T, t) = min(σ_LM, σв) в каждом узле и наименьшее отношение σ_доп/σ — по Мизесу и по
-    наибольшему главному растягивающему; по σθ,ср сечения при средней и наибольшей температуре."""
+    """Длительная прочность (Ларсон — Миллер, типовые свойства отдельно отлитых образцов, разрыв). В каждом узле
+    σ_LM(T, t); ползучесть определяет там, где σ_LM ≤ σв(T) — по этим узлам наименьшее отношение σ_LM/σ по Мизесу
+    и по наибольшему главному растягивающему (None, если таких узлов нет: всюду холоднее диапазона данных и
+    определяет кратковременная прочность). Отдельно — местная кратковременная прочность σв(T)/σ_Мизес по всем
+    узлам и оценки по σθ,ср сечения при средней и наибольшей температуре."""
     a = node_fields(case, wd)
     T, vm, s1 = a[:, 2], a[:, 3], a[:, 4]
-    out = {}
+    uts = np.interp(T, [u[0] for u in uts_tab], [u[1] for u in uts_tab]) * 1e6
+    iu = int(np.argmin(uts / np.maximum(vm, 1.0)))
+    out = dict(uts_local=dict(ratio=float(uts[iu] / vm[iu]), at=dict(r_mm=a[iu, 0] * 1e3, z_mm=a[iu, 1] * 1e3,
+                                                                     T_C=T[iu], sigma_MPa=vm[iu] / 1e6,
+                                                                     uts_MPa=uts[iu] / 1e6)))
+
+    def worst(sig, mask, s_all, ex):
+        if not mask.any():
+            return None
+        q = np.where(mask & (sig > 0), s_all / np.where(sig > 0, sig, 1.0), np.inf)
+        i = int(np.argmin(q))
+        return dict(ratio=float(q[i]), at=dict(r_mm=a[i, 0] * 1e3, z_mm=a[i, 1] * 1e3, T_C=T[i], sigma_MPa=sig[i] / 1e6,
+                                               sigma_LM_MPa=s_all[i] / 1e6), extrapolated=bool(ex[i]))
     for th in A["creep_hours"]:
-        sa, ex, cap = sigma_allow(lmp, uts_tab, T, th)
-        sall = sa * 1e6
-        rv = sall / np.maximum(vm, 1.0)
-        iv = int(np.argmin(rv))
-        pos = s1 > 0
-        r1 = np.where(pos, sall / np.where(pos, s1, 1.0), np.inf)
-        i1 = int(np.argmin(r1))
+        P = (T + 273.15) * (lmp.C + math.log10(th))
+        s_lm = 10.0 ** lmp.log_sigma_v(P) * 1e6
+        ex = (P < lmp.Pmin) | (P > lmp.Pmax)
+        gov = s_lm <= uts
         sec = res["section"]
         Tm, Tx = sec["T_mean_C"], float(T.max())
         s_sec = sec["hoop_mean_ip_MPa"]
-        out[f"{int(th)}h"] = dict(
-            vm=dict(ratio=float(rv[iv]), at=dict(r_mm=a[iv, 0] * 1e3, z_mm=a[iv, 1] * 1e3, T_C=T[iv],
-                                                  sigma_MPa=vm[iv] / 1e6, sigma_allow_MPa=sall[iv] / 1e6),
-                    extrapolated=bool(ex[iv]), capped_by_uts=bool(cap[iv])),
-            s1=dict(ratio=float(r1[i1]), at=dict(r_mm=a[i1, 0] * 1e3, z_mm=a[i1, 1] * 1e3, T_C=T[i1],
-                                                  sigma_MPa=s1[i1] / 1e6, sigma_allow_MPa=sall[i1] / 1e6),
-                    extrapolated=bool(ex[i1]), capped_by_uts=bool(cap[i1])),
-            section_mean_T=dict(T_C=Tm, sigma_MPa=s_sec, sigma_allow_MPa=float(sigma_allow(lmp, uts_tab, Tm, th)[0]),
-                                ratio=float(sigma_allow(lmp, uts_tab, Tm, th)[0]) / s_sec if s_sec > 0 else None),
-            section_hot_T=dict(T_C=Tx, sigma_MPa=s_sec, sigma_allow_MPa=float(sigma_allow(lmp, uts_tab, Tx, th)[0]),
-                               ratio=float(sigma_allow(lmp, uts_tab, Tx, th)[0]) / s_sec if s_sec > 0 else None),
-            share_nodes_extrapolated=float(ex.mean()), share_nodes_capped_by_uts=float(cap.mean()))
+
+        def sec_ratio(Tc):
+            sa, e_, c_ = sigma_allow(lmp, uts_tab, Tc, th)
+            return dict(T_C=Tc, sigma_MPa=s_sec, sigma_allow_MPa=float(sa), extrapolated=bool(e_),
+                        capped_by_uts=bool(c_), ratio=float(sa) / s_sec if s_sec > 0 else None)
+        out[f"{int(th)}h"] = dict(vm=worst(vm, gov, s_lm, ex), s1=worst(s1, gov, s_lm, ex),
+                                  section_mean_T=sec_ratio(Tm), section_hot_T=sec_ratio(Tx),
+                                  share_nodes_creep_governed=float(gov.mean()),
+                                  share_nodes_extrapolated=float(ex.mean()))
     return out
 
 
@@ -441,6 +451,24 @@ def hot_zone(case, wd, thresholds=(200.0, 300.0, 350.0, 400.0)):
         out[f"T_ge_{int(th)}C"] = dict(vm_max_MPa=a[i, 3] / 1e6, r_mm=a[i, 0] * 1e3, z_mm=a[i, 1] * 1e3, T_C=a[i, 2],
                                       share_of_nodes=float(m.mean()))
     return out
+
+
+def uts_local(case, wd, uts_tab):
+    """местная кратковременная прочность: наименьшее σв(T)/σ_Мизес по узлам (σв IN-713C между 20 и 870 °C —
+    линейная интерполяция, консервативно; выше 870 °C — крайнее значение, завышено)"""
+    a = node_fields(case, wd)
+    uts = np.interp(a[:, 2], [u[0] for u in uts_tab], [u[1] for u in uts_tab]) * 1e6
+    i = int(np.argmin(uts / np.maximum(a[:, 3], 1.0)))
+    return dict(ratio=float(uts[i] / a[i, 3]), at=dict(r_mm=a[i, 0] * 1e3, z_mm=a[i, 1] * 1e3, T_C=a[i, 2],
+                                                      sigma_MPa=a[i, 3] / 1e6, uts_MPa=uts[i] / 1e6))
+
+
+def _r(x):
+    return None if x is None else x["ratio"]
+
+
+def _at(x):
+    return None if x is None else x["at"]
 
 
 def summary(res, n_design):
@@ -486,7 +514,7 @@ def build(pt):
     tin = inputs_from_point(pt)
     n0 = tin["stage1"]["n_rpm"]
     assert tin["stage2"]["n_rpm"] == n0 and tin["turbine"]["n"] == n0
-    ti, ni = disk.load_material("ti64"), disk.load_material("in713c")
+    ni = disk.load_material("in713c")
     jobs, meta = [], {}
 
     def add(key, case, meshes=("base", "fine")):
@@ -684,6 +712,7 @@ def assemble(pt, tin, meta, out, cases, wall):
                 f, b = get(key), get(key, "base")
                 c = summary(f, n0)
                 c["yield_ratio_ref_20C"] = f["vm_max_node_MPa"] / ni["ys_MPa"][0][1]
+                c["uts_local"] = uts_local(*cases[key + ("fine",)], ni["uts_MPa"])
                 c["convergence_fine_vs_base"] = conv(f, b)
                 if abs(sp - 1.0) < 1e-12:
                     c["creep_margins"] = creep_margins(cases[key + ("fine",)][0], cases[key + ("fine",)][1], f, lmp, ni["uts_MPa"])
@@ -713,15 +742,15 @@ def assemble(pt, tin, meta, out, cases, wall):
             fs[kk[1]]["cases"][kk[3]] = dict(
                 vm_max_node_MPa=f["vm_max_node_MPa"], vm_max_at=f["vm_max_at"], burst_margin=f["burst"]["margin"],
                 hoop_mean_MPa=f["section"]["hoop_mean_ip_MPa"], quality_passed=f["quality"]["passed"],
-                creep_s1_ratio_25000h=cm["25000h"]["s1"]["ratio"], creep_s1_at_25000h=cm["25000h"]["s1"]["at"],
-                creep_vm_ratio_25000h=cm["25000h"]["vm"]["ratio"], creep_s1_ratio_50000h=cm["50000h"]["s1"]["ratio"])
+                creep_s1_ratio_25000h=_r(cm["25000h"]["s1"]), creep_s1_at_25000h=_at(cm["25000h"]["s1"]),
+                creep_vm_ratio_25000h=_r(cm["25000h"]["vm"]), creep_s1_ratio_50000h=_r(cm["50000h"]["s1"]))
         if fs:
             nom = {tv: dict(vm_max_node_MPa=v["cases"]["100"]["vm_max_node_MPa"],
                             burst_margin=v["cases"]["100"]["burst_margin"],
-                            creep_s1_ratio_25000h=v["cases"]["100"]["creep_margins"]["25000h"]["s1"]["ratio"],
-                            creep_s1_at_25000h=v["cases"]["100"]["creep_margins"]["25000h"]["s1"]["at"],
-                            creep_vm_ratio_25000h=v["cases"]["100"]["creep_margins"]["25000h"]["vm"]["ratio"],
-                            creep_s1_ratio_50000h=v["cases"]["100"]["creep_margins"]["50000h"]["s1"]["ratio"])
+                            creep_s1_ratio_25000h=_r(v["cases"]["100"]["creep_margins"]["25000h"]["s1"]),
+                            creep_s1_at_25000h=_at(v["cases"]["100"]["creep_margins"]["25000h"]["s1"]),
+                            creep_vm_ratio_25000h=_r(v["cases"]["100"]["creep_margins"]["25000h"]["vm"]),
+                            creep_s1_ratio_50000h=_r(v["cases"]["100"]["creep_margins"]["50000h"]["s1"]))
                    for tv, v in e["variants"].items() if tv in ("T_rel", "cooled_750")}
             fs[f"fillet{A['turb_fillet_w']}"] = dict(fillet_w=A["turb_fillet_w"], accepted=True, cases=nom)
             e["fillet_study_100pct"] = dict(
@@ -811,12 +840,113 @@ def table_rows(parts):
                 if "creep_margins" in c:
                     cm = c["creep_margins"]
                     for th in ("25000h", "50000h"):
-                        row[f"creep_s1_ratio_{th}"] = cm[th]["s1"]["ratio"]
-                        row[f"creep_vm_ratio_{th}"] = cm[th]["vm"]["ratio"]
+                        row[f"creep_s1_ratio_{th}"] = _r(cm[th]["s1"])
+                        row[f"creep_vm_ratio_{th}"] = _r(cm[th]["vm"])
+                    row["uts_local_ratio"] = cm["uts_local"]["ratio"]
                     row["creep_life_s1_h"] = c["creep"]["local_s1_min_h"]
                     row["creep_life_vm_h"] = c["creep"]["local_min_h"]
                 rows.append(row)
     return rows
+
+
+def _f(x, nd=2):
+    return "—" if x is None else f"{x:.{nd}f}".replace(".", ",")
+
+
+def conclusions(parts, analytic, gates):
+    """выводы — строки, каждое число в них взято из результатов этого расчёта"""
+    L = []
+    for part, name in (("comp1", "Колесо ступени 1 (Ti-6Al-4V, двустороннее, без отверстия)"),
+                       ("comp2", "Колесо ступени 2 (Ti-6Al-4V, без отверстия)")):
+        v = parts[part]["variants"]["solid"]["cases"]
+        b = parts[part]["variants"]["bore"]["cases"]
+        L.append(f"{name}: наибольшее σ по Мизесу {_f(v['100']['vm_max_node_MPa'], 0)} / {_f(v['115']['vm_max_node_MPa'], 0)}"
+                 f" / {_f(v['120']['vm_max_node_MPa'], 0)} МПа при 100 / 115 / 120 % (у оси), окружное "
+                 f"{_f(v['100']['hoop_max_MPa'], 0)} / {_f(v['115']['hoop_max_MPa'], 0)} / {_f(v['120']['hoop_max_MPa'], 0)} МПа; "
+                 f"запас по пределу текучести {_f(v['100']['yield_margin'])} (рабочая частота), {_f(v['120']['yield_margin'])} "
+                 f"при 120 %; запас по разрушающей частоте {_f(v['100']['burst_margin'])} (n_разр "
+                 f"{_f(v['100']['burst_rpm'], 0)} об/мин). Вариант со сквозным отверстием 60 мм: запас по текучести "
+                 f"{_f(b['100']['yield_margin'])} при 100 % и {_f(b['120']['yield_margin'])} при 120 %.")
+    t = parts["comp2"]["titanium_temperature"]
+    hz = parts["comp2"]["variants"]["solid"]["cases"]["100"]["hot_zone"]
+    L.append(f"Ступень 2: T02 = {_f(t['T02_C'], 0)} °C, относительная температура торможения у выхода колеса "
+             f"{_f(t['T0_rel_rotor_exit_C'], 0)} °C. Вывод: " + t["verdict"] + f" Напряжения в горячей зоне невелики: "
+             f"σ по Мизесу не больше {_f(hz['T_ge_400C']['vm_max_MPa'], 0)} МПа там, где T ≥ 400 °C, и "
+             f"{_f(hz['T_ge_350C']['vm_max_MPa'], 0)} МПа там, где T ≥ 350 °C (100 %). Предложение: " + t["proposal"])
+    e = parts["turb1"]
+    vv = e["variants"]
+    for tv, lab in (("T_gas_1000", "обод 1000 °C (= T газа, верхняя граница; σв выше 870 °C — крайнее значение "
+                                   "таблицы, запас по разрушению завышен; σ_LM — экстраполяция за данные)"),
+                    ("T_rel", f"обод {_f(vv['T_rel']['T_rim_C'], 0)} °C (относительная T торможения, без охлаждения)"),
+                    ("cooled_750", "обод 750 °C (продувка полостей, оценка)")):
+        c = vv[tv]["cases"]
+        cm = c["100"]["creep_margins"]
+        lr = e["creep_sized_web"]["variants"][tv]["25000h"]
+        L.append(f"Диск турбины ступени 1, {lab}: σ по Мизесу у оси {_f(c['100']['vm_max_node_MPa'], 0)} / "
+                 f"{_f(c['120']['vm_max_node_MPa'], 0)} МПа (100 / 120 %); запас по разрушающей частоте "
+                 f"{_f(c['100']['burst_margin'])} / {_f(c['120']['burst_margin'])}; длительная прочность (разрыв, "
+                 f"типовые свойства) — наименьшее σ_LM/σ1 {_f(_r(cm['25000h']['s1']))} за 25 000 ч и "
+                 f"{_f(_r(cm['50000h']['s1']))} за 50 000 ч, по Мизесу {_f(_r(cm['25000h']['vm']))} и "
+                 f"{_f(_r(cm['50000h']['vm']))}; живой обод: давление лопаток {_f(lr and e['creep_sized_web']['variants'][tv]['p_live_rim_MPa'], 0)} "
+                 f"МПа против σ_LM {_f(lr['live_rim_sigma_allow_MPa'], 0)} МПа (25 000 ч); местное σв/σ "
+                 f"{_f(c['100']['uts_local']['ratio'])} / {_f(c['120']['uts_local']['ratio'])} (у оси).")
+    bl = e["blade"]
+    L.append(f"Лопатка ступени 1 (неохлаждаемая, IN-713C, {_f(bl['T_C'], 0)} °C): σ в корне профиля "
+             f"{_f(bl['sigma_root_MPa'], 0)} МПа, срок до разрыва {_f(bl['creep_life_h'], 0)} ч; σ_LM/σ "
+             f"{_f(bl['ratio_25000h'])} за 25 000 ч, {_f(bl['ratio_50000h'])} за 50 000 ч.")
+    for k in (2, 3):
+        e = parts[f"turb{k}"]
+        c = e["variants"]["T_rel"]["cases"]
+        cm = c["100"]["creep_margins"]
+        bl = e["blade"]
+        cr = (f"длительная прочность σ_LM/σ1 {_f(_r(cm['25000h']['s1']))} / {_f(_r(cm['50000h']['s1']))} за 25 / 50 тыс. ч"
+              if cm["25000h"]["s1"] else "ползучесть не определяет (во всех узлах σ_LM > σв: холоднее диапазона данных)")
+        L.append(f"Диск турбины ступени {k} (обод {_f(e['variants']['T_rel']['T_rim_C'], 0)} °C): σ по Мизесу у оси "
+                 f"{_f(c['100']['vm_max_node_MPa'], 0)} / {_f(c['120']['vm_max_node_MPa'], 0)} МПа; запас по разрушающей "
+                 f"частоте {_f(c['100']['burst_margin'])} / {_f(c['120']['burst_margin'])} (100 / 120 %); {cr}; местное "
+                 f"σв/σ {_f(c['100']['uts_local']['ratio'])} / {_f(c['120']['uts_local']['ratio'])}. Лопатка: σ в корне "
+                 f"{_f(bl['sigma_root_MPa'], 0)} МПа при {_f(bl['T_C'], 0)} °C, σ/σв {_f(bl['sigma_root_over_uts']['100'])} / "
+                 f"{_f(bl['sigma_root_over_uts']['115'])} / {_f(bl['sigma_root_over_uts']['120'])} при 100 / 115 / 120 %.")
+    g3 = parts["turb3"]["geometry"]
+    L.append(f"AN² последней ступени из точки {_f(g3['AN2_point_m2rpm2'] / 1e7)}·10⁷ м²·(об/мин)²: σ в корне лопатки без сужения "
+             f"{_f(g3['sigma_AN2_untapered_MPa'], 0)} МПа, с принятым сужением {_f(g3['taper'], 1)} — "
+             f"{_f(g3['sigma_root_MPa'], 0)} МПа; формула подтверждена ccx (стержень C3D20R, расхождение "
+             f"{_f(abs(parts['turb3']['blade']['ccx_bar_check']['dev']) * 100, 5)} %).")
+    dev = max(abs(v["dev"][k]) for v in analytic.values() for k in v["dev"])
+    cv = [abs(x) for e2 in parts.values() for v in e2["variants"].values() for c in v["cases"].values()
+          for kk, x in c["convergence_fine_vs_base"].items() if x is not None and not kk.startswith("creep")]
+    cc = [abs(x) for e2 in parts.values() for v in e2["variants"].values() for c in v["cases"].values()
+          for kk, x in c["convergence_fine_vs_base"].items() if x is not None and kk.startswith("creep")]
+    cs = [parts[f"turb{k}"]["constant_stress_check"]["dev_max"] for k in (1, 2, 3)
+          if parts[f"turb{k}"]["constant_stress_check"]["dev_max"] is not None]
+    L.append(f"Проверки: сверка с тонким вращающимся диском постоянной толщины — расхождение не больше "
+             f"{_f(dev * 100, 3)} %; невязка равновесия полудиска во всех расчётах не больше {max(gates):.1e} (ворота "
+             f"1e-3); сетки 80x12 и 160x24 — напряжения, средние окружные и запасы различаются не больше чем на "
+             f"{_f(max(cv) * 100)} %, местный срок по Ларсону — Миллеру — до {_f(max(cc) * 100, 0)} %; полотно дисков "
+             f"турбины 1 и 2 в изотермическом расчёте отличается от равнопрочного диска Стодолы не больше чем на "
+             f"{_f(max(cs) * 100, 1)} %.")
+    return L
+
+
+LIMITATIONS = [
+    "Профили колёс и дисков — облик по размерам точки (принятые величины — assumptions), не чертёж.",
+    "Поля температур заданы по радиусу (условно), по оси постоянны; теплового расчёта нет (нужен OpenFOAM/ccx).",
+    "Лопатки колёс компрессора — только массой в плотности столбца; лопатки турбины — массой на ободе: напряжений в "
+    "самих лопатках, шейках и ёлочных замках нет (кроме среднего напряжения в корне профиля); нужна трёхмерная "
+    "секторная модель по чертежу.",
+    "Отверстия под стяжные болты в полотне, фланцы и шлицевые (curvic) соединения в осесимметричной модели не видны.",
+    "Свойства материалов — выдержки поиска (materials.json, статусы); толстое литое сечение, вероятно, слабее отдельно "
+    "отлитых образцов; данные Ларсона — Миллера — типовые (не минимальные) и по разрыву, а не по допустимой "
+    "деформации ползучести.",
+    "σ0,2(T) IN-713C нет (только 20 °C) — запас по текучести дисков турбины не определён; дано только отношение к σ0,2 "
+    "при 20 °C и местное σв(T)/σ.",
+    "Ползучесть Ti-6Al-4V не оценена (lmp = null); Ti-6242S не посчитан — свойств нет.",
+    "Запас по разрушающей частоте — k = 1 (верхняя оценка); настоящий k даст разгонное испытание.",
+    "Малоцикловая усталость и частоты (диаграмма Кэмпбелла) не считались.",
+]
+
+
+
 
 
 def make_doc(pt, tin, meta, out, cases, wall, workers):
@@ -869,6 +999,8 @@ def make_doc(pt, tin, meta, out, cases, wall, workers):
             prerequisites=("перед расчётом: .claude/skills/calculix-rotor/scripts/ccx_selfcheck.py — all_ok: true "
                            "(7 из 7); routes/gtu/platform/fea/test_disk.py — все 12 проверок пройдены (прогоны "
                            "14.11.2026)")),
+        conclusions=conclusions(parts, analytic, gates),
+        limitations=LIMITATIONS,
         parts=parts,
         table=table_rows(parts),
         run=dict(cases=len(out), wall_s=round(wall, 1), workers=workers, ccx_threads=1,
@@ -883,8 +1015,9 @@ def print_table(doc):
     for r in doc["table"]:
         cr = ""
         if "creep_s1_ratio_25000h" in r:
-            cr = (f" LM25k s1 {r['creep_s1_ratio_25000h']:.2f} vm {r['creep_vm_ratio_25000h']:.2f};"
-                  f" LM50k s1 {r['creep_s1_ratio_50000h']:.2f}")
+            f2 = lambda x: "—" if x is None else f"{x:.2f}"  # noqa: E731
+            cr = (f" LM25k s1 {f2(r['creep_s1_ratio_25000h'])} vm {f2(r['creep_vm_ratio_25000h'])};"
+                  f" LM50k s1 {f2(r['creep_s1_ratio_50000h'])}; σв/σ {r['uts_local_ratio']:.2f}")
         ym = "—" if r["yield_margin"] is None else f"{r['yield_margin']:.2f}"
         print(f"{r['part']:6s} {r['variant']:10s} {r['speed_pct']:3d}% U={r['U_tip']:.0f} vm={r['vm_max_MPa']:.0f} "
               f"(r={r['vm_at_r_mm']:.0f}) hoop={r['hoop_max_MPa']:.0f} yield×{ym} burst×{r['burst_margin']:.3f}{cr}")
