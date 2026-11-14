@@ -27,6 +27,33 @@ n_passages_example = true
 gamma = 1.4                 # как в шаблоне узла su2 (идеальный газ)
 gas_constant_J_kgK = 287.058
 
+# Каких данных нет и кто их даёт (значения выше — EXAMPLE).
+[[example_data]]
+param = "case.mesh, case.mesh_sha256"
+unit = "файл .su2, координаты в м"
+owner = "узел geom (impeller.py) — сетка канала расчётной точки KV-3 с пристенным слоем"
+impact = "время, память, доля ядра f действительны только для этой сетки; сравнение конфигураций — нет"
+[[example_data]]
+param = "case.restart, case.restart_sha256"
+unit = "файл рестарта SU2"
+owner = "узел su2 (run_case.py: стадии разгона на CPU)"
+impact = "число итераций до сходимости; одинаковый рестарт исключает разгон из сравнения"
+[[example_data]]
+param = "case.omega_rad_s"
+unit = "рад/с"
+owner = "узел geom (su2.rotation_rate_rad_s в JSON сетки) по расчётной точке frame3"
+impact = "момент ∝ 1/ω: абсолютное значение — прямо; сравнение конфигураций — нет (ω общая)"
+[[example_data]]
+param = "case.n_passages"
+unit = "—"
+owner = "узел geom (params.Z)"
+impact = "расход и момент колеса = канал × Z; сравнение конфигураций — нет"
+[[example_data]]
+param = "decision.series_time_limit_h"
+unit = "ч"
+owner = "владелец (срок серии расчётов)"
+impact = "порог перехода к нескольким узлам и к GPU ради срока, а не стоимости"
+
 # ---------------------------------------------------------------- критерии сходимости (одни для всех)
 # Из навыка su2-turbo, раздел 6 («принято в навыке», не из документации SU2).
 [convergence]

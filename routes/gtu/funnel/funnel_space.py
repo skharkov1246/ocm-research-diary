@@ -96,9 +96,11 @@ CAT = {
     "split_bl": [0, 1],
 }
 CONT = {   # непрерывные оси: доля 0..1 переводится в величину в concept() (диапазоны могут зависеть от дискретных осей)
-    "pi": "общая степень сжатия: 1Ц 3-8, Д 2,5-6, 2Ц 6-20, ОЦ (1 осевая) 4-14, ОЦ (2 осевые) 5-18 (оценка)",
+    "pi": "общая степень сжатия: 1Ц 3-8, Д 2,5-6, 2Ц 6-20, ОЦ (1 осевая) 4-14, ОЦ (2 осевые) 5-18 (оценка); верхняя граница "
+          "не выше pi_max_U - π, при которой ступени укладываются в предел окружной скорости материала при выбранных mu1, mu2, split",
     "split": "доля ln π на первую ступень (2Ц) или на осевую часть (ОЦ): 0,35-0,65",
-    "t41": "T41, °C: от 850 до предела класса охлаждения, типа турбины и сплава (make_model.t41_limit)",
+    "t41": "T41, °C: от 850 до предела класса охлаждения, типа турбины и сплава (make_model.t41_limit); плотность смещена к пределу: "
+           "T41 = Tlim - (Tlim - 850)·u² (низкая T41 не даёт мощности при мягком допуске по расходу)",
     "mu1": "коэффициент работы первой ступени w/U²: центробежная 0,60-0,80, диагональная 0,50-0,70, осевая 0,30-0,50 (оценка)",
     "mu2": "то же для последней ступени (2Ц, ОЦ)",
     "phi1": "коэффициент расхода G/(ρ·U2·D2²) первой центробежной ступени свободного вала: 0,04-0,12; у вала с частотой пакета - выводится",
@@ -253,14 +255,16 @@ def concept(i, n, kv="KV-3", seed=SEED):
     c["cartridge"] = cat("cartridge")
     c["split_bl"] = cat("split_bl")
     # непрерывные
-    lo, hi = PI_RANGE[(c["comp"], c["n_ax"])] if c["comp"] == "ОЦ" else PI_RANGE[c["comp"]]
-    c["pi"] = _lerp(u["pi"], lo, hi)
-    c["split"] = _lerp(u["split"], 0.35, 0.65)
-    tl = MK.t41_limit(c["turb"], c["cool"], c["mat_tw"], c["m_tw"])[0]
-    c["t41"] = _lerp(u["t41"], T41_MIN, tl) if tl > T41_MIN else T41_MIN
     st = stage_types(c)
     c["mu1"] = _lerp(u["mu1"], *MU_RANGE[st[0]])
     c["mu2"] = _lerp(u["mu2"], *MU_RANGE[st[-1]])
+    c["split"] = _lerp(u["split"], 0.35, 0.65)
+    lo, hi = PI_RANGE[(c["comp"], c["n_ax"])] if c["comp"] == "ОЦ" else PI_RANGE[c["comp"]]
+    c["pi_max_U"] = round(pi_max_by_speed(c), 4)
+    hi_eff = min(hi, c["pi_max_U"])
+    c["pi"] = _lerp(u["pi"], lo, hi_eff) if hi_eff > lo else lo
+    tl = MK.t41_limit(c["turb"], c["cool"], c["mat_tw"], c["m_tw"])[0]
+    c["t41"] = tl - (tl - T41_MIN) * float(u["t41"]) ** 2 if tl > T41_MIN else T41_MIN
     c["phi1"] = _lerp(u["phi1"], 0.04, 0.12)
     c["kcm"] = _lerp(u["kcm"], 0.20, 0.35)
     c["zc"] = int(round(_lerp(u["zc"], 7, 15)))
@@ -292,6 +296,41 @@ def _E():
         os.chdir(cwd)
         _EX = ex
     return _EX
+
+
+U_MARGIN, ETA_MARGIN = 0.97, 0.03     # запас при выборе верхней границы π: доля предела скорости и снижение КПД (оценка)
+
+
+def pi_max_by_speed(c):
+    """наибольшая общая π, при которой каждая ступень укладывается в предел окружной скорости своего материала при
+    выбранных коэффициентах работы mu1/mu2 и распределении split (с запасом U_MARGIN, ETA_MARGIN). Нужна, чтобы
+    выборка не тратилась на заведомо превышенную окружную скорость; правило U_comp всё равно проверяется."""
+    E = _E()
+    typ = stage_types(c)
+    mus = [c["mu1"]] * (len(typ) - 1) + [c["mu2"]] if len(typ) > 1 else [c["mu1"]]
+    if c["comp"] == "ОЦ":
+        mus = [c["mu1"]] * c["n_ax"] + [c["mu2"]]
+    T = E.T0; pmax = []
+    for k, (t, mu) in enumerate(zip(typ, mus)):
+        mat = c["mat_cw"] if not (c["mat_cw"] == "Al" and k > 0) else "Ti64"
+        Ul = MK.u_limit_comp(mat, c["m_cw"])[0] * U_MARGIN
+        T2 = E.T_h(E.h(T) + mu * Ul ** 2)
+        pis = 3.0
+        for _ in range(3):
+            eta = eta_comp(t, pis, mat, k, c["inlet"]) - ETA_MARGIN
+            pis = math.exp(eta * (E.s0(T2) - E.s0(T)) / E.RA)
+        if t == "О":
+            pis = min(pis, AX_PI_MAX)
+        if t == "Д":
+            pis = min(pis, D_PI_MAX)
+        pmax.append(pis); T = T2
+    s = c["split"]
+    if c["comp"] in ("1Ц", "Д"):
+        return pmax[0]
+    if c["comp"] == "2Ц":
+        return min(pmax[0] ** (1 / s), pmax[1] ** (1 / (1 - s)))
+    na = c["n_ax"]
+    return min(min(pmax[:na]) ** (na / s), pmax[-1] ** (1 / (1 - s)))
 
 
 def stages_pi(c):
@@ -796,7 +835,7 @@ AX_PI_MAX, D_PI_MAX = 1.8, 5.0          # степень сжатия осево
 PSI_MAX = 2.5                            # gtu_explore.turb_axial, frame3
 NU_RANGE = (0.50, 0.90)                  # U/C0 радиальной турбины (оценка; оптимум 0,70 - gtu_explore)
 NS_RANGE = (0.25, 1.00)                  # быстроходность радиальной турбины ω·√Q/Δh^0,75 (оценка)
-HTR_MIN_T, HTR_MIN_AX = 0.50, 0.35       # отношение втулки к периферии: последняя ступень турбины (frame3 - 0,54), осевая ступень компрессора (оценка)
+HTR_MIN_T, HTR_MIN_AX = 0.40, 0.35       # отношение втулки к периферии: последняя ступень турбины (оценка; frame3 - 0,54), осевая ступень компрессора (оценка)
 T_REC_MAX = 700.0                        # LIM T_rec_max
 
 

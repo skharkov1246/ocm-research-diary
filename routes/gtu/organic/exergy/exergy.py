@@ -611,6 +611,9 @@ COL = dict(flow="#6da7ec", fuel="#2a78d6", work="#6250d6", destr="#eb6834", out=
            ink="#0b0b0b", ink2="#52514e", grid="#d6d5d0")
 
 
+HALO = 'stroke="#ffffff" stroke-width="3" paint-order="stroke"'
+
+
 def _f(x):
     return f"{x:.1f}"
 
@@ -785,10 +788,6 @@ def grassmann_svg(acc, title, subtitle, scale, path):
         for i in range(len(xs_l) - 2, -1, -1):
             xs_l[i] = min(xs_l[i], xs_l[i + 1] - minsp)
     ylab = max(t[1] for t in labels) + 26 if labels else yr + 200
-    for (xb, yb, a, b), xl in zip(labels, xs_l):
-        el.append(f'<path d="M{_f(xb)},{_f(yb)} L{_f(xl)},{_f(ylab - 12)}" stroke="{COL["grid"]}" stroke-width="1" fill="none"/>')
-        el.append(f'<text x="{_f(xl)}" y="{_f(ylab)}" text-anchor="middle" font-size="10.5" fill="{COL["ink"]}">{a}</text>')
-        el.append(f'<text x="{_f(xl)}" y="{_f(ylab + 13)}" text-anchor="middle" font-size="10.5" fill="{COL["ink2"]}">{b}</text>')
     # --- рекуператор: петля снизу (под подписями), от горячей стороны к холодной
     y_bottom = ylab + 13
     if has_rec:
@@ -800,6 +799,10 @@ def grassmann_svg(acc, title, subtitle, scale, path):
         el.append(f'<text x="{_f((xg + xcld) / 2)}" y="{_f(y_low + 4)}" text-anchor="middle" font-size="11" '
                   f'fill="{COL["ink"]}">рекуператор возвращает воздуху {rec_tr:.0f} кВт ({_pct(100 * rec_tr / Ef)})</text>')
         y_bottom = y_low + s * rec_tr / 2
+    for (xb, yb, a, b), xl in zip(labels, xs_l):
+        el.append(f'<path d="M{_f(xb)},{_f(yb)} L{_f(xl)},{_f(ylab - 12)}" stroke="{COL["grid"]}" stroke-width="1" fill="none"/>')
+        el.append(f'<text x="{_f(xl)}" y="{_f(ylab)}" text-anchor="middle" font-size="10.5" fill="{COL["ink"]}" {HALO}>{a}</text>')
+        el.append(f'<text x="{_f(xl)}" y="{_f(ylab + 13)}" text-anchor="middle" font-size="10.5" fill="{COL["ink2"]}" {HALO}>{b}</text>')
     Hh = int(y_bottom + 50)
     # легенда
     ly = Hh - 18
@@ -808,7 +811,7 @@ def grassmann_svg(acc, title, subtitle, scale, path):
                      (COL["destr"], "разрушение эксергии"), (COL["out"], "уходит с потоком")):
         el.append(f'<rect x="{lx}" y="{ly - 9}" width="14" height="10" fill="{col}"/>')
         el.append(f'<text x="{lx + 19}" y="{ly}" font-size="11" fill="{COL["ink2"]}">{txt}</text>')
-        lx += 19 + 7.0 * len(txt) + 24
+        lx += 19 + 5.8 * len(txt) + 26
     svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {Hh}" width="{W}" height="{Hh}" '
            f'font-family="Times New Roman, Times, serif">\n<rect width="{W}" height="{Hh}" fill="#ffffff"/>\n'
            f'<text x="30" y="28" font-size="16" fill="{COL["ink"]}">{title}</text>\n'
