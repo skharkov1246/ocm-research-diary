@@ -1,0 +1,608 @@
+{
+ "model": "SGT-300",
+ "records": [
+  {
+   "model": "SGT-300",
+   "variant": "PG 8.0 MW",
+   "power_kW": 8000,
+   "heat_rate_kJ_kWh": 11594,
+   "eff_pct": 31.0,
+   "exh_flow_kg_s": 30.2,
+   "exh_temp_C": 534,
+   "PR": 14.4,
+   "comp_stages": "10",
+   "turb_stages": "2 (single-shaft)",
+   "shafts": "single",
+   "out_rpm": "14045 rpm - turbine speed of the single-shaft engine = input of the package reduction gearbox (gearbox output 1500 rpm 50 Hz / 1800 rpm 60 Hz, 4-pole generator, per Centrax CX300-1S)",
+   "pkg_L_m": 11.9,
+   "pkg_W_m": 2.7,
+   "pkg_H_m": 4.0,
+   "pkg_kg": 58967,
+   "engine_kg": null,
+   "engine_L_m": null,
+   "engine_D_m": null,
+   "extra": {
+    "engine_designation": "SGT-300-1S (single-shaft)",
+    "fuel_gas_kPa": null,
+    "fuel_gas_note": "Required fuel-gas supply pressure not published. IFV flyer (applies to SGT-300): the Integrated Fuel Valve 'can translate to a lower required gas fuel supply pressure'; 'Up to 3 IFVs may be required depending on the number of gas streams i.e. whether the engine is non-DLE, DLE or EDLE.' Gas fuel module is common to SGT-100..SGT-400 (PAGE).",
+    "inlet_dp_kPa": null,
+    "exhaust_dp_kPa": null,
+    "inlet_exhaust_dp_note": "Siemens rating basis only: 'All simple cycle and mechanical drive performance data in this document are gross values at ISO ambient conditions.' (PORTF); inlet/exhaust losses not stated. Centrax CX300 ratings: '* Inlet losses, exhaust losses & package auxiliary losses are excluded' (zero-loss basis), ISO 15 °C, sea level, 1013 mbar, 60 % RH, natural gas LHV 47,889 kJ/kg.",
+    "engine_removal": "Siemens PAGE: 'Large side doors on enclosure for equipment exchange'; 'Internal lifting equipment'; 'Package designed for gas turbine removal on either side'; 'Rapid core exchange option for minimized downtimes'; 'The core engine maintenance can be performed on-site or off-site.' PORTF p.16: 'Package is designed for rapid core engine exchange'. So the engine is withdrawn sideways (either side) through the enclosure side doors on the package's internal lifting equipment. Centrax CX300 packages: 'Integral engine and auxiliary maintenance beams'. Change-out time, lift weight and side clearance not published.",
+    "compressor": "10 axial stages (Centrax: '10 Stage axial compressor'); 'Horizontally split compressor casing'; 'Horizontally and vertically split inlet casing'; 'The first stage rotor blades can be axially removed for quick and easy on-site exchange' (PAGE). Compressor (inlet) air mass flow not published.",
+    "combustor": "'can annular combustion system with six reverse-flow tubular chambers, and a high energy igniter in each combustor'; 'six reverse-flow tubular combustion chambers positioned around a high-pressure casing' (PAGE); Centrax: '6 reverse flow combustion chambers (cans)'. DLE standard; up to 30 vol% H2 with DLE burners; Wobbe 50 down to 17.5 MJ/m3 (PAGE, stated for the single-shaft engine).",
+    "package_contents": "'The packages incorporate gas turbine, gearbox (where applicable), drive unit and all factory-tested fluid modules, all of which are mounted on an underbase.'; fluid modules common to SGT-100..SGT-400: auto drains, gas fuel, lube oil, liquid fuel (optional) (PAGE).",
+    "pkg_basis": "PG package incl. AC generator; 'Dimensions exclude inlet filter housing and exhaust stack. For power generation, the AC generator is included. For mechanical drive, the driven equipment is excluded.' (PAGE)",
+    "fleet_experience": "'over 200 units have been sold, contributing to a combined fleet experience exceeding of over 10 million equivalent operating hours, which demontsrates a class-leading reliability rate of 99.5%' (PAGE; typos as printed)",
+    "not_published": "Not published in any document that could be opened (PAGE, PAGE_US, POSTER, PORTF, CN, BR, HEA, EVGV, IFV, CX1S, CX2S): core-engine weight and envelope (length, diameter), required fuel-gas supply pressure at the package inlet, lube-oil flow and heat rejection, number of bleed (blow-off) valves, engine accessory gearbox, number of bearings of the twin-shaft engine, inlet/exhaust pressure losses assumed in the Siemens rating, engine change-out time, Siemens-package starter type/power, Siemens-package lube-tank volume, inlet (compressor) air mass flow.",
+    "rating_editions": "Two editions of the Siemens SGT-300 rating tables are live at the same time (all opened 2026-11-14). (C) current: global and US product pages (identical) and the PORTF p.16 data-sheet tables (Jan 2026): PG 8.0 MW(e), 31.0 %, '11,594 kJ/kWh (10,990 Btu/kWh)', 14,045 rpm, 14.4 : 1, 30.2 kg/s (66.6 lb/s), '534 °C (993° F)', NOx < 10 ppmvd; MD 8 MW version 8.4 MW, 35.3 %, 10,204 kJ/kWh, 13.9 : 1, 29.5 kg/s, 490 °C, NOx <= 10 ppmvd; MD 9 MW version 9.1 MW, 35.9 %, 10,003 kJ/kWh, 14.6 : 1, 30.4 kg/s, 504 °C, NOx <= 15 ppmvd; MD speed 5,750 – 11,500 – 12,075 rpm. (A) older: SGT-300 poster (2021; still the poster linked from the global, US and BR pages), CN page, BR page, PORTF p.16 summary block and PORTF p.24 imperial MD table: PG 7.9 MW, 30.8 %, 11,704 kJ/kWh (11,089 Btu/kWh poster / 11.094 BR), 14,045 rpm, 13.7:1, 30.2 kg/s, 543 °C (poster, CN; BR prints 534 °C), °F always 993; MD 8.4 MW (11,214 hp) / 9.1 MW (12,317 hp), 35.3 % / 36 % (36.0 %), 10,204 / 10,003 kJ/kWh, 5,750 / 11,500 / 12,075 rpm, 13.5:1 / 14.1:1, 29.5 / 30.4 kg/s, 490 / 504 °C. Mixed: PORTF p.24 PG metric row prints 31.0 % and 14.4 : 1 (edition C) with 11,704 kJ/kWh (edition A); PORTF p.24 PG imperial row prints 67.4 lb/s (= 30.57 kg/s) where every other document prints 30.2 kg/s / 66.6 lb/s. Rule applied: edition C (current manufacturer page) for every rating value. Note for the existing-package case: the Siemens HEA flyer (2026) still calls the installed fleet 'SGT-300-1S (7.9 MW) units', so installed single-shaft packages may carry the edition-A rating (7.9 MW, 13.7:1, 11,704 kJ/kWh, 30.2 kg/s); the flyer offers '~180 kW power uplift at base load (site-dependent)'.",
+    "package_editions": "Package dimensions/weights: PAGE = PAGE_US = PORTF p.16 = BR page: PG 11.9 x 2.7 x 4.0 m, '58.967 kg (130,844 lb)'; MD 6.9 x 2.9 x 3.5 m, 30,409 kg (67,042 lb). The CN page package table ('经典包*' / '单提式成套设备**': 285,000 kg, 20.8 x 7.3 x 6.6 m / 305,000 kg, 22.0 x 4.7 x 5.3 m) cannot be an SGT-300 package (5x the PG weight, copied from a large-turbine page) and is rejected. Third-party package (different packager, different basis - includes the inlet filter house): Centrax CX300-1S drawing: height 10369 mm, end-view width 6087 mm, side-view length 14526 mm plus 1741 mm, 'Approx total weight = 84000 KG / 185188 lbs'; CX300-2S: height '9748mm / 777in' (777 in = 19.7 m - inch figure misprinted; 9748 mm = 384 in), end-view width 7398 mm, side-view length 4400 mm + 11876 mm (two baseplates), 117,000 kg. Reading of which drawing dimension is length/width/height is from the drawing layout (page image), not from text labels.",
+    "power_at": "'Power output | 8.0 MW(e)', 'Gross efficiency' (PAGE): gross electrical output at the generator terminals, ISO, before package auxiliaries ('gross values at ISO ambient conditions', PORTF)",
+    "starter": {
+     "type": "electro-hydraulic (110 kW 3-phase AC motor driving a hydraulic start system)",
+     "kW": 110,
+     "applies_to": "Centrax CX300-1S package (third-party packager of the SGT-300-1S)",
+     "siemens_package": null,
+     "quote": "Electro-hydraulic start system, 110kW 3 phase AC motor"
+    },
+    "lube": {
+     "tank_l": 4500,
+     "flow": null,
+     "heat_rejection_kW": null,
+     "applies_to": "Centrax CX300-1S package",
+     "quote": "4500ltr integral oil tank is incorporated within the baseplate; Gearbox driven main lube oil pump, AC driven auxiliary pump, DC driven emergency pump; External oil to air heat exchanger with safe area axial fans",
+     "siemens_package": "Lube oil module (common SGT-100..SGT-400 fluid module, PAGE); volume/flow/heat rejection not published"
+    },
+    "variable_geometry": {
+     "rows": "variable guide vanes on stages 1 to 4 (Centrax wording; whether the inlet guide vane row is counted inside 'stages 1 to 4' is not stated)",
+     "actuator": "VGV actuation historically hydraulic, pneumatic or electric; Siemens offers an electric VGV actuator retrofit for SGT-300 (EVGV flyer)",
+     "quote": "10 Stage axial compressor with variable guide vanes on stages 1 to 4 (CX1S); '*Subject to control system and Variable Guide Vane Actuation compatibility.' (HEA, SGT-300-1S)"
+    },
+    "bleed_valves": {
+     "count": null,
+     "quote": "Pressure ratio 13.7:1, blow-off valves to prevent compressor surge (CX1S)"
+    },
+    "accessory_gearbox": {
+     "present": null,
+     "note": "Not published. Main lube pump is gearbox-driven ('Gearbox driven main lube oil pump', CX1S) - in the CX300-1S this is the package speed-reduction gearbox; no engine accessory gearbox is mentioned in any opened document"
+    },
+    "bearings": {
+     "type": "tilting-pad journal and thrust (CX1S)",
+     "rotor_bearings": 2,
+     "quote": "'The single-shaft SGT-300 consists of a single twin-bearing rotor with heavy-duty casing.' (PAGE); 'Tilting pad journal & thrust bearings' (CX1S)"
+    },
+    "drive_end": "cold end (compressor/intake end) - 'Power take-off through intake end (cold end drive)' (CX1S)",
+    "exhaust_exit": "axial - 'Axial exhaust exit' (CX1S package)",
+    "gearbox": "package reduction gearbox: 'Compund Epicyclic speed reduction gearbox' reducing to '1500rpm (50Hz) or 1800rpm (60Hz)' (CX1S, typo 'Compund' as printed); Siemens: 'gearbox (where applicable)' (PAGE); 'Frequency | 50/60 Hz'",
+    "generator": "'4 poles, 3 phase synchronous' (CX1S)",
+    "alt_package_centrax_cx300_1s": {
+     "power_kWe": 7886,
+     "heat_rate_kJ_kWh": 11658,
+     "eff_pct_printed": 31,
+     "exh_flow_kg_s": 30.2,
+     "exh_temp_C": 536,
+     "overall_H_mm": 10369,
+     "overall_W_mm": 6087,
+     "overall_L_mm": 14526,
+     "extra_L_mm": 1741,
+     "total_kg": 84000,
+     "basis": "Centrax generator set on SGT-300-1S core, ISO, inlet/exhaust/auxiliary losses excluded; overall package incl. inlet filter house (drawing); single-skid baseplate for driver and driven equipment; baseplate designed for single point lift",
+     "note": "Third-party package - not the Siemens package; dimensions read from the drawing layout"
+    },
+    "check": "Two-way check: (1) second document - 8.0 MW, 31.0 %, 11,594 kJ/kWh, 14,045 rpm, 14.4 : 1, 30.2 kg/s, 534 °C identical in PAGE, PAGE_US and PORTF p.16 data sheet; flow 30.2 kg/s and 14,045 rpm also in POSTER, CN, BR and Centrax CX300-1S (30.2 kg/s, 66.6 lb/s); 534 °C also in BR and PORTF p.24; Centrax CX300-1S 536 °C at 7,886 kWe. (2) internal - 10,990 Btu/kWh x 1.05506 = 11,595 kJ/kWh (matches 11,594); 3600/11,594 = 31.05 % (31.0 % printed); 66.6 lb/s = 30.21 kg/s; 993 °F = 533.9 °C (matches 534, not the 543 °C of POSTER/CN: 543 °C = 1,009 °F); 130,000 lb = 58,967 kg exactly, but the printed '130,844 lb' = 59,350 kg (imperial figure inconsistent, metric kept); 39.0 ft = 11.89 m; 8.8 ft = 2.68 m; 13.1 ft = 3.99 m (consistent). Exhaust energy balance q = G*1.10*(T-15)/(P*(100/eta-1)) = 30.2*1.10*519/(8000*(100/31.05-1)) = 0.97 (edition A: 0.99; Centrax CX300-1S: 0.98; band 0.88-1.06)."
+   },
+   "notes": "Current Siemens page values (edition C: global = US page = PORTF p.16 data sheet, Jan 2026). eff_pct as printed (3600/11,594 = 31.05 %). Older edition still live (2021 poster linked from the page, CN and BR pages): 7.9 MW, 30.8 %, 11,704 kJ/kWh, PR 13.7:1, 30.2 kg/s, 543 °C (poster/CN; BR 534 °C). Exhaust 534 °C taken: matches '993 °F' printed in every document (543 °C = 1,009 °F, poster/CN value is likely a digit swap - not resolved by a second Siemens source; Centrax CX300-1S 536 °C at 7,886 kWe). PORTF p.24 PG metric row pairs 31.0 % with 11,704 kJ/kWh (mixed editions) and imperial row prints 67.4 lb/s (30.57 kg/s) - not used. Weight '58.967 kg (130,844 lb)': 58,967 kg = 130,000 lb exactly, the printed 130,844 lb (= 59,350 kg) is inconsistent; metric value kept. out_rpm = turbine speed of the single-shaft engine = gearbox input. Package 11.9 x 2.7 x 4.0 m incl. AC generator, excl. inlet filter house and exhaust stack. comp_stages, turb_stages, starter, lube tank, VGV rows, bearings type, drive end come from the Centrax CX300-1S data sheet (third-party licensed packager), because no opened Siemens document states them; Siemens page gives 'single twin-bearing rotor'. Siemens HEA flyer (2026) calls installed units 'SGT-300-1S (7.9 MW)' - existing packages may carry the 7.9 MW / 13.7:1 rating. Prelim claims not reopenable: older datasheet 58,349 kg at 11.7 x 2.9 x 3.5 m (soar.hk, host blocked).",
+   "sources": {
+    "power_kW": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "heat_rate_kJ_kWh": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "eff_pct": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "exh_flow_kg_s": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "exh_temp_C": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "PR": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "comp_stages": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX300-1S-web.pdf",
+    "turb_stages": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX300-1S-web.pdf",
+    "shafts": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "out_rpm": [
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX300-1S-web.pdf"
+    ],
+    "pkg_L_m": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "pkg_W_m": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "pkg_H_m": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "pkg_kg": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "starter": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX300-1S-web.pdf",
+    "lube": [
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX300-1S-web.pdf",
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html"
+    ],
+    "variable_geometry": [
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX300-1S-web.pdf",
+     "https://assets.siemens-energy.com/dam/d8c2a6fc-4344-416a-813e-b4a300a11c8e/SGT-30~1-PDF_Original%20file.PDF",
+     "https://assets.siemens-energy.com/dam/58b94f37-1abf-4e19-aa5f-b4a50085bfae/EVGVUP~1-PDF_Original%20file.PDF"
+    ],
+    "bleed_valves": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX300-1S-web.pdf",
+    "accessory_gearbox": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX300-1S-web.pdf",
+    "bearings": [
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX300-1S-web.pdf"
+    ],
+    "drive_end": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX300-1S-web.pdf",
+    "exhaust_exit": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX300-1S-web.pdf",
+    "gearbox": [
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX300-1S-web.pdf",
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html"
+    ],
+    "generator": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX300-1S-web.pdf",
+    "alt_package_centrax_cx300_1s": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX300-1S-web.pdf",
+    "power_at": [
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+     "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf"
+    ],
+    "fuel_gas_kPa": null,
+    "fuel_gas_note": "https://assets.siemens-energy.com/dam/68090946-00cd-4874-b448-b46400e22761/IFV-Upgrade-Flyer_SGT-pdf_Original%20file.pdf",
+    "inlet_dp_kPa": null,
+    "exhaust_dp_kPa": null,
+    "inlet_exhaust_dp_note": [
+     "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX300-1S-web.pdf",
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf"
+    ],
+    "engine_removal": [
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+     "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf"
+    ],
+    "compressor": [
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX300-1S-web.pdf",
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf",
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html"
+    ],
+    "combustor": [
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX300-1S-web.pdf"
+    ],
+    "package_contents": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "pkg_basis": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "fleet_experience": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "engine_kg": null,
+    "engine_L_m": null,
+    "engine_D_m": null,
+    "editions_cross_check": [
+     "https://www.siemens-energy.com/us/en/home/products-services/product/sgt-300.html",
+     "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "https://assets.siemens-energy.com/dam/c71bf020-1e39-48e7-8e56-b0840000a12a/Poster-SGT-300-pdf_Original%20file.pdf",
+     "https://assets.siemens-energy.com/dam/d3583a28-872b-43e6-b799-b03e0003192e/Poster-SGT-300-pdf_Original%20file.pdf",
+     "https://www.siemens-energy.com/cn/zh/home/products-services/product/sgt-300.html",
+     "https://www.siemens-energy.com/br/pt/home/products-services/product/sgt-300.html"
+    ],
+    "quotes": {
+     "power_kW|heat_rate_kJ_kWh|eff_pct|exh_flow_kg_s|exh_temp_C|PR|out_rpm (PAGE)": "Power output | 8.0 MW(e) | Fuel* | Natural gas, liquid fuel, dual fuel | Frequency | 50/60 Hz | Gross efficiency | 31.0% | Heat rate | 11,594 kJ/kWh (10,990 Btu/kWh) | Turbine speed | 14,045 rpm | Pressure ratio | 14.4 : 1 | Exhaust mass flow | 30.2 kg/s (66.6 lb/s) | Exhaust temperature | 534 °C (993° F)",
+     "out_rpm (CX1S, gearbox)": "Compund Epicyclic speed reduction gearbox ... 1500rpm (50Hz) or 1800rpm (60Hz)",
+     "comp_stages|variable_geometry|bleed_valves (CX1S)": "Industrial single shaft design 10 Stage axial compressor with variable guide vanes on stages 1 to 4 Pressure ratio 13.7:1, blow-off valves to prevent compressor surge",
+     "turb_stages|drive_end|bearings (CX1S)": "2 stage turbine Power take-off through intake end (cold end drive) Tilting pad journal & thrust bearings",
+     "shafts (PAGE)": "With a single-shaft configuration providing an electrical power output of 8.0 MW, and a twin-shaft version delivering either 8.4 MW or 9.1 MW ... It is available in a single-shaft configuration for power generation and a twin-shaft version for mechanical drive applications.",
+     "bearings (PAGE)": "The single-shaft SGT-300 consists of a single twin-bearing rotor with heavy-duty casing. Quick core engine exchange is possible, which significantly cuts your maintenance-related downtime.",
+     "pkg_L_m|pkg_W_m|pkg_H_m|pkg_kg (PAGE)": "Power generation package | Mechanical drive package | Approx. weight | 58.967 kg (130,844 lb) | 30,409 kg (67,042 lb) | Length | 11.9 m (39.0 ft) | 6.9 m (22.6 ft) | Width | 2.7 m (8.8 ft) | 2.9 m (9.5 ft) | Height | 4.0 m (13.1 ft) | 3.5 m (11.5 ft)",
+     "pkg_basis (PAGE)": "Dimensions exclude inlet filter housing and exhaust stack. For power generation, the AC generator is included. For mechanical drive, the driven equipment is excluded.",
+     "second document: PORTF p.16 data sheet": "Power output 8.0 MW(e) ... Frequency 50/60 Hz Gross efficiency 31.0% Heat rate 11,594 kJ/kwh (10,990 Btu/kwh) Turbine speed 14,045 rpm Pressure ratio 14.4 : 1 Exhaust mass flow 30.2 kg/s (66.6 lb/s) Exhaust temperature 534 °C (993 °F)",
+     "second document: PORTF p.16 package": "SGT-300: Physical dimensions Power generation package Mechanical drive package Approx. weight 58.967 kg (130,844 lb) 30.409 kg (67,042 lb) Length 11.9 m (39.0 ft) 6.9 m (22.6 ft) Width 2.7 m (8.8 ft) 2.9 m (9.5 ft) Height 4.0 m (13.1 ft) 3.5 m (11.5 ft) Note: Above dimensions exclude inlet filter housing and exhaust stack. For power generation, AC generator is included. For mechanical drive, driven equipment is excluded.",
+     "PORTF p.24 metric / imperial rows": "SGT-300 8.0 MW(e) 50/60 Hz 31.0% 11,704 kJ/kWh 14,045 rpm 14.4 : 1 30.2 kg/s 534 °C ... SGT-300 8.0 MW(e) 50/60 Hz 31.0% 10,990 Btu/kWh 14,045 rpm 14.4 : 1 67.4 lb/s 993 °F",
+     "rating basis (PORTF)": "All simple cycle and mechanical drive performance data in this document are gross values at ISO ambient conditions.",
+     "edition A: POSTER (2021)": "Power Simple cycle 7.9 MW Mech. Drive 8.4 MW (11,214 hp) Mech. Drive 9.1 MW (12,317 hp) Gross efficiency 30.8% 35.3% 36% Heat rate 11,704 kJ / kWh (11,089 Btu / kWh) 10,204 kJ / kWh (7,212 Btu / hph) 10,003 kJ / kWh (7,070 Btu / hph) Turbine speed 14,045 rpm 5,750 / 11,500 / 12,075 rpm 5,750 / 11,500 / 12,075 rpm Pressure ratio 13.7:1 13.5:1 14.1:1 Exhaust mass flow 30.2 kg / s (66.6 lb / s) 29.5 kg / s (65.0 lb / s) 30.4 kg / s (67.0 lb / s) Exhaust temperature 543°C (993°F) 490°C (914°F) 504°C (939°F)",
+     "edition A: CN page": "总功率输出 | 7.9 兆瓦(电) | 汽油* | 天然气、液体燃料、双燃料 | 频率 | 50/60 赫兹 | 总效率 | 30.8% | 总热耗率 | 11,704 千焦/千瓦时 | 涡轮转速 | 14,045 转/分 | 14,045 转/分 | 13.7 : 1 | 排气质量流量 | 30.2 公斤/秒 | 排气温度 | 543 °C (993 °F)",
+     "edition A: BR page": "Potência de saída | 7,9 SM(e) | Combustível* | Gás natural, combustível líquido, combustível duplo | Frequência | 50/60 Hz | Eficiência bruta | 30.8% | Taxa de calor | 11.704 kJ/kWh (11.094 Btu/kWh) | Velocidade da turbina | 14.045 rpm | Relação de pressão | 13.7 : 1 | Caudal mássico dos gases de escape | 30,2 kg/s (66,6 lb/s) | Temperatura de exaustão | 534 °C (993° F)",
+     "Centrax CX300-1S performance": "CX300-1S 7.9MW Gas Turbine Generator Set ... Power Output 7886 kWe Heat Rate 11658 kJ/kWh 11049 BTU/kWh Exhaust Flow 30.2 kg/s 66.6 Ib/s Exhaust Temperature 536ºc 996.8ºF ... Electrical efficiency at generator terminals 31% ... * Inlet losses, exhaust losses & package auxiliary losses are excluded ... General specifications - Siemens SGT-300-1S 7.9MWe",
+     "starter (CX1S)": "Electro-hydraulic start system, 110kW 3 phase AC motor",
+     "lube (CX1S)": "4500ltr integral oil tank is incorporated within the baseplate ... Gearbox driven main lube oil pump AC driven auxiliary pump DC driven emergency pump",
+     "exhaust_exit (CX1S)": "Axial exhaust exit",
+     "generator (CX1S)": "4 poles, 3 phase synchronous",
+     "variable_geometry (HEA, EVGV)": "*Subject to control system and Variable Guide Vane Actuation compatibility. ... The new EVGV assembly is designed to fit the existing support bracket on the core and is compatible with SGT-100, SGT-300, and SGT-400, as well as in the legacy fleet model SGT-200. ... VGV actuation systems have historically been either hydraulic, pneumatic or electric but many of these parts are facing obsolescence issues.",
+     "installed fleet rating (HEA)": "Customers who own and operate SGT-300-1S (7.9 MW) units and are seeking a retrofit HEA compressor upgrade to improve efficiency and operational performance without major package changes. ... To ensure retrofitability, the stage and blade counts, as well as their axial positions, are maintained within the existing compressor rotor and casings. ... ~180 kW power uplift at base load (site-dependent)",
+     "Centrax CX300-1S package": "10369mm / 408in ... 6087mm / 239in ... 14526mm / 572in ... Approx total weight = 84000 KG / 185188 lbs ... Single-skid baseplate for driver and driven equipment",
+     "fuel_gas_note (IFV)": "This can translate to a lower required gas fuel supply pressure. ... Up to 3 IFVs may be required depending on the number of gas streams i.e. whether the engine is non-DLE, DLE or EDLE."
+    }
+   }
+  },
+  {
+   "model": "SGT-300 (8.4 MW)",
+   "variant": "MD 8.4 MW",
+   "power_kW": 8400,
+   "heat_rate_kJ_kWh": 10204,
+   "eff_pct": 35.3,
+   "exh_flow_kg_s": 29.5,
+   "exh_temp_C": 490,
+   "PR": 13.9,
+   "comp_stages": "10",
+   "turb_stages": "2 GG + 2 PT (2-stage gas generator turbine, 2-stage free power turbine)",
+   "shafts": "two",
+   "out_rpm": "11500 rpm nominal (100 % design speed of the power-turbine drive shaft); range 5750-12075 rpm ('5,750 – 11,500 – 12,075 rpm')",
+   "pkg_L_m": 6.9,
+   "pkg_W_m": 2.9,
+   "pkg_H_m": 3.5,
+   "pkg_kg": 30409,
+   "engine_kg": null,
+   "engine_L_m": null,
+   "engine_D_m": null,
+   "extra": {
+    "engine_designation": "SGT-300-2S (twin-shaft; designation used by Centrax 'Siemens SGT-300-2S')",
+    "fuel_gas_kPa": null,
+    "fuel_gas_note": "Required fuel-gas supply pressure not published. IFV flyer (applies to SGT-300): the Integrated Fuel Valve 'can translate to a lower required gas fuel supply pressure'; 'Up to 3 IFVs may be required depending on the number of gas streams i.e. whether the engine is non-DLE, DLE or EDLE.' Gas fuel module is common to SGT-100..SGT-400 (PAGE).",
+    "inlet_dp_kPa": null,
+    "exhaust_dp_kPa": null,
+    "inlet_exhaust_dp_note": "Siemens rating basis only: 'All simple cycle and mechanical drive performance data in this document are gross values at ISO ambient conditions.' (PORTF); inlet/exhaust losses not stated. Centrax CX300 ratings: '* Inlet losses, exhaust losses & package auxiliary losses are excluded' (zero-loss basis), ISO 15 °C, sea level, 1013 mbar, 60 % RH, natural gas LHV 47,889 kJ/kg.",
+    "engine_removal": "Siemens PAGE: 'Large side doors on enclosure for equipment exchange'; 'Internal lifting equipment'; 'Package designed for gas turbine removal on either side'; 'Rapid core exchange option for minimized downtimes'; 'The core engine maintenance can be performed on-site or off-site.' PORTF p.16: 'Package is designed for rapid core engine exchange'. So the engine is withdrawn sideways (either side) through the enclosure side doors on the package's internal lifting equipment. Centrax CX300 packages: 'Integral engine and auxiliary maintenance beams'. Change-out time, lift weight and side clearance not published.",
+    "compressor": "10 axial stages (Centrax: '10 Stage axial compressor'); 'Horizontally split compressor casing'; 'Horizontally and vertically split inlet casing'; 'The first stage rotor blades can be axially removed for quick and easy on-site exchange' (PAGE). Compressor (inlet) air mass flow not published.",
+    "combustor": "'can annular combustion system with six reverse-flow tubular chambers, and a high energy igniter in each combustor'; 'six reverse-flow tubular combustion chambers positioned around a high-pressure casing' (PAGE); Centrax: '6 reverse flow combustion chambers (cans)'. DLE standard; up to 30 vol% H2 with DLE burners; Wobbe 50 down to 17.5 MJ/m3 (PAGE, stated for the single-shaft engine).",
+    "package_contents": "'The packages incorporate gas turbine, gearbox (where applicable), drive unit and all factory-tested fluid modules, all of which are mounted on an underbase.'; fluid modules common to SGT-100..SGT-400: auto drains, gas fuel, lube oil, liquid fuel (optional) (PAGE).",
+    "pkg_basis": "MD package excl. driven equipment; 'Dimensions exclude inlet filter housing and exhaust stack. For power generation, the AC generator is included. For mechanical drive, the driven equipment is excluded.' (PAGE)",
+    "fleet_experience": "'over 200 units have been sold, contributing to a combined fleet experience exceeding of over 10 million equivalent operating hours, which demontsrates a class-leading reliability rate of 99.5%' (PAGE; typos as printed)",
+    "not_published": "Not published in any document that could be opened (PAGE, PAGE_US, POSTER, PORTF, CN, BR, HEA, EVGV, IFV, CX1S, CX2S): core-engine weight and envelope (length, diameter), required fuel-gas supply pressure at the package inlet, lube-oil flow and heat rejection, number of bleed (blow-off) valves, engine accessory gearbox, number of bearings of the twin-shaft engine, inlet/exhaust pressure losses assumed in the Siemens rating, engine change-out time, Siemens-package starter type/power, Siemens-package lube-tank volume, inlet (compressor) air mass flow.",
+    "rating_editions": "Same two editions as described in record 'PG 8.0 MW', extra.rating_editions (edition C taken).",
+    "package_editions": "See record 'PG 8.0 MW', extra.package_editions (MD package 6.9 x 2.9 x 3.5 m, 30,409 kg identical in PAGE, PORTF p.16, BR).",
+    "rating": "8 MW version",
+    "power_at": "'Power output | 8.4 MW | 9.1 MW' under 'Mechanical drive' (PAGE): power-turbine shaft output, ISO, gross ('gross values at ISO ambient conditions', PORTF)",
+    "starter": {
+     "type": null,
+     "kW": null,
+     "siemens_package": null,
+     "centrax_cx300_2s_generator_package": "electro-hydraulic, 110 kW 3-phase AC motor ('Electro-hydraulic start system, 110kW 3 phase AC motor') - generator set on the same twin-shaft core, not the Siemens MD package"
+    },
+    "lube": {
+     "tank_l": null,
+     "flow": null,
+     "heat_rejection_kW": null,
+     "siemens_package": "Lube oil module (common SGT-100..SGT-400 fluid module, PAGE); volume/flow/heat rejection not published",
+     "centrax_cx300_2s_generator_package": "'5500ltr integral oil tank is incorporated within the turbine baseplate'; gearbox-driven main pump, AC auxiliary pump, DC emergency pump"
+    },
+    "variable_geometry": {
+     "rows": "variable guide vanes on stages 1 to 5 (Centrax CX300-2S, twin-shaft core; whether the inlet guide vane row is counted is not stated). NB Centrax gives 'stages 1 to 4' for the single-shaft core",
+     "actuator": "Siemens EVGV electric actuator retrofit applies to SGT-300 (EVGV flyer)",
+     "quote": "10 Stage axial compressor with variable guide vanes on stages 1 to 5 (CX2S)"
+    },
+    "bleed_valves": {
+     "count": null,
+     "quote": "Pressure ratio 13.7:1, blow-off valves to prevent compressor surge (CX2S; the 13.7:1 there is the single-shaft figure repeated)"
+    },
+    "accessory_gearbox": {
+     "present": null,
+     "note": "Not published for the Siemens MD package. Centrax CX300-2S: 'Gearbox driven main lube oil pump' - the generator speed-reduction gearbox of that package"
+    },
+    "bearings": {
+     "type": "tilting-pad journal and thrust (CX2S)",
+     "count": null,
+     "quote": "Tilting pad journal & thrust bearings (CX2S)"
+    },
+    "drive_end": "hot end (exhaust end) - 'Power take-off through exhaust end (hot end drive)' (CX2S, twin-shaft core)",
+    "exhaust_exit": "radial - 'Radial exhaust exit (Left/Right/Vertical)' (CX2S package on the twin-shaft core); Siemens MD package exhaust orientation not published",
+    "turndown": "'The twin-shaft configuration offers excellent speed and load turndown characteristics to allow maximum flexibility of operation.' (PAGE)",
+    "out_rpm_note": "PAGE labels the row 'Turbine speed'; PORTF p.16 labels it 'Drive shaft speed' with '* Value shown indicates 100%-design speed of drive shaft'; POSTER '5,750 / 11,500 / 12,075 rpm'. Minimum 5,750 = 50 %, maximum 12,075 = 105 % of 11,500",
+    "alt_package_centrax_cx300_2s": {
+     "power_kWe": 8606,
+     "heat_rate_kJ_kWh": 10374,
+     "eff_pct_printed": 35,
+     "exh_flow_kg_s": 30.1,
+     "exh_temp_C": 498,
+     "overall_H_mm": 9748,
+     "overall_W_mm": 7398,
+     "overall_L_mm": "4400 + 11876",
+     "total_kg": 117000,
+     "basis": "Centrax generator set on the twin-shaft SGT-300-2S core (title '8.5MW', spec header '8.6MWe', table 8606 kWe), ISO, inlet/exhaust/auxiliary losses excluded; two baseplates (turbine & gearbox / generator), each for single point lift; overall incl. inlet filter house (drawing)",
+     "note": "Third-party generator package on the MD core - not a Siemens rating; '9748mm / 777in' inch value misprinted"
+    },
+    "check": "Two-way check: (1) second document - 8.4 MW, 35.3 %, 10,204 kJ/kWh, 5,750 – 11,500 – 12,075 rpm, 29.5 kg/s, 490 °C identical in PAGE, PAGE_US, PORTF p.16 and p.24, POSTER, CN, BR; PR 13.9 : 1 in PAGE/PORTF p.16/p.24 metric, 13.5:1 in POSTER, CN, BR, PORTF p.24 imperial (older edition). (2) internal - 3600/10,204 = 35.28 %; 7,212 Btu/hph = 10,204 kJ/kWh (PAGE labels it 'Btu/kWh' - wrong unit; PORTF p.16 and POSTER print 'Btu/hph'); BR 9.666 Btu/kWh = 10,198 kJ/kWh; 65.0 lb/s = 29.48 kg/s; 914 °F = 490.0 °C; package 67,042 lb = 30,410 kg, 22.6 ft = 6.89 m, 9.5 ft = 2.90 m, 11.5 ft = 3.51 m (consistent). POSTER '8.4 MW (11,214 hp)': 11,214 hp = 8,362 kW (pair off by 0.45 %). Exhaust energy balance q = 29.5*1.10*475/(8400*(100/35.28-1)) = 1.00 (band 0.88-1.06)."
+   },
+   "sources": {
+    "power_kW": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "heat_rate_kJ_kWh": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "eff_pct": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "exh_flow_kg_s": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "exh_temp_C": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "PR": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "comp_stages": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf",
+    "turb_stages": [
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf"
+    ],
+    "shafts": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "out_rpm": [
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+     "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "https://assets.siemens-energy.com/dam/c71bf020-1e39-48e7-8e56-b0840000a12a/Poster-SGT-300-pdf_Original%20file.pdf"
+    ],
+    "pkg_L_m": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "pkg_W_m": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "pkg_H_m": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "pkg_kg": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "starter": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf",
+    "lube": [
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf"
+    ],
+    "variable_geometry": [
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf",
+     "https://assets.siemens-energy.com/dam/58b94f37-1abf-4e19-aa5f-b4a50085bfae/EVGVUP~1-PDF_Original%20file.PDF"
+    ],
+    "bleed_valves": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf",
+    "accessory_gearbox": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf",
+    "bearings": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf",
+    "drive_end": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf",
+    "exhaust_exit": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf",
+    "turndown": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "out_rpm_note": [
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+     "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "https://assets.siemens-energy.com/dam/c71bf020-1e39-48e7-8e56-b0840000a12a/Poster-SGT-300-pdf_Original%20file.pdf"
+    ],
+    "alt_package_centrax_cx300_2s": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf",
+    "power_at": [
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+     "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf"
+    ],
+    "fuel_gas_kPa": null,
+    "fuel_gas_note": "https://assets.siemens-energy.com/dam/68090946-00cd-4874-b448-b46400e22761/IFV-Upgrade-Flyer_SGT-pdf_Original%20file.pdf",
+    "inlet_dp_kPa": null,
+    "exhaust_dp_kPa": null,
+    "inlet_exhaust_dp_note": [
+     "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX300-1S-web.pdf",
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf"
+    ],
+    "engine_removal": [
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+     "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf"
+    ],
+    "compressor": [
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX300-1S-web.pdf",
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf",
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html"
+    ],
+    "combustor": [
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX300-1S-web.pdf"
+    ],
+    "package_contents": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "pkg_basis": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "fleet_experience": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "engine_kg": null,
+    "engine_L_m": null,
+    "engine_D_m": null,
+    "editions_cross_check": [
+     "https://www.siemens-energy.com/us/en/home/products-services/product/sgt-300.html",
+     "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "https://assets.siemens-energy.com/dam/c71bf020-1e39-48e7-8e56-b0840000a12a/Poster-SGT-300-pdf_Original%20file.pdf",
+     "https://assets.siemens-energy.com/dam/d3583a28-872b-43e6-b799-b03e0003192e/Poster-SGT-300-pdf_Original%20file.pdf",
+     "https://www.siemens-energy.com/cn/zh/home/products-services/product/sgt-300.html",
+     "https://www.siemens-energy.com/br/pt/home/products-services/product/sgt-300.html"
+    ],
+    "quotes": {
+     "power_kW|heat_rate_kJ_kWh|eff_pct|exh_flow_kg_s|exh_temp_C|PR|out_rpm (PAGE)": "8 MW version | 9 MW version | Power output | 8.4 MW | 9.1 MW | Fuel* | Natural gas, liquid fuel, dual fuel | Natural gas, liquid fuel, dual fuel | Efficiency | 35.3% | 35.9% | Heat rate | 10,204 kJ/kWh (7,212 Btu/kWh) | 10,003 kJ/kWh (7,070 Btu/kWh) | Turbine speed | 5,750 – 11,500 – 12,075 rpm | 5,750 – 11,500 – 12,075 rpm | Pressure ratio | 13.9 : 1 | 14.6 : 1 | Exhaust mass flow | 29.5 kg/s (65.0 lb/s) | 30.4 kg/s (67.0 lb/s) | Exhaust temperature | 490 °C (914 °F) | 504 °C (939 °F)",
+     "out_rpm (PORTF p.16)": "Efficiency 35.3% 35.9% Heat rate 10,204 kJ/kWh (7,212 Btu/hph) 10,003 kJ/kWh (7,070 Btu/hph) Drive shaft speed 5,750 – 11,500 – 12,075 rpm* 5,750 – 11,500 – 12,075 rpm* Pressure ratio 13.9 : 1 14.6 : 1 Exhaust mass flow 29.5 kg/s (65.0 lb/s) 30.4 kg/s (67.0 lb/s) Exhaust temperature 490 °C (914 °F) 504 °C (939 °F) ... * Value shown indicates 100%-design speed of drive shaft",
+     "turb_stages (PAGE)": "The SGT-300 twin-shaft has a 2-stage gas generator turbine and a 2-stage power turbine. ... Its modular design approach allows turbine module exchanges to be carried out on-site as an alternative to a gas generator or power turbine service exchange.",
+     "turb_stages|drive_end|bearings (CX2S)": "2 stage compressor turbine, 2 stage power turbine Power take-off through exhaust end (hot end drive) Tilting pad journal & thrust bearings",
+     "comp_stages|variable_geometry|bleed_valves (CX2S)": "Industrial twin shaft design 10 Stage axial compressor with variable guide vanes on stages 1 to 5 Pressure ratio 13.7:1, blow-off valves to prevent compressor surge",
+     "shafts (PAGE)": "With a single-shaft configuration providing an electrical power output of 8.0 MW, and a twin-shaft version delivering either 8.4 MW or 9.1 MW ... It is available in a single-shaft configuration for power generation and a twin-shaft version for mechanical drive applications.",
+     "pkg_L_m|pkg_W_m|pkg_H_m|pkg_kg (PAGE)": "Power generation package | Mechanical drive package | Approx. weight | 58.967 kg (130,844 lb) | 30,409 kg (67,042 lb) | Length | 11.9 m (39.0 ft) | 6.9 m (22.6 ft) | Width | 2.7 m (8.8 ft) | 2.9 m (9.5 ft) | Height | 4.0 m (13.1 ft) | 3.5 m (11.5 ft)",
+     "pkg_basis (PAGE)": "Dimensions exclude inlet filter housing and exhaust stack. For power generation, the AC generator is included. For mechanical drive, the driven equipment is excluded.",
+     "second document: PORTF p.16 data sheet": "Power output 8.4 MW 9.1 MW ... Efficiency 35.3% 35.9% Heat rate 10,204 kJ/kWh (7,212 Btu/hph) 10,003 kJ/kWh (7,070 Btu/hph) Drive shaft speed 5,750 – 11,500 – 12,075 rpm* 5,750 – 11,500 – 12,075 rpm* Pressure ratio 13.9 : 1 14.6 : 1 Exhaust mass flow 29.5 kg/s (65.0 lb/s) 30.4 kg/s (67.0 lb/s) Exhaust temperature 490 °C (914 °F) 504 °C (939 °F)",
+     "second document: PORTF p.24 metric": "SGT-300 (9 MW) 9.1 MW 35.9% 10,003 kJ/kWh 5,750 – 11,500 – 12,075 rpm 14.6 : 1 30.4 kg/s 504 °C SGT-300 (8 MW) 8.4 MW 35.3% 10,204 kJ/kWh 5,750 – 11,500 – 12,075 rpm 13.9 : 1 29.5 kg/s 490 °C",
+     "PORTF p.24 imperial (older PR)": "SGT-300 (9 MW) 9.1 MW 36.0% 9,476 Btu/kWh 7,070 Btu/hph 5,750 – 11,500 – 12,075 rpm 14.1 : 1 67.0 lb/s 939 °F SGT-300 (8 MW) 8.4 MW 35.3% 9,666 Btu/kWh 7,212 Btu/hph 5,750 – 11,500 – 12,075 rpm 13.5 : 1 65.0 lb/s 914 °F",
+     "PORTF p.16 summary block": "Power generation Mechanical drive applications Frequency 50/60 Hz Efficiency 35.3 – 36.0% Gross efficiency 30.8% Exhaust temperature 490 – 504 °C (914 – 939 °F) Exhaust temperature 534 °C (993 °F) Exhaust mass flow 29.5 – 30.4 kg/s Exhaust mass flow 30.2 kg/s",
+     "second document: PORTF p.16 package": "SGT-300: Physical dimensions Power generation package Mechanical drive package Approx. weight 58.967 kg (130,844 lb) 30.409 kg (67,042 lb) Length 11.9 m (39.0 ft) 6.9 m (22.6 ft) Width 2.7 m (8.8 ft) 2.9 m (9.5 ft) Height 4.0 m (13.1 ft) 3.5 m (11.5 ft) Note: Above dimensions exclude inlet filter housing and exhaust stack. For power generation, AC generator is included. For mechanical drive, driven equipment is excluded.",
+     "rating basis (PORTF)": "All simple cycle and mechanical drive performance data in this document are gross values at ISO ambient conditions.",
+     "edition A: POSTER (2021)": "Power Simple cycle 7.9 MW Mech. Drive 8.4 MW (11,214 hp) Mech. Drive 9.1 MW (12,317 hp) Gross efficiency 30.8% 35.3% 36% Heat rate 11,704 kJ / kWh (11,089 Btu / kWh) 10,204 kJ / kWh (7,212 Btu / hph) 10,003 kJ / kWh (7,070 Btu / hph) Turbine speed 14,045 rpm 5,750 / 11,500 / 12,075 rpm 5,750 / 11,500 / 12,075 rpm Pressure ratio 13.7:1 13.5:1 14.1:1 Exhaust mass flow 30.2 kg / s (66.6 lb / s) 29.5 kg / s (65.0 lb / s) 30.4 kg / s (67.0 lb / s) Exhaust temperature 543°C (993°F) 490°C (914°F) 504°C (939°F)",
+     "edition A: CN page": "总效率 | 35.3% | 36.0% | 总热耗率 | 10,204 千焦/千瓦时 | 10,003 千焦/千瓦时 | 涡轮转速 | 5,750 – 11,500 – 12,075 转/分 | 5,750 – 11,500 – 12,075 转/分 | 压力比 | 13.5 : 1 | 14.1 : 1",
+     "edition A: BR page": "Eficiência | 35.3% | 36.0% | Taxa de calor | 10.204 kJ/kWh (9.666 Btu/kWh) | 10.003 kJ/kWh (9.476 Btu/kWh) | Velocidade da turbina | 5.750 – 11.500 – 12.075 rpm | 5.750 – 11.500 – 12.075 rpm | Relação de pressão | 13.5 : 1 | 14.1 : 1 | Caudal mássico dos gases de escape | 29,5 kg/s (67,0 lb/s) | 30,4 kg/s )65,0 lb/s)",
+     "turndown (PAGE)": "The twin-shaft configuration offers excellent speed and load turndown characteristics to allow maximum flexibility of operation.",
+     "Centrax CX300-2S performance": "CX300-2S 8.5MW Gas Turbine Generator Set ... Power Output 8606 kWe Heat Rate 10374 kJ/kWh 9833 BTU/kWh Exhaust Flow 30.1 kg/s 66.4 Ib/s Exhaust Temperature 498ºc 928ºF ... Electrical efficiency at generator terminals 35% ... * Inlet losses, exhaust losses & package auxiliary losses are excluded ... General specifications - Siemens SGT-300-2S 8.6MWe",
+     "starter (CX2S)": "Electro-hydraulic start system, 110kW 3 phase AC motor",
+     "lube (CX2S)": "5500ltr integral oil tank is incorporated within the turbine baseplate ... Gearbox driven main lube oil pump AC driven auxiliary pump DC driven emergency pump",
+     "exhaust_exit (CX2S)": "Radial exhaust exit (Left/Right/Vertical)",
+     "variable_geometry (EVGV)": "The new EVGV assembly is designed to fit the existing support bracket on the core and is compatible with SGT-100, SGT-300, and SGT-400, as well as in the legacy fleet model SGT-200.",
+     "Centrax CX300-2S package": "9748mm / 777in ... 7398mm / 291in ... 4400mm / 173in ... 11876mm / 467in ... Approx total weight = 117000 KG / 257941 lbs ... Two baseplates for driver (turbine & gearbox) and driven (generator) equipment",
+     "fuel_gas_note (IFV)": "This can translate to a lower required gas fuel supply pressure. ... Up to 3 IFVs may be required depending on the number of gas streams i.e. whether the engine is non-DLE, DLE or EDLE."
+    }
+   },
+   "notes": "Current Siemens page values (edition C: global = US page = PORTF p.16 and p.24 metric). eff_pct as printed (3600/10,204 = 35.28 %). Older edition (2021 poster, CN, BR, PORTF p.24 imperial): PR 13.5:1, all other values identical. PAGE prints the heat rate pair as '(7,212 Btu/kWh)'; 7,212 is Btu/hph (PORTF p.16 and POSTER print 'Btu/hph'; BR prints 9.666 Btu/kWh). BR swaps the lb/s figures of the two MD versions. out_rpm: nominal 11,500 rpm (100 % design speed of the drive shaft), range 5,750-12,075 rpm. MD package (6.9 x 2.9 x 3.5 m, 30,409 kg) common to both MD ratings, excl. driven equipment, inlet filter house and exhaust stack. comp_stages and VGV/bearing/drive-end details from Centrax CX300-2S data sheet (generator set on the twin-shaft core; third party) - no opened Siemens document states the compressor stage count."
+  },
+  {
+   "model": "SGT-300 (9.1 MW)",
+   "variant": "MD 9.1 MW",
+   "power_kW": 9100,
+   "heat_rate_kJ_kWh": 10003,
+   "eff_pct": 35.9,
+   "exh_flow_kg_s": 30.4,
+   "exh_temp_C": 504,
+   "PR": 14.6,
+   "comp_stages": "10",
+   "turb_stages": "2 GG + 2 PT (2-stage gas generator turbine, 2-stage free power turbine)",
+   "shafts": "two",
+   "out_rpm": "11500 rpm nominal (100 % design speed of the power-turbine drive shaft); range 5750-12075 rpm ('5,750 – 11,500 – 12,075 rpm')",
+   "pkg_L_m": 6.9,
+   "pkg_W_m": 2.9,
+   "pkg_H_m": 3.5,
+   "pkg_kg": 30409,
+   "engine_kg": null,
+   "engine_L_m": null,
+   "engine_D_m": null,
+   "extra": {
+    "engine_designation": "SGT-300-2S (twin-shaft; designation used by Centrax 'Siemens SGT-300-2S')",
+    "fuel_gas_kPa": null,
+    "fuel_gas_note": "Required fuel-gas supply pressure not published. IFV flyer (applies to SGT-300): the Integrated Fuel Valve 'can translate to a lower required gas fuel supply pressure'; 'Up to 3 IFVs may be required depending on the number of gas streams i.e. whether the engine is non-DLE, DLE or EDLE.' Gas fuel module is common to SGT-100..SGT-400 (PAGE).",
+    "inlet_dp_kPa": null,
+    "exhaust_dp_kPa": null,
+    "inlet_exhaust_dp_note": "Siemens rating basis only: 'All simple cycle and mechanical drive performance data in this document are gross values at ISO ambient conditions.' (PORTF); inlet/exhaust losses not stated. Centrax CX300 ratings: '* Inlet losses, exhaust losses & package auxiliary losses are excluded' (zero-loss basis), ISO 15 °C, sea level, 1013 mbar, 60 % RH, natural gas LHV 47,889 kJ/kg.",
+    "engine_removal": "Siemens PAGE: 'Large side doors on enclosure for equipment exchange'; 'Internal lifting equipment'; 'Package designed for gas turbine removal on either side'; 'Rapid core exchange option for minimized downtimes'; 'The core engine maintenance can be performed on-site or off-site.' PORTF p.16: 'Package is designed for rapid core engine exchange'. So the engine is withdrawn sideways (either side) through the enclosure side doors on the package's internal lifting equipment. Centrax CX300 packages: 'Integral engine and auxiliary maintenance beams'. Change-out time, lift weight and side clearance not published.",
+    "compressor": "10 axial stages (Centrax: '10 Stage axial compressor'); 'Horizontally split compressor casing'; 'Horizontally and vertically split inlet casing'; 'The first stage rotor blades can be axially removed for quick and easy on-site exchange' (PAGE). Compressor (inlet) air mass flow not published.",
+    "combustor": "'can annular combustion system with six reverse-flow tubular chambers, and a high energy igniter in each combustor'; 'six reverse-flow tubular combustion chambers positioned around a high-pressure casing' (PAGE); Centrax: '6 reverse flow combustion chambers (cans)'. DLE standard; up to 30 vol% H2 with DLE burners; Wobbe 50 down to 17.5 MJ/m3 (PAGE, stated for the single-shaft engine).",
+    "package_contents": "'The packages incorporate gas turbine, gearbox (where applicable), drive unit and all factory-tested fluid modules, all of which are mounted on an underbase.'; fluid modules common to SGT-100..SGT-400: auto drains, gas fuel, lube oil, liquid fuel (optional) (PAGE).",
+    "pkg_basis": "MD package excl. driven equipment; 'Dimensions exclude inlet filter housing and exhaust stack. For power generation, the AC generator is included. For mechanical drive, the driven equipment is excluded.' (PAGE)",
+    "fleet_experience": "'over 200 units have been sold, contributing to a combined fleet experience exceeding of over 10 million equivalent operating hours, which demontsrates a class-leading reliability rate of 99.5%' (PAGE; typos as printed)",
+    "not_published": "Not published in any document that could be opened (PAGE, PAGE_US, POSTER, PORTF, CN, BR, HEA, EVGV, IFV, CX1S, CX2S): core-engine weight and envelope (length, diameter), required fuel-gas supply pressure at the package inlet, lube-oil flow and heat rejection, number of bleed (blow-off) valves, engine accessory gearbox, number of bearings of the twin-shaft engine, inlet/exhaust pressure losses assumed in the Siemens rating, engine change-out time, Siemens-package starter type/power, Siemens-package lube-tank volume, inlet (compressor) air mass flow.",
+    "rating_editions": "Same two editions as described in record 'PG 8.0 MW', extra.rating_editions (edition C taken).",
+    "package_editions": "See record 'PG 8.0 MW', extra.package_editions (MD package 6.9 x 2.9 x 3.5 m, 30,409 kg identical in PAGE, PORTF p.16, BR).",
+    "rating": "9 MW version",
+    "power_at": "'Power output | 8.4 MW | 9.1 MW' under 'Mechanical drive' (PAGE): power-turbine shaft output, ISO, gross ('gross values at ISO ambient conditions', PORTF)",
+    "starter": {
+     "type": null,
+     "kW": null,
+     "siemens_package": null,
+     "centrax_cx300_2s_generator_package": "electro-hydraulic, 110 kW 3-phase AC motor ('Electro-hydraulic start system, 110kW 3 phase AC motor') - generator set on the same twin-shaft core, not the Siemens MD package"
+    },
+    "lube": {
+     "tank_l": null,
+     "flow": null,
+     "heat_rejection_kW": null,
+     "siemens_package": "Lube oil module (common SGT-100..SGT-400 fluid module, PAGE); volume/flow/heat rejection not published",
+     "centrax_cx300_2s_generator_package": "'5500ltr integral oil tank is incorporated within the turbine baseplate'; gearbox-driven main pump, AC auxiliary pump, DC emergency pump"
+    },
+    "variable_geometry": {
+     "rows": "variable guide vanes on stages 1 to 5 (Centrax CX300-2S, twin-shaft core; whether the inlet guide vane row is counted is not stated). NB Centrax gives 'stages 1 to 4' for the single-shaft core",
+     "actuator": "Siemens EVGV electric actuator retrofit applies to SGT-300 (EVGV flyer)",
+     "quote": "10 Stage axial compressor with variable guide vanes on stages 1 to 5 (CX2S)"
+    },
+    "bleed_valves": {
+     "count": null,
+     "quote": "Pressure ratio 13.7:1, blow-off valves to prevent compressor surge (CX2S; the 13.7:1 there is the single-shaft figure repeated)"
+    },
+    "accessory_gearbox": {
+     "present": null,
+     "note": "Not published for the Siemens MD package. Centrax CX300-2S: 'Gearbox driven main lube oil pump' - the generator speed-reduction gearbox of that package"
+    },
+    "bearings": {
+     "type": "tilting-pad journal and thrust (CX2S)",
+     "count": null,
+     "quote": "Tilting pad journal & thrust bearings (CX2S)"
+    },
+    "drive_end": "hot end (exhaust end) - 'Power take-off through exhaust end (hot end drive)' (CX2S, twin-shaft core)",
+    "exhaust_exit": "radial - 'Radial exhaust exit (Left/Right/Vertical)' (CX2S package on the twin-shaft core); Siemens MD package exhaust orientation not published",
+    "turndown": "'The twin-shaft configuration offers excellent speed and load turndown characteristics to allow maximum flexibility of operation.' (PAGE)",
+    "out_rpm_note": "PAGE labels the row 'Turbine speed'; PORTF p.16 labels it 'Drive shaft speed' with '* Value shown indicates 100%-design speed of drive shaft'; POSTER '5,750 / 11,500 / 12,075 rpm'. Minimum 5,750 = 50 %, maximum 12,075 = 105 % of 11,500",
+    "alt_package_centrax_cx300_2s": {
+     "power_kWe": 8606,
+     "heat_rate_kJ_kWh": 10374,
+     "eff_pct_printed": 35,
+     "exh_flow_kg_s": 30.1,
+     "exh_temp_C": 498,
+     "overall_H_mm": 9748,
+     "overall_W_mm": 7398,
+     "overall_L_mm": "4400 + 11876",
+     "total_kg": 117000,
+     "basis": "Centrax generator set on the twin-shaft SGT-300-2S core (title '8.5MW', spec header '8.6MWe', table 8606 kWe), ISO, inlet/exhaust/auxiliary losses excluded; two baseplates (turbine & gearbox / generator), each for single point lift; overall incl. inlet filter house (drawing)",
+     "note": "Third-party generator package on the MD core - not a Siemens rating; '9748mm / 777in' inch value misprinted"
+    },
+    "check": "Two-way check: (1) second document - 9.1 MW, 10,003 kJ/kWh, 5,750 – 11,500 – 12,075 rpm, 30.4 kg/s, 504 °C identical in PAGE, PAGE_US, PORTF p.16 and p.24, POSTER, CN, BR; efficiency 35.9 % in PAGE, PORTF p.16 and p.24 metric; 36 % / 36.0 % in POSTER, CN, BR, PORTF p.24 imperial and PORTF p.16 summary ('35.3 – 36.0%'); PR 14.6 : 1 (edition C) vs 14.1:1 (edition A). (2) internal - 3600/10,003 = 35.99 % (closer to 36.0 % than to the 35.9 % printed on the current page; difference 0.09 pp, inside the 0.15 pp tolerance, printed value kept); 7,070 Btu/hph = 10,003 kJ/kWh; BR 9.476 Btu/kWh = 9,998 kJ/kWh; 67.0 lb/s = 30.39 kg/s; 939 °F = 503.9 °C (consistent). POSTER '9.1 MW (12,317 hp)': 12,317 hp = 9,185 kW (pair off by 0.9 %). Exhaust energy balance q = 30.4*1.10*489/(9100*(100/35.99-1)) = 1.01 (band 0.88-1.06)."
+   },
+   "sources": {
+    "power_kW": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "heat_rate_kJ_kWh": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "eff_pct": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "exh_flow_kg_s": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "exh_temp_C": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "PR": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "comp_stages": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf",
+    "turb_stages": [
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf"
+    ],
+    "shafts": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "out_rpm": [
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+     "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "https://assets.siemens-energy.com/dam/c71bf020-1e39-48e7-8e56-b0840000a12a/Poster-SGT-300-pdf_Original%20file.pdf"
+    ],
+    "pkg_L_m": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "pkg_W_m": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "pkg_H_m": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "pkg_kg": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "starter": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf",
+    "lube": [
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf"
+    ],
+    "variable_geometry": [
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf",
+     "https://assets.siemens-energy.com/dam/58b94f37-1abf-4e19-aa5f-b4a50085bfae/EVGVUP~1-PDF_Original%20file.PDF"
+    ],
+    "bleed_valves": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf",
+    "accessory_gearbox": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf",
+    "bearings": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf",
+    "drive_end": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf",
+    "exhaust_exit": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf",
+    "turndown": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "out_rpm_note": [
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+     "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "https://assets.siemens-energy.com/dam/c71bf020-1e39-48e7-8e56-b0840000a12a/Poster-SGT-300-pdf_Original%20file.pdf"
+    ],
+    "alt_package_centrax_cx300_2s": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf",
+    "power_at": [
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+     "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf"
+    ],
+    "fuel_gas_kPa": null,
+    "fuel_gas_note": "https://assets.siemens-energy.com/dam/68090946-00cd-4874-b448-b46400e22761/IFV-Upgrade-Flyer_SGT-pdf_Original%20file.pdf",
+    "inlet_dp_kPa": null,
+    "exhaust_dp_kPa": null,
+    "inlet_exhaust_dp_note": [
+     "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX300-1S-web.pdf",
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf"
+    ],
+    "engine_removal": [
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+     "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf"
+    ],
+    "compressor": [
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX300-1S-web.pdf",
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-_CX300-2S-web.pdf",
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html"
+    ],
+    "combustor": [
+     "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+     "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CX300-1S-web.pdf"
+    ],
+    "package_contents": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "pkg_basis": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "fleet_experience": "https://www.siemens-energy.com/global/en/home/products-services/product/sgt-300.html",
+    "engine_kg": null,
+    "engine_L_m": null,
+    "engine_D_m": null,
+    "editions_cross_check": [
+     "https://www.siemens-energy.com/us/en/home/products-services/product/sgt-300.html",
+     "https://assets.siemens-energy.com/dam/4b92fab0-08bf-4ffe-8eb9-b3da0096cddd/GT-Portfolio-Brochure__HQ-pdf_Original%20file.pdf",
+     "https://assets.siemens-energy.com/dam/c71bf020-1e39-48e7-8e56-b0840000a12a/Poster-SGT-300-pdf_Original%20file.pdf",
+     "https://assets.siemens-energy.com/dam/d3583a28-872b-43e6-b799-b03e0003192e/Poster-SGT-300-pdf_Original%20file.pdf",
+     "https://www.siemens-energy.com/cn/zh/home/products-services/product/sgt-300.html",
+     "https://www.siemens-energy.com/br/pt/home/products-services/product/sgt-300.html"
+    ],
+    "quotes": {
+     "power_kW|heat_rate_kJ_kWh|eff_pct|exh_flow_kg_s|exh_temp_C|PR|out_rpm (PAGE)": "8 MW version | 9 MW version | Power output | 8.4 MW | 9.1 MW | Fuel* | Natural gas, liquid fuel, dual fuel | Natural gas, liquid fuel, dual fuel | Efficiency | 35.3% | 35.9% | Heat rate | 10,204 kJ/kWh (7,212 Btu/kWh) | 10,003 kJ/kWh (7,070 Btu/kWh) | Turbine speed | 5,750 – 11,500 – 12,075 rpm | 5,750 – 11,500 – 12,075 rpm | Pressure ratio | 13.9 : 1 | 14.6 : 1 | Exhaust mass flow | 29.5 kg/s (65.0 lb/s) | 30.4 kg/s (67.0 lb/s) | Exhaust temperature | 490 °C (914 °F) | 504 °C (939 °F)",
+     "out_rpm (PORTF p.16)": "Efficiency 35.3% 35.9% Heat rate 10,204 kJ/kWh (7,212 Btu/hph) 10,003 kJ/kWh (7,070 Btu/hph) Drive shaft speed 5,750 – 11,500 – 12,075 rpm* 5,750 – 11,500 – 12,075 rpm* Pressure ratio 13.9 : 1 14.6 : 1 Exhaust mass flow 29.5 kg/s (65.0 lb/s) 30.4 kg/s (67.0 lb/s) Exhaust temperature 490 °C (914 °F) 504 °C (939 °F) ... * Value shown indicates 100%-design speed of drive shaft",
+     "turb_stages (PAGE)": "The SGT-300 twin-shaft has a 2-stage gas generator turbine and a 2-stage power turbine. ... Its modular design approach allows turbine module exchanges to be carried out on-site as an alternative to a gas generator or power turbine service exchange.",
+     "turb_stages|drive_end|bearings (CX2S)": "2 stage compressor turbine, 2 stage power turbine Power take-off through exhaust end (hot end drive) Tilting pad journal & thrust bearings",
+     "comp_stages|variable_geometry|bleed_valves (CX2S)": "Industrial twin shaft design 10 Stage axial compressor with variable guide vanes on stages 1 to 5 Pressure ratio 13.7:1, blow-off valves to prevent compressor surge",
+     "shafts (PAGE)": "With a single-shaft configuration providing an electrical power output of 8.0 MW, and a twin-shaft version delivering either 8.4 MW or 9.1 MW ... It is available in a single-shaft configuration for power generation and a twin-shaft version for mechanical drive applications.",
+     "pkg_L_m|pkg_W_m|pkg_H_m|pkg_kg (PAGE)": "Power generation package | Mechanical drive package | Approx. weight | 58.967 kg (130,844 lb) | 30,409 kg (67,042 lb) | Length | 11.9 m (39.0 ft) | 6.9 m (22.6 ft) | Width | 2.7 m (8.8 ft) | 2.9 m (9.5 ft) | Height | 4.0 m (13.1 ft) | 3.5 m (11.5 ft)",
+     "pkg_basis (PAGE)": "Dimensions exclude inlet filter housing and exhaust stack. For power generation, the AC generator is included. For mechanical drive, the driven equipment is excluded.",
+     "second document: PORTF p.16 data sheet": "Power output 8.4 MW 9.1 MW ... Efficiency 35.3% 35.9% Heat rate 10,204 kJ/kWh (7,212 Btu/hph) 10,003 kJ/kWh (7,070 Btu/hph) Drive shaft speed 5,750 – 11,500 – 12,075 rpm* 5,750 – 11,500 – 12,075 rpm* Pressure ratio 13.9 : 1 14.6 : 1 Exhaust mass flow 29.5 kg/s (65.0 lb/s) 30.4 kg/s (67.0 lb/s) Exhaust temperature 490 °C (914 °F) 504 °C (939 °F)",
+     "second document: PORTF p.24 metric": "SGT-300 (9 MW) 9.1 MW 35.9% 10,003 kJ/kWh 5,750 – 11,500 – 12,075 rpm 14.6 : 1 30.4 kg/s 504 °C SGT-300 (8 MW) 8.4 MW 35.3% 10,204 kJ/kWh 5,750 – 11,500 – 12,075 rpm 13.9 : 1 29.5 kg/s 490 °C",
+     "PORTF p.24 imperial (older PR)": "SGT-300 (9 MW) 9.1 MW 36.0% 9,476 Btu/kWh 7,070 Btu/hph 5,750 – 11,500 – 12,075 rpm 14.1 : 1 67.0 lb/s 939 °F SGT-300 (8 MW) 8.4 MW 35.3% 9,666 Btu/kWh 7,212 Btu/hph 5,750 – 11,500 – 12,075 rpm 13.5 : 1 65.0 lb/s 914 °F",
+     "PORTF p.16 summary block": "Power generation Mechanical drive applications Frequency 50/60 Hz Efficiency 35.3 – 36.0% Gross efficiency 30.8% Exhaust temperature 490 – 504 °C (914 – 939 °F) Exhaust temperature 534 °C (993 °F) Exhaust mass flow 29.5 – 30.4 kg/s Exhaust mass flow 30.2 kg/s",
+     "second document: PORTF p.16 package": "SGT-300: Physical dimensions Power generation package Mechanical drive package Approx. weight 58.967 kg (130,844 lb) 30.409 kg (67,042 lb) Length 11.9 m (39.0 ft) 6.9 m (22.6 ft) Width 2.7 m (8.8 ft) 2.9 m (9.5 ft) Height 4.0 m (13.1 ft) 3.5 m (11.5 ft) Note: Above dimensions exclude inlet filter housing and exhaust stack. For power generation, AC generator is included. For mechanical drive, driven equipment is excluded.",
+     "rating basis (PORTF)": "All simple cycle and mechanical drive performance data in this document are gross values at ISO ambient conditions.",
+     "edition A: POSTER (2021)": "Power Simple cycle 7.9 MW Mech. Drive 8.4 MW (11,214 hp) Mech. Drive 9.1 MW (12,317 hp) Gross efficiency 30.8% 35.3% 36% Heat rate 11,704 kJ / kWh (11,089 Btu / kWh) 10,204 kJ / kWh (7,212 Btu / hph) 10,003 kJ / kWh (7,070 Btu / hph) Turbine speed 14,045 rpm 5,750 / 11,500 / 12,075 rpm 5,750 / 11,500 / 12,075 rpm Pressure ratio 13.7:1 13.5:1 14.1:1 Exhaust mass flow 30.2 kg / s (66.6 lb / s) 29.5 kg / s (65.0 lb / s) 30.4 kg / s (67.0 lb / s) Exhaust temperature 543°C (993°F) 490°C (914°F) 504°C (939°F)",
+     "edition A: CN page": "总效率 | 35.3% | 36.0% | 总热耗率 | 10,204 千焦/千瓦时 | 10,003 千焦/千瓦时 | 涡轮转速 | 5,750 – 11,500 – 12,075 转/分 | 5,750 – 11,500 – 12,075 转/分 | 压力比 | 13.5 : 1 | 14.1 : 1",
+     "edition A: BR page": "Eficiência | 35.3% | 36.0% | Taxa de calor | 10.204 kJ/kWh (9.666 Btu/kWh) | 10.003 kJ/kWh (9.476 Btu/kWh) | Velocidade da turbina | 5.750 – 11.500 – 12.075 rpm | 5.750 – 11.500 – 12.075 rpm | Relação de pressão | 13.5 : 1 | 14.1 : 1 | Caudal mássico dos gases de escape | 29,5 kg/s (67,0 lb/s) | 30,4 kg/s )65,0 lb/s)",
+     "turndown (PAGE)": "The twin-shaft configuration offers excellent speed and load turndown characteristics to allow maximum flexibility of operation.",
+     "Centrax CX300-2S performance": "CX300-2S 8.5MW Gas Turbine Generator Set ... Power Output 8606 kWe Heat Rate 10374 kJ/kWh 9833 BTU/kWh Exhaust Flow 30.1 kg/s 66.4 Ib/s Exhaust Temperature 498ºc 928ºF ... Electrical efficiency at generator terminals 35% ... * Inlet losses, exhaust losses & package auxiliary losses are excluded ... General specifications - Siemens SGT-300-2S 8.6MWe",
+     "starter (CX2S)": "Electro-hydraulic start system, 110kW 3 phase AC motor",
+     "lube (CX2S)": "5500ltr integral oil tank is incorporated within the turbine baseplate ... Gearbox driven main lube oil pump AC driven auxiliary pump DC driven emergency pump",
+     "exhaust_exit (CX2S)": "Radial exhaust exit (Left/Right/Vertical)",
+     "variable_geometry (EVGV)": "The new EVGV assembly is designed to fit the existing support bracket on the core and is compatible with SGT-100, SGT-300, and SGT-400, as well as in the legacy fleet model SGT-200.",
+     "Centrax CX300-2S package": "9748mm / 777in ... 7398mm / 291in ... 4400mm / 173in ... 11876mm / 467in ... Approx total weight = 117000 KG / 257941 lbs ... Two baseplates for driver (turbine & gearbox) and driven (generator) equipment",
+     "fuel_gas_note (IFV)": "This can translate to a lower required gas fuel supply pressure. ... Up to 3 IFVs may be required depending on the number of gas streams i.e. whether the engine is non-DLE, DLE or EDLE."
+    }
+   },
+   "notes": "Current Siemens page values (edition C). eff_pct 35.9 % as printed on PAGE / PORTF p.16 / PORTF p.24 metric; 3600/10,003 = 35.99 %, and the poster, CN, BR, PORTF p.24 imperial and PORTF p.16 summary print 36 % / 36.0 % - the difference (0.09 pp) is rounding, printed value kept. Older edition: PR 14.1:1 (poster, CN, BR, PORTF p.24 imperial) vs 14.6 : 1 now. out_rpm: nominal 11,500 rpm, range 5,750-12,075 rpm. Package common with the 8.4 MW version. Prelim note (older brochure: 9.2 MW, 35.6 %, PR 14.5; slideshare copy) could not be reopened (host blocked) and is not used. comp_stages and VGV/bearing/drive-end details from Centrax CX300-2S (third party)."
+  }
+ ]
+}

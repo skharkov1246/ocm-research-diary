@@ -1,0 +1,122 @@
+{
+ "model": "Taurus 65",
+ "records": [
+  {
+   "variant": "GS",
+   "power_kW": 6500,
+   "heat_rate_kJ_kWh": 10860,
+   "eff_pct": 33.1,
+   "exh_flow_kg_s": 21.36,
+   "exh_temp_C": 540,
+   "PR": 15.0,
+   "comp_stages": "13 (axial)",
+   "turb_stages": "3 (reaction)",
+   "shafts": "single",
+   "out_rpm": null,
+   "pkg_L_m": 9.8,
+   "pkg_W_m": 2.6,
+   "pkg_H_m": 3.3,
+   "pkg_kg": 39600,
+   "engine_kg": null,
+   "engine_L_m": null,
+   "engine_D_m": null,
+   "extra": {
+    "power_hp": null,
+    "exh_flow_kg_h": 76880,
+    "exh_flow_lb_h": 169495,
+    "inlet_airflow_kg_s": 21,
+    "inlet_airflow_lb_s": 46.4,
+    "heat_rate_btu_kWh": 10295,
+    "turbine_type_code": "T-8401 (Turbomach sheet 2008 and handbook BPHBTBM/512: 'Turbine type: TAURUS 65 (T 8401)')",
+    "rating_editions": {
+     "6500 kWe (taken)": "DS65PG/1218 (2018): 6500 kWe, 10 860 kJ/kWe-hr (10,295 Btu), 76 880 kg/hr (169,495 lb/hr), 540 C (1000 F), 'Engine efficiency: 33%'; BIL/0622 (2022): 6500 kWe, 33.1 %",
+     "6300 kWe (earlier)": "Turbomach 2008 sheet: 6.30 MW, 11'000 kJ/kWe-hr in table (10.945 marked on the ISO correction curve), 19.1 MJ/s, 32.9 %, 21.1 kg/s, 549 C; Turbomach BPHBTBM/512 (2012): 6.30 MW, 10'945 kJ/kWe-hr, 19.16 MJ/s, 32.88 %, 21.10 kg/s, 549 C; BIL/512 (2012): 6300 kWe, 32.9 %; BPGPSG/116 (2016): 6.3 MW, 10 945 kJ/kWe-hr (10,375 Btu), 550 C (1020 F), 76.0 thousand kg/hr (167.4 thousand lb/hr); Michelin case CSCHP-MRK/616 (2016): '6.3 MW Taurus 65'",
+     "6000 kWe (launch 2004, unverified)": "Press release news.thomasnet.com (search-index extract only, host not in allowed list, not opened): 6000 kWe continuous ISO, 10,373 Btu/kWe-hr, exhaust 155,677 lb/hr at 1017 F, cold-end drive single-shaft, three-stage turbine with shrouded stage-3 blade",
+     "product page (unverified)": "solarturbines.com product page not openable (WebFetch: DNS not resolved; curl: Akamai 'Access Denied' 403). Search-index extracts: 6500 kWe, 10,375 Btu/kWh (10,945 kJ), 167,440 lb/hr (75,950 kg/hr), 1020 F (550 C), steam 32.4-125.9 klb/hr - i.e. the 6.3 MW-edition heat rate/exhaust figures of BPGPSG/116 next to the 6500 kWe power; internally inconsistent, not taken"
+    },
+    "out_rpm_unverified": null,
+    "gen_rpm": "1500 or 1800 (50 or 60 Hz) - gearbox output ('Main Reduction Drive • Epicyclic Type – 1500 or 1800 rpm (50 or 60 Hz)')",
+    "main_reduction_drive": "Epicyclic type; vibration monitoring: acceleration transducer",
+    "cold_end_drive": "not stated in any opened document (only in the 2004 press release search extract); DS65PG-003C plan drawing shows generator - gearbox - engine with the exhaust collector at the far end",
+    "combustor": "Combustion Chamber, Annular-Type; 10 Lean-Premixed, Dry Low Emissions SoLoNOx injectors; single torch ignitor system",
+    "compressor_case": "Vertically Split Case",
+    "turbine_rotation": "Clockwise",
+    "coatings": "Compressor: inorganic aluminum; turbine and nozzle blades: platinum aluminide (stages 1 and 2)",
+    "vibration": "Proximity probes, 2 per radial bearing / 2 per thrust bearing (1 active, 1 inactive); velocity pick-up optional",
+    "starter": {
+     "type": "electric: 'Start System – Direct Drive AC Motor with VFD Control' (DS65PG/1218); Turbomach 2008/2012: 'Start system: AC'",
+     "power_kW": null
+    },
+    "fuel_gas_kPa": null,
+    "fuel": "DS65PG/1218: 'Fuel System – Natural Gas' (gas only); Turbomach 2012 handbook: NG; Turbomach 2008 sheet: NG/LF",
+    "lube": {
+     "description": "Integrated Lube Oil System: Turbine-Driven Lube Pump; AC Motor Driven Pre/Post Lube Pump; DC Motor Driven Backup Lube Pump; Air to Oil Cooler; Water to Oil Cooler (option); Integral Lube Oil Tank; Lube Oil Tank Heater; Lube Oil Filter (Duplex option); Oil Tank Vent Separator with Flame Arrestor",
+     "tank_L": null,
+     "oil_flow": null,
+     "heat_rejection_kW": null
+    },
+    "variable_geometry": {
+     "description": "'13 Stage Axial Compressor – Variable Inlet Guide Vanes and Stators'",
+     "vigv": true,
+     "variable_stator_rows": null
+    },
+    "bleed_valves": null,
+    "accessory_gearbox": null,
+    "accessory_gearbox_note": "not stated; the main lube pump is listed as 'Turbine-Driven Lube Pump' (mechanically driven), its drive point is not published",
+    "bearings": {
+     "type": "Gas turbine: '3 Radial Journal: Tilt-Pad', '1 Thrust, Active: Tilt-Pad', '1 Thrust, Inactive: Fixed Tapered Land' (oil-film bearings; no rolling-element bearings listed). Generator: sleeve bearings.",
+     "count": "3 radial journal + 2 thrust (1 active, 1 inactive)"
+    },
+    "engine_removal": {
+     "method": "lateral (sideways): drawing DS65PG-003C shows 'MINIMUM CLEARANCE REQUIRED FOR ENGINE REMOVAL' as a 3.0 m (9'10\") deep zone along the long side of the 9.8 m package; separate 3.0 m (9'10\") 'GENERATOR MAINTENANCE' zone at the generator end",
+     "time_h": null
+    },
+    "inlet_dp_kPa": 0,
+    "exhaust_dp_kPa": 0,
+    "dp_note": "0 = rating basis 'No inlet/exhaust losses' (DS65PG/1218, BIL/0622 'zero inlet or exhaust duct losses'), not a package duct loss. Steam figures assume: BPGPSG/116 (2016) inlet 100 mm H2O (4 in.), exhaust 254 mm H2O (10 in.); Turbomach BPHBTBM/512 (2012) inlet 75 mmH2O, exhaust 250 mmH2O.",
+    "generator": "4 pole, 3 phase, 6 wire, wye connected, synchronous with permanent magnet generator exciter; open drip-proof (CACA/TEAAC, CACW/TEWAC options); sleeve bearings; Class F insulation; 3300/6600/11 000 V (50 Hz), 4160/6900/12 470/13 200/13 800 V (60 Hz); BIL/0622 standard voltages 6900-13 800",
+    "control": "Turbotronic on-skid gas turbine and generator control system",
+    "enclosure": "Complete package enclosure; fire detection and CO2 suppression system",
+    "application_performance": "DS65PG/1218: steam unfired 14.7 t/hr (32,430 lb/hr); fired to 1536 C (2800 F) 57.1 t/hr (125,850 lb/hr); absorption chilling 12 670 kW (3600 RT)",
+    "rating_basis": "ISO 15 C (59 F), sea level, RH 60%, no inlet/exhaust losses, natural gas LHV 35 MJ/Nm3 (940 Btu/scf), no accessory losses, efficiency measured at generator terminals",
+    "pkg_basis": "DS65PG/1218: L 9.8 m (32'2\") x W 2.6 m (8'6\") on drawing DS65PG-003C 'Enclosure Access and Maintenance Space'; 'Package Height: 3.3 m (10' 9\")', 'Package Weight: 39 600 kg (87,300 lb)'; enclosed/dry not stated on the sheet. BPGPSG/116: 'Actual values vary with customer options specified, such as type of generator.'",
+    "pkg_editions": "BIL/0622 (2022) and BPGPSG/116 (2016): 9.8 m (32'2\") x 2.6 m (8'6\") x 3.3 m (10'9\"), 39 600 kg (87,300 lb) - same as DS65PG/1218; BIL/512 (2012): 9.8 m (32'3\") x 2.6 m (8'6\") x 3.3 m (10'9\"), 39 620 kg (87,160 lb); BO&G/811 (2011) 'APPROXIMATE DIMENSIONS (unenclosed)': 9.8 m (32'0\") x 2.5 m (8'2\") x 2.9 m (9'8\"), 33 045 kg (72,700 lb); Turbomach 2008 sheet and BPHBTBM/512 (2012) Turbomach package: L 11.0 m (11000 mm), W 2.2 m (2200 mm), enclosure height 3390 mm, overall height 6.6 m (6590 mm) and 56 t 'including Filter system and for outdoor installation'. The DS65PG/1218 PDF text layer also carries non-displayed dimension labels of an earlier drawing revision (9754 mm (32'0\"), 9800 mm (32'3\"), 2477 mm (8' 1-1/2\"), 3048 mm) - not taken; they match the 2011 2.5 m (8'2\") width.",
+    "md_variant": "not offered: BO&G/811 (2011) package table 'MECHANICAL DRIVES ... Taurus 65 N/A'; Taurus 65 absent from the 'Compressor Set/Mechanical Drive Specifications' tables of BIL/512 (2012) and BIL/0622 (2022)",
+    "lineup_status": "Taurus 65 is absent from the 2025 Power Generation Product Handbook BPGPH/0525 (lists Centaur 40/50, Mercury 50, Taurus 60/70, Mars 100, Titan 130/250/350); last seen in BIL/0622 (2022) and DSVET-HRSG/0419 (2019)"
+   },
+   "notes": "Primary document (opened): Solar data sheet DS65PG/1218 'TAURUS 65 Gas Turbine Generator Set' (2018, scene7 CM20150703-52095-38597). Cross-checked with BIL/0622 (2022), BPGPSG/116 (2016), BIL/512 (2012), BO&G/811 (2011), Turbomach Taurus 65 sheet (2008, C10518775), Turbomach handbook BPHBTBM/512 (2012), BPGPH/0525 (2025), Michelin case CSCHP-MRK/616 (2016), DSVET-HRSG/0419 (2019). Manufacturer product page solarturbines.com NOT openable in this session (WebFetch: host not resolved; curl: Akamai 'Access Denied' 403) - its values are known only from search-index extracts and are not used. RATING EDITIONS (important for an engine swap in an existing package - the installed unit may carry either rating): (a) 6500 kWe edition - DS65PG/1218 and BIL/0622: 6500 kWe, 10 860 kJ/kWe-hr (10,295 Btu), exhaust 76 880 kg/hr = 21.36 kg/s (unit conversion), 540 C (1000 F), efficiency 33 % (data sheet) / 33.1 % (BIL/0622); TAKEN as the newest opened manufacturer rating. (b) 6300 kWe edition - Turbomach 2008/2012, BIL/512 (2012), BPGPSG/116 (2016): 6.30 MW, 10 945 kJ/kWe-hr (10,375 Btu), 21.1 kg/s (Turbomach) / 76.0 thousand kg/hr (BPGPSG/116), 549-550 C, 32.9 %. (c) 6000 kWe launch rating (2004 press release, search extract only, not opened). The product page as indexed shows 6500 kWe together with the (b) heat rate/exhaust figures (10,945 kJ, 75,950 kg/hr, 550 C) - internally inconsistent; the earlier record (10945 / 21.1 / 550 / 32.9) came from there and is corrected to the data sheet. Spread between editions: exhaust flow 21.10-21.36 kg/s (1.2 %), exhaust temperature 540-550 C. eff_pct 33.1 is PUBLISHED (BIL/0622 'Taurus 65 6500 33.1'; DS65PG/1218 rounds to 33 %); 3600/10860 = 33.15 agrees. Fuel input check 6500 x 10860/3600 = 19.6 MJ/s; exhaust 21.36 kg/s vs inlet airflow 21 kg/s (46.4 lb/s) - consistent. Design (DS65PG/1218): industrial single-shaft; 13-stage axial compressor with variable inlet guide vanes and stators, PR 15:1, vertically split case; annular combustor with 10 SoLoNOx injectors; 3-stage reaction turbine; 3 tilt-pad radial journal bearings + active tilt-pad thrust + inactive fixed tapered-land thrust; epicyclic main reduction drive to a 4-pole generator (1500/1800 rpm). out_rpm (gearbox input = turbine speed): not published in any opened document - null. Package: 9.8 x 2.6 x 3.3 m, 39 600 kg (DS65PG/1218 = BIL/0622 = BPGPSG/116) taken; older editions: BIL/512 39 620 kg; BO&G/811 (2011, unenclosed approx.) 9.8 (32'0\") x 2.5 (8'2\") x 2.9 m, 33 045 kg; Turbomach-built packages 11.0 x 2.2 x 6.6 m incl. filter, 56 t - check the actual package drawing of the installed unit. Engine removal per drawing DS65PG-003C: sideways, 3.0 m clearance along the package side. Not published in any opened document - null: engine (core) weight and dimensions, turbine/gearbox-input speed, starter power, fuel gas supply pressure, lube tank volume/flow/heat rejection, number of variable stator rows, bleed valves, accessory gearbox, engine change time. No Taurus 65 Turbomachinery Package Specification found on manualsdir.com (only Taurus 60 TPS60CSMD/309 and Taurus 70); siemens-energy.com and centraxgt.com not consulted (other manufacturers, no Solar documents expected). Taurus 65 is GS only (no MD record).",
+   "sources": {
+    "power_kW": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-38597 (DS65PG/1218: 'Output Power 6500 kWe'); also https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-28113 (BIL/0622: 'Taurus 65 6500 33.1'); earlier 6.3 MW: https://s7d2.scene7.com/is/content/Caterpillar/C10518775, https://s7d2.scene7.com/is/content/Caterpillar/C10518078, https://s7d2.scene7.com/is/content/Caterpillar/C10550168, https://s7d2.scene7.com/is/content/Caterpillar/C10550166",
+    "heat_rate_kJ_kWh": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-38597 ('Heat Rate 10 860 kJ/kWe-hr (10,295 Btu/kWe-hr)'); 6.3 MW edition 10 945: https://s7d2.scene7.com/is/content/Caterpillar/C10550166, https://s7d2.scene7.com/is/content/Caterpillar/C10518078",
+    "eff_pct": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-28113 ('Taurus 65 6500 33.1'); https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-38597 ('Engine efficiency: 33% (measured at generator terminals)'); 3600/10860 = 33.15 agrees",
+    "exh_flow_kg_s": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-38597 ('Exhaust Flow 76 880 kg/hr (169,495 lbs/hr)' -> /3600 = 21.36 kg/s); 6.3 MW edition: https://s7d2.scene7.com/is/content/Caterpillar/C10518078 ('Exhaust gas flow: kg/s 21.10'), https://s7d2.scene7.com/is/content/Caterpillar/C10550166 ('76.0' thousand kg/hr)",
+    "exh_temp_C": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-38597 ('Exhaust Temperature 540°C (1000°F)'); 6.3 MW edition: https://s7d2.scene7.com/is/content/Caterpillar/C10550166 ('550 (1020)'), https://s7d2.scene7.com/is/content/Caterpillar/C10518078 ('549')",
+    "PR": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-38597 ('Pressure Ratio: 15:1')",
+    "comp_stages": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-38597 ('13 Stage Axial Compressor')",
+    "turb_stages": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-38597 ('Power Turbine – 3-Stage Reaction')",
+    "shafts": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-38597 ('Industrial, Single-Shaft')",
+    "out_rpm": "not published: https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-38597 gives only gearbox output '1500 or 1800 rpm (50 or 60 Hz)'",
+    "pkg_L_m": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-38597 (drawing DS65PG-003C: '9.8 m (32' 2\")'); also https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-28113, https://s7d2.scene7.com/is/content/Caterpillar/C10550166",
+    "pkg_W_m": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-38597 (drawing DS65PG-003C: '2.6 m (8' 6\")'); also https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-28113, https://s7d2.scene7.com/is/content/Caterpillar/C10550166",
+    "pkg_H_m": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-38597 ('Package Height: 3.3 m (10' 9\")'); also https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-28113, https://s7d2.scene7.com/is/content/Caterpillar/C10550166",
+    "pkg_kg": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-38597 ('Package Weight: 39 600 kg (87,300 lb)'); also https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-28113 ('39 600 87,300'), https://s7d2.scene7.com/is/content/Caterpillar/C10550166",
+    "engine_kg": "not published in any opened document",
+    "engine_L_m": "not published in any opened document",
+    "engine_D_m": "not published in any opened document",
+    "starter": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-38597 ('Start System – Direct Drive AC Motor with VFD Control'); https://s7d2.scene7.com/is/content/Caterpillar/C10518775 ('Start system: AC')",
+    "fuel_gas_kPa": "not published in any opened document",
+    "lube": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-38597 ('Integrated Lube Oil System – Turbine-Driven Lube Pump ...')",
+    "variable_geometry": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-38597 ('Variable Inlet Guide Vanes and Stators')",
+    "bleed_valves": "not published in any opened document",
+    "accessory_gearbox": "not published in any opened document",
+    "bearings": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-38597 ('Bearings – 3 Radial Journal: Tilt-Pad – 1 Thrust, Active: Tilt-Pad – 1 Thrust, Inactive: Fixed Tapered Land')",
+    "engine_removal": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-38597 (drawing DS65PG-003C 'MINIMUM CLEARANCE REQUIRED FOR ENGINE REMOVAL', 3.0 m (9' 10\"))",
+    "inlet_dp_kPa": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-38597 ('No inlet/exhaust losses'); steam basis: https://s7d2.scene7.com/is/content/Caterpillar/C10550166 ('Inlet Pressure Loss, H2O 100 mm (4 in.)'), https://s7d2.scene7.com/is/content/Caterpillar/C10518078 ('75 mmH2O inlet loss')",
+    "exhaust_dp_kPa": "https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-38597 ('No inlet/exhaust losses'); steam basis: https://s7d2.scene7.com/is/content/Caterpillar/C10550166 ('Exhaust Pressure Loss, H2O 254 mm (10 in.)'), https://s7d2.scene7.com/is/content/Caterpillar/C10518078 ('250 mmH2O exhaust loss')",
+    "md_variant": "https://s7d2.scene7.com/is/content/Caterpillar/C10550151 ('MECHANICAL DRIVES ... N/A' in the Taurus 65 column); https://s7d2.scene7.com/is/content/Caterpillar/CM20150703-52095-28113, https://s7d2.scene7.com/is/content/Caterpillar/C10550168 (no Taurus 65 row in Compressor Set/Mechanical Drive tables)",
+    "lineup_status": "https://s7d2.scene7.com/is/content/Caterpillar/CM20190218-53670-53247 (no Taurus 65); https://s7d2.scene7.com/is/content/Caterpillar/CM20190529-a7744-d4f6e (Taurus 65 listed, 2019); https://s7d2.scene7.com/is/content/Caterpillar/CM20160730-06862-31642 ('6.3 MW Taurus 65', 2016)",
+    "product_page_unverified": "https://www.solarturbines.com/en_US/products/power-generation-packages/taurus-65.html (not openable; search-index extract only)"
+   }
+  }
+ ]
+}
