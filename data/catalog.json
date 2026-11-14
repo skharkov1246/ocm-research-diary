@@ -4,12 +4,12 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 365,
-    "total_bytes": 3802844,
-    "results_files": 169,
-    "results_with_script": 47,
+    "datasets": 377,
+    "total_bytes": 3999486,
+    "results_files": 171,
+    "results_with_script": 49,
     "results_referenced_in_site": 22,
-    "results_with_provenance_fields": 20,
+    "results_with_provenance_fields": 22,
     "by_track": {
       "ammonia": 91,
       "battery-cathode": 1,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 46,
+      "не определён": 58,
       "прочее": 25
     }
   },
@@ -6553,10 +6553,82 @@
       "last_commit": "5d7e73f"
     },
     {
+      "path": "routes/gtu/combustor/targets_basis_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 23669,
+      "referenced_in_site": false,
+      "produced_by": "routes/targets_basis.py",
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "status",
+        "runtime_s",
+        "inputs",
+        "assumptions",
+        "inlet",
+        "cycle_check",
+        "dp_sensitivity",
+        "flame_temperature",
+        "crn_grid",
+        "tau_psr_sensitivity",
+        "psr_lbo",
+        "unmixedness",
+        "hydrogen",
+        "part_load_fixed_split",
+        "diesel",
+        "hot_zone_volume",
+        "exit_uniformity",
+        "units"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "493cb81"
+    },
+    {
+      "path": "routes/gtu/combustor/targets.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 48621,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "schema",
+        "title",
+        "date",
+        "status",
+        "method",
+        "software",
+        "inputs",
+        "applies_to",
+        "conventions",
+        "targets",
+        "guides",
+        "funnel_interface",
+        "gaps"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "493cb81"
+    },
+    {
       "path": "routes/gtu/frame3/frame3_point_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 32463,
+      "bytes": 33665,
       "referenced_in_site": false,
       "produced_by": "routes/frame3_point.py",
       "shape": "объект",
@@ -6585,7 +6657,7 @@
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "55d1e8c"
+      "last_commit": "493cb81"
     },
     {
       "path": "routes/gtu/platform/aws/iam_policy_addendum.json",
@@ -6617,6 +6689,211 @@
       "last_change": "2026-11-14",
       "last_author": "Claude",
       "last_commit": "1c1983b"
+    },
+    {
+      "path": "routes/gtu/platform/batch/bench_runner_jobs.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 1569,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "defaults",
+        "jobs"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "493cb81"
+    },
+    {
+      "path": "routes/gtu/platform/batch/cost_estimate_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 63330,
+      "referenced_in_site": false,
+      "produced_by": "routes/cost_estimate.py",
+      "shape": "объект",
+      "top_keys": [
+        "method",
+        "software",
+        "date",
+        "inputs",
+        "rates_used",
+        "scenarios",
+        "plan",
+        "plan_shared_total",
+        "plan_total",
+        "ceiling_check",
+        "warnings",
+        "lines",
+        "variants"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "493cb81"
+    },
+    {
+      "path": "routes/gtu/platform/batch/templates/compute_environment.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 719,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "computeEnvironmentName",
+        "type",
+        "state",
+        "computeResources",
+        "tags"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "493cb81"
+    },
+    {
+      "path": "routes/gtu/platform/batch/templates/job_definition.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 1218,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "jobDefinitionName",
+        "type",
+        "platformCapabilities",
+        "parameters",
+        "containerProperties",
+        "retryStrategy",
+        "timeout",
+        "propagateTags",
+        "tags"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "493cb81"
+    },
+    {
+      "path": "routes/gtu/platform/batch/templates/job_queue.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 466,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "jobQueueName",
+        "state",
+        "priority",
+        "computeEnvironmentOrder",
+        "jobStateTimeLimitActions",
+        "tags"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "493cb81"
+    },
+    {
+      "path": "routes/gtu/platform/batch/templates/submit_array_job.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 349,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "jobName",
+        "jobQueue",
+        "jobDefinition",
+        "arrayProperties",
+        "parameters",
+        "timeout",
+        "propagateTags",
+        "tags"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "493cb81"
+    },
+    {
+      "path": "routes/gtu/platform/bench/break_even.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 34474,
+      "referenced_in_site": false,
+      "produced_by": "routes/break_even.py",
+      "shape": "объект",
+      "top_keys": [
+        "method",
+        "software",
+        "date",
+        "inputs",
+        "break_even",
+        "task_crosscheck",
+        "missing_in_region",
+        "gpu_memory_estimate",
+        "spmv_roofline",
+        "bandwidth_per_dollar",
+        "measured"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "493cb81"
+    },
+    {
+      "path": "routes/gtu/platform/bench/mesh_stats.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 1610,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "method",
+        "software",
+        "date",
+        "inputs",
+        "meshes"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "493cb81"
+    },
+    {
+      "path": "routes/gtu/platform/bench/tariffs_us-east-1.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 12930,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "method",
+        "software",
+        "date",
+        "inputs",
+        "regions",
+        "extras",
+        "missing"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "493cb81"
     },
     {
       "path": "routes/gtu/platform/fea/disk_results.json",
@@ -6694,6 +6971,18 @@
       "last_commit": "55d1e8c"
     },
     {
+      "path": "routes/gtu/platform/su2/plan_cont_p075.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 94,
+      "referenced_in_site": false,
+      "shape": "список",
+      "records": 1,
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "493cb81"
+    },
+    {
       "path": "routes/gtu/platform/su2/plan_smoke_p075.json",
       "track": "не определён",
       "kind": "данные",
@@ -6709,7 +6998,7 @@
       "path": "routes/gtu/platform/su2/su2_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 8930,
+      "bytes": 15321,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -6719,7 +7008,7 @@
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "4def261"
+      "last_commit": "493cb81"
     },
     {
       "path": "routes/gtu/platform/surrogate/test_surrogate_results.json",
