@@ -1203,10 +1203,10 @@ def parts(res, hx, tech):
     if t["tcr"] == "fh":
         items += [("подогреватель топлива", mods("подогр")), ("клапан", 1)]
     if t["tcr"] == "steam":
-        items += [("риформер с катализатором + парогенератор: модули", mods("риформер")), ("водоподготовка", 1),
+        items += [("риформер с катализатором + парогенератор: модули", max(1, mods("риформер"))), ("водоподготовка", 1),
                   ("питательный насос + двигатель", 2), ("клапан пара", 1), ("бак воды", 1)]
     if t["tcr"] == "egr":
-        items += [("риформер с катализатором: модули", mods("риформер")), ("компрессор рециркуляции (2 колеса) + двигатель", 3),
+        items += [("риформер с катализатором: модули", max(1, mods("риформер"))), ("компрессор рециркуляции (2 колеса) + двигатель", 3),
                   ("охладители рециркулята", 2), ("вентилятор + двигатель", 2), ("клапан", 1), ("газоход рециркуляции", 1)]
     dwheels = (res["nc"] + res["nt"]) - 5
     added = sum(n for _, n in items) + dwheels
@@ -1444,6 +1444,24 @@ def _opt_trec800(t):
     return optimize_topo(t, extra=dict(T_rec_max=800.0))
 
 
+def murray_for(o, tech="lpbf"):
+    """деревья-распределители рекуператора варианта o: газовая сторона (1 атм) и воздушная (за компрессором)"""
+    rr = _safe(o["topo"], o["opt"]["PR"], o["opt"]["prm"], detail=True)
+    st = rr["_streams"]
+    hx = [h for h in hx_list(rr, tech) if h["name"] == "рекуператор"][0]
+    W1 = rr["W_air"]
+    t = HX_TECH[tech]
+    Afree_face = t["Dh"] / 2 / (t["Dh"] + 2 * t["t"]) * hx["A_front_m2"]
+    out = dict(key=o["key"], A_front_m2=hx["A_front_m2"], A_free_face_m2=Afree_face, V_core_m3=hx["V_core_m3"])
+    for side, stream, dp in (("gas", st["g_in"], A["dp_rg"]), ("air", st["air2"], A["dp_ra"])):
+        rho, mu, _, _ = tprops(stream.T, stream.P, stream.Y)
+        out[side] = dict(m_kg_s=stream.m * W1, rho=rho, Q_m3_s=stream.m * W1 / rho,
+                         dP_budget_Pa=(1 - A["dp_core_share"]) * dp * stream.P,
+                         trees={f"{a:.3f}": murray_tree(stream.m * W1, rho, mu, hx["A_front_m2"], Afree_face, exponent=a)
+                                for a in (3.0, 7.0 / 3.0, 2.0)})
+    return out
+
+
 def study_wall(res_best):
     """чувствительность печатной сердцевины рекуператора к стенке и каналу (LPBF): объём, масса, модули"""
     rows = []
@@ -1530,6 +1548,20 @@ def flat(o, tag, tech):
 
 
 # ======================================================================== графики
+CURATED = [   # опорные варианты: подписи на графиках, построчная эксергия в сжатом файле
+    ("R00-ic-rh-ibc-none-none", "простой"), ("R00-ic-rh-ibc-none-fh", "подогрев топлива"),
+    ("R00-IC-rh-ibc-none-none", "промохлаждение"), ("R00-ic-RH-ibc-none-none", "подогрев"),
+    ("R00-ic-rh-IBC-none-none", "IBC"), ("R00-ic-rh-ibc-real-none", "рост давления 25 %"),
+    ("R00-ic-rh-ibc-ideal-none", "рост давления, предел"), ("R00-ic-rh-ibc-none-steam", "паровой риформинг"),
+    ("R00-ic-rh-ibc-none-egr", "риформинг рециркулятом"), ("R90-ic-rh-ibc-none-none", "рекуператор 0,90"),
+    ("R85-ic-RH-ibc-none-none", "рек. 0,85 + подогрев"), ("R90-ic-RH-ibc-none-none", "рек. 0,90 + подогрев"),
+    ("R90-ic-RH-ibc-none-steam", "рек. 0,90 + подогрев + пар"), ("R90-IC-rh-ibc-none-none", "рек. 0,90 + промохл."),
+    ("R92-IC-RH-ibc-none-none", "рек. 0,92 + промохл. + подогрев")]
+EX_CURATED = ["R00-ic-rh-ibc-none-none", "R00-ic-rh-ibc-none-fh", "R00-IC-rh-ibc-none-none", "R00-ic-rh-IBC-none-none",
+              "R00-ic-rh-ibc-ideal-none", "R00-ic-rh-ibc-none-steam", "R00-ic-rh-ibc-none-egr", "R90-ic-RH-ibc-none-none",
+              "R90-ic-RH-ibc-none-steam", "R92-IC-RH-ibc-none-none"]
+
+
 def plots(rows, front, ref):
     import matplotlib
     matplotlib.use("Agg")
@@ -1546,15 +1578,20 @@ def plots(rows, front, ref):
     ax.axhline(100 * ref, color="#555", lw=0.8, ls="--")
     ax.annotate("KV-3 простой, π 13,5 (вне допуска по расходу)", xy=(ax.get_xlim()[1], 100 * ref), xytext=(-4, -11),
                 textcoords="offset points", ha="right", fontsize=8, color="#444")
-    for r in fr:
-        ax.annotate(r["name"].replace("рекуператор", "рек.").replace("подогрев топлива", "подогр. топлива")[:38],
-                    xy=(r["added"], 100 * r["eff_el"]), xytext=(6, 3), textcoords="offset points", fontsize=7, color="#222")
+    lab = dict(CURATED)
+    off = {"R00-ic-rh-ibc-none-fh": (-4, 9, "right"), "R00-ic-rh-ibc-real-none": (8, 7, "left"),
+           "R85-ic-RH-ibc-none-none": (-8, 4, "right"), "R00-ic-rh-ibc-none-none": (7, -6, "left")}
+    for r in ok:
+        if r["key"] in lab:
+            dx, dy, ha = off.get(r["key"], (7, -3, "left"))
+            ax.annotate(lab[r["key"]], xy=(r["added"], 100 * r["eff_el"]), xytext=(dx, dy), textcoords="offset points", ha=ha,
+                        fontsize=7.5, color="#111", bbox=dict(boxstyle="round,pad=0.15", fc="white", ec="none", alpha=0.8))
     from matplotlib.ticker import MaxNLocator
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     plt.colorbar(sc_, ax=ax, label="TRL (оценка)")
     ax.set_xlabel("добавочные детали и узлы (относительно KV-3 простого)")
     ax.set_ylabel("КПД на клеммах, %")
-    ax.set_title("KV-3: перебор циклов (печатные теплообменники LPBF), оптимум π")
+    ax.set_title("KV-3, 576 топологий: КПД против добавочных деталей (теплообменники LPBF, оптимум π)")
     ax.legend(fontsize=8, loc="upper left")
     fig.tight_layout()
     fig.savefig(os.path.join(OUT_DIR, "cycles_pareto.png"), bbox_inches="tight")
@@ -1566,6 +1603,29 @@ EX_GROUPS = [("Компрессор и промохлаждение", ("Комп
              ("Турбины", ("Турбина",)),
              ("Теплообменники и риформер", ("Рекуператор", "Риформер", "Подогреватель", "Охладитель", "Вентилятор охл", "Насос")),
              ("Прочее (мех. потери, каналы, утечки)", ("Механические", "Канал", "Утечки", "Отбор", "Разделение"))]
+
+
+def _ex_items(res):
+    lab = dict(CURATED)
+    items = []
+    for k in EX_CURATED:
+        o = next((x for x in res if x["key"] == k), None)
+        if o and o["opt"].get("ok") and o["opt"]["exergy"].get("rows"):
+            tag = "" if o["opt"]["limits"]["all"] else ", вне допуска"
+            items.append((f"{lab[k]} (π {o['opt']['PR']:.1f}{tag})", o["opt"]))
+    return items
+
+
+def replot():
+    """графики из полного результата (scratchpad) без перебора"""
+    out = json.load(open(os.path.join(SCRATCH, "cycles_results_full.json"), encoding="utf-8"))
+    res = out["results"]
+    rows = [f for o in res for f in [flat(o, "opt", "lpbf")] if f]
+    sel = [r for r in rows if r["limits_ok"] and not r["bound"] and not r["degenerate"]]
+    front_i = pareto(sel, [("eff_el", 1), ("added", -1), ("V_added_m3", -1)])
+    base = [o for o in res if o["key"] == "R00-ic-rh-ibc-none-none"][0]
+    plots(sel + [r for r in rows if not r["limits_ok"] and not r["bound"]], front_i, base["pr135"]["eff_el"])
+    plots_exergy(_ex_items(res))
 
 
 def plots_exergy(items):
@@ -1602,7 +1662,7 @@ def plots_exergy(items):
     ax.invert_yaxis()
     ax.set_xlim(0, 101)
     ax.set_xlabel("% эксергии топлива (метан + вода, если есть)")
-    ax.set_title("KV-3: куда уходит эксергия топлива (фронт Парето)")
+    ax.set_title("KV-3: куда уходит эксергия топлива (опорные варианты, оптимум π)")
     ax.legend(fontsize=7, ncol=2, loc="upper center", bbox_to_anchor=(0.45, -0.14), frameon=False)
     fig.tight_layout()
     fig.savefig(os.path.join(OUT_DIR, "cycles_exergy.png"), bbox_inches="tight")
@@ -1649,20 +1709,7 @@ def main():
     o_best = [x for x in res if x["key"] == rec_best["key"]][0] if rec_best else None
     trade = study_recup_tradeoff(o_best["opt"]["PR"], o_best["opt"]["prm"]) if o_best else []
     refm = study_reformer()
-    murray = None
-    if o_best:
-        rr = _safe(o_best["topo"], o_best["opt"]["PR"], o_best["opt"]["prm"], detail=True)
-        st = rr["_streams"]
-        hx = [h for h in hx_list(rr, tech) if h["name"] == "рекуператор"][0]
-        W1 = rr["W_air"]
-        gin = st["g_in"]
-        rho, mu, _, _ = tprops(gin.T, gin.P, gin.Y)
-        Afree_face = HX_TECH[tech]["Dh"] / 2 / (HX_TECH[tech]["Dh"] + 2 * HX_TECH[tech]["t"]) * hx["A_front_m2"]
-        murray = dict(key=rec_best["key"], A_front_m2=hx["A_front_m2"], A_free_face_m2=Afree_face,
-                      trees={str(a): murray_tree(gin.m * W1, rho, mu, hx["A_front_m2"], Afree_face, exponent=a)
-                             for a in (3.0, 7.0 / 3.0, 2.0)},
-                      dP_budget_gas_Pa=(1 - A["dp_core_share"]) * A["dp_rg"] * gin.P,
-                      V_core_m3=hx["V_core_m3"])
+    murray = murray_for(o_best, tech) if o_best else None
     rows800 = [f for o in res800 for f in [flat(o, "opt", tech)] if f]
     sel800 = [r for r in rows800 if r["limits_ok"]]
     front800 = sorted([sel800[i] for i in pareto(sel800, [("eff_el", 1), ("added", -1), ("V_added_m3", -1)])],
@@ -1699,13 +1746,13 @@ def main():
         runtime_s=time.time() - t0,
     )
     out["feed_to_funnels"] = feed_from(out)
-    keep = {base["key"]} | {r["key"] for r in front + front_p} | ({rec_best["key"]} if rec_best else set())
+    keep = {base["key"]} | {r["key"] for r in front + front_p} | ({rec_best["key"]} if rec_best else set()) | {k for k, _ in CURATED}
     if OUT_DIR == HERE:          # полный файл (12 МБ) — в scratchpad, в репозиторий — сжатый
         os.makedirs(SCRATCH, exist_ok=True)
         json.dump(out, open(os.path.join(SCRATCH, "cycles_results_full.json"), "w", encoding="utf-8"), ensure_ascii=False,
                   default=_jdef)
     json.dump(compact(out, keep), open(os.path.join(OUT_DIR, "cycles_results.json"), "w", encoding="utf-8"),
-              ensure_ascii=False, indent=1, default=_jdef)
+              ensure_ascii=False, separators=(",", ":"), default=_jdef)
     cols = list(rows[0].keys())
     with open(os.path.join(OUT_DIR, "cycles.csv"), "w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=cols)
@@ -1714,12 +1761,7 @@ def main():
             w.writerow({k: (round(v, 5) if isinstance(v, float) else v) for k, v in r.items()})
     plots(sel + [r for r in rows if r["point"] == "opt" and r["tech"] == tech and (not r["limits_ok"]) and not r["bound"]],
           front_i, ref_eff)
-    items = [("KV-3 простой, π опт.", base["opt"])]
-    for r in front[:8]:
-        o = [x for x in res if x["key"] == r["key"]][0]
-        if o["key"] != base["key"]:
-            items.append((f"{o['name']} (π {r['PR']:.1f})"[:70], o["opt"]))
-    plots_exergy(items)
+    plots_exergy(_ex_items(res))
     print("feed:", write_feed(out["feed_to_funnels"]))
     print(f"готово за {time.time() - t0:.0f} с; фронт Парето: {len(front)}")
     for r in front:
@@ -1756,6 +1798,8 @@ def compact(out, keep_keys):
                 ex_.pop("rows", None)
                 r["exergy"] = ex_
                 r["parts"] = {t: {k: v for k, v in p.items() if k != "items" or t == "lpbf"} for t, p in r["parts"].items()}
+                r["hx"] = {t: [{k: h[k] for k in ("name", "Q_kW", "V_core_m3", "mass_kg", "modules", "A_front_m2", "L_m")}
+                               for h in lst] for t, lst in r["hx"].items()}
             oo[tag] = r
         res.append(oo)
     c["results"] = res
@@ -1814,6 +1858,7 @@ def feed_from(out):
     icr = _pick(res, lambda t: t["rec"] and t["ic"] and not t["rh"] and not t["ibc"] and t["pgc"] == "none" and t["tcr"] == "none")
     fh = _pick(res, lambda t: not t["rec"] and not t["ic"] and not t["rh"] and not t["ibc"] and t["pgc"] == "none" and t["tcr"] == "fh")
     pg = [o for o in res if o["key"] in ("R00-ic-rh-ibc-real-none", "R00-ic-rh-ibc-ideal-none")]
+    rec90 = next((o for o in res if o["key"] == "R90-ic-RH-ibc-none-none"), None)
     short = lambda o, tag="opt": None if o is None else dict(
         key=o["key"], name=o["name"], PR=round(o[tag]["PR"], 2), eff_el=round(o[tag]["eff_el"], 4), W_air=round(o[tag]["W_air"], 2),
         EGT_C=round(o[tag]["EGT_C"], 1), T_rec_in_C=None if o[tag]["T_rec_in_C"] is None else round(o[tag]["T_rec_in_C"], 1),
@@ -1831,6 +1876,8 @@ def feed_from(out):
         key_finding=f"при T41 {A['T41_C']:.0f} °C (класс U) мягкий допуск по расходу требует удельной работы ≥ {w_need:.1f} кДж/кг; "
                     "простой цикл KV-3 на пределе, рекуператор сам по себе её снижает (потери давления) и не проходит; проходит "
                     "рекуператор вместе с повторным подогревом (или с промохлаждением) — см. representative",
+        recommended=dict(note="рекомендуемое для KV: рекуператор 0,90 + межтурбинный подогрев; as_is — с компрессором KV-3 (π 13,5)",
+                         opt=short(rec90), as_is=short(rec90, "pr135")) if rec90 else None,
         representative=dict(simple=short(simple), recup_only_out_of_limits=short(rec_only), recup_reheat=short(rec_rh),
                             recup_reheat_fuelheat=short(rec_rh_fh), recup_intercool=short(icr), fuel_heat=short(fh),
                             pgc=[short(o) for o in pg]),
@@ -1904,12 +1951,56 @@ def write_feed(fd):
     return own, path
 
 
+def rebuild_tables():
+    """пересчитать детали, таблицу и фронты Парето из полного результата (scratchpad) без перебора:
+    те же функции parts/flat/pareto, что в main"""
+    path = os.path.join(SCRATCH, "cycles_results_full.json")
+    out = json.load(open(path, encoding="utf-8"))
+    for o in out["results"] + out.get("_res800", []):
+        for tag in ("opt", "pr135"):
+            r = o[tag]
+            if r.get("ok"):
+                r["parts"] = {t: parts(r, r["hx"][t], t) for t in HX_TECH}
+    tech = "lpbf"
+    rows = [f for o in out["results"] for tag in ("opt", "pr135") for tc in HX_TECH for f in [flat(o, tag, tc)] if f]
+    sel = [r for r in rows if r["point"] == "opt" and r["tech"] == tech and r["limits_ok"] and not r["bound"] and not r["degenerate"]]
+    out["pareto_lpbf"] = sorted([sel[i] for i in pareto(sel, [("eff_el", 1), ("added", -1), ("V_added_m3", -1)])],
+                                key=lambda r: (r["added"], -r["eff_el"]))
+    sel_p = [r for r in sel if r["pnp"] != "нет" and r["TRL"] >= 5]
+    out["pareto_lpbf_pnp"] = sorted([sel_p[i] for i in pareto(sel_p, [("eff_el", 1), ("added", -1), ("V_added_m3", -1)])],
+                                    key=lambda r: (r["added"], -r["eff_el"]))
+    base = [o for o in out["results"] if o["key"] == "R00-ic-rh-ibc-none-none"][0]
+    out["base"] = dict(key=base["key"], pr135=base["pr135"], opt=base["opt"])
+    ob = next((o for o in out["results"] if o["key"] == "R90-ic-RH-ibc-none-none"), None)
+    if ob:
+        out["murray"] = murray_for(ob)
+    out["feed_to_funnels"] = feed_from(out)
+    json.dump(out, open(path, "w", encoding="utf-8"), ensure_ascii=False, default=_jdef)
+    with open(os.path.join(HERE, "cycles.csv"), "w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=list(rows[0].keys()))
+        w.writeheader()
+        for r in rows:
+            w.writerow({k: (round(v, 5) if isinstance(v, float) else v) for k, v in r.items()})
+    print("feed:", write_feed(out["feed_to_funnels"]))
+    return len(out["pareto_lpbf"]), len(out["pareto_lpbf_pnp"])
+
+
+def recompact():
+    """переписать сжатый cycles_results.json из полного (scratchpad) без перебора"""
+    out = json.load(open(os.path.join(SCRATCH, "cycles_results_full.json"), encoding="utf-8"))
+    keep = {out["base"]["key"]} | {r["key"] for r in out["pareto_lpbf"] + out["pareto_lpbf_pnp"]} | {k for k, _ in CURATED}
+    if out.get("murray"):
+        keep.add(out["murray"]["key"])
+    json.dump(compact(out, keep), open(os.path.join(HERE, "cycles_results.json"), "w", encoding="utf-8"),
+              ensure_ascii=False, separators=(",", ":"), default=_jdef)
+
+
 def feed_only():
     """пересобрать feed_to_funnels и графики из готового cycles_results.json (без перебора)"""
     path = os.path.join(OUT_DIR, "cycles_results.json")
     out = json.load(open(path, encoding="utf-8"))
     out["feed_to_funnels"] = feed_from(out)
-    json.dump(out, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1, default=_jdef)
+    json.dump(out, open(path, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"), default=_jdef)
     print("feed:", write_feed(out["feed_to_funnels"]))
     tech = "lpbf"
     res = out["results"]
@@ -1918,16 +2009,18 @@ def feed_only():
     front_i = pareto(sel, [("eff_el", 1), ("added", -1), ("V_added_m3", -1)])
     base = [o for o in res if o["key"] == "R00-ic-rh-ibc-none-none"][0]
     plots(sel + [r for r in rows if not r["limits_ok"] and not r["bound"]], front_i, base["pr135"]["eff_el"])
-    items = [("KV-3 простой, π опт.", base["opt"])]
-    for r in out["pareto_lpbf"][:8]:
-        o = [x for x in res if x["key"] == r["key"]][0]
-        if o["key"] != base["key"]:
-            items.append((f"{o['name']} (π {r['PR']:.1f})"[:70], o["opt"]))
-    plots_exergy(items)
+    plots_exergy(_ex_items(res))
 
 
 if __name__ == "__main__":
-    if "--feed-only" in sys.argv:
+    if "--rebuild" in sys.argv:
+        print("фронты:", rebuild_tables())
+        recompact()
+        replot()
+    elif "--recompact" in sys.argv:
+        recompact()
+        replot()
+    elif "--feed-only" in sys.argv:
         feed_only()
     else:
         main()

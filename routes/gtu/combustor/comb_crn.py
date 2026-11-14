@@ -58,14 +58,18 @@ DIESEL_LIQ = dict(rho=840.0, sigma=0.028, mu=3.0e-3, T_b=550.0, L_v=2.5e5,
 DP_FUEL_PS = 3.0e6         # перепад на центробежной форсунке при 100 %, Па; при частичной ~ расход² (простая форсунка)
 K_MIX_D, T_CHEM_K = 1.0, 1.0   # время смешения паров (K·l/u, один пролёт) и множитель химического времени α/S_L²
 H_FUEL_DIESEL = 13.5       # массовая доля водорода дизеля, % (оценка) -> фактор светимости L = 336/H² (Lefebvre, по памяти)
-K_FB = 10.0                # критический градиент турбулентного пограничного слоя / S_L²/α (порядок величины - Eichler,
-                           # Sattelmayer 2011-2012, по памяти, не сверено)
+K_FB = 25.0                # критический градиент у стенки / (S_L²/α). Подбор (оценка): опорный серийный завихритель
+                           # (крутка 0,7, перепад 3 %, канал 50 мм, phi 0,55, S 0,05) держит метан с запасом около 2,4,
+                           # 50 % H2 - 1,6 и не держит 100 % H2 (0,35); серийные DLE - 20-30 % H2 (STATE_OF_ART.md,
+                           # разд. 2, по выдаче поиска). Влияние чисел Льюиса водорода не учтено - запас по H2 оценка сверху
 K_CRZ = 0.5                # рециркуляция закрутки: K = K_CRZ·(крутка - 0,4)+
 KV_MAX = 3.0               # предел степени рециркуляции FLOX (стеснение струи)
 T_LO_CAT, T_CAT_MAX = 723.0, 1173.0   # зажигание катализатора и предел его температуры, K (оценка)
 PHI_PB = 0.5               # phi бедной предгорелки каталитической схемы (оценка)
 F_SEG = 0.3                # доля времени догорания, которую струйки неравномерности идут раздельно (оценка)
 T_REC = 1.0e-3             # возраст рециркулирующих продуктов (догорание после зоны пламени), с (оценка)
+PHI_DET_MIN = 0.6          # бедный предел устойчивой детонации метан - воздух (оценка, по памяти, не сверено)
+ETA_MIN = 0.99             # полнота сгорания на 30/50/100 % для цели load_range (оценка)
 ETA_PG = 0.05              # доля идеального прироста давления постоянного объёма, реализуемая RDC (оценка)
 EPS_W = {"металл": 0.7, "керамика": 0.85}   # излучательная способность стенки: 0,7 Nimonic (по выдержке поиска), CMC - оценка
 EPS_C = 0.4                # кожуха
@@ -659,7 +663,8 @@ def gas_network(c, d, bc, li):
             o = K.pfr(Stream(fr.m, K.GM.enthalpy_mass, K.GM.Y.copy(), p), F_SEG * tb)
             seg.append(o); Ts.append((wk, K.T(o)))
         res["p_cv_ratio"] = float(np.mean(pcv))
-        margins.append(("детонация", 1.0))
+        res["phi_det"] = (Wf / (a_pz * W)) / bc["far_st_CH4"]
+        margins.append(("детонация", res["phi_det"] / PHI_DET_MIN))   # предел детонации по phi (оценка)
     # смешение струек, совместное догорание, разбавление, выход
     if s == "CAT":
         hot = K.mix(*seg)
@@ -754,14 +759,14 @@ def diesel_network(c, d, bc, li, gas_res):
         air_d = x_diff * Wfd / far_d
         m_lean_air = max(a_zone - air_d, 0.05 * a_zone)
         phi_lean = (1 - x_diff) * Wfd / m_lean_air / far_d
-        parts = []
+        parts, t_seg = [], F_SEG * (tp + tb)
         if phi_lean > 0.05:
             ln = K.from_dz(phi_lean, p, T3, T3, m_lean_air + (1 - x_diff) * Wfd)
-            parts.append(K.pfr(ln, tp + tb))
+            parts.append(K.pfr(ln, t_seg))
         if x_diff > 1e-4:
             df = K.from_dz(1.0, p, T3, T3, air_d + x_diff * Wfd)
-            parts.append(K.pfr(df, min(tp + tb, t_mix + t_chem)))   # пар горит у стехиометрии, пока не перемешан
-        hot = K.mix(*parts)
+            parts.append(K.pfr(df, min(t_seg, t_mix + t_chem)))   # пар горит у стехиометрии, пока не перемешан
+        hot = K.pfr(K.mix(*parts), (1 - F_SEG) * (tp + tb))     # совместное догорание (как на газе)
         res["phi_lean"] = phi_lean
     T_hot = K.T(hot)
     used_air = hot.m - Wfd
@@ -1064,7 +1069,8 @@ def compliance(c, row):
     put("nox_gas", max(g[1.0]["NOx"], g[0.5]["NOx"]), nox_t["target"]["max"])
     put("co_gas", max(g[1.0]["CO"], g[0.5]["CO"]), co_t["target"]["max"])
     lr = max(g[0.3]["NOx"] / nox_t["also"]["max"], g[0.3]["CO"] / co_t["also"]["max"],
-             1.0 / max(min(r["margin_lbo"] or 0.0 for r in row["gas"]), 1e-6))
+             1.0 / max(min(r["margin_lbo"] or 0.0 for r in row["gas"]), 1e-6),
+             max(1.0 - r["eta_c"] for r in row["gas"]) / (1.0 - ETA_MIN))
     put("load_range", lr, 1.0)
     put("fuel_valves", max(row["module"]["valves_gas"], row["module"]["valves_diesel"]),
         _tg("fuel_valves")["target"]["control_valves_per_fuel"])

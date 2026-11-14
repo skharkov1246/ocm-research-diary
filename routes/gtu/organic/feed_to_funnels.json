@@ -4,6 +4,49 @@
   "date": "2026-11-14",
   "status": "оценка уровня облика (0D-цикл); числа — из cycles_results.json",
   "key_finding": "при T41 1000 °C (класс U) мягкий допуск по расходу требует удельной работы ≥ 230.5 кДж/кг; простой цикл KV-3 на пределе, рекуператор сам по себе её снижает (потери давления) и не проходит; проходит рекуператор вместе с повторным подогревом (или с промохлаждением) — см. representative",
+  "recommended": {
+   "note": "рекомендуемое для KV: рекуператор 0,90 + межтурбинный подогрев; as_is — с компрессором KV-3 (π 13,5)",
+   "opt": {
+    "key": "R90-ic-RH-ibc-none-none",
+    "name": "рекуператор 0.90 + подогрев",
+    "PR": 8.22,
+    "eff_el": 0.3952,
+    "W_air": 22.2,
+    "EGT_C": 362.9,
+    "T_rec_in_C": 699.9,
+    "added_lpbf": 12,
+    "V_added_m3_lpbf": 4.56,
+    "mass_hx_kg_lpbf": 7974,
+    "mass_hx_kg_foil": 2131,
+    "limits_ok": true,
+    "T41_for_G_cap_C": null,
+    "prm": {
+     "x_rh": 0.35,
+     "sc": 2.0,
+     "R_egr": 1.0
+    }
+   },
+   "as_is": {
+    "key": "R90-ic-RH-ibc-none-none",
+    "name": "рекуператор 0.90 + подогрев",
+    "PR": 13.5,
+    "eff_el": 0.357,
+    "W_air": 20.96,
+    "EGT_C": 443.8,
+    "T_rec_in_C": 634.8,
+    "added_lpbf": 11,
+    "V_added_m3_lpbf": 4.13,
+    "mass_hx_kg_lpbf": 7238,
+    "mass_hx_kg_foil": 1935,
+    "limits_ok": true,
+    "T41_for_G_cap_C": null,
+    "prm": {
+     "x_rh": 0.35,
+     "sc": 2.0,
+     "R_egr": 1.0
+    }
+   }
+  },
   "representative": {
    "simple": {
     "key": "R00-ic-rh-ibc-none-none",

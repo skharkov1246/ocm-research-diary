@@ -1,0 +1,8431 @@
+{
+ "title": "Камера сгорания KV-3, уровень 0: слияние частей, рейтинг и фронт Парето",
+ "method": "слияние частей comb_l0.py с контролем полноты; рейтинг - взвешенная сумма нормированных оценок × штраф жёстких целей exp(-2·Σ нарушений); фронт Парето по шести целям; чувствительность - веса x0,5/x1,5 и 300 наборов Дирихле",
+ "software": "python 3.13.18, numpy 2.5.3",
+ "date": "2026-11-14",
+ "status": "уровень облика (0D + корреляции): числа - оценка для отбора на L1 (RANS), не прогноз конструкции",
+ "complete": true,
+ "completeness": {
+  "files": 4,
+  "problems": [],
+  "ref": {
+   "schema": "kv.combustor.l0.shard/1",
+   "kv": "KV-3",
+   "n": 300,
+   "seed": 20261114,
+   "shards": 4,
+   "fingerprint": "666131092b69648f",
+   "code_hash": "90a15bd14dfa6979",
+   "bc_key": "0c9adbbae89f091d"
+  },
+  "duplicate_shards": {},
+  "missing_shards": [],
+  "duplicate_indices": 0,
+  "missing_indices": 0,
+  "missing_indices_head": []
+ },
+ "inputs": [
+  {
+   "file": "comb_l0_KV-3_n300_s000of004.json",
+   "shard": 0,
+   "rows": 75,
+   "runtime_s": 14.5
+  },
+  {
+   "file": "comb_l0_KV-3_n300_s001of004.json",
+   "shard": 1,
+   "rows": 75,
+   "runtime_s": 14.4
+  },
+  {
+   "file": "comb_l0_KV-3_n300_s002of004.json",
+   "shard": 2,
+   "rows": 75,
+   "runtime_s": 14.9
+  },
+  {
+   "file": "comb_l0_KV-3_n300_s003of004.json",
+   "shard": 3,
+   "rows": 75,
+   "runtime_s": 10.6
+  }
+ ],
+ "weights": {
+  "parts": 0.3,
+  "plugplay": 0.2,
+  "service": 0.15,
+  "eff": 0.12,
+  "size": 0.08,
+  "make": 0.1,
+  "nox": 0.05
+ },
+ "weights_note": "приоритеты владельца 14.11.2026: детали (главное) > Plug&Play > монтаж и ремонт > КПД > размер; изготовимость и NOx - малыми весами (выбросы держат жёсткие цели); значения весов - оценка",
+ "penalty_k": 2.0,
+ "hard_targets": [
+  "nox_gas",
+  "co_gas",
+  "load_range",
+  "fuel_valves",
+  "diesel_dry",
+  "fuel_changeover",
+  "exit_uniformity",
+  "wall_life",
+  "combustion_dynamics"
+ ],
+ "counts": {
+  "n": 300,
+  "rows": 300,
+  "status": {
+   "отсев": 165,
+   "ok": 135
+  },
+  "reject_codes": {
+   "ВОЗДУХ": 35,
+   "ОХЛАЖДЕНИЕ": 23,
+   "ТОПЛИВО": 50,
+   "ЭЛЕМЕНТ": 19,
+   "ПОГАСАНИЕ_100": 51,
+   "ЭЛЕМЕНТОВ_НА_ТРУБУ": 9,
+   "ДИЗЕЛЬ_ФОРСУНКИ": 7,
+   "ПРОСКОК": 6,
+   "САМОВОСПЛАМЕНЕНИЕ": 1
+  },
+  "feasible": 135,
+  "hard_ok": 0
+ },
+ "timing": {
+  "t_variant_mean_s": 0.661679,
+  "t_variant_median_s": 0.454189,
+  "t_variant_max_s": 2.86772,
+  "t_variant_sum_s": 198.504,
+  "shard_runtime_s": [
+   14.5,
+   14.4,
+   14.9,
+   10.6
+  ]
+ },
+ "by_scheme": {
+  "RDC": {
+   "total": 43,
+   "ok": 14,
+   "hard_ok": 0,
+   "reject": {
+    "ВОЗДУХ": 3,
+    "ОХЛАЖДЕНИЕ": 5,
+    "ТОПЛИВО": 10,
+    "ПОГАСАНИЕ_100": 14,
+    "ЭЛЕМЕНТ": 1
+   },
+   "best_idx": 112,
+   "best_score": 3.56778e-07,
+   "NOx_100_median": 360.015,
+   "NOx_30_median": 0.0665079,
+   "CO_30_median": 0.0849285,
+   "diesel_NOx_100_median": 392.896,
+   "parts_min": 5,
+   "dp_min": -0.0783743,
+   "target_pass_share": {
+    "nox_gas": 0.0,
+    "co_gas": 0.428571,
+    "load_range": 0.0,
+    "fuel_valves": 0.0,
+    "diesel_dry": 0.0714286,
+    "fuel_changeover": 0.0,
+    "hydrogen": 1.0,
+    "pressure_loss": 1.0,
+    "exit_uniformity": 0.857143,
+    "wall_life": 0.785714,
+    "parts_count": 0.142857,
+    "cartridge_swap": 0.357143,
+    "combustion_dynamics": 0.0
+   }
+  },
+  "RQL": {
+   "total": 42,
+   "ok": 31,
+   "hard_ok": 0,
+   "reject": {
+    "ПОГАСАНИЕ_100": 3,
+    "ВОЗДУХ": 4,
+    "ОХЛАЖДЕНИЕ": 1,
+    "ЭЛЕМЕНТОВ_НА_ТРУБУ": 2,
+    "ТОПЛИВО": 2,
+    "ДИЗЕЛЬ_ФОРСУНКИ": 3
+   },
+   "best_idx": 217,
+   "best_score": 2.61998e-06,
+   "NOx_100_median": 115.773,
+   "NOx_30_median": 44.0082,
+   "CO_30_median": 279.295,
+   "diesel_NOx_100_median": 147.02,
+   "parts_min": 4,
+   "dp_min": 0.0345003,
+   "target_pass_share": {
+    "nox_gas": 0.0,
+    "co_gas": 0.322581,
+    "load_range": 0.0,
+    "fuel_valves": 1.0,
+    "diesel_dry": 0.0,
+    "fuel_changeover": 0.645161,
+    "hydrogen": 1.0,
+    "pressure_loss": 0.129032,
+    "exit_uniformity": 0.967742,
+    "wall_life": 1.0,
+    "parts_count": 0.0645161,
+    "cartridge_swap": 0.129032,
+    "combustion_dynamics": 1.0
+   }
+  },
+  "CAT": {
+   "total": 44,
+   "ok": 19,
+   "hard_ok": 0,
+   "reject": {
+    "ЭЛЕМЕНТ": 3,
+    "ТОПЛИВО": 9,
+    "ВОЗДУХ": 7,
+    "ОХЛАЖДЕНИЕ": 3,
+    "ПОГАСАНИЕ_100": 7,
+    "ЭЛЕМЕНТОВ_НА_ТРУБУ": 3
+   },
+   "best_idx": 284,
+   "best_score": 4.60612e-10,
+   "NOx_100_median": 0.252656,
+   "NOx_30_median": 0.299888,
+   "CO_30_median": 605.191,
+   "diesel_NOx_100_median": 82.5901,
+   "parts_min": 6,
+   "dp_min": 0.0306559,
+   "target_pass_share": {
+    "nox_gas": 1.0,
+    "co_gas": 0.0,
+    "load_range": 0.0,
+    "fuel_valves": 0.0,
+    "diesel_dry": 0.105263,
+    "fuel_changeover": 0.0,
+    "hydrogen": 1.0,
+    "pressure_loss": 0.157895,
+    "exit_uniformity": 0.842105,
+    "wall_life": 0.0,
+    "parts_count": 0.0,
+    "cartridge_swap": 0.263158,
+    "combustion_dynamics": 0.947368
+   }
+  },
+  "TVC": {
+   "total": 42,
+   "ok": 27,
+   "hard_ok": 0,
+   "reject": {
+    "ЭЛЕМЕНТ": 3,
+    "ТОПЛИВО": 5,
+    "ВОЗДУХ": 1,
+    "ОХЛАЖДЕНИЕ": 1,
+    "ПОГАСАНИЕ_100": 1,
+    "ЭЛЕМЕНТОВ_НА_ТРУБУ": 2,
+    "ПРОСКОК": 2,
+    "САМОВОСПЛАМЕНЕНИЕ": 1
+   },
+   "best_idx": 84,
+   "best_score": 3.34502e-06,
+   "NOx_100_median": 67.409,
+   "NOx_30_median": 2.89262,
+   "CO_30_median": 1493.5,
+   "diesel_NOx_100_median": 281.471,
+   "parts_min": 4,
+   "dp_min": 0.0359235,
+   "target_pass_share": {
+    "nox_gas": 0.148148,
+    "co_gas": 0.333333,
+    "load_range": 0.037037,
+    "fuel_valves": 1.0,
+    "diesel_dry": 0.111111,
+    "fuel_changeover": 0.62963,
+    "hydrogen": 0.962963,
+    "pressure_loss": 0.0740741,
+    "exit_uniformity": 0.740741,
+    "wall_life": 0.777778,
+    "parts_count": 0.111111,
+    "cartridge_swap": 0.148148,
+    "combustion_dynamics": 0.148148
+   }
+  },
+  "MM": {
+   "total": 43,
+   "ok": 13,
+   "hard_ok": 0,
+   "reject": {
+    "ТОПЛИВО": 14,
+    "ЭЛЕМЕНТ": 5,
+    "ВОЗДУХ": 6,
+    "ОХЛАЖДЕНИЕ": 5,
+    "ПОГАСАНИЕ_100": 8
+   },
+   "best_idx": 21,
+   "best_score": 0.0611757,
+   "NOx_100_median": 75.8874,
+   "NOx_30_median": 1.26909,
+   "CO_30_median": 5.32091,
+   "diesel_NOx_100_median": 23.425,
+   "parts_min": 4,
+   "dp_min": 0.0365779,
+   "target_pass_share": {
+    "nox_gas": 0.0769231,
+    "co_gas": 0.461538,
+    "load_range": 0.0769231,
+    "fuel_valves": 1.0,
+    "diesel_dry": 0.307692,
+    "fuel_changeover": 0.384615,
+    "hydrogen": 1.0,
+    "pressure_loss": 0.0769231,
+    "exit_uniformity": 0.384615,
+    "wall_life": 1.0,
+    "parts_count": 0.230769,
+    "cartridge_swap": 0.230769,
+    "combustion_dynamics": 0.307692
+   }
+  },
+  "FLOX": {
+   "total": 43,
+   "ok": 15,
+   "hard_ok": 0,
+   "reject": {
+    "ВОЗДУХ": 9,
+    "ОХЛАЖДЕНИЕ": 3,
+    "ПОГАСАНИЕ_100": 10,
+    "ТОПЛИВО": 8,
+    "ЭЛЕМЕНТ": 3,
+    "ДИЗЕЛЬ_ФОРСУНКИ": 2
+   },
+   "best_idx": 233,
+   "best_score": 0.626081,
+   "NOx_100_median": 2.39372,
+   "NOx_30_median": 1.38775e-05,
+   "CO_30_median": 0.530475,
+   "diesel_NOx_100_median": 39.894,
+   "parts_min": 4,
+   "dp_min": 0.0358978,
+   "target_pass_share": {
+    "nox_gas": 0.8,
+    "co_gas": 0.733333,
+    "load_range": 0.2,
+    "fuel_valves": 1.0,
+    "diesel_dry": 0.133333,
+    "fuel_changeover": 0.733333,
+    "hydrogen": 1.0,
+    "pressure_loss": 0.0666667,
+    "exit_uniformity": 0.866667,
+    "wall_life": 1.0,
+    "parts_count": 0.266667,
+    "cartridge_swap": 0.266667,
+    "combustion_dynamics": 0.2
+   }
+  },
+  "LPP": {
+   "total": 43,
+   "ok": 16,
+   "hard_ok": 0,
+   "reject": {
+    "ВОЗДУХ": 5,
+    "ОХЛАЖДЕНИЕ": 5,
+    "ЭЛЕМЕНТОВ_НА_ТРУБУ": 2,
+    "ДИЗЕЛЬ_ФОРСУНКИ": 2,
+    "ПРОСКОК": 4,
+    "ЭЛЕМЕНТ": 4,
+    "ПОГАСАНИЕ_100": 8,
+    "ТОПЛИВО": 2
+   },
+   "best_idx": 2,
+   "best_score": 1.37287e-06,
+   "NOx_100_median": 2.73475,
+   "NOx_30_median": 0.000489605,
+   "CO_30_median": 0.000127894,
+   "diesel_NOx_100_median": 322.036,
+   "parts_min": 4,
+   "dp_min": 0.0266676,
+   "target_pass_share": {
+    "nox_gas": 0.6875,
+    "co_gas": 0.625,
+    "load_range": 0.125,
+    "fuel_valves": 1.0,
+    "diesel_dry": 0.125,
+    "fuel_changeover": 0.625,
+    "hydrogen": 0.9375,
+    "pressure_loss": 0.125,
+    "exit_uniformity": 0.4375,
+    "wall_life": 0.75,
+    "parts_count": 0.1875,
+    "cartridge_swap": 0.25,
+    "combustion_dynamics": 0.125
+   }
+  }
+ },
+ "top": [
+  {
+   "idx": 233,
+   "score": 0.626081,
+   "penalty": 0.801495,
+   "scheme": "FLOX",
+   "chamber": "выносная",
+   "injector": "струи",
+   "diesel": "пневматическая",
+   "cooling": "отверстия",
+   "make": "печатный картридж",
+   "passive": "струи",
+   "n_el": 275,
+   "n_jet": 1650,
+   "d_jet_mm": 0.504539,
+   "d_air_mm": 9.0072,
+   "a_pz": 0.4671,
+   "a_aux": 0.136454,
+   "k_pass": 0.941292,
+   "tau_pz_ms": 0.6345,
+   "tau_bo_ms": 7.58513,
+   "dp_inj": 0.048155,
+   "dp_total": 0.0797864,
+   "NOx": [
+    3.12129,
+    3.28729,
+    4.24418
+   ],
+   "CO": [
+    4.11618,
+    4.65951,
+    4.19552
+   ],
+   "margin_lbo": [
+    9.13982,
+    6.61169,
+    5.62341
+   ],
+   "NOx_diesel": [
+    46.6468,
+    36.8917
+   ],
+   "CO_diesel": [
+    7.73407,
+    2.84851
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0835637,
+   "T_wall_K": 803.905,
+   "parts": 4,
+   "swap_h": 0.8,
+   "mass_kg": 14.081,
+   "plugplay": 9.625,
+   "service": 10.0,
+   "make_score": 8.29951,
+   "D_env": 0.447501,
+   "L_mod": 1.09593,
+   "V_L": 51.5869,
+   "hard_ok": false,
+   "hard_fail": [
+    "diesel_dry"
+   ]
+  },
+  {
+   "idx": 21,
+   "score": 0.0611757,
+   "penalty": 0.0919778,
+   "scheme": "MM",
+   "chamber": "выносная",
+   "injector": "микросмесители",
+   "diesel": "испарительная",
+   "cooling": "керамика",
+   "make": "гибрид",
+   "passive": "струи",
+   "n_el": 1428,
+   "n_jet": 2856,
+   "d_jet_mm": 0.335751,
+   "d_air_mm": 4.18476,
+   "a_pz": 0.467149,
+   "a_aux": 0.19184,
+   "k_pass": 0.777143,
+   "tau_pz_ms": 1.51471,
+   "tau_bo_ms": 16.0776,
+   "dp_inj": 0.038337,
+   "dp_total": 0.0690419,
+   "NOx": [
+    17.1706,
+    16.2214,
+    14.0422
+   ],
+   "CO": [
+    3.56203,
+    1.99787,
+    1.13222
+   ],
+   "margin_lbo": [
+    10.7461,
+    4.06794,
+    2.37137
+   ],
+   "NOx_diesel": [
+    22.8002,
+    15.6567
+   ],
+   "CO_diesel": [
+    6.62847,
+    0.0966932
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.0959618,
+   "T_wall_K": 1147.63,
+   "parts": 7,
+   "swap_h": 0.8,
+   "mass_kg": 10.2766,
+   "plugplay": 8.625,
+   "service": 9.0,
+   "make_score": 7.29964,
+   "D_env": 0.461362,
+   "L_mod": 1.51649,
+   "V_L": 102.233,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "fuel_changeover",
+    "exit_uniformity"
+   ]
+  },
+  {
+   "idx": 73,
+   "score": 0.00174303,
+   "penalty": 0.00247875,
+   "scheme": "FLOX",
+   "chamber": "выносная",
+   "injector": "микросмесители",
+   "diesel": "пневматическая",
+   "cooling": "керамика",
+   "make": "печатный картридж",
+   "passive": "струи",
+   "n_el": 703,
+   "n_jet": 703,
+   "d_jet_mm": 0.61097,
+   "d_air_mm": 6.21603,
+   "a_pz": 0.618691,
+   "a_aux": 0.21295,
+   "k_pass": 0.969764,
+   "tau_pz_ms": 1.77569,
+   "tau_bo_ms": 5.25365,
+   "dp_inj": 0.056994,
+   "dp_total": 0.087887,
+   "NOx": [
+    0.466717,
+    1.17849,
+    1.75402
+   ],
+   "CO": [
+    0.15639,
+    0.336319,
+    0.530475
+   ],
+   "margin_lbo": [
+    4.29351,
+    3.27812,
+    2.78813
+   ],
+   "NOx_diesel": [
+    28.1481,
+    23.6721
+   ],
+   "CO_diesel": [
+    0.285978,
+    1415.86
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.0594598,
+   "T_wall_K": 991.837,
+   "parts": 6,
+   "swap_h": 0.8,
+   "mass_kg": 8.4082,
+   "plugplay": 9.125,
+   "service": 9.0,
+   "make_score": 7.29971,
+   "D_env": 0.430869,
+   "L_mod": 1.16146,
+   "V_L": 69.6666,
+   "hard_ok": false,
+   "hard_fail": [
+    "diesel_dry"
+   ]
+  },
+  {
+   "idx": 246,
+   "score": 0.00165681,
+   "penalty": 0.00247875,
+   "scheme": "FLOX",
+   "chamber": "кольцевая",
+   "injector": "микросмесители",
+   "diesel": "пневматическая",
+   "cooling": "керамика",
+   "make": "гибрид",
+   "passive": "струи",
+   "n_el": 618,
+   "n_jet": 1236,
+   "d_jet_mm": 0.613931,
+   "d_air_mm": 7.47748,
+   "a_pz": 0.570144,
+   "a_aux": 0.197419,
+   "k_pass": 0.838637,
+   "tau_pz_ms": 2.90922,
+   "tau_bo_ms": 5.44107,
+   "dp_inj": 0.02991,
+   "dp_total": 0.041463,
+   "NOx": [
+    0.472788,
+    0.393874,
+    0.382293
+   ],
+   "CO": [
+    0.495274,
+    0.353114,
+    0.726063
+   ],
+   "margin_lbo": [
+    11.9709,
+    6.26434,
+    4.29351
+   ],
+   "NOx_diesel": [
+    46.6338,
+    39.0039
+   ],
+   "CO_diesel": [
+    0.928044,
+    691.718
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0410099,
+   "T_wall_K": 983.805,
+   "parts": 8,
+   "swap_h": 12.0,
+   "mass_kg": 13.8956,
+   "plugplay": 9.5,
+   "service": 3.26667,
+   "make_score": 7.29952,
+   "D_env": 0.772351,
+   "L_mod": 0.414127,
+   "V_L": 59.3147,
+   "hard_ok": false,
+   "hard_fail": [
+    "diesel_dry"
+   ]
+  },
+  {
+   "idx": 84,
+   "score": 3.34502e-06,
+   "penalty": 5.51323e-06,
+   "scheme": "TVC",
+   "chamber": "противоточная",
+   "injector": "закрутка",
+   "diesel": "пневматическая",
+   "cooling": "керамика",
+   "make": "печатный картридж",
+   "passive": "струи",
+   "n_el": 1,
+   "n_jet": 18,
+   "d_jet_mm": 3.47828,
+   "d_air_mm": 163.621,
+   "a_pz": 0.467727,
+   "a_aux": 0.094022,
+   "k_pass": 1.19846,
+   "tau_pz_ms": 2.52907,
+   "tau_bo_ms": 15.6641,
+   "dp_inj": 0.033533,
+   "dp_total": 0.0527255,
+   "NOx": [
+    52.1597,
+    39.815,
+    3.06883
+   ],
+   "CO": [
+    0.461789,
+    0.604454,
+    0.428431
+   ],
+   "margin_lbo": [
+    10.1815,
+    9.13982,
+    6.26434
+   ],
+   "NOx_diesel": [
+    1419.63,
+    1404.2
+   ],
+   "CO_diesel": [
+    2647.2,
+    4565.62
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0148987,
+   "T_wall_K": 1552.81,
+   "parts": 7,
+   "swap_h": 6.0,
+   "mass_kg": 23.9339,
+   "plugplay": 10.0,
+   "service": 4.40952,
+   "make_score": 7.29917,
+   "D_env": 1.0537,
+   "L_mod": 1.70847,
+   "V_L": 121.744,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "diesel_dry",
+    "wall_life"
+   ]
+  },
+  {
+   "idx": 94,
+   "score": 3.03199e-06,
+   "penalty": 4.61724e-06,
+   "scheme": "FLOX",
+   "chamber": "противоточная",
+   "injector": "микросмесители",
+   "diesel": "испарительная",
+   "cooling": "решётка",
+   "make": "гибрид",
+   "passive": "струи",
+   "n_el": 373,
+   "n_jet": 746,
+   "d_jet_mm": 0.494345,
+   "d_air_mm": 7.81083,
+   "a_pz": 0.469677,
+   "a_aux": 0.221365,
+   "k_pass": 0.20278,
+   "tau_pz_ms": 3.99428,
+   "tau_bo_ms": 3.62416,
+   "dp_inj": 0.046799,
+   "dp_total": 0.0699928,
+   "NOx": [
+    3.81975,
+    0.146611,
+    0.0091675
+   ],
+   "CO": [
+    2.80198,
+    7.3225,
+    10321.6
+   ],
+   "margin_lbo": [
+    48.6968,
+    4.29351,
+    0.1
+   ],
+   "NOx_diesel": [
+    30.962,
+    25.5286
+   ],
+   "CO_diesel": [
+    5.39787,
+    3.74631
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.026311,
+   "T_wall_K": 882.747,
+   "parts": 5,
+   "swap_h": 6.5,
+   "mass_kg": 56.6413,
+   "plugplay": 8.61979,
+   "service": 4.40401,
+   "make_score": 7.79803,
+   "D_env": 1.00525,
+   "L_mod": 0.402881,
+   "V_L": 63.1908,
+   "hard_ok": false,
+   "hard_fail": [
+    "load_range",
+    "fuel_changeover",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 108,
+   "score": 2.67234e-06,
+   "penalty": 3.76128e-06,
+   "scheme": "TVC",
+   "chamber": "кольцевая",
+   "injector": "струи",
+   "diesel": "испарительная",
+   "cooling": "отверстия",
+   "make": "печатный картридж",
+   "passive": "струи",
+   "n_el": 125,
+   "n_jet": 875,
+   "d_jet_mm": 0.564084,
+   "d_air_mm": 12.2936,
+   "a_pz": 0.389303,
+   "a_aux": 0.075593,
+   "k_pass": 0.656753,
+   "tau_pz_ms": 0.956306,
+   "tau_bo_ms": 2.97392,
+   "dp_inj": 0.046654,
+   "dp_total": 0.0581941,
+   "NOx": [
+    8.03453,
+    1.78114,
+    3.56529
+   ],
+   "CO": [
+    3.49764,
+    1.22447,
+    20.8133
+   ],
+   "margin_lbo": [
+    9.13982,
+    0.333333,
+    0.1
+   ],
+   "NOx_diesel": [
+    46.3058,
+    39.7594
+   ],
+   "CO_diesel": [
+    6.76805,
+    26.5679
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.058503,
+   "T_wall_K": 876.308,
+   "parts": 4,
+   "swap_h": 12.0,
+   "mass_kg": 20.3086,
+   "plugplay": 9.0,
+   "service": 3.6,
+   "make_score": 8.29929,
+   "D_env": 0.784582,
+   "L_mod": 0.335271,
+   "V_L": 39.8137,
+   "hard_ok": false,
+   "hard_fail": [
+    "load_range",
+    "diesel_dry",
+    "fuel_changeover",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 217,
+   "score": 2.61998e-06,
+   "penalty": 4.27417e-06,
+   "scheme": "RQL",
+   "chamber": "выносная",
+   "injector": "струи",
+   "diesel": "пневматическая",
+   "cooling": "плёночное",
+   "make": "литьё",
+   "passive": "нет",
+   "n_el": 76,
+   "n_jet": 304,
+   "d_jet_mm": 0.919869,
+   "d_air_mm": 13.7661,
+   "a_pz": 0.185893,
+   "a_aux": 0.428222,
+   "k_pass": 0.0,
+   "tau_pz_ms": 2.86658,
+   "tau_bo_ms": 7.22271,
+   "dp_inj": 0.018302,
+   "dp_total": 0.0489444,
+   "NOx": [
+    101.399,
+    284.503,
+    17.7219
+   ],
+   "CO": [
+    0.127821,
+    12.1429,
+    49.9794
+   ],
+   "margin_lbo": [
+    57.2549,
+    209.08,
+    67.317
+   ],
+   "NOx_diesel": [
+    105.308,
+    554.423
+   ],
+   "CO_diesel": [
+    0.24099,
+    11.5298
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0413914,
+   "T_wall_K": 1007.57,
+   "parts": 14,
+   "swap_h": 0.8,
+   "mass_kg": 24.6771,
+   "plugplay": 9.625,
+   "service": 8.6,
+   "make_score": 7.42857,
+   "D_env": 0.508732,
+   "L_mod": 1.81124,
+   "V_L": 114.18,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "diesel_dry"
+   ]
+  },
+  {
+   "idx": 91,
+   "score": 2.18664e-06,
+   "penalty": 3.15679e-06,
+   "scheme": "RQL",
+   "chamber": "выносная",
+   "injector": "струи",
+   "diesel": "испарительная",
+   "cooling": "плёночное",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 26,
+   "n_jet": 156,
+   "d_jet_mm": 1.0037,
+   "d_air_mm": 18.4175,
+   "a_pz": 0.180368,
+   "a_aux": 0.287414,
+   "k_pass": 0.0,
+   "tau_pz_ms": 1.16164,
+   "tau_bo_ms": 2.4153,
+   "dp_inj": 0.045951,
+   "dp_total": 0.0836861,
+   "NOx": [
+    155.728,
+    200.971,
+    17.0381
+   ],
+   "CO": [
+    3.00715,
+    5.98883,
+    59.506
+   ],
+   "margin_lbo": [
+    19.4564,
+    93.0572,
+    31.6228
+   ],
+   "NOx_diesel": [
+    198.722,
+    312.331
+   ],
+   "CO_diesel": [
+    5.71484,
+    3.53272
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0426866,
+   "T_wall_K": 1116.04,
+   "parts": 4,
+   "swap_h": 0.8,
+   "mass_kg": 14.9514,
+   "plugplay": 7.63953,
+   "service": 10.0,
+   "make_score": 8.29948,
+   "D_env": 0.457807,
+   "L_mod": 1.46853,
+   "V_L": 53.3154,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "diesel_dry",
+    "fuel_changeover"
+   ]
+  },
+  {
+   "idx": 174,
+   "score": 1.95469e-06,
+   "penalty": 2.81976e-06,
+   "scheme": "FLOX",
+   "chamber": "противоточная",
+   "injector": "микросмесители",
+   "diesel": "пневматическая",
+   "cooling": "решётка",
+   "make": "печатный картридж",
+   "passive": "струи",
+   "n_el": 662,
+   "n_jet": 1324,
+   "d_jet_mm": 0.430308,
+   "d_air_mm": 6.3152,
+   "a_pz": 0.492487,
+   "a_aux": 0.155009,
+   "k_pass": 0.337348,
+   "tau_pz_ms": 1.51577,
+   "tau_bo_ms": 3.02283,
+   "dp_inj": 0.038227,
+   "dp_total": 0.0751818,
+   "NOx": [
+    2.39372,
+    0.18981,
+    0.0525682
+   ],
+   "CO": [
+    1.14832,
+    15.0093,
+    453.713
+   ],
+   "margin_lbo": [
+    15.6788,
+    1.81056,
+    0.0333333
+   ],
+   "NOx_diesel": [
+    35.5036,
+    29.0838
+   ],
+   "CO_diesel": [
+    2.29297,
+    69.4404
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.0254713,
+   "T_wall_K": 814.441,
+   "parts": 4,
+   "swap_h": 6.5,
+   "mass_kg": 56.8361,
+   "plugplay": 9.5,
+   "service": 4.40245,
+   "make_score": 7.79802,
+   "D_env": 1.02226,
+   "L_mod": 0.363164,
+   "V_L": 70.7431,
+   "hard_ok": false,
+   "hard_fail": [
+    "co_gas",
+    "load_range",
+    "diesel_dry",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 250,
+   "score": 1.38549e-06,
+   "penalty": 2.14582e-06,
+   "scheme": "MM",
+   "chamber": "кольцевая",
+   "injector": "микросмесители",
+   "diesel": "испарительная",
+   "cooling": "отверстия",
+   "make": "гибрид",
+   "passive": "струи",
+   "n_el": 731,
+   "n_jet": 1462,
+   "d_jet_mm": 0.30351,
+   "d_air_mm": 6.00192,
+   "a_pz": 0.398637,
+   "a_aux": 0.095815,
+   "k_pass": 0.758841,
+   "tau_pz_ms": 0.318854,
+   "tau_bo_ms": 5.63614,
+   "dp_inj": 0.025177,
+   "dp_total": 0.0365779,
+   "NOx": [
+    83.6086,
+    105.601,
+    143.297
+   ],
+   "CO": [
+    14.1641,
+    9.64695,
+    5.32091
+   ],
+   "margin_lbo": [
+    6.61169,
+    2.78813,
+    1.62531
+   ],
+   "NOx_diesel": [
+    58.0918,
+    31.7786
+   ],
+   "CO_diesel": [
+    24.1716,
+    0.407478
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.0782066,
+   "T_wall_K": 966.134,
+   "parts": 5,
+   "swap_h": 12.0,
+   "mass_kg": 26.543,
+   "plugplay": 7.13228,
+   "service": 3.6,
+   "make_score": 7.79908,
+   "D_env": 0.798384,
+   "L_mod": 0.396658,
+   "V_L": 68.7217,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "diesel_dry",
+    "fuel_changeover"
+   ]
+  },
+  {
+   "idx": 2,
+   "score": 1.37287e-06,
+   "penalty": 2.86938e-06,
+   "scheme": "LPP",
+   "chamber": "противоточная",
+   "injector": "закрутка",
+   "diesel": "центробежная",
+   "cooling": "решётка",
+   "make": "печатный картридж",
+   "passive": "струи",
+   "n_el": 21,
+   "n_jet": 168,
+   "d_jet_mm": 1.43637,
+   "d_air_mm": 35.6729,
+   "a_pz": 0.376877,
+   "a_aux": 0.198651,
+   "k_pass": 0.44413,
+   "tau_pz_ms": 2.09011,
+   "tau_bo_ms": 12.8653,
+   "dp_inj": 0.02185,
+   "dp_total": 0.0550362,
+   "NOx": [
+    266.145,
+    39.7058,
+    12.6245
+   ],
+   "CO": [
+    20.7106,
+    3.43436,
+    0.783761
+   ],
+   "margin_lbo": [
+    63.7804,
+    9.64662,
+    2.78813
+   ],
+   "NOx_diesel": [
+    520.084,
+    1399.32
+   ],
+   "CO_diesel": [
+    32.8062,
+    4496.33
+   ],
+   "H2_vol_max": 0.0,
+   "PF": 0.0451994,
+   "T_wall_K": 921.164,
+   "parts": 25,
+   "swap_h": 6.5,
+   "mass_kg": 69.2653,
+   "plugplay": 10.0,
+   "service": 3.96969,
+   "make_score": 8.29759,
+   "D_env": 1.07154,
+   "L_mod": 0.460478,
+   "V_L": 112.497,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "diesel_dry"
+   ]
+  },
+  {
+   "idx": 281,
+   "score": 1.13318e-06,
+   "penalty": 2.46113e-06,
+   "scheme": "RQL",
+   "chamber": "трубчатые",
+   "injector": "струи",
+   "diesel": "пневматическая",
+   "cooling": "керамика",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 188,
+   "n_jet": 1504,
+   "d_jet_mm": 0.593604,
+   "d_air_mm": 8.88253,
+   "a_pz": 0.177433,
+   "a_aux": 0.251257,
+   "k_pass": 0.0,
+   "tau_pz_ms": 1.51309,
+   "tau_bo_ms": 14.1195,
+   "dp_inj": 0.01572,
+   "dp_total": 0.0360221,
+   "NOx": [
+    187.544,
+    260.655,
+    21.8617
+   ],
+   "CO": [
+    9.20984,
+    0.109706,
+    6.86829
+   ],
+   "margin_lbo": [
+    24.1442,
+    121.881,
+    46.1384
+   ],
+   "NOx_diesel": [
+    295.499,
+    455.186
+   ],
+   "CO_diesel": [
+    17.5651,
+    0.20138
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0510378,
+   "T_wall_K": 1232.96,
+   "parts": 45,
+   "swap_h": 4.6,
+   "mass_kg": 15.2162,
+   "plugplay": 9.775,
+   "service": 5.20952,
+   "make_score": 7.29947,
+   "D_env": 0.951156,
+   "L_mod": 0.836984,
+   "V_L": 93.4779,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "diesel_dry"
+   ]
+  },
+  {
+   "idx": 268,
+   "score": 9.2435e-07,
+   "penalty": 1.35921e-06,
+   "scheme": "TVC",
+   "chamber": "противоточная",
+   "injector": "микросмесители",
+   "diesel": "испарительная",
+   "cooling": "плёночное",
+   "make": "гибрид",
+   "passive": "струи",
+   "n_el": 781,
+   "n_jet": 1562,
+   "d_jet_mm": 0.451592,
+   "d_air_mm": 4.96552,
+   "a_pz": 0.354148,
+   "a_aux": 0.090663,
+   "k_pass": 0.718081,
+   "tau_pz_ms": 0.705641,
+   "tau_bo_ms": 6.61405,
+   "dp_inj": 0.037158,
+   "dp_total": 0.0565191,
+   "NOx": [
+    14.503,
+    1.1808,
+    3.01013
+   ],
+   "CO": [
+    5.05587,
+    1.07675,
+    16.1371
+   ],
+   "margin_lbo": [
+    10.1815,
+    1.17574,
+    0.1
+   ],
+   "NOx_diesel": [
+    23.8168,
+    17.1545
+   ],
+   "CO_diesel": [
+    9.54302,
+    0.872406
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0337238,
+   "T_wall_K": 1054.11,
+   "parts": 5,
+   "swap_h": 6.0,
+   "mass_kg": 29.7862,
+   "plugplay": 9.0,
+   "service": 4.74286,
+   "make_score": 7.79896,
+   "D_env": 1.0255,
+   "L_mod": 0.351087,
+   "V_L": 60.9974,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "fuel_changeover",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 131,
+   "score": 4.57246e-07,
+   "penalty": 6.65446e-07,
+   "scheme": "TVC",
+   "chamber": "выносная",
+   "injector": "микросмесители",
+   "diesel": "испарительная",
+   "cooling": "керамика",
+   "make": "печатный картридж",
+   "passive": "струи",
+   "n_el": 824,
+   "n_jet": 1648,
+   "d_jet_mm": 0.403648,
+   "d_air_mm": 4.49367,
+   "a_pz": 0.315939,
+   "a_aux": 0.135389,
+   "k_pass": 0.676007,
+   "tau_pz_ms": 0.470899,
+   "tau_bo_ms": 10.5196,
+   "dp_inj": 0.039609,
+   "dp_total": 0.0697331,
+   "NOx": [
+    13.3691,
+    4.44853,
+    2.89262
+   ],
+   "CO": [
+    3.19502,
+    22.2463,
+    15.5838
+   ],
+   "margin_lbo": [
+    7.36525,
+    0.333333,
+    0.0333333
+   ],
+   "NOx_diesel": [
+    24.3336,
+    16.5154
+   ],
+   "CO_diesel": [
+    6.04573,
+    0.210437
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0525494,
+   "T_wall_K": 1194.32,
+   "parts": 6,
+   "swap_h": 0.8,
+   "mass_kg": 10.1833,
+   "plugplay": 8.625,
+   "service": 9.0,
+   "make_score": 7.29965,
+   "D_env": 0.497736,
+   "L_mod": 1.36933,
+   "V_L": 97.1152,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "fuel_changeover",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 81,
+   "score": 4.54264e-07,
+   "penalty": 6.35528e-07,
+   "scheme": "FLOX",
+   "chamber": "выносная",
+   "injector": "струи",
+   "diesel": "испарительная",
+   "cooling": "отверстия",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 47,
+   "n_jet": 376,
+   "d_jet_mm": 0.942697,
+   "d_air_mm": 20.4115,
+   "a_pz": 0.427055,
+   "a_aux": 0.19457,
+   "k_pass": 0.0,
+   "tau_pz_ms": 1.29425,
+   "tau_bo_ms": 9.93598,
+   "dp_inj": 0.052254,
+   "dp_total": 0.0813326,
+   "NOx": [
+    12.8522,
+    0.0848657,
+    1.80825e-05
+   ],
+   "CO": [
+    7.01017,
+    0.106098,
+    12.6427
+   ],
+   "margin_lbo": [
+    26.896,
+    1.38237,
+    0.0333333
+   ],
+   "NOx_diesel": [
+    65.6682,
+    49.0039
+   ],
+   "CO_diesel": [
+    13.0317,
+    0.187942
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.060362,
+   "T_wall_K": 832.955,
+   "parts": 5,
+   "swap_h": 0.8,
+   "mass_kg": 19.9419,
+   "plugplay": 8.625,
+   "service": 10.0,
+   "make_score": 8.29931,
+   "D_env": 0.509858,
+   "L_mod": 1.2094,
+   "V_L": 86.6478,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "diesel_dry",
+    "fuel_changeover",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 112,
+   "score": 3.56778e-07,
+   "penalty": 5.67338e-07,
+   "scheme": "RDC",
+   "chamber": "кольцевая",
+   "injector": "струи",
+   "diesel": "испарительная",
+   "cooling": "решётка",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 28,
+   "n_jet": 168,
+   "d_jet_mm": 0.952911,
+   "d_air_mm": 27.49,
+   "a_pz": 0.408809,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.056598,
+   "tau_bo_ms": 3.40592,
+   "dp_inj": 0.041008,
+   "dp_total": -0.0588618,
+   "NOx": [
+    16.5405,
+    0.015161,
+    0.000632191
+   ],
+   "CO": [
+    2.82744,
+    0.241686,
+    0.0766378
+   ],
+   "margin_lbo": [
+    1.02006,
+    0.64552,
+    0.494238
+   ],
+   "NOx_diesel": [
+    73.8599,
+    63.5754
+   ],
+   "CO_diesel": [
+    31.7989,
+    2.59348
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.0546065,
+   "T_wall_K": 903.345,
+   "parts": 6,
+   "swap_h": 12.0,
+   "mass_kg": 31.7169,
+   "plugplay": 4.66357,
+   "service": 3.6,
+   "make_score": 7.9239,
+   "D_env": 0.734024,
+   "L_mod": 0.571665,
+   "V_L": 26.0384,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 251,
+   "score": 3.03727e-07,
+   "penalty": 6.19434e-07,
+   "scheme": "RQL",
+   "chamber": "выносная",
+   "injector": "закрутка",
+   "diesel": "центробежная",
+   "cooling": "решётка",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 23,
+   "n_jet": 230,
+   "d_jet_mm": 1.12159,
+   "d_air_mm": 21.8071,
+   "a_pz": 0.210026,
+   "a_aux": 0.439656,
+   "k_pass": 0.0,
+   "tau_pz_ms": 3.254,
+   "tau_bo_ms": 16.6424,
+   "dp_inj": 0.040508,
+   "dp_total": 0.0822724,
+   "NOx": [
+    129.315,
+    99.7368,
+    5.73295
+   ],
+   "CO": [
+    0.160709,
+    10.5406,
+    107.361
+   ],
+   "margin_lbo": [
+    135.773,
+    168.485,
+    33.3762
+   ],
+   "NOx_diesel": [
+    265.843,
+    161.857
+   ],
+   "CO_diesel": [
+    0.309899,
+    6.05549
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0179331,
+   "T_wall_K": 802.157,
+   "parts": 27,
+   "swap_h": 0.8,
+   "mass_kg": 49.6704,
+   "plugplay": 9.625,
+   "service": 9.0,
+   "make_score": 8.29827,
+   "D_env": 0.531565,
+   "L_mod": 1.57471,
+   "V_L": 123.244,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "diesel_dry"
+   ]
+  },
+  {
+   "idx": 121,
+   "score": 1.8566e-07,
+   "penalty": 2.45078e-07,
+   "scheme": "RQL",
+   "chamber": "выносная",
+   "injector": "закрутка",
+   "diesel": "пневматическая",
+   "cooling": "решётка",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 2,
+   "n_jet": 48,
+   "d_jet_mm": 2.24632,
+   "d_air_mm": 74.8755,
+   "a_pz": 0.16526,
+   "a_aux": 0.294747,
+   "k_pass": 0.0,
+   "tau_pz_ms": 1.01911,
+   "tau_bo_ms": 5.55911,
+   "dp_inj": 0.023865,
+   "dp_total": 0.0663086,
+   "NOx": [
+    189.502,
+    293.437,
+    38.4116
+   ],
+   "CO": [
+    4.10191,
+    0.885597,
+    26.8501
+   ],
+   "margin_lbo": [
+    11.9709,
+    88.1683,
+    43.7144
+   ],
+   "NOx_diesel": [
+    335.722,
+    473.028
+   ],
+   "CO_diesel": [
+    7.95053,
+    0.303503
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0882054,
+   "T_wall_K": 943.183,
+   "parts": 4,
+   "swap_h": 0.8,
+   "mass_kg": 30.9805,
+   "plugplay": 9.625,
+   "service": 10.0,
+   "make_score": 8.29892,
+   "D_env": 0.490037,
+   "L_mod": 1.47215,
+   "V_L": 61.7189,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "diesel_dry",
+    "exit_uniformity"
+   ]
+  },
+  {
+   "idx": 196,
+   "score": 1.30362e-07,
+   "penalty": 1.81669e-07,
+   "scheme": "RQL",
+   "chamber": "противоточная",
+   "injector": "закрутка",
+   "diesel": "пневматическая",
+   "cooling": "плёночное",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 14,
+   "n_jet": 322,
+   "d_jet_mm": 0.829612,
+   "d_air_mm": 20.543,
+   "a_pz": 0.098892,
+   "a_aux": 0.312398,
+   "k_pass": 0.0,
+   "tau_pz_ms": 1.95701,
+   "tau_bo_ms": 2.0233,
+   "dp_inj": 0.030779,
+   "dp_total": 0.0514316,
+   "NOx": [
+    106.839,
+    36.1318,
+    109.295
+   ],
+   "CO": [
+    16.7143,
+    8.872,
+    384.851
+   ],
+   "margin_lbo": [
+    2.24679,
+    15.6788,
+    57.2549
+   ],
+   "NOx_diesel": [
+    111.143,
+    33.3813
+   ],
+   "CO_diesel": [
+    32.1406,
+    2.85038
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0560808,
+   "T_wall_K": 1085.04,
+   "parts": 4,
+   "swap_h": 6.0,
+   "mass_kg": 18.8823,
+   "plugplay": 10.0,
+   "service": 4.74286,
+   "make_score": 8.29934,
+   "D_env": 0.984968,
+   "L_mod": 0.329109,
+   "V_L": 22.8825,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "diesel_dry"
+   ]
+  },
+  {
+   "idx": 134,
+   "score": 7.15472e-08,
+   "penalty": 1.28446e-07,
+   "scheme": "RQL",
+   "chamber": "противоточная",
+   "injector": "струи",
+   "diesel": "пневматическая",
+   "cooling": "отверстия",
+   "make": "литьё",
+   "passive": "нет",
+   "n_el": 9,
+   "n_jet": 54,
+   "d_jet_mm": 2.54099,
+   "d_air_mm": 29.6621,
+   "a_pz": 0.167565,
+   "a_aux": 0.279638,
+   "k_pass": 0.0,
+   "tau_pz_ms": 1.9926,
+   "tau_bo_ms": 17.0852,
+   "dp_inj": 0.049195,
+   "dp_total": 0.0685246,
+   "NOx": [
+    110.32,
+    385.441,
+    44.0082
+   ],
+   "CO": [
+    6.42239,
+    0.0723201,
+    19.3964
+   ],
+   "margin_lbo": [
+    24.1442,
+    168.485,
+    79.1476
+   ],
+   "NOx_diesel": [
+    150.429,
+    794.707
+   ],
+   "CO_diesel": [
+    12.4191,
+    0.12945
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0131871,
+   "T_wall_K": 803.061,
+   "parts": 10,
+   "swap_h": 6.0,
+   "mass_kg": 39.4442,
+   "plugplay": 10.0,
+   "service": 4.74286,
+   "make_score": 7.42857,
+   "D_env": 1.03796,
+   "L_mod": 0.610532,
+   "V_L": 101.509,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "diesel_dry"
+   ]
+  },
+  {
+   "idx": 62,
+   "score": 6.95349e-08,
+   "penalty": 9.69787e-08,
+   "scheme": "MM",
+   "chamber": "противоточная",
+   "injector": "микросмесители",
+   "diesel": "испарительная",
+   "cooling": "отверстия",
+   "make": "печатный картридж",
+   "passive": "струи",
+   "n_el": 1767,
+   "n_jet": 3534,
+   "d_jet_mm": 0.327143,
+   "d_air_mm": 4.09106,
+   "a_pz": 0.564589,
+   "a_aux": 0.211667,
+   "k_pass": 0.434049,
+   "tau_pz_ms": 1.72489,
+   "tau_bo_ms": 12.1338,
+   "dp_inj": 0.04004,
+   "dp_total": 0.0593587,
+   "NOx": [
+    1.16424,
+    0.316189,
+    0.0991336
+   ],
+   "CO": [
+    0.337835,
+    1.08054,
+    0.183448
+   ],
+   "margin_lbo": [
+    2.78813,
+    0.333333,
+    0.1
+   ],
+   "NOx_diesel": [
+    16.0315,
+    14.1168
+   ],
+   "CO_diesel": [
+    0.639786,
+    146.577
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0208124,
+   "T_wall_K": 749.132,
+   "parts": 4,
+   "swap_h": 6.0,
+   "mass_kg": 41.1339,
+   "plugplay": 9.0,
+   "service": 4.74286,
+   "make_score": 7.79857,
+   "D_env": 1.02229,
+   "L_mod": 0.496901,
+   "V_L": 109.292,
+   "hard_ok": false,
+   "hard_fail": [
+    "load_range",
+    "diesel_dry",
+    "fuel_changeover",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 13,
+   "score": 3.33757e-08,
+   "penalty": 5.49885e-08,
+   "scheme": "LPP",
+   "chamber": "выносная",
+   "injector": "струи",
+   "diesel": "пневматическая",
+   "cooling": "отверстия",
+   "make": "литьё",
+   "passive": "нет",
+   "n_el": 109,
+   "n_jet": 327,
+   "d_jet_mm": 0.816831,
+   "d_air_mm": 16.0529,
+   "a_pz": 0.440557,
+   "a_aux": 0.221928,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.693021,
+   "tau_bo_ms": 3.52046,
+   "dp_inj": 0.027026,
+   "dp_total": 0.0694212,
+   "NOx": [
+    6.01531,
+    1.12928e-05,
+    1.72229e-05
+   ],
+   "CO": [
+    7.05472,
+    7.45689e-07,
+    2.37423e-08
+   ],
+   "margin_lbo": [
+    7.36525,
+    0.1,
+    0.0
+   ],
+   "NOx_diesel": [
+    106.94,
+    86.75
+   ],
+   "CO_diesel": [
+    13.7392,
+    7.9015
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.152197,
+   "T_wall_K": 957.374,
+   "parts": 18,
+   "swap_h": 0.8,
+   "mass_kg": 10.9124,
+   "plugplay": 9.625,
+   "service": 8.6,
+   "make_score": 8.55357,
+   "D_env": 0.395331,
+   "L_mod": 1.34414,
+   "V_L": 34.1649,
+   "hard_ok": false,
+   "hard_fail": [
+    "load_range",
+    "diesel_dry",
+    "exit_uniformity",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 181,
+   "score": 3.11036e-08,
+   "penalty": 4.185e-08,
+   "scheme": "MM",
+   "chamber": "выносная",
+   "injector": "микросмесители",
+   "diesel": "пневматическая",
+   "cooling": "отверстия",
+   "make": "гибрид",
+   "passive": "струи",
+   "n_el": 453,
+   "n_jet": 453,
+   "d_jet_mm": 0.809,
+   "d_air_mm": 7.26879,
+   "a_pz": 0.376153,
+   "a_aux": 0.059143,
+   "k_pass": 0.711843,
+   "tau_pz_ms": 0.484672,
+   "tau_bo_ms": 2.50022,
+   "dp_inj": 0.027135,
+   "dp_total": 0.0627263,
+   "NOx": [
+    75.8874,
+    91.3211,
+    120.942
+   ],
+   "CO": [
+    28.2872,
+    14.0935,
+    6.75813
+   ],
+   "margin_lbo": [
+    14.0746,
+    5.62341,
+    2.94273
+   ],
+   "NOx_diesel": [
+    72.4647,
+    39.6947
+   ],
+   "CO_diesel": [
+    46.8795,
+    1.04642
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.158208,
+   "T_wall_K": 951.257,
+   "parts": 5,
+   "swap_h": 0.8,
+   "mass_kg": 14.123,
+   "plugplay": 9.125,
+   "service": 10.0,
+   "make_score": 9.04951,
+   "D_env": 0.43202,
+   "L_mod": 1.23438,
+   "V_L": 50.6292,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "diesel_dry",
+    "exit_uniformity"
+   ]
+  },
+  {
+   "idx": 207,
+   "score": 2.68135e-08,
+   "penalty": 4.00842e-08,
+   "scheme": "RDC",
+   "chamber": "выносная",
+   "injector": "струи",
+   "diesel": "испарительная",
+   "cooling": "решётка",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 25,
+   "n_jet": 25,
+   "d_jet_mm": 1.99357,
+   "d_air_mm": 21.7056,
+   "a_pz": 0.392927,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.090954,
+   "tau_bo_ms": 3.52997,
+   "dp_inj": 0.122265,
+   "dp_total": 0.0300512,
+   "NOx": [
+    42.3176,
+    0.0396071,
+    0.000959336
+   ],
+   "CO": [
+    3.16428,
+    0.18456,
+    0.0931309
+   ],
+   "margin_lbo": [
+    1.06129,
+    0.671612,
+    0.514215
+   ],
+   "NOx_diesel": [
+    32.3967,
+    16.2197
+   ],
+   "CO_diesel": [
+    29.159,
+    0.802083
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0242492,
+   "T_wall_K": 1095.12,
+   "parts": 5,
+   "swap_h": 0.8,
+   "mass_kg": 31.056,
+   "plugplay": 2.925,
+   "service": 10.0,
+   "make_score": 7.92392,
+   "D_env": 0.43364,
+   "L_mod": 1.61189,
+   "V_L": 58.7745,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "fuel_valves",
+    "fuel_changeover",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 162,
+   "score": 1.45707e-08,
+   "penalty": 2.00551e-08,
+   "scheme": "LPP",
+   "chamber": "противоточная",
+   "injector": "микросмесители",
+   "diesel": "испарительная",
+   "cooling": "плёночное",
+   "make": "печатный картридж",
+   "passive": "струи",
+   "n_el": 539,
+   "n_jet": 1078,
+   "d_jet_mm": 0.434101,
+   "d_air_mm": 7.27139,
+   "a_pz": 0.467912,
+   "a_aux": 0.05039,
+   "k_pass": 0.467121,
+   "tau_pz_ms": 0.65323,
+   "tau_bo_ms": 3.12451,
+   "dp_inj": 0.029616,
+   "dp_total": 0.0491652,
+   "NOx": [
+    11.7365,
+    4.87654,
+    1.79734
+   ],
+   "CO": [
+    3.31449,
+    30.734,
+    10.7547
+   ],
+   "margin_lbo": [
+    4.53158,
+    0.333333,
+    0.1
+   ],
+   "NOx_diesel": [
+    35.6117,
+    30.3658
+   ],
+   "CO_diesel": [
+    6.31323,
+    32.9357
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.19879,
+   "T_wall_K": 963.886,
+   "parts": 4,
+   "swap_h": 6.0,
+   "mass_kg": 23.7454,
+   "plugplay": 8.91371,
+   "service": 4.74286,
+   "make_score": 7.79917,
+   "D_env": 1.00265,
+   "L_mod": 0.303868,
+   "V_L": 38.7752,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "fuel_changeover",
+    "exit_uniformity",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 180,
+   "score": 1.42987e-08,
+   "penalty": 2.36212e-08,
+   "scheme": "RQL",
+   "chamber": "кольцевая",
+   "injector": "закрутка",
+   "diesel": "испарительная",
+   "cooling": "решётка",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 7,
+   "n_jet": 133,
+   "d_jet_mm": 0.996343,
+   "d_air_mm": 39.0866,
+   "a_pz": 0.203796,
+   "a_aux": 0.419664,
+   "k_pass": 0.0,
+   "tau_pz_ms": 2.82122,
+   "tau_bo_ms": 6.34966,
+   "dp_inj": 0.039896,
+   "dp_total": 0.0674517,
+   "NOx": [
+    111.237,
+    128.22,
+    7.28659
+   ],
+   "CO": [
+    0.253766,
+    28.3629,
+    137.342
+   ],
+   "margin_lbo": [
+    98.2172,
+    159.634,
+    37.1803
+   ],
+   "NOx_diesel": [
+    163.296,
+    205.078
+   ],
+   "CO_diesel": [
+    0.482534,
+    20.8287
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0176109,
+   "T_wall_K": 784.283,
+   "parts": 4,
+   "swap_h": 12.0,
+   "mass_kg": 43.2166,
+   "plugplay": 7.00172,
+   "service": 3.6,
+   "make_score": 8.29849,
+   "D_env": 0.794687,
+   "L_mod": 0.613453,
+   "V_L": 57.3051,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "diesel_dry",
+    "fuel_changeover"
+   ]
+  },
+  {
+   "idx": 52,
+   "score": 1.2624e-08,
+   "penalty": 1.94715e-08,
+   "scheme": "TVC",
+   "chamber": "противоточная",
+   "injector": "закрутка",
+   "diesel": "испарительная",
+   "cooling": "плёночное",
+   "make": "гибрид",
+   "passive": "гидравлика",
+   "n_el": 9,
+   "n_jet": 189,
+   "d_jet_mm": 1.12223,
+   "d_air_mm": 43.4263,
+   "a_pz": 0.317963,
+   "a_aux": 0.084713,
+   "k_pass": 1.36728,
+   "tau_pz_ms": 1.95958,
+   "tau_bo_ms": 5.41303,
+   "dp_inj": 0.038557,
+   "dp_total": 0.0577651,
+   "NOx": [
+    55.8296,
+    188.094,
+    106.381
+   ],
+   "CO": [
+    12.3447,
+    0.228167,
+    2876.13
+   ],
+   "margin_lbo": [
+    37.1803,
+    5.32798,
+    1.11397
+   ],
+   "NOx_diesel": [
+    156.841,
+    125.266
+   ],
+   "CO_diesel": [
+    20.7445,
+    0.353445
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0324807,
+   "T_wall_K": 1167.39,
+   "parts": 5,
+   "swap_h": 6.0,
+   "mass_kg": 33.1172,
+   "plugplay": 9.0,
+   "service": 4.74286,
+   "make_score": 8.29885,
+   "D_env": 1.05568,
+   "L_mod": 0.561132,
+   "V_L": 74.007,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "diesel_dry",
+    "fuel_changeover"
+   ]
+  },
+  {
+   "idx": 242,
+   "score": 1.03596e-08,
+   "penalty": 1.69635e-08,
+   "scheme": "LPP",
+   "chamber": "противоточная",
+   "injector": "струи",
+   "diesel": "пневматическая",
+   "cooling": "решётка",
+   "make": "гибрид",
+   "passive": "струи",
+   "n_el": 68,
+   "n_jet": 136,
+   "d_jet_mm": 1.11439,
+   "d_air_mm": 15.8105,
+   "a_pz": 0.353208,
+   "a_aux": 0.227698,
+   "k_pass": 0.51581,
+   "tau_pz_ms": 1.2712,
+   "tau_bo_ms": 8.51293,
+   "dp_inj": 0.047436,
+   "dp_total": 0.0774658,
+   "NOx": [
+    141.967,
+    9.63758,
+    2.96814
+   ],
+   "CO": [
+    59.1915,
+    10.4519,
+    2.93809
+   ],
+   "margin_lbo": [
+    51.397,
+    11.9709,
+    4.29351
+   ],
+   "NOx_diesel": [
+    266.777,
+    65.0137
+   ],
+   "CO_diesel": [
+    94.6087,
+    1.51715
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.0288821,
+   "T_wall_K": 934.485,
+   "parts": 5,
+   "swap_h": 6.5,
+   "mass_kg": 61.1255,
+   "plugplay": 9.33465,
+   "service": 4.36814,
+   "make_score": 8.29787,
+   "D_env": 1.005,
+   "L_mod": 0.592264,
+   "V_L": 67.1346,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "diesel_dry"
+   ]
+  },
+  {
+   "idx": 25,
+   "score": 9.48919e-09,
+   "penalty": 1.523e-08,
+   "scheme": "RQL",
+   "chamber": "выносная",
+   "injector": "закрутка",
+   "diesel": "центробежная",
+   "cooling": "отверстия",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 7,
+   "n_jet": 105,
+   "d_jet_mm": 1.56293,
+   "d_air_mm": 30.793,
+   "a_pz": 0.109023,
+   "a_aux": 0.310465,
+   "k_pass": 0.0,
+   "tau_pz_ms": 1.18336,
+   "tau_bo_ms": 19.2601,
+   "dp_inj": 0.02964,
+   "dp_total": 0.0596117,
+   "NOx": [
+    134.967,
+    62.3416,
+    188.746
+   ],
+   "CO": [
+    8.35537,
+    0.126606,
+    7.39868
+   ],
+   "margin_lbo": [
+    2.12875,
+    14.8551,
+    71.0497
+   ],
+   "NOx_diesel": [
+    236.285,
+    37.5867
+   ],
+   "CO_diesel": [
+    15.2448,
+    0.233884
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0458195,
+   "T_wall_K": 833.921,
+   "parts": 12,
+   "swap_h": 0.8,
+   "mass_kg": 27.3376,
+   "plugplay": 9.625,
+   "service": 9.0,
+   "make_score": 8.29905,
+   "D_env": 0.532926,
+   "L_mod": 1.77301,
+   "V_L": 133.169,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "diesel_dry"
+   ]
+  }
+ ],
+ "pareto": [
+  {
+   "idx": 233,
+   "score": 0.626081,
+   "penalty": 0.801495,
+   "scheme": "FLOX",
+   "chamber": "выносная",
+   "injector": "струи",
+   "diesel": "пневматическая",
+   "cooling": "отверстия",
+   "make": "печатный картридж",
+   "passive": "струи",
+   "n_el": 275,
+   "n_jet": 1650,
+   "d_jet_mm": 0.504539,
+   "d_air_mm": 9.0072,
+   "a_pz": 0.4671,
+   "a_aux": 0.136454,
+   "k_pass": 0.941292,
+   "tau_pz_ms": 0.6345,
+   "tau_bo_ms": 7.58513,
+   "dp_inj": 0.048155,
+   "dp_total": 0.0797864,
+   "NOx": [
+    3.12129,
+    3.28729,
+    4.24418
+   ],
+   "CO": [
+    4.11618,
+    4.65951,
+    4.19552
+   ],
+   "margin_lbo": [
+    9.13982,
+    6.61169,
+    5.62341
+   ],
+   "NOx_diesel": [
+    46.6468,
+    36.8917
+   ],
+   "CO_diesel": [
+    7.73407,
+    2.84851
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0835637,
+   "T_wall_K": 803.905,
+   "parts": 4,
+   "swap_h": 0.8,
+   "mass_kg": 14.081,
+   "plugplay": 9.625,
+   "service": 10.0,
+   "make_score": 8.29951,
+   "D_env": 0.447501,
+   "L_mod": 1.09593,
+   "V_L": 51.5869,
+   "hard_ok": false,
+   "hard_fail": [
+    "diesel_dry"
+   ]
+  },
+  {
+   "idx": 73,
+   "score": 0.00174303,
+   "penalty": 0.00247875,
+   "scheme": "FLOX",
+   "chamber": "выносная",
+   "injector": "микросмесители",
+   "diesel": "пневматическая",
+   "cooling": "керамика",
+   "make": "печатный картридж",
+   "passive": "струи",
+   "n_el": 703,
+   "n_jet": 703,
+   "d_jet_mm": 0.61097,
+   "d_air_mm": 6.21603,
+   "a_pz": 0.618691,
+   "a_aux": 0.21295,
+   "k_pass": 0.969764,
+   "tau_pz_ms": 1.77569,
+   "tau_bo_ms": 5.25365,
+   "dp_inj": 0.056994,
+   "dp_total": 0.087887,
+   "NOx": [
+    0.466717,
+    1.17849,
+    1.75402
+   ],
+   "CO": [
+    0.15639,
+    0.336319,
+    0.530475
+   ],
+   "margin_lbo": [
+    4.29351,
+    3.27812,
+    2.78813
+   ],
+   "NOx_diesel": [
+    28.1481,
+    23.6721
+   ],
+   "CO_diesel": [
+    0.285978,
+    1415.86
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.0594598,
+   "T_wall_K": 991.837,
+   "parts": 6,
+   "swap_h": 0.8,
+   "mass_kg": 8.4082,
+   "plugplay": 9.125,
+   "service": 9.0,
+   "make_score": 7.29971,
+   "D_env": 0.430869,
+   "L_mod": 1.16146,
+   "V_L": 69.6666,
+   "hard_ok": false,
+   "hard_fail": [
+    "diesel_dry"
+   ]
+  },
+  {
+   "idx": 246,
+   "score": 0.00165681,
+   "penalty": 0.00247875,
+   "scheme": "FLOX",
+   "chamber": "кольцевая",
+   "injector": "микросмесители",
+   "diesel": "пневматическая",
+   "cooling": "керамика",
+   "make": "гибрид",
+   "passive": "струи",
+   "n_el": 618,
+   "n_jet": 1236,
+   "d_jet_mm": 0.613931,
+   "d_air_mm": 7.47748,
+   "a_pz": 0.570144,
+   "a_aux": 0.197419,
+   "k_pass": 0.838637,
+   "tau_pz_ms": 2.90922,
+   "tau_bo_ms": 5.44107,
+   "dp_inj": 0.02991,
+   "dp_total": 0.041463,
+   "NOx": [
+    0.472788,
+    0.393874,
+    0.382293
+   ],
+   "CO": [
+    0.495274,
+    0.353114,
+    0.726063
+   ],
+   "margin_lbo": [
+    11.9709,
+    6.26434,
+    4.29351
+   ],
+   "NOx_diesel": [
+    46.6338,
+    39.0039
+   ],
+   "CO_diesel": [
+    0.928044,
+    691.718
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0410099,
+   "T_wall_K": 983.805,
+   "parts": 8,
+   "swap_h": 12.0,
+   "mass_kg": 13.8956,
+   "plugplay": 9.5,
+   "service": 3.26667,
+   "make_score": 7.29952,
+   "D_env": 0.772351,
+   "L_mod": 0.414127,
+   "V_L": 59.3147,
+   "hard_ok": false,
+   "hard_fail": [
+    "diesel_dry"
+   ]
+  },
+  {
+   "idx": 84,
+   "score": 3.34502e-06,
+   "penalty": 5.51323e-06,
+   "scheme": "TVC",
+   "chamber": "противоточная",
+   "injector": "закрутка",
+   "diesel": "пневматическая",
+   "cooling": "керамика",
+   "make": "печатный картридж",
+   "passive": "струи",
+   "n_el": 1,
+   "n_jet": 18,
+   "d_jet_mm": 3.47828,
+   "d_air_mm": 163.621,
+   "a_pz": 0.467727,
+   "a_aux": 0.094022,
+   "k_pass": 1.19846,
+   "tau_pz_ms": 2.52907,
+   "tau_bo_ms": 15.6641,
+   "dp_inj": 0.033533,
+   "dp_total": 0.0527255,
+   "NOx": [
+    52.1597,
+    39.815,
+    3.06883
+   ],
+   "CO": [
+    0.461789,
+    0.604454,
+    0.428431
+   ],
+   "margin_lbo": [
+    10.1815,
+    9.13982,
+    6.26434
+   ],
+   "NOx_diesel": [
+    1419.63,
+    1404.2
+   ],
+   "CO_diesel": [
+    2647.2,
+    4565.62
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0148987,
+   "T_wall_K": 1552.81,
+   "parts": 7,
+   "swap_h": 6.0,
+   "mass_kg": 23.9339,
+   "plugplay": 10.0,
+   "service": 4.40952,
+   "make_score": 7.29917,
+   "D_env": 1.0537,
+   "L_mod": 1.70847,
+   "V_L": 121.744,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "diesel_dry",
+    "wall_life"
+   ]
+  },
+  {
+   "idx": 108,
+   "score": 2.67234e-06,
+   "penalty": 3.76128e-06,
+   "scheme": "TVC",
+   "chamber": "кольцевая",
+   "injector": "струи",
+   "diesel": "испарительная",
+   "cooling": "отверстия",
+   "make": "печатный картридж",
+   "passive": "струи",
+   "n_el": 125,
+   "n_jet": 875,
+   "d_jet_mm": 0.564084,
+   "d_air_mm": 12.2936,
+   "a_pz": 0.389303,
+   "a_aux": 0.075593,
+   "k_pass": 0.656753,
+   "tau_pz_ms": 0.956306,
+   "tau_bo_ms": 2.97392,
+   "dp_inj": 0.046654,
+   "dp_total": 0.0581941,
+   "NOx": [
+    8.03453,
+    1.78114,
+    3.56529
+   ],
+   "CO": [
+    3.49764,
+    1.22447,
+    20.8133
+   ],
+   "margin_lbo": [
+    9.13982,
+    0.333333,
+    0.1
+   ],
+   "NOx_diesel": [
+    46.3058,
+    39.7594
+   ],
+   "CO_diesel": [
+    6.76805,
+    26.5679
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.058503,
+   "T_wall_K": 876.308,
+   "parts": 4,
+   "swap_h": 12.0,
+   "mass_kg": 20.3086,
+   "plugplay": 9.0,
+   "service": 3.6,
+   "make_score": 8.29929,
+   "D_env": 0.784582,
+   "L_mod": 0.335271,
+   "V_L": 39.8137,
+   "hard_ok": false,
+   "hard_fail": [
+    "load_range",
+    "diesel_dry",
+    "fuel_changeover",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 217,
+   "score": 2.61998e-06,
+   "penalty": 4.27417e-06,
+   "scheme": "RQL",
+   "chamber": "выносная",
+   "injector": "струи",
+   "diesel": "пневматическая",
+   "cooling": "плёночное",
+   "make": "литьё",
+   "passive": "нет",
+   "n_el": 76,
+   "n_jet": 304,
+   "d_jet_mm": 0.919869,
+   "d_air_mm": 13.7661,
+   "a_pz": 0.185893,
+   "a_aux": 0.428222,
+   "k_pass": 0.0,
+   "tau_pz_ms": 2.86658,
+   "tau_bo_ms": 7.22271,
+   "dp_inj": 0.018302,
+   "dp_total": 0.0489444,
+   "NOx": [
+    101.399,
+    284.503,
+    17.7219
+   ],
+   "CO": [
+    0.127821,
+    12.1429,
+    49.9794
+   ],
+   "margin_lbo": [
+    57.2549,
+    209.08,
+    67.317
+   ],
+   "NOx_diesel": [
+    105.308,
+    554.423
+   ],
+   "CO_diesel": [
+    0.24099,
+    11.5298
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0413914,
+   "T_wall_K": 1007.57,
+   "parts": 14,
+   "swap_h": 0.8,
+   "mass_kg": 24.6771,
+   "plugplay": 9.625,
+   "service": 8.6,
+   "make_score": 7.42857,
+   "D_env": 0.508732,
+   "L_mod": 1.81124,
+   "V_L": 114.18,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "diesel_dry"
+   ]
+  },
+  {
+   "idx": 174,
+   "score": 1.95469e-06,
+   "penalty": 2.81976e-06,
+   "scheme": "FLOX",
+   "chamber": "противоточная",
+   "injector": "микросмесители",
+   "diesel": "пневматическая",
+   "cooling": "решётка",
+   "make": "печатный картридж",
+   "passive": "струи",
+   "n_el": 662,
+   "n_jet": 1324,
+   "d_jet_mm": 0.430308,
+   "d_air_mm": 6.3152,
+   "a_pz": 0.492487,
+   "a_aux": 0.155009,
+   "k_pass": 0.337348,
+   "tau_pz_ms": 1.51577,
+   "tau_bo_ms": 3.02283,
+   "dp_inj": 0.038227,
+   "dp_total": 0.0751818,
+   "NOx": [
+    2.39372,
+    0.18981,
+    0.0525682
+   ],
+   "CO": [
+    1.14832,
+    15.0093,
+    453.713
+   ],
+   "margin_lbo": [
+    15.6788,
+    1.81056,
+    0.0333333
+   ],
+   "NOx_diesel": [
+    35.5036,
+    29.0838
+   ],
+   "CO_diesel": [
+    2.29297,
+    69.4404
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.0254713,
+   "T_wall_K": 814.441,
+   "parts": 4,
+   "swap_h": 6.5,
+   "mass_kg": 56.8361,
+   "plugplay": 9.5,
+   "service": 4.40245,
+   "make_score": 7.79802,
+   "D_env": 1.02226,
+   "L_mod": 0.363164,
+   "V_L": 70.7431,
+   "hard_ok": false,
+   "hard_fail": [
+    "co_gas",
+    "load_range",
+    "diesel_dry",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 250,
+   "score": 1.38549e-06,
+   "penalty": 2.14582e-06,
+   "scheme": "MM",
+   "chamber": "кольцевая",
+   "injector": "микросмесители",
+   "diesel": "испарительная",
+   "cooling": "отверстия",
+   "make": "гибрид",
+   "passive": "струи",
+   "n_el": 731,
+   "n_jet": 1462,
+   "d_jet_mm": 0.30351,
+   "d_air_mm": 6.00192,
+   "a_pz": 0.398637,
+   "a_aux": 0.095815,
+   "k_pass": 0.758841,
+   "tau_pz_ms": 0.318854,
+   "tau_bo_ms": 5.63614,
+   "dp_inj": 0.025177,
+   "dp_total": 0.0365779,
+   "NOx": [
+    83.6086,
+    105.601,
+    143.297
+   ],
+   "CO": [
+    14.1641,
+    9.64695,
+    5.32091
+   ],
+   "margin_lbo": [
+    6.61169,
+    2.78813,
+    1.62531
+   ],
+   "NOx_diesel": [
+    58.0918,
+    31.7786
+   ],
+   "CO_diesel": [
+    24.1716,
+    0.407478
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.0782066,
+   "T_wall_K": 966.134,
+   "parts": 5,
+   "swap_h": 12.0,
+   "mass_kg": 26.543,
+   "plugplay": 7.13228,
+   "service": 3.6,
+   "make_score": 7.79908,
+   "D_env": 0.798384,
+   "L_mod": 0.396658,
+   "V_L": 68.7217,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "diesel_dry",
+    "fuel_changeover"
+   ]
+  },
+  {
+   "idx": 281,
+   "score": 1.13318e-06,
+   "penalty": 2.46113e-06,
+   "scheme": "RQL",
+   "chamber": "трубчатые",
+   "injector": "струи",
+   "diesel": "пневматическая",
+   "cooling": "керамика",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 188,
+   "n_jet": 1504,
+   "d_jet_mm": 0.593604,
+   "d_air_mm": 8.88253,
+   "a_pz": 0.177433,
+   "a_aux": 0.251257,
+   "k_pass": 0.0,
+   "tau_pz_ms": 1.51309,
+   "tau_bo_ms": 14.1195,
+   "dp_inj": 0.01572,
+   "dp_total": 0.0360221,
+   "NOx": [
+    187.544,
+    260.655,
+    21.8617
+   ],
+   "CO": [
+    9.20984,
+    0.109706,
+    6.86829
+   ],
+   "margin_lbo": [
+    24.1442,
+    121.881,
+    46.1384
+   ],
+   "NOx_diesel": [
+    295.499,
+    455.186
+   ],
+   "CO_diesel": [
+    17.5651,
+    0.20138
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0510378,
+   "T_wall_K": 1232.96,
+   "parts": 45,
+   "swap_h": 4.6,
+   "mass_kg": 15.2162,
+   "plugplay": 9.775,
+   "service": 5.20952,
+   "make_score": 7.29947,
+   "D_env": 0.951156,
+   "L_mod": 0.836984,
+   "V_L": 93.4779,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "diesel_dry"
+   ]
+  },
+  {
+   "idx": 112,
+   "score": 3.56778e-07,
+   "penalty": 5.67338e-07,
+   "scheme": "RDC",
+   "chamber": "кольцевая",
+   "injector": "струи",
+   "diesel": "испарительная",
+   "cooling": "решётка",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 28,
+   "n_jet": 168,
+   "d_jet_mm": 0.952911,
+   "d_air_mm": 27.49,
+   "a_pz": 0.408809,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.056598,
+   "tau_bo_ms": 3.40592,
+   "dp_inj": 0.041008,
+   "dp_total": -0.0588618,
+   "NOx": [
+    16.5405,
+    0.015161,
+    0.000632191
+   ],
+   "CO": [
+    2.82744,
+    0.241686,
+    0.0766378
+   ],
+   "margin_lbo": [
+    1.02006,
+    0.64552,
+    0.494238
+   ],
+   "NOx_diesel": [
+    73.8599,
+    63.5754
+   ],
+   "CO_diesel": [
+    31.7989,
+    2.59348
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.0546065,
+   "T_wall_K": 903.345,
+   "parts": 6,
+   "swap_h": 12.0,
+   "mass_kg": 31.7169,
+   "plugplay": 4.66357,
+   "service": 3.6,
+   "make_score": 7.9239,
+   "D_env": 0.734024,
+   "L_mod": 0.571665,
+   "V_L": 26.0384,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 121,
+   "score": 1.8566e-07,
+   "penalty": 2.45078e-07,
+   "scheme": "RQL",
+   "chamber": "выносная",
+   "injector": "закрутка",
+   "diesel": "пневматическая",
+   "cooling": "решётка",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 2,
+   "n_jet": 48,
+   "d_jet_mm": 2.24632,
+   "d_air_mm": 74.8755,
+   "a_pz": 0.16526,
+   "a_aux": 0.294747,
+   "k_pass": 0.0,
+   "tau_pz_ms": 1.01911,
+   "tau_bo_ms": 5.55911,
+   "dp_inj": 0.023865,
+   "dp_total": 0.0663086,
+   "NOx": [
+    189.502,
+    293.437,
+    38.4116
+   ],
+   "CO": [
+    4.10191,
+    0.885597,
+    26.8501
+   ],
+   "margin_lbo": [
+    11.9709,
+    88.1683,
+    43.7144
+   ],
+   "NOx_diesel": [
+    335.722,
+    473.028
+   ],
+   "CO_diesel": [
+    7.95053,
+    0.303503
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0882054,
+   "T_wall_K": 943.183,
+   "parts": 4,
+   "swap_h": 0.8,
+   "mass_kg": 30.9805,
+   "plugplay": 9.625,
+   "service": 10.0,
+   "make_score": 8.29892,
+   "D_env": 0.490037,
+   "L_mod": 1.47215,
+   "V_L": 61.7189,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "diesel_dry",
+    "exit_uniformity"
+   ]
+  },
+  {
+   "idx": 196,
+   "score": 1.30362e-07,
+   "penalty": 1.81669e-07,
+   "scheme": "RQL",
+   "chamber": "противоточная",
+   "injector": "закрутка",
+   "diesel": "пневматическая",
+   "cooling": "плёночное",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 14,
+   "n_jet": 322,
+   "d_jet_mm": 0.829612,
+   "d_air_mm": 20.543,
+   "a_pz": 0.098892,
+   "a_aux": 0.312398,
+   "k_pass": 0.0,
+   "tau_pz_ms": 1.95701,
+   "tau_bo_ms": 2.0233,
+   "dp_inj": 0.030779,
+   "dp_total": 0.0514316,
+   "NOx": [
+    106.839,
+    36.1318,
+    109.295
+   ],
+   "CO": [
+    16.7143,
+    8.872,
+    384.851
+   ],
+   "margin_lbo": [
+    2.24679,
+    15.6788,
+    57.2549
+   ],
+   "NOx_diesel": [
+    111.143,
+    33.3813
+   ],
+   "CO_diesel": [
+    32.1406,
+    2.85038
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0560808,
+   "T_wall_K": 1085.04,
+   "parts": 4,
+   "swap_h": 6.0,
+   "mass_kg": 18.8823,
+   "plugplay": 10.0,
+   "service": 4.74286,
+   "make_score": 8.29934,
+   "D_env": 0.984968,
+   "L_mod": 0.329109,
+   "V_L": 22.8825,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "diesel_dry"
+   ]
+  },
+  {
+   "idx": 62,
+   "score": 6.95349e-08,
+   "penalty": 9.69787e-08,
+   "scheme": "MM",
+   "chamber": "противоточная",
+   "injector": "микросмесители",
+   "diesel": "испарительная",
+   "cooling": "отверстия",
+   "make": "печатный картридж",
+   "passive": "струи",
+   "n_el": 1767,
+   "n_jet": 3534,
+   "d_jet_mm": 0.327143,
+   "d_air_mm": 4.09106,
+   "a_pz": 0.564589,
+   "a_aux": 0.211667,
+   "k_pass": 0.434049,
+   "tau_pz_ms": 1.72489,
+   "tau_bo_ms": 12.1338,
+   "dp_inj": 0.04004,
+   "dp_total": 0.0593587,
+   "NOx": [
+    1.16424,
+    0.316189,
+    0.0991336
+   ],
+   "CO": [
+    0.337835,
+    1.08054,
+    0.183448
+   ],
+   "margin_lbo": [
+    2.78813,
+    0.333333,
+    0.1
+   ],
+   "NOx_diesel": [
+    16.0315,
+    14.1168
+   ],
+   "CO_diesel": [
+    0.639786,
+    146.577
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0208124,
+   "T_wall_K": 749.132,
+   "parts": 4,
+   "swap_h": 6.0,
+   "mass_kg": 41.1339,
+   "plugplay": 9.0,
+   "service": 4.74286,
+   "make_score": 7.79857,
+   "D_env": 1.02229,
+   "L_mod": 0.496901,
+   "V_L": 109.292,
+   "hard_ok": false,
+   "hard_fail": [
+    "load_range",
+    "diesel_dry",
+    "fuel_changeover",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 13,
+   "score": 3.33757e-08,
+   "penalty": 5.49885e-08,
+   "scheme": "LPP",
+   "chamber": "выносная",
+   "injector": "струи",
+   "diesel": "пневматическая",
+   "cooling": "отверстия",
+   "make": "литьё",
+   "passive": "нет",
+   "n_el": 109,
+   "n_jet": 327,
+   "d_jet_mm": 0.816831,
+   "d_air_mm": 16.0529,
+   "a_pz": 0.440557,
+   "a_aux": 0.221928,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.693021,
+   "tau_bo_ms": 3.52046,
+   "dp_inj": 0.027026,
+   "dp_total": 0.0694212,
+   "NOx": [
+    6.01531,
+    1.12928e-05,
+    1.72229e-05
+   ],
+   "CO": [
+    7.05472,
+    7.45689e-07,
+    2.37423e-08
+   ],
+   "margin_lbo": [
+    7.36525,
+    0.1,
+    0.0
+   ],
+   "NOx_diesel": [
+    106.94,
+    86.75
+   ],
+   "CO_diesel": [
+    13.7392,
+    7.9015
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.152197,
+   "T_wall_K": 957.374,
+   "parts": 18,
+   "swap_h": 0.8,
+   "mass_kg": 10.9124,
+   "plugplay": 9.625,
+   "service": 8.6,
+   "make_score": 8.55357,
+   "D_env": 0.395331,
+   "L_mod": 1.34414,
+   "V_L": 34.1649,
+   "hard_ok": false,
+   "hard_fail": [
+    "load_range",
+    "diesel_dry",
+    "exit_uniformity",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 181,
+   "score": 3.11036e-08,
+   "penalty": 4.185e-08,
+   "scheme": "MM",
+   "chamber": "выносная",
+   "injector": "микросмесители",
+   "diesel": "пневматическая",
+   "cooling": "отверстия",
+   "make": "гибрид",
+   "passive": "струи",
+   "n_el": 453,
+   "n_jet": 453,
+   "d_jet_mm": 0.809,
+   "d_air_mm": 7.26879,
+   "a_pz": 0.376153,
+   "a_aux": 0.059143,
+   "k_pass": 0.711843,
+   "tau_pz_ms": 0.484672,
+   "tau_bo_ms": 2.50022,
+   "dp_inj": 0.027135,
+   "dp_total": 0.0627263,
+   "NOx": [
+    75.8874,
+    91.3211,
+    120.942
+   ],
+   "CO": [
+    28.2872,
+    14.0935,
+    6.75813
+   ],
+   "margin_lbo": [
+    14.0746,
+    5.62341,
+    2.94273
+   ],
+   "NOx_diesel": [
+    72.4647,
+    39.6947
+   ],
+   "CO_diesel": [
+    46.8795,
+    1.04642
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.158208,
+   "T_wall_K": 951.257,
+   "parts": 5,
+   "swap_h": 0.8,
+   "mass_kg": 14.123,
+   "plugplay": 9.125,
+   "service": 10.0,
+   "make_score": 9.04951,
+   "D_env": 0.43202,
+   "L_mod": 1.23438,
+   "V_L": 50.6292,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "diesel_dry",
+    "exit_uniformity"
+   ]
+  },
+  {
+   "idx": 207,
+   "score": 2.68135e-08,
+   "penalty": 4.00842e-08,
+   "scheme": "RDC",
+   "chamber": "выносная",
+   "injector": "струи",
+   "diesel": "испарительная",
+   "cooling": "решётка",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 25,
+   "n_jet": 25,
+   "d_jet_mm": 1.99357,
+   "d_air_mm": 21.7056,
+   "a_pz": 0.392927,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.090954,
+   "tau_bo_ms": 3.52997,
+   "dp_inj": 0.122265,
+   "dp_total": 0.0300512,
+   "NOx": [
+    42.3176,
+    0.0396071,
+    0.000959336
+   ],
+   "CO": [
+    3.16428,
+    0.18456,
+    0.0931309
+   ],
+   "margin_lbo": [
+    1.06129,
+    0.671612,
+    0.514215
+   ],
+   "NOx_diesel": [
+    32.3967,
+    16.2197
+   ],
+   "CO_diesel": [
+    29.159,
+    0.802083
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0242492,
+   "T_wall_K": 1095.12,
+   "parts": 5,
+   "swap_h": 0.8,
+   "mass_kg": 31.056,
+   "plugplay": 2.925,
+   "service": 10.0,
+   "make_score": 7.92392,
+   "D_env": 0.43364,
+   "L_mod": 1.61189,
+   "V_L": 58.7745,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "fuel_valves",
+    "fuel_changeover",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 162,
+   "score": 1.45707e-08,
+   "penalty": 2.00551e-08,
+   "scheme": "LPP",
+   "chamber": "противоточная",
+   "injector": "микросмесители",
+   "diesel": "испарительная",
+   "cooling": "плёночное",
+   "make": "печатный картридж",
+   "passive": "струи",
+   "n_el": 539,
+   "n_jet": 1078,
+   "d_jet_mm": 0.434101,
+   "d_air_mm": 7.27139,
+   "a_pz": 0.467912,
+   "a_aux": 0.05039,
+   "k_pass": 0.467121,
+   "tau_pz_ms": 0.65323,
+   "tau_bo_ms": 3.12451,
+   "dp_inj": 0.029616,
+   "dp_total": 0.0491652,
+   "NOx": [
+    11.7365,
+    4.87654,
+    1.79734
+   ],
+   "CO": [
+    3.31449,
+    30.734,
+    10.7547
+   ],
+   "margin_lbo": [
+    4.53158,
+    0.333333,
+    0.1
+   ],
+   "NOx_diesel": [
+    35.6117,
+    30.3658
+   ],
+   "CO_diesel": [
+    6.31323,
+    32.9357
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.19879,
+   "T_wall_K": 963.886,
+   "parts": 4,
+   "swap_h": 6.0,
+   "mass_kg": 23.7454,
+   "plugplay": 8.91371,
+   "service": 4.74286,
+   "make_score": 7.79917,
+   "D_env": 1.00265,
+   "L_mod": 0.303868,
+   "V_L": 38.7752,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "fuel_changeover",
+    "exit_uniformity",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 49,
+   "score": 8.83139e-09,
+   "penalty": 1.1445e-08,
+   "scheme": "FLOX",
+   "chamber": "выносная",
+   "injector": "струи",
+   "diesel": "испарительная",
+   "cooling": "решётка",
+   "make": "печатный картридж",
+   "passive": "гидравлика",
+   "n_el": 171,
+   "n_jet": 855,
+   "d_jet_mm": 0.580298,
+   "d_air_mm": 13.3172,
+   "a_pz": 0.684004,
+   "a_aux": 0.184947,
+   "k_pass": 1.43151,
+   "tau_pz_ms": 0.902471,
+   "tau_bo_ms": 3.32077,
+   "dp_inj": 0.055888,
+   "dp_total": 0.106608,
+   "NOx": [
+    0.246117,
+    1.58171e-05,
+    1.38775e-05
+   ],
+   "CO": [
+    1.75336,
+    0.0318315,
+    0.000249626
+   ],
+   "margin_lbo": [
+    1.53993,
+    0.0,
+    0.0
+   ],
+   "NOx_diesel": [
+    41.2957,
+    37.6787
+   ],
+   "CO_diesel": [
+    1.19537,
+    2163.93
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0461419,
+   "T_wall_K": 856.749,
+   "parts": 4,
+   "swap_h": 0.8,
+   "mass_kg": 25.5527,
+   "plugplay": 8.625,
+   "service": 10.0,
+   "make_score": 8.29911,
+   "D_env": 0.397139,
+   "L_mod": 1.06529,
+   "V_L": 48.5336,
+   "hard_ok": false,
+   "hard_fail": [
+    "load_range",
+    "diesel_dry",
+    "fuel_changeover",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 286,
+   "score": 8.70928e-09,
+   "penalty": 1.523e-08,
+   "scheme": "FLOX",
+   "chamber": "противоточная",
+   "injector": "микросмесители",
+   "diesel": "пневматическая",
+   "cooling": "керамика",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 533,
+   "n_jet": 533,
+   "d_jet_mm": 0.445616,
+   "d_air_mm": 7.61191,
+   "a_pz": 0.638649,
+   "a_aux": 0.195771,
+   "k_pass": 0.0,
+   "tau_pz_ms": 1.90779,
+   "tau_bo_ms": 19.1824,
+   "dp_inj": 0.046983,
+   "dp_total": 0.0662417,
+   "NOx": [
+    0.209395,
+    7.72574e-06,
+    1.05288e-06
+   ],
+   "CO": [
+    0.124785,
+    6.55297,
+    0.0379706
+   ],
+   "margin_lbo": [
+    3.85423,
+    0.0,
+    0.0
+   ],
+   "NOx_diesel": [
+    37.8805,
+    31.7802
+   ],
+   "CO_diesel": [
+    0.234486,
+    953.662
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0192072,
+   "T_wall_K": 892.211,
+   "parts": 8,
+   "swap_h": 6.0,
+   "mass_kg": 24.3165,
+   "plugplay": 7.0,
+   "service": 4.40952,
+   "make_score": 7.29915,
+   "D_env": 1.02974,
+   "L_mod": 0.580419,
+   "V_L": 141.417,
+   "hard_ok": false,
+   "hard_fail": [
+    "load_range",
+    "diesel_dry",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 137,
+   "score": 8.37737e-09,
+   "penalty": 1.1445e-08,
+   "scheme": "FLOX",
+   "chamber": "выносная",
+   "injector": "струи",
+   "diesel": "испарительная",
+   "cooling": "решётка",
+   "make": "гибрид",
+   "passive": "гидравлика",
+   "n_el": 33,
+   "n_jet": 231,
+   "d_jet_mm": 0.815583,
+   "d_air_mm": 30.9705,
+   "a_pz": 0.640553,
+   "a_aux": 0.146188,
+   "k_pass": 1.32246,
+   "tau_pz_ms": 0.653404,
+   "tau_bo_ms": 2.62719,
+   "dp_inj": 0.044992,
+   "dp_total": 0.0916681,
+   "NOx": [
+    0.307944,
+    3.00625e-06,
+    1.67588e-06
+   ],
+   "CO": [
+    0.460644,
+    0.0270285,
+    0.000425587
+   ],
+   "margin_lbo": [
+    1.38237,
+    0.0,
+    0.0
+   ],
+   "NOx_diesel": [
+    39.894,
+    43.7276
+   ],
+   "CO_diesel": [
+    0.418208,
+    1150.45
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.049258,
+   "T_wall_K": 861.64,
+   "parts": 5,
+   "swap_h": 0.8,
+   "mass_kg": 31.3741,
+   "plugplay": 8.35114,
+   "service": 10.0,
+   "make_score": 8.29891,
+   "D_env": 0.42554,
+   "L_mod": 1.55487,
+   "V_L": 65.2937,
+   "hard_ok": false,
+   "hard_fail": [
+    "load_range",
+    "diesel_dry",
+    "fuel_changeover",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 238,
+   "score": 7.62279e-09,
+   "penalty": 1.00633e-08,
+   "scheme": "FLOX",
+   "chamber": "кольцевая",
+   "injector": "струи",
+   "diesel": "пневматическая",
+   "cooling": "отверстия",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 42,
+   "n_jet": 126,
+   "d_jet_mm": 1.40813,
+   "d_air_mm": 26.2879,
+   "a_pz": 0.434758,
+   "a_aux": 0.216545,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.749723,
+   "tau_bo_ms": 10.2919,
+   "dp_inj": 0.02465,
+   "dp_total": 0.0358978,
+   "NOx": [
+    10.8647,
+    7.65648e-05,
+    5.27836e-09
+   ],
+   "CO": [
+    7.58131,
+    8.23791e-06,
+    1.78452e-06
+   ],
+   "margin_lbo": [
+    8.65964,
+    0.1,
+    0.0
+   ],
+   "NOx_diesel": [
+    183.993,
+    146.399
+   ],
+   "CO_diesel": [
+    14.9698,
+    0.188938
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0653281,
+   "T_wall_K": 822.664,
+   "parts": 4,
+   "swap_h": 12.0,
+   "mass_kg": 26.7945,
+   "plugplay": 10.0,
+   "service": 3.6,
+   "make_score": 8.29907,
+   "D_env": 0.819687,
+   "L_mod": 0.688165,
+   "V_L": 68.8729,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "diesel_dry",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 269,
+   "score": 7.48682e-09,
+   "penalty": 1.50461e-08,
+   "scheme": "LPP",
+   "chamber": "трубчатые",
+   "injector": "закрутка",
+   "diesel": "центробежная",
+   "cooling": "керамика",
+   "make": "печатный картридж",
+   "passive": "гидравлика",
+   "n_el": 22,
+   "n_jet": 176,
+   "d_jet_mm": 1.03741,
+   "d_air_mm": 45.1825,
+   "a_pz": 0.648139,
+   "a_aux": 0.236413,
+   "k_pass": 1.35949,
+   "tau_pz_ms": 1.67617,
+   "tau_bo_ms": 2.58084,
+   "dp_inj": 0.02288,
+   "dp_total": 0.0433855,
+   "NOx": [
+    0.633399,
+    1.18119e-06,
+    2.74881e-07
+   ],
+   "CO": [
+    1.38035,
+    0.000866642,
+    0.000152822
+   ],
+   "margin_lbo": [
+    1.81056,
+    0.0,
+    0.0
+   ],
+   "NOx_diesel": [
+    1266.62,
+    1190.58
+   ],
+   "CO_diesel": [
+    2331.16,
+    4562.83
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0338679,
+   "T_wall_K": 1481.95,
+   "parts": 61,
+   "swap_h": 4.6,
+   "mass_kg": 12.5707,
+   "plugplay": 9.775,
+   "service": 5.04286,
+   "make_score": 7.67456,
+   "D_env": 0.91774,
+   "L_mod": 0.808572,
+   "V_L": 67.1542,
+   "hard_ok": false,
+   "hard_fail": [
+    "load_range",
+    "diesel_dry",
+    "wall_life",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 226,
+   "score": 7.39504e-09,
+   "penalty": 1.32168e-08,
+   "scheme": "LPP",
+   "chamber": "кольцевая",
+   "injector": "закрутка",
+   "diesel": "центробежная",
+   "cooling": "керамика",
+   "make": "литьё",
+   "passive": "нет",
+   "n_el": 5,
+   "n_jet": 45,
+   "d_jet_mm": 2.13139,
+   "d_air_mm": 93.507,
+   "a_pz": 0.519029,
+   "a_aux": 0.115024,
+   "k_pass": 0.0,
+   "tau_pz_ms": 2.59399,
+   "tau_bo_ms": 9.25601,
+   "dp_inj": 0.015485,
+   "dp_total": 0.0266676,
+   "NOx": [
+    2.98168,
+    0.0446342,
+    1.97668e-10
+   ],
+   "CO": [
+    0.769179,
+    0.142368,
+    1.2716e-08
+   ],
+   "margin_lbo": [
+    8.2047,
+    0.1,
+    0.0
+   ],
+   "NOx_diesel": [
+    1411.09,
+    1395.5
+   ],
+   "CO_diesel": [
+    2068.55,
+    4523.29
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.0591394,
+   "T_wall_K": 1577.42,
+   "parts": 24,
+   "swap_h": 12.0,
+   "mass_kg": 19.1503,
+   "plugplay": 9.89935,
+   "service": 3.1,
+   "make_score": 7.30357,
+   "D_env": 0.830065,
+   "L_mod": 0.788665,
+   "V_L": 98.8467,
+   "hard_ok": false,
+   "hard_fail": [
+    "load_range",
+    "diesel_dry",
+    "wall_life",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 89,
+   "score": 7.1215e-09,
+   "penalty": 1.523e-08,
+   "scheme": "RQL",
+   "chamber": "трубчатые",
+   "injector": "струи",
+   "diesel": "пневматическая",
+   "cooling": "решётка",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 95,
+   "n_jet": 380,
+   "d_jet_mm": 0.787229,
+   "d_air_mm": 8.95487,
+   "a_pz": 0.090001,
+   "a_aux": 0.363509,
+   "k_pass": 0.0,
+   "tau_pz_ms": 2.78326,
+   "tau_bo_ms": 4.74303,
+   "dp_inj": 0.015334,
+   "dp_total": 0.0529354,
+   "NOx": [
+    121.498,
+    29.0099,
+    68.1128
+   ],
+   "CO": [
+    4.91721,
+    2.45205,
+    213.486
+   ],
+   "margin_lbo": [
+    2.01691,
+    13.3352,
+    46.1384
+   ],
+   "NOx_diesel": [
+    176.72,
+    45.6749
+   ],
+   "CO_diesel": [
+    9.5791,
+    0.703744
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0685171,
+   "T_wall_K": 843.594,
+   "parts": 33,
+   "swap_h": 4.6,
+   "mass_kg": 44.1249,
+   "plugplay": 9.775,
+   "service": 5.54286,
+   "make_score": 8.29846,
+   "D_env": 0.941538,
+   "L_mod": 0.676511,
+   "V_L": 52.4245,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "diesel_dry"
+   ]
+  },
+  {
+   "idx": 17,
+   "score": 7.09388e-09,
+   "penalty": 1.523e-08,
+   "scheme": "FLOX",
+   "chamber": "трубчатые",
+   "injector": "микросмесители",
+   "diesel": "пневматическая",
+   "cooling": "решётка",
+   "make": "гибрид",
+   "passive": "гидравлика",
+   "n_el": 581,
+   "n_jet": 581,
+   "d_jet_mm": 0.639948,
+   "d_air_mm": 6.28918,
+   "a_pz": 0.470747,
+   "a_aux": 0.233032,
+   "k_pass": 0.856222,
+   "tau_pz_ms": 2.62732,
+   "tau_bo_ms": 2.91707,
+   "dp_inj": 0.046099,
+   "dp_total": 0.0740872,
+   "NOx": [
+    2.5448,
+    0.00903553,
+    4.30325e-06
+   ],
+   "CO": [
+    2.65585,
+    11932.3,
+    0.964002
+   ],
+   "margin_lbo": [
+    6.61169,
+    0.333333,
+    0.0
+   ],
+   "NOx_diesel": [
+    33.145,
+    26.3837
+   ],
+   "CO_diesel": [
+    5.15115,
+    12.4135
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.0347079,
+   "T_wall_K": 884.184,
+   "parts": 33,
+   "swap_h": 4.6,
+   "mass_kg": 43.8943,
+   "plugplay": 9.275,
+   "service": 5.54286,
+   "make_score": 8.29847,
+   "D_env": 0.931861,
+   "L_mod": 0.513511,
+   "V_L": 54.7902,
+   "hard_ok": false,
+   "hard_fail": [
+    "co_gas",
+    "load_range",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 221,
+   "score": 6.94254e-09,
+   "penalty": 1.523e-08,
+   "scheme": "LPP",
+   "chamber": "трубчатые",
+   "injector": "струи",
+   "diesel": "центробежная",
+   "cooling": "отверстия",
+   "make": "литьё",
+   "passive": "струи",
+   "n_el": 28,
+   "n_jet": 224,
+   "d_jet_mm": 1.31604,
+   "d_air_mm": 33.1178,
+   "a_pz": 0.605301,
+   "a_aux": 0.206113,
+   "k_pass": 0.394043,
+   "tau_pz_ms": 1.44448,
+   "tau_bo_ms": 3.57455,
+   "dp_inj": 0.04268,
+   "dp_total": 0.0629252,
+   "NOx": [
+    0.369278,
+    0.00067467,
+    0.000400608
+   ],
+   "CO": [
+    0.160706,
+    5.83294e-05,
+    3.3217e-06
+   ],
+   "margin_lbo": [
+    1.45902,
+    0.1,
+    0.0333333
+   ],
+   "NOx_diesel": [
+    1289.34,
+    1214.06
+   ],
+   "CO_diesel": [
+    2714.46,
+    4564.12
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0211647,
+   "T_wall_K": 844.077,
+   "parts": 65,
+   "swap_h": 4.6,
+   "mass_kg": 26.5156,
+   "plugplay": 9.025,
+   "service": 5.20952,
+   "make_score": 8.92857,
+   "D_env": 0.927588,
+   "L_mod": 0.963935,
+   "V_L": 66.9454,
+   "hard_ok": false,
+   "hard_fail": [
+    "load_range",
+    "diesel_dry",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 266,
+   "score": 6.79824e-09,
+   "penalty": 1.523e-08,
+   "scheme": "LPP",
+   "chamber": "противоточная",
+   "injector": "струи",
+   "diesel": "центробежная",
+   "cooling": "керамика",
+   "make": "печатный картридж",
+   "passive": "струи",
+   "n_el": 45,
+   "n_jet": 270,
+   "d_jet_mm": 0.962273,
+   "d_air_mm": 26.6303,
+   "a_pz": 0.567414,
+   "a_aux": 0.116502,
+   "k_pass": 0.912927,
+   "tau_pz_ms": 1.13323,
+   "tau_bo_ms": 3.50282,
+   "dp_inj": 0.034731,
+   "dp_total": 0.0541652,
+   "NOx": [
+    1.39235,
+    2.56805,
+    8.06927
+   ],
+   "CO": [
+    0.257254,
+    0.594725,
+    45.1411
+   ],
+   "margin_lbo": [
+    1.81056,
+    1.11397,
+    0.333333
+   ],
+   "NOx_diesel": [
+    152.335,
+    129.053
+   ],
+   "CO_diesel": [
+    0.577139,
+    1598.48
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0303404,
+   "T_wall_K": 922.646,
+   "parts": 52,
+   "swap_h": 6.0,
+   "mass_kg": 17.9457,
+   "plugplay": 9.25,
+   "service": 4.24286,
+   "make_score": 7.67437,
+   "D_env": 1.00795,
+   "L_mod": 0.482953,
+   "V_L": 74.3221,
+   "hard_ok": false,
+   "hard_fail": [
+    "load_range",
+    "diesel_dry",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 124,
+   "score": 6.54128e-09,
+   "penalty": 9.94174e-09,
+   "scheme": "TVC",
+   "chamber": "противоточная",
+   "injector": "закрутка",
+   "diesel": "центробежная",
+   "cooling": "плёночное",
+   "make": "гибрид",
+   "passive": "гидравлика",
+   "n_el": 2,
+   "n_jet": 38,
+   "d_jet_mm": 1.88051,
+   "d_air_mm": 104.576,
+   "a_pz": 0.266084,
+   "a_aux": 0.137369,
+   "k_pass": 1.16155,
+   "tau_pz_ms": 1.94375,
+   "tau_bo_ms": 2.84733,
+   "dp_inj": 0.016259,
+   "dp_total": 0.0359235,
+   "NOx": [
+    145.49,
+    67.4424,
+    8.75596
+   ],
+   "CO": [
+    13.7642,
+    1.08585,
+    3394.67
+   ],
+   "margin_lbo": [
+    115.478,
+    13.3352,
+    2.01691
+   ],
+   "NOx_diesel": [
+    1322.7,
+    1258.09
+   ],
+   "CO_diesel": [
+    2563.29,
+    4581.19
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0753378,
+   "T_wall_K": 1423.16,
+   "parts": 7,
+   "swap_h": 6.0,
+   "mass_kg": 28.6225,
+   "plugplay": 10.0,
+   "service": 4.40952,
+   "make_score": 8.299,
+   "D_env": 1.00431,
+   "L_mod": 1.16597,
+   "V_L": 53.1908,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "diesel_dry",
+    "wall_life"
+   ]
+  },
+  {
+   "idx": 173,
+   "score": 5.13839e-09,
+   "penalty": 7.21057e-09,
+   "scheme": "LPP",
+   "chamber": "выносная",
+   "injector": "струи",
+   "diesel": "испарительная",
+   "cooling": "керамика",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 12,
+   "n_jet": 84,
+   "d_jet_mm": 2.09505,
+   "d_air_mm": 58.1616,
+   "a_pz": 0.505774,
+   "a_aux": 0.126696,
+   "k_pass": 0.0,
+   "tau_pz_ms": 2.17561,
+   "tau_bo_ms": 11.4215,
+   "dp_inj": 0.017055,
+   "dp_total": 0.0477411,
+   "NOx": [
+    2.48782,
+    0.000503723,
+    0.000578602
+   ],
+   "CO": [
+    0.978576,
+    6.22515e-05,
+    1.02662e-06
+   ],
+   "margin_lbo": [
+    8.2047,
+    0.1,
+    0.0
+   ],
+   "NOx_diesel": [
+    227.63,
+    219.138
+   ],
+   "CO_diesel": [
+    2.22174,
+    4.92443
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.103404,
+   "T_wall_K": 1172.52,
+   "parts": 7,
+   "swap_h": 0.8,
+   "mass_kg": 10.6151,
+   "plugplay": 8.625,
+   "service": 9.0,
+   "make_score": 5.79963,
+   "D_env": 0.454948,
+   "L_mod": 2.07602,
+   "V_L": 108.268,
+   "hard_ok": false,
+   "hard_fail": [
+    "load_range",
+    "diesel_dry",
+    "fuel_changeover",
+    "exit_uniformity",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 60,
+   "score": 4.94134e-09,
+   "penalty": 8.09724e-09,
+   "scheme": "TVC",
+   "chamber": "кольцевая",
+   "injector": "микросмесители",
+   "diesel": "испарительная",
+   "cooling": "керамика",
+   "make": "гибрид",
+   "passive": "струи",
+   "n_el": 1180,
+   "n_jet": 1180,
+   "d_jet_mm": 0.441763,
+   "d_air_mm": 4.05685,
+   "a_pz": 0.310973,
+   "a_aux": 0.116428,
+   "k_pass": 0.707382,
+   "tau_pz_ms": 0.874207,
+   "tau_bo_ms": 10.9025,
+   "dp_inj": 0.028169,
+   "dp_total": 0.0396393,
+   "NOx": [
+    233.682,
+    97.4628,
+    167.588
+   ],
+   "CO": [
+    9.09003,
+    1.53376,
+    0.359978
+   ],
+   "margin_lbo": [
+    18.4342,
+    1.30975,
+    0.1
+   ],
+   "NOx_diesel": [
+    38.4321,
+    20.8091
+   ],
+   "CO_diesel": [
+    15.1385,
+    0.192946
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.0985332,
+   "T_wall_K": 1193.83,
+   "parts": 8,
+   "swap_h": 12.0,
+   "mass_kg": 15.6734,
+   "plugplay": 9.0,
+   "service": 3.26667,
+   "make_score": 7.29945,
+   "D_env": 0.796087,
+   "L_mod": 0.45843,
+   "V_L": 79.2551,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "fuel_changeover",
+    "exit_uniformity",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 1,
+   "score": 4.24946e-09,
+   "penalty": 6.29426e-09,
+   "scheme": "MM",
+   "chamber": "выносная",
+   "injector": "микросмесители",
+   "diesel": "испарительная",
+   "cooling": "керамика",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 3027,
+   "n_jet": 3027,
+   "d_jet_mm": 0.391026,
+   "d_air_mm": 2.99386,
+   "a_pz": 0.459564,
+   "a_aux": 0.120334,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.975612,
+   "tau_bo_ms": 2.73154,
+   "dp_inj": 0.03152,
+   "dp_total": 0.0649289,
+   "NOx": [
+    42.2092,
+    1.75294,
+    0.257791
+   ],
+   "CO": [
+    2.89434,
+    9.99646,
+    0.919519
+   ],
+   "margin_lbo": [
+    7.77365,
+    0.1,
+    0.0
+   ],
+   "NOx_diesel": [
+    16.9762,
+    13.3348
+   ],
+   "CO_diesel": [
+    5.1706,
+    19.5316
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.109112,
+   "T_wall_K": 1256.85,
+   "parts": 6,
+   "swap_h": 0.8,
+   "mass_kg": 7.30723,
+   "plugplay": 8.625,
+   "service": 9.0,
+   "make_score": 7.29975,
+   "D_env": 0.430528,
+   "L_mod": 1.24787,
+   "V_L": 59.8957,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "fuel_changeover",
+    "exit_uniformity",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 205,
+   "score": 2.92316e-09,
+   "penalty": 3.68712e-09,
+   "scheme": "LPP",
+   "chamber": "выносная",
+   "injector": "закрутка",
+   "diesel": "испарительная",
+   "cooling": "плёночное",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 8,
+   "n_jet": 136,
+   "d_jet_mm": 1.69844,
+   "d_air_mm": 78.8019,
+   "a_pz": 0.670732,
+   "a_aux": 0.143445,
+   "k_pass": 0.0,
+   "tau_pz_ms": 2.28813,
+   "tau_bo_ms": 3.95548,
+   "dp_inj": 0.020027,
+   "dp_total": 0.0531978,
+   "NOx": [
+    0.915463,
+    0.0356759,
+    8.86338e-08
+   ],
+   "CO": [
+    2.34753,
+    7.37915,
+    2.25532e-05
+   ],
+   "margin_lbo": [
+    1.11397,
+    0.0,
+    0.0
+   ],
+   "NOx_diesel": [
+    401.187,
+    368.289
+   ],
+   "CO_diesel": [
+    0.235745,
+    3032.75
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.131574,
+   "T_wall_K": 1019.09,
+   "parts": 5,
+   "swap_h": 0.8,
+   "mass_kg": 16.8073,
+   "plugplay": 8.625,
+   "service": 10.0,
+   "make_score": 8.29941,
+   "D_env": 0.391272,
+   "L_mod": 1.54712,
+   "V_L": 65.6209,
+   "hard_ok": false,
+   "hard_fail": [
+    "load_range",
+    "diesel_dry",
+    "fuel_changeover",
+    "exit_uniformity",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 253,
+   "score": 2.83476e-09,
+   "penalty": 3.97049e-09,
+   "scheme": "LPP",
+   "chamber": "выносная",
+   "injector": "микросмесители",
+   "diesel": "испарительная",
+   "cooling": "отверстия",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 4210,
+   "n_jet": 4210,
+   "d_jet_mm": 0.331893,
+   "d_air_mm": 2.37763,
+   "a_pz": 0.416863,
+   "a_aux": 0.15088,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.438905,
+   "tau_bo_ms": 4.14974,
+   "dp_inj": 0.033705,
+   "dp_total": 0.0661878,
+   "NOx": [
+    64.9518,
+    2.26957,
+    0.253996
+   ],
+   "CO": [
+    9.14977,
+    14.9443,
+    1.02497
+   ],
+   "margin_lbo": [
+    6.97831,
+    0.1,
+    0.0
+   ],
+   "NOx_diesel": [
+    19.9812,
+    10.1303
+   ],
+   "CO_diesel": [
+    16.8135,
+    1.05567
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.128464,
+   "T_wall_K": 794.099,
+   "parts": 5,
+   "swap_h": 0.8,
+   "mass_kg": 15.1302,
+   "plugplay": 8.625,
+   "service": 10.0,
+   "make_score": 7.79947,
+   "D_env": 0.446736,
+   "L_mod": 1.14258,
+   "V_L": 57.2089,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "fuel_changeover",
+    "exit_uniformity",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 4,
+   "score": 2.2168e-09,
+   "penalty": 3.17638e-09,
+   "scheme": "RQL",
+   "chamber": "противоточная",
+   "injector": "струи",
+   "diesel": "испарительная",
+   "cooling": "отверстия",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 224,
+   "n_jet": 448,
+   "d_jet_mm": 0.941147,
+   "d_air_mm": 8.67213,
+   "a_pz": 0.197159,
+   "a_aux": 0.435974,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.622792,
+   "tau_bo_ms": 5.69145,
+   "dp_inj": 0.015048,
+   "dp_total": 0.0346471,
+   "NOx": [
+    115.773,
+    71.5627,
+    6.77992
+   ],
+   "CO": [
+    0.160999,
+    126.9,
+    528.498
+   ],
+   "margin_lbo": [
+    17.4658,
+    39.2419,
+    10.1815
+   ],
+   "NOx_diesel": [
+    39.3949,
+    68.918
+   ],
+   "CO_diesel": [
+    0.281495,
+    53.8589
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0300943,
+   "T_wall_K": 745.086,
+   "parts": 5,
+   "swap_h": 6.0,
+   "mass_kg": 30.2754,
+   "plugplay": 9.0,
+   "service": 4.74286,
+   "make_score": 8.29895,
+   "D_env": 1.01111,
+   "L_mod": 0.496416,
+   "V_L": 59.3716,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "diesel_dry",
+    "fuel_changeover"
+   ]
+  },
+  {
+   "idx": 130,
+   "score": 1.78809e-09,
+   "penalty": 3.24783e-09,
+   "scheme": "LPP",
+   "chamber": "кольцевая",
+   "injector": "закрутка",
+   "diesel": "центробежная",
+   "cooling": "плёночное",
+   "make": "литьё",
+   "passive": "нет",
+   "n_el": 12,
+   "n_jet": 96,
+   "d_jet_mm": 1.50604,
+   "d_air_mm": 63.1774,
+   "a_pz": 0.654449,
+   "a_aux": 0.105117,
+   "k_pass": 0.0,
+   "tau_pz_ms": 1.99136,
+   "tau_bo_ms": 2.67157,
+   "dp_inj": 0.020511,
+   "dp_total": 0.0320393,
+   "NOx": [
+    0.671107,
+    2.22677e-06,
+    1.98057e-07
+   ],
+   "CO": [
+    7.86679,
+    0.00171132,
+    8.61573e-05
+   ],
+   "margin_lbo": [
+    1.24094,
+    0.0,
+    0.0
+   ],
+   "NOx_diesel": [
+    1278.08,
+    1196.4
+   ],
+   "CO_diesel": [
+    3178.06,
+    4623.01
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.14212,
+   "T_wall_K": 1267.7,
+   "parts": 32,
+   "swap_h": 12.0,
+   "mass_kg": 23.0668,
+   "plugplay": 10.0,
+   "service": 3.26667,
+   "make_score": 8.92857,
+   "D_env": 0.769152,
+   "L_mod": 0.476404,
+   "V_L": 51.9685,
+   "hard_ok": false,
+   "hard_fail": [
+    "load_range",
+    "diesel_dry",
+    "exit_uniformity",
+    "wall_life",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 128,
+   "score": 1.31275e-09,
+   "penalty": 2.03615e-09,
+   "scheme": "RDC",
+   "chamber": "кольцевая",
+   "injector": "струи",
+   "diesel": "пневматическая",
+   "cooling": "решётка",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 15,
+   "n_jet": 75,
+   "d_jet_mm": 1.69037,
+   "d_air_mm": 27.8569,
+   "a_pz": 0.390939,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.102766,
+   "tau_bo_ms": 4.28812,
+   "dp_inj": 0.123923,
+   "dp_total": 0.0127638,
+   "NOx": [
+    50.7131,
+    0.0481049,
+    0.00103428
+   ],
+   "CO": [
+    3.43983,
+    0.124943,
+    0.0860711
+   ],
+   "margin_lbo": [
+    1.06669,
+    0.675027,
+    0.516829
+   ],
+   "NOx_diesel": [
+    104.991,
+    70.6238
+   ],
+   "CO_diesel": [
+    30.2625,
+    0.604131
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0131607,
+   "T_wall_K": 928.275,
+   "parts": 5,
+   "swap_h": 12.0,
+   "mass_kg": 42.0974,
+   "plugplay": 5.8,
+   "service": 3.6,
+   "make_score": 7.92353,
+   "D_env": 0.794482,
+   "L_mod": 0.690691,
+   "V_L": 57.6556,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 201,
+   "score": 9.49495e-10,
+   "penalty": 2.10042e-09,
+   "scheme": "FLOX",
+   "chamber": "трубчатые",
+   "injector": "микросмесители",
+   "diesel": "пневматическая",
+   "cooling": "отверстия",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 869,
+   "n_jet": 869,
+   "d_jet_mm": 0.467928,
+   "d_air_mm": 5.94334,
+   "a_pz": 0.708512,
+   "a_aux": 0.081526,
+   "k_pass": 0.0,
+   "tau_pz_ms": 1.74189,
+   "tau_bo_ms": 6.65209,
+   "dp_inj": 0.05853,
+   "dp_total": 0.0785649,
+   "NOx": [
+    0.143471,
+    5.72881e-06,
+    4.47191e-07
+   ],
+   "CO": [
+    1.03945,
+    4.74637,
+    0.0217812
+   ],
+   "margin_lbo": [
+    1.62531,
+    0.0,
+    0.0
+   ],
+   "NOx_diesel": [
+    26.527,
+    22.4297
+   ],
+   "CO_diesel": [
+    0.205675,
+    1999.02
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.167207,
+   "T_wall_K": 731.357,
+   "parts": 33,
+   "swap_h": 4.6,
+   "mass_kg": 25.8739,
+   "plugplay": 9.05623,
+   "service": 5.54286,
+   "make_score": 7.7991,
+   "D_env": 0.928572,
+   "L_mod": 0.49845,
+   "V_L": 64.7182,
+   "hard_ok": false,
+   "hard_fail": [
+    "load_range",
+    "diesel_dry",
+    "exit_uniformity",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 127,
+   "score": 8.62023e-10,
+   "penalty": 1.20423e-09,
+   "scheme": "RDC",
+   "chamber": "выносная",
+   "injector": "микросмесители",
+   "diesel": "испарительная",
+   "cooling": "отверстия",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 244,
+   "n_jet": 488,
+   "d_jet_mm": 0.846354,
+   "d_air_mm": 7.48215,
+   "a_pz": 0.377058,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.148408,
+   "tau_bo_ms": 12.4301,
+   "dp_inj": 0.08371,
+   "dp_total": -0.0200186,
+   "NOx": [
+    209.924,
+    0.474213,
+    0.00581668
+   ],
+   "CO": [
+    4.88132,
+    0.0652528,
+    0.0321544
+   ],
+   "margin_lbo": [
+    1.10596,
+    0.699878,
+    0.535856
+   ],
+   "NOx_diesel": [
+    118.907,
+    17.2631
+   ],
+   "CO_diesel": [
+    34.3184,
+    0.675834
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.0269118,
+   "T_wall_K": 850.191,
+   "parts": 6,
+   "swap_h": 0.8,
+   "mass_kg": 22.9115,
+   "plugplay": 5.425,
+   "service": 10.0,
+   "make_score": 7.9242,
+   "D_env": 0.501545,
+   "L_mod": 1.37353,
+   "V_L": 106.332,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 289,
+   "score": 7.6721e-10,
+   "penalty": 1.06087e-09,
+   "scheme": "MM",
+   "chamber": "выносная",
+   "injector": "микросмесители",
+   "diesel": "пневматическая",
+   "cooling": "отверстия",
+   "make": "гибрид",
+   "passive": "струи",
+   "n_el": 1000,
+   "n_jet": 2000,
+   "d_jet_mm": 0.381511,
+   "d_air_mm": 5.06537,
+   "a_pz": 0.463346,
+   "a_aux": 0.086322,
+   "k_pass": 0.270021,
+   "tau_pz_ms": 2.36792,
+   "tau_bo_ms": 2.34131,
+   "dp_inj": 0.035827,
+   "dp_total": 0.0707676,
+   "NOx": [
+    42.3231,
+    2.64669,
+    1.26909
+   ],
+   "CO": [
+    3.23545,
+    25.1215,
+    13.8547
+   ],
+   "margin_lbo": [
+    17.4658,
+    1.17574,
+    0.1
+   ],
+   "NOx_diesel": [
+    30.5825,
+    24.1159
+   ],
+   "CO_diesel": [
+    5.90079,
+    13.7841
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.139215,
+   "T_wall_K": 771.207,
+   "parts": 5,
+   "swap_h": 0.8,
+   "mass_kg": 14.4055,
+   "plugplay": 9.125,
+   "service": 10.0,
+   "make_score": 8.5495,
+   "D_env": 0.418962,
+   "L_mod": 1.22832,
+   "V_L": 52.2933,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "exit_uniformity",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 171,
+   "score": 6.55279e-10,
+   "penalty": 9.5972e-10,
+   "scheme": "TVC",
+   "chamber": "выносная",
+   "injector": "струи",
+   "diesel": "пневматическая",
+   "cooling": "плёночное",
+   "make": "литьё",
+   "passive": "нет",
+   "n_el": 18,
+   "n_jet": 126,
+   "d_jet_mm": 1.41875,
+   "d_air_mm": 42.5423,
+   "a_pz": 0.475211,
+   "a_aux": 0.06873,
+   "k_pass": 0.663692,
+   "tau_pz_ms": 0.34834,
+   "tau_bo_ms": 6.0468,
+   "dp_inj": 0.023377,
+   "dp_total": 0.0549023,
+   "NOx": [
+    2.70715,
+    5.5986e-10,
+    1.02287e-09
+   ],
+   "CO": [
+    0.755236,
+    8.05882e-13,
+    1.85316e-13
+   ],
+   "margin_lbo": [
+    1.0,
+    0.0,
+    0.0
+   ],
+   "NOx_diesel": [
+    280.522,
+    1277.42
+   ],
+   "CO_diesel": [
+    1.58943,
+    4676.96
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.200104,
+   "T_wall_K": 974.518,
+   "parts": 11,
+   "swap_h": 0.8,
+   "mass_kg": 13.864,
+   "plugplay": 9.625,
+   "service": 8.6,
+   "make_score": 7.42857,
+   "D_env": 0.447368,
+   "L_mod": 1.39281,
+   "V_L": 50.3434,
+   "hard_ok": false,
+   "hard_fail": [
+    "load_range",
+    "diesel_dry",
+    "exit_uniformity",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 48,
+   "score": 5.12706e-10,
+   "penalty": 8.56233e-10,
+   "scheme": "RDC",
+   "chamber": "кольцевая",
+   "injector": "микросмесители",
+   "diesel": "пневматическая",
+   "cooling": "отверстия",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 955,
+   "n_jet": 955,
+   "d_jet_mm": 0.394121,
+   "d_air_mm": 3.65865,
+   "a_pz": 0.364092,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.163053,
+   "tau_bo_ms": 8.50974,
+   "dp_inj": 0.08912,
+   "dp_total": -0.028631,
+   "NOx": [
+    302.523,
+    30.2534,
+    0.721424
+   ],
+   "CO": [
+    7.48841,
+    0.0896624,
+    0.0620842
+   ],
+   "margin_lbo": [
+    1.14535,
+    0.724802,
+    0.554939
+   ],
+   "NOx_diesel": [
+    128.764,
+    11.1482
+   ],
+   "CO_diesel": [
+    46.9814,
+    0.984477
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.0154091,
+   "T_wall_K": 908.575,
+   "parts": 6,
+   "swap_h": 12.0,
+   "mass_kg": 30.6306,
+   "plugplay": 4.53147,
+   "service": 3.6,
+   "make_score": 7.42393,
+   "D_env": 0.807146,
+   "L_mod": 0.4727,
+   "V_L": 90.2838,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 284,
+   "score": 4.60612e-10,
+   "penalty": 1.08373e-09,
+   "scheme": "CAT",
+   "chamber": "трубчатые",
+   "injector": "микросмесители",
+   "diesel": "испарительная",
+   "cooling": "отверстия",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 2254,
+   "n_jet": 4508,
+   "d_jet_mm": 0.328664,
+   "d_air_mm": 3.85409,
+   "a_pz": 0.509858,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.560293,
+   "tau_bo_ms": 7.28087,
+   "dp_inj": 0.025477,
+   "dp_total": 0.045362,
+   "NOx": [
+    0.466284,
+    0.233161,
+    0.251599
+   ],
+   "CO": [
+    1128.99,
+    617.08,
+    1221.01
+   ],
+   "margin_lbo": [
+    2.66667,
+    2.66667,
+    2.18182
+   ],
+   "NOx_diesel": [
+    24.8923,
+    20.5591
+   ],
+   "CO_diesel": [
+    1.84603,
+    35.4924
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.0717069,
+   "T_wall_K": 760.815,
+   "parts": 39,
+   "swap_h": 4.6,
+   "mass_kg": 29.451,
+   "plugplay": 5.575,
+   "service": 5.54286,
+   "make_score": 7.79897,
+   "D_env": 0.931194,
+   "L_mod": 0.633539,
+   "V_L": 77.2806,
+   "hard_ok": false,
+   "hard_fail": [
+    "co_gas",
+    "load_range",
+    "fuel_valves",
+    "fuel_changeover",
+    "wall_life"
+   ]
+  },
+  {
+   "idx": 143,
+   "score": 1.47747e-10,
+   "penalty": 2.00581e-10,
+   "scheme": "RDC",
+   "chamber": "выносная",
+   "injector": "микросмесители",
+   "diesel": "пневматическая",
+   "cooling": "отверстия",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 1089,
+   "n_jet": 2178,
+   "d_jet_mm": 0.308658,
+   "d_air_mm": 3.21795,
+   "a_pz": 0.359124,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.261114,
+   "tau_bo_ms": 8.81351,
+   "dp_inj": 0.111419,
+   "dp_total": 0.0174334,
+   "NOx": [
+    319.765,
+    111.818,
+    3.43503
+   ],
+   "CO": [
+    10.4418,
+    0.111141,
+    0.0851612
+   ],
+   "margin_lbo": [
+    1.16119,
+    0.734828,
+    0.562616
+   ],
+   "NOx_diesel": [
+    160.275,
+    8.80436
+   ],
+   "CO_diesel": [
+    87.5938,
+    1.28254
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0770321,
+   "T_wall_K": 789.401,
+   "parts": 5,
+   "swap_h": 0.8,
+   "mass_kg": 16.2414,
+   "plugplay": 5.425,
+   "service": 10.0,
+   "make_score": 7.42443,
+   "D_env": 0.44925,
+   "L_mod": 1.27973,
+   "V_L": 62.5249,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 292,
+   "score": 7.63159e-11,
+   "penalty": 1.40854e-10,
+   "scheme": "RQL",
+   "chamber": "противоточная",
+   "injector": "струи",
+   "diesel": "пневматическая",
+   "cooling": "керамика",
+   "make": "литьё",
+   "passive": "нет",
+   "n_el": 9,
+   "n_jet": 63,
+   "d_jet_mm": 2.28844,
+   "d_air_mm": 39.8901,
+   "a_pz": 0.198497,
+   "a_aux": 0.525151,
+   "k_pass": 0.0,
+   "tau_pz_ms": 1.38738,
+   "tau_bo_ms": 3.80174,
+   "dp_inj": 0.021106,
+   "dp_total": 0.0406735,
+   "NOx": [
+    103.222,
+    101.508,
+    7.60691
+   ],
+   "CO": [
+    2.28405,
+    128.391,
+    328.404
+   ],
+   "margin_lbo": [
+    41.4178,
+    83.5363,
+    21.6739
+   ],
+   "NOx_diesel": [
+    60.1172,
+    140.349
+   ],
+   "CO_diesel": [
+    0.533466,
+    89.0462
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0132889,
+   "T_wall_K": 912.04,
+   "parts": 16,
+   "swap_h": 6.0,
+   "mass_kg": 16.7263,
+   "plugplay": 10.0,
+   "service": 4.40952,
+   "make_score": 6.92857,
+   "D_env": 1.01312,
+   "L_mod": 0.961654,
+   "V_L": 66.7847,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "diesel_dry"
+   ]
+  },
+  {
+   "idx": 211,
+   "score": 6.7377e-11,
+   "penalty": 8.50146e-11,
+   "scheme": "TVC",
+   "chamber": "выносная",
+   "injector": "струи",
+   "diesel": "пневматическая",
+   "cooling": "отверстия",
+   "make": "гибрид",
+   "passive": "гидравлика",
+   "n_el": 109,
+   "n_jet": 327,
+   "d_jet_mm": 0.967092,
+   "d_air_mm": 16.3938,
+   "a_pz": 0.415782,
+   "a_aux": 0.067051,
+   "k_pass": 0.725477,
+   "tau_pz_ms": 1.75145,
+   "tau_bo_ms": 2.86618,
+   "dp_inj": 0.022131,
+   "dp_total": 0.0520046,
+   "NOx": [
+    12.5778,
+    3.08295,
+    0.960116
+   ],
+   "CO": [
+    1.41264,
+    690.298,
+    1037.44
+   ],
+   "margin_lbo": [
+    11.9709,
+    0.333333,
+    0.0333333
+   ],
+   "NOx_diesel": [
+    117.441,
+    97.6339
+   ],
+   "CO_diesel": [
+    2.94798,
+    48.1494
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.117629,
+   "T_wall_K": 786.77,
+   "parts": 5,
+   "swap_h": 0.8,
+   "mass_kg": 17.7216,
+   "plugplay": 9.625,
+   "service": 10.0,
+   "make_score": 8.29938,
+   "D_env": 0.487243,
+   "L_mod": 1.2204,
+   "V_L": 72.8041,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "diesel_dry",
+    "exit_uniformity",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 151,
+   "score": 5.65779e-11,
+   "penalty": 8.67598e-11,
+   "scheme": "RDC",
+   "chamber": "выносная",
+   "injector": "струи",
+   "diesel": "испарительная",
+   "cooling": "керамика",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 30,
+   "n_jet": 90,
+   "d_jet_mm": 1.38778,
+   "d_air_mm": 19.3292,
+   "a_pz": 0.333207,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.051862,
+   "tau_bo_ms": 6.18475,
+   "dp_inj": 0.09709,
+   "dp_total": -0.0133759,
+   "NOx": [
+    166.569,
+    0.379046,
+    0.00602025
+   ],
+   "CO": [
+    20.4505,
+    0.250354,
+    0.105186
+   ],
+   "margin_lbo": [
+    1.25151,
+    0.791984,
+    0.606376
+   ],
+   "NOx_diesel": [
+    305.915,
+    30.5328
+   ],
+   "CO_diesel": [
+    177.09,
+    2.89348
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.0392561,
+   "T_wall_K": 1397.26,
+   "parts": 8,
+   "swap_h": 0.8,
+   "mass_kg": 6.10657,
+   "plugplay": 4.92641,
+   "service": 9.0,
+   "make_score": 6.92479,
+   "D_env": 0.429689,
+   "L_mod": 1.40484,
+   "V_L": 47.1566,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 241,
+   "score": 2.6315e-11,
+   "penalty": 3.77513e-11,
+   "scheme": "FLOX",
+   "chamber": "выносная",
+   "injector": "микросмесители",
+   "diesel": "пневматическая",
+   "cooling": "керамика",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 3412,
+   "n_jet": 3412,
+   "d_jet_mm": 0.303842,
+   "d_air_mm": 2.84472,
+   "a_pz": 0.549641,
+   "a_aux": 0.055636,
+   "k_pass": 0.0,
+   "tau_pz_ms": 3.63679,
+   "tau_bo_ms": 4.0095,
+   "dp_inj": 0.043534,
+   "dp_total": 0.076392,
+   "NOx": [
+    0.656376,
+    8.0601e-05,
+    2.05616e-06
+   ],
+   "CO": [
+    0.904242,
+    8614.75,
+    0.288136
+   ],
+   "margin_lbo": [
+    19.4564,
+    0.1,
+    0.0
+   ],
+   "NOx_diesel": [
+    14.9454,
+    12.3234
+   ],
+   "CO_diesel": [
+    1.62513,
+    253.01
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0830211,
+   "T_wall_K": 1090.58,
+   "parts": 7,
+   "swap_h": 0.8,
+   "mass_kg": 6.62137,
+   "plugplay": 9.125,
+   "service": 9.0,
+   "make_score": 7.29977,
+   "D_env": 0.418446,
+   "L_mod": 1.04106,
+   "V_L": 47.6155,
+   "hard_ok": false,
+   "hard_fail": [
+    "co_gas",
+    "load_range",
+    "diesel_dry",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 192,
+   "score": 2.50857e-11,
+   "penalty": 3.84414e-11,
+   "scheme": "RDC",
+   "chamber": "кольцевая",
+   "injector": "микросмесители",
+   "diesel": "испарительная",
+   "cooling": "отверстия",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 270,
+   "n_jet": 270,
+   "d_jet_mm": 0.924575,
+   "d_air_mm": 6.35389,
+   "a_pz": 0.337912,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.239333,
+   "tau_bo_ms": 12.8738,
+   "dp_inj": 0.105576,
+   "dp_total": -0.00627342,
+   "NOx": [
+    417.702,
+    350.668,
+    20.8204
+   ],
+   "CO": [
+    21.5602,
+    0.201885,
+    0.0713131
+   ],
+   "margin_lbo": [
+    1.23408,
+    0.780956,
+    0.597933
+   ],
+   "NOx_diesel": [
+    479.877,
+    15.4339
+   ],
+   "CO_diesel": [
+    156.781,
+    2.5285
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.110018,
+   "T_wall_K": 822.266,
+   "parts": 5,
+   "swap_h": 12.0,
+   "mass_kg": 27.4901,
+   "plugplay": 5.8,
+   "service": 3.6,
+   "make_score": 7.92404,
+   "D_env": 0.807622,
+   "L_mod": 0.409051,
+   "V_L": 73.7561,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "exit_uniformity",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 228,
+   "score": 2.48387e-11,
+   "penalty": 3.77513e-11,
+   "scheme": "RQL",
+   "chamber": "кольцевая",
+   "injector": "струи",
+   "diesel": "пневматическая",
+   "cooling": "плёночное",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 29,
+   "n_jet": 116,
+   "d_jet_mm": 0.997114,
+   "d_air_mm": 20.612,
+   "a_pz": 0.173597,
+   "a_aux": 0.385702,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.664715,
+   "tau_bo_ms": 2.32784,
+   "dp_inj": 0.02181,
+   "dp_total": 0.0345003,
+   "NOx": [
+    76.3574,
+    187.283,
+    20.2062
+   ],
+   "CO": [
+    0.687202,
+    108.96,
+    283.209
+   ],
+   "margin_lbo": [
+    9.64662,
+    57.2549,
+    22.8757
+   ],
+   "NOx_diesel": [
+    59.5347,
+    245.417
+   ],
+   "CO_diesel": [
+    1.27687,
+    70.6569
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0513782,
+   "T_wall_K": 957.551,
+   "parts": 5,
+   "swap_h": 12.0,
+   "mass_kg": 17.9113,
+   "plugplay": 7.5,
+   "service": 3.6,
+   "make_score": 8.29938,
+   "D_env": 0.754568,
+   "L_mod": 0.578658,
+   "V_L": 29.456,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "diesel_dry"
+   ]
+  },
+  {
+   "idx": 36,
+   "score": 2.14915e-11,
+   "penalty": 3.77513e-11,
+   "scheme": "RQL",
+   "chamber": "кольцевая",
+   "injector": "закрутка",
+   "diesel": "центробежная",
+   "cooling": "отверстия",
+   "make": "литьё",
+   "passive": "нет",
+   "n_el": 3,
+   "n_jet": 42,
+   "d_jet_mm": 2.89955,
+   "d_air_mm": 54.5271,
+   "a_pz": 0.132273,
+   "a_aux": 0.503427,
+   "k_pass": 0.0,
+   "tau_pz_ms": 1.83371,
+   "tau_bo_ms": 5.00223,
+   "dp_inj": 0.02416,
+   "dp_total": 0.0359068,
+   "NOx": [
+    49.6042,
+    122.872,
+    333.638
+   ],
+   "CO": [
+    0.141075,
+    569.572,
+    381.892
+   ],
+   "margin_lbo": [
+    7.77365,
+    67.317,
+    151.247
+   ],
+   "NOx_diesel": [
+    87.134,
+    135.997
+   ],
+   "CO_diesel": [
+    0.255006,
+    435.46
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0215069,
+   "T_wall_K": 757.095,
+   "parts": 14,
+   "swap_h": 12.0,
+   "mass_kg": 26.308,
+   "plugplay": 10.0,
+   "service": 3.26667,
+   "make_score": 7.42857,
+   "D_env": 0.786472,
+   "L_mod": 0.638491,
+   "V_L": 63.2293,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "diesel_dry"
+   ]
+  },
+  {
+   "idx": 256,
+   "score": 2.05172e-11,
+   "penalty": 3.57332e-11,
+   "scheme": "RDC",
+   "chamber": "кольцевая",
+   "injector": "микросмесители",
+   "diesel": "пневматическая",
+   "cooling": "решётка",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 575,
+   "n_jet": 1150,
+   "d_jet_mm": 0.31111,
+   "d_air_mm": 4.12331,
+   "a_pz": 0.320789,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.123396,
+   "tau_bo_ms": 7.88717,
+   "dp_inj": 0.118294,
+   "dp_total": 0.00210879,
+   "NOx": [
+    400.265,
+    62.5747,
+    2.02392
+   ],
+   "CO": [
+    28.0254,
+    0.314042,
+    0.0621689
+   ],
+   "margin_lbo": [
+    1.29995,
+    0.822642,
+    0.62985
+   ],
+   "NOx_diesel": [
+    568.7,
+    11.2946
+   ],
+   "CO_diesel": [
+    114.868,
+    3.91799
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0129287,
+   "T_wall_K": 1002.84,
+   "parts": 6,
+   "swap_h": 12.5,
+   "mass_kg": 53.4992,
+   "plugplay": 3.3,
+   "service": 3.57201,
+   "make_score": 7.42314,
+   "D_env": 0.812161,
+   "L_mod": 0.454091,
+   "V_L": 87.5576,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 244,
+   "score": 1.43062e-11,
+   "penalty": 2.11902e-11,
+   "scheme": "TVC",
+   "chamber": "противоточная",
+   "injector": "микросмесители",
+   "diesel": "пневматическая",
+   "cooling": "отверстия",
+   "make": "печатный картридж",
+   "passive": "струи",
+   "n_el": 2073,
+   "n_jet": 2073,
+   "d_jet_mm": 0.301028,
+   "d_air_mm": 3.50764,
+   "a_pz": 0.519367,
+   "a_aux": 0.12401,
+   "k_pass": 1.11529,
+   "tau_pz_ms": 0.79479,
+   "tau_bo_ms": 2.56685,
+   "dp_inj": 0.045555,
+   "dp_total": 0.0647577,
+   "NOx": [
+    101.567,
+    13.7775,
+    1.57682
+   ],
+   "CO": [
+    1.76946,
+    40.9873,
+    2922.02
+   ],
+   "margin_lbo": [
+    1.53993,
+    1.24094,
+    0.333333
+   ],
+   "NOx_diesel": [
+    17.79,
+    14.9783
+   ],
+   "CO_diesel": [
+    0.408508,
+    1562.9
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0150571,
+   "T_wall_K": 741.063,
+   "parts": 4,
+   "swap_h": 6.0,
+   "mass_kg": 32.3462,
+   "plugplay": 9.5,
+   "service": 4.74286,
+   "make_score": 7.79887,
+   "D_env": 1.04842,
+   "L_mod": 0.305233,
+   "V_L": 69.669,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "diesel_dry",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 10,
+   "score": 1.36197e-11,
+   "penalty": 1.98677e-11,
+   "scheme": "LPP",
+   "chamber": "кольцевая",
+   "injector": "микросмесители",
+   "diesel": "пневматическая",
+   "cooling": "отверстия",
+   "make": "печатный картридж",
+   "passive": "гидравлика",
+   "n_el": 325,
+   "n_jet": 650,
+   "d_jet_mm": 0.689221,
+   "d_air_mm": 7.30448,
+   "a_pz": 0.368938,
+   "a_aux": 0.130924,
+   "k_pass": 1.28052,
+   "tau_pz_ms": 0.833549,
+   "tau_bo_ms": 2.59129,
+   "dp_inj": 0.049731,
+   "dp_total": 0.0623129,
+   "NOx": [
+    70.487,
+    2.92776,
+    2.56661
+   ],
+   "CO": [
+    50.4053,
+    1.59338,
+    1103.72
+   ],
+   "margin_lbo": [
+    33.3762,
+    1.24094,
+    0.1
+   ],
+   "NOx_diesel": [
+    72.9187,
+    29.5493
+   ],
+   "CO_diesel": [
+    91.6813,
+    1.11378
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.0946669,
+   "T_wall_K": 795.453,
+   "parts": 4,
+   "swap_h": 12.0,
+   "mass_kg": 16.0084,
+   "plugplay": 9.5,
+   "service": 3.6,
+   "make_score": 9.04944,
+   "D_env": 0.744506,
+   "L_mod": 0.320783,
+   "V_L": 24.6184,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "diesel_dry",
+    "exit_uniformity",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 276,
+   "score": 1.12454e-11,
+   "penalty": 1.67887e-11,
+   "scheme": "TVC",
+   "chamber": "противоточная",
+   "injector": "закрутка",
+   "diesel": "пневматическая",
+   "cooling": "решётка",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 5,
+   "n_jet": 35,
+   "d_jet_mm": 2.28898,
+   "d_air_mm": 62.4863,
+   "a_pz": 0.336304,
+   "a_aux": 0.052232,
+   "k_pass": 0.861052,
+   "tau_pz_ms": 1.54255,
+   "tau_bo_ms": 4.64233,
+   "dp_inj": 0.032601,
+   "dp_total": 0.0666174,
+   "NOx": [
+    72.6133,
+    0.899519,
+    0.145548
+   ],
+   "CO": [
+    21.0774,
+    0.432981,
+    3687.35
+   ],
+   "margin_lbo": [
+    48.6968,
+    1.62531,
+    0.1
+   ],
+   "NOx_diesel": [
+    371.032,
+    1273.19
+   ],
+   "CO_diesel": [
+    34.7485,
+    4580.84
+   ],
+   "H2_vol_max": 0.0,
+   "PF": 0.0468925,
+   "T_wall_K": 888.683,
+   "parts": 4,
+   "swap_h": 6.5,
+   "mass_kg": 50.1107,
+   "plugplay": 10.0,
+   "service": 4.45626,
+   "make_score": 8.29826,
+   "D_env": 1.02904,
+   "L_mod": 0.684002,
+   "V_L": 58.0991,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "diesel_dry",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 156,
+   "score": 1.68664e-12,
+   "penalty": 2.6863e-12,
+   "scheme": "CAT",
+   "chamber": "кольцевая",
+   "injector": "закрутка",
+   "diesel": "испарительная",
+   "cooling": "отверстия",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 13,
+   "n_jet": 260,
+   "d_jet_mm": 0.99926,
+   "d_air_mm": 59.3543,
+   "a_pz": 0.658945,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 2.8311,
+   "tau_bo_ms": 3.6827,
+   "dp_inj": 0.022743,
+   "dp_total": 0.034194,
+   "NOx": [
+    0.166009,
+    0.236116,
+    0.310155
+   ],
+   "CO": [
+    564.535,
+    2368.1,
+    322.001
+   ],
+   "margin_lbo": [
+    1.41176,
+    1.2,
+    1000.0
+   ],
+   "NOx_diesel": [
+    234.179,
+    222.878
+   ],
+   "CO_diesel": [
+    0.132921,
+    2347.09
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0245266,
+   "T_wall_K": 738.578,
+   "parts": 7,
+   "swap_h": 12.0,
+   "mass_kg": 31.4054,
+   "plugplay": 5.8,
+   "service": 3.6,
+   "make_score": 8.29891,
+   "D_env": 0.775865,
+   "L_mod": 0.859636,
+   "V_L": 91.2524,
+   "hard_ok": false,
+   "hard_fail": [
+    "co_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "wall_life"
+   ]
+  },
+  {
+   "idx": 280,
+   "score": 1.67765e-12,
+   "penalty": 2.6863e-12,
+   "scheme": "CAT",
+   "chamber": "кольцевая",
+   "injector": "струи",
+   "diesel": "испарительная",
+   "cooling": "плёночное",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 41,
+   "n_jet": 82,
+   "d_jet_mm": 1.57634,
+   "d_air_mm": 27.426,
+   "a_pz": 0.5639,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 1.03542,
+   "tau_bo_ms": 3.61849,
+   "dp_inj": 0.036731,
+   "dp_total": 0.0479561,
+   "NOx": [
+    0.325037,
+    0.20501,
+    0.270073
+   ],
+   "CO": [
+    637.506,
+    4962.81,
+    982.809
+   ],
+   "margin_lbo": [
+    1.33333,
+    1.33333,
+    1000.0
+   ],
+   "NOx_diesel": [
+    101.466,
+    92.4172
+   ],
+   "CO_diesel": [
+    0.583443,
+    1094.76
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0277122,
+   "T_wall_K": 933.377,
+   "parts": 6,
+   "swap_h": 12.0,
+   "mass_kg": 27.9911,
+   "plugplay": 5.73695,
+   "service": 3.6,
+   "make_score": 8.29902,
+   "D_env": 0.816062,
+   "L_mod": 0.482418,
+   "V_L": 75.4722,
+   "hard_ok": false,
+   "hard_fail": [
+    "co_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "wall_life"
+   ]
+  },
+  {
+   "idx": 35,
+   "score": 1.6712e-12,
+   "penalty": 2.6863e-12,
+   "scheme": "CAT",
+   "chamber": "выносная",
+   "injector": "закрутка",
+   "diesel": "испарительная",
+   "cooling": "отверстия",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 14,
+   "n_jet": 168,
+   "d_jet_mm": 0.903312,
+   "d_air_mm": 46.8758,
+   "a_pz": 0.637206,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 1.75558,
+   "tau_bo_ms": 3.82114,
+   "dp_inj": 0.047136,
+   "dp_total": 0.0838739,
+   "NOx": [
+    0.19414,
+    0.22909,
+    0.300115
+   ],
+   "CO": [
+    716.024,
+    3111.44,
+    333.103
+   ],
+   "margin_lbo": [
+    1.41176,
+    1.33333,
+    1000.0
+   ],
+   "NOx_diesel": [
+    156.777,
+    143.219
+   ],
+   "CO_diesel": [
+    0.286399,
+    2380.13
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0643104,
+   "T_wall_K": 816.763,
+   "parts": 6,
+   "swap_h": 0.8,
+   "mass_kg": 14.8232,
+   "plugplay": 3.67158,
+   "service": 10.0,
+   "make_score": 8.29948,
+   "D_env": 0.373228,
+   "L_mod": 1.49261,
+   "V_L": 53.2598,
+   "hard_ok": false,
+   "hard_fail": [
+    "co_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "wall_life"
+   ]
+  },
+  {
+   "idx": 295,
+   "score": 1.66862e-12,
+   "penalty": 2.6863e-12,
+   "scheme": "CAT",
+   "chamber": "выносная",
+   "injector": "закрутка",
+   "diesel": "испарительная",
+   "cooling": "решётка",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 2,
+   "n_jet": 30,
+   "d_jet_mm": 3.88022,
+   "d_air_mm": 149.8,
+   "a_pz": 0.702264,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.668137,
+   "tau_bo_ms": 9.32808,
+   "dp_inj": 0.026899,
+   "dp_total": 0.0748763,
+   "NOx": [
+    0.168502,
+    0.243737,
+    0.330593
+   ],
+   "CO": [
+    6.778,
+    1570.92,
+    342.365
+   ],
+   "margin_lbo": [
+    3.42857,
+    2.4,
+    1000.0
+   ],
+   "NOx_diesel": [
+    399.97,
+    400.671
+   ],
+   "CO_diesel": [
+    0.0831138,
+    2211.03
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.042225,
+   "T_wall_K": 820.412,
+   "parts": 7,
+   "swap_h": 0.8,
+   "mass_kg": 44.8614,
+   "plugplay": 5.425,
+   "service": 10.0,
+   "make_score": 6.79844,
+   "D_env": 0.462933,
+   "L_mod": 2.24052,
+   "V_L": 110.655,
+   "hard_ok": false,
+   "hard_fail": [
+    "co_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "wall_life"
+   ]
+  },
+  {
+   "idx": 56,
+   "score": 1.60462e-12,
+   "penalty": 2.6863e-12,
+   "scheme": "CAT",
+   "chamber": "кольцевая",
+   "injector": "струи",
+   "diesel": "испарительная",
+   "cooling": "решётка",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 136,
+   "n_jet": 952,
+   "d_jet_mm": 0.507291,
+   "d_air_mm": 15.1127,
+   "a_pz": 0.587758,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.554083,
+   "tau_bo_ms": 5.61557,
+   "dp_inj": 0.039337,
+   "dp_total": 0.0556595,
+   "NOx": [
+    0.242013,
+    0.208706,
+    0.277877
+   ],
+   "CO": [
+    1.34572,
+    4177.25,
+    434.24
+   ],
+   "margin_lbo": [
+    2.0,
+    2.0,
+    1000.0
+   ],
+   "NOx_diesel": [
+    53.8825,
+    49.1603
+   ],
+   "CO_diesel": [
+    0.688887,
+    1158.32
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0508396,
+   "T_wall_K": 854.602,
+   "parts": 7,
+   "swap_h": 12.0,
+   "mass_kg": 38.0499,
+   "plugplay": 5.8,
+   "service": 3.6,
+   "make_score": 8.29867,
+   "D_env": 0.77641,
+   "L_mod": 0.396102,
+   "V_L": 48.0099,
+   "hard_ok": false,
+   "hard_fail": [
+    "co_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "wall_life"
+   ]
+  },
+  {
+   "idx": 104,
+   "score": 1.60217e-12,
+   "penalty": 2.6863e-12,
+   "scheme": "CAT",
+   "chamber": "кольцевая",
+   "injector": "микросмесители",
+   "diesel": "испарительная",
+   "cooling": "плёночное",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 1030,
+   "n_jet": 1030,
+   "d_jet_mm": 0.345776,
+   "d_air_mm": 5.6106,
+   "a_pz": 0.462561,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 2.84958,
+   "tau_bo_ms": 15.3169,
+   "dp_inj": 0.02236,
+   "dp_total": 0.0335304,
+   "NOx": [
+    2.7414,
+    0.257762,
+    0.288141
+   ],
+   "CO": [
+    89.7235,
+    111.506,
+    1112.4
+   ],
+   "margin_lbo": [
+    4.8,
+    4.8,
+    4.8
+   ],
+   "NOx_diesel": [
+    41.7436,
+    30.5868
+   ],
+   "CO_diesel": [
+    9.50624,
+    0.100686
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.732661,
+   "T_wall_K": 1031.38,
+   "parts": 6,
+   "swap_h": 12.0,
+   "mass_kg": 31.4592,
+   "plugplay": 3.32276,
+   "service": 3.6,
+   "make_score": 7.7989,
+   "D_env": 0.799969,
+   "L_mod": 0.490824,
+   "V_L": 94.4309,
+   "hard_ok": false,
+   "hard_fail": [
+    "co_gas",
+    "load_range",
+    "fuel_valves",
+    "fuel_changeover",
+    "exit_uniformity",
+    "wall_life"
+   ]
+  },
+  {
+   "idx": 163,
+   "score": 1.573e-12,
+   "penalty": 2.6863e-12,
+   "scheme": "CAT",
+   "chamber": "выносная",
+   "injector": "струи",
+   "diesel": "испарительная",
+   "cooling": "керамика",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 246,
+   "n_jet": 984,
+   "d_jet_mm": 0.645803,
+   "d_air_mm": 12.2866,
+   "a_pz": 0.776215,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 1.79763,
+   "tau_bo_ms": 9.16327,
+   "dp_inj": 0.047997,
+   "dp_total": 0.0773808,
+   "NOx": [
+    0.162303,
+    0.266221,
+    0.365508
+   ],
+   "CO": [
+    130.604,
+    440.199,
+    381.896
+   ],
+   "margin_lbo": [
+    3.42857,
+    1000.0,
+    1000.0
+   ],
+   "NOx_diesel": [
+    38.2089,
+    35.4226
+   ],
+   "CO_diesel": [
+    0.55832,
+    2108.99
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0185589,
+   "T_wall_K": 911.873,
+   "parts": 9,
+   "swap_h": 0.8,
+   "mass_kg": 11.495,
+   "plugplay": 5.425,
+   "service": 9.0,
+   "make_score": 7.2996,
+   "D_env": 0.439449,
+   "L_mod": 1.45374,
+   "V_L": 115.525,
+   "hard_ok": false,
+   "hard_fail": [
+    "co_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "wall_life"
+   ]
+  },
+  {
+   "idx": 199,
+   "score": 1.48651e-12,
+   "penalty": 2.08182e-12,
+   "scheme": "CAT",
+   "chamber": "выносная",
+   "injector": "микросмесители",
+   "diesel": "испарительная",
+   "cooling": "отверстия",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 1959,
+   "n_jet": 3918,
+   "d_jet_mm": 0.324055,
+   "d_air_mm": 5.25447,
+   "a_pz": 0.656812,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 2.74294,
+   "tau_bo_ms": 16.8696,
+   "dp_inj": 0.016201,
+   "dp_total": 0.0449328,
+   "NOx": [
+    0.763799,
+    0.232617,
+    0.310632
+   ],
+   "CO": [
+    651.357,
+    1146.93,
+    834.482
+   ],
+   "margin_lbo": [
+    6.0,
+    4.8,
+    1000.0
+   ],
+   "NOx_diesel": [
+    39.3462,
+    33.9591
+   ],
+   "CO_diesel": [
+    0.175254,
+    1257.21
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.0947067,
+   "T_wall_K": 793.917,
+   "parts": 6,
+   "swap_h": 0.8,
+   "mass_kg": 26.8255,
+   "plugplay": 5.425,
+   "service": 10.0,
+   "make_score": 7.79907,
+   "D_env": 0.487836,
+   "L_mod": 1.39796,
+   "V_L": 135.171,
+   "hard_ok": false,
+   "hard_fail": [
+    "co_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "exit_uniformity",
+    "wall_life"
+   ]
+  },
+  {
+   "idx": 3,
+   "score": 1.45954e-12,
+   "penalty": 2.6863e-12,
+   "scheme": "CAT",
+   "chamber": "выносная",
+   "injector": "струи",
+   "diesel": "испарительная",
+   "cooling": "отверстия",
+   "make": "литьё",
+   "passive": "нет",
+   "n_el": 27,
+   "n_jet": 216,
+   "d_jet_mm": 0.865863,
+   "d_air_mm": 41.1008,
+   "a_pz": 0.850463,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.737387,
+   "tau_bo_ms": 4.34756,
+   "dp_inj": 0.038197,
+   "dp_total": 0.0728492,
+   "NOx": [
+    0.165744,
+    0.290704,
+    0.400583
+   ],
+   "CO": [
+    4058.28,
+    271.852,
+    422.63
+   ],
+   "margin_lbo": [
+    1.6,
+    1000.0,
+    1000.0
+   ],
+   "NOx_diesel": [
+    82.5901,
+    85.2618
+   ],
+   "CO_diesel": [
+    115.472,
+    1980.93
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0186499,
+   "T_wall_K": 817.932,
+   "parts": 12,
+   "swap_h": 0.8,
+   "mass_kg": 16.6333,
+   "plugplay": 4.56986,
+   "service": 8.6,
+   "make_score": 7.42857,
+   "D_env": 0.347747,
+   "L_mod": 1.81968,
+   "V_L": 63.1585,
+   "hard_ok": false,
+   "hard_fail": [
+    "co_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "wall_life"
+   ]
+  },
+  {
+   "idx": 7,
+   "score": 1.43792e-12,
+   "penalty": 2.6863e-12,
+   "scheme": "CAT",
+   "chamber": "выносная",
+   "injector": "закрутка",
+   "diesel": "испарительная",
+   "cooling": "плёночное",
+   "make": "литьё",
+   "passive": "нет",
+   "n_el": 6,
+   "n_jet": 78,
+   "d_jet_mm": 1.69294,
+   "d_air_mm": 81.3372,
+   "a_pz": 0.676917,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.873924,
+   "tau_bo_ms": 7.85704,
+   "dp_inj": 0.031949,
+   "dp_total": 0.0633099,
+   "NOx": [
+    0.169919,
+    0.236943,
+    0.318634
+   ],
+   "CO": [
+    1.58653,
+    2152.81,
+    329.747
+   ],
+   "margin_lbo": [
+    3.0,
+    2.4,
+    1000.0
+   ],
+   "NOx_diesel": [
+    236.96,
+    230.613
+   ],
+   "CO_diesel": [
+    0.177252,
+    2185.79
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0640597,
+   "T_wall_K": 943.366,
+   "parts": 17,
+   "swap_h": 0.8,
+   "mass_kg": 16.6062,
+   "plugplay": 5.425,
+   "service": 8.6,
+   "make_score": 7.42857,
+   "D_env": 0.412017,
+   "L_mod": 1.66796,
+   "V_L": 65.8915,
+   "hard_ok": false,
+   "hard_fail": [
+    "co_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "wall_life"
+   ]
+  },
+  {
+   "idx": 264,
+   "score": 1.00845e-12,
+   "penalty": 2.6863e-12,
+   "scheme": "CAT",
+   "chamber": "трубчатые",
+   "injector": "закрутка",
+   "diesel": "испарительная",
+   "cooling": "отверстия",
+   "make": "литьё",
+   "passive": "нет",
+   "n_el": 7,
+   "n_jet": 84,
+   "d_jet_mm": 1.36005,
+   "d_air_mm": 67.6526,
+   "a_pz": 0.532478,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.658608,
+   "tau_bo_ms": 3.91611,
+   "dp_inj": 0.030347,
+   "dp_total": 0.0535044,
+   "NOx": [
+    0.32095,
+    0.193113,
+    0.257513
+   ],
+   "CO": [
+    1.56097,
+    6323.9,
+    1006.32
+   ],
+   "margin_lbo": [
+    1.41176,
+    1.5,
+    1.0
+   ],
+   "NOx_diesel": [
+    208.597,
+    199.25
+   ],
+   "CO_diesel": [
+    2.07857,
+    436.219
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.058091,
+   "T_wall_K": 834.862,
+   "parts": 56,
+   "swap_h": 4.6,
+   "mass_kg": 18.2537,
+   "plugplay": 4.52088,
+   "service": 5.54286,
+   "make_score": 7.42857,
+   "D_env": 0.894431,
+   "L_mod": 0.991116,
+   "V_L": 37.1839,
+   "hard_ok": false,
+   "hard_fail": [
+    "co_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "wall_life"
+   ]
+  },
+  {
+   "idx": 135,
+   "score": 1.00688e-12,
+   "penalty": 2.6863e-12,
+   "scheme": "CAT",
+   "chamber": "трубчатые",
+   "injector": "струи",
+   "diesel": "испарительная",
+   "cooling": "решётка",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 93,
+   "n_jet": 372,
+   "d_jet_mm": 0.632631,
+   "d_air_mm": 19.9707,
+   "a_pz": 0.595873,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.841614,
+   "tau_bo_ms": 5.82573,
+   "dp_inj": 0.028354,
+   "dp_total": 0.0596967,
+   "NOx": [
+    0.210669,
+    0.211446,
+    0.280398
+   ],
+   "CO": [
+    0.231954,
+    4388.37,
+    283.911
+   ],
+   "margin_lbo": [
+    2.18182,
+    2.18182,
+    1000.0
+   ],
+   "NOx_diesel": [
+    51.8902,
+    52.0985
+   ],
+   "CO_diesel": [
+    0.436144,
+    939.13
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0329069,
+   "T_wall_K": 810.759,
+   "parts": 39,
+   "swap_h": 4.6,
+   "mass_kg": 48.6811,
+   "plugplay": 4.3036,
+   "service": 5.54286,
+   "make_score": 8.2983,
+   "D_env": 0.954181,
+   "L_mod": 0.659032,
+   "V_L": 66.6674,
+   "hard_ok": false,
+   "hard_fail": [
+    "co_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "wall_life"
+   ]
+  },
+  {
+   "idx": 291,
+   "score": 1.00072e-12,
+   "penalty": 2.6863e-12,
+   "scheme": "CAT",
+   "chamber": "трубчатые",
+   "injector": "струи",
+   "diesel": "испарительная",
+   "cooling": "керамика",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 60,
+   "n_jet": 60,
+   "d_jet_mm": 1.64803,
+   "d_air_mm": 28.8253,
+   "a_pz": 0.867069,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.882559,
+   "tau_bo_ms": 4.98312,
+   "dp_inj": 0.033232,
+   "dp_total": 0.0537844,
+   "NOx": [
+    0.168381,
+    0.296395,
+    0.408431
+   ],
+   "CO": [
+    2851.82,
+    277.126,
+    430.446
+   ],
+   "margin_lbo": [
+    1.84615,
+    1000.0,
+    1000.0
+   ],
+   "NOx_diesel": [
+    69.954,
+    70.7868
+   ],
+   "CO_diesel": [
+    125.54,
+    2083.08
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0066118,
+   "T_wall_K": 870.796,
+   "parts": 51,
+   "swap_h": 4.6,
+   "mass_kg": 13.6696,
+   "plugplay": 4.7417,
+   "service": 5.20952,
+   "make_score": 7.29952,
+   "D_env": 0.905212,
+   "L_mod": 0.985786,
+   "V_L": 79.4535,
+   "hard_ok": false,
+   "hard_fail": [
+    "co_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "wall_life"
+   ]
+  },
+  {
+   "idx": 271,
+   "score": 5.07069e-13,
+   "penalty": 7.03299e-13,
+   "scheme": "RDC",
+   "chamber": "выносная",
+   "injector": "струи",
+   "diesel": "пневматическая",
+   "cooling": "отверстия",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 11,
+   "n_jet": 55,
+   "d_jet_mm": 1.93194,
+   "d_air_mm": 27.4294,
+   "a_pz": 0.286923,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.054319,
+   "tau_bo_ms": 5.12591,
+   "dp_inj": 0.132047,
+   "dp_total": 0.0178529,
+   "NOx": [
+    528.216,
+    3.0543,
+    0.0456901
+   ],
+   "CO": [
+    123.624,
+    1.18453,
+    0.118013
+   ],
+   "margin_lbo": [
+    1.45339,
+    0.91974,
+    0.704192
+   ],
+   "NOx_diesel": [
+    1048.49,
+    69.3371
+   ],
+   "CO_diesel": [
+    897.937,
+    15.1545
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.0379669,
+   "T_wall_K": 803.892,
+   "parts": 6,
+   "swap_h": 0.8,
+   "mass_kg": 9.53893,
+   "plugplay": 5.425,
+   "service": 10.0,
+   "make_score": 7.92467,
+   "D_env": 0.409895,
+   "L_mod": 1.48913,
+   "V_L": 27.2561,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 40,
+   "score": 3.50275e-13,
+   "penalty": 6.52971e-13,
+   "scheme": "RDC",
+   "chamber": "кольцевая",
+   "injector": "струи",
+   "diesel": "испарительная",
+   "cooling": "керамика",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 27,
+   "n_jet": 135,
+   "d_jet_mm": 0.995356,
+   "d_air_mm": 20.5362,
+   "a_pz": 0.294424,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.079324,
+   "tau_bo_ms": 5.97077,
+   "dp_inj": 0.073449,
+   "dp_total": -0.0745561,
+   "NOx": [
+    639.052,
+    3.06821,
+    0.0426836
+   ],
+   "CO": [
+    67.3589,
+    0.773341,
+    0.0846958
+   ],
+   "margin_lbo": [
+    1.41636,
+    0.896308,
+    0.686251
+   ],
+   "NOx_diesel": [
+    1089.64,
+    26.3113
+   ],
+   "CO_diesel": [
+    251.42,
+    10.0072
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.020687,
+   "T_wall_K": 1469.0,
+   "parts": 8,
+   "swap_h": 12.0,
+   "mass_kg": 14.6129,
+   "plugplay": 3.88712,
+   "service": 3.26667,
+   "make_score": 6.92449,
+   "D_env": 0.779711,
+   "L_mod": 0.744984,
+   "V_L": 72.897,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 159,
+   "score": 2.81783e-13,
+   "penalty": 3.94912e-13,
+   "scheme": "RDC",
+   "chamber": "выносная",
+   "injector": "микросмесители",
+   "diesel": "испарительная",
+   "cooling": "плёночное",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 1323,
+   "n_jet": 2646,
+   "d_jet_mm": 0.313272,
+   "d_air_mm": 3.0783,
+   "a_pz": 0.296406,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.156977,
+   "tau_bo_ms": 9.71563,
+   "dp_inj": 0.061412,
+   "dp_total": -0.0658672,
+   "NOx": [
+    1067.85,
+    9.10766,
+    0.146158
+   ],
+   "CO": [
+    67.6444,
+    0.748326,
+    0.0546726
+   ],
+   "margin_lbo": [
+    1.40689,
+    0.890314,
+    0.681662
+   ],
+   "NOx_diesel": [
+    1472.11,
+    9.88221
+   ],
+   "CO_diesel": [
+    318.051,
+    9.71995
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.0561935,
+   "T_wall_K": 1456.43,
+   "parts": 6,
+   "swap_h": 0.8,
+   "mass_kg": 17.9595,
+   "plugplay": 5.425,
+   "service": 10.0,
+   "make_score": 7.42437,
+   "D_env": 0.48256,
+   "L_mod": 1.25247,
+   "V_L": 73.7407,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "wall_life",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 69,
+   "score": 2.12228e-13,
+   "penalty": 3.05003e-13,
+   "scheme": "MM",
+   "chamber": "выносная",
+   "injector": "микросмесители",
+   "diesel": "испарительная",
+   "cooling": "отверстия",
+   "make": "печатный картридж",
+   "passive": "струи",
+   "n_el": 510,
+   "n_jet": 510,
+   "d_jet_mm": 0.544347,
+   "d_air_mm": 5.51025,
+   "a_pz": 0.355486,
+   "a_aux": 0.117596,
+   "k_pass": 0.627662,
+   "tau_pz_ms": 0.543466,
+   "tau_bo_ms": 5.84145,
+   "dp_inj": 0.057898,
+   "dp_total": 0.0948846,
+   "NOx": [
+    177.749,
+    191.971,
+    136.821
+   ],
+   "CO": [
+    70.4652,
+    17.2877,
+    6.72958
+   ],
+   "margin_lbo": [
+    21.6739,
+    7.36525,
+    3.27812
+   ],
+   "NOx_diesel": [
+    137.187,
+    16.5932
+   ],
+   "CO_diesel": [
+    125.56,
+    1.555
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.375168,
+   "T_wall_K": 803.887,
+   "parts": 4,
+   "swap_h": 0.8,
+   "mass_kg": 11.6303,
+   "plugplay": 7.44991,
+   "service": 10.0,
+   "make_score": 8.29959,
+   "D_env": 0.429034,
+   "L_mod": 1.083,
+   "V_L": 38.4176,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "diesel_dry",
+    "fuel_changeover",
+    "exit_uniformity"
+   ]
+  },
+  {
+   "idx": 223,
+   "score": 1.50355e-13,
+   "penalty": 2.36956e-13,
+   "scheme": "RDC",
+   "chamber": "выносная",
+   "injector": "струи",
+   "diesel": "пневматическая",
+   "cooling": "керамика",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 144,
+   "n_jet": 432,
+   "d_jet_mm": 0.572571,
+   "d_air_mm": 9.18978,
+   "a_pz": 0.259112,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 0.060033,
+   "tau_bo_ms": 3.20572,
+   "dp_inj": 0.049874,
+   "dp_total": -0.0783743,
+   "NOx": [
+    519.366,
+    94.3258,
+    5.02207
+   ],
+   "CO": [
+    613.036,
+    2.82098,
+    0.259364
+   ],
+   "margin_lbo": [
+    1.60939,
+    1.01846,
+    0.779774
+   ],
+   "NOx_diesel": [
+    1173.1,
+    42.8773
+   ],
+   "CO_diesel": [
+    1290.03,
+    39.8474
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.129525,
+   "T_wall_K": 1678.69,
+   "parts": 8,
+   "swap_h": 0.8,
+   "mass_kg": 6.4546,
+   "plugplay": 3.87648,
+   "service": 9.0,
+   "make_score": 6.92477,
+   "D_env": 0.48108,
+   "L_mod": 0.905685,
+   "V_L": 40.7843,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "exit_uniformity",
+    "wall_life",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 203,
+   "score": 1.28812e-13,
+   "penalty": 1.80695e-13,
+   "scheme": "TVC",
+   "chamber": "выносная",
+   "injector": "микросмесители",
+   "diesel": "пневматическая",
+   "cooling": "керамика",
+   "make": "печатный картридж",
+   "passive": "гидравлика",
+   "n_el": 1460,
+   "n_jet": 2920,
+   "d_jet_mm": 0.340603,
+   "d_air_mm": 3.75496,
+   "a_pz": 0.264083,
+   "a_aux": 0.077563,
+   "k_pass": 0.895013,
+   "tau_pz_ms": 0.450584,
+   "tau_bo_ms": 17.5389,
+   "dp_inj": 0.01808,
+   "dp_total": 0.0466558,
+   "NOx": [
+    441.897,
+    6.08136,
+    2.57586
+   ],
+   "CO": [
+    45.5151,
+    1.09597,
+    10789.0
+   ],
+   "margin_lbo": [
+    29.9614,
+    1.53993,
+    0.1
+   ],
+   "NOx_diesel": [
+    554.208,
+    25.5335
+   ],
+   "CO_diesel": [
+    69.0287,
+    1.98321
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.134677,
+   "T_wall_K": 1522.11,
+   "parts": 6,
+   "swap_h": 0.8,
+   "mass_kg": 12.8311,
+   "plugplay": 9.125,
+   "service": 9.0,
+   "make_score": 7.29955,
+   "D_env": 0.556757,
+   "L_mod": 1.29528,
+   "V_L": 127.669,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "diesel_dry",
+    "exit_uniformity",
+    "wall_life",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 44,
+   "score": 7.31329e-14,
+   "penalty": 1.07309e-13,
+   "scheme": "TVC",
+   "chamber": "противоточная",
+   "injector": "струи",
+   "diesel": "пневматическая",
+   "cooling": "решётка",
+   "make": "печатный картридж",
+   "passive": "гидравлика",
+   "n_el": 70,
+   "n_jet": 70,
+   "d_jet_mm": 1.75269,
+   "d_air_mm": 16.5812,
+   "a_pz": 0.341221,
+   "a_aux": 0.040673,
+   "k_pass": 1.01181,
+   "tau_pz_ms": 0.504134,
+   "tau_bo_ms": 10.4503,
+   "dp_inj": 0.034535,
+   "dp_total": 0.0606753,
+   "NOx": [
+    92.4419,
+    37.3487,
+    10.4453
+   ],
+   "CO": [
+    22.1746,
+    1814.96,
+    1456.05
+   ],
+   "margin_lbo": [
+    16.5482,
+    0.333333,
+    0.0333333
+   ],
+   "NOx_diesel": [
+    165.124,
+    79.4823
+   ],
+   "CO_diesel": [
+    36.115,
+    0.6196
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.031413,
+   "T_wall_K": 952.664,
+   "parts": 4,
+   "swap_h": 6.5,
+   "mass_kg": 63.8229,
+   "plugplay": 10.0,
+   "service": 4.34656,
+   "make_score": 8.29778,
+   "D_env": 1.03649,
+   "L_mod": 0.615271,
+   "V_L": 87.2498,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "diesel_dry",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 285,
+   "score": 4.83486e-14,
+   "penalty": 7.03204e-14,
+   "scheme": "LPP",
+   "chamber": "выносная",
+   "injector": "закрутка",
+   "diesel": "испарительная",
+   "cooling": "решётка",
+   "make": "гибрид",
+   "passive": "струи",
+   "n_el": 1,
+   "n_jet": 13,
+   "d_jet_mm": 3.03266,
+   "d_air_mm": 183.434,
+   "a_pz": 0.67646,
+   "a_aux": 0.124087,
+   "k_pass": 0.258036,
+   "tau_pz_ms": 2.59975,
+   "tau_bo_ms": 2.46022,
+   "dp_inj": 0.044403,
+   "dp_total": 0.0882924,
+   "NOx": [
+    0.213172,
+    1.72103e-07,
+    3.51343e-08
+   ],
+   "CO": [
+    67.852,
+    7.02233e-05,
+    8.89514e-06
+   ],
+   "margin_lbo": [
+    1.17574,
+    0.0333333,
+    0.0
+   ],
+   "NOx_diesel": [
+    377.296,
+    377.222
+   ],
+   "CO_diesel": [
+    0.782342,
+    2251.03
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.423879,
+   "T_wall_K": 936.678,
+   "parts": 5,
+   "swap_h": 0.8,
+   "mass_kg": 22.0727,
+   "plugplay": 6.125,
+   "service": 10.0,
+   "make_score": 8.29923,
+   "D_env": 0.372953,
+   "L_mod": 2.03188,
+   "V_L": 38.3019,
+   "hard_ok": false,
+   "hard_fail": [
+    "co_gas",
+    "load_range",
+    "diesel_dry",
+    "fuel_changeover",
+    "exit_uniformity",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 83,
+   "score": 3.37124e-14,
+   "penalty": 8.39294e-14,
+   "scheme": "TVC",
+   "chamber": "трубчатые",
+   "injector": "закрутка",
+   "diesel": "пневматическая",
+   "cooling": "керамика",
+   "make": "литьё",
+   "passive": "нет",
+   "n_el": 7,
+   "n_jet": 77,
+   "d_jet_mm": 0.819454,
+   "d_air_mm": 70.3729,
+   "a_pz": 0.483333,
+   "a_aux": 0.125181,
+   "k_pass": 1.32708,
+   "tau_pz_ms": 1.71047,
+   "tau_bo_ms": 11.9522,
+   "dp_inj": 0.021356,
+   "dp_total": 0.0410388,
+   "NOx": [
+    72.1229,
+    44.3243,
+    4.67959
+   ],
+   "CO": [
+    0.230998,
+    7269.74,
+    2181.06
+   ],
+   "margin_lbo": [
+    6.61169,
+    0.333333,
+    0.0333333
+   ],
+   "NOx_diesel": [
+    1422.0,
+    1397.96
+   ],
+   "CO_diesel": [
+    3193.89,
+    4597.71
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0277309,
+   "T_wall_K": 1553.13,
+   "parts": 62,
+   "swap_h": 4.6,
+   "mass_kg": 16.5942,
+   "plugplay": 7.63469,
+   "service": 5.20952,
+   "make_score": 6.92857,
+   "D_env": 0.959244,
+   "L_mod": 0.944859,
+   "V_L": 95.5657,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "diesel_dry",
+    "wall_life",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 235,
+   "score": 2.83364e-14,
+   "penalty": 7.03204e-14,
+   "scheme": "TVC",
+   "chamber": "трубчатые",
+   "injector": "струи",
+   "diesel": "испарительная",
+   "cooling": "керамика",
+   "make": "гибрид",
+   "passive": "гидравлика",
+   "n_el": 10,
+   "n_jet": 20,
+   "d_jet_mm": 2.61372,
+   "d_air_mm": 52.6361,
+   "a_pz": 0.430312,
+   "a_aux": 0.04756,
+   "k_pass": 1.01737,
+   "tau_pz_ms": 1.38156,
+   "tau_bo_ms": 15.1075,
+   "dp_inj": 0.026502,
+   "dp_total": 0.0459221,
+   "NOx": [
+    67.409,
+    64.7755,
+    14.5529
+   ],
+   "CO": [
+    1.79505,
+    1471.11,
+    985.301
+   ],
+   "margin_lbo": [
+    10.1815,
+    0.333333,
+    0.0333333
+   ],
+   "NOx_diesel": [
+    173.408,
+    162.898
+   ],
+   "CO_diesel": [
+    3.43133,
+    0.20823
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0260531,
+   "T_wall_K": 1079.25,
+   "parts": 45,
+   "swap_h": 4.6,
+   "mass_kg": 20.4147,
+   "plugplay": 8.0929,
+   "service": 5.20952,
+   "make_score": 7.29929,
+   "D_env": 0.984457,
+   "L_mod": 1.00539,
+   "V_L": 127.929,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "diesel_dry",
+    "fuel_changeover",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 107,
+   "score": 2.00529e-14,
+   "penalty": 2.71973e-14,
+   "scheme": "TVC",
+   "chamber": "выносная",
+   "injector": "закрутка",
+   "diesel": "испарительная",
+   "cooling": "отверстия",
+   "make": "печатный картридж",
+   "passive": "гидравлика",
+   "n_el": 2,
+   "n_jet": 10,
+   "d_jet_mm": 2.91806,
+   "d_air_mm": 108.37,
+   "a_pz": 0.359427,
+   "a_aux": 0.140253,
+   "k_pass": 0.815659,
+   "tau_pz_ms": 1.41447,
+   "tau_bo_ms": 2.26947,
+   "dp_inj": 0.025726,
+   "dp_total": 0.0574205,
+   "NOx": [
+    65.3883,
+    3.85887,
+    1.39831
+   ],
+   "CO": [
+    1.59137,
+    7447.73,
+    1987.07
+   ],
+   "margin_lbo": [
+    16.5482,
+    0.333333,
+    0.1
+   ],
+   "NOx_diesel": [
+    396.699,
+    364.495
+   ],
+   "CO_diesel": [
+    3.26258,
+    196.061
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.123898,
+   "T_wall_K": 777.649,
+   "parts": 4,
+   "swap_h": 0.8,
+   "mass_kg": 12.9677,
+   "plugplay": 7.61208,
+   "service": 10.0,
+   "make_score": 8.29955,
+   "D_env": 0.465521,
+   "L_mod": 1.41817,
+   "V_L": 45.3795,
+   "hard_ok": false,
+   "hard_fail": [
+    "nox_gas",
+    "co_gas",
+    "load_range",
+    "diesel_dry",
+    "fuel_changeover",
+    "exit_uniformity",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 8,
+   "score": 3.908e-15,
+   "penalty": 6.65866e-15,
+   "scheme": "CAT",
+   "chamber": "кольцевая",
+   "injector": "микросмесители",
+   "diesel": "испарительная",
+   "cooling": "керамика",
+   "make": "гибрид",
+   "passive": "нет",
+   "n_el": 3876,
+   "n_jet": 3876,
+   "d_jet_mm": 0.314002,
+   "d_air_mm": 3.82629,
+   "a_pz": 0.748501,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 1.98527,
+   "tau_bo_ms": 5.10528,
+   "dp_inj": 0.019114,
+   "dp_total": 0.0306559,
+   "NOx": [
+    0.252656,
+    0.259803,
+    0.354284
+   ],
+   "CO": [
+    672.792,
+    1662.58,
+    605.191
+   ],
+   "margin_lbo": [
+    1.84615,
+    0.0,
+    1000.0
+   ],
+   "NOx_diesel": [
+    25.5381,
+    22.3319
+   ],
+   "CO_diesel": [
+    1.17664,
+    2036.33
+   ],
+   "H2_vol_max": 1.0,
+   "PF": 0.0294116,
+   "T_wall_K": 851.547,
+   "parts": 10,
+   "swap_h": 12.0,
+   "mass_kg": 16.0301,
+   "plugplay": 5.8,
+   "service": 3.26667,
+   "make_score": 7.29944,
+   "D_env": 0.761781,
+   "L_mod": 0.528926,
+   "V_L": 87.47,
+   "hard_ok": false,
+   "hard_fail": [
+    "co_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "wall_life",
+    "combustion_dynamics"
+   ]
+  },
+  {
+   "idx": 39,
+   "score": 2.87101e-15,
+   "penalty": 6.65866e-15,
+   "scheme": "CAT",
+   "chamber": "трубчатые",
+   "injector": "струи",
+   "diesel": "испарительная",
+   "cooling": "плёночное",
+   "make": "печатный картридж",
+   "passive": "нет",
+   "n_el": 10,
+   "n_jet": 70,
+   "d_jet_mm": 1.84018,
+   "d_air_mm": 56.8076,
+   "a_pz": 0.465336,
+   "a_aux": 0.0,
+   "k_pass": 0.0,
+   "tau_pz_ms": 2.0732,
+   "tau_bo_ms": 6.90195,
+   "dp_inj": 0.022843,
+   "dp_total": 0.0431218,
+   "NOx": [
+    1.00258,
+    0.184718,
+    0.225496
+   ],
+   "CO": [
+    493.137,
+    609.784,
+    2977.33
+   ],
+   "margin_lbo": [
+    2.4,
+    2.4,
+    2.4
+   ],
+   "NOx_diesel": [
+    272.906,
+    243.671
+   ],
+   "CO_diesel": [
+    8.49433,
+    2.16519
+   ],
+   "H2_vol_max": 0.5,
+   "PF": 0.38226,
+   "T_wall_K": 967.827,
+   "parts": 39,
+   "swap_h": 4.6,
+   "mass_kg": 23.4263,
+   "plugplay": 5.575,
+   "service": 5.54286,
+   "make_score": 8.29918,
+   "D_env": 0.925287,
+   "L_mod": 0.747812,
+   "V_L": 55.479,
+   "hard_ok": false,
+   "hard_fail": [
+    "co_gas",
+    "load_range",
+    "fuel_valves",
+    "diesel_dry",
+    "fuel_changeover",
+    "exit_uniformity",
+    "wall_life"
+   ]
+  }
+ ],
+ "pareto_objectives": [
+  [
+   "parts",
+   "min"
+  ],
+  [
+   "plugplay",
+   "max"
+  ],
+  [
+   "service",
+   "max"
+  ],
+  [
+   "dp",
+   "min"
+  ],
+  [
+   "V_env",
+   "min"
+  ],
+  [
+   "NOx",
+   "min"
+  ]
+ ],
+ "sensitivity": {
+  "one_at_a_time": [
+   {
+    "weight": "parts",
+    "factor": 0.5,
+    "top10_overlap": 1.0,
+    "best_idx": 233,
+    "base_best_rank": 1
+   },
+   {
+    "weight": "parts",
+    "factor": 1.5,
+    "top10_overlap": 1.0,
+    "best_idx": 233,
+    "base_best_rank": 1
+   },
+   {
+    "weight": "plugplay",
+    "factor": 0.5,
+    "top10_overlap": 1.0,
+    "best_idx": 233,
+    "base_best_rank": 1
+   },
+   {
+    "weight": "plugplay",
+    "factor": 1.5,
+    "top10_overlap": 1.0,
+    "best_idx": 233,
+    "base_best_rank": 1
+   },
+   {
+    "weight": "service",
+    "factor": 0.5,
+    "top10_overlap": 1.0,
+    "best_idx": 233,
+    "base_best_rank": 1
+   },
+   {
+    "weight": "service",
+    "factor": 1.5,
+    "top10_overlap": 1.0,
+    "best_idx": 233,
+    "base_best_rank": 1
+   },
+   {
+    "weight": "eff",
+    "factor": 0.5,
+    "top10_overlap": 1.0,
+    "best_idx": 233,
+    "base_best_rank": 1
+   },
+   {
+    "weight": "eff",
+    "factor": 1.5,
+    "top10_overlap": 1.0,
+    "best_idx": 233,
+    "base_best_rank": 1
+   },
+   {
+    "weight": "size",
+    "factor": 0.5,
+    "top10_overlap": 1.0,
+    "best_idx": 233,
+    "base_best_rank": 1
+   },
+   {
+    "weight": "size",
+    "factor": 1.5,
+    "top10_overlap": 1.0,
+    "best_idx": 233,
+    "base_best_rank": 1
+   },
+   {
+    "weight": "make",
+    "factor": 0.5,
+    "top10_overlap": 1.0,
+    "best_idx": 233,
+    "base_best_rank": 1
+   },
+   {
+    "weight": "make",
+    "factor": 1.5,
+    "top10_overlap": 1.0,
+    "best_idx": 233,
+    "base_best_rank": 1
+   },
+   {
+    "weight": "nox",
+    "factor": 0.5,
+    "top10_overlap": 1.0,
+    "best_idx": 233,
+    "base_best_rank": 1
+   },
+   {
+    "weight": "nox",
+    "factor": 1.5,
+    "top10_overlap": 1.0,
+    "best_idx": 233,
+    "base_best_rank": 1
+   }
+  ],
+  "dirichlet_top10_freq": [
+   {
+    "idx": 233,
+    "freq": 1.0
+   },
+   {
+    "idx": 21,
+    "freq": 1.0
+   },
+   {
+    "idx": 73,
+    "freq": 1.0
+   },
+   {
+    "idx": 246,
+    "freq": 1.0
+   },
+   {
+    "idx": 84,
+    "freq": 1.0
+   },
+   {
+    "idx": 94,
+    "freq": 1.0
+   },
+   {
+    "idx": 217,
+    "freq": 1.0
+   },
+   {
+    "idx": 108,
+    "freq": 1.0
+   },
+   {
+    "idx": 91,
+    "freq": 0.996667
+   },
+   {
+    "idx": 174,
+    "freq": 0.98
+   },
+   {
+    "idx": 2,
+    "freq": 0.01
+   },
+   {
+    "idx": 250,
+    "freq": 0.00666667
+   },
+   {
+    "idx": 281,
+    "freq": 0.00666667
+   }
+  ]
+ },
+ "feed_to_engine_funnel": {
+  "note": "лучший вариант по рейтингу в каждой паре (схема, тип камеры); поля - targets.json funnel_interface; замена заглушек funnel_space.py (dp 4/5 %, D_comb = 1,1·Dc, L_comb, m_comb, n_inj)",
+  "best": {
+   "FLOX|выносная": {
+    "idx": 233,
+    "score": 0.626081,
+    "hard_ok": false,
+    "dp_comb": 0.0797864,
+    "D_comb": 0.447501,
+    "L_comb": 1.09593,
+    "m_comb": 14.081,
+    "n_inj": 275,
+    "parts": 4,
+    "NOx_100": 3.12129,
+    "NOx_50": 3.28729,
+    "NOx_30": 4.24418,
+    "CO_100": 4.11618,
+    "CO_50": 4.65951,
+    "CO_30": 4.19552,
+    "PF": 0.0835637,
+    "RTDF": 0.0417819,
+    "T_metal_max_K": 803.905,
+    "fuel_valves": 1,
+    "H2_vol_max": 1.0,
+    "diesel_NOx_100": 46.6468,
+    "diesel_NOx_50": 36.8917,
+    "cartridge_swap_h": 0.8,
+    "V_L": 51.5869
+   },
+   "MM|выносная": {
+    "idx": 21,
+    "score": 0.0611757,
+    "hard_ok": false,
+    "dp_comb": 0.0690419,
+    "D_comb": 0.461362,
+    "L_comb": 1.51649,
+    "m_comb": 10.2766,
+    "n_inj": 1428,
+    "parts": 7,
+    "NOx_100": 17.1706,
+    "NOx_50": 16.2214,
+    "NOx_30": 14.0422,
+    "CO_100": 3.56203,
+    "CO_50": 1.99787,
+    "CO_30": 1.13222,
+    "PF": 0.0959618,
+    "RTDF": 0.0479809,
+    "T_metal_max_K": 1147.63,
+    "fuel_valves": 1,
+    "H2_vol_max": 0.5,
+    "diesel_NOx_100": 22.8002,
+    "diesel_NOx_50": 15.6567,
+    "cartridge_swap_h": 0.8,
+    "V_L": 102.233
+   },
+   "FLOX|кольцевая": {
+    "idx": 246,
+    "score": 0.00165681,
+    "hard_ok": false,
+    "dp_comb": 0.041463,
+    "D_comb": 0.772351,
+    "L_comb": 0.414127,
+    "m_comb": 13.8956,
+    "n_inj": 618,
+    "parts": 8,
+    "NOx_100": 0.472788,
+    "NOx_50": 0.393874,
+    "NOx_30": 0.382293,
+    "CO_100": 0.495274,
+    "CO_50": 0.353114,
+    "CO_30": 0.726063,
+    "PF": 0.0410099,
+    "RTDF": 0.0205049,
+    "T_metal_max_K": 983.805,
+    "fuel_valves": 1,
+    "H2_vol_max": 1.0,
+    "diesel_NOx_100": 46.6338,
+    "diesel_NOx_50": 39.0039,
+    "cartridge_swap_h": 12.0,
+    "V_L": 59.3147
+   },
+   "TVC|противоточная": {
+    "idx": 84,
+    "score": 3.34502e-06,
+    "hard_ok": false,
+    "dp_comb": 0.0527255,
+    "D_comb": 1.0537,
+    "L_comb": 1.70847,
+    "m_comb": 23.9339,
+    "n_inj": 1,
+    "parts": 7,
+    "NOx_100": 52.1597,
+    "NOx_50": 39.815,
+    "NOx_30": 3.06883,
+    "CO_100": 0.461789,
+    "CO_50": 0.604454,
+    "CO_30": 0.428431,
+    "PF": 0.0148987,
+    "RTDF": 0.00744935,
+    "T_metal_max_K": 1552.81,
+    "fuel_valves": 1,
+    "H2_vol_max": 1.0,
+    "diesel_NOx_100": 1419.63,
+    "diesel_NOx_50": 1404.2,
+    "cartridge_swap_h": 6.0,
+    "V_L": 121.744
+   },
+   "FLOX|противоточная": {
+    "idx": 94,
+    "score": 3.03199e-06,
+    "hard_ok": false,
+    "dp_comb": 0.0699928,
+    "D_comb": 1.00525,
+    "L_comb": 0.402881,
+    "m_comb": 56.6413,
+    "n_inj": 373,
+    "parts": 5,
+    "NOx_100": 3.81975,
+    "NOx_50": 0.146611,
+    "NOx_30": 0.0091675,
+    "CO_100": 2.80198,
+    "CO_50": 7.3225,
+    "CO_30": 10321.6,
+    "PF": 0.026311,
+    "RTDF": 0.0131555,
+    "T_metal_max_K": 882.747,
+    "fuel_valves": 1,
+    "H2_vol_max": 0.5,
+    "diesel_NOx_100": 30.962,
+    "diesel_NOx_50": 25.5286,
+    "cartridge_swap_h": 6.5,
+    "V_L": 63.1908
+   },
+   "TVC|кольцевая": {
+    "idx": 108,
+    "score": 2.67234e-06,
+    "hard_ok": false,
+    "dp_comb": 0.0581941,
+    "D_comb": 0.784582,
+    "L_comb": 0.335271,
+    "m_comb": 20.3086,
+    "n_inj": 125,
+    "parts": 4,
+    "NOx_100": 8.03453,
+    "NOx_50": 1.78114,
+    "NOx_30": 3.56529,
+    "CO_100": 3.49764,
+    "CO_50": 1.22447,
+    "CO_30": 20.8133,
+    "PF": 0.058503,
+    "RTDF": 0.0292515,
+    "T_metal_max_K": 876.308,
+    "fuel_valves": 1,
+    "H2_vol_max": 0.5,
+    "diesel_NOx_100": 46.3058,
+    "diesel_NOx_50": 39.7594,
+    "cartridge_swap_h": 12.0,
+    "V_L": 39.8137
+   },
+   "RQL|выносная": {
+    "idx": 217,
+    "score": 2.61998e-06,
+    "hard_ok": false,
+    "dp_comb": 0.0489444,
+    "D_comb": 0.508732,
+    "L_comb": 1.81124,
+    "m_comb": 24.6771,
+    "n_inj": 76,
+    "parts": 14,
+    "NOx_100": 101.399,
+    "NOx_50": 284.503,
+    "NOx_30": 17.7219,
+    "CO_100": 0.127821,
+    "CO_50": 12.1429,
+    "CO_30": 49.9794,
+    "PF": 0.0413914,
+    "RTDF": 0.0206957,
+    "T_metal_max_K": 1007.57,
+    "fuel_valves": 1,
+    "H2_vol_max": 1.0,
+    "diesel_NOx_100": 105.308,
+    "diesel_NOx_50": 554.423,
+    "cartridge_swap_h": 0.8,
+    "V_L": 114.18
+   },
+   "MM|кольцевая": {
+    "idx": 250,
+    "score": 1.38549e-06,
+    "hard_ok": false,
+    "dp_comb": 0.0365779,
+    "D_comb": 0.798384,
+    "L_comb": 0.396658,
+    "m_comb": 26.543,
+    "n_inj": 731,
+    "parts": 5,
+    "NOx_100": 83.6086,
+    "NOx_50": 105.601,
+    "NOx_30": 143.297,
+    "CO_100": 14.1641,
+    "CO_50": 9.64695,
+    "CO_30": 5.32091,
+    "PF": 0.0782066,
+    "RTDF": 0.0391033,
+    "T_metal_max_K": 966.134,
+    "fuel_valves": 1,
+    "H2_vol_max": 0.5,
+    "diesel_NOx_100": 58.0918,
+    "diesel_NOx_50": 31.7786,
+    "cartridge_swap_h": 12.0,
+    "V_L": 68.7217
+   },
+   "LPP|противоточная": {
+    "idx": 2,
+    "score": 1.37287e-06,
+    "hard_ok": false,
+    "dp_comb": 0.0550362,
+    "D_comb": 1.07154,
+    "L_comb": 0.460478,
+    "m_comb": 69.2653,
+    "n_inj": 21,
+    "parts": 25,
+    "NOx_100": 266.145,
+    "NOx_50": 39.7058,
+    "NOx_30": 12.6245,
+    "CO_100": 20.7106,
+    "CO_50": 3.43436,
+    "CO_30": 0.783761,
+    "PF": 0.0451994,
+    "RTDF": 0.0225997,
+    "T_metal_max_K": 921.164,
+    "fuel_valves": 1,
+    "H2_vol_max": 0.0,
+    "diesel_NOx_100": 520.084,
+    "diesel_NOx_50": 1399.32,
+    "cartridge_swap_h": 6.5,
+    "V_L": 112.497
+   },
+   "RQL|трубчатые": {
+    "idx": 281,
+    "score": 1.13318e-06,
+    "hard_ok": false,
+    "dp_comb": 0.0360221,
+    "D_comb": 0.951156,
+    "L_comb": 0.836984,
+    "m_comb": 15.2162,
+    "n_inj": 188,
+    "parts": 45,
+    "NOx_100": 187.544,
+    "NOx_50": 260.655,
+    "NOx_30": 21.8617,
+    "CO_100": 9.20984,
+    "CO_50": 0.109706,
+    "CO_30": 6.86829,
+    "PF": 0.0510378,
+    "RTDF": 0.0255189,
+    "T_metal_max_K": 1232.96,
+    "fuel_valves": 1,
+    "H2_vol_max": 1.0,
+    "diesel_NOx_100": 295.499,
+    "diesel_NOx_50": 455.186,
+    "cartridge_swap_h": 4.6,
+    "V_L": 93.4779
+   },
+   "TVC|выносная": {
+    "idx": 131,
+    "score": 4.57246e-07,
+    "hard_ok": false,
+    "dp_comb": 0.0697331,
+    "D_comb": 0.497736,
+    "L_comb": 1.36933,
+    "m_comb": 10.1833,
+    "n_inj": 824,
+    "parts": 6,
+    "NOx_100": 13.3691,
+    "NOx_50": 4.44853,
+    "NOx_30": 2.89262,
+    "CO_100": 3.19502,
+    "CO_50": 22.2463,
+    "CO_30": 15.5838,
+    "PF": 0.0525494,
+    "RTDF": 0.0262747,
+    "T_metal_max_K": 1194.32,
+    "fuel_valves": 1,
+    "H2_vol_max": 1.0,
+    "diesel_NOx_100": 24.3336,
+    "diesel_NOx_50": 16.5154,
+    "cartridge_swap_h": 0.8,
+    "V_L": 97.1152
+   },
+   "RDC|кольцевая": {
+    "idx": 112,
+    "score": 3.56778e-07,
+    "hard_ok": false,
+    "dp_comb": -0.0588618,
+    "D_comb": 0.734024,
+    "L_comb": 0.571665,
+    "m_comb": 31.7169,
+    "n_inj": 28,
+    "parts": 6,
+    "NOx_100": 16.5405,
+    "NOx_50": 0.015161,
+    "NOx_30": 0.000632191,
+    "CO_100": 2.82744,
+    "CO_50": 0.241686,
+    "CO_30": 0.0766378,
+    "PF": 0.0546065,
+    "RTDF": 0.0273032,
+    "T_metal_max_K": 903.345,
+    "fuel_valves": 2,
+    "H2_vol_max": 0.5,
+    "diesel_NOx_100": 73.8599,
+    "diesel_NOx_50": 63.5754,
+    "cartridge_swap_h": 12.0,
+    "V_L": 26.0384
+   },
+   "RQL|противоточная": {
+    "idx": 196,
+    "score": 1.30362e-07,
+    "hard_ok": false,
+    "dp_comb": 0.0514316,
+    "D_comb": 0.984968,
+    "L_comb": 0.329109,
+    "m_comb": 18.8823,
+    "n_inj": 14,
+    "parts": 4,
+    "NOx_100": 106.839,
+    "NOx_50": 36.1318,
+    "NOx_30": 109.295,
+    "CO_100": 16.7143,
+    "CO_50": 8.872,
+    "CO_30": 384.851,
+    "PF": 0.0560808,
+    "RTDF": 0.0280404,
+    "T_metal_max_K": 1085.04,
+    "fuel_valves": 1,
+    "H2_vol_max": 1.0,
+    "diesel_NOx_100": 111.143,
+    "diesel_NOx_50": 33.3813,
+    "cartridge_swap_h": 6.0,
+    "V_L": 22.8825
+   },
+   "MM|противоточная": {
+    "idx": 62,
+    "score": 6.95349e-08,
+    "hard_ok": false,
+    "dp_comb": 0.0593587,
+    "D_comb": 1.02229,
+    "L_comb": 0.496901,
+    "m_comb": 41.1339,
+    "n_inj": 1767,
+    "parts": 4,
+    "NOx_100": 1.16424,
+    "NOx_50": 0.316189,
+    "NOx_30": 0.0991336,
+    "CO_100": 0.337835,
+    "CO_50": 1.08054,
+    "CO_30": 0.183448,
+    "PF": 0.0208124,
+    "RTDF": 0.0104062,
+    "T_metal_max_K": 749.132,
+    "fuel_valves": 1,
+    "H2_vol_max": 1.0,
+    "diesel_NOx_100": 16.0315,
+    "diesel_NOx_50": 14.1168,
+    "cartridge_swap_h": 6.0,
+    "V_L": 109.292
+   },
+   "LPP|выносная": {
+    "idx": 13,
+    "score": 3.33757e-08,
+    "hard_ok": false,
+    "dp_comb": 0.0694212,
+    "D_comb": 0.395331,
+    "L_comb": 1.34414,
+    "m_comb": 10.9124,
+    "n_inj": 109,
+    "parts": 18,
+    "NOx_100": 6.01531,
+    "NOx_50": 1.12928e-05,
+    "NOx_30": 1.72229e-05,
+    "CO_100": 7.05472,
+    "CO_50": 7.45689e-07,
+    "CO_30": 2.37423e-08,
+    "PF": 0.152197,
+    "RTDF": 0.0760986,
+    "T_metal_max_K": 957.374,
+    "fuel_valves": 1,
+    "H2_vol_max": 1.0,
+    "diesel_NOx_100": 106.94,
+    "diesel_NOx_50": 86.75,
+    "cartridge_swap_h": 0.8,
+    "V_L": 34.1649
+   },
+   "RDC|выносная": {
+    "idx": 207,
+    "score": 2.68135e-08,
+    "hard_ok": false,
+    "dp_comb": 0.0300512,
+    "D_comb": 0.43364,
+    "L_comb": 1.61189,
+    "m_comb": 31.056,
+    "n_inj": 25,
+    "parts": 5,
+    "NOx_100": 42.3176,
+    "NOx_50": 0.0396071,
+    "NOx_30": 0.000959336,
+    "CO_100": 3.16428,
+    "CO_50": 0.18456,
+    "CO_30": 0.0931309,
+    "PF": 0.0242492,
+    "RTDF": 0.0121246,
+    "T_metal_max_K": 1095.12,
+    "fuel_valves": 2,
+    "H2_vol_max": 1.0,
+    "diesel_NOx_100": 32.3967,
+    "diesel_NOx_50": 16.2197,
+    "cartridge_swap_h": 0.8,
+    "V_L": 58.7745
+   },
+   "RQL|кольцевая": {
+    "idx": 180,
+    "score": 1.42987e-08,
+    "hard_ok": false,
+    "dp_comb": 0.0674517,
+    "D_comb": 0.794687,
+    "L_comb": 0.613453,
+    "m_comb": 43.2166,
+    "n_inj": 7,
+    "parts": 4,
+    "NOx_100": 111.237,
+    "NOx_50": 128.22,
+    "NOx_30": 7.28659,
+    "CO_100": 0.253766,
+    "CO_50": 28.3629,
+    "CO_30": 137.342,
+    "PF": 0.0176109,
+    "RTDF": 0.00880543,
+    "T_metal_max_K": 784.283,
+    "fuel_valves": 1,
+    "H2_vol_max": 1.0,
+    "diesel_NOx_100": 163.296,
+    "diesel_NOx_50": 205.078,
+    "cartridge_swap_h": 12.0,
+    "V_L": 57.3051
+   },
+   "LPP|трубчатые": {
+    "idx": 269,
+    "score": 7.48682e-09,
+    "hard_ok": false,
+    "dp_comb": 0.0433855,
+    "D_comb": 0.91774,
+    "L_comb": 0.808572,
+    "m_comb": 12.5707,
+    "n_inj": 22,
+    "parts": 61,
+    "NOx_100": 0.633399,
+    "NOx_50": 1.18119e-06,
+    "NOx_30": 2.74881e-07,
+    "CO_100": 1.38035,
+    "CO_50": 0.000866642,
+    "CO_30": 0.000152822,
+    "PF": 0.0338679,
+    "RTDF": 0.0169339,
+    "T_metal_max_K": 1481.95,
+    "fuel_valves": 1,
+    "H2_vol_max": 1.0,
+    "diesel_NOx_100": 1266.62,
+    "diesel_NOx_50": 1190.58,
+    "cartridge_swap_h": 4.6,
+    "V_L": 67.1542
+   },
+   "LPP|кольцевая": {
+    "idx": 226,
+    "score": 7.39504e-09,
+    "hard_ok": false,
+    "dp_comb": 0.0266676,
+    "D_comb": 0.830065,
+    "L_comb": 0.788665,
+    "m_comb": 19.1503,
+    "n_inj": 5,
+    "parts": 24,
+    "NOx_100": 2.98168,
+    "NOx_50": 0.0446342,
+    "NOx_30": 1.97668e-10,
+    "CO_100": 0.769179,
+    "CO_50": 0.142368,
+    "CO_30": 1.2716e-08,
+    "PF": 0.0591394,
+    "RTDF": 0.0295697,
+    "T_metal_max_K": 1577.42,
+    "fuel_valves": 1,
+    "H2_vol_max": 0.5,
+    "diesel_NOx_100": 1411.09,
+    "diesel_NOx_50": 1395.5,
+    "cartridge_swap_h": 12.0,
+    "V_L": 98.8467
+   },
+   "FLOX|трубчатые": {
+    "idx": 17,
+    "score": 7.09388e-09,
+    "hard_ok": false,
+    "dp_comb": 0.0740872,
+    "D_comb": 0.931861,
+    "L_comb": 0.513511,
+    "m_comb": 43.8943,
+    "n_inj": 581,
+    "parts": 33,
+    "NOx_100": 2.5448,
+    "NOx_50": 0.00903553,
+    "NOx_30": 4.30325e-06,
+    "CO_100": 2.65585,
+    "CO_50": 11932.3,
+    "CO_30": 0.964002,
+    "PF": 0.0347079,
+    "RTDF": 0.0173539,
+    "T_metal_max_K": 884.184,
+    "fuel_valves": 1,
+    "H2_vol_max": 0.5,
+    "diesel_NOx_100": 33.145,
+    "diesel_NOx_50": 26.3837,
+    "cartridge_swap_h": 4.6,
+    "V_L": 54.7902
+   },
+   "MM|трубчатые": {
+    "idx": 5,
+    "score": 1.84649e-09,
+    "hard_ok": false,
+    "dp_comb": 0.0734726,
+    "D_comb": 1.01129,
+    "L_comb": 0.550547,
+    "m_comb": 80.3973,
+    "n_inj": 1245,
+    "parts": 27,
+    "NOx_100": 156.97,
+    "NOx_50": 1.05527,
+    "NOx_30": 0.176558,
+    "CO_100": 9.12179,
+    "CO_50": 0.161768,
+    "CO_30": 0.797592,
+    "PF": 0.0197342,
+    "RTDF": 0.00986708,
+    "T_metal_max_K": 903.157,
+    "fuel_valves": 1,
+    "H2_vol_max": 0.5,
+    "diesel_NOx_100": 68.4797,
+    "diesel_NOx_50": 17.3209,
+    "cartridge_swap_h": 5.1,
+    "V_L": 140.741
+   },
+   "CAT|трубчатые": {
+    "idx": 284,
+    "score": 4.60612e-10,
+    "hard_ok": false,
+    "dp_comb": 0.045362,
+    "D_comb": 0.931194,
+    "L_comb": 0.633539,
+    "m_comb": 29.451,
+    "n_inj": 2254,
+    "parts": 39,
+    "NOx_100": 0.466284,
+    "NOx_50": 0.233161,
+    "NOx_30": 0.251599,
+    "CO_100": 1128.99,
+    "CO_50": 617.08,
+    "CO_30": 1221.01,
+    "PF": 0.0717069,
+    "RTDF": 0.0358534,
+    "T_metal_max_K": 760.815,
+    "fuel_valves": 2,
+    "H2_vol_max": 0.5,
+    "diesel_NOx_100": 24.8923,
+    "diesel_NOx_50": 20.5591,
+    "cartridge_swap_h": 4.6,
+    "V_L": 77.2806
+   },
+   "CAT|кольцевая": {
+    "idx": 152,
+    "score": 4.61997e-11,
+    "hard_ok": false,
+    "dp_comb": 0.0584039,
+    "D_comb": 0.809589,
+    "L_comb": 0.877221,
+    "m_comb": 28.9602,
+    "n_inj": 9,
+    "parts": 7,
+    "NOx_100": 0.878116,
+    "NOx_50": 0.178723,
+    "NOx_30": 0.235575,
+    "CO_100": 263.443,
+    "CO_50": 307.675,
+    "CO_30": 3104.32,
+    "PF": 0.0265409,
+    "RTDF": 0.0132704,
+    "T_metal_max_K": 1010.62,
+    "fuel_valves": 2,
+    "H2_vol_max": 1.0,
+    "diesel_NOx_100": 96.5826,
+    "diesel_NOx_50": 95.4192,
+    "cartridge_swap_h": 12.0,
+    "V_L": 81.9333
+   },
+   "CAT|выносная": {
+    "idx": 35,
+    "score": 1.6712e-12,
+    "hard_ok": false,
+    "dp_comb": 0.0838739,
+    "D_comb": 0.373228,
+    "L_comb": 1.49261,
+    "m_comb": 14.8232,
+    "n_inj": 14,
+    "parts": 6,
+    "NOx_100": 0.19414,
+    "NOx_50": 0.22909,
+    "NOx_30": 0.300115,
+    "CO_100": 716.024,
+    "CO_50": 3111.44,
+    "CO_30": 333.103,
+    "PF": 0.0643104,
+    "RTDF": 0.0321552,
+    "T_metal_max_K": 816.763,
+    "fuel_valves": 2,
+    "H2_vol_max": 1.0,
+    "diesel_NOx_100": 156.777,
+    "diesel_NOx_50": 143.219,
+    "cartridge_swap_h": 0.8,
+    "V_L": 53.2598
+   },
+   "TVC|трубчатые": {
+    "idx": 83,
+    "score": 3.37124e-14,
+    "hard_ok": false,
+    "dp_comb": 0.0410388,
+    "D_comb": 0.959244,
+    "L_comb": 0.944859,
+    "m_comb": 16.5942,
+    "n_inj": 7,
+    "parts": 62,
+    "NOx_100": 72.1229,
+    "NOx_50": 44.3243,
+    "NOx_30": 4.67959,
+    "CO_100": 0.230998,
+    "CO_50": 7269.74,
+    "CO_30": 2181.06,
+    "PF": 0.0277309,
+    "RTDF": 0.0138654,
+    "T_metal_max_K": 1553.13,
+    "fuel_valves": 1,
+    "H2_vol_max": 1.0,
+    "diesel_NOx_100": 1422.0,
+    "diesel_NOx_50": 1397.96,
+    "cartridge_swap_h": 4.6,
+    "V_L": 95.5657
+   }
+  }
+ },
+ "runtime_s": 0.7
+}
