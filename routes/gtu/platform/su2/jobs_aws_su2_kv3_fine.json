@@ -1,0 +1,257 @@
+{
+ "_comment": "Этап B (fine) линий частоты SU2: KV-3 ступень 1 и core130. Раннер берёт только defaults и jobs; блоки estimate, merge, plan_check — для сессии с ключами. Код — ветка claude/lucid-allen-yvps5d. Сгенерировано make_jobs_su2_kv3.py; правки — в нём. Запускать после разбора этапа A; точки — по его итогам (make_jobs_su2_kv3.py --fine-pfracs).",
+ "defaults": {
+  "instance_type": "c7a.16xlarge",
+  "fallback_types": [
+   "c7i.16xlarge"
+  ],
+  "image": "al2023",
+  "container": "ubuntu:24.04",
+  "container_setup": [
+   "apt-get update -q",
+   "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+   "python3 -m venv /opt/venv",
+   "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+   "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+   "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+   "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+   "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+  ]
+ },
+ "jobs": [
+  {
+   "name": "su2-kv3-stage1-fine-a",
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; free -g; df -h /tmp; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/frame3/frame3_geom.py --out \"$W/geom\" --levels fine --stages stage1 --gzip-levels --threads \"$NPROC\" --results \"$GTU_OUT/frame3_geom_results.json\" > \"$GTU_OUT/geom.log\" 2>&1\npython routes/gtu/platform/su2/char_points.py run --case custom --level fine --geom-out \"$W/geom/stage1_fine\" --label kv3_stage1 --pfracs 0.60 --base-pfrac 0.75 --np-per-point 64 --point-iter 6000 --point-pramp 300 --job-max-min 450 --su2-src /opt/SU2-src --work \"$W/runs\" --out \"$GTU_OUT\"",
+   "max_min": 450,
+   "disk_gb": 80
+  },
+  {
+   "name": "su2-kv3-stage1-fine-b",
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; free -g; df -h /tmp; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/frame3/frame3_geom.py --out \"$W/geom\" --levels fine --stages stage1 --gzip-levels --threads \"$NPROC\" --results \"$GTU_OUT/frame3_geom_results.json\" > \"$GTU_OUT/geom.log\" 2>&1\npython routes/gtu/platform/su2/char_points.py run --case custom --level fine --geom-out \"$W/geom/stage1_fine\" --label kv3_stage1 --pfracs 0.80 --base-pfrac 0.75 --np-per-point 64 --point-iter 6000 --point-pramp 300 --job-max-min 450 --su2-src /opt/SU2-src --work \"$W/runs\" --out \"$GTU_OUT\"",
+   "max_min": 450,
+   "disk_gb": 80
+  },
+  {
+   "name": "su2-kv3-stage1-fine-c",
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; free -g; df -h /tmp; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/frame3/frame3_geom.py --out \"$W/geom\" --levels fine --stages stage1 --gzip-levels --threads \"$NPROC\" --results \"$GTU_OUT/frame3_geom_results.json\" > \"$GTU_OUT/geom.log\" 2>&1\npython routes/gtu/platform/su2/char_points.py run --case custom --level fine --geom-out \"$W/geom/stage1_fine\" --label kv3_stage1 --pfracs 0.90 --base-pfrac 0.75 --np-per-point 64 --point-iter 6000 --point-pramp 300 --job-max-min 450 --su2-src /opt/SU2-src --work \"$W/runs\" --out \"$GTU_OUT\"",
+   "max_min": 450,
+   "disk_gb": 80
+  },
+  {
+   "name": "su2-kv3-stage1-fine-d",
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; free -g; df -h /tmp; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/frame3/frame3_geom.py --out \"$W/geom\" --levels fine --stages stage1 --gzip-levels --threads \"$NPROC\" --results \"$GTU_OUT/frame3_geom_results.json\" > \"$GTU_OUT/geom.log\" 2>&1\npython routes/gtu/platform/su2/char_points.py run --case custom --level fine --geom-out \"$W/geom/stage1_fine\" --label kv3_stage1 --pfracs 1.00 --base-pfrac 0.75 --np-per-point 64 --point-iter 6000 --point-pramp 300 --job-max-min 450 --su2-src /opt/SU2-src --work \"$W/runs\" --out \"$GTU_OUT\"",
+   "max_min": 450,
+   "disk_gb": 80
+  },
+  {
+   "name": "su2-core130-fine-a",
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; free -g; df -h /tmp; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/platform/geom/impeller.py --case core130 --level fine --no-step --out \"$W/geom/core130_fine\" --threads \"$NPROC\" > \"$GTU_OUT/geom.log\" 2>&1\npython routes/gtu/platform/su2/char_points.py run --case core130 --level fine --geom-out \"$W/geom/core130_fine\" --label core130 --pfracs 0.60,0.90 --base-pfrac 0.75 --np-per-point 32 --point-iter 6000 --point-pramp 300 --job-max-min 420 --su2-src /opt/SU2-src --work \"$W/runs\" --out \"$GTU_OUT\"",
+   "max_min": 420,
+   "disk_gb": 80
+  },
+  {
+   "name": "su2-core130-fine-b",
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; free -g; df -h /tmp; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/platform/geom/impeller.py --case core130 --level fine --no-step --out \"$W/geom/core130_fine\" --threads \"$NPROC\" > \"$GTU_OUT/geom.log\" 2>&1\npython routes/gtu/platform/su2/char_points.py run --case core130 --level fine --geom-out \"$W/geom/core130_fine\" --label core130 --pfracs 0.80,1.00 --base-pfrac 0.75 --np-per-point 32 --point-iter 6000 --point-pramp 300 --job-max-min 420 --su2-src /opt/SU2-src --work \"$W/runs\" --out \"$GTU_OUT\"",
+   "max_min": 420,
+   "disk_gb": 80
+  }
+ ],
+ "lines": {
+  "kv3_stage1": "KV-3 ступень 1 (Taurus 60 GS, генератор): двусторонний вход, 25,55 кг/с (12,775 на сторону), π 4,49, 14 950 об/мин, D2 0,695 м — frame3_point_results.json → stage1; сетка — одна сторона",
+  "core130": "core130: схема 130 gtu_explore (ядро кластера 4 x 9,95 кг/с, π 4,25, 22 197 об/мин, D2 0,435 м)"
+ },
+ "setup": {
+  "base": "линия сетки -> база: план smoke075 run_case.py на 64 процессах при p_вых 0,75 оценки (как прогон Б, README узла) -> точки: рестарт от базы, рампа p_вых за 300 итераций, всего 6000 итераций второго порядка; SST, покрышка и стенки за колесом без трения (--shroud slip --vaneless slip — как дымовой прогон; с неподвижной покрышкой на сетках geom расчёт расходился)",
+  "pfracs": "доли оценки статического давления на выходе (run_case.estimate_p_out; у KV-3 — по расходу стороны); у задачи — свои, чередованием",
+  "outputs_per_job": "char_summary.json, env.txt, geom.log, frame3_geom_results.json (KV-3), _su2_build.log, base/ и p<доля>/: run_summary.json, history_*.csv, su2_*.log, case_*.cfg, run_case.out, surface_flow.vtu (лопатка и втулка), итоговый рестарт точки restart_c1_point.dat; сетки и объёмные поля не выгружаются (поле — SU2_SOL из рестарта)"
+ },
+ "merge": {
+  "where": "сессия с ключами после run: результаты уже в routes/gtu/platform/aws/runs/<run_id>/<задача>/ (или runner.py collect --run-id <run_id> --job <задача> по каждой)",
+  "commands": [
+   "python3 routes/gtu/platform/su2/char_points.py merge --in routes/gtu/platform/aws/runs/<run_id> --out routes/gtu/platform/su2/su2_char_kv3_fine.json --run-id <run_id>"
+  ],
+  "to_branch": [
+   "routes/gtu/platform/su2/su2_char_kv3_fine.json",
+   "routes/gtu/platform/aws/ledger.jsonl"
+  ],
+  "not_to_branch": "runs/<run_id>/ (рестарты точек: ~100 МБ на точку medium KV-3, ~0,5 ГБ fine — остаются в S3 и в runs/, папка в .gitignore)",
+  "checks": "merge откажет (код 2), если точка задана дважды, пришла не своей задаче или сводка > 5 МБ; missing — заданные, но не пришедшие точки; converged — π и η меняются < 0,1 % за 500 итераций"
+ },
+ "estimate": {
+  "stage": "fine",
+  "machines": 6,
+  "vcpu_per_machine": 64,
+  "machine_hours_expected": 41.92,
+  "usd": {
+   "spot_expected": 31.44,
+   "disk": 0.368,
+   "ipv4": 0.21,
+   "total_expected": 32.02
+  },
+  "upper_bound_usd": 64.55,
+  "upper_bound_rule": "раннер: (MaxPrice 1,4206 + диск + IPv4) × (max_min + 10) / 60 на машину — если каждая задача дойдёт до сторожа",
+  "jobs": [
+   {
+    "job": "su2-kv3-stage1-fine-a",
+    "line": "kv3_stage1",
+    "level": "fine",
+    "pfracs": [
+     0.6
+    ],
+    "np_per_point": 64,
+    "max_min": 450,
+    "disk_gb": 80,
+    "nodes": 5009000,
+    "s_per_iter_base": 3.447,
+    "s_per_iter_point": 3.447,
+    "base_min": 29.9,
+    "points_min": 344.7,
+    "total_min": 432.6,
+    "mem_gb_points": 50.1
+   },
+   {
+    "job": "su2-kv3-stage1-fine-b",
+    "line": "kv3_stage1",
+    "level": "fine",
+    "pfracs": [
+     0.8
+    ],
+    "np_per_point": 64,
+    "max_min": 450,
+    "disk_gb": 80,
+    "nodes": 5009000,
+    "s_per_iter_base": 3.447,
+    "s_per_iter_point": 3.447,
+    "base_min": 29.9,
+    "points_min": 344.7,
+    "total_min": 432.6,
+    "mem_gb_points": 50.1
+   },
+   {
+    "job": "su2-kv3-stage1-fine-c",
+    "line": "kv3_stage1",
+    "level": "fine",
+    "pfracs": [
+     0.9
+    ],
+    "np_per_point": 64,
+    "max_min": 450,
+    "disk_gb": 80,
+    "nodes": 5009000,
+    "s_per_iter_base": 3.447,
+    "s_per_iter_point": 3.447,
+    "base_min": 29.9,
+    "points_min": 344.7,
+    "total_min": 432.6,
+    "mem_gb_points": 50.1
+   },
+   {
+    "job": "su2-kv3-stage1-fine-d",
+    "line": "kv3_stage1",
+    "level": "fine",
+    "pfracs": [
+     1.0
+    ],
+    "np_per_point": 64,
+    "max_min": 450,
+    "disk_gb": 80,
+    "nodes": 5009000,
+    "s_per_iter_base": 3.447,
+    "s_per_iter_point": 3.447,
+    "base_min": 29.9,
+    "points_min": 344.7,
+    "total_min": 432.6,
+    "mem_gb_points": 50.1
+   },
+   {
+    "job": "su2-core130-fine-a",
+    "line": "core130",
+    "level": "fine",
+    "pfracs": [
+     0.6,
+     0.9
+    ],
+    "np_per_point": 32,
+    "max_min": 420,
+    "disk_gb": 80,
+    "nodes": 2455000,
+    "s_per_iter_base": 1.69,
+    "s_per_iter_point": 3.379,
+    "base_min": 14.6,
+    "points_min": 337.9,
+    "total_min": 392.5,
+    "mem_gb_points": 49.1
+   },
+   {
+    "job": "su2-core130-fine-b",
+    "line": "core130",
+    "level": "fine",
+    "pfracs": [
+     0.8,
+     1.0
+    ],
+    "np_per_point": 32,
+    "max_min": 420,
+    "disk_gb": 80,
+    "nodes": 2455000,
+    "s_per_iter_base": 1.69,
+    "s_per_iter_point": 3.379,
+    "base_min": 14.6,
+    "points_min": 337.9,
+    "total_min": 392.5,
+    "mem_gb_points": 49.1
+   }
+  ],
+  "time_model": {
+   "formula": "t_итерации = C · узлы / процессы / EFF; машина = загрузка + подготовка + сетка + база (520 итераций на 64 процессах) + точки (point_iter итераций) + запасы",
+   "C_us_core_per_node_iter": 35.24,
+   "C_source": "ref_cost_estimate",
+   "measurements": {
+    "ref_cost_estimate": {
+     "s_per_iter": 1.2255,
+     "nodes": 139121,
+     "procs": 4,
+     "source": "routes/gtu/platform/batch/cost_estimate.toml [su2_time]: дымовой прогон core130 coarse 14.11.2026, среднее по 169 итерациям history_s1_ramp60.csv"
+    },
+    "mini_kv3_coarse": null
+   },
+   "EFF": 0.8,
+   "boot_min": 3,
+   "setup_min": 12,
+   "mesh_min": {
+    "kv3_stage1/medium": 8,
+    "core130/medium": 4,
+    "kv3_stage1/fine": 30,
+    "core130/fine": 12
+   },
+   "base_iters": 520,
+   "point_iter": 6000,
+   "reserve_min": 13,
+   "nodes": {
+    "kv3_stage1/coarse": 258565,
+    "kv3_stage1/medium": 1137992,
+    "core130/coarse": 139121,
+    "core130/medium": 584357,
+    "kv3_stage1/fine": 5009000,
+    "core130/fine": 2455000
+   },
+   "nodes_source": {
+    "kv3_stage1": "frame3_geom.py --levels coarse medium, 14.11.2026 (frame3_geom_results.json → stages.stage1.levels; 1 200 627 и 5 819 064 ячеек)",
+    "core130": "routes/gtu/platform/bench/mesh_stats.json (core130 coarse 139 121, medium 584 357 узлов)"
+   },
+   "fine_nodes_rule": "fine — оценка: узлы medium² / узлы coarse (рост сетки при переходе уровня — тот же)",
+   "notes": [
+    "C взят наибольшим из замеров на общей 4-ядерной машине (загрузка 5–15) — для c7a.16xlarge, скорее всего, завышен; EFF — допущение",
+    "boot, setup, mesh — оценки; сборка SU2 на 64 ядрах не мерилась; сетки medium и fine на AWS не строились",
+    "точка идёт до point_iter или до срока: срок обёртка считает от max_min и /proc/uptime, SU2 останавливается сам и пишет рестарт"
+   ]
+  },
+  "price": {
+   "expected": 0.75,
+   "upper": 1.4206,
+   "basis": "ожидаемая — задача владельца 14.11.2026 (спот c7a.16xlarge 0,71–0,75 долл./ч; ledger smoke2 20261114T231610Z-9b64: us-east-1c 0,7064); верхняя — MaxPrice раннера в ledger.jsonl"
+  },
+  "disk_rate": "0,08 долл./ГБ·мес / 730 ч и IPv4 0,005 долл./ч — ставки раннера (допущения кода)",
+  "memory_check": "память точек на машину ≤ 128 ГБ при 10.0 КБ/узел (оценка) — поле mem_gb_points"
+ }
+}

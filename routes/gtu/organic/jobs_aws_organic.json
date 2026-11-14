@@ -1,0 +1,124 @@
+{
+ "_comment": "«Живая геометрия» (routes/gtu/organic): перебор циклов на полной сетке кода (CYCLES_FINE) и базовой (сверка повторяемости) + эксергия, одна машина. Оптимизации топологии (structure, thermal) в ветке нет - задач под неё нет (pending ниже). Заменяет cycles/aws_jobs_cycles.json (ubuntu2404 - образ раннером v2 вживую не выдаётся; пакеты не закреплены). Раннер берёт только defaults и jobs. Код - ветка claude/lucid-allen-yvps5d.",
+ "defaults": {
+  "instance_type": "c7a.16xlarge",
+  "fallback_types": [
+   "c7i.16xlarge"
+  ],
+  "image": "al2023",
+  "disk_gb": 30,
+  "python": "3.12",
+  "pip": [
+   "cantera==3.2.0",
+   "numpy==2.5.3",
+   "scipy==1.18.1",
+   "matplotlib==3.11.2"
+  ]
+ },
+ "jobs": [
+  {
+   "name": "organic-cycles",
+   "command": "set -e\nmkdir -p \"$GTU_OUT/exergy\" \"$GTU_OUT/base\"\n( cd routes/gtu/organic/exergy && python -u exergy.py > \"$GTU_OUT/exergy/exergy.log\" 2>&1 && rc=0 || rc=$?; echo \"$rc\" > \"$GTU_OUT/exergy/exit_code.txt\" ) &\nEXJ=$!\ncd routes/gtu/organic/cycles\nCYCLES_WORKERS=$((NPROC - 1)) CYCLES_OUT=\"$GTU_OUT/base\" python -u cycles.py > \"$GTU_OUT/base/cycles_base.log\" 2>&1\nCYCLES_FINE=1 CYCLES_WORKERS=$((NPROC - 1)) CYCLES_OUT=\"$GTU_OUT\" python -u cycles.py > \"$GTU_OUT/cycles_fine.log\" 2>&1\nwait \"$EXJ\" || true\nif [ \"$(cat \"$GTU_OUT/exergy/exit_code.txt\")\" = 0 ]; then cp ../exergy/exergy_results.json ../exergy/*.svg \"$GTU_OUT/exergy/\"; fi\nls -l \"$GTU_OUT\" \"$GTU_OUT/base\" \"$GTU_OUT/exergy\" > \"$GTU_OUT/_files_list.txt\"",
+   "max_min": 40
+  }
+ ],
+ "collect": {
+  "where": "сессия с ключами после run (иначе collect --run-id <run_id> --job organic-cycles); тот же коммит, что в _job.log; слияния частей нет - одна задача",
+  "commands": [
+   "mkdir -p routes/gtu/organic/cycles/aws_fine",
+   "gzip -9 -c routes/gtu/platform/aws/runs/<run_id>/organic-cycles/cycles_results.json > routes/gtu/organic/cycles/aws_fine/cycles_results_fine.json.gz",
+   "gzip -9 -c routes/gtu/platform/aws/runs/<run_id>/organic-cycles/cycles.csv > routes/gtu/organic/cycles/aws_fine/cycles_fine.csv.gz",
+   "cp routes/gtu/platform/aws/runs/<run_id>/organic-cycles/feed_cycles.json routes/gtu/organic/cycles/aws_fine/feed_cycles_fine.json",
+   "cp routes/gtu/platform/aws/runs/<run_id>/organic-cycles/cycles_pareto.png routes/gtu/organic/cycles/aws_fine/cycles_pareto_fine.png",
+   "cp routes/gtu/platform/aws/runs/<run_id>/organic-cycles/cycles_exergy.png routes/gtu/organic/cycles/aws_fine/cycles_exergy_fine.png",
+   "cp routes/gtu/platform/aws/runs/<run_id>/organic-cycles/cycles_fine.log routes/gtu/platform/aws/runs/<run_id>/organic-cycles/base/cycles_base.log routes/gtu/organic/cycles/aws_fine/",
+   "python3 -c \"import json,sys; a=json.load(open(sys.argv[1]))['feed_to_funnels']; b=json.load(open(sys.argv[2]))['feed_to_funnels']; ok=json.dumps(a,sort_keys=True)==json.dumps(b,sort_keys=True); print('base == repo:', ok); sys.exit(0 if ok else 4)\" routes/gtu/platform/aws/runs/<run_id>/organic-cycles/base/cycles_results.json routes/gtu/organic/cycles/cycles_results.json",
+   "cat routes/gtu/platform/aws/runs/<run_id>/organic-cycles/exergy/exit_code.txt && python3 -c \"import json,sys; a=json.load(open(sys.argv[1])); b=json.load(open(sys.argv[2])); print('exergy keys equal:', sorted(a)==sorted(b))\" routes/gtu/platform/aws/runs/<run_id>/organic-cycles/exergy/exergy_results.json routes/gtu/organic/exergy/exergy_results.json",
+   "du -ch routes/gtu/organic/cycles/aws_fine/* | tail -n 1"
+  ],
+  "expect": "base == repo: True (код 0) - машина повторила базовый перебор ветки; код 4 - разбор (или cycles_results.json в ветке устарел относительно cycles.py); exit_code exergy 0; итог в ветке ~1 МБ",
+  "to_branch": "routes/gtu/organic/cycles/aws_fine/: cycles_results_fine.json.gz, cycles_fine.csv.gz, feed_cycles_fine.json, два PNG, журналы; ledger.jsonl",
+  "stays_in_s3": "несжатые cycles_results.json (FINE и base), exergy/ (сверка) - s3://<бакет>/<префикс>/gtu/<run_id>/organic-cycles/"
+ },
+ "estimate": {
+  "what": "один c7a.16xlarge: (1) cycles.py на базовой сетке (576 топологий) - сверка повторяемости с cycles_results.json ветки; (2) cycles.py CYCLES_FINE=1 - полная сетка кода: 864 топологии (степень регенерации 0/0,70...0,94 - 9 значений, IC, RH, IBC, горение с ростом давления 3, химическая рекуперация 4 - подогрев топлива, паровой риформинг, риформинг рециркулятом), π 3...21 через 0,5 (37), x_rh 5, S/C 5, R_egr 5, plow 13; (3) exergy.py параллельно на одном ядре - повтор на Python 3.12",
+  "topologies": {
+   "base": 576,
+   "fine": 864
+  },
+  "s_cpu_per_topology": {
+   "base": 2.42,
+   "fine": 5.17,
+   "base_max": 13.31,
+   "fine_max": 28.07
+  },
+  "cpu_s_total": {
+   "base": 1394,
+   "fine": 4467
+  },
+  "workers": "NPROC - 1 = 63 (одно ядро - exergy.py)",
+  "cycles_min": {
+   "expected": 4.24,
+   "planning": 8.48,
+   "rule": "ЦП-сумма / 63 + самая долгая топология (хвост пула) + 1 мин на последовательную часть, на каждый из двух прогонов"
+  },
+  "exergy_min": {
+   "expected": 5.0,
+   "planning": 10.0
+  },
+  "safety": 2.0,
+  "setup_min": 2.0,
+  "upload_min": 1.0,
+  "machine_min": {
+   "expected": 8.0,
+   "planning": 13.0
+  },
+  "machine_hours": {
+   "expected": 0.1333,
+   "planning": 0.2167
+  },
+  "max_min": 40,
+  "max_min_why": "команда до старт + max_min - 8 = 32 мин против 13.0 по плану",
+  "usd": {
+   "machine_hours_x_0_75": 0.1625,
+   "disk_ipv4": 0.0018,
+   "s3_month": 0.00069,
+   "transfer_to_session": 0.0027,
+   "total_planning": 0.1677,
+   "total_expected_spot_0_706": 0.0994
+  },
+  "price": {
+   "planning": 0.75,
+   "expected": 0.7064,
+   "basis": "как в jobs_aws_comb_l0.json: задача владельца 0,71-0,75; ledger smoke2 0,7064 (us-east-1c)"
+  },
+  "measurements": {
+   "cpu_per_topology": [
+    {
+     "value_s": 5.17,
+     "max_s": 28.07,
+     "how": "time.process_time вокруг cycles.optimize_topo в пуле 4 процессов; 24 топологии, случайная выборка random.Random(20261114).sample из 864 (CYCLES_FINE=1)"
+    },
+    {
+     "value_s": 2.42,
+     "max_s": 13.31,
+     "how": "то же без CYCLES_FINE: 24 из 576; отношение FINE/база 2,14"
+    }
+   ],
+   "crosscheck": "второй способ: базовый прогон cycles.py потока organic - runtime_s 505 с на 4 процессах (cycles_results.json, 23:24) = 2020 ядро-с против 576 x 2,42 = 1394 ЦП-с: стена выше на 45 % (чужая нагрузка и последовательная часть) - согласуется",
+   "mini": "CYCLES_QUICK=1 CYCLES_FINE=1, 12 топологий, 4 процесса: перебор 31 с, всё 34 с (код f92879b); без FINE - 17 и 19 с",
+   "where": "контейнер сессии, 4 общих ядра, python 3.12.16 (uv), cantera 3.2.0, numpy 2.5.3, scipy 1.18.1",
+   "output_size": "базовый cycles_results.json потока 3,72 МБ (gzip -9 0,43 МБ), cycles.csv 0,83 МБ (gzip 0,10 МБ); FINE - примерно x1,5 по числу топологий: ~5,6 МБ, gzip ~0,7 МБ (оценка)",
+   "setup": "как в jobs_aws_comb_l0.json: ledger.jsonl, 62,5 с от запуска до конца машины smoke-py"
+  },
+  "assumptions": {
+   "c7a_core": "ядро c7a не медленнее ядра контейнера сессии; запас 2",
+   "disk_ipv4": "ставки раннера - допущения кода",
+   "s3": "0,03 ГБ результатов; 0,023 долл./ГБ-мес и 0,09 долл./ГБ - допущения"
+  }
+ },
+ "pending": {
+  "topology_optimization": "structure и thermal (оптимизация топологии на мелкой сетке) - кода в ветке нет (routes/gtu/organic/: только cycles и exergy, 14.11.2026 23:30 UTC); задача - когда код появится: контейнер или python, $NPROC, части по индексу, сводка до 5 МБ",
+  "hx_cell_cfd": "периодическая ячейка гироида (Nu, f·Re при Re 300-800) - названа потоком organic как задача AWS (scratchpad readme_organic), кода нет"
+ }
+}
