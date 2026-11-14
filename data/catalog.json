@@ -5,7 +5,7 @@
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
     "datasets": 353,
-    "total_bytes": 3267702,
+    "total_bytes": 3268143,
     "results_files": 163,
     "results_with_script": 44,
     "results_referenced_in_site": 22,
@@ -6596,7 +6596,7 @@
       "path": "routes/gtu/platform/surrogate/test_surrogate_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 21118,
+      "bytes": 21559,
       "referenced_in_site": false,
       "produced_by": "routes/test_surrogate.py",
       "shape": "объект",
@@ -6608,6 +6608,7 @@
         "optimize",
         "studied_region",
         "next_batch",
+        "robustness",
         "versions",
         "date"
       ],
@@ -6616,7 +6617,7 @@
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "faa3216"
+      "last_commit": "4ba862b"
     },
     {
       "path": "routes/halogen_Br.json",
