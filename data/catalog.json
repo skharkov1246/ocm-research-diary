@@ -4,8 +4,8 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 339,
-    "total_bytes": 2800485,
+    "datasets": 353,
+    "total_bytes": 3267702,
     "results_files": 163,
     "results_with_script": 44,
     "results_referenced_in_site": 22,
@@ -16,7 +16,7 @@
       "cc-activation-recycling": 36,
       "ch4-to-methanol": 9,
       "co2-to-fuels": 5,
-      "gas-turbine": 11,
+      "gas-turbine": 25,
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
@@ -3114,34 +3114,254 @@
       "last_commit": "a4b6e07"
     },
     {
-      "path": "routes/gtu/fleet/gtu_fleet_siemens_prelim.json",
+      "path": "routes/gtu/fleet/gtu_fleet_centaur40.json",
       "track": "gas-turbine",
       "kind": "данные",
-      "bytes": 33927,
+      "bytes": 15154,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
-        "_meta",
-        "models"
+        "model",
+        "records"
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "98bd6ff"
+      "last_commit": "83355f2"
     },
     {
-      "path": "routes/gtu/fleet/gtu_fleet_solar_prelim.json",
+      "path": "routes/gtu/fleet/gtu_fleet_centaur50.json",
       "track": "gas-turbine",
       "kind": "данные",
-      "bytes": 36999,
+      "bytes": 22403,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
-        "meta",
-        "models"
+        "model",
+        "records"
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "98bd6ff"
+      "last_commit": "83355f2"
+    },
+    {
+      "path": "routes/gtu/fleet/gtu_fleet_mars100.json",
+      "track": "gas-turbine",
+      "kind": "данные",
+      "bytes": 30878,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "model",
+        "records"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "83355f2"
+    },
+    {
+      "path": "routes/gtu/fleet/gtu_fleet_mars90.json",
+      "track": "gas-turbine",
+      "kind": "данные",
+      "bytes": 23581,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "model",
+        "records"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "83355f2"
+    },
+    {
+      "path": "routes/gtu/fleet/gtu_fleet_mercury50.json",
+      "track": "gas-turbine",
+      "kind": "данные",
+      "bytes": 14630,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "model",
+        "records"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "83355f2"
+    },
+    {
+      "path": "routes/gtu/fleet/gtu_fleet_saturn20.json",
+      "track": "gas-turbine",
+      "kind": "данные",
+      "bytes": 15511,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "model",
+        "records"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "83355f2"
+    },
+    {
+      "path": "routes/gtu/fleet/gtu_fleet_sgt100.json",
+      "track": "gas-turbine",
+      "kind": "данные",
+      "bytes": 44553,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "model",
+        "records"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "83355f2"
+    },
+    {
+      "path": "routes/gtu/fleet/gtu_fleet_sgt200.json",
+      "track": "gas-turbine",
+      "kind": "данные",
+      "bytes": 22864,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "model",
+        "records"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "83355f2"
+    },
+    {
+      "path": "routes/gtu/fleet/gtu_fleet_sgt300.json",
+      "track": "gas-turbine",
+      "kind": "данные",
+      "bytes": 70418,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "model",
+        "records"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "83355f2"
+    },
+    {
+      "path": "routes/gtu/fleet/gtu_fleet_sgt400.json",
+      "track": "gas-turbine",
+      "kind": "данные",
+      "bytes": 63239,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "model",
+        "maker",
+        "collected",
+        "common",
+        "records"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "83355f2"
+    },
+    {
+      "path": "routes/gtu/fleet/gtu_fleet_sgt500.json",
+      "track": "gas-turbine",
+      "kind": "данные",
+      "bytes": 42122,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "model",
+        "maker",
+        "collected",
+        "records",
+        "changes",
+        "unverified"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "83355f2"
+    },
+    {
+      "path": "routes/gtu/fleet/gtu_fleet_sgta05.json",
+      "track": "gas-turbine",
+      "kind": "данные",
+      "bytes": 69078,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "model",
+        "maker",
+        "collected",
+        "common",
+        "records"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "83355f2"
+    },
+    {
+      "path": "routes/gtu/fleet/gtu_fleet_taurus60.json",
+      "track": "gas-turbine",
+      "kind": "данные",
+      "bytes": 30850,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "model",
+        "records"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "83355f2"
+    },
+    {
+      "path": "routes/gtu/fleet/gtu_fleet_taurus65.json",
+      "track": "gas-turbine",
+      "kind": "данные",
+      "bytes": 17070,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "model",
+        "records"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "83355f2"
+    },
+    {
+      "path": "routes/gtu/fleet/gtu_fleet_taurus70.json",
+      "track": "gas-turbine",
+      "kind": "данные",
+      "bytes": 38988,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "model",
+        "records"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "83355f2"
+    },
+    {
+      "path": "routes/gtu/fleet/gtu_fleet_titan130.json",
+      "track": "gas-turbine",
+      "kind": "данные",
+      "bytes": 22308,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "model",
+        "records"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "83355f2"
     },
     {
       "path": "routes/gtu/gtu_cycle_results.json",
@@ -3244,7 +3464,7 @@
       "path": "routes/gtu/gtu_family_results.json",
       "track": "gas-turbine",
       "kind": "результат расчёта",
-      "bytes": 82051,
+      "bytes": 76547,
       "referenced_in_site": false,
       "produced_by": "routes/gtu_family.py",
       "shape": "объект",
@@ -3268,7 +3488,7 @@
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "98bd6ff"
+      "last_commit": "83355f2"
     },
     {
       "path": "routes/gtu/gtu_point_results.json",
