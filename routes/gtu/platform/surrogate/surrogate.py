@@ -251,6 +251,9 @@ class MLPEnsemble:
 
     def _select_alpha(self, U, Ys, cols):
         from sklearn.model_selection import KFold
+        if len(U) < 4:
+            raise ValueError(f"alpha='auto' (4-кратная проверка) требует не меньше 4 точек, а их {len(U)}; "
+                             "задайте alpha числом")
         splits = list(KFold(4, shuffle=True, random_state=self.seed).split(U))
         jobs, keys = [], []
         for ci, c in enumerate(cols):
@@ -345,11 +348,18 @@ class Surrogate:
                 self.models[kind] = GPModel(**kw).fit(U, Ys)
             else:
                 raise ValueError(f"неизвестный вид модели: {kind}")
-        # изученная область: прямоугольник по данным и типичное расстояние между соседями
+        # изученная область: прямоугольник по данным и типичное расстояние между соседями.
+        # Расстояние — по различным точкам: повторы (пересчёт той же точки) дают нулевого соседа,
+        # и при половине повторов медиана стала бы 0 — штраф за дыры приковал бы оптимум к данным.
         self.box_lo, self.box_hi = X.min(0), X.max(0)
-        self.tree = cKDTree(self._ub(X))
-        dnn = self.tree.query(self._ub(X), k=2)[0][:, 1]
-        self.nn_med = float(np.median(dnn))
+        Ub = self._ub(X)
+        self.tree = cKDTree(Ub)
+        Uu = np.unique(np.round(Ub, 12), axis=0)
+        self.n_unique = int(len(Uu))
+        if self.n_unique >= 2:
+            self.nn_med = float(np.median(cKDTree(Uu).query(Uu, k=2)[0][:, 1]))
+        else:
+            self.nn_med = 1.0
         return self
 
     def _ub(self, X):
@@ -394,7 +404,7 @@ class Surrogate:
 
     def describe(self):
         return dict(inputs=self.space.bounds(), outputs=self.outputs, n=len(self.X),
-                    log=[o for o, f in zip(self.outputs, self.log) if f],
+                    n_unique=getattr(self, "n_unique", None), log=[o for o, f in zip(self.outputs, self.log) if f],
                     studied=dict(zip(self.space.names, zip(self.box_lo.tolist(), self.box_hi.tolist()))),
                     nn_median_unit=self.nn_med, noise_sd_gp=self.noise_sd(),
                     models={k: m.describe() for k, m in self.models.items()},
@@ -470,7 +480,8 @@ def block_cv(X, Y, space, outputs, n_folds=5, groups="kmeans", n_blocks=20, kind
 
 
 # ======================================================================= оптимизация
-_CON = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*(>=|<=)\s*([-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?)\s*$")
+_CON = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*(>=|<=)\s*"
+                  r"([-+]?(?:[0-9]+\.?[0-9]*|\.[0-9]+)(?:[eE][-+]?[0-9]+)?)\s*$")
 
 
 def parse_constraint(c):
@@ -481,6 +492,19 @@ def parse_constraint(c):
     if not m:
         raise ValueError(f"ограничение не разобрано: {c!r} (формат: имя>=число или имя<=число)")
     return m.group(1), m.group(2), float(m.group(3))
+
+
+def _check_task(sur, objective, kind, constraints):
+    """проверка цели, вида модели и имён в ограничениях; возвращает разобранные ограничения"""
+    if objective not in sur.outputs:
+        raise ValueError(f"цель {objective!r} не среди показателей {sur.outputs}")
+    if kind not in sur.models:
+        raise ValueError(f"модель {kind!r} не обучена")
+    cons = [parse_constraint(c) for c in constraints]
+    for name, _, _ in cons:
+        if name not in sur.outputs and name not in sur.space.names:
+            raise ValueError(f"ограничение по неизвестной величине {name!r}")
+    return cons
 
 
 def _full(sur, fixed):
@@ -534,15 +558,8 @@ def optimize(sur, objective, maximize=True, constraints=(), fixed=None, kind="ml
     at_edge — оси, по которым без штрафа за край модель ушла бы дальше (оптимум упирается в край
     изученной области; истинный может лежать снаружи). tol — допуск цели (см. _tol).
     Возвращает словарь: точка, прогноз обеих моделей, флаги, сведения о поиске."""
-    if objective not in sur.outputs:
-        raise ValueError(f"цель {objective!r} не среди показателей {sur.outputs}")
-    if kind not in sur.models:
-        raise ValueError(f"модель {kind!r} не обучена")
+    cons = _check_task(sur, objective, kind, constraints)
     sign = 1.0 if maximize else -1.0
-    cons = [parse_constraint(c) for c in constraints]
-    for name, _, _ in cons:
-        if name not in sur.outputs and name not in sur.space.names:
-            raise ValueError(f"ограничение по неизвестной величине {name!r}")
     free, base = _full(sur, fixed)
     if not free:
         raise ValueError("все входы закреплены — оптимизировать нечего")
@@ -675,11 +692,18 @@ def propose(sur, k, objective, maximize=True, constraints=(), fixed=None, kind="
     Когда EI исчезает везде (максимум меньше 1e-6 СКО цели — уточнённый believer-точками район
     модели уже нечего улучшать), точка берётся по верхней доверительной границе
     sign*mu + beta*sigma среди кандидатов с вероятностью выполнить ограничения >= 0,5
-    (режим 'ucb' в строке результата), а не по шуму в EI."""
-    cons = [parse_constraint(c) for c in constraints]
+    (режим 'ucb' в строке результата), а не по шуму в EI.
+    В строке результата: mode — ei | ucb | pof; acq — значение критерия, по которому выбрана точка
+    (EI*PoF, sign*mu + beta*sigma или PoF — единицы разные); ei — EI*PoF в единицах цели при любом
+    режиме (0, если допустимых кандидатов нет): по нему и судят, исчерпан ли дорасчёт."""
+    cons = _check_task(sur, objective, kind, constraints)
+    if domain not in ("bounds", "studied"):
+        raise ValueError(f"domain: bounds или studied, а не {domain!r}")
     sign = 1.0 if maximize else -1.0
     io = sur.outputs.index(objective)
     free, base = _full(sur, fixed) if domain == "studied" else _free_nominal(sur, fixed)
+    if not free:
+        raise ValueError("все входы закреплены — выбирать нечего")
     lo = sur.box_lo if domain == "studied" else sur.space.lo
     hi = sur.box_hi if domain == "studied" else sur.space.hi
     rng = np.random.default_rng(seed)
@@ -713,6 +737,7 @@ def propose(sur, k, objective, maximize=True, constraints=(), fixed=None, kind="
             acq = expected_improvement(mu[:, io], sd[:, io], best, xi, maximize) * pof
         else:
             best, acq = None, pof.copy()
+        eipof = acq.copy() if best is not None else np.zeros(len(Xc))   # EI x PoF, в единицах цели
         banned = np.zeros(len(Xc), bool)
         if chosen:  # не ближе exclude типичных расстояний к уже выбранным точкам порции
             d = cKDTree(sur._ub(np.array(chosen))).query(sur._ub(Xc), k=1)[0]
@@ -727,7 +752,8 @@ def propose(sur, k, objective, maximize=True, constraints=(), fixed=None, kind="
         i = int(np.argmax(acq))
         x = Xc[i].copy()
         chosen.append(x)
-        rows.append(dict(x=dict(zip(sur.space.names, x.tolist())), mode=mode, acq=float(acq[i]), pof=float(pof[i]),
+        rows.append(dict(x=dict(zip(sur.space.names, x.tolist())), mode=mode, acq=float(acq[i]),
+                         ei=float(eipof[i]), pof=float(pof[i]),
                          best=best, pred={o: dict(mean=float(mu[i, j]), sd=float(sd[i, j]))
                                           for j, o in enumerate(sur.outputs)}))
         if kind == "gp":  # Kriging believer: точка входит в модель со своим прогнозом
@@ -740,6 +766,9 @@ def propose(sur, k, objective, maximize=True, constraints=(), fixed=None, kind="
 def _free_nominal(sur, fixed):
     fixed = dict(fixed or {})
     names = sur.space.names
+    unknown = [k for k in fixed if k not in names]
+    if unknown:
+        raise ValueError(f"нет таких входов: {unknown}")
     for k, v in fixed.items():
         j = names.index(k)
         if not (sur.space.lo[j] <= v <= sur.space.hi[j]):
@@ -784,13 +813,20 @@ def read_table(path, inputs, outputs, group_col=None):
 
 
 def write_table(path, X, names, extra=None):
-    """X (n, d) с именами столбцов names + необязательные столбцы extra {имя: массив}"""
+    """X (n, d) с именами столбцов names + необязательные столбцы extra {имя: массив};
+    нечисловые значения (например, режим выбора точки) пишутся как текст"""
     extra = extra or {}
     with open(path, "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
         w.writerow(list(names) + list(extra))
         for i, row in enumerate(np.asarray(X, float)):
-            w.writerow([f"{v:.10g}" for v in row] + [f"{float(extra[c][i]):.10g}" for c in extra])
+            w.writerow([f"{v:.10g}" for v in row] + [_cell(extra[c][i]) for c in extra])
+
+
+def _cell(v):
+    if isinstance(v, str):
+        return v
+    return f"{float(v):.10g}"
 
 
 # ======================================================================= командная строка
@@ -923,7 +959,8 @@ def main(argv=None):
     if args.out:
         io = args.objective
         write_table(args.out, Xn, sur.space.names,
-                    {"acq": [r["acq"] for r in rows], "pof": [r["pof"] for r in rows],
+                    {"mode": [r["mode"] for r in rows], "acq": [r["acq"] for r in rows],
+                     "ei": [r["ei"] for r in rows], "pof": [r["pof"] for r in rows],
                      f"pred_{io}": [r["pred"][io]["mean"] for r in rows],
                      f"sd_{io}": [r["pred"][io]["sd"] for r in rows]})
     print(json.dumps(rows, ensure_ascii=False, indent=1))
@@ -931,4 +968,9 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    # Запуск скриптом: классы иначе попали бы в model.joblib как __main__.Surrogate, и модель,
+    # сохранённая `python surrogate.py fit`, не грузилась бы через `import surrogate`.
+    # Поэтому работаем через модуль, импортированный под своим именем.
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import surrogate as _mod
+    sys.exit(_mod.main())

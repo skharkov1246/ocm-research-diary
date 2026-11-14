@@ -39,7 +39,7 @@
     0.8585853739760367
    ]
   },
-  "fit_seconds": 12.7,
+  "fit_seconds": 40.4,
   "data_seconds": 0.6,
   "model": {
    "inputs": {
@@ -62,6 +62,7 @@
     "D2"
    ],
    "n": 200,
+   "n_unique": 200,
    "log": [
     "D2"
    ],
@@ -79,7 +80,7 @@
      318.02439348167576
     ]
    },
-   "nn_median_unit": 0.11776731889032048,
+   "nn_median_unit": 0.11776731888994588,
    "noise_sd_gp": {
     "eta": 0.002566108609871267,
     "PR": 0.024100821153933607,
@@ -258,7 +259,7 @@
   "folds": 5,
   "blocks": 20,
   "groups": "kmeans",
-  "seconds": 52.3,
+  "seconds": 146.6,
   "metrics": {
    "mlp": {
     "eta": {
@@ -377,14 +378,14 @@
    "flags": [],
    "at_edge": [],
    "notes": [],
-   "nn_ratio": 0.8504828073970473,
+   "nn_ratio": 0.8504828073997526,
    "de": {
     "success": true,
     "message": "Optimization terminated successfully.",
     "nfev": 103,
     "nit": 57,
     "fun": -47.347012763796826,
-    "seconds": 0.34
+    "seconds": 0.47
    }
   },
   "B_core130_D040/mlp": {
@@ -432,14 +433,14 @@
    "flags": [],
    "at_edge": [],
    "notes": [],
-   "nn_ratio": 1.2467994958307893,
+   "nn_ratio": 1.2467994958347552,
    "de": {
     "success": true,
     "message": "Optimization terminated successfully.",
     "nfev": 118,
     "nit": 81,
     "fun": -47.30039366325716,
-    "seconds": 0.43
+    "seconds": 0.42
    }
   },
   "C_taurus60/mlp": {
@@ -488,14 +489,14 @@
    "flags": [],
    "at_edge": [],
    "notes": [],
-   "nn_ratio": 0.9014768010594072,
+   "nn_ratio": 0.9014768010622747,
    "de": {
     "success": true,
     "message": "Optimization terminated successfully.",
     "nfev": 144,
     "nit": 80,
     "fun": -46.01946640763334,
-    "seconds": 0.52
+    "seconds": 0.5
    }
   },
   "A_core130/gp": {
@@ -542,14 +543,14 @@
    "flags": [],
    "at_edge": [],
    "notes": [],
-   "nn_ratio": 1.005543910909394,
+   "nn_ratio": 1.0055439109125925,
    "de": {
     "success": true,
     "message": "Optimization terminated successfully.",
     "nfev": 96,
     "nit": 53,
     "fun": -47.327681608235665,
-    "seconds": 0.23
+    "seconds": 0.22
    }
   },
   "B_core130_D040/gp": {
@@ -597,14 +598,14 @@
    "flags": [],
    "at_edge": [],
    "notes": [],
-   "nn_ratio": 1.2454073255303655,
+   "nn_ratio": 1.245407325534327,
    "de": {
     "success": true,
     "message": "Optimization terminated successfully.",
     "nfev": 113,
     "nit": 79,
     "fun": -47.30839335443201,
-    "seconds": 0.26
+    "seconds": 0.27
    }
   },
   "C_taurus60/gp": {
@@ -653,14 +654,14 @@
    "flags": [],
    "at_edge": [],
    "notes": [],
-   "nn_ratio": 0.9096304858011497,
+   "nn_ratio": 0.9096304858040432,
    "de": {
     "success": true,
     "message": "Optimization terminated successfully.",
     "nfev": 115,
     "nit": 78,
     "fun": -46.02587735263597,
-    "seconds": 0.24
+    "seconds": 0.25
    }
   }
  },
@@ -704,6 +705,7 @@
     },
     "mode": "ei",
     "acq": 0.00024110017761109383,
+    "ei": 0.00024110017761109383,
     "pof": 0.9313679149483973,
     "best": 0.8591282374096246,
     "pred": {
@@ -729,6 +731,7 @@
     },
     "mode": "ei",
     "acq": 2.4691025844012095e-05,
+    "ei": 2.4691025844012095e-05,
     "pof": 0.9097964739788482,
     "best": 0.8591282374096211,
     "pred": {
@@ -754,6 +757,7 @@
     },
     "mode": "ei",
     "acq": 3.299360719736683e-07,
+    "ei": 3.299360719736683e-07,
     "pof": 0.9984982732611847,
     "best": 0.8591282374096373,
     "pred": {
@@ -779,6 +783,7 @@
     },
     "mode": "ucb",
     "acq": 0.8587760061691626,
+    "ei": 9.153227414448048e-11,
     "pof": 1.0,
     "best": 0.8591282374096445,
     "pred": {
@@ -804,6 +809,7 @@
     },
     "mode": "ucb",
     "acq": 0.8583920530154592,
+    "ei": 3.1824788648743296e-13,
     "pof": 1.0,
     "best": 0.8591282374096473,
     "pred": {
@@ -829,6 +835,7 @@
     },
     "mode": "ucb",
     "acq": 0.8578268555947131,
+    "ei": 1.0281640698098868e-39,
     "pof": 1.0,
     "best": 0.8591282374096362,
     "pred": {
@@ -854,6 +861,7 @@
     },
     "mode": "ucb",
     "acq": 0.8577767537736155,
+    "ei": 2.212627598811949e-91,
     "pof": 1.0,
     "best": 0.8591282374096492,
     "pred": {
@@ -879,6 +887,7 @@
     },
     "mode": "ucb",
     "acq": 0.8576888426439443,
+    "ei": 1.4502401849672235e-212,
     "pof": 1.0,
     "best": 0.8591282374096645,
     "pred": {
@@ -898,7 +907,7 @@
    }
   ],
   "min_dist_unit": 0.06280029087095916,
-  "nn_med_unit": 0.11776731889032048,
+  "nn_med_unit": 0.11776731888994588,
   "true": [
    [
     0.8584321998888352,
@@ -953,6 +962,14 @@
    "direct_eta": 0.8584839453678901
   },
   "before_direct_eta": 0.8583325236991637
+ },
+ "robustness": {
+  "dup_nn_med": 0.14904546242386135,
+  "dup_opt": {
+   "x": 0.3014061260180373,
+   "y": 0.6012477693239874
+  },
+  "dup_flags": []
  },
  "versions": {
   "sklearn": "1.9.1",
