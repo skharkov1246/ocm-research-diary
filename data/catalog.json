@@ -4,12 +4,12 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 359,
-    "total_bytes": 3358205,
-    "results_files": 166,
-    "results_with_script": 46,
+    "datasets": 362,
+    "total_bytes": 3688547,
+    "results_files": 167,
+    "results_with_script": 47,
     "results_referenced_in_site": 22,
-    "results_with_provenance_fields": 18,
+    "results_with_provenance_fields": 19,
     "by_track": {
       "ammonia": 91,
       "battery-cathode": 1,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 40,
+      "не определён": 43,
       "прочее": 25
     }
   },
@@ -6556,7 +6556,7 @@
       "path": "routes/gtu/frame3/frame3_point_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 31369,
+      "bytes": 32463,
       "referenced_in_site": false,
       "produced_by": "routes/frame3_point.py",
       "shape": "объект",
@@ -6585,7 +6585,7 @@
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "0aa29fd"
+      "last_commit": "55d1e8c"
     },
     {
       "path": "routes/gtu/platform/aws/iam_policy_addendum.json",
@@ -6679,6 +6679,21 @@
       "last_commit": "4e68edf"
     },
     {
+      "path": "routes/gtu/platform/su2/aws_job.example.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 768,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "defaults",
+        "jobs"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "55d1e8c"
+    },
+    {
       "path": "routes/gtu/platform/surrogate/test_surrogate_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
@@ -6704,6 +6719,29 @@
       "last_change": "2026-11-14",
       "last_author": "Claude",
       "last_commit": "4ba862b"
+    },
+    {
+      "path": "routes/gtu/shaft/data/solar_available_power_taurus60.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 3200,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "method",
+        "software",
+        "date",
+        "GS",
+        "MD"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "55d1e8c"
     },
     {
       "path": "routes/gtu/shaft/maps/npss_axi5.json",
@@ -6762,11 +6800,12 @@
       "last_commit": "0aa29fd"
     },
     {
-      "path": "routes/gtu/validation/validation_balances_results.json",
+      "path": "routes/gtu/validation/balances_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
       "bytes": 11095,
       "referenced_in_site": false,
+      "produced_by": "routes/balances.py",
       "shape": "объект",
       "top_keys": [
         "method",
@@ -6784,7 +6823,48 @@
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "0847bb3"
+      "last_commit": "55d1e8c"
+    },
+    {
+      "path": "routes/gtu/validation/validation_fleet_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 325280,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "method",
+        "software",
+        "date",
+        "inputs",
+        "units",
+        "definitions",
+        "primary_variant",
+        "runtime_s",
+        "config",
+        "calibration_sets",
+        "summary",
+        "groups_primary_independent",
+        "groups_coolT41_independent",
+        "generator_drive_pairs_summary",
+        "trends_primary_independent",
+        "trends_coolT41_independent",
+        "single_shaft_duct_effect",
+        "generator_drive_pairs",
+        "sensitivity_cycle",
+        "sensitivity_recup",
+        "breaks_primary",
+        "recuperated",
+        "records"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "55d1e8c"
     },
     {
       "path": "routes/halogen_Br.json",
