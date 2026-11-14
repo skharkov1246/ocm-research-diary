@@ -16,7 +16,7 @@
 | `bench.toml` | одна задача, критерии сходимости, допуски, правила решения, 8 конфигураций |
 | `bench_parse.py` | разбор журналов SU2 по конфигурациям → `bench_summary.csv`, `bench_compare.csv` |
 | `break_even.py` | тарифы (`tariffs`), сетки (`mesh`), порог окупаемости (`compute`) → `break_even.json` |
-| `test_bench.py` | 17 тестов на придуманных журналах (SYNTHETIC) |
+| `test_bench.py` | 18 тестов на придуманных журналах (SYNTHETIC) |
 
 ## 1. Что умеют наши решатели на GPU (проверено по первоисточникам)
 

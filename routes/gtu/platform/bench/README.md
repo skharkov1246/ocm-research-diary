@@ -16,7 +16,7 @@
 | `tariffs_us-east-1.json` | тарифы us-east-1 и eu-north-1 от 14.11.2026 с sha256 исходных файлов |
 | `mesh_stats.json` | узлы и рёбра сеток узла geom (core130 coarse/medium, taurus60 coarse) |
 | `break_even.json` | порог S* по парам GPU × CPU × рынок, доля ядра по Амдалу, оценка видеопамяти и обмена, упор в полосу памяти, сверка с цифрами задания |
-| `test_bench.py` | 17 тестов на придуманных журналах (SYNTHETIC) |
+| `test_bench.py` | 18 тестов на придуманных журналах (SYNTHETIC) |
 
 ```bash
 python3 -m pytest -q test_bench.py

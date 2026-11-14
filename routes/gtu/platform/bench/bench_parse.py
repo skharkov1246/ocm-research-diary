@@ -354,13 +354,22 @@ def parse_run(run_dir: Path, case: dict, conv: dict, time_kind: str | None = Non
     if log["rss_kb"]:
         out["cpu_peak_rss_sum_GiB"] = sum(log["rss_kb"]) * 1024 / 2**30
         out["cpu_peak_rss_max_GiB"] = max(log["rss_kb"]) * 1024 / 2**30
-    gm = [parse_gpu_mem(p) for p in sorted(run_dir.glob("gpu_mem*.csv"))]
+    gm, ns = [], []
+    for pth in sorted(run_dir.glob("gpu_mem*.csv")):
+        try:
+            gm.append(parse_gpu_mem(pth))
+        except (ParseError, ValueError, StopIteration) as e:
+            notes.append(f"не разобран {pth.name}: {e}")
+    for pth in sorted(run_dir.glob("nsys_mem*.csv")):
+        try:
+            ns.append(parse_nsys_mem(pth))
+        except (ParseError, ValueError, KeyError) as e:
+            notes.append(f"не разобран {pth.name}: {e}")
     if gm:
         peaks = [g["peak_MiB"] for g in gm if g["peak_MiB"] is not None]
         utils = [g["util_mean"] for g in gm if g["util_mean"] is not None]
         out["gpu_peak_mem_GiB"] = max(peaks) / 1024 if peaks else None
         out["gpu_util_mean_pct"] = statistics.mean(utils) if utils else None
-    ns = [parse_nsys_mem(p) for p in sorted(run_dir.glob("nsys_mem*.csv"))]
     if ns:
         out["htod_s"] = sum(n["htod_s"] for n in ns)
         out["dtoh_s"] = sum(n["dtoh_s"] for n in ns)

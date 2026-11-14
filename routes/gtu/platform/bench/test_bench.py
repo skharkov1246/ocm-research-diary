@@ -181,6 +181,13 @@ def test_log_and_aux_files(tmp_path):
     assert r["machine_s"] == pytest.approx(1800.0)
 
 
+def test_bad_aux_file_is_noted_not_fatal(tmp_path):
+    d = make_run(tmp_path / "run")
+    (d / "gpu_mem_SYNTHETIC.csv").write_text("timestamp, temperature.gpu\n2026/11/14, 40\n", encoding="utf-8")
+    r = bp.parse_run(d, CASE, CONV)
+    assert r["status"] == "ok" and "gpu_mem_SYNTHETIC.csv" in r["notes"] and r.get("gpu_peak_mem_GiB") is None
+
+
 def test_diverged_nan(tmp_path):
     d = make_run(tmp_path / "run", n=50)
     txt = (d / "history_SYNTHETIC.csv").read_text(encoding="utf-8").splitlines()

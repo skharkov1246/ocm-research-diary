@@ -196,14 +196,17 @@ def estimate_p_out(d1: dict, frac: float, r_out: float, b_out: float, gamma: flo
     m = d1["m"] * frac
     A = 2 * math.pi * r_out * b_out
     cm, p = 0.0, p02
-    for _ in range(50):
+    for _ in range(200):
         T = T02 - (ct ** 2 + cm ** 2) / (2 * cp)
+        if T <= 0:  # неразрывность на r_out невыполнима (запирание): без проверки сюда шло комплексное число
+            raise ValueError(f"оценка p_вых: при расходе {m:.3g} кг/с и ширине {b_out:.4g} м на r = {r_out:.4g} м "
+                             "дозвукового решения нет — задайте давление явно (--p-out)")
         p = p02 * (T / T02) ** k
         cm_new = m / (p / (R * T) * A)
         if abs(cm_new - cm) < 1e-6:
-            break
+            return p
         cm = cm_new
-    return p
+    raise ValueError("оценка p_вых не сошлась за 200 итераций (близко к запиранию) — задайте --p-out")
 
 
 # ----------------------------------------------------------------------------------------------
@@ -264,17 +267,60 @@ def mpi_cmd(np_: int, exe: str, cfg: str, extra: list[str] | None = None):
 _CHILD = {"pgid": None, "signal": None}
 
 
-def _kill_child(signum, frame):  # noqa: ARG001
-    """SIGTERM/SIGINT/SIGHUP самому run_case.py (timeout, runner.py, Ctrl-C) гасит и группу SU2:
-    SU2 запущен в своей сессии (start_new_session) и сам по себе сигнал родителя не получит.
-    Если SU2 идёт — он получает SIGTERM (SU2 v8.6.0 на нём дописывает рестарт и выходит, проверено),
-    стадия помечается «terminated», итог прогона записывается; иначе выход сразу."""
-    _CHILD["signal"] = signum
-    if _CHILD["pgid"]:
+def _su2_pids(root: int) -> list[int]:
+    """PID процессов SU2_CFD среди root и его потомков (ранги MPI под mpirun или сам SU2 без mpirun).
+    Читает /proc (Linux); если /proc нет — пустой список."""
+    try:
+        names = [d for d in os.listdir("/proc") if d.isdigit()]
+    except OSError:
+        return []
+    ppid, comm = {}, {}
+    for d in names:
         try:
-            os.killpg(_CHILD["pgid"], signal.SIGTERM)
+            with open(f"/proc/{d}/stat", "rb") as f:
+                st = f.read().decode("utf-8", "replace")
+        except OSError:
+            continue
+        a, b = st.find("("), st.rfind(")")
+        comm[int(d)] = st[a + 1:b]
+        ppid[int(d)] = int(st[b + 2:].split()[1])
+    tree, todo = {root}, [root]
+    while todo:
+        cur = todo.pop()
+        for pid, par in ppid.items():
+            if par == cur and pid not in tree:
+                tree.add(pid)
+                todo.append(pid)
+    return sorted(pid for pid in tree if comm.get(pid, "").startswith("SU2_CFD"))
+
+
+def _stop_su2(root: int):
+    """Мягкий останов SU2: SIGTERM самим процессам SU2_CFD, а не mpirun. SU2 v8.6.0 на SIGTERM доводит
+    итерацию до конца (флаг останова сводится между рангами, COutput::GetConvergence), пишет рестарт и выходит.
+    mpirun OpenMPI 4.1.6 на SIGTERM добивает ранги SIGKILL через odls_base_sigkill_timeout = 1 с: при
+    итерации дольше секунды рестарт не записывался (прогон В и проверка 14.11.2026). Нет процессов SU2_CFD
+    в дереве (или нет /proc) — SIGTERM всей группе, как раньше."""
+    pids = _su2_pids(root)
+    for pid in pids:
+        try:
+            os.kill(pid, signal.SIGTERM)
         except ProcessLookupError:
             pass
+    if not pids:
+        try:
+            os.killpg(root, signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+
+
+def _kill_child(signum, frame):  # noqa: ARG001
+    """SIGTERM/SIGINT/SIGHUP самому run_case.py (timeout, runner.py, Ctrl-C) останавливает и SU2:
+    SU2 запущен в своей сессии (start_new_session) и сам по себе сигнал родителя не получит.
+    Если SU2 идёт — его процессы получают SIGTERM (_stop_su2: рестарт дописывается), стадия помечается
+    «terminated», итог прогона записывается; иначе выход сразу."""
+    _CHILD["signal"] = signum
+    if _CHILD["pgid"]:
+        _stop_su2(_CHILD["pgid"])
         return
     raise SystemExit(128 + signum)
 
@@ -303,7 +349,7 @@ def run_limited(cmd, cwd, log_path, deadline, env=None):
             if _CHILD["signal"]:
                 status = "terminated"
         except subprocess.TimeoutExpired:
-            os.killpg(p.pid, signal.SIGTERM)
+            _stop_su2(p.pid)  # ранги дописывают рестарт; mpirun выходит сам, когда они завершились
             try:
                 p.wait(timeout=30)
             except subprocess.TimeoutExpired:
@@ -449,33 +495,46 @@ def parse_log(path: str):
     return o
 
 
-def smoke_checks(stages_out: list, mass_tol: float):
-    """Критерии дымового прогона из задания: нет расхождения, невязки падают, расход вход/выход ±mass_tol."""
+SLOPE_MAX = -0.1  # «невязки падают»: наклон rms[Rho] на второй половине последней стадии, порядков на 100 итераций
+                  # (порог принят здесь, не из документации SU2)
+
+
+def smoke_checks(stages_out: list, mass_tol: float, slope_max: float = SLOPE_MAX):
+    """Критерии дымового прогона из задания: все стадии дошли до конца и нет расхождения, невязки падают
+    (последняя стадия: наклон второй половины <= slope_max и конец ниже максимума стадии), расход вход/выход
+    в пределах mass_tol при прямом течении. Остановленный по лимиту или вручную прогон проверку не проходит,
+    но его история разбирается — видно, сколько прошло."""
     last = next((s for s in reversed(stages_out) if s.get("history", {}).get("rows")), None)
     if not last:
         return {"passed": False, "reason": "нет истории"}
     h = last["history"]
     rho = h["residuals"].get("rms[Rho]", {})
     perf = h.get("performance", {})
-    any_nan = any(s.get("status") == "diverged" for s in stages_out)
+    statuses = [s.get("status") for s in stages_out]
     first_rho = next((s["history"]["residuals"]["rms[Rho]"] for s in stages_out
                       if s.get("history", {}).get("residuals", {}).get("rms[Rho]")), {})
+    slope = rho.get("slope_per_100_last_half")
     c = {
-        "no_divergence": not any_nan,
+        "statuses": statuses,
+        "all_stages_finished": bool(statuses) and all(st == "finished" for st in statuses),
+        "iterations_in_run": sum(s.get("history", {}).get("rows", 0) for s in stages_out),
+        "no_divergence": not any(st == "diverged" for st in statuses),
         "rms_rho_first_stage_start": first_rho.get("first"),
         "rms_rho_last": rho.get("last"),
-        "rms_rho_drop_over_run": (first_rho.get("max", float("nan")) - rho.get("last", float("nan")))
-        if first_rho and rho else None,
-        "rms_rho_slope_last_half_per_100": rho.get("slope_per_100_last_half"),
+        # первая итерация прогона минус последняя: > 0 — упала, < 0 — выросла (рестарт и разгон её поднимают)
+        "rms_rho_drop_over_run": (first_rho["first"] - rho["last"]) if "first" in first_rho and "last" in rho else None,
+        "rms_rho_last_stage_drop_from_max": rho.get("drop_from_max"),
+        "rms_rho_slope_last_half_per_100": slope,
+        "slope_max_per_100": slope_max,
         "mass_imbalance": perf.get("mass_imbalance"),
         "mass_sign_ok": perf.get("mass_sign_ok"),
     }
-    falling = (c["rms_rho_drop_over_run"] or 0) > 0 and (c["rms_rho_slope_last_half_per_100"] or 1) < 0
-    c["residuals_falling"] = bool(falling)
+    c["residuals_falling"] = bool(_finite(slope) and slope <= slope_max and (rho.get("drop_from_max") or 0) > 0)
     c["mass_within_tol"] = bool(_finite(c["mass_imbalance"]) and c["mass_imbalance"] <= mass_tol
                                 and c["mass_sign_ok"])
     c["mass_tol"] = mass_tol
-    c["passed"] = bool(c["no_divergence"] and c["residuals_falling"] and c["mass_within_tol"])
+    c["passed"] = bool(c["all_stages_finished"] and c["no_divergence"] and c["residuals_falling"]
+                       and c["mass_within_tol"])
     return c
 
 
