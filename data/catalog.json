@@ -5,7 +5,7 @@
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
     "datasets": 363,
-    "total_bytes": 3792944,
+    "total_bytes": 3793706,
     "results_files": 168,
     "results_with_script": 47,
     "results_referenced_in_site": 22,
@@ -6803,7 +6803,7 @@
       "path": "routes/gtu/shaft/shaft_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 104397,
+      "bytes": 105159,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -6826,7 +6826,7 @@
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "4724411"
+      "last_commit": "3f6dd21"
     },
     {
       "path": "routes/gtu/validation/balances_results.json",
