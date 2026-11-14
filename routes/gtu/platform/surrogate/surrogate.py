@@ -191,38 +191,44 @@ class MLPEnsemble:
 
     name = "mlp"
 
-    def __init__(self, members=8, hidden=(64, 64), alpha=1e-3, activation="tanh", bootstrap=True,
-                 max_iter=3000, seed=0, n_jobs=1):
+    def __init__(self, members=8, hidden=(64, 64), alpha=1e-2, activation="tanh", bootstrap=True,
+                 per_output=True, max_iter=3000, seed=0, n_jobs=1):
         self.members, self.hidden, self.alpha = members, tuple(hidden), alpha
         self.activation, self.bootstrap, self.max_iter = activation, bootstrap, max_iter
-        self.seed, self.n_jobs = seed, n_jobs
+        self.per_output, self.seed, self.n_jobs = per_output, seed, n_jobs
         self.nets = []
 
     def fit(self, U, Ys):
-        n = len(U)
+        """per_output=True — своя сеть на каждый показатель (у показателей разная гладкость и шум),
+        иначе одна сеть с несколькими выходами"""
+        n, p = Ys.shape
+        cols = [[j] for j in range(p)] if self.per_output else [list(range(p))]
         jobs = []
         for i in range(self.members):
             rng = np.random.default_rng(self.seed + 1000 * i)
             idx = rng.integers(0, n, n) if self.bootstrap else np.arange(n)
-            jobs.append((U[idx], Ys[idx]))
+            for c in cols:
+                yb = Ys[np.ix_(idx, c)]
+                jobs.append((U[idx], yb[:, 0] if len(c) == 1 else yb, self.seed + i))
+        args = (self.hidden, self.alpha, self.activation, self.max_iter)
         if self.n_jobs == 1:
-            self.nets = [_fit_member(a, b, self.hidden, self.alpha, self.activation, self.max_iter, self.seed + i)
-                         for i, (a, b) in enumerate(jobs)]
+            nets = [_fit_member(a, b, *args, sd) for a, b, sd in jobs]
         else:
-            self.nets = joblib.Parallel(n_jobs=self.n_jobs)(
-                joblib.delayed(_fit_member)(a, b, self.hidden, self.alpha, self.activation, self.max_iter, self.seed + i)
-                for i, (a, b) in enumerate(jobs))
+            nets = joblib.Parallel(n_jobs=self.n_jobs)(joblib.delayed(_fit_member)(a, b, *args, sd) for a, b, sd in jobs)
+        self.nets = [nets[i * len(cols):(i + 1) * len(cols)] for i in range(self.members)]
         return self
 
     def predict(self, U, latent=True):
-        P = np.stack([np.asarray(net.predict(2.0 * U - 1.0)).reshape(len(U), -1) for net in self.nets])
+        Z = 2.0 * U - 1.0
+        P = np.stack([np.column_stack([np.asarray(net.predict(Z)).reshape(len(U), -1) for net in member])
+                      for member in self.nets])
         sd = P.std(axis=0, ddof=1) if len(self.nets) > 1 else np.zeros(P.shape[1:])
         return P.mean(axis=0), sd
 
     def describe(self):
         return dict(members=self.members, hidden=list(self.hidden), alpha=self.alpha,
-                    activation=self.activation, bootstrap=self.bootstrap,
-                    iters=[int(net.n_iter_) for net in self.nets])
+                    activation=self.activation, bootstrap=self.bootstrap, per_output=self.per_output,
+                    iters_max=max(int(net.n_iter_) for member in self.nets for net in member))
 
 
 class Surrogate:
@@ -714,7 +720,7 @@ def main(argv=None):
     a.add_argument("--n-blocks", type=int, default=20)
     a.add_argument("--members", type=int, default=8)
     a.add_argument("--hidden", default="64,64")
-    a.add_argument("--alpha", type=float, default=1e-3)
+    a.add_argument("--alpha", type=float, default=1e-2)
     a.add_argument("--jobs", type=int, default=4)
     a.add_argument("--seed", type=int, default=0)
     a.add_argument("--out", required=True)
