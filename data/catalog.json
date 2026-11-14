@@ -5,7 +5,7 @@
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
     "datasets": 339,
-    "total_bytes": 2793552,
+    "total_bytes": 2800485,
     "results_files": 163,
     "results_with_script": 44,
     "results_referenced_in_site": 22,
@@ -6316,7 +6316,7 @@
       "path": "routes/gtu/platform/fea/disk_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 111948,
+      "bytes": 112048,
       "referenced_in_site": false,
       "produced_by": "routes/disk.py",
       "shape": "объект",
@@ -6335,13 +6335,13 @@
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "98bd6ff"
+      "last_commit": "4e68edf"
     },
     {
       "path": "routes/gtu/platform/fea/materials.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 8856,
+      "bytes": 8970,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -6351,13 +6351,13 @@
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "98bd6ff"
+      "last_commit": "4e68edf"
     },
     {
       "path": "routes/gtu/platform/geom/impeller_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 18354,
+      "bytes": 25073,
       "referenced_in_site": false,
       "produced_by": "routes/impeller.py",
       "shape": "объект",
@@ -6370,7 +6370,7 @@
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "d25ab38"
+      "last_commit": "4e68edf"
     },
     {
       "path": "routes/gtu/platform/surrogate/test_surrogate_results.json",
