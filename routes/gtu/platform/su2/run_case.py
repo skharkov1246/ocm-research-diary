@@ -200,13 +200,13 @@ def estimate_p_out(d1: dict, frac: float, r_out: float, b_out: float, gamma: flo
         T = T02 - (ct ** 2 + cm ** 2) / (2 * cp)
         if T <= 0:  # неразрывность на r_out невыполнима (запирание): без проверки сюда шло комплексное число
             raise ValueError(f"оценка p_вых: при расходе {m:.3g} кг/с и ширине {b_out:.4g} м на r = {r_out:.4g} м "
-                             "дозвукового решения нет — задайте давление явно (--p-out)")
+                             "дозвукового решения нет (запирание)")
         p = p02 * (T / T02) ** k
         cm_new = m / (p / (R * T) * A)
         if abs(cm_new - cm) < 1e-6:
             return p
         cm = cm_new
-    raise ValueError("оценка p_вых не сошлась за 200 итераций (близко к запиранию) — задайте --p-out")
+    raise ValueError("оценка p_вых не сошлась за 200 итераций (близко к запиранию)")
 
 
 # ----------------------------------------------------------------------------------------------
@@ -564,6 +564,33 @@ def wall_lines(shroud: str, vaneless: str) -> dict:
     }
 
 
+def validate_plan(plan, iter_scale: float = 1.0) -> list:
+    """Стадии плана с применённым --iter-scale; ошибка — если поля нет или рампа не успевает дойти до конца.
+    SU2 считает внутренние итерации 0..ITER-1 и ставит конечное значение рампы на итерации, равной её длине
+    (CFluidIteration::UpdateRamps): длина рампы >= ITER — частота или давление не дойдут до заданных, а
+    следующая стадия начнёт рампу от заданных, а не от достигнутых."""
+    if not isinstance(plan, list) or not plan:
+        raise SystemExit("план — непустой список стадий")
+    out = []
+    for k, s in enumerate(plan):
+        if not isinstance(s, dict):
+            raise SystemExit(f"стадия {k}: ожидается объект")
+        miss = [f for f in ("name", "frac", "pfrac", "iter") if f not in s]
+        if miss:
+            raise SystemExit(f"стадия {k}: нет полей {miss} (нужны name, frac, pfrac, iter; ramp, pramp, muscl — по желанию)")
+        s = dict(s)
+        s.setdefault("ramp", 0)
+        s["iter"] = max(1, int(round(s["iter"] * iter_scale)))
+        s["ramp"] = int(round(s["ramp"] * iter_scale))
+        if "pramp" in s:
+            s["pramp"] = int(round(s["pramp"] * iter_scale))
+        for f in ("ramp", "pramp"):
+            if s.get(f, 0) >= s["iter"] and s.get(f, 0) > 0:
+                raise SystemExit(f"стадия {s['name']}: {f} = {s[f]} >= iter = {s['iter']} — рампа не дойдёт до конца")
+        out.append(s)
+    return out
+
+
 def build_cfg(tpl: str, params: dict) -> str:
     txt = string.Template(tpl).substitute(params)
     # пустая строка ${SA_OPTIONS} не мешает SU2, но уберём её для чистоты
@@ -633,12 +660,8 @@ def main(argv=None):
     plan = PLANS.get(a.plan)
     if plan is None:
         plan = json.load(open(a.plan, encoding="utf-8"))
-    plan = [dict(s) for s in plan]
+    plan = validate_plan(plan, a.iter_scale)
     for s in plan:
-        s["iter"] = max(1, int(round(s["iter"] * a.iter_scale)))
-        s["ramp"] = int(round(s["ramp"] * a.iter_scale))
-        if "pramp" in s:
-            s["pramp"] = int(round(s["pramp"] * a.iter_scale))
         if a.frac is not None:
             s["frac"] = a.frac
 
@@ -676,7 +699,13 @@ def main(argv=None):
     params.update(FS_P=f"{fs_p:.6g}", FS_T=f"{fs_t:.6g}")
     # радиус выхода области: contours.r_out JSON сетки (в impeller.py — 1,3 r2)
     r_out = float(mj.get("contours", {}).get("r_out", 1.3 * d1["r2"]))
-    p_out_est = estimate_p_out(d1, 1.0, r_out, d1["b2"], gamma, R)
+    try:
+        p_out_est = estimate_p_out(d1, 1.0, r_out, d1["b2"], gamma, R)
+        for st in plan:
+            estimate_p_out(d1, st["frac"], r_out, d1["b2"], gamma, R)
+    except ValueError as e:  # давления всех стадий (и пропорции при --p-out) идут от этой оценки
+        raise SystemExit(f"{e}: для этого случая одномерная оценка давления на выходе не годится, "
+                         "run_case.py его не считает (нужна другая оценка в estimate_p_out)")
 
     su2 = find_su2(a.su2_bin)
     out = os.path.abspath(a.out or os.path.join(HERE, "runs", f"{a.case}_{a.level}_{a.plan if a.plan in PLANS else 'custom'}"))
@@ -745,6 +774,8 @@ def main(argv=None):
             HISTORY_NAME=f"history_{name}", RESTART_NAME=f"restart_{name}.dat", VOLUME_NAME=f"vol_{name}",
             MESH=su2_mesh,
         )
+        if ramp == 0 and abs(frac - prev_frac) > 1e-9:
+            print(f"[{name}] внимание: частота меняется скачком {prev_frac:.2f} -> {frac:.2f} (ramp = 0)", flush=True)
         rot_changes = ramp > 0 and abs(frac - prev_frac) > 1e-9
         p.update(RAMP_ROT="YES" if rot_changes else "NO",
                  RAMP_ROT_INI=f"{omega[2] * prev_frac:.10g}", RAMP_ROT_FREQ=a.ramp_freq, RAMP_ROT_ITER=max(ramp, 1))

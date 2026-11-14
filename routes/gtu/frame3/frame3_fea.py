@@ -389,7 +389,7 @@ def build(pt):
     def add(key, case, meshes=("base", "fine")):
         for mk in meshes:
             nr, nz = MESH[mk]
-            jobs.append(((key, mk), dict(case, mesh=dict(nr=nr, nz=nz), threads=1)))
+            jobs.append((key + (mk,), dict(case, mesh=dict(nr=nr, nz=nz), threads=1)))
 
     # --- колёса компрессора
     for part, sk, double in (("comp1", "stage1", True), ("comp2", "stage2", False)):

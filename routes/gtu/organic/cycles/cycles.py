@@ -476,10 +476,11 @@ def carbon_activity(Y, T, P):
         _GR = ct.Solution("graphite.yaml")
     g = gas()
     g.TPY = T, P, Y
-    gs = g.standard_gibbs_RT
+    pa = g.X * P / ct.one_atm
+    g.TP = T, ct.one_atm          # standard_gibbs_RT в Cantera — при текущем давлении; нужны значения при 1 атм
+    gs = g.standard_gibbs_RT.copy()
     _GR.TP = T, ct.one_atm
     gc = _GR.standard_gibbs_RT[0]
-    pa = g.X * P / ct.one_atm
     KM = math.exp(-(2 * gs[I["H2"]] + gc - gs[I["CH4"]]))
     KB = math.exp(-(gc + gs[I["CO2"]] - 2 * gs[I["CO"]]))
     aM = KM * pa[I["CH4"]] / max(pa[I["H2"]], 1e-30) ** 2

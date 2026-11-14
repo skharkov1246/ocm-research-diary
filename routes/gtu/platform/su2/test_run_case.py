@@ -70,6 +70,53 @@ def test_estimate_p_out_limits_and_monotonic():
     assert m == pytest.approx(D1_FIXTURE["m"], rel=1e-4)
 
 
+def test_estimate_p_out_choked_raises():
+    """Расход, при котором неразрывность на r_out невыполнима: раньше возвращалось комплексное число."""
+    g, R = 1.4, 287.058
+    d = dict(D1_FIXTURE, m=3 * D1_FIXTURE["m"])
+    with pytest.raises(ValueError):
+        rc.estimate_p_out(d, 1.0, 1.3 * d["r2"], d["b2"], g, R)
+
+
+def test_validate_plan():
+    p = rc.validate_plan([dict(name="a", frac=1.0, pfrac=1.0, ramp=80, pramp=160, iter=200)], 1.0)
+    assert p[0]["ramp"] == 80 and p[0]["pramp"] == 160
+    with pytest.raises(SystemExit):  # рампа давления не дойдёт до конца: SU2 считает итерации 0..ITER-1
+        rc.validate_plan([dict(name="a", frac=1.0, pfrac=1.0, ramp=80, pramp=200, iter=200)])
+    with pytest.raises(SystemExit):  # при малом --iter-scale рампа сравнялась с числом итераций
+        rc.validate_plan(rc.PLANS["smoke"], 0.05)
+    with pytest.raises(SystemExit):  # нет pfrac
+        rc.validate_plan([dict(name="a", frac=1.0, ramp=0, iter=10)])
+    for name, plan in rc.PLANS.items():  # штатные планы проходят
+        assert len(rc.validate_plan(plan)) == len(plan), name
+
+
+def test_stop_su2_signals_su2_processes_not_parent(tmp_path):
+    """_stop_su2 находит процессы с именем SU2_CFD среди потомков и шлёт SIGTERM им, а родитель (как mpirun)
+    живёт до их выхода. Вместо SU2 — sleep под именем SU2_CFD (FIXTURE)."""
+    import shutil
+    import subprocess
+    import time
+    fake = tmp_path / "SU2_CFD"
+    fake.symlink_to(shutil.which("sleep"))
+    p = subprocess.Popen(["sh", "-c", f"'{fake}' 60 & '{fake}' 60 & wait; echo parent-done"],
+                         stdout=subprocess.PIPE, text=True, start_new_session=True)
+    try:
+        for _ in range(50):
+            pids = rc._su2_pids(p.pid)
+            if len(pids) == 2:
+                break
+            time.sleep(0.1)
+        assert len(pids) == 2 and p.pid not in pids
+        rc._stop_su2(p.pid)
+        out, _ = p.communicate(timeout=10)
+        assert "parent-done" in out  # родитель не убит сигналом, а дождался детей
+        assert rc._su2_pids(p.pid) == []
+    finally:
+        if p.poll() is None:
+            os.killpg(p.pid, 9)
+
+
 HIST_FIXTURE = (
     '"Time_Iter","Outer_Iter","Inner_Iter","rms[Rho]","rms[RhoE]","Avg_Massflow(inlet)","Avg_Massflow(outlet)",'
     '"Avg_TotalPress(inlet)","Avg_TotalPress(outlet)","Avg_TotalTemp(inlet)","Avg_TotalTemp(outlet)","PRTT","TotTotEff"\n'
@@ -123,6 +170,21 @@ def test_smoke_checks_divergence_fails(tmp_path):
     assert ok["passed"] is True
     bad = rc.smoke_checks([{"status": "diverged", "history": h}], 0.05)
     assert bad["passed"] is False and bad["no_divergence"] is False
+    # остановлен по лимиту или вручную: история разбирается, но проверка не пройдена
+    for st in ("timeout", "terminated"):
+        c = rc.smoke_checks([{"status": st, "history": h}], 0.05)
+        assert c["passed"] is False and c["all_stages_finished"] is False and c["iterations_in_run"] == 40
+
+
+def test_smoke_checks_flat_residual_not_falling(tmp_path):
+    """Как прогон В: невязка после рестарта выросла (-5,06 -> -4,71) и стоит (наклон -0,02 на 100):
+    прежний критерий (макс. первой стадии минус конец > 0) считал это «падает»."""
+    rows = [[0, 0, i, (-5.06 + 0.035 * i) if i < 10 else (-4.71 - 0.0002 * (i - 10)), 1.0,
+             0.64, -0.64, 101325.0, 320000.0, 288.15, 480.0, 3.16, 62.0] for i in range(101)]
+    h = rc.analyse_history(_write_hist(tmp_path, rows), 1.4, 9)
+    c = rc.smoke_checks([{"status": "finished", "history": h}], 0.05)
+    assert c["residuals_falling"] is False and c["passed"] is False
+    assert c["rms_rho_drop_over_run"] < 0  # выросла за прогон
 
 
 LOG_FIXTURE = """Matching the periodic boundary points for marker pair 1.
