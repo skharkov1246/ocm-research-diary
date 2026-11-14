@@ -995,7 +995,9 @@ class Runner:
                 self.ledger.append("launch", run_id=self.cfg.run_id, job=job.name, attempt=attempt, iid=iid,
                                    itype=itype, az=az_act, az_req=az or "", az_rank=act.az_rank,
                                    az_cheapest=cheapest, zones=[[z, round(p, 4)] for z, p in by_price],
-                                   subnet=(subnet or {}).get("id", ""), image=job.image, mode=job.mode,
+                                   # как задана зона (id подсети не пишем: журнал коммитится в открытый репозиторий)
+                                   net=("subnet" if subnet["public"] else "eni") if subnet else ("placement" if az else "auto"),
+                                   image=job.image, mode=job.mode,
                                    spot_usd_h=round(spot, 4), max_usd_h=maxp,
                                    ebs_usd_h=round(self.ebs_usd_h(job), 5), ip_usd_h=self.cfg.ipv4_usd_h,
                                    t_launch=round(now, 1), allot_min=self.allot_min(job))
@@ -1479,7 +1481,7 @@ def main(argv=None) -> int:
             r = Runner(cfg)
             for job in jobs:
                 extra = {"python": f"Python {job.python} (uv)", "system": "системный python3",
-                         "container": f"контейнер {job.container}, container_setup: {len(job.container_setup)} команд"}
+                         "container": f"контейнер {job.container}, команд container_setup: {len(job.container_setup)}"}
                 r.say(f"[задача] {job.name}: образ {job.image}, {extra[job.mode]}, {job.vcpu} vCPU, "
                       f"сторож {job.max_min} мин")
                 st, _ = r.launch(job)

@@ -1,5 +1,5 @@
 {
-  "_comment": "Дополнение к calc/aws_setup/user_policy.json для runner.py (спот, оценка цены, образ Ubuntu 24.04). Применяет владелец с админ-доступом. Заменить REGION и ACCOUNT_ID. Не проверено на живом аккаунте: проверка — runner.py run --dryrun.",
+  "_comment": "Дополнение к calc/aws_setup/user_policy.json для runner.py (спот, оценка цены, образ Ubuntu 24.04; v2 — подсети по умолчанию и поиск образа Canonical). Применяет владелец с админ-доступом. Заменить REGION и ACCOUNT_ID. На 14.11.2026 не применено (живой прогон: AccessDenied на параметр SSM Canonical); runner v2 работает и без него: без DescribeSubnets зона задаётся Placement, без образа Ubuntu — al2023. Проверка — runner.py run без --live.",
   "Version": "2012-10-17",
   "Statement": [
     {
@@ -21,6 +21,13 @@
       "Effect": "Allow",
       "Action": "ssm:GetParameter",
       "Resource": "arn:aws:ssm:REGION::parameter/aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id"
+    },
+    {
+      "Sid": "Ec2DescribeSubnetsImagesRegionPinnedOptional",
+      "Effect": "Allow",
+      "Action": ["ec2:DescribeSubnets", "ec2:DescribeImages"],
+      "Resource": "*",
+      "Condition": { "StringEquals": { "aws:RequestedRegion": "REGION" } }
     }
   ]
 }

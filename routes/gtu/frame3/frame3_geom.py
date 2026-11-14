@@ -168,13 +168,15 @@ def check_su2(path, imp, Z):
                       one_to_one=bool(len(set(mp[n1].tolist())) == len(n1)), triangles_match=tri_match))
 
 
-def check_step(path, solid, double_sided):
-    """STEP колеса читается обратно: одно тело, объём, наибольший радиус и зеркальность по узлам рёбер"""
+def check_step(path, solid, double_sided, threads=4):
+    """STEP колеса читается обратно: одно тело; объём тремя способами (по частям при построении, getMass OCC
+    прочитанного тела, сумма объёмов его тетраэдрической сетки); наибольший радиус; зеркальность по узлам рёбер"""
     import gmsh
     from scipy.spatial import cKDTree
     gmsh.initialize()
     try:
         gmsh.option.setNumber("General.Terminal", 0)
+        gmsh.option.setNumber("General.NumThreads", threads)
         gmsh.model.occ.importShapes(path)
         gmsh.model.occ.synchronize()
         vols = gmsh.model.getEntities(3)
@@ -182,10 +184,28 @@ def check_step(path, solid, double_sided):
         gmsh.option.setNumber("Mesh.MeshSizeMax", 0.004)
         gmsh.model.mesh.generate(1)
         X = gmsh.model.mesh.getNodes()[1].reshape(-1, 3)
+        # объём тетраэдрической сетки (размеры - как в test_impeller.py, проверка 3)
+        gmsh.model.mesh.clear()
+        for k, v in (("Mesh.MeshSizeMax", 0.01), ("Mesh.MeshSizeMin", 0.0004), ("Mesh.MeshSizeFromCurvature", 16),
+                     ("Mesh.Algorithm3D", 10), ("Mesh.MaxNumThreads3D", threads)):
+            gmsh.option.setNumber(k, v)
+        gmsh.model.mesh.generate(3)
+        tags, Xn, _ = gmsh.model.mesh.getNodes()
+        Xn = Xn.reshape(-1, 3)
+        idx = np.zeros(int(tags.max()) + 1, dtype=np.int64)
+        idx[tags.astype(np.int64)] = np.arange(len(tags))
+        _, _, en = gmsh.model.mesh.getElements(3)
+        Tt = idx[np.concatenate(en).astype(np.int64)].reshape(-1, 4)
+        a, b, c, d = (Xn[Tt[:, k]] for k in range(4))
+        Vt = float(np.abs(np.einsum("ij,ij->i", np.cross(b - a, c - a), d - a)).sum() / 6.0)
+        r_max_3d = float(np.hypot(Xn[:, 0], Xn[:, 1]).max())
+        n_tet = int(len(Tt))
     finally:
         gmsh.finalize()
     out = dict(n_volumes=len(vols), volume_occ_step_m3=V, volume_by_parts_m3=solid["volume_m3"],
-               volume_rel_diff=V / solid["volume_m3"] - 1.0, r_max_edge_nodes_m=float(np.hypot(X[:, 0], X[:, 1]).max()),
+               volume_rel_diff=V / solid["volume_m3"] - 1.0, volume_tet_mesh_m3=Vt, n_tet_check=n_tet,
+               volume_tet_rel_diff=Vt / solid["volume_m3"] - 1.0,
+               r_max_edge_nodes_m=float(np.hypot(X[:, 0], X[:, 1]).max()), r_max_tet_nodes_m=r_max_3d,
                z_min_m=float(X[:, 2].min()), z_max_m=float(X[:, 2].max()))
     if double_sided:
         zc = solid["z_mid_plane"]
@@ -219,11 +239,11 @@ def run_stage(key, s, levels, out, threads):
                 d1_comp_stage_not_used_for_geometry={k: d1[k] for k in ("w", "T2", "psi", "psi_euler", "eta_comp_stage",
                                                                         "slip_wiesner", "phi")},
                 geometry=res["geometry"], area=res["area"], contours=res["contours"], warnings=res["warnings"],
-                solid={k: v for k, v in solid.items() if k != "step"},
+                solid={k: v for k, v in solid.items() if k not in ("step", "bbox_occ")},  # рамка OCC грубая
                 solid_file=file_info(res["files"]["impeller_step"]),
                 su2=res["su2"])
             t1 = time.time()
-            res_st["solid_check"] = check_step(res["files"]["impeller_step"], solid, kw["double_sided"])
+            res_st["solid_check"] = check_step(res["files"]["impeller_step"], solid, kw["double_sided"], threads)
             res_st["solid_check"]["t_s"] = round(time.time() - t1, 1)
         t1 = time.time()
         chk = check_su2(res["files"]["passage_su2"], imp, kw["Z"])
@@ -267,10 +287,14 @@ def verdicts(st, s):
                     and abs(c["gap_min_from_blade_nodes_m"] / s["tip_clearance_m"] - 1) < 0.02
                     and L["minSICN"] > 0 and c["mean_ratio_min"] > 0))
     sc = st["solid_check"]
-    v["solid"] = dict(one_body=sc["n_volumes"] == 1, volume_rel_diff=sc["volume_rel_diff"],
-                      r_max_over_r2=sc["r_max_edge_nodes_m"] / (D2 / 2),
-                      ok=bool(sc["n_volumes"] == 1 and abs(sc["volume_rel_diff"]) < 1e-4
+    # допуски: getMass OCC - 1e-3 (точность интегрирования по сложным граням, README узла geom), объём сетки -
+    # 2e-3 (линейные тетраэдры на кривых гранях, как test_impeller.py)
+    v["solid"] = dict(one_body=sc["n_volumes"] == 1, volume_occ_rel_diff=sc["volume_rel_diff"],
+                      volume_tet_rel_diff=sc["volume_tet_rel_diff"], r_max_over_r2=sc["r_max_edge_nodes_m"] / (D2 / 2),
+                      ok=bool(sc["n_volumes"] == 1 and abs(sc["volume_rel_diff"]) < 1e-3
+                              and abs(sc["volume_tet_rel_diff"]) < 2e-3
                               and abs(sc["r_max_edge_nodes_m"] / (D2 / 2) - 1) < 1e-5
+                              and sc["r_max_tet_nodes_m"] < (D2 / 2) * (1 + 1e-6)
                               and (not st["d1"]["double_sided"] or sc["z_symmetry_error_m"] < 1e-6)))
     return v
 
