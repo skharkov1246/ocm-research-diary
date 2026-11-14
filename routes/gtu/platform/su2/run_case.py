@@ -241,16 +241,19 @@ def read_history(path: str):
     if not rows:
         return [], {}
     head = [h.strip().strip('"') for h in rows[0]]
-    data = {h: [] for h in head}
+    first = {}
+    for j, h in enumerate(head):
+        first.setdefault(h, j)  # повторённый заголовок (например, Time(sec)) — берётся первый столбец
+    data = {h: [] for h in first}
     for r in rows[1:]:
         if len(r) != len(head):
             continue  # недописанная строка при остановке по лимиту
-        for h, v in zip(head, r):
+        for h, j in first.items():
             try:
-                data[h].append(float(v))
+                data[h].append(float(r[j]))
             except ValueError:
                 data[h].append(float("nan"))
-    return head, data
+    return list(first), data
 
 
 def _finite(x):
@@ -547,6 +550,11 @@ def main(argv=None):
         summ["stages"].append(rec)
         if su2 is None:
             rec["status"] = "no_su2"
+            continue
+        if a.dry and prev_restart:
+            # SU2_CFD -d читает файл рестарта, а его в сухом прогоне нет: cfg только записан
+            rec.update(status="cfg_only")
+            prev_frac, prev_p = frac, p_target
             continue
         if a.dry:
             rc, status, dt = run_limited([su2, "-d", cfg_name], out, os.path.join(out, f"dry_{name}.log"), deadline,
