@@ -1195,7 +1195,14 @@ def parts(res, hx, tech):
 PR_GRID = [3.0, 3.5, 4.0, 4.5, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.5, 15.0, 17.0, 19.0, 21.0]
 
 
+QUICK = bool(os.environ.get("CYCLES_QUICK"))
+OUT_DIR = SCRATCH if QUICK else HERE
+
+
 def topologies():
+    if QUICK:      # проверка вывода: 12 топологий, вывод — в scratchpad
+        return [dict(rec=r, ic=False, rh=h, ibc=False, pgc="none", tcr=c) for r in (0.0, 0.9) for h in (False, True)
+                for c in ("none", "fh", "steam")]
     L = []
     for rec in (0.0, 0.70, 0.80, 0.85, 0.90, 0.92):
         for ic in (False, True):
@@ -1497,7 +1504,7 @@ def plots(rows, front, ref):
     ax.set_title("KV-3: перебор циклов (печатные теплообменники LPBF), оптимум π")
     ax.legend(fontsize=8, loc="lower right")
     fig.tight_layout()
-    fig.savefig(os.path.join(HERE, "cycles_pareto.png"))
+    fig.savefig(os.path.join(OUT_DIR, "cycles_pareto.png"))
     plt.close(fig)
 
 
@@ -1588,10 +1595,10 @@ def main():
         runtime_s=time.time() - t0,
     )
     out["feed_to_funnels"] = feed(out, rows, front, front_p)
-    json.dump(out, open(os.path.join(HERE, "cycles_results.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1,
+    json.dump(out, open(os.path.join(OUT_DIR, "cycles_results.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1,
               default=_jdef)
     cols = list(rows[0].keys())
-    with open(os.path.join(HERE, "cycles.csv"), "w", newline="", encoding="utf-8") as fh:
+    with open(os.path.join(OUT_DIR, "cycles.csv"), "w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=cols)
         w.writeheader()
         for r in rows:

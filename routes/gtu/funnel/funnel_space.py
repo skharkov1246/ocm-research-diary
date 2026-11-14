@@ -106,7 +106,8 @@ CONT = {   # непрерывные оси: доля 0..1 переводится
     "phi1": "коэффициент расхода G/(ρ·U2·D2²) первой центробежной ступени свободного вала: 0,04-0,12; у вала с частотой пакета - выводится",
     "kcm": "cm2/U2 на выходе колеса - ширина b2: 0,20-0,35",
     "zc": "число основных лопаток колеса компрессора: 7-15",
-    "kUt": "окружная скорость турбины в долях предела материала: 0,75-1,00",
+    "kUt": "окружная скорость турбины в долях предела: 0,75-1,00; предел - меньшее из предела материала и (одновальная схема) "
+           "π·n·Dmax/60, где Dmax - предел отливки, поковки, керамики или камеры принтера",
     "zt": "лопаток рабочего колеса турбины: радиальная 9-17, осевая 30-80 на ступень",
     "zn": "лопаток соплового аппарата: радиальная 12-24, осевая 20-60 на ступень",
     "kUpt": "окружная скорость силовой турбины в долях 380 м/с: 0,85-1,00 (ниже - лопатки последней ступени слишком длинные при частоте пакета)",
@@ -132,18 +133,18 @@ ARCH = {
         mat_tw=["IN718", "Haynes282", "CM247LC"], m_hot=["печать"], m_comb=["печать"], m_case=["печать", "литьё"],
         hot_integral=[1], cartridge=[1])),
     "литой монолит": dict(name="литой монолит: ротор заодно или сварка трением двух отливок", allowed=dict(
-        comp=["1Ц", "2Ц"], turb=["Р"], cool=["U", "N"], rotor_join=["заодно", "сварка"], m_tw=["литьё"], mat_tw=["K418", "CM247LC"],
+        comp=["1Ц", "2Ц"], turb=["Р"], cool=["U", "N", "K"], rotor_join=["заодно", "сварка"], m_tw=["литьё"], mat_tw=["K418", "CM247LC"],
         m_hot=["литьё"], m_comb=["литьё", "обработка"], m_case=["литьё"], hot_integral=[0, 1])),
     "гибрид": dict(name="гибрид литьё + печать: литые колёса и корпуса, печатная горячая часть с печатным охлаждением", allowed=dict(
         cool=["P", "N"], rotor_join=["сварка", "сборный"], m_cw=["поковка", "литьё"], mat_cw=["Ti64"], m_tw=["литьё"],
         m_hot=["печать"], m_comb=["печать"], m_case=["литьё"], hot_integral=[0, 1])),
     "печатный рекуператор": dict(name="печатный рекуператор в корпусе", allowed=dict(
-        comp=["1Ц", "2Ц", "Д"], cool=["U", "N"], recup=["печатный"], recup_integral=[1], m_case=["литьё", "печать"])),
+        comp=["1Ц", "2Ц", "Д"], cool=["U", "N", "P"], recup=["печатный"], recup_integral=[1], m_case=["литьё", "печать"])),
     "керамика": dict(name="керамическая горячая часть (Si3N4, CMC)", allowed=dict(
         comp=["1Ц", "2Ц"], turb=["Р"], cool=["C"], rotor_join=["сборный"], m_cw=["поковка", "литьё"], mat_cw=["Ti64"],
         m_tw=["керамика"], mat_tw=["Si3N4"], m_hot=["керамика"], mat_hot=["CMC"], m_comb=["керамика", "печать"])),
     "кластер": dict(name="кластер малых ядер + общая силовая турбина", allowed=dict(
-        cores=[2, 4], rotors=[2], comp=["1Ц", "2Ц"], inlet=["одно"], turb=["Р"], cool=["U", "N"], recup=["нет"],
+        cores=[2, 4], rotors=[2], comp=["1Ц", "2Ц"], inlet=["одно"], turb=["Р"], cool=["U", "N", "K", "P"], recup=["нет"],
         rotor_join=["заодно", "сварка", "сборный"], m_tw=["литьё", "печать"])),
     "простой ротор": dict(name="предельно простой ротор: одно трансзвуковое колесо + одна турбина", allowed=dict(
         rotors=[1], comp=["1Ц"], nt=[1], cool=["U", "N", "K", "P"], rotor_join=["заодно", "сварка", "сборный"])),
@@ -152,7 +153,7 @@ ARCH = {
     "RDC": dict(name="горение с ростом давления (вращающаяся детонация)", allowed=dict(
         comp=["1Ц", "2Ц", "Д"], cool=["N", "K", "P"], recup=["нет"], comb=["RDC"], m_comb=["печать"])),
     "волновой ротор": dict(name="волновой ротор (ударная волна сжимает газ перед турбиной)", allowed=dict(
-        comp=["1Ц", "Д"], cool=["U", "N", "K"], recup=["нет"], comb=["ВР"], m_comb=["печать", "литьё"])),
+        comp=["1Ц", "Д"], cool=["U", "N", "K", "P"], recup=["нет"], comb=["ВР"], m_comb=["печать", "литьё"])),
 }
 ARCH_KEYS = list(ARCH)
 CAT["arch"] = ARCH_KEYS
@@ -303,6 +304,40 @@ def _E():
 U_MARGIN, ETA_MARGIN = 0.97, 0.03     # запас при выборе верхней границы π: доля предела скорости и снижение КПД (оценка)
 
 
+def d_cap_comp(c):
+    """наибольший диаметр колеса компрессора по способу изготовления (make_model: CAST, FORGE, принтеры), м"""
+    j, m, mat = c["rotor_join"], c["m_cw"], c["mat_cw"]
+    if m == "печать":
+        return MK.largest_print_dim()
+    if j == "заодно":
+        return MK.CAST["rotor_mono"]["max"]
+    if j == "сварка":
+        return MK.CAST["rotor_section"]["max"]
+    kind = "wheel_ti" if mat == "Ti64" else "wheel_al"
+    return (MK.FORGE if m == "поковка" else MK.CAST)[kind]["max"]
+
+
+def d_cap_turb(c):
+    """наибольший диаметр колеса турбины (радиальная - периферия; осевая - средний по ротору заодно), м"""
+    m, j = c["m_tw"], c["rotor_join"]
+    if m == "печать":
+        return MK.largest_print_dim()
+    if m == "керамика":
+        return MK.CERAMIC["turb_radial"]["max"]
+    if j == "заодно":
+        return MK.CAST["rotor_mono"]["max"]
+    if c["turb"] == "Р":
+        return MK.CAST["turb_radial"]["max"] if j == "сборный" else MK.CAST["rotor_section"]["max"]
+    return None
+
+
+def u_cap_size(c, D):
+    """при частоте пакета (одновальная схема) предел диаметра - это предел окружной скорости π·n·D/60"""
+    if D is None or c["rotors"] != 1:
+        return float("inf")
+    return math.pi * target(c["kv"])["n_pkg"] * D / 60.0
+
+
 def pi_max_by_speed(c):
     """наибольшая общая π, при которой каждая ступень укладывается в предел окружной скорости своего материала при
     выбранных коэффициентах работы mu1/mu2 и распределении split (с запасом U_MARGIN, ETA_MARGIN). Нужна, чтобы
@@ -313,7 +348,7 @@ def pi_max_by_speed(c):
     T = E.T0; pmax = []
     for k, (t, mu) in enumerate(zip(typ, mus)):
         mat = c["mat_cw"] if not (c["mat_cw"] == "Al" and k > 0) else "Ti64"
-        Ul = MK.u_limit_comp(mat, c["m_cw"])[0] * U_MARGIN
+        Ul = min(MK.u_limit_comp(mat, c["m_cw"])[0], u_cap_size(c, d_cap_comp(c))) * U_MARGIN
         T2 = E.T_h(E.h(T) + mu * Ul ** 2)
         pis = 3.0
         for _ in range(3):
@@ -452,8 +487,10 @@ def _core(c, comp_out, eta_gg, eta_pt):
 
 
 def turb_speed(c):
+    """окружная скорость турбины: kUt x меньшее из предела материала и предела размера при частоте пакета"""
     U, ub = MK.u_limit_turb(c["turb"], c["mat_tw"], c["t41"])
-    return c["kUt"] * U, U, ub
+    cap = u_cap_size(c, d_cap_turb(c)) * 0.99
+    return c["kUt"] * min(U, cap), U, ub
 
 
 def _radial_stage(t, nt, U):
