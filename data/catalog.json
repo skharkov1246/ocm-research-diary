@@ -4,12 +4,12 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 338,
-    "total_bytes": 2772434,
-    "results_files": 162,
-    "results_with_script": 43,
+    "datasets": 339,
+    "total_bytes": 2793552,
+    "results_files": 163,
+    "results_with_script": 44,
     "results_referenced_in_site": 22,
-    "results_with_provenance_fields": 14,
+    "results_with_provenance_fields": 15,
     "by_track": {
       "ammonia": 91,
       "battery-cathode": 1,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 35,
+      "не определён": 36,
       "прочее": 25
     }
   },
@@ -6371,6 +6371,32 @@
       "last_change": "2026-11-14",
       "last_author": "Claude",
       "last_commit": "d25ab38"
+    },
+    {
+      "path": "routes/gtu/platform/surrogate/test_surrogate_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 21118,
+      "referenced_in_site": false,
+      "produced_by": "routes/test_surrogate.py",
+      "shape": "объект",
+      "top_keys": [
+        "setup",
+        "holdout_vs_truth",
+        "holdout_vs_noisy",
+        "block_cv",
+        "optimize",
+        "studied_region",
+        "next_batch",
+        "versions",
+        "date"
+      ],
+      "provenance_fields": [
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "faa3216"
     },
     {
       "path": "routes/halogen_Br.json",
