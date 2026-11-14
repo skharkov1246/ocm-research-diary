@@ -1096,7 +1096,8 @@ class _FakeEc2:
         attempt = int(re.search(r"GTU_ATTEMPT=(\d+)", p["UserData"]).group(1))
         iid = f"i-{len(self.c.inst) + 1:04d}"
         self.c.inst[iid] = dict(state="running", t=self.c.clock(), job=tags["Job"], attempt=attempt, az=az, key=key,
-                                tags=tags, reason="", uploaded=False, vcpu=R.VCPU[p["InstanceType"]])
+                                tags=tags, reason="", uploaded=False, vcpu=R.VCPU[p["InstanceType"]],
+                                token=p["ClientToken"])
         live = self.c.live()
         self.c.max_live = max(self.c.max_live, len(live))
         self.c.max_vcpu = max(self.c.max_vcpu, sum(i["vcpu"] for i in live))
@@ -1108,6 +1109,8 @@ class _FakeEc2:
         out = []
         for iid, i in self.c.inst.items():
             if "instance-id" in f and iid not in f["instance-id"]:
+                continue
+            if "client-token" in f and i["token"] not in f["client-token"]:
                 continue
             if "tag:RunId" in f and (i["tags"]["RunId"] not in f["tag:RunId"]
                                      or i["state"] not in f["instance-state-name"]):

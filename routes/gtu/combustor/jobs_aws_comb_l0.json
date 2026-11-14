@@ -107,9 +107,13 @@
   "measurements": {
    "cpu_per_variant": [
     {
+     "value_s": 0.55,
+     "how": "time.process_time вокруг comb_crn.evaluate, по одному процессу; 96 вариантов i = 5 (mod 2731) выборки n = 262144; код 39f054d = f3cd3e4 (code_hash 90a15bd14dfa6979, тот же, что в миниатюре): ok 38, отсев 58",
+     "where": "контейнер сессии, 4 общих ядра, python 3.12.16 (uv), cantera 3.2.0, numpy 2.5.3, scipy 1.18.1"
+    },
+    {
      "value_s": 0.553,
-     "how": "time.process_time вокруг comb_crn.evaluate, по одному процессу; 96 вариантов i = 5 (mod 2731) выборки n = 262144 (те же, что в части comb_l0 ниже)",
-     "where": "контейнер сессии, 4 общих ядра, python 3.12.16 (uv), cantera 3.2.0, numpy 2.5.3, scipy 1.18.1; код ветки 51adce7/f92879b (comb_space/comb_crn, code_hash 6749ba46e54e90e5)"
+     "how": "то же на тех же 96 вариантах, прежний код 51adce7 (code_hash 6749ba46e54e90e5); в смету берётся большее из двух"
     },
     {
      "value_s": 0.497,
@@ -121,7 +125,7 @@
     }
    ],
    "pool_wall_note": "comb_l0.py --n 262144 --shards 2731 --shard 5 --workers 4: 96 вариантов за 50,0 с, t_variant_mean 1,95 с - в 3,5 раза больше ЦП-времени тех же вариантов: средняя нагрузка контейнера 12-15 (соседние потоки) на 4 ядрах; для сметы не берётся",
-   "status_mix": "96 вариантов: ok 44, отсев 52; ЦП: ok 3,1 с, отсев 1,0 с в пуле (под нагрузкой)",
+   "status_mix": "96 вариантов (код 51adce7): ok 44, отсев 52; стена в пуле под нагрузкой: ok 3,1 с, отсев 1,0 с",
    "output_size": "часть 96 строк: 425 481 байт JSON, 90 680 байт gzip -6 (x4,69)",
    "setup": "ledger.jsonl (живые прогоны 14.11.2026, al2023 + uv + Python 3.12 + pip cantera/numpy/scipy + клон): запуск -> конец машины 62,5 с (smoke-py), 61,5 и 124 с (l0-debug-m1/m0, вместе со счётом и выгрузкой)",
    "merge_memory": "merge_l0.py, пик ru_maxrss: 125,7 МБ на 64 настоящих строках, 460 МБ на 20 000 синтетических (строки настоящей части, размноженные по индексам) -> ~16,7 КБ на строку; на 262144: ~4.3 ГБ"
@@ -131,5 +135,131 @@
    "disk_ipv4": "ставки раннера (0,08 долл./ГБ-мес gp3, 0,005 долл./ч IPv4) - допущения кода",
    "s3": "0.023 долл./ГБ-мес, выход в интернет 0.09 долл./ГБ - допущения"
   }
+ },
+ "mini_check": {
+  "how": "копия ветки git archive HEAD (только отслеживаемые файлы) в scratch; те же команды задач с n = 96 вместо 262 144 (48 частей и 6 задач - как в боевом пакете, по 2 варианта в части); каждая команда - `bash cmd.sh` из корня копии с GTU_OUT, NPROC = 4, python 3.12 из venv uv; затем команды merge с путями scratch; runner.py plan по мини-файлу",
+  "commit": "39f054d20eaadca6eadd5454d0cdfe4e75d8f5e4",
+  "python": "3.12.16 3.2.0 2.5.3 1.18.1",
+  "jobs": [
+   {
+    "job": "comb-l0-m0",
+    "exit_code": 0,
+    "wall_s": 40.5,
+    "files": 10
+   },
+   {
+    "job": "comb-l0-m1",
+    "exit_code": 0,
+    "wall_s": 34.3,
+    "files": 10
+   },
+   {
+    "job": "comb-l0-m2",
+    "exit_code": 0,
+    "wall_s": 39.0,
+    "files": 10
+   },
+   {
+    "job": "comb-l0-m3",
+    "exit_code": 0,
+    "wall_s": 31.0,
+    "files": 10
+   },
+   {
+    "job": "comb-l0-m4",
+    "exit_code": 0,
+    "wall_s": 34.3,
+    "files": 10
+   },
+   {
+    "job": "comb-l0-m5",
+    "exit_code": 0,
+    "wall_s": 32.7,
+    "files": 10
+   }
+  ],
+  "merge": [
+   {
+    "cmd": "bash -euo pipefail -c 'D=/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/offload/comb-organic/mini/comb_merge_parts; mkdir -p \"$D\"; fin",
+    "exit_code": 0,
+    "wall_s": 0.4,
+    "tail": [
+     "48"
+    ]
+   },
+   {
+    "cmd": "mkdir -p /tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/offload/comb-organic/mini/comb_merged",
+    "exit_code": 0,
+    "wall_s": 0.0,
+    "tail": []
+   },
+   {
+    "cmd": "python3 routes/gtu/combustor/merge_l0.py /tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/offload/comb-organic/mini/comb_merge_parts --o",
+    "exit_code": 0,
+    "wall_s": 1.2,
+    "tail": [
+     "полнота: True; строк 96 из 96; допустимых 42; все жёсткие цели - 0; запись /tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/offload/comb-organic/mini/comb_merged/comb_l0_KV-3_n96_results.json"
+    ]
+   },
+   {
+    "cmd": "python3 -c \"import os,sys; s=os.path.getsize('/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/offload/comb-organic/mini/comb_merged/com",
+    "exit_code": 0,
+    "wall_s": 0.0,
+    "tail": [
+     "109088"
+    ]
+   }
+  ],
+  "merged": {
+   "complete": true,
+   "counts": {
+    "n": 96,
+    "rows": 96,
+    "status": {
+     "отсев": 54,
+     "ok": 42
+    },
+    "reject_codes": {
+     "ВОЗДУХ": 11,
+     "ОХЛАЖДЕНИЕ": 8,
+     "ПОГАСАНИЕ_100": 16,
+     "ЭЛЕМЕНТОВ_НА_ТРУБУ": 4,
+     "ЭЛЕМЕНТ": 4,
+     "ТОПЛИВО": 16,
+     "ДИЗЕЛЬ_ФОРСУНКИ": 2,
+     "ПРОСКОК": 2
+    },
+    "feasible": 42,
+    "hard_ok": 0
+   },
+   "timing": 1.24115
+  },
+  "date": "2026-11-14"
+ },
+ "plan_check": {
+  "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/combustor/jobs_aws_comb_l0.json --assume-price 0.75 --assume-zone-prices us-east-1a=0.9554,us-east-1b=0.7478,us-east-1c=0.7064,us-east-1d=0.8576,us-east-1f=1.1804",
+  "exit_code": 0,
+  "forecast_usd": 7.84,
+  "lines": [
+   "[задача] comb-l0-m0: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 45 мин",
+   "[бюджет] comb-l0-m0 на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 0.00 + новая 1.31 = 1.47 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[зоны] comb-l0-m0 c7a.16xlarge: us-east-1c 0.7064 → us-east-1b 0.7478 → us-east-1d 0.8576 → us-east-1a 0.9554 → us-east-1f 1.1804 (допущение plan); ожидается us-east-1c по 0.7064 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.4165 и бюджет — по максимуму цены за окно",
+   "[задача] comb-l0-m1: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 45 мин",
+   "[бюджет] comb-l0-m1 на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 1.31 + новая 1.31 = 2.78 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[зоны] comb-l0-m1 c7a.16xlarge: us-east-1c 0.7064 → us-east-1b 0.7478 → us-east-1d 0.8576 → us-east-1a 0.9554 → us-east-1f 1.1804 (допущение plan); ожидается us-east-1c по 0.7064 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.4165 и бюджет — по максимуму цены за окно",
+   "[задача] comb-l0-m2: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 45 мин",
+   "[бюджет] comb-l0-m2 на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 2.61 + новая 1.31 = 4.09 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[зоны] comb-l0-m2 c7a.16xlarge: us-east-1c 0.7064 → us-east-1b 0.7478 → us-east-1d 0.8576 → us-east-1a 0.9554 → us-east-1f 1.1804 (допущение plan); ожидается us-east-1c по 0.7064 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.4165 и бюджет — по максимуму цены за окно",
+   "[задача] comb-l0-m3: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 45 мин",
+   "[бюджет] comb-l0-m3 на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 3.92 + новая 1.31 = 5.39 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[зоны] comb-l0-m3 c7a.16xlarge: us-east-1c 0.7064 → us-east-1b 0.7478 → us-east-1d 0.8576 → us-east-1a 0.9554 → us-east-1f 1.1804 (допущение plan); ожидается us-east-1c по 0.7064 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.4165 и бюджет — по максимуму цены за окно",
+   "[задача] comb-l0-m4: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 45 мин",
+   "[бюджет] comb-l0-m4 на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 5.22 + новая 1.31 = 6.70 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[зоны] comb-l0-m4 c7a.16xlarge: us-east-1c 0.7064 → us-east-1b 0.7478 → us-east-1d 0.8576 → us-east-1a 0.9554 → us-east-1f 1.1804 (допущение plan); ожидается us-east-1c по 0.7064 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.4165 и бюджет — по максимуму цены за окно",
+   "[задача] comb-l0-m5: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 45 мин",
+   "[бюджет] comb-l0-m5 на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 6.53 + новая 1.31 = 8.00 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[зоны] comb-l0-m5 c7a.16xlarge: us-east-1c 0.7064 → us-east-1b 0.7478 → us-east-1d 0.8576 → us-east-1a 0.9554 → us-east-1f 1.1804 (допущение plan); ожидается us-east-1c по 0.7064 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.4165 и бюджет — по максимуму цены за окно",
+   "[план] прогноз пакета 7.84 долл. (цена спота — допущение 0.75/ч)"
+  ]
  }
 }

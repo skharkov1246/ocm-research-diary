@@ -995,14 +995,24 @@ def aws_plan(a) -> int:
     cap_h = sum(e["cap_hours_per_line"] * e["jobs"] for e in est)
     disk_ipv4_h = a.disk_gb * 0.08 / 730 + 0.005
     runner_bound = sum((a.price * 1.2 + disk_ipv4_h) * (e["max_min"] + 10) / 60 * e["jobs"] for e in est)
+    t_kind = {k: (sum(s[f"sec_per_iter_{k}"] * s["rows"] for s in run0["stages"] if s.get(f"sec_per_iter_{k}") and s.get("rows"))
+                  / max(1, sum(s["rows"] for s in run0["stages"] if s.get(f"sec_per_iter_{k}") and s.get("rows"))))
+              for k in ("median", "p10")}
+    # если на облаке итерация окажется такой же медленной, как медиана здесь (общая машина с чужими задачами):
+    # сколько стоили бы все итерации линий и сколько итераций успеет до лимита счёта
+    pess = []
+    for e in est:
+        t_med = t_kind["median"] * (e["nodes"] / n_ref) * (np_ref / a.procs) / a.parallel_eff
+        h_full = (a.setup_min + a.mesh_min + a.upload_min + iters_line * t_med / 60.0) / 60.0
+        pess.append({"stage": e["stage"], "t_iter_s": t_med, "hours_per_line_uncapped": h_full,
+                     "iterations_within_time_limit": int(e["su2_time_limit_s"] / t_med) if t_med > 0 else None,
+                     "jobs": e["jobs"]})
     summary = {
         "jobs_file": rel(a.out), "n_jobs": len(jobs), "speeds": speeds, "pfracs": pfracs,
         "iterations": {"startup": startup_iter, "first_point": a.first_iter, "next_point": a.next_iter,
                        "per_line": iters_line},
         "t_ref_s_per_iter": t_ref, "t_ref_source": t_src,
-        "t_ref_by_kind": {k: (sum(s[f"sec_per_iter_{k}"] * s["rows"] for s in run0["stages"] if s.get(f"sec_per_iter_{k}") and s.get("rows"))
-                              / max(1, sum(s["rows"] for s in run0["stages"] if s.get(f"sec_per_iter_{k}") and s.get("rows"))))
-                          for k in ("median", "p10")},
+        "t_ref_by_kind": t_kind,
         "n_ref_nodes": n_ref, "np_ref": np_ref, "procs_aws": a.procs, "parallel_eff": a.parallel_eff,
         "parallel_eff_note": "EXAMPLE: принято (как batch/cost_estimate.toml), не замер — ускорение 4 → 64 процесса не мерилось",
         "setup_min": a.setup_min, "mesh_min": a.mesh_min, "upload_min": a.upload_min, "time_margin": a.time_margin,
@@ -1016,6 +1026,11 @@ def aws_plan(a) -> int:
         "machine_hours_expected": exp_h, "usd_expected": exp_h * a.price,
         "machine_hours_cap": cap_h, "usd_cap_at_price": cap_h * a.price,
         "usd_runner_budget_bound": runner_bound,
+        "pessimistic_median_speed": {"per_stage": pess,
+                                     "usd_uncapped": sum(x["hours_per_line_uncapped"] * x["jobs"] for x in pess) * a.price,
+                                     "note": "время итерации — медиана пробного прогона на общей машине; линии, не "
+                                             "успевшие за лимит счёта, обрываются с записью рестарта (расход ограничен "
+                                             "max_min, то есть usd_runner_budget_bound)"},
         "runner_bound_note": "верхняя граница предохранителя runner.py: (MaxPrice = цена × 1,2 + диск + IPv4) × (max_min + "
                              "grace 10 мин) по всем задачам",
         "ceiling_usd": a.ceiling, "within_ceiling": bool(exp_h * a.price <= a.ceiling and runner_bound <= a.ceiling),

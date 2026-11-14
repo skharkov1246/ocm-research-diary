@@ -114,16 +114,46 @@ class PeriodicVoxelFlow:
         Zp = Zp.tolil(); Zp[pin, pin] = 1.0; Zp = Zp.tocsr()
         Gc = G.tolil(); Gc[:, pin] = 0; Gc = Gc.tocsr()
         self.K = sp.bmat([[A, Gc], [GT, Zp]], format="csc")
-        self.A = A
+        self.K0 = sp.bmat([[A, G], [G.T, None]], format="csr")   # без закрепления — для итерационного решателя
+        self.A = A.tocsr()
 
-    def stokes(self, axis=0, g=1.0):
-        b = np.zeros(self.nu + self.np_)
+    def stokes(self, axis=0, g=1.0, solver="auto", tol=1e-10, maxiter=3000):
+        """solver: 'direct' (SuperLU), 'minres' (MINRES + блочный предобуславливатель: V-цикл pyamg по A,
+        единичная матрица по давлению — дополнение Шура стоксовой задачи спектрально эквивалентно ей),
+        'auto' — прямой до 30 000 неизвестных."""
+        n = self.nu + self.np_
+        b = np.zeros(n)
         sl = slice(sum(int(self.act[d].sum()) for d in range(axis)),
                    sum(int(self.act[d].sum()) for d in range(axis + 1)))
         b[sl] = g
-        lu = spla.splu(self.K, permc_spec="COLAMD")
-        x = lu.solve(b)
-        res = np.linalg.norm(self.K @ x - b) / np.linalg.norm(b)
+        if solver == "auto":
+            solver = "direct" if n <= 30000 else "minres"
+        info = dict(solver=solver)
+        if solver == "direct":
+            lu = spla.splu(self.K, permc_spec="COLAMD")
+            x = lu.solve(b)
+            res = np.linalg.norm(self.K @ x - b) / np.linalg.norm(b)
+        else:
+            import pyamg
+            ml = pyamg.smoothed_aggregation_solver(self.A, symmetry="symmetric", max_coarse=500)
+            Pu = ml.aspreconditioner(cycle="V")
+            nu = self.nu
+
+            def prec(v):
+                out = np.empty_like(v)
+                out[:nu] = Pu @ v[:nu]
+                out[nu:] = v[nu:]
+                return out
+            M = spla.LinearOperator((n, n), matvec=prec)
+            it = [0]
+
+            def cb(xk):
+                it[0] += 1
+            x, flag = spla.minres(self.K0, b, M=M, rtol=tol, maxiter=maxiter, callback=cb)
+            x[nu:] -= x[nu:].mean()
+            res = np.linalg.norm(self.K0 @ x - b) / np.linalg.norm(b)
+            info.update(iterations=it[0], flag=int(flag))
+        info["residual"] = float(res)
         self.x = x
         U = []
         for d in range(self.nd):
@@ -133,7 +163,7 @@ class PeriodicVoxelFlow:
         p = np.zeros(self.N)
         p[self.fluid] = x[self.pid[self.fluid]]
         self.U, self.p, self.axis, self.g = U, p, axis, g
-        return dict(residual=float(res))
+        return info
 
     def mean_velocity(self):
         """средняя скорость в жидкости вдоль оси течения (межпоровая): ∫u dV / V_f"""
@@ -177,7 +207,14 @@ class PeriodicVoxelFlow:
         ax = self.axis
         ux_c = 0.5 * (U[ax] + _roll(U[ax], -1, ax))[f]
         rhs = -ux_c
-        phi_v = spla.spsolve(M, rhs)
+        if nc <= 60000:
+            phi_v = spla.spsolve(M, rhs)
+        else:
+            ilu = spla.spilu(M.tocsc(), drop_tol=1e-5, fill_factor=20)
+            P = spla.LinearOperator((nc, nc), matvec=ilu.solve)
+            phi_v, flag = spla.gmres(M, rhs, M=P, rtol=1e-11, restart=200, maxiter=50)
+            if flag != 0:
+                phi_v = spla.spsolve(M, rhs)
         phi = np.zeros(N)
         phi[f] = phi_v
         # тепловой поток в стенку (жидкость получает тепло): сумма связей со стенкой 2·(0 − φ)

@@ -1562,8 +1562,8 @@ def validate_config(cfg: Config) -> None:
         bad.append("spent_before, ebs_usd_gb_month, ipv4_usd_h ≥ 0 (иначе потолок обходится)")
     if cfg.grace_min < 5:
         bad.append("grace_min ≥ 5 (запас на загрузку машины до старта сторожа)")
-    if not cfg.poll_s >= 5 or cfg.retries < 0 or cfg.quota_wait_polls < 0:
-        bad.append("poll_s ≥ 5, retries ≥ 0, quota_wait_polls ≥ 0")
+    if not cfg.poll_s >= 5 or cfg.retries < 0 or cfg.quota_wait_polls < 0 or cfg.capacity_wait_polls < 0:
+        bad.append("poll_s ≥ 5, retries ≥ 0, quota_wait_polls ≥ 0, capacity_wait_polls ≥ 0")
     if bad:
         raise RunnerError("; ".join(bad))
 
@@ -1587,6 +1587,8 @@ def build_parser() -> argparse.ArgumentParser:
                         help="квота спота, vCPU (384): сверх неё задачи ждут в очереди")
         sp.add_argument("--quota-wait-polls", type=int, default=15,
                         help="квотная ошибка AWS без своих машин в работе: опросов ожидания (15)")
+        sp.add_argument("--capacity-wait-polls", type=int, default=15,
+                        help="нет ёмкости спота ни в одной зоне ни на одном типе: повторов через --poll-s (15)")
         sp.add_argument("--price-margin", type=float, default=1.2, help="MaxPrice = макс. цена за окно × запас")
         sp.add_argument("--price-window-h", type=float, default=6.0)
         sp.add_argument("--ebs-usd-gb-month", type=float, default=0.08)
@@ -1642,19 +1644,26 @@ def main(argv=None) -> int:
                   f"итого {total:.2f} из {a.ceiling:.2f}, остаток {a.ceiling - total:.2f} долл.")
             return 0
         if a.cmd == "plan":
+            if not a.assume_price > 0:
+                raise RunnerError("--assume-price: цена спота должна быть > 0 (иначе ни одна задача не планируется)")
             cfg = _config_from_args(a, need_env=False)
             cfg.offline_price = a.assume_price
             if a.assume_zone_prices:
                 cfg.offline_zones = parse_zone_prices(a.assume_zone_prices)
             jobs = load_jobs(a.jobs, a.max_job_min)
             r = Runner(cfg)
+            r.check_userdata(jobs)            # все попытки: повтор пишет в более длинный префикс
             for job in jobs:
                 extra = {"python": f"Python {job.python} (uv)", "system": "системный python3",
                          "container": f"контейнер {job.container}, команд container_setup: {len(job.container_setup)}"}
                 r.say(f"[задача] {job.name}: образ {job.image}, {extra[job.mode]}, {job.vcpu} vCPU, "
                       f"сторож {job.max_min} мин")
+                for w in job_warnings(job):
+                    r.say(f"[внимание] {w}")
                 st, _ = r.launch(job)
                 r.results[job.name] = {"status": st}
+                if job.name in r._why:
+                    r.results[job.name]["detail"] = r._why[job.name]
                 if r.last_params and st == "planned":
                     shown = dict(r.last_params)
                     ud = shown.pop("UserData")
@@ -1668,6 +1677,10 @@ def main(argv=None) -> int:
                 r.say(f"[очередь] пакет {need} vCPU > квоты {cfg.vcpu_quota}: одновременно не больше "
                       f"{cfg.vcpu_quota} vCPU и {cfg.max_parallel} машин, остальные ждут освобождения")
             r.say(f"[план] прогноз пакета {r.virtual:.2f} долл. (цена спота — допущение {a.assume_price}/ч)")
+            bad = {k: v for k, v in r.results.items() if v["status"] != "planned"}
+            if bad:
+                r.say(f"[план] НЕ спланированы: {bad}")
+                return 1
             return 0
         if a.cmd == "run":
             # по умолчанию — проверка прав без запуска (DryRun=True); живой запуск только с --live или GTU_LIVE=1
