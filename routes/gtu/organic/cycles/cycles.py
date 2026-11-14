@@ -1203,7 +1203,14 @@ PR_GRID = [3.0, 3.5, 4.0, 4.5, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.5, 
 
 
 QUICK = bool(os.environ.get("CYCLES_QUICK"))
-OUT_DIR = SCRATCH if QUICK else HERE
+FINE = bool(os.environ.get("CYCLES_FINE"))       # мелкая сетка (задача AWS, aws_jobs_cycles.json)
+OUT_DIR = os.environ.get("CYCLES_OUT") or (SCRATCH if QUICK else HERE)
+WORKERS = int(os.environ.get("CYCLES_WORKERS", "4"))
+EPS_LIST = (0.0, 0.70, 0.75, 0.80, 0.85, 0.88, 0.90, 0.92, 0.94) if FINE else (0.0, 0.70, 0.80, 0.85, 0.90, 0.92)
+if FINE:
+    PR_GRID = [round(3.0 + 0.5 * i, 2) for i in range(37)]
+    A.update(x_rh=(0.3, 0.4, 0.5, 0.6, 0.7), sc=(1.0, 1.5, 2.0, 2.5, 3.0), R_egr=(0.25, 0.5, 1.0, 2.0, 4.0),
+             plow=tuple(round(0.2 + 0.05 * i, 2) for i in range(13)))
 
 
 def topologies():
@@ -1211,7 +1218,7 @@ def topologies():
         return [dict(rec=r, ic=False, rh=h, ibc=False, pgc="none", tcr=c) for r in (0.0, 0.9) for h in (False, True)
                 for c in ("none", "fh", "steam")]
     L = []
-    for rec in (0.0, 0.70, 0.80, 0.85, 0.90, 0.92):
+    for rec in EPS_LIST:
         for ic in (False, True):
             for rh in (False, True):
                 for ibc in (False, True):
@@ -1579,7 +1586,7 @@ def main():
     print("сверка рекуп.:", json.dumps({k: cross["recup"][k] for k in ("gtu_cycle", "cycles")}, ensure_ascii=False))
     lamc = lam()
     print("ламинарные постоянные:", lamc)
-    with ProcessPoolExecutor(max_workers=4) as exe:
+    with ProcessPoolExecutor(max_workers=WORKERS) as exe:
         res = list(exe.map(optimize_topo, L, chunksize=2))
         print(f"перебор: {time.time() - t0:.0f} с")
         L8 = [t for t in L if t["rec"] and t["pgc"] == "none" and not t["ibc"] and t["tcr"] in ("none", "fh")]

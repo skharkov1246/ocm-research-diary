@@ -24,7 +24,7 @@
 ```bash
 python3 exergy.py                      # около 4 мин CPU на одном ядре -> exergy_results.json и *.svg
 python3 exergy.py --svg                # только перерисовать SVG из exergy_results.json
-python3 -m pytest -q test_exergy.py    # около 1 мин (нужен готовый exergy_results.json)
+python3 -m pytest -q test_exergy.py    # около 15 с (нужен готовый exergy_results.json)
 ```
 
 Зависимости — как у `gtu_cycle.py` (cantera 3.2.0, numpy, scipy). Вход: `../../frame3/frame3_point_results.json`,
@@ -229,5 +229,5 @@ python3 -m pytest -q test_exergy.py    # около 1 мин (нужен гот�
 | гироидный (TPMS) теплообменник: меньший объём при той же теплопередаче, но больше потеря давления на единицу длины | APS DFD 2025, тезисы https://archive.aps.org/dfd/2025/t37/2 | по выдержке поиска |
 | оптимизация топологии (плотностная) | Bendsøe M. P., Kikuchi N. Generating optimal topologies in structural design using a homogenization method. Comput. Methods Appl. Mech. Eng. 71 (1988) 197–224 | не открыт |
 | сопряжённая (adjoint) оптимизация формы | Jameson A. Aerodynamic design via control theory. J. Sci. Comput. 3 (1988) 233–260 | не открыт |
-| свойства газа, GRI-Mech 3.0, ct.Water | Cantera 3.2.0 (как в навыке gtu-cycle, `.claude/skills/gtu-cycle/SKILL.md`, раздел «Источники») | открыт (пакет установлен) |
+| свойства газа, GRI-Mech 3.0, ct.Water | Cantera 3.2.0 (сверка — навык трека gtu-cycle, раздел «Источники») | открыт (пакет установлен) |
 

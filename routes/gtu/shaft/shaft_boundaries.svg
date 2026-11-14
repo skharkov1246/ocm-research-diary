@@ -71,7 +71,6 @@
   <line x1="609" y1="160" x2="609" y2="420" stroke="#c0262d" stroke-width="3" stroke-dasharray="9 5"/>
   <text x="560" y="438" font-size="12" font-weight="bold" fill="#c0262d">граница замены</text>
   <g font-size="12.5" fill="#111">
-    <rect x="520" y="372" width="180" height="0" />
     <text x="626" y="230" font-weight="bold">на муфте:</text>
     <text x="626" y="246">P_мех, кВт</text>
     <text x="626" y="320">M = P_мех/ω, Н·м</text>
@@ -188,7 +187,7 @@
 
   <!-- формула MD -->
   <rect x="716" y="820" width="494" height="74" rx="6" fill="#f7f9fb" stroke="#c9d1da"/>
-  <text x="730" y="844" font-size="13.5" fill="#111">P_мех = ṁ·H_p/η_p + P_мех.потерь техкомпрессора</text>
+  <text x="730" y="844" font-size="13.5" fill="#111">P_мех = P_газ + P_мех.потерь,  P_газ = ṁ·H_p/η_p</text>
   <text x="730" y="864" font-size="12" fill="#444">рабочая точка: карта (Q ~ n, H ~ n², η по Q/n) ∩ сеть; n_СТ — там,</text>
   <text x="730" y="880" font-size="12" fill="#444">где P_СТ(n) = P_мех(n); карта, газ, сеть — EXAMPLE (data_needed.csv)</text>
 

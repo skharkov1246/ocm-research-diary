@@ -27,7 +27,7 @@ P_мех, кВт; M = P/omega, Н·м; n, об/мин; для генератор
   5. выгрузка         shaft_<конфиг>.csv, shaft_results.json, data_needed.csv.
 
 Запуск (из любой папки): python3 gtu_shaft.py [--out DIR] [конфиг.toml ...]
-По умолчанию — оба конфига Taurus 60, файлы пишутся рядом со скриптом. Около 2–4 мин на 4 ядрах.
+По умолчанию — оба конфига Taurus 60, файлы пишутся рядом со скриптом. Около 1–2 мин (одно ядро).
 """
 import argparse, csv, datetime, hashlib, json, math, os, platform, sys, tomllib
 

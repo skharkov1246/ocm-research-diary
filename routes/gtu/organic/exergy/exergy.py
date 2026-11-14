@@ -683,7 +683,7 @@ def grassmann_svg(acc, title, subtitle, scale, path):
     air_c = E["air_c3"]                                         # воздух в камеру (или в рекуператор)
     air_in = E["air_comb_in"]
     comb_in = air_in + Ef
-    s4, s41, s5, exh = E["s4"], E["s41"], E["s5"], E["exhaust"]
+    s4, s5, exh = E["s4"], E["s5"], E["exhaust"]
     rec_tr = E["recup_transfer"]
     x = 70.0
     wc_blk = max(s * (Wc + cool) + 30, 90)

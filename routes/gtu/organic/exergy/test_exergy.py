@@ -1,5 +1,5 @@
 """Проверки эксергетического анализа KV-3: баланс, совпадение с моделью цикла, независимые формулы,
-повторяемость. Запуск: python3 -m pytest -q test_exergy.py (около 1 мин)."""
+повторяемость. Запуск: python3 -m pytest -q test_exergy.py (около 15 с)."""
 import json
 import math
 import os
