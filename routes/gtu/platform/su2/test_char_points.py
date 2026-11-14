@@ -162,12 +162,12 @@ def test_run_case_argv():
 def test_keep_files(tmp_path):
     src, dst = tmp_path / "s", tmp_path / "d"
     src.mkdir()
-    for n in ("run_summary.json", "history_c1_point.csv", "su2_c1_point.log", "case_c1_point.cfg", "surface_flow.vtu",
+    for n in ("run_summary.json", "history_c1_point.csv", "su2_c1_point.log", "case_c1_point.cfg", "surface.vtu",
               "mesh_vaneless_split.su2", "restart_in.dat", "restart_c1_point.dat", "vol_c1_point.vtu"):
         (src / n).write_text("x")
     got = C.keep_files(str(src), str(dst), "restart_c1_point.dat")
     assert sorted(got) == sorted(["run_summary.json", "history_c1_point.csv", "su2_c1_point.log", "case_c1_point.cfg",
-                                  "surface_flow.vtu", "restart_c1_point.dat"])
+                                  "surface.vtu", "restart_c1_point.dat"])
     C.drop_big(str(src))
     assert not (src / "mesh_vaneless_split.su2").exists() and not (src / "restart_in.dat").exists()
 

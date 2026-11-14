@@ -49,8 +49,7 @@ RUNNER_UPLOAD_RESERVE_S = 8 * 60   # runner.py: команда идёт до «�
 BASE_PLAN = "smoke075"             # прошёл дымовую проверку на core130 coarse (README, прогон Б)
 WINDOW_CONV = 500                  # окно сходимости навыка su2-turbo: π и η меняются < 0,1 % за 500 итераций
 CONV_TOL = 1e-3
-KEEP_PATTERNS = ("run_summary.json", "history_*.csv", "su2_*.log", "dry_*.log", "case_*.cfg", "surface_flow*.vtu",
-                 "surface_flow*.csv")
+KEEP_PATTERNS = ("run_summary.json", "history_*.csv", "su2_*.log", "dry_*.log", "case_*.cfg", "surface*.vtu", "surface*.csv")
 SKIP_ALWAYS = ("mesh_vaneless_split.su2", "restart_in.dat")
 
 

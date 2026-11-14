@@ -248,7 +248,7 @@ def build(stage: str, fine_pfracs: list) -> dict:
                             "стороны); у задачи — свои, чередованием",
                   "outputs_per_job": "char_summary.json, env.txt, geom.log, frame3_geom_results.json (KV-3), "
                                      "_su2_build.log, base/ и p<доля>/: run_summary.json, history_*.csv, su2_*.log, "
-                                     "case_*.cfg, run_case.out, surface_flow.vtu (лопатка и втулка), итоговый рестарт точки "
+                                     "case_*.cfg, run_case.out, surface.vtu (лопатка и втулка, SURFACE_PARAVIEW), итоговый рестарт точки "
                                      "restart_c1_point.dat; сетки и объёмные поля не выгружаются (поле — SU2_SOL из рестарта)"},
         "merge": {
             "where": "сессия с ключами после run: результаты уже в routes/gtu/platform/aws/runs/<run_id>/<задача>/ "
@@ -292,7 +292,7 @@ def main(argv=None) -> int:
     if a.mini:
         os.makedirs(a.mini, exist_ok=True)
         mini = dict(level="coarse", np_pt=2, nproc=4, base_plan="/gtu/mini/plan_base_mini.json", point_iter=6,
-                    point_pramp=3, time_limit=600)
+                    point_pramp=3, time_limit=1500)
         with open(os.path.join(a.mini, "plan_base_mini.json"), "w", encoding="utf-8") as f:
             json.dump([dict(name="b1", frac=0.6, pfrac=0.95, ramp=2, pramp=3, iter=4),
                        dict(name="b2", frac=1.0, pfrac=0.75, ramp=2, pramp=3, iter=4),
