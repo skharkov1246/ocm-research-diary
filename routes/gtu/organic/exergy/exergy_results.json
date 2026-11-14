@@ -1,0 +1,4830 @@
+{
+ "title": "KV-3: эксергетический анализ — разрушение эксергии по узлам, три исполнения, где резерв КПД",
+ "method": "0D-цикл: цепочка состояний — копия gtu_cycle.cycle_r (Cantera GRI-Mech 3.0, метан, полное сгорание, политропные процессы 40 шагами), совпадение с gtu_cycle.cycle/recup проверяется; эксергия потока = тепловая + от давления + химическая (среда ISO 3977-2: 15 °C, 101,325 кПа, RH 60 %; химические потенциалы среды из Cantera, метан — через реакцию полного сгорания); разрушение — теорема Гюи — Стодолы T0·S_gen и, независимо, баланс эксергии узла; охлаждение — x = K·ε/(1-ε) (Holland & Thake 1980; Horlock et al. 2001), K литья — по классу K трека, печать — K·η_c,литьё/η_c,печать",
+ "software": "python 3.13.18, cantera 3.2.0, numpy 2.5.3, scipy 1.18.1",
+ "date": "2026-11-14",
+ "status": "оценка уровня облика: КПД узлов, потери, модель охлаждения — принятые величины (оценка); газ — идеальный, конденсация воды в выхлопе при T0 не учитывается; кинетическая энергия не учитывается (полные параметры)",
+ "inputs": [
+  {
+   "file": "routes/gtu/frame3/frame3_point_results.json",
+   "field": "split.pi, inputs[slots…мягкий].T41_C/G/n_out, cycle.frame3.eta_pc/eta_t/dp_duct, inputs[gtu_family…].x_leak/eta_gen/eta_gearbox, stage1/stage2.PR/eta_p/eta_basis, turbine.options[3].stages, cycle.required",
+   "used": {
+    "PR": 13.5,
+    "T41_C": 1000.0,
+    "G": 25.55,
+    "n_rpm": 14950.0,
+    "eta_pc": 0.841259,
+    "eta_t": 0.884623,
+    "dp_duct": 0.0,
+    "x_leak": 0.015,
+    "eta_gen": 0.972,
+    "eta_gb": 0.985,
+    "P_shaft_kW_ref": 5780.87,
+    "eff_ref": 0.31629,
+    "EGT_ref": 458.175,
+    "pi1": 4.49,
+    "eta_p1": 0.844042,
+    "pi2": 3.00668,
+    "eta_p2": 0.839139,
+    "eta_p1_nofric": 0.856117,
+    "eta_p2_nofric": 0.862775,
+    "turb_ER": [
+     2.01868,
+     2.28575,
+     2.75043
+    ],
+    "turb_eta": 0.884623,
+    "T_rel1_C": 897.72,
+    "T01_1_C": 1000.0,
+    "P_req_kW": 5922,
+    "G_cap": 25.692,
+    "EGT_cap": 610.0
+   }
+  },
+  {
+   "file": "routes/gtu/gtu_cycle.py",
+   "field": "cycle, cycle_r, recup, poly_process, AIR, T0, P0, LHV",
+   "used": {
+    "AIR": "O2:0.2095,N2:0.7808,AR:0.0093,CO2:0.0004",
+    "T0": 288.15,
+    "P0": 101325.0,
+    "LHV": 50030000.0
+   }
+  },
+  {
+   "file": "routes/gtu/gtu_explore.py",
+   "field": "LIM['T_rec_max']",
+   "used": 700.0
+  },
+  {
+   "file": "routes/gtu/gtu_family.py",
+   "field": "COOL (классы U, N, K)",
+   "used": {
+    "U": {
+     "name": "без охлаждения",
+     "T": [
+      900,
+      925,
+      950,
+      975,
+      1000
+     ],
+     "xn": 0.0,
+     "xr": 0.0,
+     "rank": 0
+    },
+    "N": {
+     "name": "охлаждаемый сопловой аппарат",
+     "T": [
+      1025,
+      1050
+     ],
+     "xn": 0.03,
+     "xr": 0.0,
+     "rank": 1
+    },
+    "K": {
+     "name": "охлаждаемые сопловой аппарат и рабочая лопатка",
+     "T": [
+      1075,
+      1100,
+      1125,
+      1150,
+      1175,
+      1200
+     ],
+     "xn": 0.055,
+     "xr": 0.055,
+     "rank": 2
+    }
+   }
+  },
+  {
+   "file": "routes/gtu/gtu_lineup_results.json",
+   "field": "lineup[name=KV-3]",
+   "used": "KV-3 = типоразмер G_frame 25,6 кг/с; расчётная точка — Taurus 60 генератор (frame3)"
+  }
+ ],
+ "assumptions": {
+  "environment": {
+   "T0_K": 288.15,
+   "p0_Pa": 101325.0,
+   "RH": 0.6,
+   "p_sat_Pa": 1701.637572,
+   "x_H2O": 0.010076,
+   "X": {
+    "N2": 0.772932,
+    "O2": 0.207389,
+    "AR": 0.009206,
+    "CO2": 0.000396,
+    "H2O": 0.010076
+   },
+   "note": "сухой воздух модели (gtu_cycle.AIR) + водяной пар при RH 60 %; p_sat — Cantera ct.Water (15 °C)"
+  },
+  "fuel_supply": "метан при T0 и давлении p3 (как в gtu_cycle: топливный компрессор не считается) — эксергия давления подачи входит в эксергию топлива",
+  "heat_loss_boundary": "недожог η_b модель снимает как теплоту; граница — среда T0: вся эксергия этой теплоты разрушена",
+  "mech_gen": {
+   "eta_m": "gtu_cycle: 0,99 на обеих частях турбины",
+   "eta_gearbox": 0.985,
+   "eta_gen": 0.972,
+   "note": "редуктор и генератор пакета: KV-3 одновальный, вал 14 950 об/мин = вход редуктора пакета"
+  },
+  "recuperator": {
+   "eps": 0.85,
+   "dp_air": 0.025,
+   "dp_gas": 0.035,
+   "T_gas_in_max_C": 700.0,
+   "note": "ε и потери давления — по умолчанию gtu_cycle.recup и перебора трека (оценка); выход газа — из баланса энергии (в модели — оценка через 0,93)"
+  },
+  "cooling": {
+   "T_m_ngv_C": 1000.0,
+   "dT_rel_K": 102.28,
+   "T_m_rot_C": 897.72,
+   "T41_cal_C": 1200.0,
+   "x_cal": [
+    0.055,
+    0.055
+   ],
+   "T3_cal_C": 410.370626,
+   "K_ngv_cast": 0.162148,
+   "K_rot_cast": 0.134021,
+   "eta_c": {
+    "cast": 0.5,
+    "printed": 0.75
+   },
+   "track_classes": {
+    "U": {
+     "T_max": 1000,
+     "xn": 0.0,
+     "xr": 0.0
+    },
+    "N": {
+     "T_max": 1050,
+     "xn": 0.03,
+     "xr": 0.0
+    },
+    "K": {
+     "T_max": 1200,
+     "xn": 0.055,
+     "xr": 0.055
+    }
+   }
+  },
+  "equal_power": "исполнения пересчитаны на ту же мощность на валу, что и расчётная точка (расход пропорционален)",
+  "comp_split": "ступень 1 — π и η_p frame3, ступень 2 — η_p, при котором выход совпадает с эквивалентным КПД цепочки"
+ },
+ "fuel_exergy_check": {
+  "ex_ch_kJ_mol_mu": 834.314704,
+  "ex_ch_kJ_mol_reaction": 834.314704,
+  "diff_rel": 0.0,
+  "ex_ch_MJ_kg": 52.004906,
+  "LHV_cantera_MJ_kg": 50.03152,
+  "LHV_model_MJ_kg": 50.03,
+  "ratio_ex_LHV_model": 1.039474,
+  "szargut_env_298K_kJ_mol": 831.856877,
+  "szargut_env_note": "среда Шаргута (парциальные давления, кПа: N2 75,78; O2 20,39; CO2 0,0335; H2O 2,2; Ar 0,906) — по памяти, источник не открыт; табличное значение 831,65 кДж/моль (Szargut, Morris, Steward 1988) выдержкой поиска не подтверждено"
+ },
+ "variants": {
+  "base": {
+   "fuel": {
+    "Ex_kW": 19140.584908,
+    "ex_MJ_kg": 52.393583,
+    "ex_ch_MJ_kg": 52.004906,
+    "ex_pressure_MJ_kg": 0.388678,
+    "ex_thermal_MJ_kg": 0.0,
+    "LHV_kW": 18277.113328,
+    "ratio_ex_LHV": 1.047243
+   },
+   "air_in": {
+    "Ex_kW": 21.401953,
+    "ex_kJ_kg": 0.83765,
+    "note": "сухой воздух модели относительно влажной среды ISO: химическая эксергия"
+   },
+   "P_shaft_kW": 5780.861808,
+   "P_el_kW": 5534.712712,
+   "eff_shaft": 0.31629,
+   "eff_el": 0.302822,
+   "ex_eff_shaft": 0.302021,
+   "ex_eff_el": 0.289161,
+   "nodes": {
+    "compressor": {
+     "label": "компрессор (обе ступени)",
+     "kW": 1026.723951,
+     "kW_by_exergy_balance": 1026.723951,
+     "pct_fuel_ex": 5.36412,
+     "S_gen_kW_K": 3.563158,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "leakage": {
+     "label": "утечки (сжатый воздух уходит мимо турбины)",
+     "kW": 141.142343,
+     "kW_by_exergy_balance": 141.142343,
+     "pct_fuel_ex": 0.737398,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0,
+     "outflow": true
+    },
+    "comb_mixing": {
+     "label": "камера: смешение топлива с воздухом",
+     "kW": 328.700646,
+     "kW_by_exergy_balance": 328.700646,
+     "pct_fuel_ex": 1.717297,
+     "S_gen_kW_K": 1.140728,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -0.0
+    },
+    "comb_reaction": {
+     "label": "камера: горение (реакция)",
+     "kW": 5795.362755,
+     "kW_by_exergy_balance": 5795.362755,
+     "pct_fuel_ex": 30.277877,
+     "S_gen_kW_K": 20.112312,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "comb_dp": {
+     "label": "камера: потеря давления",
+     "kW": 87.200862,
+     "kW_by_exergy_balance": 87.200862,
+     "pct_fuel_ex": 0.455581,
+     "S_gen_kW_K": 0.302623,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "comb_heat_loss": {
+     "label": "камера: недожог η_b (потеря тепла в модели)",
+     "kW": 70.725961,
+     "kW_by_exergy_balance": 70.725961,
+     "pct_fuel_ex": 0.369508,
+     "S_gen_kW_K": 0.245448,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -0.0
+    },
+    "cool_throttle_ngv": {
+     "label": "охлаждение соплового аппарата: дросселирование воздуха p3 -> p4",
+     "kW": 0.0,
+     "kW_by_exergy_balance": 0.0,
+     "pct_fuel_ex": 0.0,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": -0.0
+    },
+    "cool_throttle_rotor": {
+     "label": "охлаждение ротора: дросселирование воздуха p3 -> p45",
+     "kW": 0.0,
+     "kW_by_exergy_balance": 0.0,
+     "pct_fuel_ex": 0.0,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": -0.0
+    },
+    "cool_mix_ngv": {
+     "label": "охлаждение соплового аппарата: смешение",
+     "kW": 0.0,
+     "kW_by_exergy_balance": -0.0,
+     "pct_fuel_ex": 0.0,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -0.0
+    },
+    "turbine_gg": {
+     "label": "турбина: часть, вращающая компрессор",
+     "kW": 362.77962,
+     "kW_by_exergy_balance": 362.77962,
+     "pct_fuel_ex": 1.895342,
+     "S_gen_kW_K": 1.258996,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "cool_mix_rotor": {
+     "label": "охлаждение ротора: смешение",
+     "kW": 0.0,
+     "kW_by_exergy_balance": -0.0,
+     "pct_fuel_ex": 0.0,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "duct_dp": {
+     "label": "переходный канал: потеря давления",
+     "kW": 0.0,
+     "kW_by_exergy_balance": 0.0,
+     "pct_fuel_ex": 0.0,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "turbine_pt": {
+     "label": "турбина: часть, дающая мощность",
+     "kW": 265.959703,
+     "kW_by_exergy_balance": 265.959703,
+     "pct_fuel_ex": 1.389507,
+     "S_gen_kW_K": 0.92299,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "mech": {
+     "label": "механические потери (подшипники)",
+     "kW": 163.592666,
+     "kW_by_exergy_balance": 163.592666,
+     "pct_fuel_ex": 0.85469,
+     "S_gen_kW_K": 0.567734,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "gearbox": {
+     "label": "редуктор пакета",
+     "kW": 86.712927,
+     "kW_by_exergy_balance": 86.712927,
+     "pct_fuel_ex": 0.453032,
+     "S_gen_kW_K": 0.30093,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "generator": {
+     "label": "генератор пакета",
+     "kW": 159.436169,
+     "kW_by_exergy_balance": 159.436169,
+     "pct_fuel_ex": 0.832974,
+     "S_gen_kW_K": 0.55331,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "exhaust": {
+     "label": "выхлоп (уходит с газом)",
+     "kW": 5138.936022,
+     "kW_by_exergy_balance": 5138.936022,
+     "pct_fuel_ex": 26.848375,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0,
+     "outflow": true,
+     "thermal_W": 4813.095785,
+     "pressure_W": 42.300877,
+     "chemical_W": 283.53936
+    }
+   },
+   "groups": [
+    {
+     "key": "compressor",
+     "label": "компрессор",
+     "kW": 1026.723951,
+     "pct_fuel_ex": 5.36412,
+     "S_gen_kW_K": 3.563158,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_mixing",
+     "label": "камера: смешение",
+     "kW": 328.700646,
+     "pct_fuel_ex": 1.717297,
+     "S_gen_kW_K": 1.140728,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_reaction",
+     "label": "камера: горение",
+     "kW": 5795.362755,
+     "pct_fuel_ex": 30.277877,
+     "S_gen_kW_K": 20.112312,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_dp",
+     "label": "камера: потеря давления",
+     "kW": 87.200862,
+     "pct_fuel_ex": 0.455581,
+     "S_gen_kW_K": 0.302623,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_heat_loss",
+     "label": "камера: недожог",
+     "kW": 70.725961,
+     "pct_fuel_ex": 0.369508,
+     "S_gen_kW_K": 0.245448,
+     "kind": "разрушение"
+    },
+    {
+     "key": "turbine",
+     "label": "турбина",
+     "kW": 628.739323,
+     "pct_fuel_ex": 3.284849,
+     "S_gen_kW_K": 2.181986,
+     "kind": "разрушение"
+    },
+    {
+     "key": "leak_cool",
+     "label": "утечки и охлаждение",
+     "kW": 141.142343,
+     "pct_fuel_ex": 0.737398,
+     "S_gen_kW_K": 0.0,
+     "kind": "разрушение + утечки"
+    },
+    {
+     "key": "recuperator",
+     "label": "рекуператор",
+     "kW": 0.0,
+     "pct_fuel_ex": 0.0,
+     "S_gen_kW_K": 0.0,
+     "kind": "разрушение"
+    },
+    {
+     "key": "exhaust",
+     "label": "выхлоп",
+     "kW": 5138.936022,
+     "pct_fuel_ex": 26.848375,
+     "S_gen_kW_K": 0.0,
+     "kind": "уходит с потоком"
+    },
+    {
+     "key": "mech_gen",
+     "label": "механика, редуктор, генератор",
+     "kW": 409.741761,
+     "pct_fuel_ex": 2.140696,
+     "S_gen_kW_K": 1.421974,
+     "kind": "разрушение"
+    }
+   ],
+   "totals": {
+    "destruction_kW": 8347.195259,
+    "destruction_pct": 43.609928,
+    "S_gen_kW_K": 28.968229,
+    "entropy_generation_number": 0.436099,
+    "outflow_kW": 5280.078365,
+    "outflow_pct": 27.585773,
+    "product_pct": 28.916111,
+    "air_in_pct": 0.111815
+   },
+   "balance": {
+    "E_in_kW": 19161.986862,
+    "residual_B_kW": 0.000525,
+    "residual_B_pct_fuel_ex": 3e-06,
+    "residual_A_pct_fuel_ex": 3e-06,
+    "energy_residual_kW": 0.000525,
+    "energy_residual_pct_LHV": 3e-06,
+    "gg_shaft_residual_kW": 0.000525,
+    "closed": true,
+    "method": "B: эксергия топлива + воздуха = мощность на клеммах + Σ T0·S_gen узлов + эксергия выхлопа и утечек; A — то же с разрушением из баланса эксергии каждого узла (тождество, контроль арифметики)"
+   },
+   "states": {
+    "s1": {
+     "T_C": 15.0,
+     "p_kPa": 101.325,
+     "ex_kJ_kg": 0.83765,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "s3": {
+     "T_C": 410.370626,
+     "p_kPa": 1367.8875,
+     "ex_kJ_kg": 368.277478,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "fuel": {
+     "T_C": 15.0,
+     "p_kPa": 1367.8875,
+     "ex_kJ_kg": 52393.583483,
+     "ex_ch_kJ_kg": 52004.905789
+    },
+    "air_in": {
+     "T_C": 410.370626,
+     "p_kPa": 1367.8875,
+     "ex_kJ_kg": 368.277478,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "mix": {
+     "T_C": 395.703904,
+     "p_kPa": 1367.8875,
+     "ex_kJ_kg": 1099.802252,
+     "ex_ch_kJ_kg": 734.986675
+    },
+    "pa": {
+     "T_C": 1002.90201,
+     "p_kPa": 1367.8875,
+     "ex_kJ_kg": 872.818617,
+     "ex_ch_kJ_kg": 11.105223
+    },
+    "pb": {
+     "T_C": 1002.90201,
+     "p_kPa": 1313.172,
+     "ex_kJ_kg": 869.403272,
+     "ex_ch_kJ_kg": 11.105223
+    },
+    "s4": {
+     "T_C": 1000.000652,
+     "p_kPa": 1313.172,
+     "ex_kJ_kg": 866.633189,
+     "ex_ch_kJ_kg": 11.105223
+    },
+    "cngv": {
+     "T_C": 410.370626,
+     "p_kPa": 1313.172,
+     "ex_kJ_kg": 364.901048,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "s41": {
+     "T_C": 1000.000652,
+     "p_kPa": 1313.172,
+     "ex_kJ_kg": 866.633189,
+     "ex_ch_kJ_kg": 11.105223
+    },
+    "s45": {
+     "T_C": 657.913838,
+     "p_kPa": 303.081454,
+     "ex_kJ_kg": 440.39315,
+     "ex_ch_kJ_kg": 11.105223
+    },
+    "crot": {
+     "T_C": 410.370626,
+     "p_kPa": 303.081454,
+     "ex_kJ_kg": 243.63017,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "s45m": {
+     "T_C": 657.913838,
+     "p_kPa": 303.081454,
+     "ex_kJ_kg": 440.39315,
+     "ex_ch_kJ_kg": 11.105223
+    },
+    "s45d": {
+     "T_C": 657.913838,
+     "p_kPa": 303.081454,
+     "ex_kJ_kg": 440.39315,
+     "ex_ch_kJ_kg": 11.105223
+    },
+    "s5": {
+     "T_C": 458.175358,
+     "p_kPa": 103.3515,
+     "ex_kJ_kg": 201.273747,
+     "ex_ch_kJ_kg": 11.105223
+    }
+   },
+   "flows": {
+    "W1": 25.55,
+    "Wca": 25.16675,
+    "Wf": 0.365323,
+    "W41": 25.532073,
+    "W45": 25.532073,
+    "Wngv": 0.0,
+    "Wrot": 0.0,
+    "Wleak": 0.38325
+   },
+   "works_kW": {
+    "W_comp": 10414.811554,
+    "W_turb": 16359.266552,
+    "W_gg": 10520.012201,
+    "W_pt": 5839.254351
+   },
+   "Ex_kW": {
+    "air_c3": 9268.347214,
+    "air_comb_in": 9268.347214,
+    "cool": 0.0,
+    "fuel": 19140.584908,
+    "s4": 22126.941897,
+    "s41": 22126.941897,
+    "s5": 5138.936022,
+    "exhaust": 5138.936022,
+    "recup_transfer": 0.0
+   },
+   "compressor_stages": {
+    "n_stages": 2,
+    "pi1": 4.49,
+    "eta_p1": 0.844042,
+    "pi2": 3.006682,
+    "eta_p2_matched": 0.839138,
+    "T2_C": 203.785601,
+    "D1_kW": 582.763068,
+    "D2_kW": 443.960883
+   },
+   "model_check": {
+    "P": 0.0,
+    "Wf": 0.0,
+    "EGT_K": 0.0,
+    "eff": 0.0
+   },
+   "inputs": {
+    "PR": 13.5,
+    "T41_C": 1000.0,
+    "eta_pc": 0.841259,
+    "eta_pt_gg": 0.884623,
+    "eta_pt_pt": 0.884623,
+    "x_ngv": 0.0,
+    "x_rot": 0.0,
+    "x_leak": 0.015,
+    "dp_duct": 0.0,
+    "W1": 25.55
+   },
+   "cycle": {
+    "P_MW": 5.780862,
+    "eff": 0.31629,
+    "EGT_C": 458.175358,
+    "T3_C": 410.370626,
+    "T4_C": 1000.000652,
+    "T45_C": 657.913838,
+    "Wf": 0.365323,
+    "W_exh": 25.532073,
+    "p45": 303081.454056,
+    "far": 0.014516
+   },
+   "turbine_stages": {
+    "stages": [
+     {
+      "stage": 1,
+      "ER": 2.019333,
+      "T_in_C": 1000.000652,
+      "T_out_C": 824.82221,
+      "w_kJkg": 213.621514,
+      "D_kW": 173.524698
+     },
+     {
+      "stage": 2,
+      "ER": 2.28662,
+      "T_in_C": 824.82221,
+      "T_out_C": 644.92069,
+      "w_kJkg": 213.603552,
+      "D_kW": 204.300328
+     },
+     {
+      "stage": 3,
+      "ER": 2.751711,
+      "T_in_C": 644.92069,
+      "T_out_C": 458.110369,
+      "w_kJkg": 213.581582,
+      "D_kW": 250.183138
+     }
+    ],
+    "sum_D_kW": 628.008164,
+    "ER_scale_log": 1.00046
+   },
+   "plug_and_play": {
+    "W1_for_P_req": 26.173796,
+    "G_cap": 25.692,
+    "flow_ok": false,
+    "T_exhaust_to_package_C": 458.175358,
+    "EGT_cap": 610.0,
+    "egt_ok": true,
+    "P_shaft_at_G_cap_kW": 5812.990276
+   }
+  },
+  "recup": {
+   "fuel": {
+    "Ex_kW": 15415.942427,
+    "ex_MJ_kg": 52.245254,
+    "ex_ch_MJ_kg": 52.004906,
+    "ex_pressure_MJ_kg": 0.240349,
+    "ex_thermal_MJ_kg": 0.0,
+    "LHV_kW": 14762.290084,
+    "ratio_ex_LHV": 1.044279
+   },
+   "air_in": {
+    "Ex_kW": 24.258143,
+    "ex_kJ_kg": 0.83765,
+    "note": "сухой воздух модели относительно влажной среды ISO: химическая эксергия"
+   },
+   "P_shaft_kW": 5780.861808,
+   "P_el_kW": 5534.712712,
+   "eff_shaft": 0.391597,
+   "eff_el": 0.374922,
+   "ex_eff_shaft": 0.374992,
+   "ex_eff_el": 0.359025,
+   "nodes": {
+    "compressor": {
+     "label": "компрессор (обе ступени)",
+     "kW": 722.531793,
+     "kW_by_exergy_balance": 722.531793,
+     "pct_fuel_ex": 4.686913,
+     "S_gen_kW_K": 2.507485,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "leakage": {
+     "label": "утечки (сжатый воздух уходит мимо турбины)",
+     "kW": 80.737912,
+     "kW_by_exergy_balance": 80.737912,
+     "pct_fuel_ex": 0.52373,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0,
+     "outflow": true
+    },
+    "recup_heat": {
+     "label": "рекуператор: теплообмен при конечной разности температур",
+     "kW": 499.622666,
+     "kW_by_exergy_balance": 499.622679,
+     "pct_fuel_ex": 3.240948,
+     "S_gen_kW_K": 1.733898,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "recup_dp_gas": {
+     "label": "рекуператор: потеря давления газа",
+     "kW": 82.681351,
+     "kW_by_exergy_balance": 82.681339,
+     "pct_fuel_ex": 0.536337,
+     "S_gen_kW_K": 0.286939,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "comb_mixing": {
+     "label": "камера: смешение топлива с воздухом",
+     "kW": 316.747747,
+     "kW_by_exergy_balance": 316.747747,
+     "pct_fuel_ex": 2.054677,
+     "S_gen_kW_K": 1.099246,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "comb_reaction": {
+     "label": "камера: горение (реакция)",
+     "kW": 4279.803497,
+     "kW_by_exergy_balance": 4279.803497,
+     "pct_fuel_ex": 27.762192,
+     "S_gen_kW_K": 14.852693,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "recup_dp_air": {
+     "label": "рекуператор: потеря давления воздуха",
+     "kW": 60.849525,
+     "kW_by_exergy_balance": 60.849525,
+     "pct_fuel_ex": 0.394718,
+     "S_gen_kW_K": 0.211173,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "comb_dp": {
+     "label": "камера: потеря давления",
+     "kW": 98.112719,
+     "kW_by_exergy_balance": 98.112719,
+     "pct_fuel_ex": 0.636437,
+     "S_gen_kW_K": 0.340492,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "comb_heat_loss": {
+     "label": "камера: недожог η_b (потеря тепла в модели)",
+     "kW": 57.119586,
+     "kW_by_exergy_balance": 57.11958,
+     "pct_fuel_ex": 0.370523,
+     "S_gen_kW_K": 0.198229,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -6e-06
+    },
+    "cool_throttle_ngv": {
+     "label": "охлаждение соплового аппарата: дросселирование воздуха p3 -> p4",
+     "kW": 0.0,
+     "kW_by_exergy_balance": 0.0,
+     "pct_fuel_ex": 0.0,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": -0.0
+    },
+    "cool_throttle_rotor": {
+     "label": "охлаждение ротора: дросселирование воздуха p3 -> p45",
+     "kW": 0.0,
+     "kW_by_exergy_balance": 0.0,
+     "pct_fuel_ex": 0.0,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "cool_mix_ngv": {
+     "label": "охлаждение соплового аппарата: смешение",
+     "kW": 0.0,
+     "kW_by_exergy_balance": -0.0,
+     "pct_fuel_ex": 0.0,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -0.0
+    },
+    "turbine_gg": {
+     "label": "турбина: часть, вращающая компрессор",
+     "kW": 195.55578,
+     "kW_by_exergy_balance": 195.55578,
+     "pct_fuel_ex": 1.26853,
+     "S_gen_kW_K": 0.67866,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "cool_mix_rotor": {
+     "label": "охлаждение ротора: смешение",
+     "kW": 0.0,
+     "kW_by_exergy_balance": 0.0,
+     "pct_fuel_ex": 0.0,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "duct_dp": {
+     "label": "переходный канал: потеря давления",
+     "kW": 0.0,
+     "kW_by_exergy_balance": 0.0,
+     "pct_fuel_ex": 0.0,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "turbine_pt": {
+     "label": "турбина: часть, дающая мощность",
+     "kW": 218.201445,
+     "kW_by_exergy_balance": 218.201445,
+     "pct_fuel_ex": 1.415427,
+     "S_gen_kW_K": 0.75725,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "mech": {
+     "label": "механические потери (подшипники)",
+     "kW": 119.814821,
+     "kW_by_exergy_balance": 119.814821,
+     "pct_fuel_ex": 0.777214,
+     "S_gen_kW_K": 0.415807,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "gearbox": {
+     "label": "редуктор пакета",
+     "kW": 86.712927,
+     "kW_by_exergy_balance": 86.712927,
+     "pct_fuel_ex": 0.562489,
+     "S_gen_kW_K": 0.30093,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "generator": {
+     "label": "генератор пакета",
+     "kW": 159.436169,
+     "kW_by_exergy_balance": 159.436169,
+     "pct_fuel_ex": 1.034229,
+     "S_gen_kW_K": 0.55331,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "exhaust": {
+     "label": "выхлоп (уходит с газом)",
+     "kW": 2927.555547,
+     "kW_by_exergy_balance": 2927.555547,
+     "pct_fuel_ex": 18.990442,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0,
+     "outflow": true,
+     "thermal_W": 2691.330606,
+     "pressure_W": 47.594186,
+     "chemical_W": 188.630754
+    }
+   },
+   "groups": [
+    {
+     "key": "compressor",
+     "label": "компрессор",
+     "kW": 722.531793,
+     "pct_fuel_ex": 4.686913,
+     "S_gen_kW_K": 2.507485,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_mixing",
+     "label": "камера: смешение",
+     "kW": 316.747747,
+     "pct_fuel_ex": 2.054677,
+     "S_gen_kW_K": 1.099246,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_reaction",
+     "label": "камера: горение",
+     "kW": 4279.803497,
+     "pct_fuel_ex": 27.762192,
+     "S_gen_kW_K": 14.852693,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_dp",
+     "label": "камера: потеря давления",
+     "kW": 98.112719,
+     "pct_fuel_ex": 0.636437,
+     "S_gen_kW_K": 0.340492,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_heat_loss",
+     "label": "камера: недожог",
+     "kW": 57.119586,
+     "pct_fuel_ex": 0.370523,
+     "S_gen_kW_K": 0.198229,
+     "kind": "разрушение"
+    },
+    {
+     "key": "turbine",
+     "label": "турбина",
+     "kW": 413.757226,
+     "pct_fuel_ex": 2.683957,
+     "S_gen_kW_K": 1.435909,
+     "kind": "разрушение"
+    },
+    {
+     "key": "leak_cool",
+     "label": "утечки и охлаждение",
+     "kW": 80.737912,
+     "pct_fuel_ex": 0.52373,
+     "S_gen_kW_K": 0.0,
+     "kind": "разрушение + утечки"
+    },
+    {
+     "key": "recuperator",
+     "label": "рекуператор",
+     "kW": 643.153542,
+     "pct_fuel_ex": 4.172003,
+     "S_gen_kW_K": 2.23201,
+     "kind": "разрушение"
+    },
+    {
+     "key": "exhaust",
+     "label": "выхлоп",
+     "kW": 2927.555547,
+     "pct_fuel_ex": 18.990442,
+     "S_gen_kW_K": 0.0,
+     "kind": "уходит с потоком"
+    },
+    {
+     "key": "mech_gen",
+     "label": "механика, редуктор, генератор",
+     "kW": 365.963917,
+     "pct_fuel_ex": 2.373932,
+     "S_gen_kW_K": 1.270047,
+     "kind": "разрушение"
+    }
+   ],
+   "totals": {
+    "destruction_kW": 6897.190027,
+    "destruction_pct": 44.740632,
+    "S_gen_kW_K": 23.93611,
+    "entropy_generation_number": 0.447406,
+    "outflow_kW": 3008.293459,
+    "outflow_pct": 19.514172,
+    "product_pct": 35.902526,
+    "air_in_pct": 0.157358
+   },
+   "balance": {
+    "E_in_kW": 15440.20057,
+    "residual_B_kW": 0.004372,
+    "residual_B_pct_fuel_ex": 2.8e-05,
+    "residual_A_pct_fuel_ex": 2.8e-05,
+    "energy_residual_kW": 0.004372,
+    "energy_residual_pct_LHV": 3e-05,
+    "gg_shaft_residual_kW": 0.004378,
+    "closed": true,
+    "method": "B: эксергия топлива + воздуха = мощность на клеммах + Σ T0·S_gen узлов + эксергия выхлопа и утечек; A — то же с разрушением из баланса эксергии каждого узла (тождество, контроль арифметики)"
+   },
+   "states": {
+    "s1": {
+     "T_C": 15.0,
+     "p_kPa": 101.325,
+     "ex_kJ_kg": 0.83765,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "s3": {
+     "T_C": 221.88532,
+     "p_kPa": 506.625,
+     "ex_kJ_kg": 185.862257,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "fuel": {
+     "T_C": 15.0,
+     "p_kPa": 506.625,
+     "ex_kJ_kg": 52245.25431,
+     "ex_ch_kJ_kg": 52004.905789
+    },
+    "air_in": {
+     "T_C": 586.519248,
+     "p_kPa": 506.625,
+     "ex_kJ_kg": 406.243267,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "mix": {
+     "T_C": 570.225387,
+     "p_kPa": 506.625,
+     "ex_kJ_kg": 925.989873,
+     "ex_ch_kJ_kg": 525.635477
+    },
+    "pa": {
+     "T_C": 1002.099997,
+     "p_kPa": 506.625,
+     "ex_kJ_kg": 777.490969,
+     "ex_ch_kJ_kg": 6.545034
+    },
+    "pb": {
+     "T_C": 1002.099997,
+     "p_kPa": 474.201,
+     "ex_kJ_kg": 771.975361,
+     "ex_ch_kJ_kg": 6.545034
+    },
+    "s4": {
+     "T_C": 999.999826,
+     "p_kPa": 474.201,
+     "ex_kJ_kg": 769.993449,
+     "ex_ch_kJ_kg": 6.545034
+    },
+    "cngv": {
+     "T_C": 221.88532,
+     "p_kPa": 474.201,
+     "ex_kJ_kg": 180.391765,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "s41": {
+     "T_C": 999.999826,
+     "p_kPa": 474.201,
+     "ex_kJ_kg": 769.993449,
+     "ex_ch_kJ_kg": 6.545034
+    },
+    "s45": {
+     "T_C": 823.244051,
+     "p_kPa": 234.565591,
+     "ex_kJ_kg": 550.087578,
+     "ex_ch_kJ_kg": 6.545034
+    },
+    "crot": {
+     "T_C": 221.88532,
+     "p_kPa": 234.565591,
+     "ex_kJ_kg": 122.171787,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "s45m": {
+     "T_C": 823.244051,
+     "p_kPa": 234.565591,
+     "ex_kJ_kg": 550.087578,
+     "ex_ch_kJ_kg": 6.545034
+    },
+    "s45d": {
+     "T_C": 823.244051,
+     "p_kPa": 234.565591,
+     "ex_kJ_kg": 550.087578,
+     "ex_ch_kJ_kg": 6.545034
+    },
+    "s5": {
+     "T_C": 650.866412,
+     "p_kPa": 106.968802,
+     "ex_kJ_kg": 339.908409,
+     "ex_ch_kJ_kg": 6.545034
+    },
+    "s6": {
+     "T_C": 304.272172,
+     "p_kPa": 103.3515,
+     "ex_kJ_kg": 101.579147,
+     "ex_ch_kJ_kg": 6.545034
+    },
+    "s5p": {
+     "T_C": 650.866413,
+     "p_kPa": 103.3515,
+     "ex_kJ_kg": 337.039565,
+     "ex_ch_kJ_kg": 6.545034
+    }
+   },
+   "flows": {
+    "W1": 28.959766,
+    "Wca": 28.52537,
+    "Wf": 0.295069,
+    "W41": 28.820438,
+    "W45": 28.820438,
+    "Wngv": 0.0,
+    "Wrot": 0.0,
+    "Wleak": 0.434396
+   },
+   "works_kW": {
+    "W_comp": 6080.801135,
+    "W_turb": 11981.482142,
+    "W_gg": 6142.227791,
+    "W_pt": 5839.254351
+   },
+   "Ex_kW": {
+    "air_c3": 5301.789573,
+    "air_comb_in": 11588.23933,
+    "cool": 0.0,
+    "fuel": 15415.942427,
+    "s4": 22191.548689,
+    "s41": 22191.548689,
+    "s5": 9796.309321,
+    "exhaust": 2927.555547,
+    "recup_transfer": 6286.449757
+   },
+   "compressor_stages": {
+    "n_stages": 2,
+    "pi1": 4.49,
+    "eta_p1": 0.844042,
+    "pi2": 1.113586,
+    "eta_p2_matched": 0.806004,
+    "T2_C": 203.785601,
+    "D1_kW": 660.535503,
+    "D2_kW": 61.99629
+   },
+   "recuperator": {
+    "Q_kW": 11118.559916,
+    "T_gas_in_C": 650.866412,
+    "T_gas_out_C": 304.272172,
+    "T_air_in_C": 221.88532,
+    "T_air_out_C": 586.519248,
+    "eps_actual": 0.85,
+    "LMTD_K": 72.995869,
+    "UA_kW_K": 152.31766
+   },
+   "model_check": {
+    "P": 0.0,
+    "Wf": 0.0,
+    "EGT_K": 0.0,
+    "eff": 0.0
+   },
+   "inputs": {
+    "PR": 5.0,
+    "T41_C": 1000.0,
+    "eta_pc": 0.841259,
+    "eta_pt_gg": 0.884623,
+    "eta_pt_pt": 0.884623,
+    "x_ngv": 0.0,
+    "x_rot": 0.0,
+    "x_leak": 0.015,
+    "dp_duct": 0.0,
+    "W1": 28.959766,
+    "eps": 0.85,
+    "dp_air": 0.025,
+    "dp_gas": 0.035
+   },
+   "cycle": {
+    "P_MW": 5.780862,
+    "eff": 0.391597,
+    "EGT_C": 650.866412,
+    "T3_C": 221.88532,
+    "T4_C": 999.999826,
+    "T45_C": 823.244051,
+    "Wf": 0.295069,
+    "W_exh": 28.820438,
+    "p45": 234565.590938,
+    "far": 0.010344,
+    "T3r_C": 586.519248,
+    "Tstack_model_C": 311.756859
+   },
+   "plug_and_play": {
+    "W1_for_P_req": 29.666811,
+    "G_cap": 25.692,
+    "flow_ok": false,
+    "T_exhaust_to_package_C": 304.272172,
+    "EGT_cap": 610.0,
+    "egt_ok": true,
+    "P_shaft_at_G_cap_kW": 5128.560131
+   }
+  },
+  "recup_1stage": {
+   "fuel": {
+    "Ex_kW": 15438.430905,
+    "ex_MJ_kg": 52.229188,
+    "ex_ch_MJ_kg": 52.004906,
+    "ex_pressure_MJ_kg": 0.224282,
+    "ex_thermal_MJ_kg": 0.0,
+    "LHV_kW": 14788.372742,
+    "ratio_ex_LHV": 1.043957
+   },
+   "air_in": {
+    "Ex_kW": 25.25141,
+    "ex_kJ_kg": 0.83765,
+    "note": "сухой воздух модели относительно влажной среды ISO: химическая эксергия"
+   },
+   "P_shaft_kW": 5780.861808,
+   "P_el_kW": 5534.712712,
+   "eff_shaft": 0.390906,
+   "eff_el": 0.374261,
+   "ex_eff_shaft": 0.374446,
+   "ex_eff_el": 0.358502,
+   "nodes": {
+    "compressor": {
+     "label": "компрессор (обе ступени)",
+     "kW": 702.152041,
+     "kW_by_exergy_balance": 702.152041,
+     "pct_fuel_ex": 4.548079,
+     "S_gen_kW_K": 2.436759,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "leakage": {
+     "label": "утечки (сжатый воздух уходит мимо турбины)",
+     "kW": 76.737216,
+     "kW_by_exergy_balance": 76.737216,
+     "pct_fuel_ex": 0.497053,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0,
+     "outflow": true
+    },
+    "recup_heat": {
+     "label": "рекуператор: теплообмен при конечной разности температур",
+     "kW": 623.464622,
+     "kW_by_exergy_balance": 623.464622,
+     "pct_fuel_ex": 4.038394,
+     "S_gen_kW_K": 2.163681,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "recup_dp_gas": {
+     "label": "рекуператор: потеря давления газа",
+     "kW": 86.007403,
+     "kW_by_exergy_balance": 86.007403,
+     "pct_fuel_ex": 0.557099,
+     "S_gen_kW_K": 0.298481,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "comb_mixing": {
+     "label": "камера: смешение топлива с воздухом",
+     "kW": 322.362265,
+     "kW_by_exergy_balance": 322.362265,
+     "pct_fuel_ex": 2.088051,
+     "S_gen_kW_K": 1.118731,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "comb_reaction": {
+     "label": "камера: горение (реакция)",
+     "kW": 4256.179444,
+     "kW_by_exergy_balance": 4256.179444,
+     "pct_fuel_ex": 27.568731,
+     "S_gen_kW_K": 14.770708,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "recup_dp_air": {
+     "label": "рекуператор: потеря давления воздуха",
+     "kW": 63.297343,
+     "kW_by_exergy_balance": 63.297343,
+     "pct_fuel_ex": 0.409999,
+     "S_gen_kW_K": 0.219668,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "comb_dp": {
+     "label": "камера: потеря давления",
+     "kW": 102.059538,
+     "kW_by_exergy_balance": 102.059538,
+     "pct_fuel_ex": 0.661075,
+     "S_gen_kW_K": 0.354189,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "comb_heat_loss": {
+     "label": "камера: недожог η_b (потеря тепла в модели)",
+     "kW": 57.220008,
+     "kW_by_exergy_balance": 57.220008,
+     "pct_fuel_ex": 0.370634,
+     "S_gen_kW_K": 0.198577,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -0.0
+    },
+    "cool_throttle_ngv": {
+     "label": "охлаждение соплового аппарата: дросселирование воздуха p3 -> p4",
+     "kW": 0.0,
+     "kW_by_exergy_balance": 0.0,
+     "pct_fuel_ex": 0.0,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": -0.0
+    },
+    "cool_throttle_rotor": {
+     "label": "охлаждение ротора: дросселирование воздуха p3 -> p45",
+     "kW": 0.0,
+     "kW_by_exergy_balance": 0.0,
+     "pct_fuel_ex": 0.0,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": -0.0
+    },
+    "cool_mix_ngv": {
+     "label": "охлаждение соплового аппарата: смешение",
+     "kW": 0.0,
+     "kW_by_exergy_balance": 0.0,
+     "pct_fuel_ex": 0.0,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "turbine_gg": {
+     "label": "турбина: часть, вращающая компрессор",
+     "kW": 185.039263,
+     "kW_by_exergy_balance": 185.039263,
+     "pct_fuel_ex": 1.198563,
+     "S_gen_kW_K": 0.642163,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "cool_mix_rotor": {
+     "label": "охлаждение ротора: смешение",
+     "kW": 0.0,
+     "kW_by_exergy_balance": -0.0,
+     "pct_fuel_ex": 0.0,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "duct_dp": {
+     "label": "переходный канал: потеря давления",
+     "kW": 0.0,
+     "kW_by_exergy_balance": 0.0,
+     "pct_fuel_ex": 0.0,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "turbine_pt": {
+     "label": "турбина: часть, дающая мощность",
+     "kW": 214.209206,
+     "kW_by_exergy_balance": 214.209206,
+     "pct_fuel_ex": 1.387506,
+     "S_gen_kW_K": 0.743395,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "mech": {
+     "label": "механические потери (подшипники)",
+     "kW": 116.904757,
+     "kW_by_exergy_balance": 116.904757,
+     "pct_fuel_ex": 0.757232,
+     "S_gen_kW_K": 0.405708,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "gearbox": {
+     "label": "редуктор пакета",
+     "kW": 86.712927,
+     "kW_by_exergy_balance": 86.712927,
+     "pct_fuel_ex": 0.561669,
+     "S_gen_kW_K": 0.30093,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "generator": {
+     "label": "генератор пакета",
+     "kW": 159.436169,
+     "kW_by_exergy_balance": 159.436169,
+     "pct_fuel_ex": 1.032723,
+     "S_gen_kW_K": 0.55331,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "exhaust": {
+     "label": "выхлоп (уходит с газом)",
+     "kW": 2877.193315,
+     "kW_by_exergy_balance": 2877.193315,
+     "pct_fuel_ex": 18.636566,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0,
+     "outflow": true,
+     "thermal_W": 2643.043373,
+     "pressure_W": 49.508776,
+     "chemical_W": 184.641166
+    }
+   },
+   "groups": [
+    {
+     "key": "compressor",
+     "label": "компрессор",
+     "kW": 702.152041,
+     "pct_fuel_ex": 4.548079,
+     "S_gen_kW_K": 2.436759,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_mixing",
+     "label": "камера: смешение",
+     "kW": 322.362265,
+     "pct_fuel_ex": 2.088051,
+     "S_gen_kW_K": 1.118731,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_reaction",
+     "label": "камера: горение",
+     "kW": 4256.179444,
+     "pct_fuel_ex": 27.568731,
+     "S_gen_kW_K": 14.770708,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_dp",
+     "label": "камера: потеря давления",
+     "kW": 102.059538,
+     "pct_fuel_ex": 0.661075,
+     "S_gen_kW_K": 0.354189,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_heat_loss",
+     "label": "камера: недожог",
+     "kW": 57.220008,
+     "pct_fuel_ex": 0.370634,
+     "S_gen_kW_K": 0.198577,
+     "kind": "разрушение"
+    },
+    {
+     "key": "turbine",
+     "label": "турбина",
+     "kW": 399.248469,
+     "pct_fuel_ex": 2.586069,
+     "S_gen_kW_K": 1.385558,
+     "kind": "разрушение"
+    },
+    {
+     "key": "leak_cool",
+     "label": "утечки и охлаждение",
+     "kW": 76.737216,
+     "pct_fuel_ex": 0.497053,
+     "S_gen_kW_K": 0.0,
+     "kind": "разрушение + утечки"
+    },
+    {
+     "key": "recuperator",
+     "label": "рекуператор",
+     "kW": 772.769368,
+     "pct_fuel_ex": 5.005492,
+     "S_gen_kW_K": 2.68183,
+     "kind": "разрушение"
+    },
+    {
+     "key": "exhaust",
+     "label": "выхлоп",
+     "kW": 2877.193315,
+     "pct_fuel_ex": 18.636566,
+     "S_gen_kW_K": 0.0,
+     "kind": "уходит с потоком"
+    },
+    {
+     "key": "mech_gen",
+     "label": "механика, редуктор, генератор",
+     "kW": 363.053853,
+     "pct_fuel_ex": 2.351624,
+     "S_gen_kW_K": 1.259947,
+     "kind": "разрушение"
+    }
+   ],
+   "totals": {
+    "destruction_kW": 6975.044985,
+    "destruction_pct": 45.179753,
+    "S_gen_kW_K": 24.206299,
+    "entropy_generation_number": 0.451798,
+    "outflow_kW": 2953.930532,
+    "outflow_pct": 19.133619,
+    "product_pct": 35.850228,
+    "air_in_pct": 0.163562
+   },
+   "balance": {
+    "E_in_kW": 15463.682315,
+    "residual_B_kW": -0.005913,
+    "residual_B_pct_fuel_ex": -3.8e-05,
+    "residual_A_pct_fuel_ex": -3.8e-05,
+    "energy_residual_kW": -0.005913,
+    "energy_residual_pct_LHV": -4e-05,
+    "gg_shaft_residual_kW": -0.005913,
+    "closed": true,
+    "method": "B: эксергия топлива + воздуха = мощность на клеммах + Σ T0·S_gen узлов + эксергия выхлопа и утечек; A — то же с разрушением из баланса эксергии каждого узла (тождество, контроль арифметики)"
+   },
+   "states": {
+    "s1": {
+     "T_C": 15.0,
+     "p_kPa": 101.325,
+     "ex_kJ_kg": 0.83765,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "s3": {
+     "T_C": 204.565135,
+     "p_kPa": 454.94925,
+     "ex_kJ_kg": 169.703834,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "fuel": {
+     "T_C": 15.0,
+     "p_kPa": 454.94925,
+     "ex_kJ_kg": 52229.187865,
+     "ex_ch_kJ_kg": 52004.905789
+    },
+    "air_in": {
+     "T_C": 602.608188,
+     "p_kPa": 454.94925,
+     "ex_kJ_kg": 409.319958,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "mix": {
+     "T_C": 586.383873,
+     "p_kPa": 454.94925,
+     "ex_kJ_kg": 909.340039,
+     "ex_ch_kJ_kg": 506.021996
+    },
+    "pa": {
+     "T_C": 1002.023979,
+     "p_kPa": 454.94925,
+     "ex_kJ_kg": 767.41512,
+     "ex_ch_kJ_kg": 6.156973
+    },
+    "pb": {
+     "T_C": 1002.023979,
+     "p_kPa": 425.832498,
+     "ex_kJ_kg": 761.901193,
+     "ex_ch_kJ_kg": 6.156973
+    },
+    "s4": {
+     "T_C": 999.999868,
+     "p_kPa": 425.832498,
+     "ex_kJ_kg": 759.993157,
+     "ex_ch_kJ_kg": 6.156973
+    },
+    "cngv": {
+     "T_C": 204.565135,
+     "p_kPa": 425.832498,
+     "ex_kJ_kg": 164.233342,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "s41": {
+     "T_C": 999.999868,
+     "p_kPa": 425.832498,
+     "ex_kJ_kg": 759.993157,
+     "ex_ch_kJ_kg": 6.156973
+    },
+    "s45": {
+     "T_C": 838.170018,
+     "p_kPa": 224.449905,
+     "ex_kJ_kg": 558.710337,
+     "ex_ch_kJ_kg": 6.156973
+    },
+    "crot": {
+     "T_C": 204.565135,
+     "p_kPa": 224.449905,
+     "ex_kJ_kg": 111.265723,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "s45m": {
+     "T_C": 838.170018,
+     "p_kPa": 224.449905,
+     "ex_kJ_kg": 558.710337,
+     "ex_ch_kJ_kg": 6.156973
+    },
+    "s45d": {
+     "T_C": 838.170018,
+     "p_kPa": 224.449905,
+     "ex_kJ_kg": 558.710337,
+     "ex_ch_kJ_kg": 6.156973
+    },
+    "s5": {
+     "T_C": 672.85108,
+     "p_kPa": 106.968802,
+     "ex_kJ_kg": 356.853875,
+     "ex_ch_kJ_kg": 6.156973
+    },
+    "s6": {
+     "T_C": 294.520701,
+     "p_kPa": 103.3515,
+     "ex_kJ_kg": 95.941779,
+     "ex_ch_kJ_kg": 6.156973
+    },
+    "s5p": {
+     "T_C": 672.85108,
+     "p_kPa": 103.3515,
+     "ex_kJ_kg": 353.985905,
+     "ex_ch_kJ_kg": 6.156973
+    }
+   },
+   "flows": {
+    "W1": 30.145544,
+    "Wca": 29.693361,
+    "Wf": 0.29559,
+    "W41": 29.988951,
+    "W45": 29.988951,
+    "Wngv": 0.0,
+    "Wrot": 0.0,
+    "Wleak": 0.452183
+   },
+   "works_kW": {
+    "W_comp": 5792.715046,
+    "W_turb": 11690.475697,
+    "W_gg": 5851.221346,
+    "W_pt": 5839.254351
+   },
+   "Ex_kW": {
+    "air_c3": 5039.077198,
+    "air_comb_in": 12154.085219,
+    "cool": 0.0,
+    "fuel": 15438.430905,
+    "s4": 22791.397527,
+    "s41": 22791.397527,
+    "s5": 10701.673361,
+    "exhaust": 2877.193315,
+    "recup_transfer": 7115.008021
+   },
+   "compressor_stages": {
+    "n_stages": 1,
+    "note": "π не больше π ступени 1 frame3: одна ступень"
+   },
+   "recuperator": {
+    "Q_kW": 12635.209698,
+    "T_gas_in_C": 672.85108,
+    "T_gas_out_C": 294.520701,
+    "T_air_in_C": 204.565135,
+    "T_air_out_C": 602.608188,
+    "eps_actual": 0.85,
+    "LMTD_K": 79.693304,
+    "UA_kW_K": 158.547946
+   },
+   "model_check": {
+    "P": 0.0,
+    "Wf": 0.0,
+    "EGT_K": 0.0,
+    "eff": 0.0
+   },
+   "inputs": {
+    "PR": 4.49,
+    "T41_C": 1000.0,
+    "eta_pc": 0.841259,
+    "eta_pt_gg": 0.884623,
+    "eta_pt_pt": 0.884623,
+    "x_ngv": 0.0,
+    "x_rot": 0.0,
+    "x_leak": 0.015,
+    "dp_duct": 0.0,
+    "W1": 30.145544,
+    "eps": 0.85,
+    "dp_air": 0.025,
+    "dp_gas": 0.035
+   },
+   "cycle": {
+    "P_MW": 5.780862,
+    "eff": 0.390906,
+    "EGT_C": 672.85108,
+    "T3_C": 204.565135,
+    "T4_C": 999.999868,
+    "T45_C": 838.170018,
+    "Wf": 0.29559,
+    "W_exh": 29.988951,
+    "p45": 224449.90541,
+    "far": 0.009955,
+    "T3r_C": 602.608188,
+    "Tstack_model_C": 302.671041
+   },
+   "plug_and_play": {
+    "W1_for_P_req": 30.881539,
+    "G_cap": 25.692,
+    "flow_ok": false,
+    "T_exhaust_to_package_C": 294.520701,
+    "EGT_cap": 610.0,
+    "egt_ok": true,
+    "P_shaft_at_G_cap_kW": 4926.827706
+   }
+  },
+  "hot_printed": {
+   "fuel": {
+    "Ex_kW": 18313.648863,
+    "ex_MJ_kg": 52.393583,
+    "ex_ch_MJ_kg": 52.004906,
+    "ex_pressure_MJ_kg": 0.388678,
+    "ex_thermal_MJ_kg": 0.0,
+    "LHV_kW": 17487.482087,
+    "ratio_ex_LHV": 1.047243
+   },
+   "air_in": {
+    "Ex_kW": 16.359003,
+    "ex_kJ_kg": 0.83765,
+    "note": "сухой воздух модели относительно влажной среды ISO: химическая эксергия"
+   },
+   "P_shaft_kW": 5780.861808,
+   "P_el_kW": 5534.712712,
+   "eff_shaft": 0.330571,
+   "eff_el": 0.316496,
+   "ex_eff_shaft": 0.315659,
+   "ex_eff_el": 0.302218,
+   "nodes": {
+    "compressor": {
+     "label": "компрессор (обе ступени)",
+     "kW": 784.79661,
+     "kW_by_exergy_balance": 784.79661,
+     "pct_fuel_ex": 4.28531,
+     "S_gen_kW_K": 2.72357,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "leakage": {
+     "label": "утечки (сжатый воздух уходит мимо турбины)",
+     "kW": 107.884921,
+     "kW_by_exergy_balance": 107.884921,
+     "pct_fuel_ex": 0.589096,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0,
+     "outflow": true
+    },
+    "comb_mixing": {
+     "label": "камера: смешение топлива с воздухом",
+     "kW": 299.431783,
+     "kW_by_exergy_balance": 299.431783,
+     "pct_fuel_ex": 1.63502,
+     "S_gen_kW_K": 1.039152,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -0.0
+    },
+    "comb_reaction": {
+     "label": "камера: горение (реакция)",
+     "kW": 5153.741344,
+     "kW_by_exergy_balance": 5153.741328,
+     "pct_fuel_ex": 28.141532,
+     "S_gen_kW_K": 17.88562,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -1.6e-05
+    },
+    "comb_dp": {
+     "label": "камера: потеря давления",
+     "kW": 63.455518,
+     "kW_by_exergy_balance": 63.455518,
+     "pct_fuel_ex": 0.346493,
+     "S_gen_kW_K": 0.220217,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "comb_heat_loss": {
+     "label": "камера: недожог η_b (потеря тепла в модели)",
+     "kW": 69.993188,
+     "kW_by_exergy_balance": 69.993204,
+     "pct_fuel_ex": 0.382191,
+     "S_gen_kW_K": 0.242905,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 1.6e-05
+    },
+    "cool_throttle_ngv": {
+     "label": "охлаждение соплового аппарата: дросселирование воздуха p3 -> p4",
+     "kW": 1.813363,
+     "kW_by_exergy_balance": 1.813363,
+     "pct_fuel_ex": 0.009902,
+     "S_gen_kW_K": 0.006293,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -0.0
+    },
+    "cool_throttle_rotor": {
+     "label": "охлаждение ротора: дросселирование воздуха p3 -> p45",
+     "kW": 60.197749,
+     "kW_by_exergy_balance": 60.197749,
+     "pct_fuel_ex": 0.328704,
+     "S_gen_kW_K": 0.208911,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": -0.0
+    },
+    "cool_mix_ngv": {
+     "label": "охлаждение соплового аппарата: смешение",
+     "kW": 42.678157,
+     "kW_by_exergy_balance": 42.678156,
+     "pct_fuel_ex": 0.23304,
+     "S_gen_kW_K": 0.148111,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -0.0
+    },
+    "turbine_gg": {
+     "label": "турбина: часть, вращающая компрессор",
+     "kW": 243.286425,
+     "kW_by_exergy_balance": 243.286425,
+     "pct_fuel_ex": 1.328443,
+     "S_gen_kW_K": 0.844305,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "cool_mix_rotor": {
+     "label": "охлаждение ротора: смешение",
+     "kW": 20.212325,
+     "kW_by_exergy_balance": 20.212325,
+     "pct_fuel_ex": 0.110368,
+     "S_gen_kW_K": 0.070145,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -0.0
+    },
+    "duct_dp": {
+     "label": "переходный канал: потеря давления",
+     "kW": 0.0,
+     "kW_by_exergy_balance": 0.0,
+     "pct_fuel_ex": 0.0,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "turbine_pt": {
+     "label": "турбина: часть, дающая мощность",
+     "kW": 233.553725,
+     "kW_by_exergy_balance": 233.553725,
+     "pct_fuel_ex": 1.275299,
+     "S_gen_kW_K": 0.810528,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "mech": {
+     "label": "механические потери (подшипники)",
+     "kW": 138.804318,
+     "kW_by_exergy_balance": 138.804318,
+     "pct_fuel_ex": 0.757928,
+     "S_gen_kW_K": 0.481709,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "gearbox": {
+     "label": "редуктор пакета",
+     "kW": 86.712927,
+     "kW_by_exergy_balance": 86.712927,
+     "pct_fuel_ex": 0.473488,
+     "S_gen_kW_K": 0.30093,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "generator": {
+     "label": "генератор пакета",
+     "kW": 159.436169,
+     "kW_by_exergy_balance": 159.436169,
+     "pct_fuel_ex": 0.870587,
+     "S_gen_kW_K": 0.55331,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "exhaust": {
+     "label": "выхлоп (уходит с газом)",
+     "kW": 5329.296634,
+     "kW_by_exergy_balance": 5329.296634,
+     "pct_fuel_ex": 29.100136,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0,
+     "outflow": true,
+     "thermal_W": 4991.142781,
+     "pressure_W": 32.541396,
+     "chemical_W": 305.612458
+    }
+   },
+   "groups": [
+    {
+     "key": "compressor",
+     "label": "компрессор",
+     "kW": 784.79661,
+     "pct_fuel_ex": 4.28531,
+     "S_gen_kW_K": 2.72357,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_mixing",
+     "label": "камера: смешение",
+     "kW": 299.431783,
+     "pct_fuel_ex": 1.63502,
+     "S_gen_kW_K": 1.039152,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_reaction",
+     "label": "камера: горение",
+     "kW": 5153.741344,
+     "pct_fuel_ex": 28.141532,
+     "S_gen_kW_K": 17.88562,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_dp",
+     "label": "камера: потеря давления",
+     "kW": 63.455518,
+     "pct_fuel_ex": 0.346493,
+     "S_gen_kW_K": 0.220217,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_heat_loss",
+     "label": "камера: недожог",
+     "kW": 69.993188,
+     "pct_fuel_ex": 0.382191,
+     "S_gen_kW_K": 0.242905,
+     "kind": "разрушение"
+    },
+    {
+     "key": "turbine",
+     "label": "турбина",
+     "kW": 476.840149,
+     "pct_fuel_ex": 2.603742,
+     "S_gen_kW_K": 1.654833,
+     "kind": "разрушение"
+    },
+    {
+     "key": "leak_cool",
+     "label": "утечки и охлаждение",
+     "kW": 232.786515,
+     "pct_fuel_ex": 1.271109,
+     "S_gen_kW_K": 0.43346,
+     "kind": "разрушение + утечки"
+    },
+    {
+     "key": "recuperator",
+     "label": "рекуператор",
+     "kW": 0.0,
+     "pct_fuel_ex": 0.0,
+     "S_gen_kW_K": 0.0,
+     "kind": "разрушение"
+    },
+    {
+     "key": "exhaust",
+     "label": "выхлоп",
+     "kW": 5329.296634,
+     "pct_fuel_ex": 29.100136,
+     "S_gen_kW_K": 0.0,
+     "kind": "уходит с потоком"
+    },
+    {
+     "key": "mech_gen",
+     "label": "механика, редуктор, генератор",
+     "kW": 384.953414,
+     "pct_fuel_ex": 2.102003,
+     "S_gen_kW_K": 1.335948,
+     "kind": "разрушение"
+    }
+   ],
+   "totals": {
+    "destruction_kW": 7358.1136,
+    "destruction_pct": 40.178304,
+    "S_gen_kW_K": 25.535706,
+    "entropy_generation_number": 0.401783,
+    "outflow_kW": 5437.181555,
+    "outflow_pct": 29.689231,
+    "product_pct": 30.221791,
+    "air_in_pct": 0.089327
+   },
+   "balance": {
+    "E_in_kW": 18330.007867,
+    "residual_B_kW": -1e-06,
+    "residual_B_pct_fuel_ex": -0.0,
+    "residual_A_pct_fuel_ex": 0.0,
+    "energy_residual_kW": -1e-06,
+    "energy_residual_pct_LHV": -0.0,
+    "gg_shaft_residual_kW": 0.0,
+    "closed": true,
+    "method": "B: эксергия топлива + воздуха = мощность на клеммах + Σ T0·S_gen узлов + эксергия выхлопа и утечек; A — то же с разрушением из баланса эксергии каждого узла (тождество, контроль арифметики)"
+   },
+   "states": {
+    "s1": {
+     "T_C": 15.0,
+     "p_kPa": 101.325,
+     "ex_kJ_kg": 0.83765,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "s3": {
+     "T_C": 410.370626,
+     "p_kPa": 1367.8875,
+     "ex_kJ_kg": 368.277478,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "fuel": {
+     "T_C": 15.0,
+     "p_kPa": 1367.8875,
+     "ex_kJ_kg": 52393.583483,
+     "ex_ch_kJ_kg": 52004.905789
+    },
+    "air_in": {
+     "T_C": 410.370626,
+     "p_kPa": 1367.8875,
+     "ex_kJ_kg": 368.277478,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "mix": {
+     "T_C": 391.203352,
+     "p_kPa": 1367.8875,
+     "ex_kJ_kg": 1334.428305,
+     "ex_ch_kJ_kg": 970.420906
+    },
+    "pa": {
+     "T_C": 1173.027367,
+     "p_kPa": 1367.8875,
+     "ex_kJ_kg": 1056.029916,
+     "ex_ch_kJ_kg": 17.002146
+    },
+    "pb": {
+     "T_C": 1173.027367,
+     "p_kPa": 1313.172,
+     "ex_kJ_kg": 1052.602131,
+     "ex_ch_kJ_kg": 17.002146
+    },
+    "s4": {
+     "T_C": 1169.320227,
+     "p_kPa": 1313.172,
+     "ex_kJ_kg": 1048.82119,
+     "ex_ch_kJ_kg": 17.002146
+    },
+    "cngv": {
+     "T_C": 410.370626,
+     "p_kPa": 1313.172,
+     "ex_kJ_kg": 364.901048,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "s41": {
+     "T_C": 1150.000004,
+     "p_kPa": 1313.172,
+     "ex_kJ_kg": 1027.298583,
+     "ex_ch_kJ_kg": 16.278652
+    },
+    "s45": {
+     "T_C": 810.558457,
+     "p_kPa": 352.787385,
+     "ex_kJ_kg": 592.399736,
+     "ex_ch_kJ_kg": 16.278652
+    },
+    "crot": {
+     "T_C": 410.370626,
+     "p_kPa": 352.787385,
+     "ex_kJ_kg": 256.190999,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "s45m": {
+     "T_C": 800.455191,
+     "p_kPa": 352.787385,
+     "ex_kJ_kg": 582.148746,
+     "ex_ch_kJ_kg": 15.603427
+    },
+    "s45d": {
+     "T_C": 800.455191,
+     "p_kPa": 352.787385,
+     "ex_kJ_kg": 582.148746,
+     "ex_ch_kJ_kg": 15.603427
+    },
+    "s5": {
+     "T_C": 548.68444,
+     "p_kPa": 103.3515,
+     "ex_kJ_kg": 272.093919,
+     "ex_ch_kJ_kg": 15.603427
+    }
+   },
+   "flows": {
+    "W1": 19.529644,
+    "Wca": 18.162569,
+    "Wf": 0.34954,
+    "W41": 19.049174,
+    "W45": 19.586239,
+    "Wngv": 0.537065,
+    "Wrot": 0.537065,
+    "Wleak": 0.292945
+   },
+   "works_kW": {
+    "W_comp": 7960.765692,
+    "W_turb": 13880.431818,
+    "W_gg": 8041.177467,
+    "W_pt": 5839.254351
+   },
+   "Ex_kW": {
+    "air_c3": 6688.86512,
+    "air_comb_in": 6688.86512,
+    "cool": 395.578045,
+    "fuel": 18313.648863,
+    "s4": 19415.89215,
+    "s41": 19569.189653,
+    "s5": 5329.296634,
+    "exhaust": 5329.296634,
+    "recup_transfer": 0.0
+   },
+   "compressor_stages": {
+    "n_stages": 2,
+    "pi1": 4.49,
+    "eta_p1": 0.844042,
+    "pi2": 3.006682,
+    "eta_p2_matched": 0.839138,
+    "T2_C": 203.785601,
+    "D1_kW": 445.446393,
+    "D2_kW": 339.350217
+   },
+   "model_check": {
+    "P": 0.0,
+    "Wf": 0.0,
+    "EGT_K": 0.0,
+    "eff": 0.0
+   },
+   "inputs": {
+    "PR": 13.5,
+    "T41_C": 1150.0,
+    "eta_pc": 0.841259,
+    "eta_pt_gg": 0.884623,
+    "eta_pt_pt": 0.884623,
+    "x_ngv": 0.0275,
+    "x_rot": 0.0275,
+    "x_leak": 0.015,
+    "dp_duct": 0.0,
+    "W1": 19.529644
+   },
+   "cycle": {
+    "P_MW": 5.780862,
+    "eff": 0.330571,
+    "EGT_C": 548.68444,
+    "T3_C": 410.370626,
+    "T4_C": 1169.320227,
+    "T45_C": 800.455191,
+    "Wf": 0.34954,
+    "W_exh": 19.586239,
+    "p45": 352787.38456,
+    "far": 0.019245
+   },
+   "plug_and_play": {
+    "W1_for_P_req": 20.006455,
+    "G_cap": 25.692,
+    "flow_ok": true,
+    "T_exhaust_to_package_C": 548.68444,
+    "EGT_cap": 610.0,
+    "egt_ok": true,
+    "P_shaft_at_G_cap_kW": 7604.946639
+   }
+  },
+  "hot_track_K": {
+   "fuel": {
+    "Ex_kW": 18751.299205,
+    "ex_MJ_kg": 52.393583,
+    "ex_ch_MJ_kg": 52.004906,
+    "ex_pressure_MJ_kg": 0.388678,
+    "ex_thermal_MJ_kg": 0.0,
+    "LHV_kW": 17905.389112,
+    "ratio_ex_LHV": 1.047243
+   },
+   "air_in": {
+    "Ex_kW": 17.245237,
+    "ex_kJ_kg": 0.83765,
+    "note": "сухой воздух модели относительно влажной среды ISO: химическая эксергия"
+   },
+   "P_shaft_kW": 5780.861808,
+   "P_el_kW": 5534.712712,
+   "eff_shaft": 0.322856,
+   "eff_el": 0.309109,
+   "ex_eff_shaft": 0.308291,
+   "ex_eff_el": 0.295164,
+   "nodes": {
+    "compressor": {
+     "label": "компрессор (обе ступени)",
+     "kW": 827.312209,
+     "kW_by_exergy_balance": 827.312209,
+     "pct_fuel_ex": 4.412026,
+     "S_gen_kW_K": 2.871116,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "leakage": {
+     "label": "утечки (сжатый воздух уходит мимо турбины)",
+     "kW": 113.729483,
+     "kW_by_exergy_balance": 113.729483,
+     "pct_fuel_ex": 0.606515,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0,
+     "outflow": true
+    },
+    "comb_mixing": {
+     "label": "камера: смешение топлива с воздухом",
+     "kW": 304.840701,
+     "kW_by_exergy_balance": 304.840701,
+     "pct_fuel_ex": 1.625704,
+     "S_gen_kW_K": 1.057924,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -0.0
+    },
+    "comb_reaction": {
+     "label": "камера: горение (реакция)",
+     "kW": 5230.466022,
+     "kW_by_exergy_balance": 5230.466022,
+     "pct_fuel_ex": 27.893886,
+     "S_gen_kW_K": 18.151886,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "comb_dp": {
+     "label": "камера: потеря давления",
+     "kW": 63.005443,
+     "kW_by_exergy_balance": 63.005443,
+     "pct_fuel_ex": 0.336006,
+     "S_gen_kW_K": 0.218655,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "comb_heat_loss": {
+     "label": "камера: недожог η_b (потеря тепла в модели)",
+     "kW": 71.929723,
+     "kW_by_exergy_balance": 71.929723,
+     "pct_fuel_ex": 0.383599,
+     "S_gen_kW_K": 0.249626,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": -0.0
+    },
+    "cool_throttle_ngv": {
+     "label": "охлаждение соплового аппарата: дросселирование воздуха p3 -> p4",
+     "kW": 3.823201,
+     "kW_by_exergy_balance": 3.823201,
+     "pct_fuel_ex": 0.020389,
+     "S_gen_kW_K": 0.013268,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -0.0
+    },
+    "cool_throttle_rotor": {
+     "label": "охлаждение ротора: дросселирование воздуха p3 -> p45",
+     "kW": 131.128029,
+     "kW_by_exergy_balance": 131.128029,
+     "pct_fuel_ex": 0.699301,
+     "S_gen_kW_K": 0.455069,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": -0.0
+    },
+    "cool_mix_ngv": {
+     "label": "охлаждение соплового аппарата: смешение",
+     "kW": 91.617772,
+     "kW_by_exergy_balance": 91.617762,
+     "pct_fuel_ex": 0.488594,
+     "S_gen_kW_K": 0.317952,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -1e-05
+    },
+    "turbine_gg": {
+     "label": "турбина: часть, вращающая компрессор",
+     "kW": 257.651126,
+     "kW_by_exergy_balance": 257.651126,
+     "pct_fuel_ex": 1.374044,
+     "S_gen_kW_K": 0.894156,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "cool_mix_rotor": {
+     "label": "охлаждение ротора: смешение",
+     "kW": 40.568118,
+     "kW_by_exergy_balance": 40.568116,
+     "pct_fuel_ex": 0.216348,
+     "S_gen_kW_K": 0.140788,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -2e-06
+    },
+    "duct_dp": {
+     "label": "переходный канал: потеря давления",
+     "kW": 0.0,
+     "kW_by_exergy_balance": 0.0,
+     "pct_fuel_ex": 0.0,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "turbine_pt": {
+     "label": "турбина: часть, дающая мощность",
+     "kW": 236.948478,
+     "kW_by_exergy_balance": 236.948478,
+     "pct_fuel_ex": 1.263638,
+     "S_gen_kW_K": 0.822309,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "mech": {
+     "label": "механические потери (подшипники)",
+     "kW": 143.160549,
+     "kW_by_exergy_balance": 143.160549,
+     "pct_fuel_ex": 0.76347,
+     "S_gen_kW_K": 0.496826,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "gearbox": {
+     "label": "редуктор пакета",
+     "kW": 86.712927,
+     "kW_by_exergy_balance": 86.712927,
+     "pct_fuel_ex": 0.462437,
+     "S_gen_kW_K": 0.30093,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "generator": {
+     "label": "генератор пакета",
+     "kW": 159.436169,
+     "kW_by_exergy_balance": 159.436169,
+     "pct_fuel_ex": 0.850267,
+     "S_gen_kW_K": 0.55331,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "exhaust": {
+     "label": "выхлоп (уходит с газом)",
+     "kW": 5471.501792,
+     "kW_by_exergy_balance": 5471.501792,
+     "pct_fuel_ex": 29.179321,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0,
+     "outflow": true,
+     "thermal_W": 5128.99832,
+     "pressure_W": 34.272998,
+     "chemical_W": 308.230474
+    }
+   },
+   "groups": [
+    {
+     "key": "compressor",
+     "label": "компрессор",
+     "kW": 827.312209,
+     "pct_fuel_ex": 4.412026,
+     "S_gen_kW_K": 2.871116,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_mixing",
+     "label": "камера: смешение",
+     "kW": 304.840701,
+     "pct_fuel_ex": 1.625704,
+     "S_gen_kW_K": 1.057924,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_reaction",
+     "label": "камера: горение",
+     "kW": 5230.466022,
+     "pct_fuel_ex": 27.893886,
+     "S_gen_kW_K": 18.151886,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_dp",
+     "label": "камера: потеря давления",
+     "kW": 63.005443,
+     "pct_fuel_ex": 0.336006,
+     "S_gen_kW_K": 0.218655,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_heat_loss",
+     "label": "камера: недожог",
+     "kW": 71.929723,
+     "pct_fuel_ex": 0.383599,
+     "S_gen_kW_K": 0.249626,
+     "kind": "разрушение"
+    },
+    {
+     "key": "turbine",
+     "label": "турбина",
+     "kW": 494.599604,
+     "pct_fuel_ex": 2.637682,
+     "S_gen_kW_K": 1.716466,
+     "kind": "разрушение"
+    },
+    {
+     "key": "leak_cool",
+     "label": "утечки и охлаждение",
+     "kW": 380.866602,
+     "pct_fuel_ex": 2.031148,
+     "S_gen_kW_K": 0.927077,
+     "kind": "разрушение + утечки"
+    },
+    {
+     "key": "recuperator",
+     "label": "рекуператор",
+     "kW": 0.0,
+     "pct_fuel_ex": 0.0,
+     "S_gen_kW_K": 0.0,
+     "kind": "разрушение"
+    },
+    {
+     "key": "exhaust",
+     "label": "выхлоп",
+     "kW": 5471.501792,
+     "pct_fuel_ex": 29.179321,
+     "S_gen_kW_K": 0.0,
+     "kind": "уходит с потоком"
+    },
+    {
+     "key": "mech_gen",
+     "label": "механика, редуктор, генератор",
+     "kW": 389.309644,
+     "pct_fuel_ex": 2.076174,
+     "S_gen_kW_K": 1.351066,
+     "kind": "разрушение"
+    }
+   ],
+   "totals": {
+    "destruction_kW": 7648.600466,
+    "destruction_pct": 40.789709,
+    "S_gen_kW_K": 26.543816,
+    "entropy_generation_number": 0.407897,
+    "outflow_kW": 5585.231275,
+    "outflow_pct": 29.785836,
+    "product_pct": 29.516423,
+    "air_in_pct": 0.091968
+   },
+   "balance": {
+    "E_in_kW": 18768.544442,
+    "residual_B_kW": -1.2e-05,
+    "residual_B_pct_fuel_ex": -0.0,
+    "residual_A_pct_fuel_ex": 0.0,
+    "energy_residual_kW": -1.2e-05,
+    "energy_residual_pct_LHV": -0.0,
+    "gg_shaft_residual_kW": 0.0,
+    "closed": true,
+    "method": "B: эксергия топлива + воздуха = мощность на клеммах + Σ T0·S_gen узлов + эксергия выхлопа и утечек; A — то же с разрушением из баланса эксергии каждого узла (тождество, контроль арифметики)"
+   },
+   "states": {
+    "s1": {
+     "T_C": 15.0,
+     "p_kPa": 101.325,
+     "ex_kJ_kg": 0.83765,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "s3": {
+     "T_C": 410.370626,
+     "p_kPa": 1367.8875,
+     "ex_kJ_kg": 368.277478,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "fuel": {
+     "T_C": 15.0,
+     "p_kPa": 1367.8875,
+     "ex_kJ_kg": 52393.583483,
+     "ex_ch_kJ_kg": 52004.905789
+    },
+    "air_in": {
+     "T_C": 410.370626,
+     "p_kPa": 1367.8875,
+     "ex_kJ_kg": 368.277478,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "mix": {
+     "T_C": 390.620661,
+     "p_kPa": 1367.8875,
+     "ex_kJ_kg": 1365.151714,
+     "ex_ch_kJ_kg": 1001.249021
+    },
+    "pa": {
+     "T_C": 1194.736167,
+     "p_kPa": 1367.8875,
+     "ex_kJ_kg": 1080.455281,
+     "ex_ch_kJ_kg": 17.826628
+    },
+    "pb": {
+     "T_C": 1194.736167,
+     "p_kPa": 1313.172,
+     "ex_kJ_kg": 1077.025868,
+     "ex_ch_kJ_kg": 17.826628
+    },
+    "s4": {
+     "T_C": 1190.926712,
+     "p_kPa": 1313.172,
+     "ex_kJ_kg": 1073.110704,
+     "ex_ch_kJ_kg": 17.826628
+    },
+    "cngv": {
+     "T_C": 410.370626,
+     "p_kPa": 1313.172,
+     "ex_kJ_kg": 364.901048,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "s41": {
+     "T_C": 1150.000003,
+     "p_kPa": 1313.172,
+     "ex_kJ_kg": 1027.298583,
+     "ex_ch_kJ_kg": 16.278652
+    },
+    "s45": {
+     "T_C": 800.276516,
+     "p_kPa": 337.279237,
+     "ex_kJ_kg": 579.479074,
+     "ex_ch_kJ_kg": 16.278652
+    },
+    "crot": {
+     "T_C": 410.370626,
+     "p_kPa": 337.279237,
+     "ex_kJ_kg": 252.472775,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "s45m": {
+     "T_C": 780.525152,
+     "p_kPa": 337.279237,
+     "ex_kJ_kg": 559.570678,
+     "ex_ch_kJ_kg": 14.936019
+    },
+    "s45d": {
+     "T_C": 780.525152,
+     "p_kPa": 337.279237,
+     "ex_kJ_kg": 559.570678,
+     "ex_ch_kJ_kg": 14.936019
+    },
+    "s5": {
+     "T_C": 540.619025,
+     "p_kPa": 103.3515,
+     "ex_kJ_kg": 265.134247,
+     "ex_ch_kJ_kg": 14.936019
+    }
+   },
+   "flows": {
+    "W1": 20.587644,
+    "Wca": 18.014188,
+    "Wf": 0.357893,
+    "W41": 19.504402,
+    "W45": 20.636722,
+    "Wngv": 1.13232,
+    "Wrot": 1.13232,
+    "Wleak": 0.308815
+   },
+   "works_kW": {
+    "W_comp": 8392.032496,
+    "W_turb": 14316.054852,
+    "W_gg": 8476.800501,
+    "W_pt": 5839.254351
+   },
+   "Ex_kW": {
+    "air_c3": 6634.219832,
+    "air_comb_in": 6634.219832,
+    "cool": 834.016208,
+    "fuel": 18751.299205,
+    "s4": 19715.277148,
+    "s41": 20036.844289,
+    "s5": 5471.501792,
+    "exhaust": 5471.501792,
+    "recup_transfer": 0.0
+   },
+   "compressor_stages": {
+    "n_stages": 2,
+    "pi1": 4.49,
+    "eta_p1": 0.844042,
+    "pi2": 3.006682,
+    "eta_p2_matched": 0.839138,
+    "T2_C": 203.785601,
+    "D1_kW": 469.578021,
+    "D2_kW": 357.734188
+   },
+   "model_check": {
+    "P": 0.0,
+    "Wf": 0.0,
+    "EGT_K": 0.0,
+    "eff": 0.0
+   },
+   "inputs": {
+    "PR": 13.5,
+    "T41_C": 1150.0,
+    "eta_pc": 0.841259,
+    "eta_pt_gg": 0.884623,
+    "eta_pt_pt": 0.884623,
+    "x_ngv": 0.055,
+    "x_rot": 0.055,
+    "x_leak": 0.015,
+    "dp_duct": 0.0,
+    "W1": 20.587644
+   },
+   "cycle": {
+    "P_MW": 5.780862,
+    "eff": 0.322856,
+    "EGT_C": 540.619025,
+    "T3_C": 410.370626,
+    "T4_C": 1190.926712,
+    "T45_C": 780.525152,
+    "Wf": 0.357893,
+    "W_exh": 20.636722,
+    "p45": 337279.237308,
+    "far": 0.019867
+   },
+   "plug_and_play": {
+    "W1_for_P_req": 21.090286,
+    "G_cap": 25.692,
+    "flow_ok": true,
+    "T_exhaust_to_package_C": 540.619025,
+    "EGT_cap": 610.0,
+    "egt_ok": true,
+    "P_shaft_at_G_cap_kW": 7214.128201
+   }
+  },
+  "hot_cast_model": {
+   "fuel": {
+    "Ex_kW": 18523.761151,
+    "ex_MJ_kg": 52.393583,
+    "ex_ch_MJ_kg": 52.004906,
+    "ex_pressure_MJ_kg": 0.388678,
+    "ex_thermal_MJ_kg": 0.0,
+    "LHV_kW": 17688.115773,
+    "ratio_ex_LHV": 1.047243
+   },
+   "air_in": {
+    "Ex_kW": 16.787768,
+    "ex_kJ_kg": 0.83765,
+    "note": "сухой воздух модели относительно влажной среды ISO: химическая эксергия"
+   },
+   "P_shaft_kW": 5780.861808,
+   "P_el_kW": 5534.712712,
+   "eff_shaft": 0.326822,
+   "eff_el": 0.312906,
+   "ex_eff_shaft": 0.312078,
+   "ex_eff_el": 0.29879,
+   "nodes": {
+    "compressor": {
+     "label": "компрессор (обе ступени)",
+     "kW": 805.365879,
+     "kW_by_exergy_balance": 805.365879,
+     "pct_fuel_ex": 4.347745,
+     "S_gen_kW_K": 2.794954,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -0.0
+    },
+    "leakage": {
+     "label": "утечки (сжатый воздух уходит мимо турбины)",
+     "kW": 110.712551,
+     "kW_by_exergy_balance": 110.712551,
+     "pct_fuel_ex": 0.597679,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0,
+     "outflow": true
+    },
+    "comb_mixing": {
+     "label": "камера: смешение топлива с воздухом",
+     "kW": 302.023973,
+     "kW_by_exergy_balance": 302.023973,
+     "pct_fuel_ex": 1.630468,
+     "S_gen_kW_K": 1.048148,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -0.0
+    },
+    "comb_reaction": {
+     "label": "камера: горение (реакция)",
+     "kW": 5190.475316,
+     "kW_by_exergy_balance": 5190.475316,
+     "pct_fuel_ex": 28.020634,
+     "S_gen_kW_K": 18.013102,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "comb_dp": {
+     "label": "камера: потеря давления",
+     "kW": 63.226374,
+     "kW_by_exergy_balance": 63.226374,
+     "pct_fuel_ex": 0.341326,
+     "S_gen_kW_K": 0.219422,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "comb_heat_loss": {
+     "label": "камера: недожог η_b (потеря тепла в модели)",
+     "kW": 70.92378,
+     "kW_by_exergy_balance": 70.92378,
+     "pct_fuel_ex": 0.38288,
+     "S_gen_kW_K": 0.246135,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "cool_throttle_ngv": {
+     "label": "охлаждение соплового аппарата: дросселирование воздуха p3 -> p4",
+     "kW": 2.791336,
+     "kW_by_exergy_balance": 2.791336,
+     "pct_fuel_ex": 0.015069,
+     "S_gen_kW_K": 0.009687,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -0.0
+    },
+    "cool_throttle_rotor": {
+     "label": "охлаждение ротора: дросселирование воздуха p3 -> p45",
+     "kW": 94.174153,
+     "kW_by_exergy_balance": 94.174153,
+     "pct_fuel_ex": 0.508396,
+     "S_gen_kW_K": 0.326823,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": -0.0
+    },
+    "cool_mix_ngv": {
+     "label": "охлаждение соплового аппарата: смешение",
+     "kW": 66.278275,
+     "kW_by_exergy_balance": 66.278272,
+     "pct_fuel_ex": 0.357801,
+     "S_gen_kW_K": 0.230013,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -3e-06
+    },
+    "turbine_gg": {
+     "label": "турбина: часть, вращающая компрессор",
+     "kW": 250.229261,
+     "kW_by_exergy_balance": 250.229261,
+     "pct_fuel_ex": 1.350856,
+     "S_gen_kW_K": 0.868399,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "cool_mix_rotor": {
+     "label": "охлаждение ротора: смешение",
+     "kW": 30.369229,
+     "kW_by_exergy_balance": 30.369228,
+     "pct_fuel_ex": 0.163947,
+     "S_gen_kW_K": 0.105394,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -1e-06
+    },
+    "duct_dp": {
+     "label": "переходный канал: потеря давления",
+     "kW": 0.0,
+     "kW_by_exergy_balance": 0.0,
+     "pct_fuel_ex": 0.0,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "turbine_pt": {
+     "label": "турбина: часть, дающая мощность",
+     "kW": 235.241384,
+     "kW_by_exergy_balance": 235.241384,
+     "pct_fuel_ex": 1.269944,
+     "S_gen_kW_K": 0.816385,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "mech": {
+     "label": "механические потери (подшипники)",
+     "kW": 140.911885,
+     "kW_by_exergy_balance": 140.911885,
+     "pct_fuel_ex": 0.760709,
+     "S_gen_kW_K": 0.489023,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "gearbox": {
+     "label": "редуктор пакета",
+     "kW": 86.712927,
+     "kW_by_exergy_balance": 86.712927,
+     "pct_fuel_ex": 0.468117,
+     "S_gen_kW_K": 0.30093,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "generator": {
+     "label": "генератор пакета",
+     "kW": 159.436169,
+     "kW_by_exergy_balance": 159.436169,
+     "pct_fuel_ex": 0.860712,
+     "S_gen_kW_K": 0.55331,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "exhaust": {
+     "label": "выхлоп (уходит с газом)",
+     "kW": 5396.963719,
+     "kW_by_exergy_balance": 5396.963719,
+     "pct_fuel_ex": 29.135356,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0,
+     "outflow": true,
+     "thermal_W": 5056.768016,
+     "pressure_W": 33.379062,
+     "chemical_W": 306.81664
+    }
+   },
+   "groups": [
+    {
+     "key": "compressor",
+     "label": "компрессор",
+     "kW": 805.365879,
+     "pct_fuel_ex": 4.347745,
+     "S_gen_kW_K": 2.794954,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_mixing",
+     "label": "камера: смешение",
+     "kW": 302.023973,
+     "pct_fuel_ex": 1.630468,
+     "S_gen_kW_K": 1.048148,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_reaction",
+     "label": "камера: горение",
+     "kW": 5190.475316,
+     "pct_fuel_ex": 28.020634,
+     "S_gen_kW_K": 18.013102,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_dp",
+     "label": "камера: потеря давления",
+     "kW": 63.226374,
+     "pct_fuel_ex": 0.341326,
+     "S_gen_kW_K": 0.219422,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_heat_loss",
+     "label": "камера: недожог",
+     "kW": 70.92378,
+     "pct_fuel_ex": 0.38288,
+     "S_gen_kW_K": 0.246135,
+     "kind": "разрушение"
+    },
+    {
+     "key": "turbine",
+     "label": "турбина",
+     "kW": 485.470645,
+     "pct_fuel_ex": 2.6208,
+     "S_gen_kW_K": 1.684784,
+     "kind": "разрушение"
+    },
+    {
+     "key": "leak_cool",
+     "label": "утечки и охлаждение",
+     "kW": 304.325543,
+     "pct_fuel_ex": 1.642893,
+     "S_gen_kW_K": 0.671917,
+     "kind": "разрушение + утечки"
+    },
+    {
+     "key": "recuperator",
+     "label": "рекуператор",
+     "kW": 0.0,
+     "pct_fuel_ex": 0.0,
+     "S_gen_kW_K": 0.0,
+     "kind": "разрушение"
+    },
+    {
+     "key": "exhaust",
+     "label": "выхлоп",
+     "kW": 5396.963719,
+     "pct_fuel_ex": 29.135356,
+     "S_gen_kW_K": 0.0,
+     "kind": "уходит с потоком"
+    },
+    {
+     "key": "mech_gen",
+     "label": "механика, редуктор, генератор",
+     "kW": 387.060981,
+     "pct_fuel_ex": 2.089538,
+     "S_gen_kW_K": 1.343262,
+     "kind": "разрушение"
+    }
+   ],
+   "totals": {
+    "destruction_kW": 7498.159941,
+    "destruction_pct": 40.478604,
+    "S_gen_kW_K": 26.021725,
+    "entropy_generation_number": 0.404786,
+    "outflow_kW": 5507.676269,
+    "outflow_pct": 29.733034,
+    "product_pct": 29.87899,
+    "air_in_pct": 0.090628
+   },
+   "balance": {
+    "E_in_kW": 18540.548918,
+    "residual_B_kW": -3e-06,
+    "residual_B_pct_fuel_ex": -0.0,
+    "residual_A_pct_fuel_ex": 0.0,
+    "energy_residual_kW": -3e-06,
+    "energy_residual_pct_LHV": -0.0,
+    "gg_shaft_residual_kW": 0.0,
+    "closed": true,
+    "method": "B: эксергия топлива + воздуха = мощность на клеммах + Σ T0·S_gen узлов + эксергия выхлопа и утечек; A — то же с разрушением из баланса эксергии каждого узла (тождество, контроль арифметики)"
+   },
+   "states": {
+    "s1": {
+     "T_C": 15.0,
+     "p_kPa": 101.325,
+     "ex_kJ_kg": 0.83765,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "s3": {
+     "T_C": 410.370626,
+     "p_kPa": 1367.8875,
+     "ex_kJ_kg": 368.277478,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "fuel": {
+     "T_C": 15.0,
+     "p_kPa": 1367.8875,
+     "ex_kJ_kg": 52393.583483,
+     "ex_ch_kJ_kg": 52004.905789
+    },
+    "air_in": {
+     "T_C": 410.370626,
+     "p_kPa": 1367.8875,
+     "ex_kJ_kg": 368.277478,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "mix": {
+     "T_C": 390.920614,
+     "p_kPa": 1367.8875,
+     "ex_kJ_kg": 1349.326227,
+     "ex_ch_kJ_kg": 985.369632
+    },
+    "pa": {
+     "T_C": 1183.569856,
+     "p_kPa": 1367.8875,
+     "ex_kJ_kg": 1067.862549,
+     "ex_ch_kJ_kg": 17.400513
+    },
+    "pb": {
+     "T_C": 1183.569856,
+     "p_kPa": 1313.172,
+     "ex_kJ_kg": 1064.433975,
+     "ex_ch_kJ_kg": 17.400513
+    },
+    "s4": {
+     "T_C": 1179.813016,
+     "p_kPa": 1313.172,
+     "ex_kJ_kg": 1060.587994,
+     "ex_ch_kJ_kg": 17.400513
+    },
+    "cngv": {
+     "T_C": 410.370626,
+     "p_kPa": 1313.172,
+     "ex_kJ_kg": 364.901048,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "s41": {
+     "T_C": 1150.000004,
+     "p_kPa": 1313.172,
+     "ex_kJ_kg": 1027.298583,
+     "ex_ch_kJ_kg": 16.278652
+    },
+    "s45": {
+     "T_C": 805.494435,
+     "p_kPa": 345.077694,
+     "ex_kJ_kg": 586.034066,
+     "ex_ch_kJ_kg": 16.278652
+    },
+    "crot": {
+     "T_C": 410.370626,
+     "p_kPa": 345.077694,
+     "ex_kJ_kg": 254.363417,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "s45m": {
+     "T_C": 790.507046,
+     "p_kPa": 345.077694,
+     "ex_kJ_kg": 570.877363,
+     "ex_ch_kJ_kg": 15.268735
+    },
+    "s45d": {
+     "T_C": 790.507046,
+     "p_kPa": 345.077694,
+     "ex_kJ_kg": 570.877363,
+     "ex_ch_kJ_kg": 15.268735
+    },
+    "s5": {
+     "T_C": 544.617037,
+     "p_kPa": 103.3515,
+     "ex_kJ_kg": 268.579986,
+     "ex_ch_kJ_kg": 15.268735
+    }
+   },
+   "flows": {
+    "W1": 20.04151,
+    "Wca": 18.087463,
+    "Wf": 0.35355,
+    "W41": 19.267725,
+    "W45": 20.094437,
+    "Wngv": 0.826712,
+    "Wrot": 0.826712,
+    "Wleak": 0.300623
+   },
+   "works_kW": {
+    "W_comp": 8169.414827,
+    "W_turb": 14091.18852,
+    "W_gg": 8251.934169,
+    "W_pt": 5839.254351
+   },
+   "Ex_kW": {
+    "air_c3": 6661.205136,
+    "air_comb_in": 6661.205136,
+    "cool": 608.919029,
+    "fuel": 18523.761151,
+    "s4": 19558.316844,
+    "s41": 19793.70675,
+    "s5": 5396.963719,
+    "exhaust": 5396.963719,
+    "recup_transfer": 0.0
+   },
+   "compressor_stages": {
+    "n_stages": 2,
+    "pi1": 4.49,
+    "eta_p1": 0.844042,
+    "pi2": 3.006682,
+    "eta_p2_matched": 0.839138,
+    "T2_C": 203.785601,
+    "D1_kW": 457.121401,
+    "D2_kW": 348.244479
+   },
+   "model_check": {
+    "P": 0.0,
+    "Wf": 0.0,
+    "EGT_K": 0.0,
+    "eff": 0.0
+   },
+   "inputs": {
+    "PR": 13.5,
+    "T41_C": 1150.0,
+    "eta_pc": 0.841259,
+    "eta_pt_gg": 0.884623,
+    "eta_pt_pt": 0.884623,
+    "x_ngv": 0.04125,
+    "x_rot": 0.04125,
+    "x_leak": 0.015,
+    "dp_duct": 0.0,
+    "W1": 20.04151
+   },
+   "cycle": {
+    "P_MW": 5.780862,
+    "eff": 0.326822,
+    "EGT_C": 544.617037,
+    "T3_C": 410.370626,
+    "T4_C": 1179.813016,
+    "T45_C": 790.507046,
+    "Wf": 0.35355,
+    "W_exh": 20.094437,
+    "p45": 345077.694151,
+    "far": 0.019547
+   },
+   "plug_and_play": {
+    "W1_for_P_req": 20.530818,
+    "G_cap": 25.692,
+    "flow_ok": true,
+    "T_exhaust_to_package_C": 544.617037,
+    "EGT_cap": 610.0,
+    "egt_ok": true,
+    "P_shaft_at_G_cap_kW": 7410.714179
+   }
+  },
+  "recup_hot_printed": {
+   "fuel": {
+    "Ex_kW": 14845.73692,
+    "ex_MJ_kg": 52.284435,
+    "ex_ch_MJ_kg": 52.004906,
+    "ex_pressure_MJ_kg": 0.279529,
+    "ex_thermal_MJ_kg": 0.0,
+    "LHV_kW": 14205.608578,
+    "ratio_ex_LHV": 1.045062
+   },
+   "air_in": {
+    "Ex_kW": 18.311384,
+    "ex_kJ_kg": 0.83765,
+    "note": "сухой воздух модели относительно влажной среды ISO: химическая эксергия"
+   },
+   "P_shaft_kW": 5780.861808,
+   "P_el_kW": 5534.712712,
+   "eff_shaft": 0.406942,
+   "eff_el": 0.389615,
+   "ex_eff_shaft": 0.389395,
+   "ex_eff_el": 0.372815,
+   "nodes": {
+    "compressor": {
+     "label": "компрессор (обе ступени)",
+     "kW": 633.633708,
+     "kW_by_exergy_balance": 633.633708,
+     "pct_fuel_ex": 4.268119,
+     "S_gen_kW_K": 2.198972,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "leakage": {
+     "label": "утечки (сжатый воздух уходит мимо турбины)",
+     "kW": 74.765659,
+     "kW_by_exergy_balance": 74.765659,
+     "pct_fuel_ex": 0.503617,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0,
+     "outflow": true
+    },
+    "recup_heat": {
+     "label": "рекуператор: теплообмен при конечной разности температур",
+     "kW": 365.024509,
+     "kW_by_exergy_balance": 365.024509,
+     "pct_fuel_ex": 2.458783,
+     "S_gen_kW_K": 1.266786,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "recup_dp_gas": {
+     "label": "рекуператор: потеря давления газа",
+     "kW": 62.726887,
+     "kW_by_exergy_balance": 62.726887,
+     "pct_fuel_ex": 0.422525,
+     "S_gen_kW_K": 0.217688,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "comb_mixing": {
+     "label": "камера: смешение топлива с воздухом",
+     "kW": 301.579895,
+     "kW_by_exergy_balance": 301.579895,
+     "pct_fuel_ex": 2.031424,
+     "S_gen_kW_K": 1.046607,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -0.0
+    },
+    "comb_reaction": {
+     "label": "камера: горение (реакция)",
+     "kW": 3758.057323,
+     "kW_by_exergy_balance": 3758.05731,
+     "pct_fuel_ex": 25.31405,
+     "S_gen_kW_K": 13.042017,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -1.4e-05
+    },
+    "recup_dp_air": {
+     "label": "рекуператор: потеря давления воздуха",
+     "kW": 44.179966,
+     "kW_by_exergy_balance": 44.179966,
+     "pct_fuel_ex": 0.297594,
+     "S_gen_kW_K": 0.153323,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "comb_dp": {
+     "label": "камера: потеря давления",
+     "kW": 71.235012,
+     "kW_by_exergy_balance": 71.235012,
+     "pct_fuel_ex": 0.479835,
+     "S_gen_kW_K": 0.247215,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "comb_heat_loss": {
+     "label": "камера: недожог η_b (потеря тепла в модели)",
+     "kW": 56.84425,
+     "kW_by_exergy_balance": 56.844264,
+     "pct_fuel_ex": 0.382899,
+     "S_gen_kW_K": 0.197273,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 1.4e-05
+    },
+    "cool_throttle_ngv": {
+     "label": "охлаждение соплового аппарата: дросселирование воздуха p3 -> p4",
+     "kW": 2.643771,
+     "kW_by_exergy_balance": 2.643771,
+     "pct_fuel_ex": 0.017808,
+     "S_gen_kW_K": 0.009175,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -0.0
+    },
+    "cool_throttle_rotor": {
+     "label": "охлаждение ротора: дросселирование воздуха p3 -> p45",
+     "kW": 32.716723,
+     "kW_by_exergy_balance": 32.716723,
+     "pct_fuel_ex": 0.220378,
+     "S_gen_kW_K": 0.113541,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": -0.0
+    },
+    "cool_mix_ngv": {
+     "label": "охлаждение соплового аппарата: смешение",
+     "kW": 56.840722,
+     "kW_by_exergy_balance": 56.840722,
+     "pct_fuel_ex": 0.382876,
+     "S_gen_kW_K": 0.197261,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -0.0
+    },
+    "turbine_gg": {
+     "label": "турбина: часть, вращающая компрессор",
+     "kW": 162.21007,
+     "kW_by_exergy_balance": 162.21007,
+     "pct_fuel_ex": 1.092637,
+     "S_gen_kW_K": 0.562936,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "cool_mix_rotor": {
+     "label": "охлаждение ротора: смешение",
+     "kW": 39.069939,
+     "kW_by_exergy_balance": 39.069939,
+     "pct_fuel_ex": 0.263173,
+     "S_gen_kW_K": 0.135589,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": -0.0
+    },
+    "duct_dp": {
+     "label": "переходный канал: потеря давления",
+     "kW": 0.0,
+     "kW_by_exergy_balance": 0.0,
+     "pct_fuel_ex": 0.0,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "turbine_pt": {
+     "label": "турбина: часть, дающая мощность",
+     "kW": 203.6299,
+     "kW_by_exergy_balance": 203.6299,
+     "pct_fuel_ex": 1.371639,
+     "S_gen_kW_K": 0.70668,
+     "A_minus_B_pct_fuel_ex": -0.0,
+     "energy_residual_kW": 0.0
+    },
+    "mech": {
+     "label": "механические потери (подшипники)",
+     "kW": 114.955166,
+     "kW_by_exergy_balance": 114.955166,
+     "pct_fuel_ex": 0.774331,
+     "S_gen_kW_K": 0.398942,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "gearbox": {
+     "label": "редуктор пакета",
+     "kW": 86.712927,
+     "kW_by_exergy_balance": 86.712927,
+     "pct_fuel_ex": 0.584093,
+     "S_gen_kW_K": 0.30093,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "generator": {
+     "label": "генератор пакета",
+     "kW": 159.436169,
+     "kW_by_exergy_balance": 159.436169,
+     "pct_fuel_ex": 1.073953,
+     "S_gen_kW_K": 0.55331,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0
+    },
+    "exhaust": {
+     "label": "выхлоп (уходит с газом)",
+     "kW": 3103.072998,
+     "kW_by_exergy_balance": 3103.072998,
+     "pct_fuel_ex": 20.902115,
+     "S_gen_kW_K": 0.0,
+     "A_minus_B_pct_fuel_ex": 0.0,
+     "energy_residual_kW": 0.0,
+     "outflow": true,
+     "thermal_W": 2857.995488,
+     "pressure_W": 36.107722,
+     "chemical_W": 208.969787
+    }
+   },
+   "groups": [
+    {
+     "key": "compressor",
+     "label": "компрессор",
+     "kW": 633.633708,
+     "pct_fuel_ex": 4.268119,
+     "S_gen_kW_K": 2.198972,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_mixing",
+     "label": "камера: смешение",
+     "kW": 301.579895,
+     "pct_fuel_ex": 2.031424,
+     "S_gen_kW_K": 1.046607,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_reaction",
+     "label": "камера: горение",
+     "kW": 3758.057323,
+     "pct_fuel_ex": 25.31405,
+     "S_gen_kW_K": 13.042017,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_dp",
+     "label": "камера: потеря давления",
+     "kW": 71.235012,
+     "pct_fuel_ex": 0.479835,
+     "S_gen_kW_K": 0.247215,
+     "kind": "разрушение"
+    },
+    {
+     "key": "comb_heat_loss",
+     "label": "камера: недожог",
+     "kW": 56.84425,
+     "pct_fuel_ex": 0.382899,
+     "S_gen_kW_K": 0.197273,
+     "kind": "разрушение"
+    },
+    {
+     "key": "turbine",
+     "label": "турбина",
+     "kW": 365.839969,
+     "pct_fuel_ex": 2.464276,
+     "S_gen_kW_K": 1.269616,
+     "kind": "разрушение"
+    },
+    {
+     "key": "leak_cool",
+     "label": "утечки и охлаждение",
+     "kW": 206.036814,
+     "pct_fuel_ex": 1.387852,
+     "S_gen_kW_K": 0.455565,
+     "kind": "разрушение + утечки"
+    },
+    {
+     "key": "recuperator",
+     "label": "рекуператор",
+     "kW": 471.931362,
+     "pct_fuel_ex": 3.178902,
+     "S_gen_kW_K": 1.637798,
+     "kind": "разрушение"
+    },
+    {
+     "key": "exhaust",
+     "label": "выхлоп",
+     "kW": 3103.072998,
+     "pct_fuel_ex": 20.902115,
+     "S_gen_kW_K": 0.0,
+     "kind": "уходит с потоком"
+    },
+    {
+     "key": "mech_gen",
+     "label": "механика, редуктор, генератор",
+     "kW": 361.104261,
+     "pct_fuel_ex": 2.432377,
+     "S_gen_kW_K": 1.253182,
+     "kind": "разрушение"
+    }
+   ],
+   "totals": {
+    "destruction_kW": 6151.496936,
+    "destruction_pct": 41.436117,
+    "S_gen_kW_K": 21.348245,
+    "entropy_generation_number": 0.414361,
+    "outflow_kW": 3177.838656,
+    "outflow_pct": 21.405732,
+    "product_pct": 37.281495,
+    "air_in_pct": 0.123344
+   },
+   "balance": {
+    "E_in_kW": 14864.048304,
+    "residual_B_kW": -1e-06,
+    "residual_B_pct_fuel_ex": -0.0,
+    "residual_A_pct_fuel_ex": 0.0,
+    "energy_residual_kW": -1e-06,
+    "energy_residual_pct_LHV": -0.0,
+    "gg_shaft_residual_kW": 0.0,
+    "closed": true,
+    "method": "B: эксергия топлива + воздуха = мощность на клеммах + Σ T0·S_gen узлов + эксергия выхлопа и утечек; A — то же с разрушением из баланса эксергии каждого узла (тождество, контроль арифметики)"
+   },
+   "states": {
+    "s1": {
+     "T_C": 15.0,
+     "p_kPa": 101.325,
+     "ex_kJ_kg": 0.83765,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "s3": {
+     "T_C": 266.545624,
+     "p_kPa": 658.6125,
+     "ex_kJ_kg": 228.009138,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "fuel": {
+     "T_C": 15.0,
+     "p_kPa": 658.6125,
+     "ex_kJ_kg": 52284.434984,
+     "ex_ch_kJ_kg": 52004.905789
+    },
+    "air_in": {
+     "T_C": 634.293733,
+     "p_kPa": 658.6125,
+     "ex_kJ_kg": 463.937645,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "mix": {
+     "T_C": 610.687386,
+     "p_kPa": 658.6125,
+     "ex_kJ_kg": 1154.551453,
+     "ex_ch_kJ_kg": 698.84017
+    },
+    "pa": {
+     "T_C": 1171.173282,
+     "p_kPa": 658.6125,
+     "ex_kJ_kg": 974.473074,
+     "ex_ch_kJ_kg": 10.267633
+    },
+    "pb": {
+     "T_C": 1171.173282,
+     "p_kPa": 616.4613,
+     "ex_kJ_kg": 968.942625,
+     "ex_ch_kJ_kg": 10.267633
+    },
+    "s4": {
+     "T_C": 1168.460059,
+     "p_kPa": 616.4613,
+     "ex_kJ_kg": 966.218765,
+     "ex_ch_kJ_kg": 10.267633
+    },
+    "cngv": {
+     "T_C": 266.545624,
+     "p_kPa": 616.4613,
+     "ex_kJ_kg": 222.538646,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "s41": {
+     "T_C": 1149.999177,
+     "p_kPa": 616.4613,
+     "ex_kJ_kg": 946.724589,
+     "ex_ch_kJ_kg": 9.906706
+    },
+    "s45": {
+     "T_C": 935.662787,
+     "p_kPa": 280.891923,
+     "ex_kJ_kg": 674.225808,
+     "ex_ch_kJ_kg": 9.906706
+    },
+    "crot": {
+     "T_C": 266.545624,
+     "p_kPa": 280.891923,
+     "ex_kJ_kg": 157.525648,
+     "ex_ch_kJ_kg": 0.83765
+    },
+    "s45m": {
+     "T_C": 922.665393,
+     "p_kPa": 280.891923,
+     "ex_kJ_kg": 661.441444,
+     "ex_ch_kJ_kg": 9.578537
+    },
+    "s45d": {
+     "T_C": 922.665393,
+     "p_kPa": 280.891923,
+     "ex_kJ_kg": 661.441444,
+     "ex_ch_kJ_kg": 9.578537
+    },
+    "s5": {
+     "T_C": 699.190458,
+     "p_kPa": 106.968803,
+     "ex_kJ_kg": 384.454095,
+     "ex_ch_kJ_kg": 9.578537
+    },
+    "s6": {
+     "T_C": 369.134432,
+     "p_kPa": 103.3515,
+     "ex_kJ_kg": 142.235384,
+     "ex_ch_kJ_kg": 9.578537
+    },
+    "s5p": {
+     "T_C": 699.190458,
+     "p_kPa": 103.3515,
+     "ex_kJ_kg": 381.578886,
+     "ex_ch_kJ_kg": 9.578537
+    }
+   },
+   "flows": {
+    "W1": 21.860428,
+    "Wca": 20.585067,
+    "Wf": 0.283942,
+    "W41": 21.352287,
+    "W45": 21.816463,
+    "Wngv": 0.483278,
+    "Wrot": 0.464176,
+    "Wleak": 0.327906
+   },
+   "works_kW": {
+    "W_comp": 5599.699583,
+    "W_turb": 11495.516556,
+    "W_gg": 5656.262205,
+    "W_pt": 5839.254351
+   },
+   "Ex_kW": {
+    "air_c3": 4693.583415,
+    "air_comb_in": 9550.187549,
+    "cool": 216.028185,
+    "fuel": 14845.73692,
+    "s4": 20164.028022,
+    "s41": 20214.735413,
+    "s5": 8387.428527,
+    "exhaust": 3103.072998,
+    "recup_transfer": 4856.604134
+   },
+   "compressor_stages": {
+    "n_stages": 2,
+    "pi1": 4.49,
+    "eta_p1": 0.844042,
+    "pi2": 1.447661,
+    "eta_p2_matched": 0.831828,
+    "T2_C": 203.785601,
+    "D1_kW": 498.608604,
+    "D2_kW": 135.025104
+   },
+   "recuperator": {
+    "Q_kW": 8172.55328,
+    "T_gas_in_C": 699.190458,
+    "T_gas_out_C": 369.134432,
+    "T_air_in_C": 266.545624,
+    "T_air_out_C": 634.293733,
+    "eps_actual": 0.85,
+    "LMTD_K": 82.309402,
+    "UA_kW_K": 99.29064
+   },
+   "model_check": {
+    "P": 0.0,
+    "Wf": 0.0,
+    "EGT_K": 0.0,
+    "eff": 0.0
+   },
+   "inputs": {
+    "PR": 6.5,
+    "T41_C": 1150.0,
+    "eta_pc": 0.841259,
+    "eta_pt_gg": 0.884623,
+    "eta_pt_pt": 0.884623,
+    "x_ngv": 0.022107,
+    "x_rot": 0.021234,
+    "x_leak": 0.015,
+    "dp_duct": 0.0,
+    "W1": 21.860428,
+    "eps": 0.85,
+    "dp_air": 0.025,
+    "dp_gas": 0.035
+   },
+   "cycle": {
+    "P_MW": 5.780862,
+    "eff": 0.406942,
+    "EGT_C": 699.190458,
+    "T3_C": 266.545624,
+    "T4_C": 1168.460059,
+    "T45_C": 922.665393,
+    "Wf": 0.283942,
+    "W_exh": 21.816463,
+    "p45": 280891.922529,
+    "far": 0.013794,
+    "T3r_C": 634.293733,
+    "Tstack_model_C": 357.184716
+   },
+   "plug_and_play": {
+    "W1_for_P_req": 22.394144,
+    "G_cap": 25.692,
+    "flow_ok": true,
+    "T_exhaust_to_package_C": 369.134432,
+    "EGT_cap": 610.0,
+    "egt_ok": true,
+    "P_shaft_at_G_cap_kW": 6794.098649
+   }
+  }
+ },
+ "recup_scan": {
+  "eps": 0.85,
+  "rows": [
+   {
+    "PR": 3.5,
+    "eff": 0.380919,
+    "EGT_C": 725.495766,
+    "T3r_C": 641.659111,
+    "sp_work_kJkg": 169.023533,
+    "x_ngv": 0.0,
+    "x_rot": 0.0,
+    "ok": false
+   },
+   {
+    "PR": 4.0,
+    "eff": 0.387847,
+    "EGT_C": 696.965033,
+    "T3r_C": 620.407728,
+    "sp_work_kJkg": 182.002044,
+    "x_ngv": 0.0,
+    "x_rot": 0.0,
+    "ok": true
+   },
+   {
+    "PR": 4.5,
+    "eff": 0.39094,
+    "EGT_C": 672.391972,
+    "T3r_C": 602.270815,
+    "sp_work_kJkg": 191.939546,
+    "x_ngv": 0.0,
+    "x_rot": 0.0,
+    "ok": true
+   },
+   {
+    "PR": 4.75,
+    "eff": 0.391513,
+    "EGT_C": 661.292842,
+    "T3r_C": 594.132482,
+    "sp_work_kJkg": 196.023235,
+    "x_ngv": 0.0,
+    "x_rot": 0.0,
+    "ok": true
+   },
+   {
+    "PR": 5.0,
+    "eff": 0.391597,
+    "EGT_C": 650.866412,
+    "T3r_C": 586.519248,
+    "sp_work_kJkg": 199.617007,
+    "x_ngv": 0.0,
+    "x_rot": 0.0,
+    "ok": true
+   },
+   {
+    "PR": 5.25,
+    "eff": 0.391281,
+    "EGT_C": 641.040965,
+    "T3r_C": 579.373969,
+    "sp_work_kJkg": 202.781961,
+    "x_ngv": 0.0,
+    "x_rot": 0.0,
+    "ok": true
+   },
+   {
+    "PR": 5.5,
+    "eff": 0.390636,
+    "EGT_C": 631.755456,
+    "T3r_C": 572.648093,
+    "sp_work_kJkg": 205.567834,
+    "x_ngv": 0.0,
+    "x_rot": 0.0,
+    "ok": true
+   },
+   {
+    "PR": 6.0,
+    "eff": 0.388566,
+    "EGT_C": 614.601868,
+    "T3r_C": 560.293958,
+    "sp_work_kJkg": 210.168003,
+    "x_ngv": 0.0,
+    "x_rot": 0.0,
+    "ok": true
+   },
+   {
+    "PR": 6.5,
+    "eff": 0.385719,
+    "EGT_C": 599.064976,
+    "T3r_C": 549.187073,
+    "sp_work_kJkg": 213.692306,
+    "x_ngv": 0.0,
+    "x_rot": 0.0,
+    "ok": true
+   },
+   {
+    "PR": 7.0,
+    "eff": 0.382318,
+    "EGT_C": 584.884422,
+    "T3r_C": 539.121984,
+    "sp_work_kJkg": 216.346134,
+    "x_ngv": 0.0,
+    "x_rot": 0.0,
+    "ok": true
+   },
+   {
+    "PR": 7.5,
+    "eff": 0.378519,
+    "EGT_C": 571.85694,
+    "T3r_C": 529.938821,
+    "sp_work_kJkg": 218.286381,
+    "x_ngv": 0.0,
+    "x_rot": 0.0,
+    "ok": true
+   },
+   {
+    "PR": 8.0,
+    "eff": 0.374431,
+    "EGT_C": 559.820926,
+    "T3r_C": 521.510889,
+    "sp_work_kJkg": 219.635088,
+    "x_ngv": 0.0,
+    "x_rot": 0.0,
+    "ok": true
+   }
+  ],
+  "best": {
+   "PR": 5.0,
+   "eff": 0.391597,
+   "EGT_C": 650.866412,
+   "T3r_C": 586.519248,
+   "sp_work_kJkg": 199.617007,
+   "x_ngv": 0.0,
+   "x_rot": 0.0,
+   "ok": true
+  },
+  "eps090_at_best_PR": {
+   "PR": 5.0,
+   "eff_shaft": 0.411138,
+   "eff_el": 0.393631
+  },
+  "eps_vs_dp": [
+   {
+    "eps": 0.85,
+    "dp_air": 0.025,
+    "dp_gas": 0.035,
+    "eff": 0.391597,
+    "EGT_C": 650.866412,
+    "NTU_counterflow_Cr1": 5.666667
+   },
+   {
+    "eps": 0.9,
+    "dp_air": 0.025,
+    "dp_gas": 0.035,
+    "eff": 0.411138,
+    "EGT_C": 650.578536,
+    "NTU_counterflow_Cr1": 9.0
+   },
+   {
+    "eps": 0.85,
+    "dp_air": 0.0375,
+    "dp_gas": 0.0525,
+    "eff": 0.382356,
+    "EGT_C": 656.875536,
+    "NTU_counterflow_Cr1": 5.666667
+   },
+   {
+    "eps": 0.9,
+    "dp_air": 0.0375,
+    "dp_gas": 0.0525,
+    "eff": 0.401986,
+    "EGT_C": 656.586837,
+    "NTU_counterflow_Cr1": 9.0
+   },
+   {
+    "eps": 0.92,
+    "dp_air": 0.0375,
+    "dp_gas": 0.0525,
+    "eff": 0.41046,
+    "EGT_C": 656.470828,
+    "NTU_counterflow_Cr1": 11.5
+   }
+  ],
+  "eps_vs_dp_note": "NTU противотока при равных теплоёмкостях потоков = ε/(1-ε) (оценка размера ядра: площадь ∝ NTU); Δp×1,5 — плата за компактную решётку (оценка)"
+ },
+ "recup_hot_scan": {
+  "T41_C": 1150.0,
+  "rows": [
+   {
+    "PR": 3.5,
+    "eff": 0.382872,
+    "EGT_C": 836.204329,
+    "T3r_C": 735.76139,
+    "sp_work_kJkg": 203.871051,
+    "x_ngv": 0.019456,
+    "x_rot": 0.018331,
+    "ok": false
+   },
+   {
+    "PR": 4.0,
+    "eff": 0.393811,
+    "EGT_C": 805.241809,
+    "T3r_C": 712.442988,
+    "sp_work_kJkg": 220.491067,
+    "x_ngv": 0.019934,
+    "x_rot": 0.018846,
+    "ok": false
+   },
+   {
+    "PR": 4.5,
+    "eff": 0.400526,
+    "EGT_C": 778.588747,
+    "T3r_C": 692.538073,
+    "sp_work_kJkg": 233.548881,
+    "x_ngv": 0.020394,
+    "x_rot": 0.019345,
+    "ok": false
+   },
+   {
+    "PR": 5.0,
+    "eff": 0.404471,
+    "EGT_C": 755.25729,
+    "T3r_C": 675.251494,
+    "sp_work_kJkg": 243.941581,
+    "x_ngv": 0.020839,
+    "x_rot": 0.01983,
+    "ok": false
+   },
+   {
+    "PR": 5.5,
+    "eff": 0.40652,
+    "EGT_C": 734.558731,
+    "T3r_C": 660.030877,
+    "sp_work_kJkg": 252.284318,
+    "x_ngv": 0.021271,
+    "x_rot": 0.020306,
+    "ok": false
+   },
+   {
+    "PR": 6.0,
+    "eff": 0.407222,
+    "EGT_C": 715.994617,
+    "T3r_C": 646.477795,
+    "sp_work_kJkg": 259.011736,
+    "x_ngv": 0.021693,
+    "x_rot": 0.020773,
+    "ok": false
+   },
+   {
+    "PR": 6.25,
+    "eff": 0.407187,
+    "EGT_C": 707.392056,
+    "T3r_C": 640.230152,
+    "sp_work_kJkg": 261.873365,
+    "x_ngv": 0.021901,
+    "x_rot": 0.021004,
+    "ok": false
+   },
+   {
+    "PR": 6.5,
+    "eff": 0.406942,
+    "EGT_C": 699.190458,
+    "T3r_C": 634.293733,
+    "sp_work_kJkg": 264.444132,
+    "x_ngv": 0.022107,
+    "x_rot": 0.021234,
+    "ok": true
+   },
+   {
+    "PR": 6.75,
+    "eff": 0.406516,
+    "EGT_C": 691.3567,
+    "T3r_C": 628.64225,
+    "sp_work_kJkg": 266.75175,
+    "x_ngv": 0.022312,
+    "x_rot": 0.021462,
+    "ok": true
+   },
+   {
+    "PR": 7.0,
+    "eff": 0.405931,
+    "EGT_C": 683.862785,
+    "T3r_C": 623.253593,
+    "sp_work_kJkg": 268.821205,
+    "x_ngv": 0.022514,
+    "x_rot": 0.021689,
+    "ok": true
+   },
+   {
+    "PR": 7.5,
+    "eff": 0.404366,
+    "EGT_C": 669.787216,
+    "T3r_C": 613.179555,
+    "sp_work_kJkg": 272.325127,
+    "x_ngv": 0.022915,
+    "x_rot": 0.022141,
+    "ok": true
+   },
+   {
+    "PR": 8.0,
+    "eff": 0.402375,
+    "EGT_C": 656.788979,
+    "T3r_C": 603.933733,
+    "sp_work_kJkg": 275.099885,
+    "x_ngv": 0.023311,
+    "x_rot": 0.022589,
+    "ok": true
+   }
+  ],
+  "best": {
+   "PR": 6.5,
+   "eff": 0.406942,
+   "EGT_C": 699.190458,
+   "T3r_C": 634.293733,
+   "sp_work_kJkg": 264.444132,
+   "x_ngv": 0.022107,
+   "x_rot": 0.021234,
+   "ok": true
+  }
+ },
+ "hot_sweep": {
+  "rows": [
+   {
+    "T41_C": 1000,
+    "cast": {
+     "x_ngv": 0.0,
+     "x_rot": 0.0,
+     "eff": 0.31629,
+     "P_kW": 5780.861808,
+     "EGT_C": 458.175358,
+     "W1_for_P_eq": 25.55
+    },
+    "printed": {
+     "x_ngv": 0.0,
+     "x_rot": 0.0,
+     "eff": 0.31629,
+     "P_kW": 5780.861808,
+     "EGT_C": 458.175358,
+     "W1_for_P_eq": 25.55
+    },
+    "track_class": {
+     "cls": "U",
+     "x_ngv": 0.0,
+     "x_rot": 0.0,
+     "eff": 0.31629,
+     "P_kW": 5780.861808,
+     "EGT_C": 458.175358
+    }
+   },
+   {
+    "T41_C": 1025,
+    "cast": {
+     "x_ngv": 0.006875,
+     "x_rot": 0.006875,
+     "eff": 0.318481,
+     "P_kW": 6051.873609,
+     "EGT_C": 473.064407,
+     "W1_for_P_eq": 24.405833
+    },
+    "printed": {
+     "x_ngv": 0.004583,
+     "x_rot": 0.004583,
+     "eff": 0.319242,
+     "P_kW": 6080.550891,
+     "EGT_C": 473.551433,
+     "W1_for_P_eq": 24.29073
+    }
+   },
+   {
+    "T41_C": 1050,
+    "cast": {
+     "x_ngv": 0.01375,
+     "x_rot": 0.01375,
+     "eff": 0.320473,
+     "P_kW": 6320.50793,
+     "EGT_C": 487.757618,
+     "W1_for_P_eq": 23.368536
+    },
+    "printed": {
+     "x_ngv": 0.009167,
+     "x_rot": 0.009167,
+     "eff": 0.321931,
+     "P_kW": 6379.231612,
+     "EGT_C": 488.809329,
+     "W1_for_P_eq": 23.153418
+    },
+    "track_class": {
+     "cls": "N",
+     "x_ngv": 0.03,
+     "x_rot": 0.0,
+     "eff": 0.324769,
+     "P_kW": 6495.909299,
+     "EGT_C": 490.937323
+    }
+   },
+   {
+    "T41_C": 1075,
+    "cast": {
+     "x_ngv": 0.020625,
+     "x_rot": 0.020625,
+     "eff": 0.322288,
+     "P_kW": 6586.699271,
+     "EGT_C": 502.257034,
+     "W1_for_P_eq": 22.424133
+    },
+    "printed": {
+     "x_ngv": 0.01375,
+     "x_rot": 0.01375,
+     "eff": 0.324387,
+     "P_kW": 6676.859478,
+     "EGT_C": 503.950366,
+     "W1_for_P_eq": 22.121331
+    }
+   },
+   {
+    "T41_C": 1100,
+    "cast": {
+     "x_ngv": 0.0275,
+     "x_rot": 0.0275,
+     "eff": 0.32394,
+     "P_kW": 6850.338677,
+     "EGT_C": 516.56575,
+     "W1_for_P_eq": 21.561127
+    },
+    "printed": {
+     "x_ngv": 0.018333,
+     "x_rot": 0.018333,
+     "eff": 0.326632,
+     "P_kW": 6973.379048,
+     "EGT_C": 518.975708,
+     "W1_for_P_eq": 21.180696
+    }
+   },
+   {
+    "T41_C": 1125,
+    "cast": {
+     "x_ngv": 0.034375,
+     "x_rot": 0.034375,
+     "eff": 0.325447,
+     "P_kW": 7111.382372,
+     "EGT_C": 530.684969,
+     "W1_for_P_eq": 20.769664
+    },
+    "printed": {
+     "x_ngv": 0.022917,
+     "x_rot": 0.022917,
+     "eff": 0.328687,
+     "P_kW": 7268.744306,
+     "EGT_C": 533.886652,
+     "W1_for_P_eq": 20.320019
+    }
+   },
+   {
+    "T41_C": 1150,
+    "cast": {
+     "x_ngv": 0.04125,
+     "x_rot": 0.04125,
+     "eff": 0.326822,
+     "P_kW": 7369.75507,
+     "EGT_C": 544.617037,
+     "W1_for_P_eq": 20.04151
+    },
+    "printed": {
+     "x_ngv": 0.0275,
+     "x_rot": 0.0275,
+     "eff": 0.330571,
+     "P_kW": 7562.914005,
+     "EGT_C": 548.68444,
+     "W1_for_P_eq": 19.529644
+    },
+    "track_class": {
+     "cls": "K",
+     "x_ngv": 0.055,
+     "x_rot": 0.055,
+     "eff": 0.322856,
+     "P_kW": 7174.255626,
+     "EGT_C": 540.619025
+    }
+   },
+   {
+    "T41_C": 1175,
+    "cast": {
+     "x_ngv": 0.048125,
+     "x_rot": 0.048125,
+     "eff": 0.328075,
+     "P_kW": 7625.395529,
+     "EGT_C": 558.36386,
+     "W1_for_P_eq": 19.369621
+    },
+    "printed": {
+     "x_ngv": 0.032083,
+     "x_rot": 0.032083,
+     "eff": 0.332301,
+     "P_kW": 7855.850909,
+     "EGT_C": 563.370282,
+     "W1_for_P_eq": 18.801403
+    }
+   },
+   {
+    "T41_C": 1200,
+    "cast": {
+     "x_ngv": 0.055,
+     "x_rot": 0.055,
+     "eff": 0.329219,
+     "P_kW": 7878.24657,
+     "EGT_C": 571.92724,
+     "W1_for_P_eq": 18.747956
+    },
+    "printed": {
+     "x_ngv": 0.036667,
+     "x_rot": 0.036667,
+     "eff": 0.333889,
+     "P_kW": 8147.521244,
+     "EGT_C": 577.945372,
+     "W1_for_P_eq": 18.128338
+    },
+    "track_class": {
+     "cls": "K",
+     "x_ngv": 0.055,
+     "x_rot": 0.055,
+     "eff": 0.329219,
+     "P_kW": 7878.24657,
+     "EGT_C": 571.92724
+    }
+   },
+   {
+    "T41_C": 1225,
+    "cast": {
+     "x_ngv": 0.061875,
+     "x_rot": 0.061875,
+     "eff": 0.33026,
+     "P_kW": 8128.254496,
+     "EGT_C": 585.308891,
+     "W1_for_P_eq": 18.171308
+    },
+    "printed": {
+     "x_ngv": 0.04125,
+     "x_rot": 0.04125,
+     "eff": 0.335349,
+     "P_kW": 8437.894214,
+     "EGT_C": 592.410901,
+     "W1_for_P_eq": 17.504488
+    }
+   },
+   {
+    "T41_C": 1250,
+    "cast": {
+     "x_ngv": 0.06875,
+     "x_rot": 0.06875,
+     "eff": 0.331209,
+     "P_kW": 8375.368587,
+     "EGT_C": 598.510446,
+     "W1_for_P_eq": 17.635166
+    },
+    "printed": {
+     "x_ngv": 0.045833,
+     "x_rot": 0.045833,
+     "eff": 0.336691,
+     "P_kW": 8726.941581,
+     "EGT_C": 606.768062,
+     "W1_for_P_eq": 16.924717
+    }
+   }
+  ],
+  "chosen_T41_C": 1150.0,
+  "note": "T41 выбрана посередине между классами N и K трека; печатные жаропрочные сплавы — оценка"
+ },
+ "reserve": [
+  {
+   "key": "comp_diffuser",
+   "group": "compressor",
+   "change": "η_p компрессора без трения в узком безлопаточном диффузоре (frame3: eta_basis.d_eta_without_diffuser_friction)",
+   "technique": "печатный диффузор и колесо, форма — сопряжённая (adjoint) оптимизация канала; шире канал, меньше трения",
+   "params": {
+    "eta_pc": 0.858299
+   },
+   "group_pct_base": 5.36412,
+   "group_pct_new": 4.612736,
+   "d_eff_shaft_pp": 1.122858,
+   "d_eff_el_pp": 1.075047,
+   "d_P_shaft_kW_same_W1": 310.961466,
+   "nodes_worse": [
+    {
+     "node": "comb_reaction",
+     "d_pp": 0.190468
+    }
+   ],
+   "nodes_better": [
+    {
+     "node": "compressor",
+     "d_pp": -0.751384
+    },
+    {
+     "node": "exhaust",
+     "d_pp": -0.389886
+    },
+    {
+     "node": "turbine_gg",
+     "d_pp": -0.096571
+    }
+   ],
+   "balance_pct": 4e-06
+  },
+  {
+   "key": "turb_plus1",
+   "group": "turbine",
+   "change": "η_p турбины +0,01 (оценка)",
+   "technique": "сопряжённая оптимизация 3D-профиля, печатный блиск с бандажом (нет утечки через зазор)",
+   "params": {
+    "eta_pt_gg": 0.894623,
+    "eta_pt_pt": 0.894623
+   },
+   "group_pct_base": 3.284849,
+   "group_pct_new": 3.000234,
+   "d_eff_shaft_pp": 0.746439,
+   "d_eff_el_pp": 0.714656,
+   "d_P_shaft_kW_same_W1": 136.427529,
+   "nodes_worse": [],
+   "nodes_better": [
+    {
+     "node": "exhaust",
+     "d_pp": -0.435351
+    },
+    {
+     "node": "turbine_gg",
+     "d_pp": -0.183707
+    },
+    {
+     "node": "turbine_pt",
+     "d_pp": -0.100908
+    }
+   ],
+   "balance_pct": 3e-06
+  },
+  {
+   "key": "leak_half",
+   "group": "leak_cool",
+   "change": "утечки 1,5 % -> 0,75 % (оценка)",
+   "technique": "цельный печатный корпус: меньше разъёмов, лабиринт и сотовое уплотнение заодно с корпусом",
+   "params": {
+    "x_leak": 0.0075
+   },
+   "group_pct_base": 0.737398,
+   "group_pct_new": 0.365913,
+   "d_eff_shaft_pp": 0.43073,
+   "d_eff_el_pp": 0.41239,
+   "d_P_shaft_kW_same_W1": 123.34118,
+   "nodes_worse": [],
+   "nodes_better": [
+    {
+     "node": "leakage",
+     "d_pp": -0.371485
+    }
+   ],
+   "balance_pct": 5e-06
+  },
+  {
+   "key": "dp_comb",
+   "group": "comb_dp",
+   "change": "потеря давления камеры 4 % -> 2,5 % (оценка)",
+   "technique": "печатная жаровая труба: подвод воздуха ветвящейся сетью по закону Мюррея, плавный диффузор",
+   "params": {
+    "dp_comb": 0.025
+   },
+   "group_pct_base": 0.455581,
+   "group_pct_new": 0.282551,
+   "d_eff_shaft_pp": 0.40173,
+   "d_eff_el_pp": 0.384624,
+   "d_P_shaft_kW_same_W1": 73.424634,
+   "nodes_worse": [],
+   "nodes_better": [
+    {
+     "node": "exhaust",
+     "d_pp": -0.234536
+    },
+    {
+     "node": "comb_dp",
+     "d_pp": -0.17303
+    }
+   ],
+   "balance_pct": -0.0
+  },
+  {
+   "key": "exh_diffuser",
+   "group": "exhaust",
+   "change": "давление за турбиной 1,02 -> 1,01 p0 (оценка)",
+   "technique": "печатный выхлопной диффузор с оптимизированной формой (adjoint)",
+   "params": {
+    "p_exh_ratio": 1.01
+   },
+   "group_pct_base": 26.848375,
+   "group_pct_new": 26.589223,
+   "d_eff_shaft_pp": 0.255448,
+   "d_eff_el_pp": 0.244571,
+   "d_P_shaft_kW_same_W1": 46.688479,
+   "nodes_worse": [],
+   "nodes_better": [
+    {
+     "node": "exhaust",
+     "d_pp": -0.259152
+    }
+   ],
+   "balance_pct": 3e-06
+  },
+  {
+   "key": "eta_b",
+   "group": "comb_heat_loss",
+   "change": "полнота сгорания 0,995 -> 0,999 (оценка)",
+   "technique": "камера: подготовка смеси, время пребывания",
+   "params": {
+    "eta_b": 0.999
+   },
+   "group_pct_base": 0.369508,
+   "group_pct_new": 0.073882,
+   "d_eff_shaft_pp": 0.125051,
+   "d_eff_el_pp": 0.119726,
+   "d_P_shaft_kW_same_W1": -2.25519,
+   "nodes_worse": [
+    {
+     "node": "exhaust",
+     "d_pp": 0.097615
+    }
+   ],
+   "nodes_better": [
+    {
+     "node": "comb_heat_loss",
+     "d_pp": -0.295626
+    }
+   ],
+   "balance_pct": 3e-06
+  },
+  {
+   "key": "eta_m",
+   "group": "mech_gen",
+   "change": "механический КПД 0,99 -> 0,995 (оценка)",
+   "technique": "один вал, меньше опор; газовые/лепестковые подшипники — проверка нужна",
+   "params": {
+    "eta_m": 0.995
+   },
+   "group_pct_base": 2.140696,
+   "group_pct_new": 1.731552,
+   "d_eff_shaft_pp": 0.447632,
+   "d_eff_el_pp": 0.428572,
+   "d_P_shaft_kW_same_W1": 81.814191,
+   "nodes_worse": [],
+   "nodes_better": [
+    {
+     "node": "mech",
+     "d_pp": -0.427344
+    }
+   ],
+   "balance_pct": 1e-05
+  },
+  {
+   "key": "fuel_preheat",
+   "group": "comb_mixing",
+   "change": "подогрев топлива до 200 °C теплом выхлопа (расширение модели)",
+   "technique": "малый печатный теплообменник топливо — выхлоп (TPMS-гироид)",
+   "params": {
+    "T_fuel": 473.15
+   },
+   "group_pct_base": 1.717297,
+   "group_pct_new": 1.42385,
+   "d_eff_shaft_pp": 0.28592,
+   "d_eff_el_pp": 0.273746,
+   "d_P_shaft_kW_same_W1": -5.127917,
+   "nodes_worse": [
+    {
+     "node": "exhaust",
+     "d_pp": 0.167727
+    }
+   ],
+   "nodes_better": [
+    {
+     "node": "comb_mixing",
+     "d_pp": -0.293447
+    },
+    {
+     "node": "comb_reaction",
+     "d_pp": -0.166113
+    }
+   ],
+   "balance_pct": 3e-06
+  },
+  {
+   "key": "all_engine",
+   "group": "—",
+   "change": "все приёмы выше, кроме подогрева топлива (новая деталь)",
+   "technique": "вместе",
+   "params": {
+    "eta_pc": 0.858299,
+    "eta_pt_gg": 0.894623,
+    "eta_pt_pt": 0.894623,
+    "x_leak": 0.0075,
+    "dp_comb": 0.025,
+    "p_exh_ratio": 1.01,
+    "eta_b": 0.999,
+    "eta_m": 0.995
+   },
+   "d_eff_shaft_pp": 3.502407,
+   "d_eff_el_pp": 3.353275,
+   "d_P_shaft_kW_same_W1": 774.823256,
+   "nodes_worse": [
+    {
+     "node": "comb_reaction",
+     "d_pp": 0.223169
+    },
+    {
+     "node": "generator",
+     "d_pp": 0.092239
+    },
+    {
+     "node": "gearbox",
+     "d_pp": 0.050166
+    }
+   ],
+   "nodes_better": [
+    {
+     "node": "exhaust",
+     "d_pp": -1.210718
+    },
+    {
+     "node": "compressor",
+     "d_pp": -0.766348
+    },
+    {
+     "node": "mech",
+     "d_pp": -0.426062
+    },
+    {
+     "node": "leakage",
+     "d_pp": -0.382932
+    },
+    {
+     "node": "comb_heat_loss",
+     "d_pp": -0.295626
+    },
+    {
+     "node": "turbine_gg",
+     "d_pp": -0.287759
+    },
+    {
+     "node": "comb_dp",
+     "d_pp": -0.176633
+    }
+   ],
+   "balance_pct": -0.0
+  },
+  {
+   "key": "recuperator",
+   "group": "исполнение",
+   "change": "рекуператор ε 0.85, π 5.0 (перебор, газ в рекуператор <= 700 °C)",
+   "technique": "печатный рекуператор с ядром из TPMS-решётки (гироид) переменной плотности; минимум S_gen: баланс ΔT и Δp (Бежан)",
+   "d_eff_shaft_pp": 7.530689,
+   "d_eff_el_pp": 7.210033,
+   "d_P_shaft_kW_same_W1": null,
+   "nodes_worse": [
+    {
+     "node": "recup_heat",
+     "d_pp": 3.240948
+    },
+    {
+     "node": "recup_dp_gas",
+     "d_pp": 0.536337
+    },
+    {
+     "node": "recup_dp_air",
+     "d_pp": 0.394718
+    },
+    {
+     "node": "comb_mixing",
+     "d_pp": 0.33738
+    },
+    {
+     "node": "generator",
+     "d_pp": 0.201255
+    },
+    {
+     "node": "comb_dp",
+     "d_pp": 0.180856
+    },
+    {
+     "node": "gearbox",
+     "d_pp": 0.109457
+    }
+   ],
+   "nodes_better": [
+    {
+     "node": "exhaust",
+     "d_pp": -7.857933
+    },
+    {
+     "node": "comb_reaction",
+     "d_pp": -2.515685
+    },
+    {
+     "node": "compressor",
+     "d_pp": -0.677207
+    },
+    {
+     "node": "turbine_gg",
+     "d_pp": -0.626813
+    },
+    {
+     "node": "leakage",
+     "d_pp": -0.213668
+    },
+    {
+     "node": "mech",
+     "d_pp": -0.077476
+    }
+   ],
+   "balance_pct": 2.8e-05
+  },
+  {
+   "key": "recuperator_1stage",
+   "group": "исполнение",
+   "change": "рекуператор ε 0.85, π 4.49 — одна центробежная ступень (π ступени 1 frame3)",
+   "technique": "то же + одна ступень компрессора вместо двух",
+   "d_eff_shaft_pp": 7.461622,
+   "d_eff_el_pp": 7.143907,
+   "d_P_shaft_kW_same_W1": null,
+   "nodes_worse": [
+    {
+     "node": "recup_heat",
+     "d_pp": 4.038394
+    },
+    {
+     "node": "recup_dp_gas",
+     "d_pp": 0.557099
+    },
+    {
+     "node": "recup_dp_air",
+     "d_pp": 0.409999
+    },
+    {
+     "node": "comb_mixing",
+     "d_pp": 0.370754
+    },
+    {
+     "node": "comb_dp",
+     "d_pp": 0.205494
+    },
+    {
+     "node": "generator",
+     "d_pp": 0.199748
+    },
+    {
+     "node": "gearbox",
+     "d_pp": 0.108638
+    }
+   ],
+   "nodes_better": [
+    {
+     "node": "exhaust",
+     "d_pp": -8.211809
+    },
+    {
+     "node": "comb_reaction",
+     "d_pp": -2.709146
+    },
+    {
+     "node": "compressor",
+     "d_pp": -0.816041
+    },
+    {
+     "node": "turbine_gg",
+     "d_pp": -0.69678
+    },
+    {
+     "node": "leakage",
+     "d_pp": -0.240345
+    },
+    {
+     "node": "mech",
+     "d_pp": -0.097458
+    }
+   ],
+   "balance_pct": -3.8e-05
+  },
+  {
+   "key": "hot_printed",
+   "group": "исполнение",
+   "change": "T41 1150 °C, печатное охлаждение (x_СА 0.0275, x_ротора 0.0275)",
+   "technique": "печатные сопловой аппарат и лопатки с внутренними каналами: ветвление по закону Мюррея, решётки в кромках",
+   "d_eff_shaft_pp": 1.428177,
+   "d_eff_el_pp": 1.367365,
+   "d_P_shaft_kW_same_W1": null,
+   "nodes_worse": [
+    {
+     "node": "exhaust",
+     "d_pp": 2.25176
+    },
+    {
+     "node": "cool_throttle_rotor",
+     "d_pp": 0.328704
+    },
+    {
+     "node": "cool_mix_ngv",
+     "d_pp": 0.23304
+    },
+    {
+     "node": "cool_mix_rotor",
+     "d_pp": 0.110368
+    }
+   ],
+   "nodes_better": [
+    {
+     "node": "comb_reaction",
+     "d_pp": -2.136345
+    },
+    {
+     "node": "compressor",
+     "d_pp": -1.07881
+    },
+    {
+     "node": "turbine_gg",
+     "d_pp": -0.566899
+    },
+    {
+     "node": "leakage",
+     "d_pp": -0.148303
+    },
+    {
+     "node": "turbine_pt",
+     "d_pp": -0.114208
+    },
+    {
+     "node": "comb_dp",
+     "d_pp": -0.109088
+    },
+    {
+     "node": "mech",
+     "d_pp": -0.096762
+    },
+    {
+     "node": "comb_mixing",
+     "d_pp": -0.082277
+    }
+   ],
+   "balance_pct": -0.0
+  },
+  {
+   "key": "hot_track_K",
+   "group": "исполнение",
+   "change": "T41 1150 °C, литое охлаждение по классу K трека (5,5 % + 5,5 %)",
+   "technique": "сравнение: литьё",
+   "d_eff_shaft_pp": 0.656632,
+   "d_eff_el_pp": 0.628673,
+   "d_P_shaft_kW_same_W1": null,
+   "nodes_worse": [
+    {
+     "node": "exhaust",
+     "d_pp": 2.330946
+    },
+    {
+     "node": "cool_throttle_rotor",
+     "d_pp": 0.699301
+    },
+    {
+     "node": "cool_mix_ngv",
+     "d_pp": 0.488594
+    },
+    {
+     "node": "cool_mix_rotor",
+     "d_pp": 0.216348
+    }
+   ],
+   "nodes_better": [
+    {
+     "node": "comb_reaction",
+     "d_pp": -2.383991
+    },
+    {
+     "node": "compressor",
+     "d_pp": -0.952094
+    },
+    {
+     "node": "turbine_gg",
+     "d_pp": -0.521298
+    },
+    {
+     "node": "leakage",
+     "d_pp": -0.130883
+    },
+    {
+     "node": "turbine_pt",
+     "d_pp": -0.125869
+    },
+    {
+     "node": "comb_dp",
+     "d_pp": -0.119575
+    },
+    {
+     "node": "comb_mixing",
+     "d_pp": -0.091592
+    },
+    {
+     "node": "mech",
+     "d_pp": -0.09122
+    }
+   ],
+   "balance_pct": -0.0
+  },
+  {
+   "key": "recup_hot_printed",
+   "group": "исполнение",
+   "change": "рекуператор ε 0.85 + T41 1150 °C печатное охлаждение, π 6.5",
+   "technique": "вместе",
+   "d_eff_shaft_pp": 9.065256,
+   "d_eff_el_pp": 8.679258,
+   "d_P_shaft_kW_same_W1": null,
+   "nodes_worse": [
+    {
+     "node": "recup_heat",
+     "d_pp": 2.458783
+    },
+    {
+     "node": "recup_dp_gas",
+     "d_pp": 0.422525
+    },
+    {
+     "node": "cool_mix_ngv",
+     "d_pp": 0.382876
+    },
+    {
+     "node": "comb_mixing",
+     "d_pp": 0.314127
+    },
+    {
+     "node": "recup_dp_air",
+     "d_pp": 0.297594
+    },
+    {
+     "node": "cool_mix_rotor",
+     "d_pp": 0.263173
+    },
+    {
+     "node": "generator",
+     "d_pp": 0.240978
+    },
+    {
+     "node": "cool_throttle_rotor",
+     "d_pp": 0.220378
+    },
+    {
+     "node": "gearbox",
+     "d_pp": 0.131061
+    }
+   ],
+   "nodes_better": [
+    {
+     "node": "exhaust",
+     "d_pp": -5.94626
+    },
+    {
+     "node": "comb_reaction",
+     "d_pp": -4.963827
+    },
+    {
+     "node": "compressor",
+     "d_pp": -1.096001
+    },
+    {
+     "node": "turbine_gg",
+     "d_pp": -0.802705
+    },
+    {
+     "node": "leakage",
+     "d_pp": -0.233781
+    },
+    {
+     "node": "mech",
+     "d_pp": -0.080359
+    }
+   ],
+   "balance_pct": -0.0
+  },
+  {
+   "key": "gearbox_generator",
+   "group": "mech_gen",
+   "change": "редуктор и генератор пакета не меняются (Plug&Play)",
+   "technique": "резерв не снимается двигателем",
+   "group_pct_base": 1.286006,
+   "d_eff_shaft_pp": 0.0,
+   "d_eff_el_pp": 0.0,
+   "d_P_shaft_kW_same_W1": 0.0,
+   "nodes_worse": [],
+   "nodes_better": []
+  }
+ ],
+ "svg": {
+  "base": "grassmann_kv3_base.svg",
+  "recup": "grassmann_kv3_recup.svg",
+  "hot": "grassmann_kv3_hot_printed.svg",
+  "bars": "exergy_groups_kv3.svg"
+ },
+ "feed_to_funnels": {
+  "engine_funnel": {
+   "new_axes": [
+    {
+     "axis": "recuperator_eps",
+     "values": [
+      0.0,
+      0.85,
+      0.9
+     ],
+     "note": "при ε > 0 оптимум π смещается к 4,5–5 (recup_scan)"
+    },
+    {
+     "axis": "T41_with_cooling_tech",
+     "values": [
+      1000,
+      1050,
+      1100,
+      1150,
+      1200
+     ],
+     "tech": [
+      "cast",
+      "printed"
+     ],
+     "note": "доли охлаждения — cooling_model (оценка); печать — η_c 0,75 против 0,5"
+    },
+    {
+     "axis": "x_leak",
+     "values": [
+      0.015,
+      0.0075
+     ],
+     "note": "цельный печатный корпус (оценка)"
+    },
+    {
+     "axis": "dp_comb",
+     "values": [
+      0.04,
+      0.025
+     ],
+     "note": "печатная жаровая труба (оценка)"
+    },
+    {
+     "axis": "eta_pc_diffuser",
+     "values": [
+      0.841259,
+      0.858299
+     ],
+     "note": "frame3 без трения в узком диффузоре"
+    }
+   ],
+   "new_models": [
+    "exergy.account(chain(...)): разрушение по узлам и эксергетический КПД как критерий отбора",
+    "exergy.cooling_model: доля охлаждения от T41, T3 и технологии"
+   ],
+   "criterion": "эксергетический КПД на клеммах и наибольшая доля разрушения узла — куда тратить расчёты"
+  },
+  "combustor_funnel": {
+   "new_axes": [
+    {
+     "axis": "air_preheat_T3r",
+     "values": "T3 или T3r рекуператора",
+     "note": "горение — крупнейшее разрушение; подогрев воздуха его снижает"
+    },
+    {
+     "axis": "dp_comb",
+     "values": [
+      0.04,
+      0.03,
+      0.025
+     ]
+    },
+    {
+     "axis": "fuel_preheat_C",
+     "values": [
+      15,
+      200
+     ]
+    }
+   ],
+   "targets": {
+    "comb_reaction_pct_base": 30.277877,
+    "comb_mixing_pct_base": 1.717297,
+    "comb_dp_pct_base": 0.455581
+   }
+  }
+ },
+ "runtime_s": 359.0
+}
