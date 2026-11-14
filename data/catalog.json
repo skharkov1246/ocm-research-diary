@@ -5,7 +5,7 @@
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
     "datasets": 405,
-    "total_bytes": 13723177,
+    "total_bytes": 13723793,
     "results_files": 179,
     "results_with_script": 54,
     "results_referenced_in_site": 22,
@@ -7424,7 +7424,7 @@
       "path": "routes/gtu/organic/jobs_aws_organic.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 8921,
+      "bytes": 9537,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -7437,7 +7437,7 @@
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "130ca04"
+      "last_commit": "ef0c673"
     },
     {
       "path": "routes/gtu/platform/aws/iam_policy_addendum.json",
