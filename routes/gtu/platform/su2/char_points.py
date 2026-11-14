@@ -421,6 +421,17 @@ def cmd_merge(a) -> int:
             print(f"  pfrac {r['pfrac']:.3f}: {r.get('status')}, m {pf.get('m_wheel_total')}, PR {pf.get('PR_tt')}, "
                   f"eta {pf.get('eta_tt_isentropic')}, сошлась {r.get('converged')}")
     print(f"записано: {a.out}")
+    if a.expect:
+        labels = {g["label"] for g in res["lines"].values()}
+        miss = [x for x in a.expect.split(",") if x and x not in labels]
+        if miss:
+            print("нет сводок линий:", miss, file=sys.stderr)
+            return 3
+    if a.require_base_ok:
+        bad = [f"{k}: {b.get('job')}" for k, g in res["lines"].items() for b in g["bases"] if not b.get("restart_ok")]
+        if bad:
+            print("база не дошла до конца:", bad, file=sys.stderr)
+            return 3
     return 0
 
 
@@ -464,6 +475,9 @@ def build_parser():
     m.add_argument("--in", dest="inp", required=True, help="папка runs/<run_id> раннера")
     m.add_argument("--out", required=True)
     m.add_argument("--run-id", default=None)
+    m.add_argument("--require-base-ok", action="store_true", help="код 3, если у какой-то задачи база не дошла до конца "
+                   "(проба на AWS)")
+    m.add_argument("--expect", default="", help="метки линий через запятую: код 3, если какой-то нет")
     return ap
 
 

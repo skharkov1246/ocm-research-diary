@@ -32,6 +32,11 @@ Coldun). Машины работают под ролью экземпляра: �
   Г) очередь под квоту (--max-vcpu, 384): запуск по мере освобождения машин, бюджет — перед
      каждым запуском; повтор после прерывания спота — в свой префикс попытки (без задвоения);
   Д) на машине переменная NPROC (число ядер).
+Правки после трёх проверок v2: машина с неподтверждённым гашением останавливает очередь (--max-vcpu);
+сетевой сбой гашения не уходит из finally; машина за ошибкой 5xx ищется по ClientToken; сверка гасит машину,
+живую после срока; DryRun-успех гасится; user-data всех попыток — до первого запуска; статусы capacity
+(с повтором), no_price, halted; метка 143 при гашении изнутри (Client.…) — не прерывание; окружение OpenFOAM
+(/openfoam/bash.rc) в контейнере.
 """
 from __future__ import annotations
 
@@ -956,6 +961,7 @@ class Runner:
         from botocore.exceptions import ClientError
         refused, ami = False, None
         no_price, cap, skipped = [], [], []
+        self._why.pop(job.name, None)             # пояснение прошлой попытки к этой не относится
         for itype in job.types:
             info = self.price(itype)
             if info.window_max <= 0:

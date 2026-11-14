@@ -1,6 +1,6 @@
 """Тесты уровня 0 воронки камеры KV: повторяемость, части без потерь, слияние, монотонности моделей.
 
-Запуск: python -m pytest -q routes/gtu/combustor/test_comb_l0.py   (около 1-2 мин на 4 ядрах; границы - из
+Запуск: python -m pytest -q routes/gtu/combustor/test_comb_l0.py   (около 1-3 мин на 4 ядрах; границы - из
 comb_bc_results.json, при несовпадении ключа считаются заново, 5-8 мин)
 """
 import copy, json, os, sys
@@ -72,10 +72,22 @@ def test_shard_bad_args():
         CS.shard_indices(10, 0, 0)
 
 
+def _close(a, b, rel=1e-4):
+    """равенство с допуском: решатели Cantera (equilibrate, steady state) стартуют с текущего состояния объекта, поэтому
+    первый вызов в новом процессе и повторный расходятся в 6-й значащей цифре (замечено проверкой скептика 14.11.2026)"""
+    if isinstance(a, dict):
+        return a.keys() == b.keys() and all(_close(a[k], b[k], rel) for k in a)
+    if isinstance(a, list):
+        return len(a) == len(b) and all(_close(x, y, rel) for x, y in zip(a, b))
+    if isinstance(a, float) and isinstance(b, (float, int)):
+        return abs(a - b) <= rel * max(abs(a), abs(b), 1e-9)
+    return a == b
+
+
 def test_evaluate_repeatable(bc):
     i, r1 = _first_ok()
     r2 = CR.evaluate(i, N)
-    assert _strip(r1) == _strip(r2)
+    assert _close(_strip(r1), _strip(r2))
 
 
 def test_shards_merge_complete_and_detects_loss(tmp_path, bc):
@@ -170,3 +182,69 @@ def test_wall_hotter_with_hotter_gas(bc):
     w1 = CR.wall_temperature(c, d, bc, 1700.0, 0.03)["T_w1"]
     w2 = CR.wall_temperature(c, d, bc, 1900.0, 0.03)["T_w1"]
     assert w2 > w1
+
+
+# --------------------------------------------------------------------------- проверка скептика 14.11.2026: выгоды даром
+def _first_concept(pred):
+    for i in range(N):
+        c = CS.concept(i, N)
+        if pred(c):
+            return c
+    raise AssertionError("нет варианта")
+
+
+def test_flox_recirculation_limited_by_confinement(bc):
+    """плотная решётка струй не получает рециркуляцию; реже струи - больше уноса; не больше KV_MAX"""
+    c = _first_concept(lambda c: c["scheme"] == "FLOX")
+    d = CS.derive(c, bc)
+    k_dense = CR.flox_recirc(dict(c, n_el=4000), d, bc, 0)
+    k_sparse = CR.flox_recirc(dict(c, n_el=8), d, bc, 0)
+    assert k_dense["K"] == 0.0 and k_dense["D_cell_over_d0"] < 3
+    assert k_sparse["K"] >= k_dense["K"] and k_sparse["K"] <= CR.KV_MAX
+
+
+def test_stratification_decays_with_mixing_length():
+    c = dict(l_mix=15.0, k_pass=1.0)
+    assert CR.strat_air_frac(c, 0.5) > 0.99                    # длинный канал - расслоение перемешано
+    assert CR.strat_air_frac(dict(c, l_mix=3.0), 0.5) < 0.9    # короткий - остаётся
+    assert CR.strat_air_frac(c, 1.0) == pytest.approx(1.0)
+
+
+def test_hole_tolerance_adds_unmixedness(bc):
+    """напечатанные отверстия (разброс 0,025 мм) дают больший разброс phi, чем сверлёные (0,008 мм)"""
+    c = _first_concept(lambda c: c["injector"] == "струи")
+    dp, dc = CS.derive(dict(c, make="печатный картридж"), bc), CS.derive(dict(c, make="литьё"), bc)
+    assert dp["S_tol"] > 0 and dc["S_tol"] > 0
+    assert dp["S_unmix"] >= dp["S_mix"] - 1e-12
+    assert 2 * CS.D_SIG_FUEL["печатный картридж"] / dp["d_jet_mm"] > 2 * CS.D_SIG_FUEL["литьё"] / dc["d_jet_mm"]
+    assert dp["dp_mix_fric"] > dc["dp_mix_fric"] > 0          # шероховатость печати - большее трение канала
+
+
+def test_film_effectiveness_within_source_branch(bc):
+    """η плёнки не выше ветви m > 1,3 (1,28·...) - без экстраполяции m^0,65"""
+    i, r = _first_ok()
+    c = r["concept"]
+    if c["cooling"] == "решётка" or c["porosity"] <= 0:
+        pytest.skip("нет плёнки")
+    d = CS.derive(c, bc)
+    w = CR.wall_temperature(c, d, bc, 1800.0, 0.03)
+    xs = 0.5 / max(c["porosity"], 1e-4)
+    assert w["eta_film"] <= 1.28 * 1.0 * xs ** -0.2 * 0.5 ** -0.2 + 1e-9
+
+
+def test_rdc_gets_no_pressure_gain_and_friction_counted(bc):
+    assert CR.ETA_PG == 0.0
+    i, r = _first_ok()
+    assert r["dp"]["p_gain"] == 0.0 or r["concept"]["scheme"] != "RDC"
+    assert r["dp"]["dp_total"] >= r["dp"]["dp_inj"] + r["dp"]["dp_mix_fric"] - 1e-12
+
+
+def test_unlit_load_does_not_pass_emission_targets(bc):
+    """погасшая на 50 % зона (полнота < 0,99) - цели NOx/CO не выполнены, хотя NOx и CO около нуля"""
+    for i in range(N):
+        r = CR.evaluate(i, N)
+        if r["status"] == "ok" and r["gas"][1]["eta_c"] < CR.ETA_MIN:
+            assert not r["targets"]["nox_gas"]["ok"] and not r["targets"]["co_gas"]["ok"]
+            assert r["feed"]["burnt"][1] is False
+            return
+    pytest.skip("нет варианта, погасшего на 50 %")

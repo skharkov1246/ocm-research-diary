@@ -54,6 +54,8 @@ def _fraction_table(n=128, kind="gyroid"):
 def sheet_threshold(rho, kind="gyroid"):
     """t такое, что доля |g| ≤ t равна rho (таблица на решётке 128³)."""
     global _TAB
+    if rho >= 0.9999:
+        return 10.0                                # сплошной металл (|g| ≤ 1,5 везде)
     if _TAB is None or _TAB[0] != kind:
         _TAB = (kind,) + _fraction_table(kind=kind)
     _, ts, fr = _TAB

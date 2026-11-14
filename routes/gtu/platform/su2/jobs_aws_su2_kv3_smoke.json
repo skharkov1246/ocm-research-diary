@@ -1,0 +1,55 @@
+{
+ "_comment": "Этап 0 линий частоты SU2: проба всей цепочки на одной машине до этапов A и B (обе линии на coarse, итераций — десятки, числа не характеристика). Раннер берёт только defaults и jobs. Код — ветка claude/lucid-allen-yvps5d. Сгенерировано make_jobs_su2_kv3.py; правки — в нём.",
+ "defaults": {
+  "instance_type": "c7a.16xlarge",
+  "fallback_types": [
+   "c7i.16xlarge"
+  ],
+  "image": "al2023",
+  "container": "ubuntu:24.04",
+  "container_setup": [
+   "apt-get update -q",
+   "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+   "python3 -m venv /opt/venv",
+   "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+   "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+   "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+   "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+   "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+  ]
+ },
+ "jobs": [
+  {
+   "name": "su2-kv3-core130-smoke",
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; free -g; df -h /tmp; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/frame3/frame3_geom.py --out \"$W/geom\" --levels coarse --stages stage1 --gzip-levels --threads \"$NPROC\" --results \"$GTU_OUT/frame3_geom_results.json\" > \"$GTU_OUT/geom_kv3_stage1.log\" 2>&1\npython routes/gtu/platform/su2/char_points.py run --case custom --level coarse --geom-out \"$W/geom/stage1_coarse\" --label kv3_stage1 --pfracs 0.70,0.90,1.00,1.10 --base-pfrac 0.75 --np-per-point 16 --base-iter-scale 0.1 --point-iter 40 --point-pramp 10 --job-max-min 60 --su2-src /opt/SU2-src --work \"$W/runs_kv3_stage1\" --out \"$GTU_OUT/kv3_stage1\" || echo \"kv3_stage1 exit $?\" >> \"$GTU_OUT/smoke_exits.txt\"\npython routes/gtu/platform/geom/impeller.py --case core130 --level coarse --no-step --out \"$W/geom/core130_coarse\" --threads \"$NPROC\" > \"$GTU_OUT/geom_core130.log\" 2>&1\npython routes/gtu/platform/su2/char_points.py run --case core130 --level coarse --geom-out \"$W/geom/core130_coarse\" --label core130 --pfracs 0.70,0.90,1.00,1.10 --base-pfrac 0.75 --np-per-point 16 --base-iter-scale 0.1 --point-iter 40 --point-pramp 10 --job-max-min 60 --su2-src /opt/SU2-src --work \"$W/runs_core130\" --out \"$GTU_OUT/core130\" || echo \"core130 exit $?\" >> \"$GTU_OUT/smoke_exits.txt\"\npython routes/gtu/platform/su2/char_points.py merge --in \"$GTU_OUT\" --out \"$GTU_OUT/smoke_merge.json\" --require-base-ok --expect kv3_stage1,core130",
+   "max_min": 60,
+   "disk_gb": 40
+  }
+ ],
+ "what_it_checks": [
+  "container_setup на машине: apt, venv, pip по requirements.txt, сборка SU2 v8.6.0 с GitHub (_su2_build.log, _container_setup.log, время — [gtu-time] container_setup в _job.log)",
+  "окружение команды (OMPI_MCA_osc=^ucx, vader) — SU2 под mpirun в docker: база на 64 процессах, 4 точки x 16 параллельно, --use-hwthread-cpus",
+  "сетки на машине: frame3_geom.py (KV-3, STEP и проверки) и impeller.py (core130)",
+  "срок от max_min и /proc/uptime (budget.uptime_at_start_s в char_summary.json)",
+  "выгрузка и сбор: char_summary.json, рестарты, surface.vtu; merge --require-base-ok -> код задачи",
+  "время подготовки и итерации на c7a.16xlarge — для уточнения сметы этапов A и B (sec_per_iter в char_summary.json, [gtu-time] в _job.log)"
+ ],
+ "merge": {
+  "commands": [
+   "python3 routes/gtu/platform/su2/char_points.py merge --in routes/gtu/platform/aws/runs/<run_id> --out <scratchpad>/su2_char_kv3_smoke.json --run-id <run_id> --require-base-ok"
+  ],
+  "to_branch": [
+   "routes/gtu/platform/aws/ledger.jsonl"
+  ],
+  "note": "числа пробы в ветку не идут; время подготовки и итерации — в смету этапов A и B (make_jobs_su2_kv3.py: SETUP_MIN, TIMING)"
+ },
+ "estimate": {
+  "machines": 1,
+  "machine_min_expected": 31,
+  "usd": {
+   "total_expected": 0.39
+  },
+  "upper_bound_usd": 1.67,
+  "basis": "загрузка 3 + подготовка 12 + 2 сетки coarse по ~5 + 2 прогона по ~3 мин (оценки; сетка KV-3 coarse здесь — 131 с, core130 coarse — 40 с); цена — как этапы A и B"
+ }
+}

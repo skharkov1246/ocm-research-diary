@@ -70,7 +70,15 @@ F_SEG = 0.3                # доля времени догорания, кот�
 T_REC = 1.0e-3             # возраст рециркулирующих продуктов (догорание после зоны пламени), с (оценка)
 PHI_DET_MIN = 0.6          # бедный предел устойчивой детонации метан - воздух (оценка, по памяти, не сверено)
 ETA_MIN = 0.99             # полнота сгорания на 30/50/100 % для цели load_range (оценка)
-ETA_PG = 0.05              # доля идеального прироста давления постоянного объёма, реализуемая RDC (оценка)
+ETA_PG = 0.0               # доля идеального прироста давления постоянного объёма, засчитываемая RDC. Было 0,05 (оценка) -
+                           # это ~10 % p3 выигрыша при TRL 4: схема получала цель потерь даром. Чистый прирост полного
+                           # давления RDC в условиях ГТУ не подтверждён (проверка скептика 14.11.2026, по памяти, не
+                           # сверено) - выигрыш не засчитывается до демонстрации; p_cv_ratio остаётся в результате
+IGN_MARGIN_MIN = 3.0       # запас по самовоспламенению в смесителе (задержка / время смешения) - одинаковый для газа (H2,
+                           # flashback) и испарительной подачи дизеля (было 1,0 у дизеля; задержка н-додекана - сокращённый
+                           # механизм Reitz, здесь с опытом не сверена)
+FILM_M_MAX = 1.3           # верхняя граница ветви η = 1,10·m^0,65 щелевой плёнки; выше - η = 1,28·(...) (Lefebvre & Ballal,
+                           # по памяти, не сверено). Было: m^0,65 без границы при m до 20 -> η упиралась в 0,95
 EPS_W = {"металл": 0.7, "керамика": 0.85}   # излучательная способность стенки: 0,7 Nimonic (по выдержке поиска), CMC - оценка
 EPS_C = 0.4                # кожуха
 K_WALL = {"металл": 25.0, "керамика": 8.0}  # теплопроводность стенки, Вт/(м·К): Hastelloy X около 1000 K / CMC - оценка
@@ -500,7 +508,10 @@ def kin():
 
 
 GH = {n: (lambda z, w: (z, w / w.sum()))(*np.polynomial.hermite_e.hermegauss(n)) for n in (1, 3, 5)}
-N_NODES = {"LPP": 5, "MM": 5, "CAT": 5, "FLOX": 3, "TVC": 3, "RDC": 3, "RQL": 1}
+# одна квадратура для всех схем с узлами неравномерности (проверка скептика 14.11.2026: 3 узла FLOX/TVC/RDC против 5 у
+# LPP/MM/CAT недооценивают богатый хвост и NOx - неравная основа сравнения); RQL - богатая зона одним узлом (без изменений)
+N_NODES = {"LPP": 5, "MM": 5, "CAT": 5, "FLOX": 5, "TVC": 5, "RDC": 5, "RQL": 1}
+JET_SPREAD = 0.22          # рост диаметра свободной струи d(x) = d0 + 2·0,22·x (видимая граница; оценка, по памяти)
 
 
 # =========================================================================== пассивное деление топлива
@@ -524,6 +535,26 @@ def _node_streams(K, m_air, m_fuel, S, n_nodes, T3, Tf, p, fuel="CH4:1"):
         out.append((wk, K.fresh(m_air * wk, m_fuel * wk * f, T3, Tf, p, fuel)))
     tot = sum(s.m for _, s in out)
     return out, tot
+
+
+def flox_recirc(c, d, bc, li):
+    """степень рециркуляции FLOX: унос Ricou - Spalding m/m0 = 0,32·(x/d0)·(ρ_b/ρ_0)^0,5 (по выдержке поиска) до длины,
+    на которой струя заполняет свою ячейку сечения (стеснение соседними струями), не дальше 0,5·L_L; не больше KV_MAX"""
+    L = bc["loads"][li]
+    T_b = max(bc["eq_T"](L["phi_ov"] / c["a_pz"])[0], 800.0)
+    d0 = 1e-3 * d["d_air_mm"]
+    D_cell = math.sqrt(4 * d["A_L"] * CS.N_CAN[c["chamber"]] / (math.pi * max(1, c["n_el"])))
+    x_ent = min(0.5 * d["L_L"], max(0.0, (D_cell - d0) / (2 * JET_SPREAD)))
+    K = min(KV_MAX, max(0.0, 0.32 * (x_ent / d0) * math.sqrt(L["T3_K"] / T_b) - 1.0))
+    return dict(K=K, D_cell_over_d0=D_cell / d0, x_ent_over_d0=x_ent / d0, T_b=T_b)
+
+
+def strat_air_frac(c, m_rel):
+    """самостратификация струй: доля воздуха зоны, встречающая топливо, при относительном расходе топлива m_rel.
+    Расслоение у входа канала (1 - m_rel^k) затухает по длине смешения тем же законом exp(-l_mix/K_MIX), что и
+    неравномерность в comb_space (оценка)"""
+    seg_left = math.exp(-c["l_mix"] / CS.K_MIX)
+    return min(1.0, 1.0 - (1.0 - m_rel ** c["k_pass"]) * seg_left)
 
 
 def gas_network(c, d, bc, li):
@@ -560,8 +591,13 @@ def gas_network(c, d, bc, li):
     if s in ("LPP", "MM", "FLOX", "TVC"):
         Krec, S_eff = K_crz, S
         if s == "FLOX":
-            T_b = max(bc["eq_T"](L["phi_ov"] / a_pz)[0], 800.0)
-            Krec = min(KV_MAX, max(0.0, 0.32 * (0.5 * d["L_L"] / (1e-3 * d["d_air_mm"])) * math.sqrt(T3 / T_b) - 1.0))
+            # унос Ricou - Spalding идёт, пока струя не заполнит свою ячейку сечения жаровой трубы (стеснение соседними
+            # струями): ячейка D_cell = (4·A_L·N/(π·n_el))^0,5, длина заполнения (D_cell - d0)/(2·JET_SPREAD), не больше
+            # половины длины трубы. Проверка скептика 14.11.2026: при x = 0,5·L_L без стеснения плотная решётка струй
+            # (каналы занимают 20-25 % сечения) получала K = 3 даром.
+            fx = flox_recirc(c, d, bc, li)
+            Krec = fx["K"]
+            res["D_cell_over_d0"], res["x_ent_over_d0"] = fx["D_cell_over_d0"], fx["x_ent_over_d0"]
             S_eff = S / (1 + Krec)
         res["K_recirc"] = Krec
         pilot = None
@@ -577,7 +613,10 @@ def gas_network(c, d, bc, li):
         else:
             m_air_main, m_fuel_main = a_pz * W, Wf
         if c["passive"] == "струи":
-            a_eff = min(1.0, m_rel ** c["k_pass"])
+            # расслоение у входа канала (1 - m_rel^k) затухает по длине смешения по тому же закону, что и неравномерность
+            # (comb_space: exp(-l_mix/K_MIX)). Проверка скептика 14.11.2026: без затухания канал в 10 калибров давал
+            # почти идеальное смешение на 100 % (S ~ 0,02) и полное расслоение на 30 % одновременно.
+            a_eff = strat_air_frac(c, m_rel)
             bypass_air = (1 - a_eff) * m_air_main
             m_air_main *= a_eff
             S_eff = S_eff + 0.3 * (1 - a_eff)
@@ -808,7 +847,7 @@ def flashback(c, d, bc):
         ig_m = (ig["ign_ms"] or ig["t_end_ms"]) / max(d["tau_mix_ms"], 1e-6)
         out[f"margin_H2_{xh}"] = m
         out[f"ign_margin_H2_{xh}"] = ig_m
-        if m >= 1 and ig_m >= 3:
+        if m >= 1 and ig_m >= IGN_MARGIN_MIN:
             h2max = xh
         else:
             break
@@ -848,7 +887,9 @@ def wall_temperature(c, d, bc, T_g, far_zone, lum=1.0):
     blow = L0["rho3"] * Uc / (rhog * Ug)
     if c["cooling"] in ("плёночное", "отверстия", "керамика", "решётка") and c["porosity"] > 0:
         xs = 0.5 / max(c["porosity"], 1e-4)
-        eta_f = 1.10 * max(blow, 0.05) ** 0.65 * (mua / mug) ** 0.15 * xs ** -0.2 * 0.5 ** -0.2
+        m_f = max(blow, 0.05)
+        pre = 1.10 * m_f ** 0.65 if m_f <= FILM_M_MAX else 1.28
+        eta_f = pre * (mua / mug) ** 0.15 * xs ** -0.2 * 0.5 ** -0.2
         if c["cooling"] == "решётка":
             eta_f *= 0.5                                 # выпотевание малой пористости - половина щелевой (оценка)
         eta_f = min(0.95, max(0.0, eta_f))
@@ -904,9 +945,11 @@ def pressure_loss(c, d, bc, g100):
     M = U_in / math.sqrt(1.4 * 287.0 * L0["T3_K"])
     dp_hot = 0.7 * M ** 2 * (g100["T_exit"] / L0["T3_K"] - 1)
     gain = g100.get("p_gain", 0.0)
-    tot = d["dp_diff"] + c["dp_inj"] + d["dp_series_wall"] + dp_hot + d["dp_duct"] - gain
+    fric = d.get("dp_mix_fric", 0.0)            # трение смесительного канала (comb_space.derive)
+    tot = d["dp_diff"] + c["dp_inj"] + fric + d["dp_series_wall"] + dp_hot + d["dp_duct"] - gain
     sl = TB["dp_sensitivity"]
-    return dict(dp_total=tot, dp_diff=d["dp_diff"], dp_inj=c["dp_inj"], dp_series_wall=d["dp_series_wall"], dp_hot=dp_hot,
+    return dict(dp_total=tot, dp_diff=d["dp_diff"], dp_inj=c["dp_inj"], dp_mix_fric=fric,
+                dp_series_wall=d["dp_series_wall"], dp_hot=dp_hot,
                 dp_duct=d["dp_duct"], p_gain=gain,
                 dP_shaft_kW=sl["dP_kW_per_pct"] * 100 * (tot - DP_COMB),
                 d_eff_pt=sl["d_eff_pt_per_pct"] * 100 * (tot - DP_COMB))
@@ -961,7 +1004,7 @@ def module_models(c, d, bc, fb, pl, wall_gas):
     parts = dict()
     if mk == "печатный картридж":
         seg = _printer_segments((D_out, d["L_mod"]))
-        parts["корпус-картридж (труба, смесители, коллекторы, штуцеры)"] = seg[0] * N
+        parts["картридж (жаровая труба, смесители, коллекторы, штуцеры)"] = seg[0] * N
     elif mk == "гибрид":
         parts["литой корпус-труба"] = N
         parts["печатная головка смесителей"] = N
@@ -992,6 +1035,13 @@ def module_models(c, d, bc, fb, pl, wall_gas):
     if ch == "трубчатые":
         parts["переходные патрубки"] = N
         parts["трубки переброса пламени"] = N
+    if ch in ("выносная", "трубчатые"):
+        # кожух (сосуд давления p3) с фланцем - в составе цели parts_count («1 корпус-фланец»); у кольцевой и
+        # противоточной его роль играет корпус двигателя. Проверка скептика 14.11.2026: выносная не считала ни кожух,
+        # ни переходный патрубок к турбине, хотя трубчатые патрубки считали, а масса картриджа кожуха не содержит
+        parts["кожух с фланцем (сосуд давления)"] = N
+    if ch == "выносная":
+        parts["переходный патрубок к турбине"] = 1
     n_parts = int(sum(parts.values()))
     welds = 0 if mk != "литьё" else 1 + parts.get("форсунки (наконечники)", 0)
     align = {"выносная": 0, "трубчатые": 2 * N, "кольцевая": 2, "противоточная": 2}[ch]
@@ -1066,8 +1116,11 @@ def compliance(c, row):
         v = (val - lim) / abs(lim) if sense == "max" else (lim - val) / abs(lim)
         out[tid] = dict(value=val, limit=lim, ok=bool(v <= 0), viol=max(0.0, v))
     nox_t, co_t = _tg("nox_gas"), _tg("co_gas")
-    put("nox_gas", max(g[1.0]["NOx"], g[0.5]["NOx"]), nox_t["target"]["max"])
-    put("co_gas", max(g[1.0]["CO"], g[0.5]["CO"]), co_t["target"]["max"])
+    # погасшая зона (полнота < ETA_MIN) даёт NOx и CO около нуля при несгоревшем метане: такие точки не считаются
+    # выполнением целей по выбросам (проверка скептика 14.11.2026 - «статус не врёт»)
+    burnt = all(g[x]["eta_c"] >= ETA_MIN for x in (1.0, 0.5))
+    put("nox_gas", max(g[1.0]["NOx"], g[0.5]["NOx"]) if burnt else None, nox_t["target"]["max"])
+    put("co_gas", max(g[1.0]["CO"], g[0.5]["CO"]) if burnt else None, co_t["target"]["max"])
     lr = max(g[0.3]["NOx"] / nox_t["also"]["max"], g[0.3]["CO"] / co_t["also"]["max"],
              1.0 / max(min(r["margin_lbo"] or 0.0 for r in row["gas"]), 1e-6),
              max(1.0 - r["eta_c"] for r in row["gas"]) / (1.0 - ETA_MIN))
@@ -1126,9 +1179,9 @@ def evaluate(i, n, kv="KV-3", seed=CS.SEED):
         dz = [diesel_network(c, d, bc, li, gas[li]) for li in DIESEL_LOADS]
         row["diesel"] = dz
         ig = [r.get("ign_margin") for r in dz if r.get("ign_margin") is not None]
-        if ig and min(ig) < 1.0:
-            rej.append(dict(code="САМОВОСПЛАМЕНЕНИЕ", value=min(ig), limit=1.0,
-                            why="дизель самовоспламеняется в смесителе (задержка меньше времени смешения)"))
+        if ig and min(ig) < IGN_MARGIN_MIN:
+            rej.append(dict(code="САМОВОСПЛАМЕНЕНИЕ", value=min(ig), limit=IGN_MARGIN_MIN,
+                            why="дизель может самовоспламениться в смесителе (задержка меньше 3 времён смешения)"))
         far_pz = (bc["loads"][0]["W_fuel"] / (c["a_pz"] * bc["loads"][0]["W_air"]))
         row["wall_gas"] = wall_temperature(c, d, bc, g100["T_flame"], min(far_pz, bc["far_st_CH4"]), 1.0)
         far_dz = bc["loads"][0]["W_fuel_diesel"] / (c["a_pz"] * bc["loads"][0]["W_air"])
@@ -1152,7 +1205,8 @@ def evaluate(i, n, kv="KV-3", seed=CS.SEED):
                            RTDF=row["pf"]["RTDF"], T_metal_max_K=max(row["wall_gas"]["T_w1"], row["wall_diesel"]["T_w1"]),
                            fuel_valves=max(row["module"]["valves_gas"], row["module"]["valves_diesel"]),
                            H2_vol_max=fb["H2_vol_max"], diesel_NOx_100=dz[0]["NOx"], diesel_NOx_50=dz[1]["NOx"],
-                           cartridge_swap_h=row["module"]["swap_h"], V_L=d["V_L"])
+                           cartridge_swap_h=row["module"]["swap_h"], V_L=d["V_L"],
+                           burnt=[bool(r["eta_c"] >= ETA_MIN) for r in gas])   # False - зона погасла, NOx/CO не годятся
     except Exception as e:      # вариант не теряется: статус «ошибка» с причиной
         row.update(status="ошибка", error=f"{type(e).__name__}: {str(e)[:300]}")
     row["t_s"] = time.perf_counter() - t0

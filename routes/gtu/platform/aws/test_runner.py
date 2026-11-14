@@ -1712,7 +1712,9 @@ def test_userdata_of_retry_checked_before_first_launch(tmp_path, capsys, monkeyp
                                     az_cheapest="us-east-1a", itype="c7a.16xlarge").encode())
     pad = R.USERDATA_LIMIT - ud_len(make_job(name="big", command="#"), 1) - 2
     big = make_job(name="big", command="#" + "x" * pad)
-    assert ud_len(big, 1) <= R.USERDATA_LIMIT < ud_len(big, 2)
+    assert ud_len(big, 1) <= R.USERDATA_LIMIT
+    with pytest.raises(R.RunnerError, match="байт >"):
+        ud_len(big, 2)
     clk = Clock()
     cloud = FakeCloud(clk)
     with pytest.raises(R.RunnerError):
