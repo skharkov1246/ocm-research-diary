@@ -287,7 +287,7 @@ def turb_T_field(r_o, T_rim, dT):
     return dict(r=rs.tolist(), T=(T_rim - dT * (1 - (rs / r_o) ** 2)).tolist())
 
 
-def blade_bar_ccx(g, mat, rpm, wd, nx=40, ny=4, nz=2):
+def _blade_bar_once(g, mat, rpm, wd, nx, ny=4, nz=2):
     """Проверка напряжения в корне профиля в CalculiX: лопатка — прямой стержень вдоль радиуса от r_hub до r_tip,
     прямоугольное сечение (ширина 2·sqrt(A_root) с линейным сужением до taper, толщина sqrt(A_root)/2
     постоянна — площадь линейна, как в blade_root_stress), C3D20R, *DLOAD CENTRIF вокруг оси z, корень закреплён
@@ -341,10 +341,24 @@ def blade_bar_ccx(g, mat, rpm, wd, nx=40, ny=4, nz=2):
     lines = open(os.path.join(wd, "bar.dat"), encoding="utf-8", errors="replace").read().splitlines()
     i = next(k for k, ln in enumerate(lines) if "total force" in ln)
     fx = float(next(ln for ln in lines[i + 1:] if ln.strip()).split()[0])
-    sig_fe = abs(fx) / A_r
-    sig_an = blade_root_stress(mat["density"], rpm * math.pi / 30, r_h, h, tau)
-    return dict(rpm=rpm, elements=e, element="C3D20R", sigma_root_fe_MPa=sig_fe / 1e6, sigma_root_formula_MPa=sig_an / 1e6,
-                dev=sig_fe / sig_an - 1, RF_x_N=fx, A_root_mm2=A_r * 1e6, width_root_m=b_r, thickness_m=t_z)
+    return dict(nx=nx, elements=e, RF_x_N=fx, sigma_root_MPa=abs(fx) / A_r / 1e6, width_root_m=b_r, thickness_m=t_z)
+
+
+def blade_bar_ccx(g, mat, rpm, wd, nx=40):
+    """Две сетки по высоте (nx и 2·nx) и экстраполяция Ричардсона: сумма реакций ccx в закреплённых узлах не
+    включает долю объёмной силы, приложенную к самим этим узлам (замечено: недобор 0,92 / 0,46 / 0,23 / 0,115 % при
+    nx = 20 / 40 / 80 / 160 — ровно ~1/nx), поэтому σ = 2·σ(2nx) − σ(nx)."""
+    a = _blade_bar_once(g, mat, rpm, os.path.join(wd, f"nx{nx}"), nx)
+    b = _blade_bar_once(g, mat, rpm, os.path.join(wd, f"nx{2 * nx}"), 2 * nx)
+    sig_x = 2 * b["sigma_root_MPa"] - a["sigma_root_MPa"]
+    sig_an = blade_root_stress(mat["density"], rpm * math.pi / 30, g["r_hub_m"], g["h_airfoil_m"], g["taper"]) / 1e6
+    return dict(rpm=rpm, element="C3D20R", meshes=[a, b], sigma_root_fe_richardson_MPa=sig_x,
+                sigma_root_formula_MPa=sig_an, dev=sig_x / sig_an - 1, dev_coarse=a["sigma_root_MPa"] / sig_an - 1,
+                dev_fine=b["sigma_root_MPa"] / sig_an - 1, A_root_mm2=g["A_root_mm2"],
+                note=("лопатка — прямой стержень вдоль радиуса с той же линейной площадью сечения, C3D20R, CENTRIF; "
+                      "среднее напряжение в корне = сумма реакций / A_root, экстраполяция Ричардсона по двум сеткам "
+                      "(реакция ccx без доли нагрузки в самих закреплённых узлах, недобор ~1/nx). Проверены формула "
+                      "и единицы, а не форма лопатки, шейки и замка — для них нужна трёхмерная модель по чертежу"))
 
 
 # ------------------------------------------------------------------ расчёт и разбор
