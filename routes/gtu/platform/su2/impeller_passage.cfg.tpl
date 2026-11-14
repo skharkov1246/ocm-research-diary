@@ -1,5 +1,5 @@
 % SU2 v8.6.0: один межлопаточный канал центробежного колеса (основная лопатка + полулопатка),
-% сетка routes/gtu/platform/geom/impeller.py. Файл заполняет run_case.py: ${...} -> числа из JSON сетки
+% сетка routes/gtu/platform/geom/impeller.py. Файл заполняет run_case.py: поля $$ИМЯ -> числа из JSON сетки
 % и ключей командной строки. Имена ключей сверяются с Common/src/CConfig.cpp v8.6.0 (run_case.py --check-keys).
 % Схема и пределы — см. README.md этой папки; что проверено прогоном, а что нет — там же.
 %
