@@ -74,13 +74,15 @@ def load_explore():
     """gtu_explore (свойства газа Cantera и comp_stage). Модуль при импорте меняет cwd - возвращаем."""
     global _E
     if _E is None:
-        cwd = os.getcwd()
+        cwd, dwb = os.getcwd(), sys.dont_write_bytecode
         if GTU_DIR not in sys.path:
             sys.path.insert(0, GTU_DIR)
+        sys.dont_write_bytecode = True  # не писать __pycache__ в чужую папку
         try:
             import gtu_explore as E
         finally:
             os.chdir(cwd)
+            sys.dont_write_bytecode = dwb
         _E = E
     return _E
 
@@ -586,6 +588,17 @@ def build_solid(imp, path, threads=4, verbose=False):
         cs = [occ.addLine(P0, P1), occ.addLine(P1, pa), hb, occ.addLine(pb, P4), occ.addLine(P4, P5), occ.addLine(P5, P0)]
         hub = _revolve_face(occ, cs, 0.0, 2 * math.pi)
         base = _blade_solids(occ, imp)
+        # объём по частям: втулка + Z (лопатки - их часть внутри втулки). getMass сплавленного тела
+        # ненадёжен (грань втулки с 2Z вырезами интегрируется с ошибкой ~0,5 %), по частям - сверено
+        # с формулой Паппа-Гульдина и с объёмом тетраэдрической сетки повторно прочитанного STEP
+        occ.synchronize()
+        V_hub = occ.getMass(3, hub)
+        V_bl = sum(occ.getMass(3, b) for b in base)
+        ov, _ = occ.intersect(occ.copy([(3, b) for b in base]), occ.copy([(3, hub)]))
+        occ.synchronize()
+        V_ov = sum(occ.getMass(3, t) for dd, t in ov if dd == 3)
+        occ.remove(ov, recursive=True)
+        V = V_hub + p["Z"] * (V_bl - V_ov)
         tools = [(3, b) for b in base]
         for k in range(1, p["Z"]):
             cp = occ.copy([(3, b) for b in base])
@@ -596,10 +609,10 @@ def build_solid(imp, path, threads=4, verbose=False):
         _keep_only(gmsh, vols)
         if len(vols) != 1:
             raise RuntimeError(f"твёрдое тело колеса: {len(vols)} тел вместо 1")
-        V = occ.getMass(3, vols[0])
         bbox = gmsh.model.getBoundingBox(3, vols[0])
         gmsh.write(path)
         return dict(step=path, volume_m3=V, mass_kg=dict(ti_6al_4v=V * 4430.0, al_2618=V * 2760.0),
+                    volume_parts_m3=dict(hub=V_hub, blade_pair=V_bl, blade_pair_inside_hub=V_ov),
                     bbox_occ=list(bbox), t_back=t_back, r_bore=r_b, z_nose=z_n,
                     n_faces=len(gmsh.model.getEntities(2)))
     finally:
@@ -779,10 +792,10 @@ def build_passage(imp, level, path_su2, path_step=None, path_msh=None, threads=4
             gmsh.option.setNumber(k, v)
         t1m = time.time()
         gmsh.model.mesh.generate(3)
-        q = _quality(gmsh)
-        if q["minSICN"] < 0.05:
+        if _quality(gmsh)["minSICN"] < 0.05:
             gmsh.model.mesh.optimize("Netgen")
-            q = _quality(gmsh)
+        snap = _snap_periodic(gmsh, groups["periodic_2"])
+        q = _quality(gmsh)
         t_mesh = time.time() - t1m
         if q["minSICN"] <= 0:
             raise RuntimeError(f"вырожденные ячейки: minSICN = {q['minSICN']}")
@@ -795,13 +808,43 @@ def build_passage(imp, level, path_su2, path_step=None, path_msh=None, threads=4
             gmsh.write(path_msh)
         stats = dict(level=level, h0=h0, h_blade=hb, h_gap=h_gap, h_edge=h_le, tol_classify=tol,
                      faces={k: groups[k] for k in MARKERS}, tip_faces=special["tip"], le_faces=special["le"],
-                     te_faces=special["te"], quality=q, t_geometry_s=round(t_geo, 1), t_mesh_s=round(t_mesh, 1),
+                     te_faces=special["te"], quality=q, periodic_snap=snap,
+                     t_geometry_s=round(t_geo, 1), t_mesh_s=round(t_mesh, 1),
                      phi1_rad=phi1, phi2_rad=phi2, sector_lo_hi_rad=[lo, hi],
                      gmsh_warnings=[w for w in gmsh.logger.get() if "Warning" in w][:50])
         return stats
     finally:
         gmsh.logger.stop()
         gmsh.finalize()
+
+
+def _snap_periodic(gmsh, slaves):
+    """узлы ведомой периодической грани (и её рёбер, вершин) ставятся точно в повёрнутые узлы ведущей.
+    Gmsh переносит сетку поворотом, но затем проецирует узлы на ведомую грань, обрезанную отдельно;
+    расхождение порядка допуска OCC (1e-8 м). Возвращает число узлов и наибольший сдвиг."""
+    ents = {(2, s) for s in slaves}
+    cur = {(1, abs(c)) for _, c in gmsh.model.getBoundary([(2, s) for s in slaves], combined=False, oriented=False)}
+    ents |= cur
+    ents |= {(0, abs(v)) for _, v in gmsh.model.getBoundary(list(cur), combined=False, oriented=False)}
+    moved, dmax = {}, 0.0
+    for dim, tag in sorted(ents, reverse=True):
+        try:
+            tm, nodes, nodes_m, tfo = gmsh.model.mesh.getPeriodicNodes(dim, tag)
+        except Exception:  # noqa - сущность не периодическая
+            continue
+        if tm == tag or not len(nodes):
+            continue
+        A = np.asarray(tfo, float).reshape(4, 4)
+        for n, nm in zip(nodes, nodes_m):
+            if n in moved:
+                continue
+            xm = np.asarray(gmsh.model.mesh.getNode(nm)[0])
+            x, uv, _, _ = gmsh.model.mesh.getNode(n)
+            xn = A[:3, :3] @ xm + A[:3, 3]
+            dmax = max(dmax, float(np.linalg.norm(xn - np.asarray(x))))
+            gmsh.model.mesh.setNode(n, list(xn), list(uv))
+            moved[n] = True
+    return dict(n_nodes=len(moved), max_shift_m=dmax)
 
 
 def _quality(gmsh):
