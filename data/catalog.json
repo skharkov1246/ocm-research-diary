@@ -3402,7 +3402,7 @@
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "c386492"
+      "last_commit": "ec29828"
     },
     {
       "path": "routes/gtu/gtu_cycle_results.json",
@@ -7250,7 +7250,7 @@
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "4def261"
+      "last_commit": "ec29828"
     },
     {
       "path": "routes/gtu/validation/balances_results.json",
