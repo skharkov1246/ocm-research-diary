@@ -350,6 +350,20 @@ python3 -m pytest -q test_su2_case.py
 - **Итог** — `case_summary.json` в папке прогона; `--record` дописывает краткий итог в results-JSON (поля `method`,
   `software` с версией SU2 и коммитом исходника, `date`, `inputs` с SHA-256 точки и сетки, `runs`).
 
+### Установка SU2 для пробного прогона (14.11.2026)
+
+- Готовые архивы выпуска: `https://github.com/su2code/SU2/releases/download/v8.6.0/SU2-v8.6.0-linux64.zip`,
+  `…-linux64-mpi.zip`, `…-linux64-omp.zip` (имена — по `.github/workflows/release-management.yml` тега), а также
+  `…-macos64.zip`, `…-win64-mpi.zip` — **HTTP 404** («Not Found»). Для сравнения те же адреса прошлых выпусков
+  отвечают 206 (файл есть): v8.5.0 `-linux64-mpi`, `-linux64-omp`; v8.0.0…v8.4.0 `-linux64`, `-linux64-mpi`. API
+  выпусков (`api.github.com/repos/su2code/SU2/releases/tags/v8.6.0`) и страница выпуска — 403 у прокси сессии.
+  Вывод: у v8.6.0 готовых архивов нет.
+- Сборка из исходника: клон тега `v8.6.0` (коммит `7048fd35`, `git status` чист), новая папка сборки,
+  `./meson.py setup <build> -Dwith-mpi=enabled -Dbuildtype=release --prefix=<scratchpad>/frame3/su2/opt` (7 с) и
+  `./ninja -C <build> -j4 install` (835 шагов, 771 с на 4 ядрах при средней загрузке 10–13 от чужих задач), код 0;
+  meson 1.8.2, g++ 13.3.0, OpenMPI 4.1.6. `SU2_CFD --help` → `SU2 v8.6.0 "Harrier"`; `ldd` → `libmpi.so.40`.
+  Сборка лежит в scratchpad и пропадёт с контейнером.
+
 ## Прогон на AWS
 
 `aws_job.example.json` — задача для `../aws/runner.py` (навык `aws-gtu-runs`): на c7a.16xlarge (запасной
