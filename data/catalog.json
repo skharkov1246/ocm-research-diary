@@ -5,7 +5,7 @@
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
     "datasets": 354,
-    "total_bytes": 3273916,
+    "total_bytes": 3284589,
     "results_files": 163,
     "results_with_script": 44,
     "results_referenced_in_site": 22,
@@ -3494,7 +3494,7 @@
       "path": "routes/gtu/gtu_fleet_closed_crosscheck.json",
       "track": "gas-turbine",
       "kind": "данные",
-      "bytes": 5773,
+      "bytes": 16446,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -3514,7 +3514,7 @@
       ],
       "last_change": "2026-11-14",
       "last_author": "Claude",
-      "last_commit": "fec4555"
+      "last_commit": "7dbea9b"
     },
     {
       "path": "routes/gtu/gtu_point_results.json",
