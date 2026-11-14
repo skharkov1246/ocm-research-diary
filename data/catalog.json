@@ -4,23 +4,23 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 378,
-    "total_bytes": 4125473,
-    "results_files": 172,
+    "datasets": 380,
+    "total_bytes": 4227233,
+    "results_files": 173,
     "results_with_script": 50,
     "results_referenced_in_site": 22,
-    "results_with_provenance_fields": 23,
+    "results_with_provenance_fields": 24,
     "by_track": {
       "ammonia": 91,
       "battery-cathode": 1,
       "cc-activation-recycling": 36,
       "ch4-to-methanol": 9,
       "co2-to-fuels": 5,
-      "gas-turbine": 27,
+      "gas-turbine": 28,
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 59,
+      "не определён": 60,
       "прочее": 25
     }
   },
@@ -3362,6 +3362,47 @@
       "last_change": "2026-11-14",
       "last_author": "Claude",
       "last_commit": "83355f2"
+    },
+    {
+      "path": "routes/gtu/funnel/gtu_funnel_space_results.json",
+      "track": "gas-turbine",
+      "kind": "результат расчёта",
+      "bytes": 100973,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "seed",
+        "status",
+        "inputs",
+        "targets",
+        "targets_in_lineup",
+        "axes",
+        "archetypes",
+        "defaults",
+        "rules",
+        "models",
+        "facts",
+        "cross_check_cycle",
+        "sharding_check",
+        "timing",
+        "debug_KV-3",
+        "examples_KV-3",
+        "debug_KV-1",
+        "debug_KV-6",
+        "elapsed_s"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "c386492"
     },
     {
       "path": "routes/gtu/gtu_cycle_results.json",
@@ -6724,6 +6765,21 @@
       "last_change": "2026-11-14",
       "last_author": "Claude",
       "last_commit": "1c1983b"
+    },
+    {
+      "path": "routes/gtu/platform/aws/jobs.smoke2.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 787,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "defaults",
+        "jobs"
+      ],
+      "last_change": "2026-11-14",
+      "last_author": "Claude",
+      "last_commit": "c386492"
     },
     {
       "path": "routes/gtu/platform/batch/bench_runner_jobs.json",
