@@ -4,8 +4,8 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 504,
-    "total_bytes": 21139874,
+    "datasets": 505,
+    "total_bytes": 21107429,
     "results_files": 207,
     "results_with_script": 66,
     "results_referenced_in_site": 22,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 184,
+      "не определён": 185,
       "прочее": 25
     }
   },
@@ -7186,7 +7186,7 @@
       "path": "routes/gtu/evo/blades/disk1d_calibration.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 38072,
+      "bytes": 3029,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -7198,18 +7198,14 @@
         "k_min",
         "k_max",
         "k_spread_rel",
-        "note",
-        "zones",
-        "table",
-        "domain",
-        "table_check"
+        "note"
       ],
       "provenance_fields": [
         "method"
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "8e2895b"
+      "last_commit": "548fbc4"
     },
     {
       "path": "routes/gtu/evo/core/.owner.json",
@@ -9813,6 +9809,28 @@
       "last_change": "2026-11-15",
       "last_author": "Claude",
       "last_commit": "04ac811"
+    },
+    {
+      "path": "routes/gtu/platform/aws/aws_prices_ref.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 2598,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "_comment",
+        "date",
+        "status",
+        "on_demand_usd_h",
+        "xfer_usd_gb",
+        "sources"
+      ],
+      "provenance_fields": [
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "548fbc4"
     },
     {
       "path": "routes/gtu/platform/aws/iam_policy_addendum.json",
