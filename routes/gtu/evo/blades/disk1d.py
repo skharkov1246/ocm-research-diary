@@ -43,7 +43,8 @@ def _tab(tab, x):
     return np.interp(x, a[:, 0], a[:, 1])
 
 
-def solve(r_nodes, h_nodes, rho_fac, T_nodes, mat_key, rpm, p_rim_Pa=0.0, T_ref=20.0, burst_k=1.0, k_peak=1.0):
+def solve(r_nodes, h_nodes, rho_fac, T_nodes, mat_key, rpm, p_rim_Pa=0.0, T_ref=20.0, burst_k=1.0, k_peak=1.0, r_split=None,
+          k_zone=None):
     """r_nodes возрастают (r_nodes[0] = 0 — сплошной диск, u(0) = 0; иначе — свободная граница отверстия), h, rho_fac
     (множитель плотности от лопаток), T — в узлах. p_rim_Pa — растягивающее радиальное напряжение на ободе (лопатки
     турбины). k_peak — поправка пика Мизеса толстой ступицы (калибровка по CalculiX, calibrate()); средние напряжения,
@@ -111,18 +112,29 @@ def solve(r_nodes, h_nodes, rho_fac, T_nodes, mat_key, rpm, p_rim_Pa=0.0, T_ref=
     vm = np.sqrt(sr ** 2 - sr * st + st ** 2)
     ys = _tab(m["ys_MPa"], Tg) * 1e6
     uts = _tab(m["uts_MPa"], Tg) * 1e6
-    yr = k_peak * vm / ys
+    yr0 = vm / ys
+    if r_split is not None and k_zone is not None:
+        # две зоны: у оси (толстая ступица, r < r_split) и полотно — свои поправки по CalculiX (calibrate_zones)
+        kz = np.where(rg < r_split, k_zone[0], k_zone[1])
+    else:
+        kz = np.full_like(rg, k_peak)
+    yr = kz * yr0
     k = int(np.argmax(yr))
     lhs = float(np.sum(st * wts))
     rhs = float(np.sum(rho * np.interp(rg, r, rf) * om * om * rg * rg * wts)) + p_rim_Pa * r[-1] * h[-1]
     burst = math.sqrt(burst_k * float(np.sum(uts * wts)) / lhs) if lhs > 0 else float("inf")
-    res = dict(vm_max_MPa=float(k_peak * vm.max() / 1e6), yield_ratio_max=float(yr[k]), yield_at_r=float(rg[k]),
+    zone = {}
+    if r_split is not None:
+        ia, iw = rg < r_split, rg >= r_split
+        zone = dict(yr_axis_raw=float(yr0[ia].max()) if ia.any() else 0.0, yr_web_raw=float(yr0[iw].max()) if iw.any() else 0.0,
+                    r_web_peak=float(rg[iw][np.argmax(yr0[iw])]) if iw.any() else None)
+    res = dict(vm_max_MPa=float((kz * vm).max() / 1e6), yield_ratio_max=float(yr[k]), yield_at_r=float(rg[k]),
                yield_at_T=float(Tg[k]), hoop_max_MPa=float(st.max() / 1e6), hoop_mean_MPa=lhs / float(np.sum(wts)) / 1e6,
                burst_margin=burst, equilibrium_rel=abs(lhs - rhs) / max(abs(rhs), 1e-300), u_rim_mm=float(u[-1] * 1e3),
-               k_peak=k_peak)
+               k_peak=k_peak, **zone)
     lmp = m.get("_lmp")
     if lmp is not None:
-        life, ex = lmp.life_h_v(k_peak * vm / 1e6, Tg)
+        life, ex = lmp.life_h_v(kz * vm / 1e6, Tg)
         j = int(np.argmin(life))
         res.update(creep_life_min_h=float(life[j]), creep_at_r=float(rg[j]), creep_at_T=float(Tg[j]),
                    creep_extrapolated=bool(ex[j]))
@@ -195,6 +207,10 @@ def calibrate(write=True):
         note=("все шесть колёс — толстая ступица без отверстия, пик у оси на задней стороне; для профилей с пиком в полотне"
               " поправка консервативна; элиты проверяются CalculiX"))
     if write:
+        if os.path.exists(CAL_JSON):          # калибровку по зонам (ccx_elites.py) не затираем
+            old = json.load(open(CAL_JSON, encoding="utf-8"))
+            if "zones" in old:
+                out["zones"] = old["zones"]
         with open(CAL_JSON, "w", encoding="utf-8") as fo:
             json.dump(out, fo, ensure_ascii=False, indent=1)
     return out
@@ -205,6 +221,23 @@ def k_peak_cal():
     if os.path.exists(CAL_JSON):
         return float(json.load(open(CAL_JSON, encoding="utf-8"))["k_peak"])
     return float(calibrate(write=False)["k_peak"])
+
+
+R_SPLIT_FRAC = 0.25        # граница зон «у оси» / «полотно», доля r2
+
+
+def k_zones_cal():
+    """(k_axis, k_web) — поправки пика по зонам из disk1d_calibration.json → zones (ccx_elites.py --calibrate);
+    нет калибровки по зонам — (k_peak, k_peak) — консервативно"""
+    import json
+    if os.path.exists(CAL_JSON):
+        d = json.load(open(CAL_JSON, encoding="utf-8"))
+        z = d.get("zones")
+        if z:
+            return float(z["k_axis"]), float(z["k_web"])
+        return float(d["k_peak"]), float(d["k_peak"])
+    k = k_peak_cal()
+    return k, k
 
 
 if __name__ == "__main__":

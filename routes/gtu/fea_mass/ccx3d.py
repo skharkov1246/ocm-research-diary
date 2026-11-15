@@ -44,6 +44,27 @@ def material_cards(mat, name="MAT", elset="EALL"):
     return out
 
 
+def ring_cards(mat, rho, fill, e_theta, name="MRING", elset="ERING"):
+    """мёртвый обод (хвостовики + выступы диска между пазами): ортотропный материал в цилиндрической системе (1 - радиус,
+    2 - окружное, 3 - ось): E_r = E_z = fill·E, E_θ = e_theta·E (паз рвёт окружную связь), сдвиг rθ и θz - 0,1·G (оценка);
+    ν23 ограничен условием положительной определённости (|ν23| < sqrt(E2/E3))"""
+    out = ["*ORIENTATION, NAME=CYL, SYSTEM=CYLINDRICAL", "0., 0., 0., 0., 0., 1.", f"*MATERIAL, NAME={name}",
+           "*ELASTIC, TYPE=ENGINEERING CONSTANTS"]
+    nu = mat.nu
+    for T, E in mat.E_tab:
+        E = E * 1e9
+        E1, E2, E3 = fill * E, e_theta * E, fill * E
+        G = E / (2 * (1 + nu))
+        n23 = 0.3 * math.sqrt(E2 / E3)
+        out.append(f"{E1:.6e}, {E2:.6e}, {E3:.6e}, {nu:.4f}, {nu:.4f}, {n23:.6f}, {0.1 * G:.6e}, {fill * G:.6e},")
+        out.append(f"{0.1 * G:.6e}, {T:.2f}")
+    out.append(f"*EXPANSION, ZERO={mat.T_ref:.1f}")
+    for T, a in mat.alpha_tab:
+        out.append(f"{a * 1e-6:.6e}, {T:.2f}")
+    out += ["*DENSITY", f"{rho * fill:.3f}", f"*SOLID SECTION, ELSET={elset}, MATERIAL={name}, ORIENTATION=CYL"]
+    return out
+
+
 def cyclic_cards(N):
     return ["*SURFACE, NAME=SSLAVE, TYPE=NODE", "NSLAVE", "*SURFACE, NAME=SMASTER, TYPE=NODE", "NMASTER",
             "*TIE, NAME=CYC, CYCLIC SYMMETRY", "SSLAVE, SMASTER", f"*CYCLIC SYMMETRY MODEL, N={int(N)}, NGRAPH=1",

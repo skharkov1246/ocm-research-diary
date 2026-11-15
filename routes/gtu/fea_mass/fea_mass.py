@@ -107,6 +107,7 @@ def build_mesh(part, level):
 
 
 def part_materials(part):
+    """материалы по классам элементов: ступица/диск, лопатка, замок (ножка, полка); мёртвый обод - ортотропный (ccx3d.ring_cards)"""
     blade = M.for_part(part["alloy"])
     disc = M.for_part(part.get("disc_alloy") or part["alloy"])
     return {G.CLASS_HUB: disc, G.CLASS_BLADE: blade, G.CLASS_ATT: blade}
@@ -114,11 +115,19 @@ def part_materials(part):
 
 def _mat_cards(mats, mesh):
     present = sorted(set(int(c) for c in mesh.ecls))
-    if all(mats[c].alloy == mats[present[0]].alloy and mats[c].rho == mats[present[0]].rho for c in present):
-        return C.material_cards(mats[present[0]], "MAT", "EALL")
+    iso = [c for c in present if c != G.CLASS_RING]
     out = []
-    for c in present:
-        out += C.material_cards(mats[c], f"M{G.CLASS_NAMES[c]}", f"E{G.CLASS_NAMES[c]}")
+    if all(mats[c].alloy == mats[iso[0]].alloy and mats[c].rho == mats[iso[0]].rho for c in iso):
+        if len(iso) == len(present):
+            return C.material_cards(mats[iso[0]], "MAT", "EALL")
+        out += C.material_cards(mats[iso[0]], "MAT", "EISO")
+        out.insert(0, "*ELSET, ELSET=EISO\n" + ", ".join(f"E{G.CLASS_NAMES[c]}" for c in iso))
+    else:
+        for c in iso:
+            out += C.material_cards(mats[c], f"M{G.CLASS_NAMES[c]}", f"E{G.CLASS_NAMES[c]}")
+    if G.CLASS_RING in present:
+        rho = 0.5 * (mats[G.CLASS_HUB].rho + mats[G.CLASS_BLADE].rho)
+        out += C.ring_cards(mats[G.CLASS_HUB], rho, G.A["dead_fill"], G.A["ring_E_theta"])
     return out
 
 

@@ -214,7 +214,7 @@ _g("r_n", 3, 14, "int"); _g("r_lean", 0.0, 45.0); _g("r_bow", 0.0, 0.2); _g("r_c
 _g("r_chord", 0.05, 0.18); _g("r_tc", 0.08, 0.30)
 _g("hf_n", 6, 48, "int"); _g("hf_t", 0.0015, 0.008); _g("hf_b", 0.01, 0.06); _g("hf_shape", 1.0, 3.0); _g("hf_span", 0.05, 0.20)
 _g("emb", 0, 1, "int6")
-_g("fuel_port", 0.0, 1.0)
+_g("fuel_port", 0.0, 1.0); _g("murray_k", 2.0, 3.0)
 _g("route", 0, 1, "cat", ["печать", "литьё", "гибрид"])
 _g("cast_mat", 0, 1, "cat", ["zg15", "ti64"])
 _g("build_dir", 0, 1, "cat", ["+z", "-z"])
@@ -403,11 +403,10 @@ def rib_segments(p, R_ref, mounts):
     return out
 
 
-def mounts_of(p):
+def mounts_of(p, R_ref=0.55):
     """опоры: (z, s, направление роста рёбер °, зеркалить) — две боковые цапфы (ниже горизонта на mount_drop) и задняя тяга снизу"""
     L = INP["zs"][-1]
     zm, zr = p["mount_z"] * L, p["rear_z"] * L
-    R_ref = 0.55
     th_r = -math.radians(p["mount_drop"])
     th_l = math.pi + math.radians(p["mount_drop"])
     return [(zm, (th_r % (2 * math.pi)) * R_ref, 0.0, True), (zm, (th_l % (2 * math.pi)) * R_ref, 0.0, True),
@@ -419,7 +418,7 @@ def rib_stats(segs, p, R_ref, area):
     H, rf = p["rib_h"], p["rib_fillet"]
     if not segs:
         return dict(V=0.0, Szz=0.0, Szs=0.0, Sss=0.0, Izz=0.0, Iss=0.0, Izs=0.0, L=0.0, n=0, ang=np.zeros(72), ent=0.0,
-                    overhang_len=0.0, by_zone=np.zeros((5, 3)))
+                    overhang_len=0.0, by_zone=np.zeros((5, 7)))
     a = np.array(segs)
     dz, ds = a[:, 2] - a[:, 0], a[:, 3] - a[:, 1]
     Ls = np.hypot(dz, ds)
@@ -437,10 +436,13 @@ def rib_stats(segs, p, R_ref, area):
     ent = float(-np.sum(pr[pr > 0] * np.log(pr[pr > 0])) / math.log(12))
     zmid = 0.5 * (a[:, 0] + a[:, 2])
     zi = _zone_of(zmid)
-    by_zone = np.zeros((5, 3))
+    # по зонам: Σ A·L·c⁴, Σ A·L·s⁴, Σ A·L, Σ A·L·c²s², Σ I·L·c⁴, Σ I·L·s⁴, Σ I·L·c²s² (c, s — косинус и синус угла ребра к оси)
+    by_zone = np.zeros((5, 7))
+    AL, IL = A * Ls, Ib * Ls
     for k in range(5):
         m = zi == k
-        by_zone[k] = [np.sum((A * Ls)[m] * c[m] ** 2), np.sum((A * Ls)[m] * s[m] ** 2), np.sum((A * Ls)[m])]
+        by_zone[k] = [np.sum(AL[m] * c[m] ** 4), np.sum(AL[m] * s[m] ** 4), np.sum(AL[m]), np.sum(AL[m] * c[m] ** 2 * s[m] ** 2),
+                      np.sum(IL[m] * c[m] ** 4), np.sum(IL[m] * s[m] ** 4), np.sum(IL[m] * c[m] ** 2 * s[m] ** 2)]
     return dict(V=float(np.sum(A * Ls)), Szz=float(np.sum(wv * c ** 4)), Szs=float(np.sum(wv * c * c * s * s)), Sss=float(np.sum(wv * s ** 4)),
                 Izz=float(np.sum(wi * c ** 4)), Iss=float(np.sum(wi * s ** 4)), Izs=float(np.sum(wi * c * c * s * s)),
                 L=float(Ls.sum()), n=len(segs), ang=ang, ent=ent, c=c, s=s, Ls=Ls, A=A, by_zone=by_zone, zmid=zmid)
@@ -483,9 +485,7 @@ def strut_frame(N, L0, lean_deg, bow, cone_deg, chord, tc, E, alpha, T_case, T_h
     Klat = 0.0
     for j in range(N):
         th = 2 * math.pi * j / N
-        er = np.array([math.cos(th), math.sin(th)])
-        ex_loc = np.array([er[0], -er[1] * 0 + (-math.sin(th)) * 0, 0.0])
-        # проекция глобального x на локальные (радиус, окружность, ось)
+        # проекция глобального x на локальные оси стойки (радиус, окружность, ось)
         ex_loc = np.array([math.cos(th), -math.sin(th), 0.0])
         Klat += ex_loc @ K1 @ ex_loc
     # тепловое рассогласование: корпус уходит от ступицы на δr (> 0 — стойка растягивается)
@@ -630,7 +630,7 @@ def evaluate_params(p, variant, with_geom=False):
     lat_frac = V_core / V_wall
     area = float(np.sum(2 * math.pi * r_o * dz))
     R_ref = float(np.sum(r_o * dz) / np.sum(dz))
-    mounts, minfo = mounts_of(p)
+    mounts, minfo = mounts_of(p, R_ref)
     segs = rib_segments(p, R_ref, mounts)
     rs = rib_stats(segs, p, R_ref, area)
     m_ribs = rs["V"] * rho_m
@@ -693,9 +693,9 @@ def evaluate_params(p, variant, with_geom=False):
         m = zi == k
         R = float(np.mean(r_m[m])); tt = float(np.mean(t[m])); tc = float(np.mean(t_c[m])); ts = tt - tc
         Lz = zn["z1"] - zn["z0"]
-        circ = 2 * math.pi * R
-        a_hoop = rib_bz[k, 1] / max(Lz * circ, 1e-12) * circ / max(circ, 1e-12)
-        a_ax = rib_bz[k, 0] / max(Lz * circ, 1e-12)
+        circA = 2 * math.pi * R * Lz
+        a_hoop = rib_bz[k, 1] / circA            # размазанная «толщина» рёбер по окружности (вклад в жёсткость s⁴)
+        a_ax = rib_bz[k, 0] / circA
         t_hoop = ts + Er * tc + a_hoop
         t_ax = ts + Er * tc + a_ax
         sth = zn["p_g"] * R / t_hoop
@@ -734,15 +734,14 @@ def evaluate_params(p, variant, with_geom=False):
             Iw = tt ** 3 / 12
         Dw = E / (1 - nu * nu) * Iw
         circA = 2 * math.pi * R * Lz
-        # рёбра этой зоны: размазанные доли по направлениям (из общей статистики пропорционально объёму в зоне)
-        share = rib_bz[k, 2] / max(rs["V"], 1e-30) if rs["V"] > 0 else 0.0
-        fz = share * area / max(circA, 1e-12)
-        A11 = Am + E * rs["Szz"] * fz; A22 = Am + E * rs["Sss"] * fz
-        A12 = nu * Am + E * rs["Szs"] * fz; A66 = E / (2 * (1 + nu)) * (ts + Er * tc) + E * rs["Szs"] * fz
+        # рёбра зоны размазаны (Baruch & Singer — приём; эксцентриситет — переносом оси, оценка)
+        Azz_r, Ass_r, Azs_r = rib_bz[k, 0] / circA, rib_bz[k, 1] / circA, rib_bz[k, 3] / circA
+        Izz_r, Iss_r, Izs_r = rib_bz[k, 4] / circA, rib_bz[k, 5] / circA, rib_bz[k, 6] / circA
+        A11 = Am + E * Azz_r; A22 = Am + E * Ass_r
+        A12 = nu * Am + E * Azs_r; A66 = E / (2 * (1 + nu)) * (ts + Er * tc) + E * Azs_r
         ecc2 = (0.5 * tt + 0.5 * p["rib_h"]) ** 2
-        Azz_r = rs["Szz"] * fz; Ass_r = rs["Sss"] * fz; Azs_r = rs["Szs"] * fz
-        D11 = Dw + E * (rs["Izz"] * fz + Azz_r * ecc2); D22 = Dw + E * (rs["Iss"] * fz + Ass_r * ecc2)
-        D12 = nu * Dw + E * (rs["Izs"] * fz + Azs_r * ecc2); D66 = Dw * (1 - nu) / 2 + E * (rs["Izs"] * fz + Azs_r * ecc2)
+        D11 = Dw + E * (Izz_r + Azz_r * ecc2); D22 = Dw + E * (Iss_r + Ass_r * ecc2)
+        D12 = nu * Dw + E * (Izs_r + Azs_r * ecc2); D66 = Dw * (1 - nu) / 2 + E * (Izs_r + Azs_r * ecc2)
         m_ns = (M_INTERNAL / 2.0) / circA if k in (1, 2) else 0.0
         rho_s = rho_m * (ts + prof["rho"].mean() * tc) + rho_m * rib_bz[k, 2] / max(circA, 1e-12) + m_ns
         f, mm, nn = shell_freq_donnell(R, Lz, A11, A22, A12, A66, D11, D22, D12, D66, rho_s)
@@ -753,7 +752,7 @@ def evaluate_params(p, variant, with_geom=False):
     rmb = np.interp(zb, z, r_m); tb = np.interp(zb, z, t - t_c + Er * t_c)
     axr = np.zeros_like(zb)
     for k in range(5):
-        circA = 2 * math.pi * float(np.mean(rmb)) * (INP["zones"][k]["z1"] - INP["zones"][k]["z0"])
+        circA = 2 * math.pi * zone_rows[k]["R"] * (INP["zones"][k]["z1"] - INP["zones"][k]["z0"])
         mzk = (zb >= INP["zones"][k]["z0"]) & (zb <= INP["zones"][k]["z1"])
         axr[mzk] = rib_bz[k, 0] / max(circA, 1e-12)
     EI = E * math.pi * rmb ** 3 * (tb + axr)
@@ -772,21 +771,17 @@ def evaluate_params(p, variant, with_geom=False):
     f_need = F_MARGIN * INP["f_op"]
     f_min = float(min(f_shell, fb[0]))
     # ---------------- детали, крепёж, ремонт
-    D_joints = [2 * float(r_o[0] + (0.0 if True else 0)), 2 * float(r_o[-1])]
+    D_front, D_rear = 2 * float(r_o[0]) + 0.04, 2 * float(r_o[-1]) + 0.04      # фланцы концов (+0,04 м на бурт — оценка)
     split_D = None
     if variant == "картридж":
         zsplit = 0.0 if p["extract"] == "вперёд" else z[-1]
         split_D = 2 * float(np.interp(zsplit, z, r_o)) + 0.04
-        D_joints.append(split_D)
-    Dj = max(D_joints)
     method = "печать" if route == "печать" else "литьё"
-    bom = dict(PM.REF_BOM)
-    bom.update(case=dict(method=method, D=Dj, pieces=1), case_arch=variant, hot_integral=True,
-               comb=dict(kind="кольцевая", method="печать", n_inj=INP["fuel"]["n_inj"]),
-               conn="быстроразъём" if Dj <= PM.CLAMP_D_MAX else "болты")
-    # печать: в камеру LPBF (без деления; иначе — на части с болтовым стыком)
     D_env = 2 * float(np.max(r_o)) + 2 * p["rib_h"]
     L_env = float(z[-1])
+    bom = dict(PM.REF_BOM)
+    bom.update(case=dict(method=method, D=D_env, pieces=1), case_arch=variant, hot_integral=True,
+               comb=dict(kind="кольцевая", method="печать", n_inj=INP["fuel"]["n_inj"]), conn="быстроразъём")
     pieces, printer = 1, None
     if route == "печать":
         lp = [q for q in MK.printers_for(D_env, L_env, False) if q["proc"] == "LPBF"]
@@ -797,6 +792,16 @@ def evaluate_params(p, variant, with_geom=False):
         bom["case"]["pieces"] = pieces
     pm = PM.count(bom)
     d_parts, d_fast, d_pipe_j, rules = 0, 0, 0, []
+
+    def per_joint(D):
+        return 2 if D <= PM.CLAMP_D_MAX else math.ceil(math.pi * D / PM.BOLT_PITCH)
+    # правило семейства: стыки на концах — по диаметру своего фланца (сужение силуэта к концам даёт хомут), прочие — по корпусу
+    f_pm = pm["by_unit"]["крепёж фланцев"]["fasteners"]
+    n_j = int(round(f_pm / per_joint(D_env)))
+    Dl = ([D_front, D_rear] + [D_env] * max(0, n_j - 2)) if n_j >= 2 else [min(D_front, D_rear)] * n_j
+    d_fast += sum(per_joint(D) for D in Dl) - f_pm
+    rules.append(f"стыков корпуса {n_j}: концы Ø{D_front:.2f} / Ø{D_rear:.2f} м — {per_joint(D_front)} / {per_joint(D_rear)} ед. крепежа, "
+                 f"прочие Ø{D_env:.2f} м — {per_joint(D_env)} (правило parts_model: хомут до {PM.CLAMP_D_MAX} м)")
     if variant == "оболочка":
         not_emb_oil = sum(1 for nm in ("масло, передняя опора", "масло, задняя опора") if nm not in emb_list)
         if "топливо" not in emb_list:

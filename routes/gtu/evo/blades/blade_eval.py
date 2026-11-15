@@ -245,9 +245,9 @@ _REF = {}
 _KP = []
 
 
-def _kpeak():
+def _kzones():
     if not _KP:
-        _KP.append(D1.k_peak_cal())
+        _KP.append(D1.k_zones_cal())
     return _KP[0]
 
 
@@ -342,9 +342,10 @@ def eval_comp(comp, x, want_geom=False, use_ref=True):
     hb = geo["hb"]
     fac = 1 + geo["blade_fill_phi"] * hb / np.maximum(dk["h_eff"], 1e-6)
     T = comp_temperature(stage, r, r[-1])
-    kp = _kpeak()
-    s100 = D1.solve(r, dk["h_eff"], fac, T, "ti64", P["n"], k_peak=kp)
-    s120 = D1.solve(r, dk["h_eff"], fac, T, "ti64", 1.2 * P["n"], k_peak=kp)
+    kz = _kzones()
+    rs = D1.R_SPLIT_FRAC * r[-1]
+    s100 = D1.solve(r, dk["h_eff"], fac, T, "ti64", P["n"], r_split=rs, k_zone=kz)
+    s120 = D1.solve(r, dk["h_eff"], fac, T, "ti64", 1.2 * P["n"], r_split=rs, k_zone=kz)
     u_disk = max(1.5 * s100["yield_ratio_max"], s120["yield_ratio_max"]) / K_ROUTE
     # изгиб лопатки от навала на выходе при 120 %
     mat = D1.material("ti64")
