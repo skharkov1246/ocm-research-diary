@@ -4,12 +4,12 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 421,
-    "total_bytes": 15641238,
-    "results_files": 185,
-    "results_with_script": 56,
+    "datasets": 422,
+    "total_bytes": 15921051,
+    "results_files": 186,
+    "results_with_script": 57,
     "results_referenced_in_site": 22,
-    "results_with_provenance_fields": 36,
+    "results_with_provenance_fields": 37,
     "by_track": {
       "ammonia": 91,
       "battery-cathode": 1,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 101,
+      "не определён": 102,
       "прочее": 25
     }
   },
@@ -6594,6 +6594,39 @@
       "last_commit": "5d7e73f"
     },
     {
+      "path": "routes/gtu/combustor/channels_plan_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 13769,
+      "referenced_in_site": false,
+      "produced_by": "routes/channels_plan.py",
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "status",
+        "throughput",
+        "channels",
+        "topology",
+        "su2_keys_used",
+        "su2_key_check",
+        "su2_enum_check",
+        "openfoam_adjoint_verified",
+        "totals",
+        "sources"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "e3b87e2"
+    },
+    {
       "path": "routes/gtu/combustor/comb_bc_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
@@ -6819,7 +6852,7 @@
       "path": "routes/gtu/frame3/frame3_fea_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 250460,
+      "bytes": 252201,
       "referenced_in_site": false,
       "produced_by": "routes/frame3_fea.py",
       "shape": "объект",
@@ -6845,9 +6878,9 @@
         "software",
         "date"
       ],
-      "last_change": "2026-11-14",
+      "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "c4a6fd7"
+      "last_commit": "e3b87e2"
     },
     {
       "path": "routes/gtu/frame3/frame3_geom_results.json",
@@ -6918,7 +6951,7 @@
       "path": "routes/gtu/funnel/funnel_l0_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 72391,
+      "bytes": 284894,
       "referenced_in_site": false,
       "produced_by": "routes/funnel_l0.py",
       "shape": "объект",
@@ -6954,15 +6987,15 @@
         "software",
         "date"
       ],
-      "last_change": "2026-11-14",
+      "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "c4a6fd7"
+      "last_commit": "e3b87e2"
     },
     {
       "path": "routes/gtu/funnel/funnel_l0_select.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 6256,
+      "bytes": 58056,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -6986,9 +7019,9 @@
         "software",
         "date"
       ],
-      "last_change": "2026-11-14",
+      "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "c4a6fd7"
+      "last_commit": "e3b87e2"
     },
     {
       "path": "routes/gtu/funnel/jobs_l0_debug.json",
