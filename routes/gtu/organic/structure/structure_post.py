@@ -456,8 +456,8 @@ def geom_frame(png, b=0.10):
     import pyvista as pv
     pv.OFF_SCREEN = True
     p = pv.Plotter(off_screen=True, window_size=(1400, 1000)); p.set_background("white")
-    p.add_mesh(pv.wrap(mesh), color="#b8b2a7", smooth_shading=True, specular=0.4)
-    p.camera_position = [(0.9 * R, -1.6 * R, 1.9 * R), (0, 0, b / 2), (0, 0, 1)]
+    p.add_mesh(pv.wrap(mesh), color="#b8b2a7", smooth_shading=False, specular=0.25)
+    p.camera_position = [(1.5 * R, -2.6 * R, 2.9 * R), (0, 0, b / 2), (0, 0, 1)]
     p.screenshot(png); p.close()
     info["render"] = os.path.basename(png)
     return info

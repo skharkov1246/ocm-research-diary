@@ -349,3 +349,44 @@ def size_plate(du, PH, PC, gap, Nu, tw=None):
     r["z"] = [float(v) for v in z]
     r["feasible"] = bool(r["Q_kW"] >= 0.995 * Qt and r["dp_h"] <= 1.005 * du["dp_h"] and r["dp_c"] <= 1.005 * du["dp_c"])
     return r
+
+
+def min_frontal(du, PH, PC, geom, prof, tw=None, model=None, Afr_hi=60.0):
+    """наименьший фронт при той же геометрии (ячейка, уровень / зазор): для каждого фронта длина подбирается под
+    Q = Q_цикла (бисекция), фронт уменьшается, пока потери в бюджете — компактная по фронту сердцевина"""
+    Qt = du["Q_kW"]
+
+    def L_for(Afr):
+        lo, hi = 0.005, 3.0
+        r = core_eval(du, PH, PC, geom, prof, Afr, hi, tw=tw, model=model)
+        if r is None or r["Q_kW"] < Qt:
+            return None
+        for _ in range(40):
+            mid = 0.5 * (lo + hi)
+            r = core_eval(du, PH, PC, geom, prof, Afr, mid, tw=tw, model=model)
+            if r["Q_kW"] >= Qt:
+                hi = mid
+            else:
+                lo = mid
+        return hi
+
+    def ok(Afr):
+        L = L_for(Afr)
+        if L is None:
+            return False, None
+        r = core_eval(du, PH, PC, geom, prof, Afr, L, tw=tw, model=model)
+        return (r["dp_h"] <= du["dp_h"] and r["dp_c"] <= du["dp_c"]), (L, r)
+    lo, hi = 0.2, Afr_hi
+    good, _ = ok(hi)
+    if not good:
+        return None
+    for _ in range(30):
+        mid = math.sqrt(lo * hi)
+        g, _ = ok(mid)
+        if g:
+            hi = mid
+        else:
+            lo = mid
+    _, (L, r) = ok(hi)
+    r["binding"] = "газ" if r["dp_h"] / du["dp_h"] > r["dp_c"] / du["dp_c"] else "воздух"
+    return r
