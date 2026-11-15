@@ -4,8 +4,8 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 406,
-    "total_bytes": 13737839,
+    "datasets": 408,
+    "total_bytes": 13762688,
     "results_files": 179,
     "results_with_script": 54,
     "results_referenced_in_site": 22,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 86,
+      "не определён": 88,
       "прочее": 25
     }
   },
@@ -7648,6 +7648,26 @@
       "last_commit": "5cb29d0"
     },
     {
+      "path": "routes/gtu/platform/bench/jobs_aws_bench.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 14876,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "_comment",
+        "defaults",
+        "jobs",
+        "what",
+        "merge",
+        "estimate",
+        "plan_check"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "bdc87fd"
+    },
+    {
       "path": "routes/gtu/platform/bench/mesh_stats.json",
       "track": "не определён",
       "kind": "данные",
@@ -8033,6 +8053,26 @@
       "last_change": "2026-11-14",
       "last_author": "Claude",
       "last_commit": "55d1e8c"
+    },
+    {
+      "path": "routes/gtu/validation/jobs_aws_validation.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 9973,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "_comment",
+        "defaults",
+        "jobs",
+        "what",
+        "merge",
+        "estimate",
+        "plan_check"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "bdc87fd"
     },
     {
       "path": "routes/gtu/validation/validation_fleet_results.json",
