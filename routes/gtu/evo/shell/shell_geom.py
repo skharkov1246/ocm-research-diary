@@ -245,9 +245,8 @@ def check_patch(p, variant, h=4e-4, size=0.05):
 
 
 def pore_rule(kind, cell, rho, t_core):
-    """дешёвое правило модели (shell_model): характерная пора решётки"""
-    tl = float(S.tpms_t_for_density("gyroid" if kind == "voronoi" else kind, rho))
-    return cell * max(0.5 - tl, 0.05) if kind != "voronoi" else cell * (1 - rho) * 0.6
+    """дешёвое правило модели (shell_model.lattice_pore)"""
+    return SM.lattice_pore(kind, cell, rho, t_core)
 
 
 def patch_escape(kind, L, rho, tc, ts, size=0.05, h=4e-4):

@@ -232,7 +232,7 @@ def cmd_polish(a):
             return -r["fitness"] + pen
         rng = IS.rng_for(a.seed, k, salt="cma-" + a.variant)
         t0 = time.time()
-        res = CM.fmin(f, e["genome"], 0.05, rng, a.evals)
+        res = CM.fmin(f, e["genome"], 0.015, rng, a.evals)
         r = SM.evaluate(res["x"], a.variant)
         rows.append(dict(uid=e["uid"], cell=list(cell0), fitness_before=e["fitness"], fitness_after=r["fitness"],
                          same_cell=GRID.cell(r["desc"]) == cell0, genome=res["x"].tolist(), objs_before=e["objs"], objs_after=r["objs"],

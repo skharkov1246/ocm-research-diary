@@ -179,6 +179,18 @@ MAT_NOTES = {
 }
 
 
+def lattice_pore(kind, L, rho, t_core):
+    """проход порошка в решётке, м (правило подогнано по своей вокселизации участков стенки shell_geom.patch_escape,
+    24 случая: шар проходит по доступному лабиринту, если доля недоступной пустоты ≤ 0,6 — patch_scan в README):
+    гироид 0,36·L·√(1 − ρ)·min(1, t/L)^0,3; алмаз 0,24·L·√(1 − ρ)·min(1, t/L); открытый Вороной 0,6·L·(1 − ρ).
+    У листовых TPMS два несвязанных лабиринта — отверстия выноса порошка нужны в каждом (правило, не учтено в деталях)."""
+    if kind == "gyroid":
+        return 0.36 * L * math.sqrt(max(1 - rho, 0.0)) * min(1.0, t_core / L) ** 0.3
+    if kind == "diamond":
+        return 0.24 * L * math.sqrt(max(1 - rho, 0.0)) * min(1.0, t_core / L)
+    return 0.6 * L * (1 - rho)
+
+
 def lattice_rel(rho):
     """E*/E и S*/σ (своя гомогенизация гироида, organic/structure lattice_results.json → law; для алмаза и Вороного
     принят тот же закон — оценка)"""
@@ -982,8 +994,7 @@ def evaluate_params(p, variant, with_geom=False):
         notes.append(f"ГИП: камера {sh['vessel']} м" if sh["hip"] else "ГИП невозможен")
         if lat_frac > 0.01:
             cons["skin"] = max(0.0, (PRINT_SKIN_MIN - p["skin"]) / PRINT_SKIN_MIN)
-            tl = float(S.tpms_t_for_density("gyroid", float(np.mean(prof["rho"]))))
-            pore = p["cell"] * max(0.5 - tl, 0.05) if p["lat_type"] != "voronoi" else p["cell"] * (1 - float(np.mean(prof["rho"]))) * 0.6
+            pore = lattice_pore(p["lat_type"], p["cell"], float(np.mean(prof["rho"])), float(np.max(t_c)))
             cons["pore"] = max(0.0, (PORE_MIN - pore) / PORE_MIN)
             if pore < PORE_LONG:
                 q *= 0.6; notes.append(f"поры решётки {pore * 1e3:.1f} мм < 5 мм при длинном пути выноса порошка")
