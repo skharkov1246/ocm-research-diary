@@ -226,3 +226,30 @@ def test_smoke_job_loads(tmp_path):
     ud = runner.build_userdata(j, run_id="r-SYNTHETIC", attempt=1, repo=runner.DEFAULT_REPO, branch=M.BRANCH,
                                bucket="bucket-EXAMPLE", key_prefix="PREFIX/gtu/r/j")
     assert len(ud.encode()) < runner.USERDATA_LIMIT
+
+
+def test_forward_sigterm_to_children(tmp_path):
+    """SIGTERM обёртке -> SIGTERM каждому дочернему run_case.py (здесь — подставной процесс, пишущий метку)."""
+    import signal
+    import subprocess
+    import time
+    mark = tmp_path / "got_term"
+    code = ("import signal, sys, time\n"
+            f"def h(s, f):\n    open({str(mark)!r}, 'w').write(str(s)); sys.exit(0)\n"
+            "signal.signal(signal.SIGTERM, h)\n"
+            f"open({str(tmp_path / 'ready')!r}, 'w').write('1')\n"
+            "time.sleep(30)\n")
+    p = subprocess.Popen([sys.executable, "-c", code])
+    try:
+        for _ in range(100):
+            if (tmp_path / "ready").exists():
+                break
+            time.sleep(0.05)
+        C._CHILDREN[:] = [p]
+        C._forward(signal.SIGTERM, None)
+        assert p.wait(timeout=10) == 0
+        assert mark.read_text() == str(int(signal.SIGTERM))
+    finally:
+        C._CHILDREN.clear()
+        if p.poll() is None:
+            p.kill()

@@ -144,18 +144,18 @@
    {
     "file": "routes/gtu/combustor/comb_l0_debug_results.json",
     "field": "timing.t_variant_mean_s",
-    "used": 2.65044
+    "used": 4.85039
    }
   ],
   "per_shard_variants": 1000,
   "workers": 64,
-  "compute_min_per_shard": 0.69021875,
+  "compute_min_per_shard": 1.2631223958333335,
   "setup_min": 10.0,
   "bc_recompute_min": 6.0,
   "upload_min": 8.0,
   "safety": 3.0,
   "max_min": 30,
-  "core_hours_total": 22.087,
+  "core_hours_total": 40.41991666666667,
   "merge": "после сбора: python routes/gtu/combustor/merge_l0.py runs/<run_id> --out routes/gtu/combustor/comb_l0_KV-3_results.json (контроль полноты; код 2 - части не хватает)",
   "status": "оценка; живой запуск - отдельная сессия с ключами (окружение Coldun)",
   "plan": [

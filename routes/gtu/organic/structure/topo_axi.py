@@ -232,7 +232,8 @@ class AxiModel:
         data = (Ee[:, None, None] * self.Ke0[col]).reshape(-1)[self._keep]
         nf = len(self._free)
         K = sp.csc_matrix((data, (self._ri, self._ci)), shape=(nf, nf))
-        lu = spla.splu(K)
+        # MMD(Aᵀ+A) в симметричном режиме — в 2,4 раза быстрее COLAMD по умолчанию на этой сетке (замер 2026-11-14)
+        lu = spla.splu(K, permc_spec="MMD_AT_PLUS_A", options=dict(SymmetricMode=True))
         F = np.zeros((self.ndof, len(cases)))
         for k, c in enumerate(cases):
             w2 = (2 * math.pi * c["rpm"] / 60.0) ** 2
