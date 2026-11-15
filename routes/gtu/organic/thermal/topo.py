@@ -455,8 +455,11 @@ def project(rt, beta, eta=0.5):
 STAGES = ((0.01, 0, 60), (0.1, 0, 40), (0.1, 2, 30), (0.1, 4, 30), (0.1, 8, 30), (0.1, 16, 30))
 
 
+STAGES_WARM = ((0.1, 0, 40), (0.1, 2, 30), (0.1, 4, 30), (0.1, 8, 30), (0.1, 16, 40))
+
+
 def optimize_uniform(case="comb6", nx=80, vol=0.30, Da=1e-5, rmin=1.5, stages=STAGES,
-                     w=1.0, move=0.1, verbose=True):
+                     w=1.0, move=0.1, verbose=True, x_init=None):
     """выходы на одинаковое давление; цель J = Φ/Φ0 + w·N·Σ(Q_k/Q̄ − 1)² при доле жидкости ≤ vol;
     Φ — самосопряжённая часть, разброс расходов — сопряжённая задача с той же (симметричной) матрицей"""
     cs = setup_case(case, nx)
@@ -464,7 +467,7 @@ def optimize_uniform(case="comb6", nx=80, vol=0.30, Da=1e-5, rmin=1.5, stages=ST
     S = Brinkman2D(nx, ny, h, with_pressure_outlets(cs))
     amax = 1.0 / Da
     H, Hs = density_filter(nx, ny, rmin)
-    x = np.full(nx * ny, vol)
+    x = np.full(nx * ny, vol) if x_init is None else np.clip(np.asarray(x_init, float).copy(), 0, 1)
     nout = cs["n_out"]
     Qbar = cs["Qin"] / nout
     # функционалы расхода по выходам: Q_k = c_kᵀ u (u — все грани)
@@ -740,13 +743,15 @@ def run_all(out_dir, nx=90, vol=0.30, cases=("comb6", "fan8")):
         t0 = time.time()
         rB = optimize(case, nx=nx, vol=vol, qs=(0.01, 0.1), iters=(60, 60), verbose=False)   # классика: расходы заданы
         rU = optimize_uniform(case, nx=nx, vol=vol, verbose=False)         # выходы на давлении + равномерность
+        rW = optimize_uniform(case, nx=nx, vol=vol, verbose=False, x_init=rB["x"], stages=STAGES_WARM)  # тёплый старт
         cs = rU["case"]
         amax = rU["amax"]
         # оценка всех форм при одинаковой α (q = 0,1, как в конце rU) — честное сравнение
         q = 0.1
         evs = []
         for label, rho in (("Борвалл — Петерсон: расходы заданы", rB["rho"]),
-                           ("равномерность в цели (выходы на давлении)", rU["rho"])):
+                           ("равномерность в цели (выходы на давлении)", rU["rho"]),
+                           ("Б — П, затем равномерность (тёплый старт)", rW["rho"])):
             ev = evaluate(cs, rho, amax, q, label, Re_list=(0.0, 20.0, 50.0))
             ev["_rho"] = rho
             ev["_S"] = Brinkman2D(cs["nx"], cs["ny"], cs["h"], with_pressure_outlets(cs))
@@ -761,15 +766,20 @@ def run_all(out_dir, nx=90, vol=0.30, cases=("comb6", "fan8")):
         evb["_rho"] = mb.astype(float)
         evb["_S"] = Brinkman2D(cs["nx"], cs["ny"], cs["h"], with_pressure_outlets(cs))
         evs.append(evb)
-        plot(cs, [evs[2], evs[0], evs[1]], out_dir / f"topo_{case}.png",
+        plot(cs, [evs[3], evs[0], evs[1], evs[2]], out_dir / f"topo_{case}.png",
              f"Коллектор: 1 вход → {cs['n_out']} выходов, доля жидкости {vol:.2f} (2D, Стокс — Бринкман, безразмерно)")
-        stl = contour_stl(out_dir / f"topo_{case}.stl", rU["rho"], cs["h"] * 100.0, thickness=4.0)
+        # STL — форма с наименьшей ценой равной раздачи (Φ с дросселями) среди трёх оптимизированных
+        bi = int(np.argmin([evs[i]["Phi_balanced"] for i in range(3)]))
+        best_rho = (rB["rho"], rU["rho"], rW["rho"])[bi]
+        stl = contour_stl(out_dir / f"topo_{case}.stl", best_rho, cs["h"] * 100.0, thickness=4.0)
+        stl["design"] = evs[bi]["label"]
         stl["path"] = str(Path(stl["path"]).relative_to(ROOT)) if str(stl["path"]).startswith(str(ROOT)) else stl["path"]
         stl["units"] = "условные мм: ширина области 100, толщина 4 (выдавливание формы каналов)"
         rows = []
         for ev in evs:
             rows.append({k: v for k, v in ev.items() if not k.startswith("_")})
         base_phi = evb["pressure_outlets"][0]["Phi"]
+        evw = evs[2]
         res["cases"][case] = dict(
             setup=dict(nx=cs["nx"], ny=cs["ny"], Lx=cs["Lx"], Ly=cs["Ly"], n_out=cs["n_out"], Q_in=cs["Qin"]),
             designs=rows,
@@ -780,10 +790,12 @@ def run_all(out_dir, nx=90, vol=0.30, cases=("comb6", "fan8")):
             nonuniformity=dict(comb=evb["pressure_outlets"][0]["nonuniformity_max_min"],
                                bp=evs[0]["pressure_outlets"][0]["nonuniformity_max_min"],
                                uniform=evs[1]["pressure_outlets"][0]["nonuniformity_max_min"]),
-            murray2d=murray2d_check(rU["rho"], cs["h"]),
+            murray2d=murray2d_check(best_rho, cs["h"]),
             stl=stl, time_s=round(time.time() - t0, 1))
         res["cases"][case]["balanced_ratio_uniform_vs_conventional"] = float(evs[1]["Phi_balanced"] / evb["Phi_balanced"])
         res["cases"][case]["balanced_ratio_bp_vs_conventional"] = float(evs[0]["Phi_balanced"] / evb["Phi_balanced"])
+        res["cases"][case]["balanced_ratio_warm_vs_conventional"] = float(evw["Phi_balanced"] / evb["Phi_balanced"])
+        res["cases"][case]["nonuniformity"]["warm"] = evw["pressure_outlets"][0]["nonuniformity_max_min"]
         print(case, "готово", round(time.time() - t0), res["cases"][case]["nonuniformity"],
               res["cases"][case]["balanced_ratio_uniform_vs_conventional"], flush=True)
         Path(out_dir, "topo_results.partial.json").write_text(json.dumps(res, ensure_ascii=False, indent=1, default=float))

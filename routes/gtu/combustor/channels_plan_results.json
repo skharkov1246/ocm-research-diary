@@ -1,0 +1,317 @@
+{
+ "title": "Каналы и печатные структуры камеры KV-3: постановка сопряжённой и топологической оптимизации",
+ "method": "постановка и смета; цены итерации - из замеров и смет (см. basis в каждой строке)",
+ "software": "python; сверка ключей - исходники SU2 v8.6.0 и openfoam.com v2512",
+ "date": "2026-11-14",
+ "status": "план (расчётов оптимизации не было); числа сметы - оценка",
+ "throughput": {
+  "su2_s_per_node_iter_core": 1.0994804884392861e-05,
+  "su2_basis": "routes/gtu/platform/su2/jobs_aws_su2_kv3.json → estimate.jobs[0].s_per_iter_base 0,782 с при 1 137 992 узлах, 16 процессов (смета пакета SU2, не замер этой сессии)",
+  "simplefoam_s_per_cell_iter_core": 1.234671125975474e-06,
+  "simplefoam_basis": "замер 14.11.2026: apt OpenFOAM 1912, канал 400×60 ячеек, k-omega SST, 300 итераций, ExecutionTime 9,05 − 0,19 с; 4 общих ядра под нагрузкой 23-28",
+  "adjoint_factor": 1.5,
+  "adjoint_factor_basis": "оценка"
+ },
+ "channels": [
+  {
+   "id": "diffuser",
+   "what": "диффузор за ступенью 2 (D2 = 0,703 м, b2 = 18.6 мм) до кожуха камеры",
+   "tool": "SU2 v8.6.0, RANS SST, AXISYMMETRIC, DISCRETE_ADJOINT, FFD_CONTROL_POINT_2D",
+   "objective": "потери полного давления (SURFACE_TOTAL_PRESSURE) + w·неравномерность (SURFACE_UNIFORMITY) на выходе",
+   "build_note": "дискретное сопряжённое требует сборки SU2 с автодифференцированием (CConfig.cpp: «MATH_PROBLEM= DISCRETE_ADJOINT requires AD support»); install_su2.sh узла su2 собирает без него - нужна отдельная сборка с -Denable-autodiff=true (meson_options.txt v8.6.0: option enable-autodiff, по умолчанию false - открыт)",
+   "constraints": [
+    "площадь выхода = площади входа в кожух (не меньше)",
+    "длина не больше габарита frame3",
+    "угол стенки ≤ 8° на участке торможения (оценка)",
+    "минимальная толщина стенки печати 1 мм"
+   ],
+   "design_variables": {
+    "ffd_points": "12 × 4",
+    "directions": 2,
+    "total": 96,
+    "active": 80
+   },
+   "mesh_nodes": 60000,
+   "iterations": {
+    "primal": 4000,
+    "adjoint": 4000,
+    "design": 30
+   },
+   "core_hours_per_design_iter": 1.8324674807321435,
+   "core_hours": 54.9740244219643,
+   "machine_hours": 0.8589691315931922,
+   "usd_expected": 0.606775794557431,
+   "usd_planning": 0.9663402730423412,
+   "basis": "SU2 1,1e-5 с/(узел·итер.·ядро) × (прямое + 1,5·сопр.)",
+   "inputs": [
+    {
+     "file": "routes/gtu/frame3/frame3_point_results.json",
+     "field": "stage2.b2_m",
+     "used": 0.0186299
+    }
+   ]
+  },
+  {
+   "id": "transition",
+   "what": "переходный канал жаровая труба -> кольцо соплового аппарата (Dm = 0.537 м, h = 28.2 мм)",
+   "tool": "openfoam.com adjointOptimisationFoam (v2512), несжимаемый, k-omega SST (сопряжённая турбулентность - замороженная, ATC standard)",
+   "objective": "PtLosses (вход-выход) + w·uniformityPatch (выход)",
+   "constraints": [
+    "площади и положения стыков закреплены (крайние ряды точек)",
+    "минимальный радиус кривизны и толщина стенки печати",
+    "без изменения длины модуля"
+   ],
+   "design_variables": {
+    "control_points": "9 × 5 × 3",
+    "directions": 3,
+    "total": 405,
+    "active": 315
+   },
+   "mesh_cells": 1500000.0,
+   "iterations": {
+    "primal": 3000,
+    "adjoint": 3000,
+    "design": 40
+   },
+   "core_hours_per_design_iter": 3.858347268673356,
+   "core_hours": 154.33389074693426,
+   "machine_hours": 2.411467042920848,
+   "usd_expected": 1.703460319119287,
+   "usd_planning": 2.712900423285954,
+   "basis": "simpleFoam 1,23e-6 с/(ячейка·итер.·ядро) - замер; сопряжённое 1,5 прямого (оценка)",
+   "inputs": [
+    {
+     "file": "routes/gtu/frame3/frame3_point_results.json",
+     "field": "turbine.options.3.Dm, stages[0].h_rotor_in_m",
+     "used": [
+      0.536549,
+      0.0281987
+     ]
+    }
+   ]
+  },
+  {
+   "id": "scroll",
+   "what": "улитка сбора воздуха за диффузором к выносной камере (вход картриджа)",
+   "tool": "openfoam.com adjointOptimisationFoam (v2512), несжимаемый, k-omega SST (сопряжённая турбулентность - замороженная, ATC standard)",
+   "objective": "PtLosses (вход-выход) + w·uniformityPatch (выход)",
+   "constraints": [
+    "площади и положения стыков закреплены (крайние ряды точек)",
+    "минимальный радиус кривизны и толщина стенки печати",
+    "без изменения длины модуля"
+   ],
+   "design_variables": {
+    "control_points": "12 × 6 × 6",
+    "directions": 3,
+    "total": 1296,
+    "active": 1080
+   },
+   "mesh_cells": 3000000.0,
+   "iterations": {
+    "primal": 3000,
+    "adjoint": 3000,
+    "design": 40
+   },
+   "core_hours_per_design_iter": 7.716694537346712,
+   "core_hours": 308.6677814938685,
+   "machine_hours": 4.822934085841696,
+   "usd_expected": 3.406920638238574,
+   "usd_planning": 5.425800846571908,
+   "basis": "simpleFoam 1,23e-6 с/(ячейка·итер.·ядро) - замер; сопряжённое 1,5 прямого (оценка)",
+   "inputs": []
+  }
+ ],
+ "topology": [
+  {
+   "id": "fuel_manifold",
+   "what": "печатный топливный коллектор: один вход (один клапан) -> n элементов, равная раздача на 30-100 % расхода",
+   "tool": "adjointOptimisationFoam v2512, topODesignVariables (пористость Бринкмана по ячейкам)",
+   "objective": "flowRatePartition (заданные доли на выходах) + w·PtLosses",
+   "design_variables": {
+    "kind": "значение на ячейку",
+    "total": 1000000
+   },
+   "cycles": 150,
+   "core_hours_per_cycle": 2.572231512448904,
+   "core_hours": 385.83472686733563,
+   "machine_hours": 6.028667607302119,
+   "usd_expected": 4.258650797798217,
+   "usd_planning": 6.782251058214884,
+   "basis": "simpleFoam замер × (1 + 1,5) × 150 циклов (оценка)",
+   "manufacturability": "фильтр радиуса ≥ 2 ячеек и порог минимального канала 0,3 мм (comb_space.D_JET_MIN, печать); нависание ≤ 45° и удаление порошка - проверка после (не в постановке)"
+  },
+  {
+   "id": "cooling_lattice",
+   "what": "печатная решётка охлаждения стенки картриджа (двойная стенка)",
+   "tool": "этап 1 - параметрическая ячейка TPMS (гироид, алмаз: размер ячейки, толщина, пористость) - chtMultiRegionFoam ячейки с периодикой + модель-заменитель (platform/surrogate); этап 2 - топология проводимости и термомеханики - pyMOTO (открыт, README: «Thermal and thermo-mechanic coupling»), сопряжённый теплообмен течения - пакета с готовой постановкой не найдено",
+   "objective": "наименьшая температура металла при перепаде dp_wall ≤ 1 % p3 и расходе охлаждения a_cool",
+   "design_variables": {
+    "stage1": "3-4 параметра ячейки",
+    "stage2": "плотность на элемент"
+   },
+   "points": 40,
+   "core_hours_per_point": 12.0,
+   "core_hours": 480.0,
+   "machine_hours": 7.5,
+   "usd_expected": 5.298,
+   "usd_planning": 8.4375,
+   "basis": "CHT ячейки 0,2 млн × 3000 итер. × 1,2·6,0e-5 с (реагирующий замер L1 как верхняя граница для нереагирующего) × 40 точек (оценка)"
+  },
+  {
+   "id": "cartridge_bracket",
+   "what": "крепления и фланец картриджа (жёсткость, масса)",
+   "tool": "TopOpt_in_PETSc (DTU, открыт, README) или SU2 TOPOLOGY_OPTIMIZATION (TOPOL_COMPLIANCE, VOLUME_FRACTION, ключи v8.6.0), проверка - CalculiX (навык calculix-rotor)",
+   "objective": "наименьшая податливость при доле объёма; ограничение - частоты вне полосы пульсаций",
+   "core_hours": 20.0,
+   "machine_hours": 0.3125,
+   "usd_expected": 0.22075,
+   "usd_planning": 0.3515625,
+   "basis": "TopOpt на 1-2 млн элементов: десятки ядро-часов (оценка)"
+  }
+ ],
+ "su2_keys_used": [
+  "AXISYMMETRIC",
+  "CONV_FIELD",
+  "CONV_RESIDUAL_MINVAL",
+  "DEFORM_LINEAR_SOLVER",
+  "DEFORM_LINEAR_SOLVER_ITER",
+  "DEFORM_MESH",
+  "DEFORM_STIFFNESS_TYPE",
+  "DV_KIND",
+  "DV_MARKER",
+  "DV_PARAM",
+  "FFD_CONTINUITY",
+  "FFD_DEFINITION",
+  "FFD_DEGREE",
+  "FREESTREAM_PRESSURE",
+  "FREESTREAM_TEMPERATURE",
+  "INIT_OPTION",
+  "ITER",
+  "KIND_TURB_MODEL",
+  "MACH_NUMBER",
+  "MARKER_ANALYZE",
+  "MARKER_ANALYZE_AVERAGE",
+  "MARKER_HEATFLUX",
+  "MARKER_INLET",
+  "MARKER_OUTLET",
+  "MARKER_SYM",
+  "MATH_PROBLEM",
+  "MESH_FILENAME",
+  "MESH_FORMAT",
+  "OBJECTIVE_FUNCTION",
+  "OBJECTIVE_WEIGHT",
+  "OPT_ACCURACY",
+  "OPT_BOUND_LOWER",
+  "OPT_BOUND_UPPER",
+  "OPT_CONSTRAINT",
+  "OPT_GRADIENT_FACTOR",
+  "OPT_ITERATIONS",
+  "OPT_OBJECTIVE",
+  "REF_DIMENSIONALIZATION",
+  "RESTART_SOL",
+  "SOLVER"
+ ],
+ "su2_key_check": {
+  "file": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/of_src/CConfig.cpp",
+  "all_present": true,
+  "keys": {
+   "AXISYMMETRIC": true,
+   "CONV_FIELD": true,
+   "CONV_RESIDUAL_MINVAL": true,
+   "DEFORM_LINEAR_SOLVER": true,
+   "DEFORM_LINEAR_SOLVER_ITER": true,
+   "DEFORM_MESH": true,
+   "DEFORM_STIFFNESS_TYPE": true,
+   "DV_KIND": true,
+   "DV_MARKER": true,
+   "DV_PARAM": true,
+   "FFD_CONTINUITY": true,
+   "FFD_DEFINITION": true,
+   "FFD_DEGREE": true,
+   "FREESTREAM_PRESSURE": true,
+   "FREESTREAM_TEMPERATURE": true,
+   "INIT_OPTION": true,
+   "ITER": true,
+   "KIND_TURB_MODEL": true,
+   "MACH_NUMBER": true,
+   "MARKER_ANALYZE": true,
+   "MARKER_ANALYZE_AVERAGE": true,
+   "MARKER_HEATFLUX": true,
+   "MARKER_INLET": true,
+   "MARKER_OUTLET": true,
+   "MARKER_SYM": true,
+   "MATH_PROBLEM": true,
+   "MESH_FILENAME": true,
+   "MESH_FORMAT": true,
+   "OBJECTIVE_FUNCTION": true,
+   "OBJECTIVE_WEIGHT": true,
+   "OPT_ACCURACY": true,
+   "OPT_BOUND_LOWER": true,
+   "OPT_BOUND_UPPER": true,
+   "OPT_CONSTRAINT": true,
+   "OPT_GRADIENT_FACTOR": true,
+   "OPT_ITERATIONS": true,
+   "OPT_OBJECTIVE": true,
+   "REF_DIMENSIONALIZATION": true,
+   "RESTART_SOL": true,
+   "SOLVER": true
+  }
+ },
+ "su2_enum_check": {
+  "SURFACE_TOTAL_PRESSURE": true,
+  "SURFACE_UNIFORMITY": true,
+  "FFD_CONTROL_POINT_2D": true,
+  "DISCRETE_ADJOINT": true,
+  "RANS": true,
+  "SST": true,
+  "MASSFLUX": true,
+  "TOPOL_COMPLIANCE": true,
+  "VOLUME_FRACTION": true,
+  "HEAT_EQUATION": true,
+  "MULTIPHYSICS": true,
+  "INC_RANS": true
+ },
+ "openfoam_adjoint_verified": {
+  "solver": "applications/solvers/incompressible/adjointOptimisationFoam (adjointOptimisationFoam.C)",
+  "objectives_incompressible": [
+   "objectiveFlowRate",
+   "objectiveFlowRatePartition",
+   "objectiveForce",
+   "objectiveMoment",
+   "objectiveNutSqr",
+   "objectivePowerDissipation",
+   "objectivePtLosses",
+   "objectiveUniformityCellZone",
+   "objectiveUniformityPatch"
+  ],
+  "design_variables": [
+   "designVariables",
+   "levelSet",
+   "shape",
+   "topODesignVariables"
+  ],
+  "parameterization": [
+   "Bezier",
+   "NURBS (NURBS3DVolume: cartesian, cylindrical, controlPointsDefinition, volBSplinesBase)"
+  ],
+  "tutorials": [
+   "shapeOptimisation/sbend (PtLosses, volumetricBSplines transformBox nCPs 9×5×3, BFGS, 3000 + 3000 итераций)",
+   "shapeOptimisation/fork-uneven (flowRate, flowRatePartition, uniformityPatch)",
+   "topologyOptimisation/monoFluidAero"
+  ],
+  "note": "тепловой цели (температура, тепловой поток) в несжимаемых объектах v2512 нет - сопряжённого теплообмена в adjointOptimisationFoam нет; для решёток охлаждения - другой путь (ниже)"
+ },
+ "totals": {
+  "core_hours": 1403.8104235301028,
+  "usd_expected": 15.494557549713509,
+  "usd_planning": 24.67635510111509
+ },
+ "sources": [
+  "https://raw.githubusercontent.com/su2code/SU2/v8.6.0/Common/src/CConfig.cpp (открыт)",
+  "https://raw.githubusercontent.com/su2code/SU2/v8.6.0/Common/include/option_structure.hpp (открыт)",
+  "https://gitlab.com/openfoam/core/openfoam (тег OpenFOAM-v2512; дерево adjointOptimisation и учебники - открыт через API GitLab)",
+  "https://raw.githubusercontent.com/topopt/TopOpt_in_PETSc/master/README.md (открыт)",
+  "https://raw.githubusercontent.com/aatmdelissen/pyMOTO/master/README.md (открыт)",
+  "https://raw.githubusercontent.com/dolfin-adjoint/pyadjoint/master/README.md (открыт)"
+ ]
+}

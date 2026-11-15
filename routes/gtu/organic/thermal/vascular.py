@@ -951,11 +951,11 @@ def plots(res, figs, out_dir):
                 if rr and rr[0]["feasible"]:
                     lab = f"x_ngv = {rr[0]['x_ngv_pct']:.2f} %, разброс {rr[0]['T_spread']:.0f} K"
                 else:
-                    lab = f"не держит 950 °C: весь перепад, T_max {Ts.max() - 273.15:.0f} °C"
+                    lab = f"не держит 950 °C (весь перепад:\nT_max {Ts.max() - 273.15:.0f} °C)"
             else:
                 rr = [r for r in rows if r["net"] == n][0]
                 lab = f"T_max {rr['at_full_dp']['T_max'] - 273.15:.0f} °C, разброс {rr['at_full_dp']['T_spread']:.0f} K"
-            ax.set_title(f"{title[n]}\n{lab}", fontsize=9)
+            ax.set_title(f"{title[n]}\n{lab}", fontsize=8.5)
             ax.set_xlabel("x, мм (от входной кромки)" if art == "ngv" else "x, мм (по оси камеры)", fontsize=8)
             ax.tick_params(labelsize=7)
         cb = fig.colorbar(im, ax=axs, shrink=0.85, pad=0.01)
@@ -973,18 +973,21 @@ def plots(res, figs, out_dir):
         if n not in mk:
             continue
         rr = [r for r in res["cases"]["ngv"]["rows"] if r["net"] == n and r["feasible"]]
+        if not rr:
+            continue
         ax.plot([r["T41_C"] for r in rr], [r["x_ngv_pct"] for r in rr], marker=mk[n], label=title[n])
     ax.axhline(3.0, color="0.5", ls="--", lw=0.8)
-    ax.text(1002, 3.05, "класс N в gtu_family: x_ngv = 3 %", fontsize=8, color="0.3")
-    ax.set_xlabel("T41, °C"); ax.set_ylabel("охладитель соплового аппарата, % расхода компрессора")
+    ax.text(1148, 2.9, "класс N в gtu_family: x_ngv = 3 %", fontsize=8, color="0.3", ha="right", va="top")
+    ax.text(1148, 0.75, "K = 3, 4 и растущее дерево\nпредел не держат", fontsize=8, color="0.3", ha="right")
+    ax.set_xlabel("T41, °C"); ax.set_ylabel("x_ngv, % расхода компрессора")
     ax.set_title("Печатная лопатка с сетью каналов: расход на охлаждение (оценка)", fontsize=10)
-    ax.grid(alpha=0.3); ax.legend(fontsize=8)
+    ax.grid(alpha=0.3); ax.legend(fontsize=8, loc="upper left")
     fig.tight_layout()
     fig.savefig(out_dir / "vascular_xngv.png", dpi=130)
     plt.close(fig)
     # развёртка по сложности (Бежан): число уровней ветвления K при равном объёме и 16 окончаниях
     fig, ax = plt.subplots(figsize=(6.4, 4.0))
-    for T41, c in ((1050.0, "#1f77b4"), (1100.0, "#d62728"), (1150.0, "#2ca02c")):
+    for T41, c in ((1000.0, "#7f3fbf"), (1050.0, "#1f77b4"), (1100.0, "#d62728"), (1150.0, "#2ca02c")):
         xs, ys = [], []
         for n, K in NET_K.items():
             rr = [r for r in res["cases"]["ngv"]["rows"] if r["net"] == n and r["T41_C"] == T41 and r["feasible"]]
@@ -992,6 +995,8 @@ def plots(res, figs, out_dir):
                 xs.append(K); ys.append(rr[0]["x_ngv_pct"])
         if xs:
             ax.plot(xs, ys, marker="o", color=c, label=f"T41 = {T41:.0f} °C")
+    ax.text(3.0, ax.get_ylim()[0] + 0.85 * (ax.get_ylim()[1] - ax.get_ylim()[0]),
+            "K = 3, 4: предел\nне держится\nни при каком T41", ha="center", fontsize=8, color="0.3")
     ax.set_xticks(list(NET_K.values()))
     ax.set_xticklabels(["0\n(прямые)", "1", "2", "3", "4\n(одно дерево)"])
     ax.set_xlabel("уровней ветвления K (16 окончаний, равный объём каналов)")

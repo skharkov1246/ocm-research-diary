@@ -64,7 +64,7 @@ def dist_to_lines(px, py, lines):
 
 
 # =========================================================================== постановки
-def setup(part, variant, h, objective="mass"):
+def setup(part, variant, h, objective="mass", k_am=None):
     d = frame3()
     P = d["parts"][part]
     meta = dict(part=part, variant=variant, h=h)
@@ -174,7 +174,8 @@ def setup(part, variant, h, objective="mass"):
         k_am = 1.0
         crit = ["LC1: σ_экв ≤ σ_LM(T, 25 000 ч) (типовые свойства, не выше σв)", "LC2 (120 %): σ_экв ≤ σв(T) местно"]
     else:
-        k_am = 1.0 if variant == "base" else K_AM
+        if k_am is None:
+            k_am = 1.0 if variant == "base" else K_AM
         ys = mt["ys"](Te) * 1e6
         a1 = k_am * ys / 1.5; a2 = k_am * ys
         crit = [f"LC1: σ_экв ≤ {k_am}·σ0,2(T)/1,5", f"LC2 (120 %): σ_экв ≤ {k_am}·σ0,2(T)"]
@@ -259,7 +260,7 @@ def summarize(model, xb, em, sol, cases, solid_mask, meta):
 def run_spec(spec):
     t0 = time.time()
     part, variant, h = spec["part"], spec["variant"], spec["h"]
-    model, design, cases, prm, meta, in_base_e = setup(part, variant, h)
+    model, design, cases, prm, meta, in_base_e = setup(part, variant, h, k_am=spec.get("k_am"))
     tgt = spec.get("u_target", [1.0, 1.0])
     if spec.get("interp"):
         prm.update(interp=spec["interp"], p=spec.get("p", 3.0), x0=spec.get("x0", 0.1))
@@ -290,12 +291,12 @@ def run_spec(spec):
         xe = xb.copy(); xe[model.group == 0] = 1.0
         return xe, np.ones(model.ne, bool)
 
-    for rep in range(3):
+    for rep in range(3 if spec.get("repair", True) else 1):
         xe, solid = binarize(opt["xb"])
         sol = model.solve(xe, prm, cases, need_sens=False)
         ub = [float(np.max(np.where(solid, c["u"], 0.0))) for c in sol["cases"]]
         repairs.append(dict(round=rep, u_binary=ub, target_eff=list(tgt_eff)))
-        if all(ub[k] <= tgt[k] * 1.005 for k in range(len(tgt))) or rep == 2:
+        if all(ub[k] <= tgt[k] * 1.005 for k in range(len(tgt))) or rep == 2 or not spec.get("repair", True):
             break
         tgt_eff = [tgt_eff[k] * min(1.0, tgt[k] / ub[k]) * 0.99 for k in range(len(tgt))]
         last = dict(stages[-1]); last["it"] = 40
@@ -336,12 +337,17 @@ def specs(h_t, h_c, u_eq):
     S = [dict(name="turb1_A_mass_eq", part="turb1", variant="A", h=h_t, objective="mass", u_target=ut),
          dict(name="turb1_A_mass_lim", part="turb1", variant="A", h=h_t, objective="mass"),
          dict(name="turb1_A_J_eq", part="turb1", variant="A", h=h_t, objective="inertia", u_target=ut),
-         dict(name="comp2_A_mass_eq", part="comp2", variant="A", h=h_c, objective="mass", u_target=uc, interp="simp"),
-         dict(name="comp2_A_mass_lim", part="comp2", variant="A", h=h_c, objective="mass", interp="simp"),
-         dict(name="comp2_A_J_eq", part="comp2", variant="A", h=h_c, objective="inertia", u_target=uc, interp="simp"),
-         dict(name="turb1_B_mass_eq", part="turb1", variant="B", h=h_t, objective="mass", u_target=ut),
-         dict(name="comp2_B_mass_eq", part="comp2", variant="B", h=h_c, objective="mass", u_target=uc),
-         dict(name="comp2_B_J_eq", part="comp2", variant="B", h=h_c, objective="inertia", u_target=uc)]
+         # колесо: eq — тот же металл, что у исходного (k = 1: эффект только формы), lim — предел печатного (k = 0,9);
+         # ремонтных кругов нет: двоичный проект судит CalculiX на гладком контуре (ступенчатая обшивка тракта в
+         # вокселях даёт ложные пики)
+         dict(name="comp2_A_mass_eq", part="comp2", variant="A", h=h_c, objective="mass", u_target=uc, interp="simp",
+              k_am=1.0, repair=False),
+         dict(name="comp2_A_mass_lim", part="comp2", variant="A", h=h_c, objective="mass", interp="simp", repair=False),
+         dict(name="comp2_A_J_eq", part="comp2", variant="A", h=h_c, objective="inertia", u_target=uc, interp="simp",
+              k_am=1.0, repair=False),
+         dict(name="turb1_B_mass_eq", part="turb1", variant="B", h=h_t, objective="mass", u_target=ut, repair=False),
+         dict(name="comp2_B_mass_eq", part="comp2", variant="B", h=h_c, objective="mass", u_target=uc, k_am=1.0, repair=False),
+         dict(name="comp2_B_J_eq", part="comp2", variant="B", h=h_c, objective="inertia", u_target=uc, k_am=1.0, repair=False)]
     return S
 
 

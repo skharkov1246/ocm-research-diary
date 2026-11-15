@@ -299,3 +299,65 @@ def run_turb_sizing(workers=3):
     with open(os.path.join(HERE, "turb_sizing_results.json"), "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=1, default=float)
     return out
+
+
+def size_turb_blend_job(job):
+    """переход к ободу как у литого профиля: t = max(t_проекта, t_литого) при r ≥ r_s; r_s — наибольший, при котором
+    выполнены критерии (перебор по сетке r_s сверху вниз)"""
+    prof = turb_profile(job["name"], sigma_s=job.get("sigma_s", 8e-3))
+    d = DT.frame3(); pb = d["parts"]["turb1"]["profile"]
+    rb, tb = np.asarray(pb["r"]), np.asarray(pb["t"])
+    r = np.asarray(prof["r"]); t0 = np.asarray(prof["t"])
+    crit = job["crit"]
+    log = []
+    best = None
+    for r_s in job.get("r_s", (0.205, 0.195, 0.185, 0.175, 0.165, 0.155, 0.145, 0.135, 0.12, 0.10, 0.0)):
+        t = np.where(r >= r_s, np.maximum(t0, np.interp(r, rb, tb)), t0)
+        p = dict(r=r.tolist(), t=t.tolist(), zc=[0.0] * len(r))
+        a = disk_case(job["name"] + "_bl", p, DT.RPM0); b = disk_case(job["name"] + "_bl", p, 1.2 * DT.RPM0)
+        ok = a["creep_local_min_h"] >= crit["life_h"] and (b["uts_ratio"] or 0) >= crit["uts_ratio"]
+        log.append(dict(r_s=r_s, ok=ok, life=a["creep_local_min_h"], uts120=b["uts_ratio"], mass=a["mass_kg"], J=a["J_kgm2"],
+                        burst=a["burst_margin"]))
+        if ok:
+            best = dict(r_s=r_s, c100=a, c120=b, profile=p)
+            break
+    return dict(name=job["name"], crit=crit, sigma_s=job.get("sigma_s", 8e-3), log=log, best=best, profile_k1=prof)
+
+
+def run_turb_blend(workers=3):
+    with open(os.path.join(HERE, "turb_sizing_results.json"), encoding="utf-8") as f:
+        prev = json.load(f)
+    ce, cl = prev["crit"]["eq"], prev["crit"]["lim"]
+    jobs = [dict(name="turb1_A_mass_eq", crit=ce), dict(name="turb1_A_J_eq", crit=ce), dict(name="turb1_A_mass_lim", crit=cl)]
+    with Pool(workers) as p:
+        res = p.map(size_turb_blend_job, jobs, chunksize=1)
+    prev["thickening_runs"] = prev.pop("runs", prev.get("thickening_runs"))
+    prev["blend_runs"] = res
+    prev["method_blend"] = ("переход к ободу как у литого профиля: t(r) = max(t_проекта, t_литого) при r ≥ r_s, r_s — наибольший "
+                            "из сетки, при котором выполнены критерии; каждый шаг — два расчёта disk.py")
+    with open(os.path.join(HERE, "turb_sizing_results.json"), "w", encoding="utf-8") as f:
+        json.dump(prev, f, ensure_ascii=False, indent=1, default=float)
+    return prev
+
+
+# =========================================================================== слияние результатов прогонов
+def merge_disk_results(parts_files):
+    """итоговый disk_topo_results.json: исходные профили + последние прогоны каждого варианта (файлы по порядку,
+    поздний перекрывает ранний)"""
+    runs, base, head = {}, None, None
+    for p in parts_files:
+        if not os.path.exists(p):
+            continue
+        with open(p, encoding="utf-8") as f:
+            d = json.load(f)
+        head = head or d
+        base = d.get("baseline") or base
+        for r in d["runs"]:
+            runs[r["name"]] = r
+    out = dict(head)
+    out["baseline"] = base
+    out["runs"] = sorted(runs.values(), key=lambda r: r["name"])
+    out["merged_from"] = [os.path.basename(p) for p in parts_files if os.path.exists(p)]
+    with open(DT.RESULTS, "w", encoding="utf-8") as f:
+        json.dump(out, f, ensure_ascii=False, indent=1, default=float)
+    return out

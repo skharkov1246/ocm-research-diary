@@ -894,6 +894,23 @@ def design(c, u, tgt):
         c["phipt"] = GOOD["phit"][1] if lo > GOOD["phit"][1] else _place(u["phipt"], (lo, GOOD["phit"][1]))
     else:
         c["kUpt"], c["phipt"] = 0.0, 0.0
+    # ---------------------------------------------------------------- сверка: номинальный цикл при окончательных осях - в окне
+    if "T41/π" not in "|".join(fl):
+        m_fin, _ = _margins(c, tgt, c["pi"], c["t41"])
+        if m_fin < 0:                       # μ, деление, вход, нагрузка турбины сдвинули КПД: π (затем T41) - назад в окно
+            moved = False
+            for T in (c["t41"], 0.5 * (c["t41"] + c["t41_hi"]), c["t41_hi"]):
+                pw2, _ = _pi_window(dict(c, t41=T), tgt, T)
+                if pw2:
+                    c["t41"], c["pi"] = T, min(pw2[1], max(pw2[0], c["pi"]))
+                    if _margins(c, tgt, c["pi"], c["t41"])[0] < 0:
+                        c["pi"] = math.sqrt(pw2[0] * pw2[1])
+                    c["pi_lo"], c["pi_hi"] = pw2
+                    c["repair"] = (c["repair"] + "; " if c["repair"] else "") + "π, T41 сдвинуты в окно после выбора μ, деления и турбины"
+                    moved = True
+                    break
+            if not moved:
+                fl.append(f"T41/π: при окончательных μ, делении и нагрузке турбины окно пусто (запас {m_fin:.3f})")
     # ---------------------------------------------------------------- габарит: корпус и рекуператор в корпусе
     Dc = max(60 * s["U"] / (math.pi * n) for s in stn)
     side = min(tgt["pkg_W"], tgt["pkg_H"])
@@ -2152,7 +2169,7 @@ SELF_N = {"KV-3": 256, "KV-1": 128, "KV-6": 128}      # решение влад�
 SELF_WORKERS = 4
 
 
-def selfcheck(out_path=RESULTS):
+def selfcheck(out_path=RESULTS, closure_all=False):
     t0 = time.time()
     lineup = json.load(open(os.path.join(GTU, "gtu_lineup_results.json"), encoding="utf-8"))["lineup"]
     member = {kv: any(m["model"] == KV[kv][0] and m["variant"] == KV[kv][1] for f in lineup if f["name"] == kv for m in f["members"])
@@ -2215,9 +2232,13 @@ def selfcheck(out_path=RESULTS):
         res[f"debug_{kv}"] = summarize(rk)
         near = sorted([r for r in rk if not r["feasible"]], key=lambda r: r["violation"])[:10]
         res[f"debug_{kv}"]["nearest_infeasible"] = [dict(idx=r["idx"], arch=r["arch"], violation=r["violation"], reject=r["reject"]) for r in near]
-    tc = time.time()
-    res["closure_tables"] = {kv: closure_table(kv) for kv in KV}
-    res["closure_tables_s"] = round(time.time() - tc, 1)
+    if closure_all:
+        tc = time.time()
+        res["closure_tables"] = {kv: closure_table(kv) for kv in KV}
+        res["closure_tables_s"] = round(time.time() - tc, 1)
+    else:
+        res["closure_tables"] = ("не считались (--closure-all): доказательство для архетипов без допустимых - closure_proof в "
+                                 "результатах слияния merge_l0 (funnel_l0_results*.json)")
     res["elapsed_s"] = round(time.time() - t0, 1)
     with open(out_path, "w", encoding="utf-8") as fh:
         json.dump(res, fh, ensure_ascii=False, indent=1, default=_jd)
@@ -2235,9 +2256,10 @@ def main(argv=None):
     ap.add_argument("--detail", action="store_true", help="полные разборы моделей в каждой записи")
     ap.add_argument("--workers", type=int, default=int(os.environ.get("GTU_WORKERS", "1")), help="процессов внутри части (на AWS - nproc)")
     ap.add_argument("--selfcheck", action="store_true", help="отладка на малой выборке -> gtu_funnel_space_results.json")
+    ap.add_argument("--closure-all", action="store_true", help="с --selfcheck: closure_table всех архетипов трёх точек (долго)")
     a = ap.parse_args(argv)
     if a.selfcheck:
-        r = selfcheck()
+        r = selfcheck(closure_all=a.closure_all)
         print(json.dumps(dict(sharding=r["sharding_check"], timing=r["timing"], kv3=dict(n=r["debug_KV-3"]["n"], feasible=r["debug_KV-3"]["feasible"]),
                               cross=r["cross_check_cycle"]), ensure_ascii=False, indent=1, default=_jd))
         return 0

@@ -28,8 +28,8 @@ fi
 cp "$HERE/foam/reactionsGRI" "$HERE/foam/thermo.compressibleGasGRI" "$D/constant/"
 sed -i '/runApplication chemkinToFoam/,+2d' "$D/Allrun"
 # опечатка образца v2606/v2512 (набор Radial_15: две компоненты) и NO, CO в выборке - навык, разделы 6, 9
-sed -i 's/end (0.024 0.108);/end (0.024 0 0.108);/' "$D/system/sampleDict"
-sed -i 's/^\(\s*fields\s*(\)/\1 NO CO /' "$D/system/sampleDict"
+sed -i 's/(0.024 0.108);/(0.024 0 0.108);/' "$D/system/sampleDict"
+sed -i '/^fields/,/^);/ s/^    CH4$/    CH4\n    NO/' "$D/system/sampleDict"
 if [ "$C1" != "1.44" ]; then
   foamDictionary "$D/constant/turbulenceProperties" -entry RAS.kEpsilonCoeffs.C1 -set "$C1" > /dev/null
 fi
