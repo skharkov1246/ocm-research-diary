@@ -468,9 +468,11 @@ def summary(recs):
         rs = [r for r in recs if r["arch"] == a]
         ok = [r for r in rs if r["feasible"]]
         d = dict(n=len(rs), feasible=len(ok))
-        if ok:
-            b = max(ok, key=lambda r: (r["score"], -r["j"]))
-            d.update(best_j=b["j"], best_idx=b["idx"], best_score=b["score"], eta_th=sorted(r["eta_th_shaft"] for r in ok)[len(ok) // 2])
+        oks = [r for r in ok if r.get("score") is not None]          # пересчёт: у записи без частных баллов оценки нет
+        if oks:
+            b = max(oks, key=lambda r: (r["score"], -r["j"]))
+            et = sorted(r["eta_th_shaft"] for r in oks if r.get("eta_th_shaft") is not None)
+            d.update(best_j=b["j"], best_idx=b["idx"], best_score=b["score"], eta_th=et[len(et) // 2] if et else None)
         elif rs:
             d["first_reject"] = dict(Counter((r["reject"] or "").split("|")[0] for r in rs).most_common(3))
         by[a] = d
@@ -480,9 +482,10 @@ def summary(recs):
                 reject_reasons=dict(rej.most_common()), by_arch=by,
                 l0_feasible_l1_infeasible=sum(1 for r in recs if r["l0_feasible"] and not r["feasible"]),
                 l0_infeasible_l1_feasible=sum(1 for r in recs if not r["l0_feasible"] and r["feasible"]),
-                score_l1=dict(p50=float(np.median([r["score"] for r in feas])) if feas else None,
-                              max=max([r["score"] for r in feas], default=None)),
-                d_score_vs_l0=dict(p50=float(np.median([r["d_score_vs_l0"] for r in feas])) if feas else None),
+                score_l1=dict(p50=(float(np.median(sv)) if (sv := [r["score"] for r in feas if r.get("score") is not None]) else None),
+                              max=max([r["score"] for r in feas if r.get("score") is not None], default=None)),
+                d_score_vs_l0=dict(p50=(float(np.median(dv)) if (dv := [r["d_score_vs_l0"] for r in feas if r.get("d_score_vs_l0") is not None])
+                                        else None)),
                 optimization=dict(start_feasible=sum(1 for r in recs if r.get("start_feasible")), n_gain_measured=len(gains),
                                   gain_p50=float(np.median(gains)) if gains else None,
                                   gain_negative=sum(1 for g in gains if g < -1e-9),
@@ -661,7 +664,8 @@ def run_merge(found, kv, M, shards, out_dir, sfx="", scale_kv=("KV-1", "KV-6"), 
                timing_detail=dict(t_opt_mean=round(float(np.mean(to)), 3) if to else None,
                                   t_od_mean=round(float(np.mean(tm) - np.mean(to)), 3) if to and tm else None,
                                   opt_share=round(float(np.mean(to) / np.mean(tm)), 3) if to and tm else None,
-                                  evals_per_start=round(float(np.mean([r["evals"] / r["starts"] for r in recs if r.get("evals")])), 1),
+                                  evals_per_start=(round(float(np.mean(ev)), 1) if (ev := [r["evals"] / r["starts"] for r in recs if r.get("evals")])
+                                                   else None),
                                   note="t_opt - оптимизация (starts × maxfev); остальное - проверка кандидатов с нерасчётными режимами и запись"),
                summary=summary(recs),
                selection=dict(file=os.path.basename(p_top), n=n_sel, note=sel_note, archetypes=dict(Counter(r["arch"] for r in sel).most_common()),

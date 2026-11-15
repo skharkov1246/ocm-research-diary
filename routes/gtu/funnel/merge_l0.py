@@ -499,11 +499,28 @@ def case_axis(T, sc):
     notes = Counter((T.get(by_idx[i].get("картридж", by_idx[i].get("разъём")), "shell_note") or "").split(":")[0]
                     for i in by_idx if "оболочка" not in by_idx[i])
     feas_shell = sum(1 for i in shell if T.feas[by_idx[i]["оболочка"]])
+    # чувствительность к готовности самой оболочки (TRL печать_оболочка - оценка): выбор, если бы оболочка не снижала TRL_min концепции
+    # (множитель - по остальным технологиям записи; s_trl внутри балла изготовимости не пересчитан - оценка сверху, разница до 0,04)
+    alt = Counter()
+    for i, v in by_idx.items():
+        if i not in feas_c:
+            continue
+        b = v.get("картридж", v.get("разъём"))
+        s_ = v.get("оболочка")
+        if s_ is None or not T.feas[s_]:
+            alt[T.case[b]] += 1
+            continue
+        other = [FS.MK.TRL[t]["trl"] for t in (T.get(s_, "techs") or "").split("|") if t and t != "печать_оболочка"]
+        sw = T.get(s_, "score_w")
+        a = (sw * L0.trl_factor(min(other))) if (other and sw is not None) else sc[s_]
+        alt[T.case[s_] if (not T.feas[b] or a > sc[b] + 1e-12) else T.case[b]] += 1
     return dict(rule="оболочка считается, если холодная часть и горячая часть целиком входят в камеру LPBF (funnel_space.shell_fit); "
                      "выбор концепции - допустимый вариант с наибольшей итоговой оценкой (final_score), при равенстве - базовый",
                 concepts=n, shell_possible=len(shell), shell_impossible=n - len(shell),
                 shell_impossible_why=dict(notes.most_common(4)), feasible_concepts=len(feas_c), feasible_shell_rows=feas_shell,
                 picked_among_feasible=dict(pick.most_common()), picked_by_arch={a: dict(v) for a, v in sorted(pick_arch.items())},
+                picked_if_shell_trl_not_limiting=dict(alt.most_common()),
+                shell_trl=FS.MK.TRL["печать_оболочка"]["trl"],
                 d_score_shell_minus_base=_q(np.array(d)) if d else None,
                 shell_better=sum(1 for x in d if x > 1e-9), shell_worse=sum(1 for x in d if x < -1e-9))
 

@@ -19,7 +19,7 @@ import merge_l1 as M1            # noqa: E402
 import offdesign_l1 as OD        # noqa: E402
 import strength_l1 as ST         # noqa: E402
 
-SEL = os.path.join(HERE, "l0_aws_debug", "funnel_l0_select_KV-3_n2000.json")
+SEL = os.path.join(HERE, "l0_v3_probe", "funnel_l0_select_KV-3_n300.json")   # v3: отбор короткой пробы уровня 0 тем же кодом (l0_v3_probe)
 
 
 @pytest.fixture(scope="module")
@@ -34,6 +34,7 @@ def point(sel):
     d, E = sel
     e = E[0]
     c0 = FS.concept(e["idx"], d["n"], d["kv"], d["seed"])
+    c0 = FS.apply_case(c0, e.get("case_arch") or FS.case_base(c0))
     tgt = FS.target(d["kv"])
     spec, order, runs, nev = L1.optimize(c0, tgt, 1, 100, e["idx"], de_gens=8)
     c = L1.x_to_c(c0, np.array(order[0][0]), spec)
@@ -218,7 +219,7 @@ def test_order_entries_round_robin(sel):
     d, E = sel
     archs = {e["arch"] for e in d["selected"] if e["feasible"]}
     assert {e["arch"] for e in E[:len(archs)]} == archs
-    assert len(E) == len(d["selected"]) and len({e["idx"] for e in E}) == len(E)
+    assert len(E) == len(d["selected"]) and len({(e["idx"], e.get("case_arch")) for e in E}) == len(E)
     assert L1.order_entries(d, 12) == E[:12]
 
 
@@ -415,3 +416,67 @@ def test_jobs_files():
             assert "--workers \"$NPROC\"" in j["command"] and "$GTU_OUT" in j["command"]
     r = json.load(open(os.path.join(HERE, "READY_L1.json"), encoding="utf-8"))
     assert r["estimate"]["budget_ok"] and r["estimate"]["total_upper_bound"] < 1500
+
+
+# =========================================================================== v3: пересчёт отбора без нового счёта
+def _rescore_records(n=200, seed=11):
+    """придуманные записи уровня 1 (FIXTURE): частные баллы и TRL_min; оценка - по формуле v2 (без множителя)"""
+    import funnel_l0 as L0
+    rng = random.Random(seed)
+    out = []
+    for r in _synthetic(n, seed):
+        s = dict(parts=round(3 + 6 * rng.random(), 3), plugplay=round(3 + 6 * rng.random(), 3), service=round(3 + 6 * rng.random(), 3),
+                 effmake=round(3 + 6 * rng.random(), 3))
+        r.update(s_parts=s["parts"], s_plugplay=s["plugplay"], s_service=s["service"], s_effmake=s["effmake"], trl_min=rng.choice([3, 4, 5, 6, 9]),
+                 score=round(L0.weighted(s), 4), d_score_vs_l0=0.1, start_score=5.0, opt_gain=0.2, l0_score=5.0)
+        for c in L1.COLUMNS:
+            r.setdefault(c, None)
+        out.append(r)
+    return out
+
+
+def test_rescore_l1_records():
+    """режим пересчёта: оценка записи = funnel_l0.final_score(частные баллы, TRL_min) - та же функция, что у счёта; отбор 50 заново;
+    записи без баллов - без оценки; поля, которые не восстановить, обнуляются; повторный пересчёт ничего не меняет"""
+    import funnel_l0 as L0
+    recs = _rescore_records()
+    recs[5].update(s_parts=None, feasible=1)
+    old = {r["j"]: r["score"] for r in recs}
+    rs = M1.rescore(recs)
+    assert rs["rescored"] == len(recs) - 1 and rs["missing_scores"] == 1 and rs["missing_scores_feasible"] == 1
+    for r in recs:
+        if r["j"] == 5:
+            assert r["score"] is None and r["score_prev"] == old[5]
+            continue
+        s = dict(parts=r["s_parts"], plugplay=r["s_plugplay"], service=r["s_service"], effmake=r["s_effmake"])
+        assert math.isclose(r["score"], L0.final_score(s, r["trl_min"]), abs_tol=1e-4)
+        assert math.isclose(r["score"], old[r["j"]] * L0.trl_factor(r["trl_min"]), abs_tol=2e-4)
+        assert r["d_score_vs_l0"] is None and r["start_score"] is None and r["opt_gain"] is None
+    sel = M1.greedy(recs)
+    assert all(r["score"] >= M1.SCORE_MIN and r["feasible"] for r in sel) and 5 not in {r["j"] for r in sel}
+    # TRL 9 не теряет, TRL 3 теряет треть - отбор сдвигается к готовым технологиям
+    hi = [r for r in recs if r["trl_min"] == 9 and r["score"] is not None]
+    assert all(math.isclose(r["score"], r["score_prev"], abs_tol=1e-4) for r in hi)
+    again = [dict(r) for r in recs]
+    M1.rescore(again)
+    assert [r["score"] for r in again] == [r["score"] for r in recs]
+
+
+def test_rescore_merge_end_to_end(tmp_path):
+    """слияние частей в режиме пересчёта: без масштабирования и CalculiX, CSV с прежней и новой оценкой, отбор по новой оценке"""
+    import funnel_l0 as L0
+    recs = _rescore_records(60, 5)
+    cols = list(recs[0])
+    M, S = len(recs), 3
+    for k in range(S):
+        js = FS.shard_indices(M, k, S)
+        _part(str(tmp_path), k, S, M, js, dict(columns=cols, rows=[[recs[j][c] for c in cols] for j in js],
+                                               method="m", software="s", target={}, order_sha="y"))
+    r = M1.run_merge(M1.find_parts([str(tmp_path)], "KV-3", M, S), "KV-3", M, S, str(tmp_path / "out"), "_rs", rescore_mode=True,
+                     scale_kv=("KV-1",), fea_top=5)
+    assert r["res"]["rescore"]["rescored"] == M and r["res"]["calculix"]["cases"] == 0 and not r["res"]["scaling"]
+    by = {x["j"]: x for x in r["recs"]}
+    for e in r["sel"]:
+        assert math.isclose(by[e["j"]]["score"], by[e["j"]]["score_prev"] * L0.trl_factor(by[e["j"]]["trl_min"]), abs_tol=2e-4)
+    head = open(r["csv"], encoding="utf-8").readline()
+    assert "score_prev" in head and "k_trl" in head
