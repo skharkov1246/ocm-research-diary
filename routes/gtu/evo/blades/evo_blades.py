@@ -50,6 +50,8 @@ CONFIG = dict(
 def config_hash(scale):
     c = dict(CONFIG)
     c["scale"] = scale
+    cal = os.path.join(HERE, "disk1d_calibration.json")
+    c["calibration"] = C.files_hash([cal]) if os.path.exists(cal) else None
     return C.stable_hash(c)
 
 

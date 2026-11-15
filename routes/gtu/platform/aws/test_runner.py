@@ -1930,3 +1930,600 @@ def test_capacity_wait_cli_flag_and_guard(tmp_path):
     assert p.parse_args(["plan", "j.json", "--assume-price", "1", "--capacity-wait-polls", "3"]).capacity_wait_polls == 3
     with pytest.raises(R.RunnerError):
         R.validate_config(make_cfg(tmp_path, capacity_wait_polls=-1))
+
+
+# ============================================================================= версия 3: соседние мощности
+# Регионы, зоны и цены спота — из проверки сессии с ключами 15.11.2026 (без трат): c7a.16xlarge us-east-1 1c 0,703 /
+# 1b 0,747 / 1d 0,879; us-east-2 2b 0,601 / 2a 0,606 / 2c 0,940; us-west-2 2a 0,866 / 2d 0,952 / 2c 1,422.
+# Квоты в тестах задаются явно; id машин, подсетей и образов выдуманы (FIXTURE).
+V3_PRICES = {
+    "us-east-1": {"c7a.16xlarge": {"us-east-1c": 0.703, "us-east-1b": 0.747, "us-east-1d": 0.879},
+                  "c7i.16xlarge": {"us-east-1f": 1.213}},
+    "us-east-2": {"c7a.16xlarge": {"us-east-2b": 0.601, "us-east-2a": 0.606, "us-east-2c": 0.940},
+                  "c7i.16xlarge": {"us-east-2c": 0.676}},
+    "us-west-2": {"c7a.16xlarge": {"us-west-2a": 0.866, "us-west-2d": 0.952, "us-west-2c": 1.422},
+                  "c7i.16xlarge": {"us-west-2a": 0.888}},
+}
+V3_WMAX = 1.422                                     # максимум по всем зонам всех трёх регионов
+V3_MAXP = "1.7064"                                  # ceil(1.422 × 1.2, 4 знака) — MaxPrice в любом регионе
+AL2023_FALLBACK = {"Owners": ["amazon"], "Filters": [{"Name": "name", "Values": ["al2023-ami-2023*-x86_64"]},
+                                                     {"Name": "state", "Values": ["available"]},
+                                                     {"Name": "architecture", "Values": ["x86_64"]}]}
+
+
+class _RegionEc2(_FakeEc2):
+    """EC2 одного региона: свои зоны и подсети, квоты спота и по требованию (vCPU живых машин), отказы в правах."""
+
+    def describe_spot_price_history(self, InstanceTypes, **kw):
+        self.c.calls.append(("describe_spot_price_history", InstanceTypes[0]))
+        if "price" in self.c.deny:
+            raise cerr("UnauthorizedOperation", "DescribeSpotPriceHistory")
+        return super().describe_spot_price_history(InstanceTypes, **kw)
+
+    def describe_subnets(self, **kw):
+        self.c.calls.append(("describe_subnets", None))
+        return {"Subnets": [{"SubnetId": s, "AvailabilityZone": az, "MapPublicIpOnLaunch": True, "State": "available"}
+                            for az, s in sorted(self.c.subnets.items())]}
+
+    def describe_images(self, **kw):
+        self.c.calls.append(("describe_images", kw))
+        return {"Images": [
+            {"ImageId": "ami-0fixture00000old0", "CreationDate": "2026-10-01T00:00:00.000Z", "Name": "al2023-old-FIXTURE"},
+            {"ImageId": "ami-0fixture00000new0", "CreationDate": "2026-11-10T00:00:00.000Z", "Name": "al2023-new-FIXTURE"}]}
+
+    def run_instances(self, **p):
+        c = self.c
+        market = "spot" if "InstanceMarketOptions" in p else "on-demand"
+        c.runs.append(p)
+        c.calls.append(("run_instances", market))
+        if "run" in c.deny or (market == "on-demand" and "od" in c.deny):
+            raise cerr("UnauthorizedOperation", "RunInstances")
+        fails = c.fail_m.get(market) or []
+        if fails:
+            code = fails.pop(0)
+            if code:
+                raise cerr(code, "RunInstances")
+        vcpu = R.VCPU[p["InstanceType"]]
+        used = sum(i["vcpu"] for i in c.live() if i["market"] == market)
+        q = c.spot_q if market == "spot" else c.od_q
+        if q is not None and used + vcpu > q:
+            raise cerr("MaxSpotInstanceCountExceeded" if market == "spot" else "VcpuLimitExceeded", "RunInstances")
+        if "SubnetId" in p:
+            az = next(a for a, s in c.subnets.items() if s == p["SubnetId"])
+        else:
+            az = p.get("Placement", {}).get("AvailabilityZone") or sorted(c.subnets)[0]
+        tags = {t["Key"]: t["Value"] for t in p["TagSpecifications"][0]["Tags"]}
+        key = re.search(r"S3_KEY=(\S+)", p["UserData"]).group(1).strip("'")
+        attempt = int(re.search(r"GTU_ATTEMPT=(\d+)", p["UserData"]).group(1))
+        c.sky.n += 1
+        iid = f"i-{c.region[-6:].replace('-', '')}{c.sky.n:04d}"
+        c.inst[iid] = dict(state="running", t=c.clock(), job=tags["Job"], attempt=attempt, az=az, key=key, tags=tags,
+                           reason="", uploaded=False, vcpu=vcpu, token=p["ClientToken"], market=market,
+                           maxp=p.get("InstanceMarketOptions", {}).get("SpotOptions", {}).get("MaxPrice"))
+        live = c.live()
+        c.max_live = max(c.max_live, len(live))
+        c.max_vcpu = max(c.max_vcpu, sum(i["vcpu"] for i in live))
+        return {"Instances": [{"InstanceId": iid, "Placement": {"AvailabilityZone": az}}]}
+
+    def describe_instances(self, Filters, **kw):
+        self.c.calls.append(("describe_instances", sorted(x["Name"] for x in Filters)))
+        return super().describe_instances(Filters, **kw)
+
+    def terminate_instances(self, InstanceIds):
+        self.c.calls.append(("terminate_instances", list(InstanceIds)))
+        return super().terminate_instances(InstanceIds)
+
+
+class _RegionSsm:
+    def __init__(self, c):
+        self.c = c
+
+    def get_parameter(self, Name):
+        self.c.calls.append(("get_parameter", Name))
+        if self.c.ssm_denied:
+            raise cerr("AccessDeniedException", "GetParameter")
+        return {"Parameter": {"Value": f"ami-0fixture{self.c.region[-1]}0000000"}}
+
+
+class _RegionSq:
+    def __init__(self, c):
+        self.c = c
+
+    def get_service_quota(self, ServiceCode, QuotaCode):
+        self.c.calls.append(("get_service_quota", QuotaCode))
+        v = self.c.sq.get(QuotaCode) if self.c.sq is not None else None
+        if v is None:
+            raise cerr("AccessDeniedException", "GetServiceQuota")
+        return {"Quota": {"ServiceCode": ServiceCode, "QuotaCode": QuotaCode, "Value": float(v)}}
+
+
+class RegionCloud(FakeCloud):
+    def __init__(self, clock, region, sky, spot_q=None, od_q=None, sq=None, deny=(), ssm_denied=False,
+                 fail_spot=(), fail_od=(), **kw):
+        super().__init__(clock, prices=V3_PRICES[region], **kw)
+        self.region, self.sky, self.objects = region, sky, sky.objects        # бакет один на все регионы
+        zones = sorted({z for m in V3_PRICES[region].values() for z in m})
+        self.subnets = {z: f"subnet-0fixture{region[-1]}{z[-1]}000000" for z in zones}
+        self.spot_q, self.od_q, self.sq, self.deny, self.ssm_denied = spot_q, od_q, sq, set(deny), ssm_denied
+        self.fail_m = {"spot": list(fail_spot), "on-demand": list(fail_od)}
+        self.calls = []
+        self.ec2, self.ssm, self.sqc = _RegionEc2(self), _RegionSsm(self), _RegionSq(self)
+
+
+class _SkyS3(_FakeS3):
+    def get_object(self, Bucket, Key):
+        for cl in self.c.clouds.values():
+            cl.tick()
+        if Key not in self.c.objects:
+            raise cerr("NoSuchKey", "GetObject")
+        return {"Body": io.BytesIO(self.c.objects[Key])}
+
+
+class Sky:
+    """Несколько регионов одной заглушкой: общие часы и бакет (в us-east-1), клиенты регионов по запросу."""
+
+    def __init__(self, clock, **spec):
+        self.clock, self.objects, self.n, self.asked = clock, {}, 0, []
+        self.clouds = {}
+        for r, kw in spec.items():
+            self.clouds[r.replace("_", "-")] = RegionCloud(clock, r.replace("_", "-"), self, **kw)
+        self.s3 = _SkyS3(self)
+
+    def clients(self, region):
+        self.asked.append(region)
+        c = self.clouds[region]
+        return {"ec2": c.ec2, "ssm": c.ssm, "servicequotas": c.sqc}
+
+    def runner(self, tmp_path, out=None, **kw):
+        home = self.clouds["us-east-1"]
+        cfg = make_cfg(tmp_path, regions=kw.pop("regions", list(self.clouds)), **kw)
+        return R.Runner(cfg, home.ec2, self.s3, home.ssm, clock=self.clock, sleep=self.clock.sleep,
+                        out=(out.append if out is not None else (lambda m: None)), region_clients=self.clients)
+
+
+def sq_vals(spot=None, od=None):
+    return {R.QUOTA_CODES["spot"]: spot, R.QUOTA_CODES["on-demand"]: od}
+
+
+def test_v3_region_by_price_and_quota_full_batch(tmp_path):
+    """Квоты — из service-quotas каждого региона (us-east-2 — одна машина, us-west-2 — две). Первая часть — в
+    us-east-2 (0,601 × 1,05 < 0,703), шесть — в us-east-1, две — в us-west-2; квота ни одного региона не превышена,
+    MaxPrice и бюджет — по максимуму цены по всем регионам, журнал пишет регион, рынок и смету передачи."""
+    clk = Clock()
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(384, 384)), us_east_2=dict(sq=sq_vals(64, 5)),
+              us_west_2=dict(sq=sq_vals(128, 300)))
+    r = sky.runner(tmp_path, max_parallel=20)
+    res = r.run([make_job(name=f"p{i}") for i in range(9)])
+    assert all(v["status"] == "ok" and v["market"] == "spot" for v in res.values())
+    by = {}
+    for v in res.values():
+        by[v["region"]] = by.get(v["region"], 0) + 1
+    assert by == {"us-east-2": 1, "us-east-1": 6, "us-west-2": 2}
+    assert res["p0"]["region"] == "us-east-2" and res["p0"]["az"] == "us-east-2b"
+    for reg, q in (("us-east-1", 384), ("us-east-2", 64), ("us-west-2", 128)):
+        cl = sky.clouds[reg]
+        assert cl.max_vcpu <= q
+        assert {i["maxp"] for i in cl.inst.values()} == {V3_MAXP}             # MaxPrice — максимум по всем регионам
+    launches = ledger(tmp_path, "launch")
+    assert {(x["region"], x["market"]) for x in launches} == {("us-east-1", "spot"), ("us-east-2", "spot"),
+                                                              ("us-west-2", "spot")}
+    assert {x["region"]: x["xfer_usd"] for x in launches} == {"us-east-1": 0.0, "us-east-2": 0.2, "us-west-2": 0.2}
+    budget = ledger(tmp_path, "budget")
+    assert all(b["max_usd_h"] == float(V3_MAXP) and b["market"] == "spot" for b in budget)
+    assert budget[0]["regions"] == ["us-east-1", "us-east-2", "us-west-2"] and budget[0]["xfer_usd"] == 0.2
+    q = {(a, b): v for a, b, v, _src in ledger(tmp_path, "quotas")[0]["quotas"]}
+    assert q == {("us-east-1", "spot"): 384, ("us-east-2", "spot"): 64, ("us-west-2", "spot"): 128}
+    s = R.Ledger(tmp_path / "ledger.jsonl").summary()
+    assert s["open"] == [] and s["closed"] == 9
+    # закрытая машина соседнего региона несёт и смету передачи (разово)
+    one = next(x for x in launches if x["region"] == "us-east-2")
+    end = next(x for x in ledger(tmp_path, "end") if x["iid"] == one["iid"])
+    assert end["region"] == "us-east-2" and end["market"] == "spot"
+
+
+def test_v3_region_fallback_denied_capacity_and_image_from_describe_images(tmp_path):
+    """us-east-2 дешевле, но RunInstances — отказ в правах: регион исключён до конца прогона; в us-east-1 нет ёмкости
+    ни в одной зоне — следующий регион us-west-2, где SSM запрещён: образ al2023 — через DescribeImages (amazon,
+    самый свежий)."""
+    clk, out = Clock(), []
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(384), fail_spot=["InsufficientInstanceCapacity"] * 3),
+              us_east_2=dict(sq=sq_vals(384), deny=("run",)),
+              us_west_2=dict(sq=sq_vals(384), ssm_denied=True))
+    r = sky.runner(tmp_path, out=out)
+    r.load_quotas()
+    st, act = r.launch(make_job(name="a"))
+    assert st == "launched" and (act.region, act.az, act.market) == ("us-west-2", "us-west-2a", "spot")
+    w2 = sky.clouds["us-west-2"]
+    assert ("describe_images", AL2023_FALLBACK) in w2.calls
+    assert w2.runs[-1]["ImageId"] == "ami-0fixture00000new0"
+    assert sky.clouds["us-east-1"].runs[0]["ImageId"] == "ami-0fixture10000000"      # свой образ из SSM своего региона
+    assert ledger(tmp_path, "region_denied") and ledger(tmp_path, "region_denied")[0]["region"] == "us-east-2"
+    errs = [(x["region"], x["az"], x["code"]) for x in ledger(tmp_path, "launch_error")]
+    assert errs == [("us-east-2", "us-east-2b", "UnauthorizedOperation"),
+                    ("us-east-1", "us-east-1c", "InsufficientInstanceCapacity"),
+                    ("us-east-1", "us-east-1b", "InsufficientInstanceCapacity"),
+                    ("us-east-1", "us-east-1d", "InsufficientInstanceCapacity")]
+    assert any("регион исключён до конца прогона" in m for m in out)
+    # следующая задача в us-east-2 больше не просится; у us-east-1 все зоны только что отказали по ёмкости —
+    # регион в конце очереди (на avoid_s), задача идёт в us-west-2
+    n_e2, n_e1 = len(sky.clouds["us-east-2"].runs), len(sky.clouds["us-east-1"].runs)
+    st2, act2 = r.launch(make_job(name="b"))
+    assert st2 == "launched" and act2.region == "us-west-2"
+    assert len(sky.clouds["us-east-2"].runs) == n_e2 and len(sky.clouds["us-east-1"].runs) == n_e1
+    assert any("us-east-1 0.7030 (зоны после сбоя)" in m for m in out)
+    clk.sleep(R.Config.avoid_s + 1)                                          # срок «после сбоя» прошёл — снова us-east-1
+    st3, act3 = r.launch(make_job(name="c"))
+    assert st3 == "launched" and (act3.region, act3.az) == ("us-east-1", "us-east-1c")
+
+
+def test_v3_image_fallback_only_in_v3_mode(tmp_path):
+    """Без новых флагов запасного DescribeImages для al2023 нет (как в версии 2): отказ SSM — image_unavailable."""
+    clk = Clock()
+    sky = Sky(clk, us_east_1=dict(ssm_denied=True))
+    home = sky.clouds["us-east-1"]
+    r = R.Runner(make_cfg(tmp_path), home.ec2, sky.s3, home.ssm, clock=clk, out=lambda m: None)
+    assert not r.v3 and r.launch(make_job())[0] == "image_unavailable"
+    assert not [c for c in home.calls if c[0] == "describe_images"] and home.runs == []
+
+
+def test_v3_on_demand_when_spot_unavailable_everywhere(tmp_path):
+    """--on-demand-fallback: спот нигде не дал машину (ёмкость во всех зонах всех регионов, оба типа) — машина по
+    требованию по цене справочника: без InstanceMarketOptions, тег Market, журнал market=on-demand, бюджет — по
+    максимуму цены справочника × запас; квота по требованию своя (us-east-1 — одна машина, вторая — в us-west-2)."""
+    clk = Clock()
+    n1, n2 = 3 + 1, 3 + 1          # зоны c7a + зона c7i в каждом регионе
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(384, 64), fail_spot=["InsufficientInstanceCapacity"] * (2 * n1)),
+              us_west_2=dict(sq=sq_vals(384, 300), fail_spot=["InsufficientInstanceCapacity"] * (2 * n2)))
+    r = sky.runner(tmp_path, regions=["us-east-1", "us-west-2"], on_demand_fallback=True)
+    r.load_quotas()
+    st, act = r.launch(make_job(name="a"))
+    assert st == "launched" and (act.region, act.market, act.itype) == ("us-east-1", "on-demand", "c7a.16xlarge")
+    p = sky.clouds["us-east-1"].runs[-1]
+    assert "InstanceMarketOptions" not in p and p["InstanceInitiatedShutdownBehavior"] == "terminate"
+    assert {"Key": "Market", "Value": "on-demand"} in p["TagSpecifications"][0]["Tags"]
+    assert p["UserData"].splitlines()[1] == "shutdown -P +60"                # сторож — тот же
+    L = ledger(tmp_path, "launch")[-1]
+    assert (L["market"], L["region"], L["spot_usd_h"], L["max_usd_h"]) == ("on-demand", "us-east-1", 3.2845, 3.9414)
+    b = ledger(tmp_path, "budget")[-1]
+    assert (b["market"], b["max_usd_h"], b["ok"]) == ("on-demand", 3.9414, True)
+    r.active[act.iid] = act
+    st2, act2 = r.launch(make_job(name="b"))                                   # квота по требованию us-east-1 занята
+    assert st2 == "launched" and (act2.region, act2.market) == ("us-west-2", "on-demand")
+    # без флага — машины по требованию нет, статус capacity с пояснением
+    clk3 = Clock()
+    sky3 = Sky(clk3, us_east_1=dict(sq=sq_vals(384, 384), fail_spot=["InsufficientInstanceCapacity"] * 100))
+    r3 = sky3.runner(tmp_path / "c", regions=["us-east-1", "us-west-2"] if False else ["us-east-1"],
+                     vcpu_quota_region={"us-east-1": 384})
+    assert not r3.v3                                                           # один регион без флагов — версия 2
+    r3b = sky3.runner(tmp_path / "d", regions=["us-east-1"], on_demand_fallback=False)
+    assert r3b.launch(make_job(name="c"))[0] == "capacity"
+    assert all(c[1] == "spot" for c in sky3.clouds["us-east-1"].calls if c[0] == "run_instances")
+
+
+def test_v3_on_demand_when_own_spot_quota_exhausted(tmp_path):
+    """Квота спота занята своими машинами, квота по требованию есть: при --on-demand-fallback очередь занимает и её
+    (решение владельца 15.11.2026: «займи соседние мощности»); бюджет — перед каждым запуском."""
+    clk = Clock()
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(128, 128)))
+    r = sky.runner(tmp_path, regions=["us-east-1"], on_demand_fallback=True, max_parallel=10)
+    res = r.run([make_job(name=f"p{i}") for i in range(4)])
+    assert all(v["status"] == "ok" for v in res.values())
+    mk = sorted(v["market"] for v in res.values())
+    assert mk == ["on-demand", "on-demand", "spot", "spot"]
+    cl = sky.clouds["us-east-1"]
+    assert max(sum(1 for i in cl.inst.values() if i["market"] == "spot" and i["t"] <= t) for t in (T0,)) == 2
+    recs = ledger(tmp_path)
+    for L in [x for x in recs if x["ev"] == "launch"]:
+        prev = recs[recs.index(L) - 1]
+        assert prev["ev"] == "budget" and prev["job"] == L["job"] and prev["market"] == L["market"] and prev["ok"]
+
+
+def test_v3_budget_by_max_across_regions_is_conservative(tmp_path):
+    """Потолок пропускает задачу по ценам одного us-east-1, но не по максимуму по всем разрешённым регионам."""
+    clk = Clock()
+    job = make_job()
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(384)), us_west_2=dict(sq=sq_vals(384)))
+    ebs_h = 50 * 0.08 / 730
+    only_e1 = (math_ceil4(0.879 * 1.2) + ebs_h + 0.005) * 70 / 60
+    with_w2 = (math_ceil4(V3_WMAX * 1.2) + ebs_h + 0.005) * 70 / 60 + 10 * 0.02
+    ceiling = round((only_e1 + with_w2) / 2, 2)
+    r = sky.runner(tmp_path, regions=["us-east-1", "us-west-2"], ceiling=ceiling)
+    r.load_quotas()
+    assert r.launch(job)[0] == "refused"
+    b = ledger(tmp_path, "budget")
+    assert b[0]["new"] == pytest.approx(with_w2, abs=1e-3) and not b[0]["ok"] and b[0]["xfer_usd"] == 0.2
+    v2 = R.Runner(make_cfg(tmp_path / "v2", ceiling=ceiling), sky.clouds["us-east-1"].ec2, sky.s3,
+                  sky.clouds["us-east-1"].ssm, clock=clk, out=lambda m: None)
+    assert v2.launch(make_job())[0] == "launched"                             # один регион — по своему максимуму
+
+
+def math_ceil4(x):
+    import math
+    return math.ceil(x * 10000) / 10000.0
+
+
+def test_v3_reap_and_final_reaper_cover_all_regions(tmp_path):
+    """Сборщик ищет машины прогона по тегам в каждом регионе прогона и гасит каждую клиентом её региона;
+    соседний прогон в том же регионе не трогается."""
+    clk, out = Clock(), []
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(64)), us_east_2=dict(sq=sq_vals(64)), us_west_2=dict(sq=sq_vals(64)))
+    r = sky.runner(tmp_path, out=out, max_parallel=10)
+    r.load_quotas()
+    acts = []
+    for n in ("a", "b", "c"):
+        st, act = r.launch(make_job(name=n))
+        assert st == "launched"
+        r.active[act.iid] = act
+        acts.append(act)
+    assert sorted(a.region for a in acts) == ["us-east-1", "us-east-2", "us-west-2"]
+    stray = sky.clouds["us-west-2"]
+    stray.inst["i-stray0001"] = dict(state="running", t=T0, job="x", attempt=1, az="us-west-2a", key="k",
+                                     tags=own_tags(run="other-run-FIXTURE"), reason="", uploaded=True, vcpu=64,
+                                     token="t", market="spot", maxp=None)
+    got = r.reap("тест", known=list(r.active))
+    assert sorted(got) == sorted(a.iid for a in acts)
+    for a in acts:
+        cl = sky.clouds[a.region]
+        assert ("terminate_instances", [a.iid]) in cl.calls and cl.inst[a.iid]["state"] == "terminated"
+        assert sum(1 for c in cl.calls if c[0] == "describe_instances" and "tag:RunId" in c[1]) == 1
+    assert stray.inst["i-stray0001"]["state"] == "running"
+    assert R.Ledger(tmp_path / "ledger.jsonl").summary()["open"] == []
+
+
+def test_v3_reconcile_and_cli_reap_by_ledger_regions(tmp_path, monkeypatch):
+    """Сверка ищет открытые машины в их регионах (поле region журнала): погашенная в us-west-2 — закрыта, живая после
+    срока в us-east-2 — погашена клиентом us-east-2. Ручной reap без --regions находит регионы прогона по журналу —
+    и так же работает раннер без новых флагов (журнал с записями версии 3)."""
+    clk = Clock(T0 + 5 * 3600)
+    sky = Sky(clk, us_east_1=dict(), us_east_2=dict(), us_west_2=dict())
+    e2 = sky.clouds["us-east-2"]
+    e2.inst["i-zombie0001"] = dict(state="running", t=T0, job="y", attempt=1, az="us-east-2b", key="k",
+                                   tags=own_tags(job="y"), reason="", uploaded=True, vcpu=64, token="t",
+                                   market="spot", maxp=None)
+    base = {"ev": "launch", "run_id": RUN, "itype": "c7a.16xlarge", "spot_usd_h": 0.6, "max_usd_h": 1.7,
+            "ebs_usd_h": 0.0, "ip_usd_h": 0.0, "t_launch": T0, "allot_min": 70, "market": "spot", "xfer_usd": 0.2}
+    write_ledger(tmp_path / "ledger.jsonl", [dict(base, job="x", iid="i-gone0001", az="us-west-2a", region="us-west-2"),
+                                             dict(base, job="y", iid="i-zombie0001", az="us-east-2b", region="us-east-2")])
+    home = sky.clouds["us-east-1"]
+    r = R.Runner(make_cfg(tmp_path), home.ec2, sky.s3, home.ssm, clock=clk, out=lambda m: None,
+                 region_clients=sky.clients)
+    assert not r.v3
+    r.reconcile()
+    ends = {x["iid"]: x["outcome"] for x in ledger(tmp_path, "end")}
+    assert ends == {"i-gone0001": "reconciled", "i-zombie0001": "reaped_overdue"}
+    assert ("terminate_instances", ["i-zombie0001"]) in e2.calls
+    assert not [c for c in home.calls if c[0] in ("describe_instances", "terminate_instances")]
+    s = R.Ledger(tmp_path / "ledger.jsonl").summary()
+    assert s["open"] == [] and s["spent"] == pytest.approx(0.6 * 70 / 60 + 0.2 + 0.6 * 5 + 0.2)
+    # CLI reap: регионы прогона — из журнала; машина в us-west-2 найдена по тегам и погашена там
+    monkeypatch.setenv("ALPHA_O_S3", f"s3://{BUCKET}/{PREFIX}")
+    monkeypatch.setenv("ALPHA_O_INSTANCE_PROFILE", "gtu-test-profile")
+    w2 = sky.clouds["us-west-2"]
+    w2.inst["i-late0001"] = dict(state="running", t=T0, job="z", attempt=1, az="us-west-2a", key="k",
+                                 tags=own_tags(job="z"), reason="", uploaded=True, vcpu=64, token="t", market="spot",
+                                 maxp=None)
+    monkeypatch.setattr(R, "_clients", lambda region: (home.ec2, sky.s3, home.ssm, None))
+    monkeypatch.setattr(R, "_region_clients", sky.clients)
+    assert R.main(["reap", "--run-id", RUN, "--ledger", str(tmp_path / "ledger.jsonl")]) == 0
+    assert w2.inst["i-late0001"]["state"] == "terminated" and ("terminate_instances", ["i-late0001"]) in w2.calls
+    assert sorted(set(sky.asked)) == ["us-east-2", "us-west-2"]                # клиент us-east-1 — из _clients
+
+
+def test_v3_backward_compat_no_flags_same_calls_and_ledger(tmp_path):
+    """Без новых флагов: клиенты соседних регионов не запрашиваются, service-quotas и справочник цен не читаются,
+    в журнале нет полей версии 3, последовательность вызовов — как в версии 2 (сверено с кодом версии 2
+    дифференциально: 22 сценария заглушки и plan по всем файлам задач — вызовы, журнал и вывод совпали)."""
+    clk = Clock()
+    cloud = FakeCloud(clk)
+    calls = []
+
+    class Rec:
+        def __init__(self, inner, name):
+            self.i, self.n = inner, name
+
+        def __getattr__(self, op):
+            f = getattr(self.i, op)
+
+            def call(**kw):
+                calls.append(f"{self.n}.{op}")
+                return f(**kw)
+            return call
+
+    def no_region(region):
+        raise AssertionError(f"клиент региона {region} запрошен без новых флагов")
+    cfg = make_cfg(tmp_path, price_ref=tmp_path / "нет-такого-файла.json")
+    assert not cfg.multi and cfg.region_list == ["us-east-1"]
+    r = R.Runner(cfg, Rec(cloud.ec2, "ec2"), Rec(cloud.s3, "s3"), Rec(cloud.ssm, "ssm"), clock=clk, sleep=clk.sleep,
+                 out=lambda m: None, region_clients=no_region)
+    res = r.run([make_job(name="a")])
+    assert res["a"]["status"] == "ok" and "region" not in res["a"] and "market" not in res["a"]
+    # последовательность записана с кода версии 2 (коммит 303e81c) на этой же заглушке
+    assert calls == ["ec2.describe_spot_price_history", "ssm.get_parameter", "ec2.describe_subnets",
+                     "ec2.run_instances", "ec2.describe_instances", "s3.get_object", "ec2.describe_instances",
+                     "s3.get_object", "ec2.describe_instances", "s3.get_object", "ec2.describe_instances",
+                     "s3.get_object", "ec2.describe_instances", "s3.get_object", "s3.list_objects_v2",
+                     "s3.get_object", "s3.get_object", "ec2.terminate_instances", "ec2.describe_instances"]
+    v3_fields = {"region", "market", "xfer_usd", "regions", "quotas", "on_demand_fallback"}
+    for x in ledger(tmp_path):
+        assert not (v3_fields & set(x)), x
+        assert x["ev"] not in ("quotas", "region_denied")
+
+
+def test_v3_quota_sources_and_zero_quota_region_unused(tmp_path):
+    """Квота: service-quotas; флаг ниже фактической — флаг; выше — фактическая (сверх неё не запускаем);
+    service-quotas не ответил — флаг, иначе запасное (region — --max-vcpu, соседний — 0: регион не используется)."""
+    clk, out = Clock(), []
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(384, 384)), us_east_2=dict(sq=sq_vals(5, 5)),
+              us_west_2=dict(sq=None))
+    r = sky.runner(tmp_path, out=out, vcpu_quota_region={"us-east-1": 128, "us-east-2": 1536},
+                   on_demand_fallback=True)
+    r.load_quotas()
+    src = {(a, b): (v, s) for a, b, v, s in ledger(tmp_path, "quotas")[0]["quotas"]}
+    assert src[("us-east-1", "spot")][0] == 128 and src[("us-east-1", "spot")][1].startswith("флаг (service-quotas")
+    assert src[("us-east-2", "spot")][0] == 5 and "взята фактическая" in src[("us-east-2", "spot")][1]
+    assert src[("us-west-2", "spot")] == (0, "запасное (service-quotas: AccessDeniedException)")
+    assert src[("us-east-1", "on-demand")][0] == 384
+    assert any("us-west-2 спот: 0 vCPU" in m and "регион не используется" in m for m in out)
+    st, act = r.launch(make_job(name="a"))
+    assert st == "launched" and act.region == "us-east-1"                   # us-east-2: 5 vCPU, машина 64 не влезает
+    assert not [c for c in sky.clouds["us-east-2"].calls if c[0] == "run_instances"]
+    assert not [c for c in sky.clouds["us-west-2"].calls if c[0] == "run_instances"]
+    # флаг выше фактической и без service-quotas: --vcpu-quota-per-region us-west-2=384 — по флагу
+    r2 = Sky(Clock(), us_east_1=dict(sq=None), us_west_2=dict(sq=None)).runner(
+        tmp_path / "b", vcpu_quota_region={"us-west-2": 384}, vcpu_quota=384, vcpu_quota_explicit=True)
+    assert r2.quota("us-west-2") == 384 and r2._quota[("us-west-2", "spot")][1] == "флаг (service-quotas: AccessDeniedException)"
+    assert r2.quota("us-east-1") == 384
+
+
+def test_v3_max_parallel_auto_and_queue_waits_per_region_quota(tmp_path):
+    """--max-parallel не задан: машин — по сумме квот / 64; очередь ждёт, пока освободится квота любого региона."""
+    clk = Clock()
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(128)), us_west_2=dict(sq=sq_vals(64)))
+    r = sky.runner(tmp_path, regions=["us-east-1", "us-west-2"], max_parallel_auto=True)
+    res = r.run([make_job(name=f"p{i}") for i in range(5)])
+    assert r.cfg.max_parallel == 6                                          # max(6, 192 // 64)
+    assert all(v["status"] == "ok" for v in res.values())
+    assert sky.clouds["us-east-1"].max_vcpu <= 128 and sky.clouds["us-west-2"].max_vcpu <= 64
+    late = [x for x in ledger(tmp_path, "launch") if x["t_launch"] > T0]
+    assert len(late) == 2                                                   # 3 сразу (2 + 1), 2 — после освобождения
+    clk2 = Clock()
+    sky2 = Sky(clk2, us_east_1=dict(sq=sq_vals(1024)), us_west_2=dict(sq=sq_vals(1024)))
+    r2 = sky2.runner(tmp_path / "b", regions=["us-east-1", "us-west-2"], max_parallel_auto=True)
+    r2.load_quotas()
+    assert r2.cfg.max_parallel == 32
+
+
+def test_v3_dryrun_spreads_waves_and_skips_denied_region(tmp_path):
+    """DryRun версии 3: задачи пакета раскладываются по регионам «волнами» квот — права проверяются в каждом регионе;
+    отказ в правах в регионе — следующий регион, итог задачи dryrun_ok."""
+    clk = Clock()
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(128)), us_east_2=dict(sq=sq_vals(64), deny=("run",)),
+              us_west_2=dict(sq=sq_vals(64)))
+
+    class DryEc2(_RegionEc2):
+        def run_instances(self, **p):
+            if p.pop("DryRun", False):
+                self.c.calls.append(("run_instances_dry", None))
+                if "run" in self.c.deny:
+                    raise cerr("UnauthorizedOperation", "RunInstances")
+                raise cerr("DryRunOperation", "RunInstances")
+            return super().run_instances(**p)
+    for cl in sky.clouds.values():
+        cl.ec2 = DryEc2(cl)
+    r = sky.runner(tmp_path, dryrun=True)
+    res = r.run([make_job(name=f"p{i}") for i in range(5)])
+    assert all(v["status"] == "dryrun_ok" for v in res.values())
+    dry = {reg: sum(1 for c in cl.calls if c[0] == "run_instances_dry") for reg, cl in sky.clouds.items()}
+    assert dry == {"us-east-1": 4, "us-east-2": 1, "us-west-2": 1}          # us-east-2 — один отказ, затем исключён
+    assert [w for w, *_ in r._placements] == [1, 1, 1, 2, 2]
+    assert not (tmp_path / "ledger.jsonl").exists()                          # общий журнал не тронут
+
+
+def test_v3_plan_cli_regions_waves_and_on_demand(tmp_path, capsys, monkeypatch):
+    monkeypatch.setenv("ALPHA_O_S3", f"s3://{BUCKET}/{PREFIX}")
+    f = tmp_path / "jobs.json"
+    f.write_text(json.dumps([{"name": f"p{i}", "command": "true", "max_min": 60} for i in range(8)]))
+    common = ["--ledger", str(tmp_path / "l.jsonl"), "--out", str(tmp_path / "runs")]
+    rc = R.main(["plan", str(f), "--assume-price", "0.9", "--regions", "us-east-1,us-east-2,us-west-2",
+                 "--assume-zone-prices", "us-east-1c=0.703,us-east-1b=0.747,us-east-2b=0.601,us-west-2a=0.866",
+                 "--vcpu-quota-per-region", "us-east-1=256,us-east-2=64,us-west-2=128", *common])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "[регион] p0: us-east-2, спот (волна 1)" in out and "[регион] p1: us-east-1, спот (волна 1)" in out
+    assert "[план] волна 1: us-east-2 спот ×1, us-east-1 спот ×4, us-west-2 спот ×2" in out
+    assert "[план] волна 2: us-east-2 спот ×1" in out
+    assert "MaxPrice 1.0800" in out                                          # ceil(0.9 × 1.2): assume-price — максимум окна
+    assert '"SubnetId": "<подсеть по умолчанию us-east-2b>"' in out
+    assert "@us-east-2; отказ — DescribeImages amazon al2023-ami-2023*-x86_64" in out
+    assert "--max-parallel не задан: 7 машин" in out
+    assert not (tmp_path / "l.jsonl").exists() and BUCKET not in out
+    rc = R.main(["plan", str(f), "--assume-price", "0.9", "--regions", "us-east-1,us-west-2", "--on-demand-fallback",
+                 "--assume-no-spot", "--od-vcpu-quota-per-region", "us-east-1=128,us-west-2=300", *common])
+    out = capsys.readouterr().out
+    assert rc == 0 and '"MarketType"' not in out and '"Value": "on-demand"' in out
+    assert "[план] волна 1: us-east-1 по требованию ×2, us-west-2 по требованию ×4" in out
+    assert "цена справочника 3.2845" in out and "верхняя граница 3.9414" in out
+    assert R.main(["plan", str(f), "--assume-price", "0.9", "--assume-no-spot", *common]) == 2   # без --on-demand-fallback
+    assert "--assume-no-spot" in capsys.readouterr().err
+
+
+def test_v3_price_ref_file_and_guards(tmp_path):
+    ref = R.load_price_ref(R.PRICE_REF)
+    assert ref["date"] == "2026-11-15" and "предварительно" in ref["status"]
+    od = ref["on_demand_usd_h"]
+    assert set(od["c7a.16xlarge"]) == {"us-east-1", "us-east-2", "us-west-2"} and od["c7i.16xlarge"]["us-east-1"] > 0
+    assert ref["xfer_usd_gb"]["default"] == pytest.approx(0.02)
+    raw = json.loads(R.PRICE_REF.read_text(encoding="utf-8"))
+    assert set(raw["sources"]) >= {"c7a.16xlarge", "c7i.16xlarge", "xfer_usd_gb"}
+    bad = tmp_path / "ref.json"
+    for data in ({"on_demand_usd_h": {}}, {"on_demand_usd_h": {"c7a.16xlarge": {"us-east-1": 0}}, "xfer_usd_gb": {"default": 0.02}},
+                 {"on_demand_usd_h": {}, "xfer_usd_gb": {}}):
+        bad.write_text(json.dumps(data))
+        with pytest.raises(R.RunnerError):
+            R.load_price_ref(bad)
+    # битый справочник в режиме версии 3 — отказ до первого запуска
+    clk = Clock()
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(384)), us_west_2=dict(sq=sq_vals(384)))
+    r = sky.runner(tmp_path, regions=["us-east-1", "us-west-2"], price_ref=bad)
+    with pytest.raises(R.RunnerError):
+        r.run([make_job(name="a")])
+    assert sky.clouds["us-east-1"].runs == [] and sky.clouds["us-west-2"].runs == []
+
+
+def test_v3_flags_parse_and_validation(tmp_path):
+    assert R.parse_regions("us-east-1, us-west-2,us-east-1") == ["us-east-1", "us-west-2"]
+    assert R.parse_region_ints("us-east-1=384,us-west-2=300", "--x") == {"us-east-1": 384, "us-west-2": 300}
+    for bad in ("", "us-east", "US-EAST-1", "us-east-1;rm"):
+        with pytest.raises(R.RunnerError):
+            R.parse_regions(bad)
+    for bad in ("us-east-1=-1", "us-east-1=x", "nope=5", ""):
+        with pytest.raises(R.RunnerError):
+            R.parse_region_ints(bad, "--x")
+    p = R.build_parser()
+    a = p.parse_args(["run", "j.json"])
+    assert a.regions is None and not a.on_demand_fallback and a.max_parallel == 6 and a.vcpu_quota == 384
+    cfg = R._config_from_args(a, need_env=False)
+    assert not cfg.multi and cfg.max_parallel_auto and not cfg.vcpu_quota_explicit
+    a = p.parse_args(["run", "j.json", "--regions", "us-east-1,us-west-2", "--max-vcpu", "384", "--max-parallel", "8",
+                      "--vcpu-quota-per-region", "us-west-2=384", "--on-demand-fallback", "--xfer-gb", "2"])
+    cfg = R._config_from_args(a, need_env=False)
+    assert cfg.multi and cfg.region_list == ["us-east-1", "us-west-2"] and cfg.on_demand_fallback
+    assert cfg.vcpu_quota_explicit and not cfg.max_parallel_auto and cfg.max_parallel == 8 and cfg.xfer_gb == 2
+    assert R._config_from_args(p.parse_args(["run", "j.json", "--on-demand-fallback"]), need_env=False).multi
+    for kw in ({"region_price_margin": -0.1}, {"xfer_gb": -1.0}, {"vcpu_quota_fallback": -1}, {"regions": ["bad"]}):
+        with pytest.raises(R.RunnerError):
+            R.validate_config(make_cfg(tmp_path, **kw))
+
+
+def test_v3_status_breakdown_by_region_and_market(tmp_path, capsys):
+    led = tmp_path / "ledger.jsonl"
+    base = {"ev": "launch", "run_id": RUN, "itype": "c7a.16xlarge", "ebs_usd_h": 0.0, "ip_usd_h": 0.0,
+            "t_launch": T0, "allot_min": 60, "job": "j"}
+    write_ledger(led, [
+        dict(HIST[0]), dict(HIST[1]),                                                    # запись версии 2
+        dict(base, iid="i-a", region="us-east-2", market="spot", spot_usd_h=0.6, max_usd_h=1.7, xfer_usd=0.2),
+        {"ev": "end", "run_id": RUN, "job": "j", "iid": "i-a", "t_end": T0 + 3600},
+        dict(base, iid="i-b", region="us-east-1", market="on-demand", spot_usd_h=3.2845, max_usd_h=3.9414, xfer_usd=0.0)])
+    assert R.main(["status", "--ledger", str(led)]) == 0
+    out = capsys.readouterr().out
+    assert "us-east-2 спот: закрыто 1, ≈ 0.80 долл.; открыто 0" in out
+    assert "us-east-1 по требованию: закрыто 0, ≈ 0.00 долл.; открыто 1, верхняя граница 3.94 долл." in out
+    assert "us-east-1 (журнал v2) спот: закрыто 1" in out
+    s = R.Ledger(led).summary()
+    assert s["spent"] == pytest.approx(1.01 + 0.6 + 0.2) and s["committed"] == pytest.approx(3.9414)
+
+
+def test_v3_lost_on_demand_machine_retried_and_terminated_in_its_region(tmp_path):
+    """Машина по требованию в соседнем регионе пропала без метки — повтор (в свой префикс), гашение итоговой
+    машины — клиентом её региона; зона после сбоя по требованию не мешает споту той же зоны."""
+    clk = Clock()
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(0, 0)), us_west_2=dict(sq=sq_vals(0, 300)))
+    w2 = sky.clouds["us-west-2"]
+    w2.interrupt = {("a", 1): 120}
+    r = sky.runner(tmp_path, regions=["us-east-1", "us-west-2"], on_demand_fallback=True)
+    res = r.run([make_job(name="a")])["a"]
+    assert (res["status"], res["attempts"], res["region"], res["market"]) == ("ok", 2, "us-west-2", "on-demand")
+    assert all(c[1] == "on-demand" for c in w2.calls if c[0] == "run_instances")
+    assert r._avoided("c7a.16xlarge/od", "us-west-2a") and not r._avoided("c7a.16xlarge", "us-west-2a")
+    term = [c for c in w2.calls if c[0] == "terminate_instances"]
+    assert term and not [c for c in sky.clouds["us-east-1"].calls if c[0] == "terminate_instances"]
