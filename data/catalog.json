@@ -4,12 +4,12 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 454,
-    "total_bytes": 17986132,
-    "results_files": 194,
+    "datasets": 456,
+    "total_bytes": 18180481,
+    "results_files": 195,
     "results_with_script": 62,
     "results_referenced_in_site": 22,
-    "results_with_provenance_fields": 45,
+    "results_with_provenance_fields": 46,
     "by_track": {
       "ammonia": 91,
       "battery-cathode": 1,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 134,
+      "не определён": 136,
       "прочее": 25
     }
   },
@@ -7602,7 +7602,7 @@
       "path": "routes/gtu/funnel/l0_aws_full/funnel_l0_results_KV-1_n50000.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 795774,
+      "bytes": 716030,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -7637,15 +7637,15 @@
         "software",
         "date"
       ],
-      "last_change": "2026-11-14",
+      "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "f47b2cb"
+      "last_commit": "f5d499b"
     },
     {
       "path": "routes/gtu/funnel/l0_aws_full/funnel_l0_results_KV-3_n200000.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 793016,
+      "bytes": 474388,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -7680,15 +7680,15 @@
         "software",
         "date"
       ],
-      "last_change": "2026-11-14",
+      "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "f47b2cb"
+      "last_commit": "f5d499b"
     },
     {
       "path": "routes/gtu/funnel/l0_aws_full/funnel_l0_results_KV-6_n50000.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 528255,
+      "bytes": 653666,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -7723,15 +7723,15 @@
         "software",
         "date"
       ],
-      "last_change": "2026-11-14",
+      "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "f47b2cb"
+      "last_commit": "f5d499b"
     },
     {
       "path": "routes/gtu/funnel/l0_aws_full/funnel_l0_select_KV-1_n50000.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 1467339,
+      "bytes": 1051277,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -7755,15 +7755,15 @@
         "software",
         "date"
       ],
-      "last_change": "2026-11-14",
+      "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "f47b2cb"
+      "last_commit": "f5d499b"
     },
     {
       "path": "routes/gtu/funnel/l0_aws_full/funnel_l0_select_KV-3_n200000.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 1159680,
+      "bytes": 1464683,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -7787,15 +7787,15 @@
         "software",
         "date"
       ],
-      "last_change": "2026-11-14",
+      "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "f47b2cb"
+      "last_commit": "f5d499b"
     },
     {
       "path": "routes/gtu/funnel/l0_aws_full/funnel_l0_select_KV-6_n50000.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 7726,
+      "bytes": 510850,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -7819,9 +7819,9 @@
         "software",
         "date"
       ],
-      "last_change": "2026-11-14",
+      "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "f47b2cb"
+      "last_commit": "f5d499b"
     },
     {
       "path": "routes/gtu/funnel/READY_L0.json",
@@ -8007,16 +8007,17 @@
       "path": "routes/gtu/organic/feed_to_funnels.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 26751,
+      "bytes": 32881,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
         "cycles",
-        "thermal"
+        "thermal",
+        "structure"
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "d66e3a0"
+      "last_commit": "3e14b35"
     },
     {
       "path": "routes/gtu/organic/jobs_aws_organic.json",
@@ -8149,6 +8150,36 @@
       "last_commit": "a09c9fa"
     },
     {
+      "path": "routes/gtu/organic/structure/profile_opt_comp2.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 39713,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "date",
+        "method",
+        "software",
+        "knots_m",
+        "base",
+        "n_eval",
+        "cobyla",
+        "best",
+        "history",
+        "check_160x24",
+        "seconds"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "3e14b35"
+    },
+    {
       "path": "routes/gtu/organic/structure/profile_opt_eq.json",
       "track": "не определён",
       "kind": "данные",
@@ -8248,6 +8279,37 @@
       "last_change": "2026-11-15",
       "last_author": "Claude",
       "last_commit": "497bb58"
+    },
+    {
+      "path": "routes/gtu/organic/structure/structure_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 28997,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "date",
+        "method",
+        "software",
+        "status",
+        "inputs",
+        "turbine_disk_stage1",
+        "compressor_wheel_stage2",
+        "lattice",
+        "shell",
+        "topo3d_demo",
+        "geometry",
+        "aws"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "3e14b35"
     },
     {
       "path": "routes/gtu/organic/structure/topo3d_demo_results.json",
@@ -8371,7 +8433,7 @@
       "path": "routes/gtu/organic/thermal/tpms_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 56404,
+      "bytes": 56809,
       "referenced_in_site": false,
       "produced_by": "routes/tpms.py",
       "shape": "объект",
@@ -8386,7 +8448,8 @@
         "transport",
         "recuperator",
         "stl",
-        "runtime_s"
+        "runtime_s",
+        "postprocess"
       ],
       "provenance_fields": [
         "method",
@@ -8395,7 +8458,7 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "d66e3a0"
+      "last_commit": "3e14b35"
     },
     {
       "path": "routes/gtu/organic/thermal/tpms_transport_mac32.json",
