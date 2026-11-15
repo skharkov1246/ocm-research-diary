@@ -5,7 +5,7 @@
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
     "datasets": 510,
-    "total_bytes": 21406738,
+    "total_bytes": 21406677,
     "results_files": 209,
     "results_with_script": 67,
     "results_referenced_in_site": 22,
@@ -10754,7 +10754,7 @@
       "path": "routes/gtu/process/blocks/blocks_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 61679,
+      "bytes": 61618,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -10779,7 +10779,7 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "b10b1b7"
+      "last_commit": "57e6a76"
     },
     {
       "path": "routes/gtu/process/mass/mass_calibration.json",
