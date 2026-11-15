@@ -1,0 +1,258 @@
+{
+ "_comment": "Задачи семейства routes/gtu/evo/shell (README семейства, раздел «AWS»). Раннер берёт только defaults и jobs. Пакет 1 — острова MAP-Elites (20 задач), пакет 2 — CalculiX элит мини-прогона (4 задачи). Перед прогоном закоммитить routes/gtu/evo вместе с verify_elites.json. Сгенерировано make_jobs_evo_shell.py; правки — в нём.",
+ "defaults": {
+  "instance_type": "c7a.16xlarge",
+  "fallback_types": [
+   "c7i.16xlarge"
+  ],
+  "image": "al2023",
+  "disk_gb": 40
+ },
+ "jobs": [
+  {
+   "name": "evo-shell-shell-p00",
+   "max_min": 45,
+   "python": "3.13",
+   "pip": [
+    "numpy==2.5.3",
+    "scipy==1.18.1"
+   ],
+   "command": "python -u routes/gtu/evo/shell/shell_evo.py run-part --variant shell --n-islands 640 --n-parts 10 --part 0 --evals 30000 --workers \"$NPROC\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "evo-shell-shell-p01",
+   "max_min": 45,
+   "python": "3.13",
+   "pip": [
+    "numpy==2.5.3",
+    "scipy==1.18.1"
+   ],
+   "command": "python -u routes/gtu/evo/shell/shell_evo.py run-part --variant shell --n-islands 640 --n-parts 10 --part 1 --evals 30000 --workers \"$NPROC\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "evo-shell-shell-p02",
+   "max_min": 45,
+   "python": "3.13",
+   "pip": [
+    "numpy==2.5.3",
+    "scipy==1.18.1"
+   ],
+   "command": "python -u routes/gtu/evo/shell/shell_evo.py run-part --variant shell --n-islands 640 --n-parts 10 --part 2 --evals 30000 --workers \"$NPROC\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "evo-shell-shell-p03",
+   "max_min": 45,
+   "python": "3.13",
+   "pip": [
+    "numpy==2.5.3",
+    "scipy==1.18.1"
+   ],
+   "command": "python -u routes/gtu/evo/shell/shell_evo.py run-part --variant shell --n-islands 640 --n-parts 10 --part 3 --evals 30000 --workers \"$NPROC\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "evo-shell-shell-p04",
+   "max_min": 45,
+   "python": "3.13",
+   "pip": [
+    "numpy==2.5.3",
+    "scipy==1.18.1"
+   ],
+   "command": "python -u routes/gtu/evo/shell/shell_evo.py run-part --variant shell --n-islands 640 --n-parts 10 --part 4 --evals 30000 --workers \"$NPROC\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "evo-shell-shell-p05",
+   "max_min": 45,
+   "python": "3.13",
+   "pip": [
+    "numpy==2.5.3",
+    "scipy==1.18.1"
+   ],
+   "command": "python -u routes/gtu/evo/shell/shell_evo.py run-part --variant shell --n-islands 640 --n-parts 10 --part 5 --evals 30000 --workers \"$NPROC\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "evo-shell-shell-p06",
+   "max_min": 45,
+   "python": "3.13",
+   "pip": [
+    "numpy==2.5.3",
+    "scipy==1.18.1"
+   ],
+   "command": "python -u routes/gtu/evo/shell/shell_evo.py run-part --variant shell --n-islands 640 --n-parts 10 --part 6 --evals 30000 --workers \"$NPROC\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "evo-shell-shell-p07",
+   "max_min": 45,
+   "python": "3.13",
+   "pip": [
+    "numpy==2.5.3",
+    "scipy==1.18.1"
+   ],
+   "command": "python -u routes/gtu/evo/shell/shell_evo.py run-part --variant shell --n-islands 640 --n-parts 10 --part 7 --evals 30000 --workers \"$NPROC\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "evo-shell-shell-p08",
+   "max_min": 45,
+   "python": "3.13",
+   "pip": [
+    "numpy==2.5.3",
+    "scipy==1.18.1"
+   ],
+   "command": "python -u routes/gtu/evo/shell/shell_evo.py run-part --variant shell --n-islands 640 --n-parts 10 --part 8 --evals 30000 --workers \"$NPROC\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "evo-shell-shell-p09",
+   "max_min": 45,
+   "python": "3.13",
+   "pip": [
+    "numpy==2.5.3",
+    "scipy==1.18.1"
+   ],
+   "command": "python -u routes/gtu/evo/shell/shell_evo.py run-part --variant shell --n-islands 640 --n-parts 10 --part 9 --evals 30000 --workers \"$NPROC\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "evo-shell-cartridge-p00",
+   "max_min": 45,
+   "python": "3.13",
+   "pip": [
+    "numpy==2.5.3",
+    "scipy==1.18.1"
+   ],
+   "command": "python -u routes/gtu/evo/shell/shell_evo.py run-part --variant cartridge --n-islands 640 --n-parts 10 --part 0 --evals 30000 --workers \"$NPROC\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "evo-shell-cartridge-p01",
+   "max_min": 45,
+   "python": "3.13",
+   "pip": [
+    "numpy==2.5.3",
+    "scipy==1.18.1"
+   ],
+   "command": "python -u routes/gtu/evo/shell/shell_evo.py run-part --variant cartridge --n-islands 640 --n-parts 10 --part 1 --evals 30000 --workers \"$NPROC\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "evo-shell-cartridge-p02",
+   "max_min": 45,
+   "python": "3.13",
+   "pip": [
+    "numpy==2.5.3",
+    "scipy==1.18.1"
+   ],
+   "command": "python -u routes/gtu/evo/shell/shell_evo.py run-part --variant cartridge --n-islands 640 --n-parts 10 --part 2 --evals 30000 --workers \"$NPROC\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "evo-shell-cartridge-p03",
+   "max_min": 45,
+   "python": "3.13",
+   "pip": [
+    "numpy==2.5.3",
+    "scipy==1.18.1"
+   ],
+   "command": "python -u routes/gtu/evo/shell/shell_evo.py run-part --variant cartridge --n-islands 640 --n-parts 10 --part 3 --evals 30000 --workers \"$NPROC\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "evo-shell-cartridge-p04",
+   "max_min": 45,
+   "python": "3.13",
+   "pip": [
+    "numpy==2.5.3",
+    "scipy==1.18.1"
+   ],
+   "command": "python -u routes/gtu/evo/shell/shell_evo.py run-part --variant cartridge --n-islands 640 --n-parts 10 --part 4 --evals 30000 --workers \"$NPROC\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "evo-shell-cartridge-p05",
+   "max_min": 45,
+   "python": "3.13",
+   "pip": [
+    "numpy==2.5.3",
+    "scipy==1.18.1"
+   ],
+   "command": "python -u routes/gtu/evo/shell/shell_evo.py run-part --variant cartridge --n-islands 640 --n-parts 10 --part 5 --evals 30000 --workers \"$NPROC\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "evo-shell-cartridge-p06",
+   "max_min": 45,
+   "python": "3.13",
+   "pip": [
+    "numpy==2.5.3",
+    "scipy==1.18.1"
+   ],
+   "command": "python -u routes/gtu/evo/shell/shell_evo.py run-part --variant cartridge --n-islands 640 --n-parts 10 --part 6 --evals 30000 --workers \"$NPROC\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "evo-shell-cartridge-p07",
+   "max_min": 45,
+   "python": "3.13",
+   "pip": [
+    "numpy==2.5.3",
+    "scipy==1.18.1"
+   ],
+   "command": "python -u routes/gtu/evo/shell/shell_evo.py run-part --variant cartridge --n-islands 640 --n-parts 10 --part 7 --evals 30000 --workers \"$NPROC\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "evo-shell-cartridge-p08",
+   "max_min": 45,
+   "python": "3.13",
+   "pip": [
+    "numpy==2.5.3",
+    "scipy==1.18.1"
+   ],
+   "command": "python -u routes/gtu/evo/shell/shell_evo.py run-part --variant cartridge --n-islands 640 --n-parts 10 --part 8 --evals 30000 --workers \"$NPROC\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "evo-shell-cartridge-p09",
+   "max_min": 45,
+   "python": "3.13",
+   "pip": [
+    "numpy==2.5.3",
+    "scipy==1.18.1"
+   ],
+   "command": "python -u routes/gtu/evo/shell/shell_evo.py run-part --variant cartridge --n-islands 640 --n-parts 10 --part 9 --evals 30000 --workers \"$NPROC\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "evo-shell-ccx-p0",
+   "max_min": 150,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-numpy python3-scipy"
+   ],
+   "command": "python3 -u routes/gtu/evo/shell/shell_ccx.py --batch routes/gtu/evo/shell/verify_elites.json --part 0 --n-parts 4 --workers 6 --threads 10 --mesh fine --out \"$GTU_OUT\""
+  },
+  {
+   "name": "evo-shell-ccx-p1",
+   "max_min": 150,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-numpy python3-scipy"
+   ],
+   "command": "python3 -u routes/gtu/evo/shell/shell_ccx.py --batch routes/gtu/evo/shell/verify_elites.json --part 1 --n-parts 4 --workers 6 --threads 10 --mesh fine --out \"$GTU_OUT\""
+  },
+  {
+   "name": "evo-shell-ccx-p2",
+   "max_min": 150,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-numpy python3-scipy"
+   ],
+   "command": "python3 -u routes/gtu/evo/shell/shell_ccx.py --batch routes/gtu/evo/shell/verify_elites.json --part 2 --n-parts 4 --workers 6 --threads 10 --mesh fine --out \"$GTU_OUT\""
+  },
+  {
+   "name": "evo-shell-ccx-p3",
+   "max_min": 150,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-numpy python3-scipy"
+   ],
+   "command": "python3 -u routes/gtu/evo/shell/shell_ccx.py --batch routes/gtu/evo/shell/verify_elites.json --part 3 --n-parts 4 --workers 6 --threads 10 --mesh fine --out \"$GTU_OUT\""
+  }
+ ],
+ "estimate": {
+  "islands": "1280 островов × 30000 оценок = 38.4 млн оценок",
+  "islands_basis": "6–10 мс на оценку (мини-прогон, 4 занятых ядра); 64 острова на машину — ≈ 3–5 мин счёта + установка ≈ 5 мин (оценка)",
+  "ccx": "случаев verify_elites.json по частям 4 × ≈ 11; сетка fine (120 × 240 × 4 слоя); ≈ 15–40 мин на случай в 10 потоков (оценка по грубой сетке)"
+ }
+}
