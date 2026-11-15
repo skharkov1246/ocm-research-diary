@@ -1,0 +1,523 @@
+{
+ "title": "Цена точки SU2 и расчёта CalculiX на машинах раннера (замер скорости)",
+ "method": "Читает <in>/<задача>/speed_su2_*.json и speed_ccx_*.json (папка прогона раннера runs/<run_id>/), пишет одну\nнебольшую сводку для ветки. Замер — время итерации и время расчёта; цена — пересчёт по формулам ниже с явными\nдопущениями (каждое — в блоке assumptions итога):",
+ "run_id": "20261115T105741Z-763c",
+ "created_utc": "2026-11-15T11:41:57Z",
+ "prices": {
+  "c7a.16xlarge": {
+   "usd_h": 0.75,
+   "basis": "0,75 долл./ч — верх ожидаемого спота c7a.16xlarge us-east-1 (задача владельца 14.11.2026: 0,71–0,75; ledger.jsonl smoke2: us-east-1c 0,7064)"
+  },
+  "c7i.16xlarge": {
+   "usd_h": 0.94248,
+   "basis": "0,94248 долл./ч — оценка спота по Spot Instance Advisor (routes/gtu/platform/batch/aws_rates.toml, экономия 67 % к 2,856); живой цены c7i в журнале нет"
+  }
+ },
+ "upper": {
+  "usd_h": 1.4206,
+  "basis": "MaxPrice раннера в ledger.jsonl живого прогона smoke 14.11.2026 (максимум по зонам × 1,2)"
+ },
+ "assumptions": {
+  "point_iters": 6000,
+  "base_iters": 520,
+  "points_per_line": 8,
+  "disk_gb": 60,
+  "disk_ipv4": "0,08 долл./ГБ·мес / 730 и 0,005 долл./ч — ставки раннера (допущения)",
+  "point_iters_source": "routes/gtu/platform/su2/jobs_aws_su2_kv3.json → setup.base: рампа давления 300 и всего 6000 итераций второго порядка на точку; сходимость за это число итераций не проверена",
+  "targets_su2": {
+   "medium": {
+    "kv3_stage1": 1137992,
+    "core130": 584357
+   },
+   "fine": {
+    "kv3_stage1": 5009000,
+    "core130": 2455000
+   }
+  },
+  "targets_ccx": [
+   100000,
+   300000,
+   1000000
+  ]
+ },
+ "su2": [
+  {
+   "job": "bench-su2-c7a16",
+   "file": "bench-su2-c7a16/speed_su2_core130.json",
+   "sha256": "9873b5e12335a7ceac225db6cbb5f1c32e90770e46ef7af5ae2ef5aa26a50c3f",
+   "itype": "c7a.16xlarge",
+   "cpu_model": "AMD EPYC 9R14",
+   "nproc": 64,
+   "threads_per_core": 1,
+   "commit": "e5bead5e3cb0be3aaa148e650c31e3c4d9881698",
+   "date": "2026-11-15T11:01:32Z",
+   "price_usd_h": 0.75,
+   "ok": true,
+   "case": "core130",
+   "meshes": {
+    "medium": {
+     "rc": 0,
+     "mesh_s": 39.0,
+     "dir": "/tmp/gtu_speed_su2/geom/core130_medium",
+     "nodes": 583914,
+     "cells": 2872836,
+     "t_geometry_s": 2.5
+    },
+    "fine": {
+     "rc": 0,
+     "mesh_s": 110.2,
+     "dir": "/tmp/gtu_speed_su2/geom/core130_fine",
+     "nodes": 1822091,
+     "cells": 9698837,
+     "t_geometry_s": 2.7
+    }
+   },
+   "skipped": [],
+   "levels": {
+    "medium": {
+     "measured": true,
+     "nodes": 583914,
+     "best": "16x4",
+     "s_iter": 1.1210820792499998,
+     "C_us_core_node_iter": 30.719101216960027,
+     "iters_per_hour_machine": 12844.733018686333,
+     "machine_h_per_point": 0.4671175330208333,
+     "usd_per_point": 0.355745195182099,
+     "usd_per_point_upper": 0.6689942128258699,
+     "base_machine_h": 0.03934621022222222,
+     "base_usd_per_point": 0.003745637940589802,
+     "mesh_machine_h": 0.010833333333333334,
+     "mesh_usd": 0.008250399543378995,
+     "all_configs": [
+      {
+       "cfg": "64x1",
+       "s_iter": 0.283118106,
+       "C_us": 31.03121141811979,
+       "iters_per_hour_machine": 12715.541407302295,
+       "rss_peak_gb": 13.768
+      },
+      {
+       "cfg": "32x2",
+       "s_iter": 0.5915072477500001,
+       "C_us": 32.41612964922918,
+       "iters_per_hour_machine": 12172.293792489712,
+       "rss_peak_gb": 20.34
+      },
+      {
+       "cfg": "16x4",
+       "s_iter": 1.1210820792499998,
+       "C_us": 30.719101216960027,
+       "iters_per_hour_machine": 12844.733018686333,
+       "rss_peak_gb": 30.555
+      }
+     ],
+     "usd_per_point_per_Mnode": 0.6092424486861061,
+     "scaled": {
+      "kv3_stage1": {
+       "nodes": 1137992,
+       "usd_per_point": 0.6933130326651994,
+       "machine_h_per_point": 0.910366964377364,
+       "note": "пересчёт ∝ узлам при той же конфигурации, не замер"
+      },
+      "core130": {
+       "nodes": 584357,
+       "usd_per_point": 0.35601508958686695,
+       "machine_h_per_point": 0.4674719226520602,
+       "note": "пересчёт ∝ узлам при той же конфигурации, не замер"
+      }
+     }
+    },
+    "fine": {
+     "measured": true,
+     "nodes": 1822091,
+     "best": "32x2",
+     "s_iter": 1.8042099445,
+     "C_us_core_node_iter": 31.68596860639781,
+     "iters_per_hour_machine": 3990.666397748591,
+     "machine_h_per_point": 1.5035082870833334,
+     "usd_per_point": 1.145034838635588,
+     "usd_per_point_upper": 2.1532874959536716,
+     "base_machine_h": 0.1292026557611111,
+     "base_usd_per_point": 0.01229969460109413,
+     "mesh_machine_h": 0.030611111111111113,
+     "mesh_usd": 0.023312667427701675,
+     "all_configs": [
+      {
+       "cfg": "64x1",
+       "s_iter": 0.9279696815,
+       "C_us": 32.59445308494472,
+       "iters_per_hour_machine": 3879.4370891308045,
+       "rss_peak_gb": 36.007
+      },
+      {
+       "cfg": "32x2",
+       "s_iter": 1.8042099445,
+       "C_us": 31.68596860639781,
+       "iters_per_hour_machine": 3990.666397748591,
+       "rss_peak_gb": 51.159
+      }
+     ],
+     "usd_per_point_per_Mnode": 0.6284180310618888,
+     "scaled": {
+      "kv3_stage1": {
+       "nodes": 5009000,
+       "usd_per_point": 3.1477459175890012,
+       "machine_h_per_point": 4.133203561183507,
+       "note": "пересчёт ∝ узлам при той же конфигурации, не замер"
+      },
+      "core130": {
+       "nodes": 2455000,
+       "usd_per_point": 1.542766266256937,
+       "machine_h_per_point": 2.025756586685069,
+       "note": "пересчёт ∝ узлам при той же конфигурации, не замер"
+      }
+     }
+    }
+   }
+  },
+  {
+   "job": "bench-su2-c7i16",
+   "file": "bench-su2-c7i16/speed_su2_core130.json",
+   "sha256": "2eb631e6f4b1a0c63a074721392c4901aa829ac8df65420fafb375e982f2116d",
+   "itype": "c7i.16xlarge",
+   "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+   "nproc": 64,
+   "threads_per_core": 2,
+   "commit": "e5bead5e3cb0be3aaa148e650c31e3c4d9881698",
+   "date": "2026-11-15T11:01:50Z",
+   "price_usd_h": 0.94248,
+   "ok": true,
+   "case": "core130",
+   "meshes": {
+    "medium": {
+     "rc": 0,
+     "mesh_s": 39.1,
+     "dir": "/tmp/gtu_speed_su2/geom/core130_medium",
+     "nodes": 583992,
+     "cells": 2873359,
+     "t_geometry_s": 2.0
+    },
+    "fine": {
+     "rc": 0,
+     "mesh_s": 110.4,
+     "dir": "/tmp/gtu_speed_su2/geom/core130_fine",
+     "nodes": 1822506,
+     "cells": 9701934,
+     "t_geometry_s": 2.0
+    }
+   },
+   "skipped": [],
+   "levels": {
+    "medium": {
+     "measured": true,
+     "nodes": 583992,
+     "best": "16x4",
+     "s_iter": 1.538601589,
+     "C_us_core_node_iter": 42.154045644460886,
+     "iters_per_hour_machine": 9359.14801008307,
+     "machine_h_per_point": 0.6410839954166666,
+     "usd_per_point": 0.6116296107965613,
+     "usd_per_point_upper": 0.918144690685178,
+     "base_machine_h": 0.05940481783888889,
+     "base_usd_per_point": 0.007084435478424605,
+     "mesh_machine_h": 0.010861111111111111,
+     "mesh_usd": 0.01036210108066971,
+     "all_configs": [
+      {
+       "cfg": "64x1",
+       "s_iter": 0.4135057705,
+       "C_us": 45.31632164824176,
+       "iters_per_hour_machine": 8706.045373071765,
+       "rss_peak_gb": 14.319
+      },
+      {
+       "cfg": "32x2",
+       "s_iter": 0.7825076950000001,
+       "C_us": 42.87772133864848,
+       "iters_per_hour_machine": 9201.187472028629,
+       "rss_peak_gb": 19.921
+      },
+      {
+       "cfg": "16x4",
+       "s_iter": 1.538601589,
+       "C_us": 42.154045644460886,
+       "iters_per_hour_machine": 9359.14801008307,
+       "rss_peak_gb": 30.548
+      }
+     ],
+     "usd_per_point_per_Mnode": 1.0473253243136231,
+     "scaled": {
+      "kv3_stage1": {
+       "nodes": 1137992,
+       "usd_per_point": 1.1918478404663084,
+       "machine_h_per_point": 1.2492439247664409,
+       "note": "пересчёт ∝ узлам при той же конфигурации, не замер"
+      },
+      "core130": {
+       "nodes": 584357,
+       "usd_per_point": 0.6120118845399358,
+       "machine_h_per_point": 0.64148467840261,
+       "note": "пересчёт ∝ узлам при той же конфигурации, не замер"
+      }
+     }
+    },
+    "fine": {
+     "measured": true,
+     "nodes": 1822506,
+     "best": "32x2",
+     "s_iter": 2.5758542945,
+     "C_us_core_node_iter": 45.22747108870972,
+     "iters_per_hour_machine": 2795.18915932999,
+     "machine_h_per_point": 2.1465452454166667,
+     "usd_per_point": 2.0479229592342327,
+     "usd_per_point_upper": 3.0742291719728496,
+     "base_machine_h": 0.19199588351666666,
+     "base_usd_per_point": 0.02289683730006354,
+     "mesh_machine_h": 0.03066666666666667,
+     "mesh_usd": 0.029257697168949773,
+     "all_configs": [
+      {
+       "cfg": "64x1",
+       "s_iter": 1.3576079315,
+       "C_us": 47.67441512730274,
+       "iters_per_hour_machine": 2651.722869667103,
+       "rss_peak_gb": 35.966
+      },
+      {
+       "cfg": "32x2",
+       "s_iter": 2.5758542945,
+       "C_us": 45.22747108870972,
+       "iters_per_hour_machine": 2795.18915932999,
+       "rss_peak_gb": 50.531
+      }
+     ],
+     "usd_per_point_per_Mnode": 1.1236851671458052,
+     "scaled": {
+      "kv3_stage1": {
+       "nodes": 5009000,
+       "usd_per_point": 5.628539002233338,
+       "machine_h_per_point": 5.899593819878827,
+       "note": "пересчёт ∝ узлам при той же конфигурации, не замер"
+      },
+      "core130": {
+       "nodes": 2455000,
+       "usd_per_point": 2.7586470853429517,
+       "machine_h_per_point": 2.891495872989124,
+       "note": "пересчёт ∝ узлам при той же конфигурации, не замер"
+      }
+     }
+    }
+   }
+  }
+ ],
+ "ccx": [
+  {
+   "job": "bench-ccx-c7a16",
+   "file": "bench-ccx-c7a16/speed_ccx_core130.json",
+   "sha256": "b1da5768deef2580f2f9c4f40cc43f59a7fa929c38a7458f1a847d31a80e0772",
+   "itype": "c7a.16xlarge",
+   "cpu_model": "AMD EPYC 9R14",
+   "nproc": 64,
+   "threads_per_core": 1,
+   "commit": "e5bead5e3cb0be3aaa148e650c31e3c4d9881698",
+   "date": "2026-11-15T10:59:29Z",
+   "price_usd_h": 0.75,
+   "ok": true,
+   "case": "core130",
+   "ccx_version": "This is Version 2.21",
+   "skipped": [],
+   "meshes": [
+    {
+     "nodes": 30796,
+     "elements": 16303,
+     "mesh_s": 1.18,
+     "single": {
+      "threads": 64,
+      "wall_s": 3.0,
+      "maxrss_gb": 1.087,
+      "usd": 0.0006346461187214613
+     },
+     "static_by_threads": {
+      "64": {
+       "wall_s": 3.0,
+       "maxrss_gb": 1.087
+      },
+      "8": {
+       "wall_s": 3.0,
+       "maxrss_gb": 0.706
+      },
+      "1": {
+       "wall_s": 5.5,
+       "maxrss_gb": 0.398
+      }
+     },
+     "max_disp_rel_spread": 0.0,
+     "pack": {
+      "threads": 8,
+      "copies": 8,
+      "cases_per_hour_machine": 9537.247,
+      "usd": 7.985274392765055e-05
+     },
+     "freq": {
+      "threads": 64,
+      "modes": 10,
+      "wall_s": 8.51,
+      "maxrss_gb": 1.101,
+      "usd": 0.0018002794901065449,
+      "freq_hz_first": [
+       1307.216,
+       1331.179,
+       1331.82
+      ]
+     },
+     "usd_best": 7.985274392765055e-05
+    },
+    {
+     "nodes": 67877,
+     "elements": 37887,
+     "mesh_s": 1.17,
+     "single": {
+      "threads": 64,
+      "wall_s": 8.5,
+      "maxrss_gb": 3.064,
+      "usd": 0.0017981640030441401
+     },
+     "static_by_threads": {
+      "64": {
+       "wall_s": 8.5,
+       "maxrss_gb": 3.064
+      },
+      "8": {
+       "wall_s": 9.0,
+       "maxrss_gb": 1.952
+      },
+      "1": {
+       "wall_s": 22.0,
+       "maxrss_gb": 1.098
+      }
+     },
+     "max_disp_rel_spread": 0.0,
+     "pack": {
+      "threads": 8,
+      "copies": 8,
+      "cases_per_hour_machine": 2875.491,
+      "usd": 0.00026485053942639826
+     },
+     "freq": {
+      "threads": 64,
+      "modes": 10,
+      "wall_s": 20.51,
+      "maxrss_gb": 3.037,
+      "usd": 0.00433886396499239,
+      "freq_hz_first": [
+       1296.619,
+       1317.403,
+       1317.727
+      ]
+     },
+     "usd_best": 0.00026485053942639826
+    },
+    {
+     "nodes": 161491,
+     "elements": 95720,
+     "mesh_s": 1.74,
+     "single": {
+      "threads": 64,
+      "wall_s": 31.01,
+      "maxrss_gb": 11.037,
+      "usd": 0.006560125380517505
+     },
+     "static_by_threads": {
+      "64": {
+       "wall_s": 31.01,
+       "maxrss_gb": 11.037
+      },
+      "8": {
+       "wall_s": 41.51,
+       "maxrss_gb": 6.553
+      },
+      "1": {
+       "wall_s": 133.03,
+       "maxrss_gb": 3.613
+      }
+     },
+     "max_disp_rel_spread": 0.0,
+     "pack": {
+      "threads": 8,
+      "copies": 8,
+      "cases_per_hour_machine": 593.172,
+      "usd": 0.0012839030541997151
+     },
+     "freq": {
+      "threads": 64,
+      "modes": 10,
+      "wall_s": 67.06,
+      "maxrss_gb": 11.357,
+      "usd": 0.014186456240487063,
+      "freq_hz_first": [
+       1295.72,
+       1312.442,
+       1312.543
+      ]
+     },
+     "usd_best": 0.0012839030541997151
+    }
+   ],
+   "fit_single": {
+    "a": 1.3595670892354396e-06,
+    "b": 1.410884131180427,
+    "n": 3,
+    "x_min": 30796.000000000015,
+    "x_max": 161490.99999999997
+   },
+   "fit_pack": {
+    "a": 1.0569151314517096e-08,
+    "b": 1.678473180574586,
+    "n": 3,
+    "x_min": 30796.000000000015,
+    "x_max": 161490.99999999997
+   },
+   "projected": [
+    {
+     "nodes": 100000,
+     "single": {
+      "machine_s": 15.41066213614214,
+      "usd": 0.0032601056372101307,
+      "extrapolated": false
+     },
+     "pack": {
+      "machine_s": 2.6085911614400947,
+      "usd": 0.0005518440853130216,
+      "extrapolated": false
+     }
+    },
+    {
+     "nodes": 300000,
+     "single": {
+      "machine_s": 72.60793844044143,
+      "usd": 0.01536011543986431,
+      "extrapolated": true
+     },
+     "pack": {
+      "machine_s": 16.490781916903398,
+      "usd": 0.003488603579414933,
+      "extrapolated": true
+     }
+    },
+    {
+     "nodes": 1000000,
+     "single": {
+      "machine_s": 396.9222369334726,
+      "usd": 0.0839683857013562,
+      "extrapolated": true
+     },
+     "pack": {
+      "machine_s": 124.41684925318522,
+      "usd": 0.026320223494029044,
+      "extrapolated": true
+     }
+    }
+   ]
+  }
+ ]
+}

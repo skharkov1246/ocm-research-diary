@@ -1,0 +1,137 @@
+{
+ "title": "Повтор эталонных расчётов трека ГТУ на машинах AWS: сверка с веткой",
+ "run_id": "20261115T105701Z-01bb",
+ "method": "compare_results.py на машине (повтор против закоммиченного JSON) + --collect по папке прогона",
+ "created_utc": "2026-11-15T11:41:57Z",
+ "ok": true,
+ "jobs": {
+  "val-cycle": {
+   "repro": {
+    "repro_balances.json": {
+     "label": "balances",
+     "ok": true,
+     "structure_ok": true,
+     "numbers": 253,
+     "numbers_bad": 0,
+     "strings_diff": 0,
+     "max_abs": {
+      "value": 0.0,
+      "path": null
+     },
+     "max_rel": {
+      "value": 0.0,
+      "path": null
+     },
+     "bad": [],
+     "missing_in_new": [],
+     "extra_in_new": [],
+     "length_mismatch": [],
+     "rtol": 1e-06,
+     "atol": 1e-09
+    },
+    "repro_validation_fleet.json": {
+     "label": "validate_fleet",
+     "ok": true,
+     "structure_ok": true,
+     "numbers": 6463,
+     "numbers_bad": 0,
+     "strings_diff": 0,
+     "max_abs": {
+      "value": 0.0,
+      "path": null
+     },
+     "max_rel": {
+      "value": 0.0,
+      "path": null
+     },
+     "bad": [],
+     "missing_in_new": [],
+     "extra_in_new": [],
+     "length_mismatch": [],
+     "rtol": 1e-06,
+     "atol": 1e-09
+    }
+   },
+   "timing": [
+    "balances_s 14",
+    "validate_fleet_s 55 workers 64"
+   ],
+   "env": [
+    "Python 3.12.16",
+    "3.2.0 2.5.3 1.18.1",
+    "nproc 64 NPROC 64 itype c7a.16xlarge"
+   ],
+   "commit": "e5bead5e3cb0be3aaa148e650c31e3c4d9881698",
+   "pytest": {
+    "pytest.txt": [
+     "......................                                                   [100%]",
+     "22 passed in 19.38s"
+    ]
+   }
+  },
+  "val-fea": {
+   "repro": {
+    "repro_disk.json": {
+     "label": "disk_examples",
+     "ok": true,
+     "structure_ok": true,
+     "numbers": 5350,
+     "numbers_bad": 0,
+     "strings_diff": 0,
+     "max_abs": {
+      "value": 0.0,
+      "path": null
+     },
+     "max_rel": {
+      "value": 0.0,
+      "path": null
+     },
+     "bad": [],
+     "missing_in_new": [],
+     "extra_in_new": [],
+     "length_mismatch": [],
+     "rtol": 1e-06,
+     "atol": 1e-09
+    },
+    "repro_frame3_fea.json": {
+     "label": "frame3_fea",
+     "ok": true,
+     "structure_ok": true,
+     "numbers": 4800,
+     "numbers_bad": 0,
+     "strings_diff": 0,
+     "max_abs": {
+      "value": 0.0,
+      "path": null
+     },
+     "max_rel": {
+      "value": 0.0,
+      "path": null
+     },
+     "bad": [],
+     "missing_in_new": [],
+     "extra_in_new": [],
+     "length_mismatch": [],
+     "rtol": 1e-06,
+     "atol": 1e-09
+    }
+   },
+   "timing": [
+    "disk_examples_s 3",
+    "frame3_fea_s 12 workers 64"
+   ],
+   "env": [
+    "This is Version 2.21",
+    "Python 3.12.3",
+    "nproc 64 NPROC 64 itype c7a.16xlarge"
+   ],
+   "commit": "e5bead5e3cb0be3aaa148e650c31e3c4d9881698",
+   "pytest": {
+    "pytest_disk.txt": [
+     "............                                                             [100%]",
+     "12 passed in 3.05s"
+    ]
+   }
+  }
+ }
+}
