@@ -15,6 +15,10 @@ seed, shards, отпечаток выборки и отпечаток кода; 
 каждой допустимой ниши + общий топ + фронт Парето [+ почти допустимые из ниш без допустимых - отдельной причиной];
 сходимость: топ-50 и ниши на первых N/4, N/2 и N концепциях (вариант i не зависит от N - свойство Соболя, тест).
 Пишет funnel_l0_results<sfx>.json, funnel_l0<sfx>.csv (все варианты), funnel_l0_select<sfx>.json.
+v3 (решения владельца 15.11.2026): оценка - funnel_l0.final_score (× множитель готовности TRL) везде, включая чувствительность к весам;
+у концепции 1-2 записи (ось «корпус»: базовый вариант и оболочка, если она входит в камеру LPBF) - доли допустимых и сходимость
+считаются по концепциям (концепция допустима, если допустим хоть один её вариант), ниши - с осью «корпус» и без неё (для сравнения
+с v2); блоки case_axis (сколько концепций выбрали оболочку и сколько картридж) и trl_multiplier (что изменил множитель).
 """
 import argparse, csv, glob, gzip, hashlib, json, math, os, re, shutil, sys, tempfile, time
 from collections import Counter, defaultdict
@@ -89,11 +93,12 @@ def merge_parts(found, kv, n, shards, seed=L0.SEED):
                 if isinstance(v, str):
                     r[j] = sys.intern(v)
         exp = FS.shard_indices(n, k, shards)
-        got = [r[0] for r in rows]
-        if got != exp:
+        got, case_bad = _row_ids(rows, d["columns"])
+        if got != exp or case_bad:
             lost = sorted(set(exp) - set(got)); extra = sorted(set(got) - set(exp))
             checks["index_errors"].append(dict(file=os.path.basename(p), shard=k, lost=lost[:20], n_lost=len(lost),
-                                               foreign=extra[:20], n_foreign=len(extra), dup=len(got) - len(set(got))))
+                                               foreign=extra[:20], n_foreign=len(extra), dup=len(got) - len(set(got)),
+                                               case_errors=case_bad[:20]))
             continue
         h = hashlib.sha256(json.dumps(rows, ensure_ascii=False, separators=(",", ":")).encode()).hexdigest()
         if k in by:
@@ -105,11 +110,14 @@ def merge_parts(found, kv, n, shards, seed=L0.SEED):
     errs = {x: checks[x] for x in ("missing", "duplicate_conflict", "meta_mismatch", "index_errors") if checks[x]}
     if errs or ref is None:
         raise MergeError(json.dumps(errs or {"files": "частей не найдено"}, ensure_ascii=False))
-    rows = sorted((r for v in by.values() for r in v["rows"]), key=lambda r: r[0])
-    idx = [r[0] for r in rows]
-    if idx != list(range(n)):
-        raise MergeError(f"индексы после слияния не равны 0..{n - 1}: {len(idx)} записей, уникальных {len(set(idx))}")
-    checks.update(indices_ok=True, n_rows=len(rows), duplicates=0, fingerprint=ref["fingerprint"], code_sha=ref["code_sha"])
+    jc = ref["columns"].index("case_arch") if "case_arch" in ref["columns"] else None
+    rows = sorted((r for v in by.values() for r in v["rows"]), key=lambda r: (r[0], _case_order(r[jc] if jc is not None else None)))
+    idx, case_bad = _row_ids(rows, ref["columns"])
+    if idx != list(range(n)) or case_bad:
+        raise MergeError(f"индексы после слияния не равны 0..{n - 1}: {len(idx)} концепций, записей {len(rows)}; ошибки оси «корпус» "
+                         f"{case_bad[:5]}")
+    checks.update(indices_ok=True, n_rows=len(rows), n_concepts=len(idx), duplicates=0, fingerprint=ref["fingerprint"],
+                  code_sha=ref["code_sha"])
     fp_local = FS.fingerprint(n, seed)
     checks["fingerprint_local"] = dict(value=fp_local, match=fp_local == ref["fingerprint"],
                                        note="отпечаток матрицы выборки в окружении слияния; несовпадение - другие версии scipy/numpy: "
@@ -121,6 +129,27 @@ def merge_parts(found, kv, n, shards, seed=L0.SEED):
         calls[key] = dict(shards=c.get("shards"), concepts=c.get("concepts"), elapsed_s=c.get("elapsed_s"),
                           s_per_concept_core=c.get("s_per_concept_core"), workers=v["workers"], host_cpus=c.get("host_cpus"))
     return ref["columns"], rows, ref, checks, list(calls.values())
+
+
+def _case_order(v):
+    return {None: 0, "разъём": 0, "картридж": 0, "оболочка": 1}.get(v, 2)
+
+
+def _row_ids(rows, columns):
+    """уникальные индексы концепций по порядку и ошибки оси «корпус»: записи концепции идут подряд, первая - базовый вариант
+    (картридж или разъём), вторая (если есть) - оболочка; части v2 без столбца case_arch - одна запись на индекс"""
+    if "case_arch" not in columns:
+        return [r[0] for r in rows], []
+    jc = columns.index("case_arch")
+    ids, bad, k = [], [], 0
+    while k < len(rows):
+        i, grp = rows[k][0], []
+        while k < len(rows) and rows[k][0] == i:
+            grp.append(rows[k][jc]); k += 1
+        ids.append(i)
+        if grp[0] not in ("картридж", "разъём") or len(grp) > 2 or (len(grp) == 2 and grp[1] != "оболочка"):
+            bad.append(dict(idx=i, cases=grp))
+    return ids, bad
 
 
 # =========================================================================== рейтинг
@@ -146,8 +175,16 @@ class Table:
         self.viol = self.num("violation")
         self.has = ~np.isnan(self.num("s_parts"))
         self.S = np.column_stack([self.num(L0.CRIT_COL[k]) for k in L0.CRIT])
+        self.trl = self.num("trl_min")
         self.niche = [r[self.C["niche"]] for r in rows]
         self.arch = [r[self.C["arch"]] for r in rows]
+        self.case = [r[self.C["case_arch"]] for r in rows] if "case_arch" in self.C else [None] * self.n
+        self.pick = (np.array([bool(r[self.C["case_pick"]]) for r in rows]) if "case_pick" in self.C else np.ones(self.n, dtype=bool))
+
+    def concepts_feasible(self, mask=None):
+        """индексы концепций, у которых допустим хоть один вариант оси «корпус» (в маске)"""
+        m = self.feas if mask is None else (self.feas & mask)
+        return set(int(i) for i in self.idx[m])
 
     def num(self, col):
         j = self.C[col]
@@ -162,9 +199,11 @@ class Table:
         return split_em["etasize"] * es + split_em["make"] * mk
 
 
-def scores(T, w, S=None):
+def scores(T, w, S=None, trl=None):
+    """итоговая оценка - funnel_l0.final_score (взвешенная × множитель готовности TRL); trl - другой вектор TRL (для сравнения:
+    np.full(n, TRL_MAX) - без множителя)"""
     S = T.S if S is None else S
-    return S @ np.array([w[k] for k in L0.CRIT])
+    return L0.final_score(S, T.trl if trl is None else trl, w)
 
 
 def order_feasible(T, sc, mask=None):
@@ -301,7 +340,8 @@ def sensitivity(T, base_w, sel_args, top_n=TOP_LIST, n_random=N_RANDOM_W, seed=L
     cnt = Counter()
     top1 = Counter()
     if len(fpos):
-        SC = T.S[fpos] @ M.T                                     # допустимые × наборы весов
+        # допустимые × наборы весов; оценка - та же final_score (с множителем TRL), что у базовых весов
+        SC = np.column_stack([L0.final_score(T.S[fpos], T.trl[fpos], dict(zip(L0.CRIT, M[j]))) for j in range(n_random)])
         for j in range(n_random):
             o = np.lexsort((T.idx[fpos], -np.round(SC[:, j], 9)))
             for p in fpos[o[:top_n]]:
@@ -311,7 +351,8 @@ def sensitivity(T, base_w, sel_args, top_n=TOP_LIST, n_random=N_RANDOM_W, seed=L
                     oat_in_top=sum(1 for r in ranks[p][1:] if r is not None and r <= top_n), oat_n=len(ranks[p]) - 1,
                     rank_min=min(r for r in ranks[p] if r is not None), rank_max=max(r for r in ranks[p] if r is not None))
             for p in base_top}
-    return dict(oat=oat, random=dict(n=n_random, seed=seed, rule="каждый вес × U(0,5; 1,5), затем сумма = 1",
+    return dict(oat=oat, score="funnel_l0.final_score: взвешенная × (0,5 + 0,5·TRL/9) - множитель готовности во всех сценариях",
+                random=dict(n=n_random, seed=seed, rule="каждый вес × U(0,5; 1,5), затем сумма = 1",
                                      top1_counts={str(k): v for k, v in top1.most_common(10)},
                                      base_top_always=sum(1 for p in base_top if cnt[p] == n_random),
                                      base_top_share_ge_0_8=sum(1 for p in base_top if cnt[p] >= 0.8 * n_random),
@@ -330,7 +371,8 @@ def convergence(T, w, sel_args, top_n=TOP_CONV):
         order = order_feasible(T, sc, mask)
         top = [int(p) for p in order[:top_n]]
         feas_n = sorted({T.niche[p] for p in np.nonzero(T.feas & mask)[0]})
-        row = dict(N=int(m), feasible=int((T.feas & mask).sum()), feasible_niches=len(feas_n),
+        row = dict(N=int(m), feasible=len(T.concepts_feasible(mask)), feasible_rows=int((T.feas & mask).sum()),
+                   feasible_niches=len(feas_n), feasible_niches_v2=len({L0.niche_v2(x) for x in feas_n}),
                    archetypes_feasible=len({T.arch[p] for p in np.nonzero(T.feas & mask)[0]}),
                    top_n=len(top), best_score=round(float(sc[order[0]]), 4) if len(order) else None,
                    mean_top=round(float(np.mean(sc[top])), 4) if top else None,
@@ -355,7 +397,7 @@ def cycle_check(T, n, kv, seed, k_max=6):
     os.chdir(cwd)
     C = T.C
     cand = [p for p in range(T.n) if T.has[p] and T.rows[p][C["rotors"]] == 2 and T.rows[p][C["cores"]] == 1
-            and T.rows[p][C["recup"]] == "нет" and T.rows[p][C["comb"]] in ("кольцевая", "выносная")]
+            and T.rows[p][C["recup"]] == "нет" and T.rows[p][C["comb"]] in ("кольцевая", "выносная") and T.case[p] != "оболочка"]
     sc = T.num("score")
     cand.sort(key=lambda p: (not T.feas[p], -sc[p], T.idx[p]))
     rows = []
@@ -398,7 +440,8 @@ def summary(T, sc):
         pos = [p for p in range(T.n) if T.arch[p] == a]
         fp = [p for p in pos if T.feas[p]]
         first = Counter((T.get(p, "reject") or "").split("|")[0] for p in pos if not T.feas[p])
-        d = dict(n=len(pos), feasible=len(fp), first_reject=dict(first.most_common(4)))
+        d = dict(n=len({int(T.idx[p]) for p in pos}), feasible=len({int(T.idx[p]) for p in fp}), rows=len(pos), feasible_rows=len(fp),
+                 first_reject=dict(first.most_common(4)))
         if "repair" in T.C:
             rp = [(T.get(p, "repair") or "") for p in pos]
             d["sampler"] = dict(
@@ -416,12 +459,78 @@ def summary(T, sc):
                 b = min(nz, key=lambda p: (T.viol[p], T.idx[p]))
                 d.update(nearest_idx=int(T.idx[b]), nearest_violation=round(float(T.viol[b]), 4), nearest_reject=T.get(b, "reject"))
         by[a] = d
-    out = dict(n=T.n, feasible=int(T.feas.sum()), feasible_share=round(float(T.feas.mean()), 5), reject_reasons=dict(rej.most_common()),
-               archetypes_feasible=sum(1 for a in by.values() if a["feasible"]), by_arch=by)
+    nc = len(set(int(i) for i in T.idx))
+    fc = len(T.concepts_feasible())
+    out = dict(n=nc, feasible=fc, feasible_share=round(fc / max(1, nc), 5), rows=T.n, feasible_rows=int(T.feas.sum()),
+               count_rule="n, feasible, feasible_share - по концепциям (допустима, если допустим хоть один вариант оси «корпус»); rows - записи",
+               reject_reasons=dict(rej.most_common()), archetypes_feasible=sum(1 for a in by.values() if a["feasible"]), by_arch=by)
     if "dflags" in T.C:
         out["design_flags"] = dict(Counter(f.split(":")[0] for p in range(T.n) for f in (T.get(p, "dflags") or "").split("|") if f).most_common())
         out["no_closure"] = sum(1 for p in range(T.n) if (T.get(p, "repair") or "").startswith("нет замыкающей"))
     return out
+
+
+def case_axis(T, sc):
+    """ось «корпус» (решение владельца 15.11.2026, п. 3): у скольких концепций оболочка возможна, какой вариант выбран (case_pick:
+    допустимый с наибольшей итоговой оценкой), по архетипам; разница оценок оболочка − базовый у пар допустимых"""
+    if "case_arch" not in T.C:
+        return None
+    by_idx = defaultdict(dict)
+    for p in range(T.n):
+        by_idx[int(T.idx[p])][T.case[p]] = p
+    n = len(by_idx)
+    shell = [i for i, v in by_idx.items() if "оболочка" in v]
+    feas_c = T.concepts_feasible()
+    pick = Counter()
+    pick_arch = defaultdict(Counter)
+    for i, v in by_idx.items():
+        if i not in feas_c:
+            continue
+        p = next(q for q in v.values() if T.pick[q])
+        pick[T.case[p]] += 1
+        pick_arch[T.arch[p]][T.case[p]] += 1
+    d = []
+    for i in shell:
+        v = by_idx[i]
+        b = v.get("картридж", v.get("разъём"))
+        s_ = v["оболочка"]
+        if T.feas[b] and T.feas[s_]:
+            d.append(float(sc[s_] - sc[b]))
+    notes = Counter((T.get(by_idx[i].get("картридж", by_idx[i].get("разъём")), "shell_note") or "").split(":")[0]
+                    for i in by_idx if "оболочка" not in by_idx[i])
+    feas_shell = sum(1 for i in shell if T.feas[by_idx[i]["оболочка"]])
+    return dict(rule="оболочка считается, если холодная часть и горячая часть целиком входят в камеру LPBF (funnel_space.shell_fit); "
+                     "выбор концепции - допустимый вариант с наибольшей итоговой оценкой (final_score), при равенстве - базовый",
+                concepts=n, shell_possible=len(shell), shell_impossible=n - len(shell),
+                shell_impossible_why=dict(notes.most_common(4)), feasible_concepts=len(feas_c), feasible_shell_rows=feas_shell,
+                picked_among_feasible=dict(pick.most_common()), picked_by_arch={a: dict(v) for a, v in sorted(pick_arch.items())},
+                d_score_shell_minus_base=_q(np.array(d)) if d else None,
+                shell_better=sum(1 for x in d if x > 1e-9), shell_worse=sum(1 for x in d if x < -1e-9))
+
+
+def trl_effect(T, w, sc, sel_args, top_n=TOP_LIST):
+    """что изменил множитель готовности (решение владельца 15.11.2026, п. 1): та же final_score при TRL = 9 у всех (множитель 1) -
+    против базовой; топ, отбор, места («сумма прячет потерю»: у скольких место хуже), средний множитель по архетипам"""
+    sc1 = scores(T, w, trl=np.full(T.n, L0.TRL_MAX))
+    o0, o1 = order_feasible(T, sc), order_feasible(T, sc1)
+    r0 = {int(p): k for k, p in enumerate(o0)}
+    r1 = {int(p): k for k, p in enumerate(o1)}
+    s0 = set(select(T, sc, **sel_args)["sel"]); s1 = set(select(T, sc1, **sel_args)["sel"])
+    fpos = np.nonzero(T.feas)[0]
+    k = L0.trl_factor(T.trl)
+    arch = {}
+    for a in FS.ARCH_KEYS:
+        ps = [p for p in fpos if T.arch[p] == a]
+        if ps:
+            arch[a] = dict(n=len(ps), k_trl_mean=round(float(np.mean(k[ps])), 4), trl_min=dict(Counter(int(T.trl[p]) for p in ps)))
+    top0, top1 = [int(p) for p in o0[:top_n]], [int(p) for p in o1[:top_n]]
+    return dict(rule=L0.TRL_BASIS, formula=f"оценка = взвешенная × ({L0.TRL_K0:g} + {L0.TRL_K1:g}·TRL_min/{L0.TRL_MAX:g})",
+                top_n=top_n, top_overlap_with_no_multiplier=len(set(top0) & set(top1)),
+                top_archetypes=dict(with_multiplier=dict(Counter(T.arch[p] for p in top0).most_common()),
+                                    no_multiplier=dict(Counter(T.arch[p] for p in top1).most_common())),
+                select_jaccard=round(len(s0 & s1) / max(1, len(s0 | s1)), 4), select_n=len(s0), select_n_no_multiplier=len(s1),
+                rank_worse=sum(1 for p in r0 if r0[p] > r1[p]), rank_better=sum(1 for p in r0 if r0[p] < r1[p]),
+                by_arch=arch)
 
 
 def normalization(T, w):
@@ -445,17 +554,18 @@ def normalization(T, w):
 
 def top_entries(T, sc, order, stab, layer, n, kv, seed, k=TOP_LIST, detail=True):
     out = []
-    keys = ["arch", "niche", "comp", "turb", "nt", "cool", "recup", "comb", "bear", "cores", "rotor_join", "m_cw", "m_tw", "pi", "t41",
+    keys = ["arch", "niche", "case_arch", "case_pick", "comp", "turb", "nt", "cool", "recup", "comb", "bear", "cores", "rotor_join", "m_cw",
+            "m_tw", "pi", "t41", "k_trl", "score_w",
             "eta_th_shaft", "eta_el", "w_kJkg", "dG_pct", "dEGT", "n_rpm", "D2", "D_env", "L_env", "W_env", "H_env", "V_env", "mass_kg",
             "s_parts", "s_plugplay", "s_service", "s_make", "s_eta", "s_size", "s_effmake", "n_parts", "n_assemblies", "n_modules",
             "heaviest_kg", "steps", "n_tools", "trl_min", "techs"]
     for r, p in enumerate(order[:k]):
         p = int(p)
         e = dict(rank=r + 1, idx=int(T.idx[p]), score=round(float(sc[p]), 4), pareto_layer=int(layer[p]))
-        e.update({x: T.get(p, x) for x in keys})
+        e.update({x: T.get(p, x) for x in keys if x in T.C})
         e["stability"] = stab.get(p)
         if detail:
-            _, det = L0.evaluate_l0(int(T.idx[p]), n, kv, seed, detail=True)
+            _, det = L0.evaluate_l0(int(T.idx[p]), n, kv, seed, detail=True, case=T.case[p])
             e["detail"] = dict(geometry=det["geometry"], modules=det["service"]["modules"], tools=det["service"]["tools"],
                                plugplay=det["plugplay"], trl_by=det["make"]["trl_by"])
         out.append(e)
@@ -531,10 +641,11 @@ def run_merge(found, kv, n, shards, out_dir, sfx="", weights=None, seed=L0.SEED,
     sel_rows = []
     for p, why in S["sel"].items():
         nr = nrank.get(p, (None, None))
-        sel_rows.append(dict(idx=int(T.idx[p]), niche=T.niche[p], arch=T.arch[p], niche_rank=nr[0], niche_size=nr[1], rank=rank.get(p),
+        sel_rows.append(dict(idx=int(T.idx[p]), case_arch=T.case[p], niche=T.niche[p], arch=T.arch[p], niche_rank=nr[0], niche_size=nr[1],
+                             rank=rank.get(p),
                              score=None if np.isnan(sc[p]) else round(float(sc[p]), 4), feasible=bool(T.feas[p]),
                              violation=float(T.viol[p]), eta_el=T.get(p, "eta_el"), reasons=why))
-    sel_rows.sort(key=lambda e: (not e["feasible"], e["rank"] or 10 ** 9, e["violation"], e["idx"]))
+    sel_rows.sort(key=lambda e: (not e["feasible"], e["rank"] or 10 ** 9, e["violation"], e["idx"], _case_order(e["case_arch"])))
     covered = {e["niche"] for e in sel_rows if e["feasible"]}
     sel_summary = dict(n_selected=len(sel_rows), n_feasible=sum(e["feasible"] for e in sel_rows),
                        n_near=sum(not e["feasible"] for e in sel_rows), K_per_niche=S["K"], K_max_in_niche=S["kmax"],
@@ -546,7 +657,8 @@ def run_merge(found, kv, n, shards, out_dir, sfx="", weights=None, seed=L0.SEED,
     sel_doc = dict(title=f"Воронка, уровень 0 -> уровень 1: отбор {kv}", **soft, kv=kv, n=n, seed=seed, fingerprint=ref["fingerprint"],
                    code_sha=ref["code_sha"], weights=w,
                    params=dict(k=k, top=top, pareto=use_pareto, k_near=k_near, near_max=near_max, target=target),
-                   how_to_rebuild="funnel_space.concept(idx, n, kv, seed) с закреплёнными версиями (fingerprint должен совпасть)",
+                   how_to_rebuild="funnel_space.apply_case(funnel_space.concept(idx, n, kv, seed), case_arch) с закреплёнными версиями "
+                                  "(fingerprint должен совпасть)",
                    summary=sel_summary, selected=sel_rows)
     with open(p_sel, "w", encoding="utf-8") as fh:
         json.dump(sel_doc, fh, ensure_ascii=False, indent=1)
@@ -584,7 +696,9 @@ def run_merge(found, kv, n, shards, out_dir, sfx="", weights=None, seed=L0.SEED,
                sensitivity=dict(oat=sens["oat"], random=sens["random"],
                                 top_stable=[dict(idx=int(T.idx[p]), rank=rank[p], **v) for p, v in sens["stability"].items()]),
                niches=dict(axes=L0.NICHE_AXES, n_seen=len(archive), n_feasible=sum(1 for e in archive if e["feasible"]),
-                           archive=archive),
+                           n_feasible_v2=len({L0.niche_v2(e["niche"]) for e in archive if e["feasible"]}),
+                           v2_note="n_feasible_v2 - те же ниши без оси «корпус» (сравнимо с выборкой v2)", archive=archive),
+               case_axis=case_axis(T, sc), trl_multiplier=trl_effect(T, w, sc, dict(sel_args, k=S["K"], target=None)),
                selection=dict(file=os.path.basename(p_sel), **sel_summary),
                convergence=dict(rule=f"топ-{TOP_CONV} и допустимые ниши на первых N/4, N/2, N концепциях; концепция i одна и та же "
                                      "при любом N (префикс последовательности Соболя), поэтому первые N/2 - это выборка объёма N/2",

@@ -1,0 +1,114 @@
+{
+ "schema": "kv.combustor.targets/2",
+ "title": "Цели камеры сгорания KV, v2: 13 целей v1 + низкие выбросы 30-100 % на одном клапане",
+ "date": "2026-11-15",
+ "base_file": "routes/gtu/combustor/targets.json",
+ "base_date": "2026-11-14",
+ "base_targets": [
+  "nox_gas",
+  "co_gas",
+  "load_range",
+  "fuel_valves",
+  "diesel_dry",
+  "fuel_changeover",
+  "hydrogen",
+  "pressure_loss",
+  "exit_uniformity",
+  "wall_life",
+  "parts_count",
+  "cartridge_swap",
+  "combustion_dynamics",
+  "fuel_supply_compatibility"
+ ],
+ "new_targets": [
+  {
+   "id": "lowem_30_100_1valve",
+   "name": "Низкие выбросы 30-100 % на одном клапане, без приводов",
+   "kind": "hard",
+   "target": {
+    "loads_pct": [
+     30,
+     50,
+     75,
+     100
+    ],
+    "NOx_max_ppm15": {
+     "50-100": 9.0,
+     "30": 15.0
+    },
+    "CO_max_ppm15": {
+     "50-100": 15.0,
+     "30": 50.0
+    },
+    "eta_min": 0.99,
+    "margin_lbo_min": 1.0,
+    "control_valves_per_fuel": 1,
+    "actuators_in_combustor": 0,
+    "bleed_valves": 0
+   },
+   "metric": "наибольшее из: NOx/9 и CO/15 на 50, 75, 100 %; NOx/15 и CO/50 на 30 %; 1/запас по срыву опорной зоны (пилот, полость, группа A; без них - основная) и (1 - полнота)/0,01 на каждой из 30/50/75/100 %; клапанов на топливо / 1; 1 + число приводов. Выполнено, если не больше 1",
+   "source": "решение владельца 15.11.2026 (routes/gtu/README.md, «Решения владельца», п. 2); пределы - nox_gas, co_gas (с also для 30 %), load_range, fuel_valves этого файла; полнота 0,99 - comb_crn.ETA_MIN (оценка)",
+   "status": "цель проекта; уровень 0 - облик (сеть реакторов), подтверждение - уровни 1-2",
+   "notes": [
+    "точка 75 % добавлена к 30/50/100 % (между 50 и 100 % v1 не проверял ничего)",
+    "смешение - по J каждой нагрузки (согласованная модель); закон затухания при малом J - оценка",
+    "строгий вариант (все зоны с запасом >= 1, как load_range v1) пишется рядом: ok_strict_all_zones"
+   ]
+  }
+ ],
+ "funnel_interface": {
+  "hard": [
+   "nox_gas",
+   "co_gas",
+   "load_range",
+   "fuel_valves",
+   "diesel_dry",
+   "fuel_changeover",
+   "exit_uniformity",
+   "wall_life",
+   "combustion_dynamics",
+   "lowem_30_100_1valve"
+  ],
+  "objectives": [
+   {
+    "id": "parts_count",
+    "sense": "min"
+   },
+   {
+    "id": "pressure_loss",
+    "sense": "min"
+   },
+   {
+    "id": "nox_gas",
+    "sense": "min"
+   },
+   {
+    "id": "hydrogen",
+    "sense": "max"
+   },
+   {
+    "id": "cartridge_swap",
+    "sense": "min"
+   }
+  ],
+  "note": "жёсткие v1 + новая; ранжирование - как v1, оценка умножается на (0,5 + 0,5·TRL/9) - решение владельца 15.11.2026, п. 1"
+ },
+ "trl_multiplier": {
+  "formula": "0,5 + 0,5·TRL/9",
+  "trl": "наименьший TRL из схемы, пассивного элемента, подачи дизеля, охлаждения и способа изготовления (все TRL - оценка)",
+  "passive": {
+   "нет": 9,
+   "гидравлика": 4,
+   "струи": 3,
+   "каналы": 4,
+   "рециркуляция": 4
+  },
+  "scheme": {
+   "LPP": 9,
+   "MM": 7,
+   "FLOX": 5,
+   "TVC": 5,
+   "RQL": 5
+  }
+ }
+}

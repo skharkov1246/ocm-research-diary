@@ -15,10 +15,16 @@
 Шаги модуля: болтовой стык - 1 + болты/10, хомут - 1; трубка - 1 (кодированный быстроразъём - 0,5); кабели - по одному
 на разъём или 1 на общий кодированный разъём; центровка - 5; балансировка на месте - 5; строповка модуля тяжелее 25 кг - 2.
 Все коэффициенты - оценка (README).
+
+v3 (решение владельца 15.11.2026, п. 3): у модуля - где его ремонтируют (repair): «на месте» (модуль чинят или меняют на объекте),
+«замена на месте, ремонт на заводе» (картридж газогенератора, силовая турбина), «на заводе» (оболочка: двигатель меняется целиком,
+разборка - на заводе). Место ремонта в балл отдельным членом не входит: оно действует через модуль замены - у оболочки частая
+замена - двигатель целиком (масса, стыки, строповка, центровка одновального), - и пишется в разбор (repair_sites, on_site_share).
 """
 import math
 
 M_ONE_PERSON, M_ZERO = 25.0, 2000.0
+REPAIR_ON_SITE, REPAIR_SWAP, REPAIR_FACTORY = "на месте", "замена на месте, ремонт на заводе", "на заводе"
 W = dict(mass=0.30, steps=0.25, tools=0.15, err=0.15, diag=0.15)
 STEP = dict(joint=1.0, bolts_per_step=10.0, clamp=1.0, pipe=1.0, pipe_keyed=0.5, align=5.0, balance=5.0, sling=2.0)
 
@@ -72,8 +78,11 @@ def score(sv):
     s_diag = 0.5 + 0.25 * bool(sv.get("amb")) + 0.25 * bool(sv.get("single_connector"))
     S = 10.0 * (W["mass"] * s_mass + W["steps"] * s_steps + W["tools"] * s_tools + W["err"] * s_err + W["diag"] * s_diag)
     heavy = max(mods.values(), key=lambda m: m.get("mass_kg", 0.0))
+    sites = {m["name"]: m.get("repair", REPAIR_ON_SITE) for m in mods.values()}
+    on_site = sum(1 for m in freq if m.get("repair", REPAIR_ON_SITE) == REPAIR_ON_SITE) / len(freq)
     return dict(score=round(S, 3), s_mass=round(s_mass, 3), s_steps=round(s_steps, 3), s_tools=round(s_tools, 3),
                 s_err=round(s_err, 3), s_diag=round(s_diag, 3), heaviest=dict(module=heavy["name"], mass_kg=round(M, 1)),
                 steps=round(steps, 2), wrongable=round(wrong, 2), tools=sorted(tools), frequent=rows,
-                modules=[dict(name=m["name"], mass_kg=round(m.get("mass_kg", 0.0), 1), steps=round(module_steps(m), 2))
-                         for m in mods.values()])
+                repair_sites=sites, on_site_share=round(on_site, 3),
+                modules=[dict(name=m["name"], mass_kg=round(m.get("mass_kg", 0.0), 1), steps=round(module_steps(m), 2),
+                              repair=m.get("repair", REPAIR_ON_SITE)) for m in mods.values()])

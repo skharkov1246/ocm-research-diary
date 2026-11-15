@@ -17,6 +17,9 @@ idx, n, kv, seed - отпечаток выборки и кода уровня 0 
   python funnel_l1.py --input l0_aws_full/funnel_l0_select_KV-3_n200000.json --top 4000 --shards 40 --shard 0,6,12 \
       --starts 6 --workers "$NPROC" --out "$GTU_OUT"
 Слияние, отбор 50 разных и масштабирование на KV-1/KV-6 - merge_l1.py. Всё - оценка (README узла, раздел «Уровень 1»).
+v3 (решения владельца 15.11.2026): оценка - funnel_l0.final_score (взвешенная × множитель готовности TRL) и в цели оптимизации, и в
+записи (score_w - без множителя, k_trl - множитель); вариант оси «корпус» берётся из отбора уровня 0 (case_arch записи отбора) и
+во время оптимизации не меняется; у оболочки правило shell_fit (funnel_space.check) держит её в камере LPBF.
 """
 import argparse, datetime, gzip, hashlib, json, math, os, sys, time
 
@@ -435,7 +438,7 @@ def evaluate_point(c, tgt):
     s_size = L0.s_size_of(lay["envelope"]["V"], V_bay)
     s_em, s_es = L0.effmake(s_eta, s_size, mr["score"])
     s = dict(parts=pr["score"], plugplay=ppr["score"], service=sr["score"], effmake=s_em)
-    score = L0.weighted(s)
+    score = L0.final_score(s, mr["trl_min"])
     return dict(ok=True, score=score, viol=viol, bad=bad, rules=rules, sol=sol, perf=perf, g=g, rec=rec, strength=stg, layout=lay,
                 scores=dict(s, make=mr["score"], eta=s_eta, size=s_size, etasize=s_es), eta_el=eta_el,
                 models=dict(pr=pr, sr=sr, ppr=ppr, mr=mr, sv=sv, mk=mk))
@@ -726,7 +729,7 @@ def add_vigv(c, tgt, ev, vigv=True, heat=False):
         lay["inlet"]["bleed_heat"] = dict(note="коллектор подогрева входа перепуском воздуха за компрессором (оценка)")
         lay["connections"].append(dict(kind="воздух: перепуск на подогрев входа", where="за компрессором -> вход",
                                        x=lay["compressor"][-1]["x0"] if lay["compressor"] else 0.0, n=1))
-    ev = dict(ev, score=L0.weighted({k: s[k] for k in ("parts", "plugplay", "service", "effmake")}), scores=s, layout=lay,
+    ev = dict(ev, score=L0.final_score({k: s[k] for k in ("parts", "plugplay", "service", "effmake")}, m["mr"]["trl_min"]), scores=s, layout=lay,
               models=dict(m, pr=pr, sr=sr, sv=sv), vigv=bool(vigv), inlet_heat=bool(heat))
     return ev
 
@@ -748,9 +751,10 @@ def _j(vals, k=4):
 
 
 CONT_AXES = ["t41", "pi", "split", "mu1", "mu2", "phi1", "lt", "kcm", "zc", "zt", "zn", "kUpt", "phit", "phipt", "eps_rec", "kD_case", "pgain"]
-COLUMNS = (["j", "idx", "kv", "arch", "niche", "l0_rank", "l0_score", "l0_feasible", "l0_eta_th"]
+COLUMNS = (["j", "idx", "kv", "arch", "niche", "case_arch", "l0_rank", "l0_score", "l0_feasible", "l0_eta_th"]
            + [a for a in FS.CAT if a != "arch"] + CONT_AXES
-           + ["feasible", "reject", "reject_detail", "violation", "score", "d_score_vs_l0", "start_score", "start_feasible", "opt_gain",
+           + ["feasible", "reject", "reject_detail", "violation", "score", "score_w", "k_trl", "d_score_vs_l0", "start_score",
+              "start_feasible", "opt_gain",
               "eta_th_shaft", "eta_el", "s_parts", "s_plugplay", "s_service", "s_make", "s_eta", "s_size", "s_effmake",
               "G", "dG_pct", "EGT", "dEGT", "n_rpm", "pi_stages", "eta_c", "eta_c_model", "M1t", "beta2b", "phi_c", "D2", "U2",
               "eta_t", "eta_t_model", "M2_t", "nu_t", "ns_t", "psi_t", "eta_pt", "burst_min_120", "life_min_h", "pf_ceramic",
@@ -767,7 +771,9 @@ def evaluate_variant(j, entry, kv, n, seed, starts, maxfev, detail=True, c0=None
     t0, tc0 = time.time(), time.process_time()
     idx = int(entry["idx"])
     scaled = c0 is not None
-    c0 = c0 if scaled else FS.concept(idx, n, kv, seed)
+    if not scaled:
+        c0 = FS.concept(idx, n, kv, seed)
+        c0 = FS.apply_case(c0, entry.get("case_arch") or FS.case_base(c0))     # вариант оси «корпус» - из отбора уровня 0
     tgt = FS.target(kv)
     spec, order, runs, nev = optimize(c0, tgt, starts, maxfev, idx, de_gens)
     t_opt = time.time() - t0
@@ -801,8 +807,8 @@ def evaluate_variant(j, entry, kv, n, seed, starts, maxfev, detail=True, c0=None
         bad = ev["bad"]
     feasible = int(not bad) and ev["ok"]
     rec = {k: None for k in COLUMNS}
-    rec.update(j=j, idx=idx, kv=kv, arch=c["arch"], niche=L0.niche_of(c), l0_rank=entry.get("rank"), l0_score=entry.get("score"),
-               l0_feasible=int(bool(entry.get("feasible"))), l0_eta_th=None)
+    rec.update(j=j, idx=idx, kv=kv, arch=c["arch"], niche=L0.niche_of(c), case_arch=c.get("case_arch"), l0_rank=entry.get("rank"),
+               l0_score=entry.get("score"), l0_feasible=int(bool(entry.get("feasible"))), l0_eta_th=None)
     for a in FS.CAT:
         if a != "arch":
             rec[a] = c[a]
@@ -811,7 +817,7 @@ def evaluate_variant(j, entry, kv, n, seed, starts, maxfev, detail=True, c0=None
     rec.update(feasible=int(feasible), reject="|".join(r["code"] for r in bad), reject_detail=L0._detail_rules(bad, 4),
                violation=round(viol_raw(bad), 4) if bad else 0.0, start_score=_r(ev0["score"]), start_feasible=int(ev0["ok"] and ev0["viol"] == 0),
                evals=nev, starts=starts)
-    l0row = (L0.evaluate_l0(idx, n, kv, seed) if not scaled else
+    l0row = (L0.evaluate_l0(idx, n, kv, seed, case=c.get("case_arch")) if not scaled else
              {k: None for k in ("eta_th_shaft", "s_parts", "s_plugplay", "s_service", "s_make", "s_eta", "s_size", "V_env")})
     rec["l0_eta_th"] = l0row["eta_th_shaft"]
     det = None
@@ -833,7 +839,9 @@ def evaluate_variant(j, entry, kv, n, seed, starts, maxfev, detail=True, c0=None
                 bursts.append(1.0 / x["overspeed_ratio"])
             if x.get("life_h") is not None:
                 lives.append(x["life_h"])
-        rec.update(score=_r(ev["score"]), d_score_vs_l0=_r(ev["score"] - entry["score"]) if entry.get("score") is not None else None,
+        rec.update(score=_r(ev["score"]), score_w=_r(L0.weighted({k: ev["scores"][k] for k in L0.CRIT})),
+                   k_trl=_r(L0.trl_factor(m["mr"]["trl_min"])),
+                   d_score_vs_l0=_r(ev["score"] - entry["score"]) if entry.get("score") is not None else None,
                    opt_gain=_r(ev["score"] - ev0["score"]) if ev0["ok"] else None,
                    eta_th_shaft=_r(perf["eta_th"] * 100, 3), eta_el=_r(ev["eta_el"], 3),
                    s_parts=ev["scores"]["parts"], s_plugplay=ev["scores"]["plugplay"], s_service=ev["scores"]["service"],
@@ -900,6 +908,8 @@ def scale_concept(c_opt, kv, n0, seed):
     c = {k: c_opt[k] for k in ["arch"] + [a for a in FS.CAT if a != "arch"]}
     c.update(idx=int(c_opt["idx"]), n=int(n0), seed=int(seed), kv=kv, repair="масштабирование: дискретные оси без изменений")
     c = {k: c[k] for k in ["idx", "n", "seed", "kv", "arch"] + [a for a in FS.CAT if a != "arch"]} | {"repair": c["repair"]}
+    if c_opt.get("case_arch"):
+        c["case_arch"] = c_opt["case_arch"]          # ось «корпус» (v3) - без изменений; оболочку держит правило shell_fit
     FS.design(c, u, FS.target(kv))
     return c
 
@@ -1025,7 +1035,8 @@ def default_workers():
 def method_text():
     return ("воронка, уровень 1: варианты отбора уровня 0 по нишам; для каждого - оптимизация непрерывных осей внутри дискретной схемы "
             "(несколько стартов: дифференциальная эволюция scipy с ограничением по правилам Лампинена + доводка COBYLA; зерно от SEED, "
-            "idx, kv и старта) по взвешенной оценке уровня 1 с ограничением «превышение правил = 0»; "
+            "idx, kv и старта) по итоговой оценке уровня 1 (взвешенная × (0,5 + 0,5·TRL/9), решение владельца 15.11.2026) с "
+            "ограничением «превышение правил = 0»; вариант оси «корпус» - из отбора уровня 0; "
             "одномерные модели ступеней (meanline_l1: Oh/Yoon/Chung, Soderberg + зазор Kacker - Okapuu, вид Baines; привязка уровня к "
             "формулам трека), цикл funnel_space._core (таблицы Cantera), рекуператор по эффективности, быстрая прочность (подобие "
             "disk.py, Ларсон - Миллер IN-713C, Вейбулл Si3N4), нерасчётные режимы −30…+45 °C и 50-100 %, запас по помпажу, пуск "
@@ -1050,12 +1061,13 @@ def run_parts(input_path, top, shard_list, shards, out, starts, maxfev, workers=
     el = time.time() - t0
     os.makedirs(out, exist_ok=True)
     sha_in = hashlib.sha256(open(input_path, "rb").read()).hexdigest()
-    ord_sha = hashlib.sha256(json.dumps([e["idx"] for e in entries]).encode()).hexdigest()[:16]
+    ord_sha = hashlib.sha256(json.dumps([[e["idx"], e.get("case_arch")] for e in entries], ensure_ascii=False).encode()).hexdigest()[:16]
     meta = dict(method=method_text(), software=FS.software(), date=DATE, level=LEVEL, kv=kv, target=FS.target(kv), n0=n, seed=seed,
                 fingerprint=sel.get("fingerprint"), l0_code_sha=sel.get("code_sha"), input=os.path.basename(input_path), input_sha256=sha_in,
                 order_sha=ord_sha, M=M, top=top, shards=shards, starts=starts, maxfev=maxfev, de_gens=de_gens, de_pop=DE_POP, tag=tag,
                 code_sha=code_sha(),
                 input_problems=problems, weights=L0.WEIGHTS, workers=workers,
+                trl=dict(k0=L0.TRL_K0, k1=L0.TRL_K1, trl_max=L0.TRL_MAX, basis=L0.TRL_BASIS),
                 call=dict(shards=shard_list, variants=len(alljs), elapsed_s=round(el, 2),
                           s_per_variant_core=round(el * workers / max(1, len(alljs)), 3),
                           s_per_variant_mean=round(float(np.mean([by_j[j][0]["t_s"] for j in alljs])), 3) if alljs else None,

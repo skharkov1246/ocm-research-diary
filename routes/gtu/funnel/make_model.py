@@ -128,6 +128,11 @@ TRL = {
     "печать_колесо_турбины": dict(trl=4, basis="печатное колесо турбины из никелевого сплава", status="оценка"),
     "печать_ротор_монолит": dict(trl=4, basis="ротор (колёса и вал) одной печатной деталью; прецедентов в ГТУ не найдено", status="оценка"),
     "печать_горячая_часть_целиком": dict(trl=5, basis="сопловой аппарат, камера и корпус турбины одной деталью", status="оценка"),
+    "печать_оболочка": dict(trl=4, basis="цельная печатная оболочка двигателя (вход, корпуса компрессора и диффузоры, корпуса подшипников, "
+                                         "каналы масла и топлива в стенке) с ротором, собранным внутри: печатные статорные детали - TRL 7, "
+                                         "цельная горячая часть - 5; оболочка 0,6-1,5 м крупнее и требует ГИП в камерах, которых в мире "
+                                         "две (Ø1,6 и Ø2,05 м), и КТ ускорителем 9 МэВ; прецедентов в ГТУ в треке не найдено - как "
+                                         "печать_ротор_монолит (organic/print_review: shell_assembly, hip_ct)", status="оценка"),
     "печатное_охлаждение": dict(trl=5, basis="охлаждающие каналы, напечатанные в сопловом аппарате или колесе", status="оценка"),
     "печать_рекуператор": dict(trl=4, basis="печатные рекуператоры IN625 испытаны на стендах sCO2 (Thar Energy, 2022), для ГТУ "
                                             "эксплуатации не найдено; sco2symposium.com/proceedings2022/175-paper.pdf",
@@ -153,9 +158,25 @@ TRL = {
 
 # --------------------------------------------------------------------------- сроки и стоимость (оценка)
 WEEKS = dict(setup_print=1.0, hip=1.0, machining_rot=1.0, cast_tooling=10.0, cast_pour_ndt=4.0, cast_machining=2.0,
-             forging=12.0, forge_machining=3.0, fabrication=6.0, ceramic=20.0)
+             forging=12.0, forge_machining=3.0, fabrication=6.0, ceramic=20.0, hip_unique=6.0, ct_linac=2.0)
 COST_U = dict(print_h=1.0, hip=50.0, cast_tooling=300.0, cast_kg=0.5, forge_kg=1.5, forge_fix=100.0, fab_kg=0.3, fab_fix=50.0,
-              ceramic_fix=500.0, ceramic_kg=5.0)
+              ceramic_fix=500.0, ceramic_kg=5.0, hip_unique=200.0, ct_linac=100.0)
+
+# --------------------------------------------------------------------------- печатная оболочка: ГИП и контроль (v3, решение владельца
+# 15.11.2026, п. 3; разбор живой геометрии - routes/gtu/organic/print_review/print_review_results.json -> hip_ct)
+HIP_VESSELS = [0.88, 1.60, 2.05]   # м, диаметр рабочей камеры ГИП: серийная QIH 200 URC; MTC Powder Solutions (Швеция); Metal Technology
+#                                    (Япония) - по выдержке поиска (organic/print_review.py: RULES["hip_largest"]); длина камер 2,15-4,2 м
+#                                    больше любой оболочки воронки
+HIP_MARGIN = 0.05                  # м, зазор детали в камере ГИП (как в print_review.hip_ct)
+HIP_SERIAL_D = 0.88                # камеры не больше этой - серийные; крупнее - две в мире (очередь и перевозка: WEEKS["hip_unique"], оценка)
+SHELL_RULES = dict(
+    hip="оболочка - корпус под давлением и опоры подшипников из печатного металла: ГИП обязателен (усталость LPBF Ti-6Al-4V: после ГИП "
+        "+10-20 %, по выдержке поиска - print_review RULES fatigue_ti64_lpbf); камера ГИП - не меньше D + 0,05 м",
+    hip_unique="D + 0,05 м больше 0,88 м: только камеры Ø1,6 и Ø2,05 м (две в мире, по выдержке поиска) - +6 недель очереди и перевозки "
+               "(оценка), качество способа не выше 0,6 (оценка); больше 2,05 м - ГИП невозможен, качество 0,2 (оценка)",
+    ct="КТ стенки по касательной - сотни миллиметров металла (KV-3: 0,46 м, print_review hip_ct): трубкой 450 кВ не просвечивается, "
+       "нужен ускоритель 9 МэВ с грубым вокселем; каналы - проливкой, свидетели-купоны в той же печати (print_review, оценка): +2 недели, "
+       "качество способа не выше 0,6 (оценка)")
 
 
 # =========================================================================== пределы, общие для воронки
@@ -282,6 +303,14 @@ def assess_part(part):
         res["hip"] = rot or mat in ("IN718", "Haynes282", "CM247LC", "K418", "Ni")
         res["weeks"] = WEEKS["setup_print"] + hours / 168.0 + (WEEKS["hip"] if res["hip"] else 0.0) + (WEEKS["machining_rot"] if rot else 0.0)
         res["cost_u"] = hours * COST_U["print_h"] + (COST_U["hip"] if res["hip"] else 0.0)
+        if part.get("shell"):                     # печатная оболочка: ГИП обязателен, контроль - ускоритель и купоны (SHELL_RULES)
+            sh = shell_process(D)
+            if sh["hip"] and not res["hip"]:
+                res["weeks"] += WEEKS["hip"]; res["cost_u"] += COST_U["hip"]
+            res.update(hip=sh["hip"], hip_vessel=sh["vessel"], control=sh["control"])
+            res["proc_q"] = min(res["proc_q"], sh["proc_q"])
+            res["weeks"] += sh["weeks"]
+            res["cost_u"] += sh["cost_u"]
     elif m == "литьё":
         lim = CAST.get(kind) or CAST["static"]
         res.update(limit=lim["max"], basis=lim["basis"], route="литьё по выплавляемым моделям")
@@ -319,6 +348,23 @@ def assess_part(part):
     return res
 
 
+def shell_process(D):
+    """печатная оболочка диаметром D, м: ГИП (камера по HIP_VESSELS) и контроль (КТ ускорителем, проливка, купоны) - SHELL_RULES.
+    Возврат: hip (возможен), vessel (диаметр камеры или None), proc_q (верхняя граница качества способа), weeks и cost_u сверх печати"""
+    need = D + HIP_MARGIN
+    fit = [v for v in HIP_VESSELS if v >= need]
+    weeks, cost, q = WEEKS["ct_linac"], COST_U["ct_linac"], 0.6
+    if not fit:
+        return dict(hip=False, vessel=None, proc_q=0.2, weeks=weeks, cost_u=cost,
+                    control="ГИП невозможен (нет камеры) + КТ ускорителем 9 МэВ, проливка каналов, купоны")
+    v = min(fit)
+    if v > HIP_SERIAL_D:
+        weeks += WEEKS["hip_unique"]; cost += COST_U["hip_unique"]
+    return dict(hip=True, vessel=v, proc_q=q, weeks=weeks, cost_u=cost,
+                control=f"ГИП в камере Ø{v:g} м" + (" (две в мире)" if v > HIP_SERIAL_D else "") +
+                        " + КТ ускорителем 9 МэВ, проливка каналов, купоны")
+
+
 # =========================================================================== балл
 W = dict(fit=0.30, proc=0.25, trl=0.30, time=0.15)
 
@@ -346,4 +392,5 @@ def facts():
     """таблицы фактов для results-JSON"""
     return dict(printers=PRINTERS, bj_shrink=BJ_SHRINK, ded=DED, cast=CAST, forge=FORGE, ceramic=CERAMIC,
                 materials=MAT, trl=TRL, ngv_t41=NGV_T41, cool_air=COOL_AIR, cool_air_basis=COOL_AIR_BASIS,
-                weeks=WEEKS, cost_u=COST_U, weights=W)
+                weeks=WEEKS, cost_u=COST_U, weights=W,
+                shell=dict(hip_vessels_m=HIP_VESSELS, hip_margin_m=HIP_MARGIN, hip_serial_d_m=HIP_SERIAL_D, rules=SHELL_RULES))

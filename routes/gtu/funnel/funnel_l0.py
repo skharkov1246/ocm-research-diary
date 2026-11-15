@@ -11,6 +11,11 @@
   * четвёртый критерий владельца «КПД при минимальном размере и изготовимость»: s_eta (КПД на клеммах против исходной
     установки), s_size (доля объёма отсека двигателя), s_make; взвешенная оценка по весам владельца (WEIGHTS);
   * правила допустимости funnel_space.check: недопустимые - с кодом, величиной, пределом (reject, reject_detail).
+v3 (решения владельца 15.11.2026):
+  * итоговая оценка = взвешенная × (0,5 + 0,5·TRL_min/9) - одна функция final_score для уровней 0 и 1, слияний и чувствительности;
+  * ось «корпус» (funnel_space.CASE_*): у каждой концепции считаются оба значения - базовое (картридж; у традиционной - разъём) и
+    оболочка, если она входит в камеру LPBF; запись на значение (столбец case_arch), case_pick = 1 у варианта, который выбрала бы
+    концепция (допустимый с наибольшей оценкой); ниша включает ось «корпус».
 
 Запуск части на AWS (несколько частей одним пулом процессов на все ядра машины):
   python funnel_l0.py --kv KV-3 --n 200000 --shards 30 --shard 0,3,6 --workers "$NPROC" --out "$GTU_OUT"
@@ -18,6 +23,8 @@
 Слияние, рейтинг, ниши и отбор на уровень 1 - merge_l0.py. Всё - оценка (README узла, раздел «Уровень 0»).
 """
 import argparse, datetime, gzip, hashlib, json, math, os, sys, time
+
+import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 GTU = os.path.dirname(HERE)
@@ -65,6 +72,32 @@ def weighted(s, w=None):
     """взвешенная оценка 0-10 по критериям s (баллы 0-10); нормировка критерия - деление на 10 (шкала постоянная)"""
     w = check_weights(dict(w or WEIGHTS))
     return sum(w[k] * s[k] for k in CRIT)
+
+
+# решение владельца 15.11.2026, п. 1: готовность технологии - итоговая оценка × (0,5 + 0,5·s_trl), s_trl = TRL/9; TRL - наименьшая
+# готовность среди технологий концепции (make_model.score: trl_min). Радикальные схемы остаются в поиске, но обходят реализуемые только
+# при явном выигрыше: TRL 9 - ×1,00, TRL 5 - ×0,78, TRL 3 - ×0,67
+TRL_K0, TRL_K1, TRL_MAX = 0.5, 0.5, 9.0
+TRL_BASIS = ("решение владельца 15.11.2026 (окно с вариантами; routes/gtu/README.md, «Решения владельца»): оценка воронки × "
+             "(0,5 + 0,5·TRL_min/9), TRL_min - make_model.score (наименьшая готовность среди технологий концепции, таблица make_model.TRL)")
+
+
+def trl_factor(trl_min):
+    """множитель готовности технологии 0,5 + 0,5·TRL_min/9; число или массив numpy (None - NaN)"""
+    t = np.asarray(np.nan if trl_min is None else trl_min, dtype=float)
+    f = TRL_K0 + TRL_K1 * t / TRL_MAX
+    return float(f) if f.ndim == 0 else f
+
+
+def final_score(s, trl_min, w=None):
+    """итоговая оценка воронки - ОДНА функция для всех мест, где она считается (уровень 0 и 1, слияния, пересчёт, чувствительность к
+    весам): взвешенная оценка по весам владельца × множитель готовности trl_factor(TRL_min). s - баллы dict(CRIT) или матрица n×4
+    (столбцы в порядке CRIT); trl_min - число или вектор длины n"""
+    w = check_weights(dict(w or WEIGHTS))
+    if isinstance(s, dict):
+        return weighted(s, w) * trl_factor(trl_min)
+    S = np.asarray(s, dtype=float)
+    return (S @ np.array([w[k] for k in CRIT])) * trl_factor(trl_min)
 
 
 def effmake(s_eta, s_size, s_make, split_em=None, split_es=None):
@@ -198,7 +231,7 @@ def s_size_of(V, V_bay):
 
 
 # =========================================================================== ниша (архив MAP-Elites)
-NICHE_AXES = ["arch", "rotors", "comp", "turb", "cool", "recup", "rotor_make"]
+NICHE_AXES = ["arch", "rotors", "comp", "turb", "cool", "recup", "rotor_make", "case_arch"]   # v3: + ось «корпус»
 
 
 def rotor_make(c):
@@ -208,20 +241,28 @@ def rotor_make(c):
 
 
 def niche_of(c):
-    """ниша = архетип × число роторов × тип компрессора × тип турбины × класс охлаждения × рекуператор × изготовление ротора"""
-    return "|".join([c["arch"], f"{c['rotors']}р", c["comp"], c["turb"], c["cool"], c["recup"], rotor_make(c)])
+    """ниша = архетип × число роторов × тип компрессора × тип турбины × класс охлаждения × рекуператор × изготовление ротора ×
+    корпус (v3; у концепции без оси - базовое значение funnel_space.case_base)"""
+    return "|".join([c["arch"], f"{c['rotors']}р", c["comp"], c["turb"], c["cool"], c["recup"], rotor_make(c),
+                     c.get("case_arch") or FS.case_base(c)])
+
+
+def niche_v2(niche):
+    """ниша без оси «корпус» - для сравнения с выборкой v2"""
+    return niche.rsplit("|", 1)[0] if niche.count("|") >= len(NICHE_AXES) - 1 else niche
 
 
 # =========================================================================== запись концепции
 AX_COLS = [a for a in FS.AXES if a != "arch"]
-COLUMNS = (["idx", "kv", "arch", "niche"] + [a for a in AX_COLS if a in FS.CAT] + ["pi_max_U"] + [a for a in AX_COLS if a in FS.CONT]
+COLUMNS = (["idx", "kv", "arch", "niche", "case_arch", "case_pick", "shell_note"] + [a for a in AX_COLS if a in FS.CAT] + ["pi_max_U"]
+           + [a for a in AX_COLS if a in FS.CONT]
            + ["repair", "dflags", "w_need", "t41_lo", "t41_hi", "pi_lo", "pi_hi", "n_gg"]
            + ["feasible", "reject", "reject_detail", "violation",
               "eta_th_shaft", "eta_el", "w_kJkg", "G", "dG_pct", "EGT", "dEGT", "T2", "T5", "pi_stages", "eta_c", "ns_c",
               "deta_c", "eta_t", "ns_t", "deta_t", "eta_pt", "psi_t", "nu_t", "htr_t", "AN2_t", "psi_pt", "htr_pt", "AN2_pt",
               "n_rpm", "D2", "U2", "b2_mm", "phi", "D_turb", "U_turb", "h_turb", "D_pt", "h_pt", "D_case", "D_env",
               "L_env", "W_env", "H_env", "V_env", "mass_kg", "rotor_kg", "rec_modules", "rec_V",
-              "s_parts", "s_plugplay", "s_service", "s_make", "s_eta", "s_size", "s_etasize", "s_effmake", "score",
+              "s_parts", "s_plugplay", "s_service", "s_make", "s_eta", "s_size", "s_etasize", "s_effmake", "score", "score_w", "k_trl",
               "n_parts", "n_assemblies", "n_moving", "n_cooled", "n_fasteners", "n_unique", "n_eff",
               "heaviest_kg", "heaviest_module", "steps", "n_tools", "wrongable", "n_modules",
               "pp_blocked", "pp_no_data", "trl_min", "weeks", "techs"])
@@ -270,15 +311,58 @@ def solve(c, tgt):
     return dict(perf=perf, g=g, dc=dc, dt=dt, nsc=nsc, nst=nst, fail=fail)
 
 
-def evaluate_l0(i, n, kv="KV-3", seed=SEED, detail=False):
-    """концепция i выборки объёма n -> плоская запись COLUMNS (dict); detail - модули, интерфейсы, геометрия"""
-    c = FS.concept(i, n, kv, seed)
+def evaluate_l0(i, n, kv="KV-3", seed=SEED, detail=False, case=None):
+    """концепция i выборки объёма n -> плоская запись COLUMNS (dict) варианта оси «корпус» case (по умолчанию - базовый:
+    funnel_space.case_base); detail - модули, интерфейсы, геометрия. Все варианты концепции сразу - evaluate_concept"""
+    c0 = FS.concept(i, n, kv, seed)
     tgt = FS.target(kv)
+    sol = solve(c0, tgt)
+    case = case or FS.case_base(c0)
+    c = FS.apply_case(c0, case)
+    g = sol["g"]
+    if case == "оболочка" and g is not None:
+        g = FS.derive(c, tgt, sol["perf"])
+    out = _row(i, kv, c, tgt, dict(sol, g=g), detail)
+    if not detail:
+        out["case_pick"] = None
+    return out
+
+
+def evaluate_concept(i, n, kv="KV-3", seed=SEED):
+    """концепция i -> записи всех вариантов оси «корпус» (v3): базовый (картридж; у традиционной - разъём) и оболочка, если она
+    входит в камеру LPBF (funnel_space.shell_fit); цикл и проточная часть считаются один раз. case_pick = 1 у варианта, который
+    выбрала бы концепция: допустимый с наибольшей итоговой оценкой, при равенстве - базовый; shell_note - почему оболочки нет"""
+    c0 = FS.concept(i, n, kv, seed)
+    tgt = FS.target(kv)
+    sol = solve(c0, tgt)
+    rows = [_row(i, kv, FS.apply_case(c0, FS.case_base(c0)), tgt, sol, False)]
+    note = ""
+    if sol["g"] is None:
+        note = "оболочка не считалась: цикл или геометрия не строятся"
+    else:
+        cs = FS.apply_case(c0, "оболочка")
+        try:
+            gs = FS.derive(cs, tgt, sol["perf"])
+            ok, why = FS.shell_fit(cs, gs)
+        except (ValueError, ZeroDivisionError, OverflowError) as e:
+            gs, ok, why = None, False, f"геометрия не строится: {e}"
+        if ok:
+            rows.append(_row(i, kv, cs, tgt, dict(sol, g=gs), False))
+        else:
+            note = "оболочка невозможна: " + why
+    best = max(range(len(rows)), key=lambda k: (rows[k]["feasible"], -1e9 if rows[k]["score"] is None else rows[k]["score"], -k))
+    for k, r in enumerate(rows):
+        r["case_pick"] = int(k == best)
+    rows[0]["shell_note"] = note or None
+    return rows
+
+
+def _row(i, kv, c, tgt, sol, detail):
+    """запись варианта c (концепция с осью «корпус») по решению цикла sol (perf, g, поправки КПД)"""
     rec = dict(idx=int(i), kv=kv, arch=c["arch"], niche=niche_of(c))
     for a in COLUMNS[4:]:
         if a in c:
             rec[a] = _r(c[a], 6)
-    sol = solve(c, tgt)
     perf, g, dc, dt, nsc, nst, fail = (sol[k] for k in ("perf", "g", "dc", "dt", "nsc", "nst", "fail"))
     if g is None:
         bad = [FS._rule("perf", False, text=fail or "нет решения")]
@@ -316,7 +400,8 @@ def evaluate_l0(i, n, kv="KV-3", seed=SEED, detail=False):
     s_em, s_es = effmake(s_eta, s_size, mr["score"])
     s = dict(parts=pr["score"], plugplay=ppr["score"], service=sr["score"], effmake=round(s_em, 3))
     rec.update(s_parts=pr["score"], s_plugplay=ppr["score"], s_service=sr["score"], s_make=mr["score"], s_eta=s_eta, s_size=s_size,
-               s_etasize=round(s_es, 3), s_effmake=round(s_em, 3), score=round(weighted(s), 4),
+               s_etasize=round(s_es, 3), s_effmake=round(s_em, 3), score=round(final_score(s, mr["trl_min"]), 4),
+               score_w=round(weighted(s), 4), k_trl=round(trl_factor(mr["trl_min"]), 4),
                n_parts=pr["parts"], n_assemblies=pr["assemblies"], n_moving=pr["moving"], n_cooled=pr["cooled"],
                n_fasteners=pr["fasteners"], n_unique=pr["unique"], n_eff=_r(float(pr["n_eff"]), 1),
                heaviest_kg=sr["heaviest"]["mass_kg"], heaviest_module=sr["heaviest"]["module"], steps=sr["steps"],
@@ -329,8 +414,9 @@ def evaluate_l0(i, n, kv="KV-3", seed=SEED, detail=False):
     geo = geometry(c, tgt, perf, g, env)
     det = dict(concept=c, geometry=geo,
                parts=dict(by_unit={u: {k: v for k, v in d.items() if k != "rule"} for u, d in pr["by_unit"].items()},
-                          welds=pr["welds"]),
-               service=dict(modules=sr["modules"], frequent=sr["frequent"], tools=sr["tools"],
+                          welds=pr["welds"], trap=pr["trap"], case_arch=pr["case_arch"]),
+               service=dict(modules=sr["modules"], frequent=sr["frequent"], tools=sr["tools"], repair_sites=sr["repair_sites"],
+                            on_site_share=sr["on_site_share"],
                             sub=dict(s_mass=sr["s_mass"], s_steps=sr["s_steps"], s_tools=sr["s_tools"], s_err=sr["s_err"],
                                      s_diag=sr["s_diag"])),
                plugplay={k: dict(state=v["state"], note=v.get("note")) for k, v in ppr["items"].items()},
@@ -353,6 +439,7 @@ def geometry(c, tgt, perf, g, env):
                             n_rpm=tgt["n_pkg"]) if g["pt"] else None),
         recuperator=(dict(modules=g["rec"]["modules"], side=_r(g["rec"]["side"], 3), V=_r(g["rec"]["V_m3"], 3),
                           integral=bool(c["recup_integral"])) if g["rec"] else None),
+        case=dict(arch=c.get("case_arch"), name=FS.CASE_NAMES.get(c.get("case_arch"))),
         cores=c["cores"], shaft_rpm=round(g["n"]), output_rpm=tgt["n_pkg"],
         envelope=dict(L=_r(env["L"], 3), W=_r(env["W"], 3), H=_r(env["H"], 3)), mass_kg_estimate=round(env["mass"]),
         note="оценка уровня 0: формулы derive/envelope (README узла)")
@@ -388,12 +475,13 @@ def parse_shards(spec, shards):
 
 
 def _eval_chunk(args):
+    """записи всех вариантов оси «корпус» по концепциям idx (список списков)"""
     idx, n, kv, seed = args
-    return [evaluate_l0(i, n, kv, seed) for i in idx]
+    return [evaluate_concept(i, n, kv, seed) for i in idx]
 
 
 def evaluate_many(indices, n, kv, seed=SEED, workers=1):
-    """записи по индексам; workers процессов; порядок и содержимое не зависят от workers"""
+    """записи по индексам (на концепцию - список вариантов оси «корпус»); workers процессов; порядок и содержимое не зависят от workers"""
     indices = list(indices)
     if workers <= 1 or len(indices) < 2:
         return _eval_chunk((indices, n, kv, seed))
@@ -417,11 +505,12 @@ def default_workers():
 
 
 def method_text():
-    return ("воронка, уровень 0: концепции по индексу из последовательности Соболя (funnel_space, зерно SEED); быстрый цикл "
+    return ("воронка, уровень 0 (v3): концепции по индексу из последовательности Соболя (funnel_space, зерно SEED); быстрый цикл "
             "на таблицах gtu_explore (Cantera GRI-Mech 3.0, метан, ISO) с КПД ступеней comp_stage, поправками за зазор и "
             "удельную быстроходность (подбор по frame3) и КПД турбин по нагрузке и U/C0; геометрия derive, габарит и масса "
-            "(оценка); правила допустимости funnel_space.check; баллы parts/service/plugplay/make, s_eta, s_size; взвешенная "
-            "оценка по весам владельца 14.11.2026. Всё - оценка (README узла).")
+            "(оценка); правила допустимости funnel_space.check; ось «корпус» - оба значения (картридж и оболочка, если входит в "
+            "камеру LPBF); баллы parts/service/plugplay/make, s_eta, s_size; итоговая оценка - взвешенная по весам владельца "
+            "14.11.2026 × (0,5 + 0,5·TRL/9) (решение 15.11.2026). Всё - оценка (README узла).")
 
 
 def part_path(out, kv, n, shard, shards, gz=False):
@@ -434,18 +523,21 @@ def run_parts(kv, n, shard_list, shards, out, seed=SEED, workers=1, gz=False):
     idx_by = {k: FS.shard_indices(n, k, shards) for k in shard_list}
     allidx = sorted(i for v in idx_by.values() for i in v)
     rows = evaluate_many(allidx, n, kv, seed, workers)
-    by_idx = {r["idx"]: r for r in rows}
+    by_idx = {rs[0]["idx"]: rs for rs in rows}
     el = time.time() - t0
     os.makedirs(out, exist_ok=True)
     meta = dict(method=method_text(), software=FS.software(), date=DATE, level=LEVEL, kv=kv, target=FS.target(kv), n=n, seed=seed,
                 shards=shards, fingerprint=FS.fingerprint(n, seed), code_sha=code_sha(), calib=calib_ns(),
                 weights=WEIGHTS, split_effmake=SPLIT_EFFMAKE, split_etasize=SPLIT_ETASIZE, workers=workers,
+                trl=dict(k0=TRL_K0, k1=TRL_K1, trl_max=TRL_MAX, basis=TRL_BASIS), sampler=FS.SAMPLER[:160],
+                case_axis=dict(values=list(FS.CASE_VALUES), names=FS.CASE_NAMES, basis=FS.CASE_BASIS),
                 call=dict(shards=shard_list, concepts=len(allidx), elapsed_s=round(el, 2),
                           s_per_concept_core=round(el * workers / max(1, len(allidx)), 5),
                           host_cpus=os.cpu_count(), started=datetime.datetime.fromtimestamp(t0, datetime.timezone.utc).isoformat()))
     paths = []
     for k in shard_list:
-        doc = dict(meta, shard=k, columns=COLUMNS, n_rows=len(idx_by[k]), rows=[[by_idx[i][c] for c in COLUMNS] for i in idx_by[k]])
+        rws = [[r[c] for c in COLUMNS] for i in idx_by[k] for r in by_idx[i]]
+        doc = dict(meta, shard=k, columns=COLUMNS, n_rows=len(rws), n_concepts=len(idx_by[k]), rows=rws)
         p = part_path(out, kv, n, k, shards, gz)
         txt = json.dumps(doc, ensure_ascii=False, separators=(",", ":"))
         if gz:

@@ -11,6 +11,21 @@
     S     = 10 * N_HALF / (N_HALF + N_eff)
 N_HALF - N_eff опорной традиционной схемы (REF_BOM: KV-3 по frame3 - два колеса, осевая турбина из трёх ступеней
 с лопатками в замках, болтовые фланцы); у неё балл 5. Больше любых деталей - балл ниже (строго).
+
+v3 (решение владельца 15.11.2026, п. 3) - ось «корпус» bom["case_arch"]:
+    «картридж» - корпус с разъёмом, газогенератор вынимается целиком; «разъём» - то же без картриджа (ротор вынимается отдельно,
+    опорная точка frame3); «оболочка» - цельная печатная оболочка (вход, корпуса и диффузоры, корпуса подшипников, каналы масла
+    и топлива в стенке) с ротором, собранным внутри, горячая часть - одной печатной деталью (разбор живой геометрии:
+    routes/gtu/organic/structure/README.md, п. 4; organic/print_review: shell_assembly).
+Правило собираемости (там же, решение владельца): число частей статора не меньше числа статорных элементов, запирающих колёса.
+Запирающие элементы ротора из n_cw колёс компрессора и n_t ступеней турбины: передний (вход с корпусом подшипника), между колёсами
+компрессора (n_cw - 1), СА 1 с внутренним корпусом камеры, СА 2 ... СА n_t, задний (выхлоп с корпусом подшипника) - всего
+n_cw + n_t + 1. Недостающие части добавляются (trap): у печатной оболочки одна её часть - один элемент; внешний печатный корпус
+картриджа элементом не служит (картридж выходит из него); цельная горячая часть - один элемент (СА 1). Ротор одной деталью
+(заодно, сварка) - каждый элемент между колёсами - из двух половин (цельное кольцо между колёсами одной детали не поставить;
+оценка): +1 деталь на элемент, если он ещё не разъёмный. Добавленные части холодного корпуса - новые стыки (как прочие части
+корпуса), кольца СА - внутренние, без стыков. Проверка: REF_BOM как оболочка - 211 деталей, крепёж 284 (хомут) / 340 (болты),
+-108 против 319 (organic/print_review_results.json -> shell_assembly).
 """
 import math
 
@@ -92,9 +107,13 @@ def count(bom):
 
     # ------------------------------------------------ корпуса (холодная часть, на ядро)
     m = case["method"]
+    case_arch = bom.get("case_arch") or "разъём"
+    shell = case_arch == "оболочка"
+    hot_int = bom.get("hot_integral", False)
     if m == "печать":
         cp = case.get("pieces", 1)
-        crule = f"печать: вход, корпус и диффузоры одной деталью (частей по камере принтера: {cp})"
+        crule = (f"печатная оболочка: вход, корпус, диффузоры и корпуса подшипников одной деталью (частей по камере принтера: {cp})" if shell else
+                 f"печать: вход, корпус и диффузоры одной деталью (частей по камере принтера: {cp})")
     else:
         cp = 1 + (1 if bom["inlet"] == "двух" else 0)
         for k, t in enumerate(comp):
@@ -112,13 +131,13 @@ def count(bom):
         if case["D"] > SPLIT_D:
             cp *= 2; crule += f"; корпус больше {SPLIT_D} м - с горизонтальным разъёмом (x2)"
     sumps = 0 if m == "печать" else 2
-    add("корпуса", parts=(cp + sumps) * cores, assemblies=cores,
-        rule=crule + f"; корпуса подшипников: {sumps} (у печатного корпуса - заодно)")
+    trap = trap_rule(bom, cp)
+    add("корпуса", parts=(cp + sumps + trap["add_cold"]) * cores, assemblies=cores,
+        rule=crule + f"; корпуса подшипников: {sumps} (у печатного корпуса - заодно)" + (f"; {trap['rule_cold']}" if trap["add_cold"] else ""))
     add("корпуса", parts=1, rule="выхлопной диффузор и коллектор - 1 на двигатель")
 
     # ------------------------------------------------ камера сгорания (на ядро)
     kind, cm, ninj = comb["kind"], comb["method"], comb["n_inj"]
-    hot_int = bom.get("hot_integral", False)
     if kind == "кольцевая":
         if cm == "печать":
             liner = 0 if hot_int else 1; inj = 1
@@ -151,13 +170,16 @@ def count(bom):
     cooled_ngv = bom.get("ngv_cooled", False)
     if hot_int:
         ngv_n = 1
-        add("горячая часть", parts=cores, cooled=(1 if cooled_ngv else 0) * cores, assemblies=cores,
-            rule="цельная горячая часть: сопловые аппараты + корпус турбины (+ жаровая труба кольцевой печатной камеры) - 1")
+        add("горячая часть", parts=(1 + trap["add_hot"]) * cores, cooled=(1 + trap["add_hot"] if cooled_ngv else 0) * cores, assemblies=cores,
+            rule="цельная горячая часть: сопловые аппараты + корпус турбины (+ жаровая труба кольцевой печатной камеры) - 1"
+                 + (f"; {trap['rule_hot']}" if trap["add_hot"] else ""))
     else:
         ngv_n = _ngv_parts(turb["stages"], cooled_ngv)
         shrouds = sum(1 for _ in turb["stages"]) if turb["type"] == "О" else 0
-        add("горячая часть", parts=(ngv_n + 1 + shrouds) * cores, cooled=(ngv_n if cooled_ngv else 0) * cores, assemblies=cores,
-            rule="сопловой аппарат: цельное кольцо - 1, иначе сегменты-дуплеты zn/2; корпус турбины - 1; кольцо над колесом осевой ступени - 1")
+        add("горячая часть", parts=(ngv_n + 1 + shrouds + trap["add_hot"]) * cores,
+            cooled=(ngv_n + trap["add_hot"] if cooled_ngv else 0) * cores, assemblies=cores,
+            rule="сопловой аппарат: цельное кольцо - 1, иначе сегменты-дуплеты zn/2; корпус турбины - 1; кольцо над колесом осевой ступени - 1"
+                 + (f"; {trap['rule_hot']}" if trap["add_hot"] else ""))
 
     # ------------------------------------------------ подшипники и уплотнения (на ротор)
     n_rot = cores + (1 if rotors == 2 else 0)
@@ -173,10 +195,21 @@ def count(bom):
 
     # ------------------------------------------------ маслосистема двигателя, топливо, пуск
     if bear == "масло":
-        add("маслосистема", parts=4 * n_rot + 2, assemblies=1,
-            rule="на ротор: 2 подводящих + 2 сливных трубки; на двигатель: коллектор + суфлёр; насос и бак - пакета")
-    add("топливо", parts=2 * cores + (1 if cores > 1 else 0), assemblies=1,
-        rule="подвод газа + гибкий рукав на ядро; распределитель при кластере; регулирующий клапан - пакета")
+        if shell:
+            n_pt = 1 if rotors == 2 else 0
+            add("маслосистема", parts=1 + 4 * n_pt, assemblies=1,
+                rule="оболочка: подвод, слив и вентиляция газогенератора - каналы в стенках стоек оболочки; суфлёр - 1"
+                     + ("; силовая турбина вне оболочки: 2 подводящих + 2 сливных трубки" if n_pt else "")
+                     + " (organic/structure shell_topo: встроенные каналы)")
+        else:
+            add("маслосистема", parts=4 * n_rot + 2, assemblies=1,
+                rule="на ротор: 2 подводящих + 2 сливных трубки; на двигатель: коллектор + суфлёр; насос и бак - пакета")
+    if shell:
+        add("топливо", parts=cores + (1 if cores > 1 else 0), assemblies=1,
+            rule="оболочка: подвод газа - канал в стенке к встроенному коллектору; гибкий рукав пакета - 1 на ядро; распределитель при кластере")
+    else:
+        add("топливо", parts=2 * cores + (1 if cores > 1 else 0), assemblies=1,
+            rule="подвод газа + гибкий рукав на ядро; распределитель при кластере; регулирующий клапан - пакета")
     if bom.get("new_starters", 0):
         add("пуск", parts=2 * bom["new_starters"], moving=bom["new_starters"], assemblies=bom["new_starters"],
             rule="новый стартёр + переходник на каждый ротор, который стартёр пакета не проворачивает")
@@ -210,7 +243,51 @@ def count(bom):
     by = {k: dict(v, rule="; ".join(v["rule"])) for k, v in U.items()}
     return dict(parts=tot["parts"], assemblies=tot["assemblies"], moving=tot["moving"], cooled=tot["cooled"],
                 fasteners=tot["fasteners"], welds=tot["welds"], unique=unique, n_eff=round(n_eff, 2),
-                score=round(score_from_neff(n_eff), 3), by_unit=by)
+                score=round(score_from_neff(n_eff), 3), by_unit=by, case_arch=case_arch,
+                trap={k: v for k, v in trap.items() if not k.startswith("rule")})
+
+
+def trap_rule(bom, cp):
+    """правило собираемости (решение владельца 15.11.2026): сколько частей статора добавить на ядро, чтобы число частей было не меньше
+    числа запирающих колёса элементов (модуль - docstring). cp - частей холодного корпуса по правилам способа. Возврат: n_trap,
+    cover (чем закрыты), add_cold, add_hot, split (элементы из половин у ротора одной деталью), rule_cold, rule_hot"""
+    comp, turb, case = bom["comp"], bom["turb"], bom["case"]
+    n_cw, n_t = len(comp), len(turb["stages"])
+    shell = (bom.get("case_arch") or "разъём") == "оболочка"
+    hot_int = bool(bom.get("hot_integral"))
+    one_piece = bom["rotor_join"] in ("заодно", "сварка")
+    m = case["method"]
+    if m == "печать":
+        cold_cover = cp if shell else 0          # часть оболочки - один элемент; внешний печатный корпус картриджа не запирает
+    else:
+        cold_cover = n_cw                        # вход + обратные каналы и кольца статора осевых ступеней - отдельными деталями
+    hot_cover = 1 if hot_int else n_t
+    split = 0
+    if one_piece:
+        add_c = 0 if cold_cover >= 1 else 1                      # передний элемент
+        if m == "печать":
+            add_c += 2 * (n_cw - 1)                              # элементы между колёсами - половинами, оболочкой быть не могут
+            split += n_cw - 1
+        elif case["D"] <= SPLIT_D:
+            add_c += n_cw - 1                                    # цельные кольца между колёсами одной детали - в половины
+            split += n_cw - 1
+        if hot_int:
+            add_h = 1 + 2 * (n_t - 1)                            # цельная горячая часть (СА 1) - из двух половин; СА 2.. - половинами
+            split += n_t
+        else:
+            add_h = sum(1 for s in turb["stages"] if s.get("ngv_ring"))   # цельные кольца СА - в половины (сегменты и так разъёмны)
+            split += add_h
+    else:
+        add_c = max(0, n_cw - cold_cover)
+        add_h = max(0, n_t - hot_cover)
+    n_trap = n_cw + n_t + 1
+    rc = (f"правило собираемости: запирающих элементов {n_trap} (передний, {n_cw - 1} между колёсами компрессора, СА 1-{n_t}, задний); "
+          f"холодный корпус даёт {min(cold_cover, n_cw)} из {n_cw}" + (", ротор одной деталью - элементы между колёсами из половин" if one_piece else "")
+          + f": +{add_c}")
+    rh = (f"правило собираемости: СА {n_t} ступеней, горячая часть даёт {hot_cover}"
+          + (", ротор одной деталью - цельные кольца СА из половин" if one_piece else "") + f": +{add_h} (кольца СА - внутренние, без стыков)")
+    return dict(n_trap=n_trap, cover_cold=min(cold_cover, n_cw), cover_hot=hot_cover, add_cold=add_c, add_hot=add_h, split=split,
+                one_piece=one_piece, rule_cold=rc, rule_hot=rh)
 
 
 def _unique(bom, U):

@@ -1780,6 +1780,67 @@ def _blisk(method, mat, Dtip, Dm):
     return False
 
 
+# =========================================================================== ось «корпус» (v3, решение владельца 15.11.2026, п. 3)
+CASE_ARCH = ("картридж", "оболочка")                 # значения оси для всех архетипов, кроме опорной точки
+CASE_VALUES = ("разъём", "картридж", "оболочка")
+CASE_NAMES = {"разъём": "корпус с разъёмом, ротор вынимается отдельно (центровка, балансировка ротора на месте) - только опорная "
+                        "точка frame3 (архетип «традиционная», шаблон cartridge = 0)",
+              "картридж": "корпус с разъёмом, газогенератор вынимается целиком картриджем (без центровки); ремонт картриджа - на заводе",
+              "оболочка": "цельная печатная оболочка (вход, корпуса и диффузоры, корпуса подшипников, каналы масла и топлива в стенке) с "
+                          "ротором, собранным внутри; горячая часть (СА, корпус турбины, жаровая труба кольцевой камеры) - одной печатной "
+                          "деталью на хомуте; ремонт - заменой двигателя, разборка на заводе"}
+CASE_BASIS = ("решение владельца 15.11.2026, п. 3: считать оба варианта для каждой концепции, где оболочка физически возможна по габариту "
+              "печати; разбор живой геометрии - routes/gtu/organic/structure/README.md, п. 4 (−108 деталей у KV-3, картридж ротора у "
+              "оболочки не вынимается) и organic/print_review (собираемость, ГИП, КТ). Ось не разыгрывается: цикл и проточная часть у "
+              "обоих значений одни и те же, меняются корпус, горячая часть, детали, модули замены, изготовление")
+SHELL_HOT_MAT = "Haynes282"       # печатная горячая часть оболочки, если у концепции литой сплав СА (IN625 или Haynes 282 - organic/structure)
+SHELL_PROC = ("LPBF",)            # оболочка - только в камере LPBF (живая геометрия: BLT-S1500, FS1521M-U, EP-M2050); BJ и DED - нет (оценка)
+
+
+def case_base(c):
+    """значение оси «корпус» для варианта без оболочки: «картридж»; у архетипа, шаблон которого не разрешает картридж
+    (традиционная - опорная точка frame3), - «разъём»"""
+    T = ARCH[c["arch"]]["allowed"]
+    return "картридж" if 1 in T.get("cartridge", _DEF["cartridge"]) else "разъём"
+
+
+def apply_case(c, case):
+    """концепция c с заданным значением оси «корпус». Цикл, проточная часть и непрерывные оси не меняются. «картридж» -
+    cartridge = 1; «разъём» - cartridge = 0; «оболочка» - корпус печатный (m_case = печать), горячая часть одной печатной деталью
+    (hot_integral = 1, m_hot = печать, сплав СА - печатный; кольцевая камера - печатная, в горячей части), картриджа нет;
+    керамическая горячая часть (класс C) остаётся отдельной"""
+    if case not in CASE_VALUES:
+        raise ValueError(f"корпус: {case}")
+    c2 = dict(c, case_arch=case)
+    if case != "оболочка":
+        c2["cartridge"] = 1 if case == "картридж" else 0
+        return c2
+    c2.update(cartridge=0, m_case="печать")
+    if c["cool"] != "C":
+        c2.update(hot_integral=1, m_hot="печать")
+        if c["mat_hot"] not in MAT_HOT["печать"]:
+            c2["mat_hot"] = SHELL_HOT_MAT
+        if c["comb"] == "кольцевая":
+            c2["m_comb"] = "печать"
+    return c2
+
+
+def shell_fit(c, g):
+    """оболочка возможна по габариту печати: холодная часть D_case × L_case и (кроме класса C) горячая часть целиком
+    D_hot × (L_hot [+ L_comb кольцевой печатной камеры]) входят в камеру LPBF (make_model.PRINTERS); у кластера - на ядро.
+    Возврат: (да/нет, пояснение)"""
+    def lpbf(D, L):
+        return [p["name"] for p in MK.printers_for(D, L, False) if p["proc"] in SHELL_PROC]
+    pc = lpbf(g["D_case"], g["L_case"])
+    if not pc:
+        return False, f"холодная часть Ø{g['D_case']:.2f} × {g['L_case']:.2f} м не входит ни в одну камеру LPBF"
+    if c["cool"] != "C":
+        L = g["L_hot"] + (g["L_comb"] if (c["comb"] == "кольцевая" and c["m_comb"] == "печать") else 0.0)
+        if not lpbf(g["D_hot"], L):
+            return False, f"горячая часть Ø{g['D_hot']:.2f} × {L:.2f} м не входит ни в одну камеру LPBF"
+    return True, "камеры LPBF: " + ", ".join(pc)
+
+
 def _parts_for_make(c, g):
     """детали со способом изготовления и размерами для make_model и правила размеров"""
     P = []
@@ -1847,12 +1908,14 @@ def _parts_for_make(c, g):
                       D=g["D_comb"], L=g["L_comb"], mass_kg=m["comb"], rotating=False))
     # холодные корпуса
     pieces = 1
+    shell = c.get("case_arch") == "оболочка"
     if c["m_case"] == "печать":
         if not MK.printers_for(g["D_case"], g["L_case"], False):
             pieces = max(2, math.ceil(max(g["D_case"], g["L_case"]) / MK.largest_print_dim()))
-    P.append(dict(name="корпус компрессора", kind="static", method=c["m_case"], material="Ti64" if c["m_case"] == "печать" else "steel",
+    P.append(dict(name="оболочка (холодная часть)" if shell else "корпус компрессора", kind="static", method=c["m_case"],
+                  material="Ti64" if c["m_case"] == "печать" else "steel",
                   D=g["D_case"] / (pieces ** 0.5 if pieces > 1 else 1.0), L=g["L_case"], mass_kg=m["case"], rotating=False,
-                  split_ok=True))
+                  split_ok=not shell, shell=shell))
     if g["rec"]:
         P.append(dict(name="модуль рекуператора", kind="static", method="печать", material="IN625", D=g["rec"]["side"], L=g["rec"]["side"],
                       mass_kg=g["rec"]["mass_kg"] / g["rec"]["modules"], rotating=False, n=g["rec"]["modules"]))
@@ -1879,8 +1942,10 @@ def model_inputs(c, tgt, perf, g):
     """ведомость для parts_model, модули для service_model, интерфейсы для plugplay_model, детали для make_model"""
     keyed = c["conn"] == "быстроразъём"
     comb_kind = c["comb"]
+    case = c.get("case_arch") or ("картридж" if c["cartridge"] else "разъём")      # концепция без оси (v2) - по оси cartridge
+    shell = case == "оболочка"
     bom = dict(cores=c["cores"], rotors=c["rotors"], comp=stage_types(c), rotor_join=c["rotor_join"], bear=c["bear"], conn=c["conn"],
-               inlet=c["inlet"],
+               inlet=c["inlet"], case_arch=case,
                turb=dict(type=c["turb"], stages=[dict(blisk=g["blisk"][k], zt=c["zt"], zn=c["zn"],
                                                       ngv_ring=(g["ngv_ring"][k] if g["ngv_ring"] else True)) for k in range(c["nt"])]),
                pt=(dict(stages=[dict(blisk=g["pt_blisk"][k], zt=c["zt"], zn=c["zn"], ngv_ring=True) for k in range(c["npt"])])
@@ -1901,37 +1966,50 @@ def model_inputs(c, tgt, perf, g):
     comb_in_hot = hot_int and c["comb"] == "кольцевая" and c["m_comb"] == "печать"
     mods = []
     if c["cartridge"]:
-        rotor_mod = dict(name="картридж ротора", mass_kg=1.3 * m["rotor"], joints=[J(0.5 * g["D_case"])] * 2, pipes=4 if oil else 0,
+        rotor_mod = dict(name="картридж газогенератора", mass_kg=1.3 * m["rotor"], joints=[J(0.5 * g["D_case"])] * 2, pipes=4 if oil else 0,
                          pipes_keyed=keyed, cables=6 if oil else 3, cables_keyed=keyed, align=False, balance=False, tools=[],
-                         frequent=False, access=["горячая часть"])
+                         frequent=False, access=["горячая часть"], repair=SM.REPAIR_SWAP)
     else:
         rotor_mod = dict(name="ротор", mass_kg=m["rotor"], joints=[dict(type="болты", n_bolts=math.ceil(2 * g["L_case"] / PM.BOLT_PITCH)),
                                                                    J(0.3 * g["Dc"])],
                          pipes=4 if oil else 0, pipes_keyed=keyed, cables=6 if oil else 3, cables_keyed=keyed, align=True,
                          balance=c["rotor_join"] == "сборный",
                          tools=(["гидравлический натяжитель стяжного болта"] if c["rotor_join"] == "сборный" else []),
-                         frequent=False, access=["горячая часть"] + ([] if comb_in_hot or c["comb"] == "выносная" else ["камера"]))
+                         frequent=False, access=["горячая часть"] + ([] if comb_in_hot or c["comb"] == "выносная" else ["камера"]),
+                         repair=SM.REPAIR_ON_SITE)
     hot_mod = dict(name="горячая часть", mass_kg=m["hot"] + (m["comb"] if comb_in_hot else 0.0), joints=[J(g["D_hot"])] * 2, pipes=0,
-                   cables=8, cables_keyed=keyed, frequent=True, access=[])
+                   cables=8, cables_keyed=keyed, frequent=True, access=[], repair=SM.REPAIR_ON_SITE)
     comb_mod = None
     if not comb_in_hot:
         if c["comb"] in ("кольцевая", "RDC"):
             integ = c["m_comb"] == "печать"
             comb_mod = dict(name="камера", mass_kg=m["comb"], joints=[J(g["D_comb"])], pipes=1 if integ else g["n_inj"], pipes_keyed=keyed,
-                            cables=2, cables_keyed=keyed, frequent=True, access=["горячая часть"])
+                            cables=2, cables_keyed=keyed, frequent=True, access=["горячая часть"], repair=SM.REPAIR_ON_SITE)
         else:
             comb_mod = dict(name="камера", mass_kg=m["comb"], joints=[J(1.2 * g["D_comb"])] * 2, pipes=1, pipes_keyed=keyed,
-                            cables=3 if c["comb"] == "ВР" else 2, cables_keyed=keyed, frequent=True, access=[])
-    if c["cores"] > 1:
+                            cables=3 if c["comb"] == "ВР" else 2, cables_keyed=keyed, frequent=True, access=[], repair=SM.REPAIR_ON_SITE)
+    if shell:
+        # оболочка: ротор собран внутри, горячая часть и кольцевая (RDC) камера - в оболочке; на объекте меняется двигатель (ядро)
+        # целиком, разборка - на заводе (решение владельца 15.11.2026, п. 3); выносная камера и волновой ротор - снаружи, отдельным модулем
+        comb_out = c["comb"] in ("выносная", "ВР")
+        eng = dict(name="двигатель в оболочке" if c["cores"] == 1 else "ядро в оболочке",
+                   mass_kg=m["rotor"] + m["case"] + m["hot"] + (0.0 if comb_out else m["comb"]), joints=[J(g["D_case"]), J(g["D_hot"])],
+                   pipes=(0 if comb_out else 1) + (2 if oil else 0), pipes_keyed=keyed, cables=(6 if oil else 3) + 8, cables_keyed=keyed,
+                   align=c["rotors"] == 1, balance=False, tools=[], frequent=True, access=[], repair=SM.REPAIR_FACTORY)
+        mods.append(eng)
+        if comb_out and comb_mod:
+            mods.append(comb_mod)
+    elif c["cores"] > 1:
         core = dict(name="ядро", mass_kg=m["rotor"] + m["case"] + m["hot"] + m["comb"], joints=[J(g["D_case"]), J(g["D_hot"])],
                     pipes=1 + (4 if oil else 0), pipes_keyed=keyed, cables=16 if not keyed else 1, cables_keyed=keyed, align=False,
-                    balance=False, tools=[], frequent=True, access=[])
+                    balance=False, tools=[], frequent=True, access=[], repair=SM.REPAIR_SWAP)
         mods.append(core)
     else:
         mods += [rotor_mod, hot_mod] + ([comb_mod] if comb_mod else [])
     if g["pt"]:
         mods.append(dict(name="силовая турбина", mass_kg=m["pt"], joints=[J(1.3 * g["pt"]["Dtip"])] * 2, pipes=4 if oil else 0,
-                         pipes_keyed=keyed, cables=4, cables_keyed=keyed, align=not c["cartridge"], frequent=False, access=[]))
+                         pipes_keyed=keyed, cables=4, cables_keyed=keyed, align=not (c["cartridge"] or shell), frequent=False, access=[],
+                         repair=SM.REPAIR_SWAP))
     if g["rec"]:
         mods.append(dict(name="модуль рекуператора", mass_kg=g["rec"]["mass_kg"] / g["rec"]["modules"],
                          joints=[J(min(g["rec"]["side"], 1.5))] * (2 if c["recup_integral"] else 4), pipes=0, cables=2, cables_keyed=keyed,
@@ -1945,7 +2023,7 @@ def model_inputs(c, tgt, perf, g):
               EGT0=tgt["EGT0"], D_env=g["D_env"], pkg_W=tgt["pkg_W"], pkg_H=tgt["pkg_H"], rotors=c["rotors"], rotors0=tgt["rotors0"],
               cores=c["cores"], inlet=c["inlet"], bear=c["bear"], recup=bool(g["rec"]), recup_integral=bool(c["recup_integral"]),
               comb=c["comb"], pi=c["pi"], pi0=tgt["pi0"], eta=perf["eta_th"] * 100 * 0.985 * 0.972, eta0=tgt["eta0"],
-              module_kg_max=max(x["mass_kg"] for x in mods), engine_kg0=tgt["engine_kg0"])
+              module_kg_max=max(x["mass_kg"] for x in mods), engine_kg0=tgt["engine_kg0"], case_arch=case)
     mk = dict(parts=g["parts_mk"], techs=techs(c))
     return bom, sv, pp, mk
 
@@ -1987,6 +2065,8 @@ def techs(c):
         T.add("волновой_ротор")
     if c["mat_tw"] == "SC":
         T.add("лопатки_SC")
+    if c.get("case_arch") == "оболочка":
+        T.add("печать_оболочка")
     return sorted(T)
 
 
@@ -2066,6 +2146,10 @@ def check(c, tgt, perf, g):
         hard = p["rotating"] or (p["name"] == "горячая часть целиком")
         R.append(_rule("size:" + p["name"], not hard, max(p["D"], p["L"]) if p["method"] == "печать" else p["D"], a["limit"],
                        f"{p['method']}: {a['basis']}" + ("" if hard else f" - делится на {a['pieces']} части")))
+    if c.get("case_arch") == "оболочка":
+        ok, why = shell_fit(c, g)
+        R.append(_rule("shell_fit", ok, text="оболочка: холодная часть и горячая часть целиком - в камере LPBF (решение владельца "
+                                             f"15.11.2026, п. 3): {why}"))
     if g["rec"]:
         R.append(_rule("recup_T", perf["T5"] <= T_REC_MAX, perf["T5"], T_REC_MAX, "LIM T_rec_max: газ на входе в рекуператор"))
     R.append(_rule("envelope", g["D_env"] <= min(tgt["pkg_W"], tgt["pkg_H"]), g["D_env"], min(tgt["pkg_W"], tgt["pkg_H"]),

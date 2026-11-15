@@ -11,6 +11,13 @@
 Хэммингу с весами, непрерывные - нормированные); не больше NICHE_MAX на нишу. Цена разнообразия - против чистого топ-50.
 Масштабирование 50 отобранных на KV-1 и KV-6: та же дискретная схема, непрерывные оси - окна design() и оптимизация.
 Пишет funnel_l1_results<sfx>.json, funnel_l1<sfx>.csv (все варианты), funnel_l1_top50<sfx>.json и .csv.
+
+Пересчёт без нового счёта (v3, решение владельца 15.11.2026, п. 1 - множитель готовности TRL):
+  python merge_l1.py --rescore --kv KV-3 --m 3983 --shards 40 --in aws/l1_full --out-dir aws/l1_full_rescore_v3 --suffix _rescore_v3 \
+      [--fea-results aws/l1_fea/funnel_l1_fea_results.json]
+  итоговая оценка каждой записи пересчитывается функцией funnel_l0.final_score по её частным баллам (s_parts, s_plugplay, s_service,
+  s_effmake) и TRL_min; отбор 50 разных, цена разнообразия и сходимость - заново; масштабирование на KV-1/KV-6 и CalculiX не
+  запускаются (это новый счёт). Записи без частных баллов (точка не построилась) оценки не получают и в отбор не идут.
 """
 import argparse, csv, glob, gzip, hashlib, json, math, os, re, sys, tempfile, shutil, time
 from collections import Counter, defaultdict
@@ -42,7 +49,7 @@ DIV_BASIS = ("штраф LAMBDA·exp(-d/D0), LAMBDA = 1,0 (единицы оце
 DISC_W = {"arch": 3.0, "rotors": 2.0, "comp": 2.0, "turb": 2.0, "cool": 2.0, "recup": 2.0, "rotor_join": 1.0, "m_cw": 1.0, "m_tw": 1.0,
           "cores": 1.0, "nt": 1.0, "npt": 1.0, "comb": 1.0, "bear": 1.0, "inlet": 1.0, "n_ax": 1.0, "mat_tw": 1.0, "mat_cw": 1.0,
           "m_hot": 1.0, "mat_hot": 1.0, "m_comb": 1.0, "m_case": 1.0, "hot_integral": 1.0, "recup_integral": 1.0, "conn": 1.0,
-          "cartridge": 1.0, "split_bl": 1.0}
+          "cartridge": 1.0, "split_bl": 1.0, "case_arch": 1.0}   # v3: ось «корпус» (вместе с cartridge разница картридж/оболочка - 2,0)
 CONT_N = {"t41": (850.0, 1350.0, "lin"), "pi": (2.5, 22.0, "log"), "eps_rec": (0.0, 0.92, "lin"), "eta_th_shaft": (20.0, 45.0, "lin"),
           "V_env": (2.0, 60.0, "log"), "mass_kg": (500.0, 20000.0, "log")}
 CONT_W = 4.0
@@ -257,6 +264,41 @@ def sensitivity_lambda(recs):
         out.append(dict(lam=lam, mean_diverse=p["mean_diverse"], n_new=p["n_new"], archetypes=p["archetypes"]["diverse"],
                         niches=p["niches"]["diverse"], min_pairwise=p["pairwise"]["diverse"]["min"]))
     return out
+
+
+# =========================================================================== пересчёт оценки без нового счёта (v3)
+RESCORE_NEED = ("s_parts", "s_plugplay", "s_service", "s_effmake", "trl_min")
+RESCORE_VOID = ("d_score_vs_l0", "start_score", "opt_gain")
+
+
+def rescore(recs, w=None):
+    """итоговая оценка по записям уровня 1 без нового счёта: score = funnel_l0.final_score(частные баллы записи, TRL_min записи) -
+    та же функция, что у счёта уровней 0 и 1. Записи без частных баллов - score None (в отбор не идут). Поля, которые по записи не
+    восстановить (оценка старта, прирост оптимизации, разница с уровнем 0 - по формуле счёта), обнуляются; прежняя оценка -
+    score_prev. Возврат: сводка (сколько пересчитано, у скольких допустимых не хватило баллов, изменение оценки)"""
+    n_ok, miss, miss_feas, d = 0, 0, 0, []
+    for r in recs:
+        r["score_prev"] = r.get("score")
+        if all(r.get(k) is not None for k in RESCORE_NEED):
+            s = {"parts": r["s_parts"], "plugplay": r["s_plugplay"], "service": r["s_service"], "effmake": r["s_effmake"]}
+            r["score"] = round(float(L0.final_score(s, r["trl_min"], w)), 4)
+            r["score_w"] = round(float(L0.weighted(s, w)), 4)
+            r["k_trl"] = round(float(L0.trl_factor(r["trl_min"])), 4)
+            n_ok += 1
+            if r["score_prev"] is not None:
+                d.append(r["score"] - r["score_prev"])
+        else:
+            miss += 1
+            miss_feas += int(bool(r.get("feasible")))
+            r["score"] = None
+        for k in RESCORE_VOID:
+            r[k] = None
+    return dict(rule="score = funnel_l0.final_score(s_parts, s_plugplay, s_service, s_effmake; trl_min) - взвешенная × (0,5 + 0,5·TRL/9)",
+                n=len(recs), rescored=n_ok, missing_scores=miss, missing_scores_feasible=miss_feas, voided=list(RESCORE_VOID),
+                d_score=dict(n=len(d), p50=round(float(np.median(d)), 4) if d else None, min=round(float(min(d)), 4) if d else None,
+                             max=round(float(max(d)), 4) if d else None),
+                note="частные баллы записи - по моделям того кода, которым считался уровень 1 (code_sha частей); пересчитывается только "
+                     "итоговая оценка и отбор, масштабирование и CalculiX - нет (новый счёт)")
 
 
 # =========================================================================== описание варианта
@@ -487,7 +529,7 @@ def apply_fea_results(recs, path, burst_min=FEA_BURST_MIN):
 
 
 def run_merge(found, kv, M, shards, out_dir, sfx="", scale_kv=("KV-1", "KV-6"), scale_starts=None, scale_maxfev=None, workers=1,
-              fea_top=0, compare=None, extra_results=None, fea_cases_out=None, fea_results=None):
+              fea_top=0, compare=None, extra_results=None, fea_cases_out=None, fea_results=None, rescore_mode=False):
     t0 = time.time()
     cols, rows, det, ref, checks, calls = merge_parts(found, kv, M, shards)
     recs = [dict(zip(cols, r)) for r in rows]
@@ -495,6 +537,12 @@ def run_merge(found, kv, M, shards, out_dir, sfx="", scale_kv=("KV-1", "KV-6"), 
     if fea_results:
         fea_aws, n_fea_bad = apply_fea_results(recs, fea_results)
         rows = [[r.get(c) for c in cols] for r in recs]           # CSV - с новой допустимостью и причиной
+    rs = None
+    if rescore_mode:                                              # пересчёт без нового счёта: оценка - по частным баллам записей
+        rs = rescore(recs)
+        cols = list(cols) + [c for c in ("score_prev", "score_w", "k_trl") if c not in cols]
+        rows = [[r.get(c) for c in cols] for r in recs]
+        scale_kv, fea_top, fea_cases_out, compare = (), 0, None, None      # новый счёт и сравнение с другими частями - не здесь
     sel = greedy(recs)
     pod = price_of_diversity(recs, sel)
     Fsel = {r["j"]: features(r) for r in sel}
@@ -627,6 +675,12 @@ def run_merge(found, kv, M, shards, out_dir, sfx="", scale_kv=("KV-1", "KV-6"), 
                                                          aws=(dict(file=os.path.basename(fea_results), variants=len(fea_aws), rejected=n_fea_bad,
                                                                    burst_min=FEA_BURST_MIN) if fea_results else None)),
                files=dict(csv=os.path.basename(p_csv), top50=os.path.basename(p_top), top50_csv=os.path.basename(p_tcsv)))
+    if rs:
+        res["rescore"] = rs
+        res["status"] = "пересчёт отбора по записям уровня 1 без нового счёта (v3: множитель готовности TRL)"
+        top_doc["rescore"] = rs
+        with open(p_top, "w", encoding="utf-8") as fh:
+            json.dump(L1._clean(top_doc), fh, ensure_ascii=False, indent=1)
     if extra_results:
         res.update(extra_results)
     res["timing"]["merge_s"] = round(time.time() - t0, 1)
@@ -715,6 +769,8 @@ def main(argv=None):
     ap.add_argument("--compare-in", nargs="*", default=None, help="папки частей с удвоенным числом стартов (_starts2x)")
     ap.add_argument("--fea-cases-out", default=None, help=f"файл случаев disk.py для лучших {FEA_AWS_TOP} (вход jobs_l1_fea.json)")
     ap.add_argument("--fea-results", default=None, help="итог jobs_l1_fea.json (funnel_l1_fea_results.json): отсев по CalculiX до отбора 50")
+    ap.add_argument("--rescore", action="store_true", help="пересчёт оценки (final_score, множитель TRL) и отбора 50 по записям частей без "
+                                                           "нового счёта; масштабирование и CalculiX не запускаются")
     a = ap.parse_args(argv)
     if a.probe:
         r = probe()
@@ -723,8 +779,9 @@ def main(argv=None):
             ap.error("нужны --m и --shards")
         try:
             r = run_merge(find_parts(a.inp, a.kv, a.m, a.shards, a.tag), a.kv, a.m, a.shards, a.out_dir, a.suffix,
-                          () if a.no_scale else ("KV-1", "KV-6"), a.scale_starts, None, a.workers or L0.default_workers(), a.fea_top,
-                          a.compare_in, fea_cases_out=a.fea_cases_out, fea_results=a.fea_results)
+                          () if (a.no_scale or a.rescore) else ("KV-1", "KV-6"), a.scale_starts, None, a.workers or L0.default_workers(),
+                          0 if a.rescore else a.fea_top, a.compare_in, fea_cases_out=a.fea_cases_out, fea_results=a.fea_results,
+                          rescore_mode=a.rescore)
         except MergeError as e:
             print(f"слияние отклонено: {e}", file=sys.stderr)
             return 2

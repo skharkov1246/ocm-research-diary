@@ -118,7 +118,7 @@ def test_parts_union_equals_whole(parts):
     assert [k for k, _ in fa] == list(range(S_T))
     ca, ra, _, ch, _ = M.merge_parts(fa, "KV-3", N_T, S_T)
     cb, rb, _, _, _ = M.merge_parts(M.find_parts([wdir], "KV-3", N_T, 1), "KV-3", N_T, 1)
-    assert ch["indices_ok"] and ch["n_rows"] == N_T and not ch["missing"]
+    assert ch["indices_ok"] and ch["n_concepts"] == N_T and N_T <= ch["n_rows"] <= 2 * N_T and not ch["missing"]   # v3: 1-2 записи на концепцию
     assert ca == cb and json.dumps(ra, ensure_ascii=False) == json.dumps(rb, ensure_ascii=False)
 
 
@@ -151,7 +151,7 @@ def test_merge_rejects_lost_duplicated_and_foreign(parts, tmp):
     src = L0.part_path(d, "KV-3", N_T, 3, S_T)
     shutil.copy(src, os.path.join(d, "attempt2", os.path.basename(src)))
     _, rows, _, ch, _ = M.merge_parts(M.find_parts([d], "KV-3", N_T, S_T), "KV-3", N_T, S_T)
-    assert len(ch["duplicate_same"]) == 1 and len(rows) == N_T
+    assert len(ch["duplicate_same"]) == 1 and len({r[0] for r in rows}) == N_T == ch["n_concepts"]
     doc = json.load(open(src, encoding="utf-8"))
     doc["rows"][0][doc["columns"].index("eta_el")] = 99.0
     json.dump(doc, open(os.path.join(d, "attempt2", os.path.basename(src)), "w", encoding="utf-8"))
@@ -176,7 +176,15 @@ def test_merge_rejects_lost_duplicated_and_foreign(parts, tmp):
     src = L0.part_path(d, "KV-3", N_T, 3, S_T)
     open(os.path.join(d, "_lost", os.path.basename(src)), "w").write(open(src).read()[:100])
     _, rows, _, ch, _ = M.merge_parts(M.find_parts([d], "KV-3", N_T, S_T), "KV-3", N_T, S_T)
-    assert len(ch["unreadable"]) == 1 and len(rows) == N_T
+    assert len(ch["unreadable"]) == 1 and len({r[0] for r in rows}) == N_T
+    # v3: у концепции две оболочки или оболочка без базовой записи - отказ
+    d = _copy_parts(pdir, os.path.join(tmp, "case"))
+    doc = json.load(open(L0.part_path(d, "KV-3", N_T, 3, S_T), encoding="utf-8"))
+    jc = doc["columns"].index("case_arch")
+    doc["rows"][0][jc] = "оболочка"
+    json.dump(doc, open(L0.part_path(d, "KV-3", N_T, 3, S_T), "w", encoding="utf-8"))
+    with pytest.raises(M.MergeError, match="index_errors"):
+        M.merge_parts(M.find_parts([d], "KV-3", N_T, S_T), "KV-3", N_T, S_T)
 
 
 # =========================================================================== отбор по нишам
@@ -191,7 +199,8 @@ def synth_table(seed=7, n=400, n_niche=60, p_feas=0.3):
         s = rng.uniform(1, 9, 4)
         r.update(idx=i, kv="KV-3", arch=f"арх{nk % 7}", niche=f"ниша{nk:03d}", feasible=int(feas), violation=0.0 if feas else
                  float(rng.uniform(0.01, 1.0)), s_parts=s[0], s_plugplay=s[1], s_service=s[2], s_effmake=s[3], s_etasize=s[3],
-                 s_make=s[3], score=0.0, reject="" if feas else "soft_G")
+                 s_make=s[3], score=0.0, reject="" if feas else "soft_G", trl_min=int(rng.integers(3, 10)), case_arch="картридж",
+                 case_pick=1)
         rows.append([r[c] for c in L0.COLUMNS])
     return M.Table(L0.COLUMNS, rows)
 
@@ -409,4 +418,167 @@ def test_closure_cache_key_turbine_alloy():
     for perm in itertools.permutations(cs):
         FS._CLOSURE.clear()
         assert {c["mat_tw"]: FS.closure(c)["ok"] for c in perm} == clean, [c["mat_tw"] for c in perm]
+    FS._CLOSURE.clear()
+
+
+# =========================================================================== v3: решения владельца 15.11.2026
+def test_trl_multiplier_one_function():
+    """п. 1: итоговая оценка = взвешенная × (0,5 + 0,5·TRL/9) - одна функция final_score для словаря баллов и матрицы, запись
+    уровня 0 и слияние (scores) считают ею; чувствительность к весам - тоже с множителем"""
+    assert L0.trl_factor(9) == 1.0 and math.isclose(L0.trl_factor(3), 2 / 3) and math.isclose(L0.trl_factor(4.5), 0.75)
+    assert np.allclose(L0.trl_factor(np.array([9, 5, 3])), [1.0, 0.5 + 0.5 * 5 / 9, 0.5 + 0.5 * 3 / 9])
+    s = dict(parts=6.0, plugplay=5.0, service=4.0, effmake=7.0)
+    assert math.isclose(L0.final_score(s, 9), L0.weighted(s)) and math.isclose(L0.final_score(s, 3), L0.weighted(s) * 2 / 3)
+    S = np.array([[s[k] for k in L0.CRIT]] * 3)
+    assert np.allclose(L0.final_score(S, np.array([9, 5, 3])), [L0.final_score(s, t) for t in (9, 5, 3)])
+    r = L0.evaluate_l0(2, 64, "KV-3")
+    sd = dict(parts=r["s_parts"], plugplay=r["s_plugplay"], service=r["s_service"], effmake=r["s_effmake"])
+    assert abs(r["score"] - L0.final_score(sd, r["trl_min"])) < 2e-3 and abs(r["score_w"] - L0.weighted(sd)) < 2e-3
+    assert math.isclose(r["k_trl"], L0.trl_factor(r["trl_min"]), abs_tol=1e-4)
+    # слияние: та же функция; при равных баллах концепция с меньшим TRL ниже
+    T = synth_table(n=80, n_niche=10, p_feas=1.0)
+    sc = M.scores(T, L0.WEIGHTS)
+    assert np.allclose(sc, L0.final_score(T.S, T.trl, L0.WEIGHTS))
+    T.S[:] = 5.0
+    sc = M.scores(T, L0.WEIGHTS)
+    for a in range(10):
+        for b in range(10):
+            if T.trl[a] < T.trl[b]:
+                assert sc[a] < sc[b]
+    # чувствительность к весам: и сценарии, и случайные наборы - final_score
+    import inspect
+    src = inspect.getsource(M.sensitivity)
+    assert "L0.final_score" in src and "T.S[fpos] @ M.T" not in src
+    src1 = inspect.getsource(__import__("funnel_l1").evaluate_point) + inspect.getsource(__import__("funnel_l1").add_vigv)
+    assert "L0.final_score" in src1 and "score = L0.weighted" not in src1
+
+
+def test_case_axis_variants_kv3():
+    """п. 3: у каждой концепции - базовая запись (картридж; у традиционной - разъём) и оболочка, если она входит в камеру LPBF;
+    ровно один выбор концепции; оболочка - печатный корпус и цельная печатная горячая часть; ниша включает ось «корпус»; цикл тот же"""
+    n, seen = 24, set()
+    for i in range(n):
+        rows = L0.evaluate_concept(i, n, "KV-3")
+        assert rows[0]["case_arch"] == FS.case_base(FS.concept(i, n, "KV-3"))
+        assert sum(r["case_pick"] for r in rows) == 1 and len(rows) in (1, 2)
+        for r in rows:
+            assert r["niche"].endswith("|" + r["case_arch"]) and L0.niche_v2(r["niche"]).count("|") == 6
+            seen.add(r["case_arch"])
+        if len(rows) == 2:
+            b, sh = rows
+            assert sh["case_arch"] == "оболочка" and sh["m_case"] == "печать" and sh["cartridge"] == 0
+            if sh["cool"] != "C":
+                assert sh["hot_integral"] == 1 and sh["m_hot"] == "печать"
+            assert (b["eta_th_shaft"], b["G"], b["EGT"], b["pi"], b["t41"]) == (sh["eta_th_shaft"], sh["G"], sh["EGT"], sh["pi"], sh["t41"])
+            assert "печать_оболочка" in sh["techs"] and sh["trl_min"] <= FS.MK.TRL["печать_оболочка"]["trl"]
+            assert "shell_fit" not in (sh["reject"] or "")
+        else:
+            assert rows[0]["shell_note"]
+        assert rows[0]["case_arch"] == "разъём" or rows[0]["cartridge"] == 1
+    assert {"картридж", "оболочка"} <= seen
+
+
+def test_shell_parts_live_geometry_and_trap_rule():
+    """п. 3, правило собираемости: REF_BOM (традиционный KV-3) как оболочка - 211 деталей (−108), крепёж 340 при болтах (D 1,84 м >
+    1,2 м); добавлены передняя крышка, кольца СА 2 и СА 3 (organic/print_review: shell_assembly). Внешний печатный корпус картриджа
+    не запирает колёса; ротор одной деталью - элементы между колёсами из половин"""
+    ref = PM.count(PM.REF_BOM)
+    assert ref["parts"] == 319 and ref["trap"]["add_cold"] == ref["trap"]["add_hot"] == 0 and PM.N_HALF == ref["n_eff"]
+    sh = dict(PM.REF_BOM, case=dict(method="печать", D=PM.REF_BOM["case"]["D"], pieces=1), hot_integral=True,
+              comb=dict(kind="кольцевая", method="печать", n_inj=14), case_arch="оболочка", conn="быстроразъём")
+    r = PM.count(sh)
+    assert r["parts"] == 211 and ref["parts"] - r["parts"] == 108 and r["fasteners"] == 340
+    assert (r["trap"]["n_trap"], r["trap"]["add_cold"], r["trap"]["add_hot"]) == (6, 1, 2)
+    small = PM.count(dict(sh, case=dict(sh["case"], D=1.1)))                       # фланец под хомут: +2 вместо болтов
+    assert small["fasteners"] == ref["by_unit"]["ротор"]["fasteners"] + 3 * 2
+    cart = PM.count(dict(sh, case_arch="картридж"))                                 # печатный внешний корпус картриджа
+    assert cart["trap"]["add_cold"] == 2 and cart["trap"]["cover_cold"] == 0
+    mono = PM.count(dict(sh, rotor_join="заодно", turb=dict(type="О", stages=[dict(blisk=True, zt=55, zn=40, ngv_ring=True)] * 3)))
+    assert mono["trap"]["add_cold"] == 2 and mono["trap"]["add_hot"] == 1 + 2 * 2 and mono["trap"]["split"] == 1 + 3
+
+
+def test_shell_make_hip_and_control():
+    """печать оболочки: камера принтера, ГИП (серийная камера 0,88 м; Ø1,6 и Ø2,05 м - две в мире), контроль ускорителем 9 МэВ"""
+    MK = FS.MK
+    base = dict(name="оболочка (холодная часть)", kind="static", method="печать", material="Ti64", mass_kg=150.0, rotating=False, shell=True)
+    a = MK.assess_part(dict(base, D=0.7, L=0.5))
+    assert a["hip"] and a["hip_vessel"] == 0.88 and a["proc_q"] <= 0.6 and a["fit"]
+    b = MK.assess_part(dict(base, D=1.34, L=1.08))
+    assert b["hip"] and b["hip_vessel"] == 1.6 and b["weeks"] > a["weeks"] + MK.WEEKS["hip_unique"] - 1e-9
+    c = MK.assess_part(dict(base, D=2.02, L=1.0))
+    assert not c["hip"] and c["hip_vessel"] is None and c["proc_q"] == 0.2
+    plain = MK.assess_part(dict(base, D=0.7, L=0.5, shell=False))
+    assert not plain["hip"] and plain["proc_q"] == 1.0
+
+
+def test_service_shell_engine_swap_repair_site():
+    """оболочка: на объекте меняется двигатель целиком, ремонт - на заводе; картридж - газогенератор вынимается целиком"""
+    i = next(i for i in range(64) if len(L0.evaluate_concept(i, 64, "KV-3")) == 2 and FS.concept(i, 64, "KV-3")["cores"] == 1)
+    c0 = FS.concept(i, 64, "KV-3"); t = FS.target("KV-3")
+    sol = L0.solve(c0, t)
+    cs = FS.apply_case(c0, "оболочка"); gs = FS.derive(cs, t, sol["perf"])
+    _, sv, pp, _ = FS.model_inputs(cs, t, sol["perf"], gs)
+    eng = next(m for m in sv["modules"] if m["name"] == "двигатель в оболочке")
+    assert eng["frequent"] and eng["repair"] == FS.SM.REPAIR_FACTORY and not any(m["name"] in ("ротор", "горячая часть") for m in sv["modules"])
+    sr = FS.SM.score(sv)
+    assert sr["repair_sites"]["двигатель в оболочке"] == "на заводе" and pp["module_kg_max"] >= eng["mass_kg"]
+    cb = FS.apply_case(c0, FS.case_base(c0))
+    _, svb, _, _ = FS.model_inputs(cb, t, sol["perf"], sol["g"])
+    names = {m["name"]: m for m in svb["modules"]}
+    assert "картридж газогенератора" in names and names["картридж газогенератора"]["repair"] == FS.SM.REPAIR_SWAP
+
+
+def test_merge_case_axis_and_trl_blocks(parts, tmp):
+    """слияние v3: доли и сходимость - по концепциям; выбор концепций (оболочка / картридж) в сумме = допустимым концепциям;
+    блок множителя готовности"""
+    pdir, _ = parts
+    r = M.run_merge(M.find_parts([pdir], "KV-3", N_T, S_T), "KV-3", N_T, S_T, os.path.join(tmp, "mc"), k=1, top=3, k_near=0,
+                    target=None, detail_top=0, cycle_k=0, closure_proof=False)
+    res = r["res"]
+    ca = res["case_axis"]
+    assert res["summary"]["n"] == N_T and ca["concepts"] == N_T and sum(ca["picked_among_feasible"].values()) == res["summary"]["feasible"]
+    assert ca["shell_possible"] + ca["shell_impossible"] == N_T
+    assert res["niches"]["n_feasible_v2"] <= res["niches"]["n_feasible"]
+    assert res["trl_multiplier"]["top_overlap_with_no_multiplier"] <= res["trl_multiplier"]["top_n"]
+    assert all(e.get("case_arch") in FS.CASE_VALUES for e in r["sel"]["selected"])
+
+
+def test_b2_shift_tries_original_inlet_first(monkeypatch):
+    """правка B2 с доработкой проверки: при пустом окне T41/π сдвиг к лучшим осям сначала при исходном входе (вход не меняется,
+    если окно нашлось), лучший вход шаблона - только если при исходном окна нет (запись «inlet: ... (окно T41/π)»)"""
+    n, kv = 64, "KV-3"
+    tgt = FS.target(kv)
+    M_ = FS.design_matrix(n)
+    i = next(i for i in range(n) if FS._discrete(dict(zip(FS.AXES, M_[i])), FS._pick(M_[i][0], FS.ARCH_KEYS))["inlet"] == "двух"
+             and "одно" in FS.ARCH[FS._pick(M_[i][0], FS.ARCH_KEYS)]["allowed"].get("inlet", FS._DEF["inlet"]))
+    u = dict(zip(FS.AXES, M_[i]))
+    arch = FS._pick(u["arch"], FS.ARCH_KEYS)
+
+    def pre():
+        c0 = FS._discrete(u, arch); c0["kv"] = kv
+        c, rep = FS._repair(u, arch, c0)
+        c.update(idx=i, n=n, seed=FS.SEED, kv=kv)
+        c["repair"] = rep
+        return c
+
+    real = FS._t41_pi_window
+    for good in ("двух", "одно"):
+        calls = []
+
+        def fake(c, tg, tl, mg=FS.MG, good=good, calls=calls):
+            calls.append(c["inlet"])
+            if len(calls) == 1 or c["inlet"] != good:
+                return None, dict(m=-0.1, t41=tl, pi=5.0, worst="w")
+            return real(c, tg, tl, FS.MG0)
+        monkeypatch.setattr(FS, "_t41_pi_window", fake)
+        monkeypatch.setattr(FS, "closure", lambda c, mg=None: dict(ok=True, mu="mid"))
+        c = pre()
+        assert c["inlet"] == "двух"
+        FS.design(c, u, tgt)
+        monkeypatch.setattr(FS, "_t41_pi_window", real)
+        if good == "двух":
+            assert calls[:2] == ["двух", "двух"] and c["inlet"] == "двух" and "inlet:" not in c["repair"]
+        else:
+            assert calls[:4] == ["двух", "двух", "двух", "одно"] and c["inlet"] == "одно" and "inlet: двух -> одно" in c["repair"]
+    monkeypatch.undo()
     FS._CLOSURE.clear()
