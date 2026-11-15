@@ -1,0 +1,778 @@
+{
+ "title": "Воронка двигателя-заменителя, уровень 1: углублённый расчёт отбора уровня 0 - KV-3, M = 150",
+ "method": "воронка, уровень 1: варианты отбора уровня 0 по нишам; для каждого - оптимизация непрерывных осей внутри дискретной схемы (несколько стартов: дифференциальная эволюция scipy с ограничением по правилам Лампинена + доводка COBYLA; зерно от SEED, idx, kv и старта) по взвешенной оценке уровня 1 с ограничением «превышение правил = 0»; одномерные модели ступеней (meanline_l1: Oh/Yoon/Chung, Soderberg + зазор Kacker - Okapuu, вид Baines; привязка уровня к формулам трека), цикл funnel_space._core (таблицы Cantera), рекуператор по эффективности, быстрая прочность (подобие disk.py, Ларсон - Миллер IN-713C, Вейбулл Si3N4), нерасчётные режимы −30…+45 °C и 50-100 %, запас по помпажу, пуск (offdesign_l1); баллы деталей, Plug&Play, монтажа, изготовимости - модели уровня 0; КПД и размер - уровня 1. Всё - оценка.",
+ "software": "python 3.12.16, numpy 2.5.3, scipy 1.18.1, cantera 3.2.0",
+ "date": "2026-11-14",
+ "status": "слияние частей уровня 1",
+ "kv": "KV-3",
+ "target": {
+  "kv": "KV-3",
+  "model": "Taurus 60",
+  "variant": "генератор",
+  "P_shaft_kW": 5922.0,
+  "P_kW": 5670.0,
+  "G0": 21.41,
+  "EGT0": 510.0,
+  "eta0": 31.5,
+  "n_pkg": 14950.0,
+  "pi0": 12.2,
+  "pkg_L": 9.8,
+  "pkg_W": 2.6,
+  "pkg_H": 3.2,
+  "rotors0": 1,
+  "engine_kg0": 3290.0,
+  "engine_kg0_note": "масса двигателя другого исполнения той же модели (паспорт fleet)"
+ },
+ "M": 150,
+ "input": {
+  "file": "funnel_l0_select_KV-3_n2000.json",
+  "sha256": "fb5bac9c653edd25556930ac39da128cc418710912cacd8ff2798bb29c4d8df7",
+  "fingerprint": "f5fad5c6f4eb42e5",
+  "l0_code_sha": "5f99d76a48e9e6db",
+  "order_sha": "130f72b2337c3628",
+  "problems": []
+ },
+ "inputs": [
+  {
+   "file": "routes/gtu/funnel/funnel_l1.py",
+   "sha256": "a75431e67977f3b38c5cb1c687bfcc77b0c7899c20fe3d9365bc547caea4ff29"
+  },
+  {
+   "file": "routes/gtu/funnel/merge_l1.py",
+   "sha256": "7ed49bd51363c5aefa34ff8a48590f9c66b9cd6138545323c3e00bb40bdcab9d"
+  },
+  {
+   "file": "routes/gtu/funnel/meanline_l1.py",
+   "sha256": "41ce2677bbee6dffaf1553171d0d4083f04590f48f4daca30aa8e58461ee49e1"
+  },
+  {
+   "file": "routes/gtu/funnel/strength_l1.py",
+   "sha256": "fedfd8b89da041ab2858d4c96829b1aafaeb119a4e55c47eb8e8301b8bf193ba"
+  },
+  {
+   "file": "routes/gtu/funnel/offdesign_l1.py",
+   "sha256": "b4fe83f61018544a8981d4f854894be884aacd85e8973715248191b7bcf3b8b5"
+  },
+  {
+   "file": "routes/gtu/funnel/funnel_l0.py",
+   "sha256": "a8dbb5dd84d667b801141d297705bceee34fb68194b839379f317d5a0ca44b5f"
+  },
+  {
+   "file": "routes/gtu/funnel/funnel_space.py",
+   "sha256": "256568a7d39213818b2a79b0cdf555358206d24d8fbd04e54e6315022cd6b191"
+  },
+  {
+   "file": "routes/gtu/frame3/frame3_point.py",
+   "sha256": "5afccdb545f64f409093f3e7eed8e50e306e4ec2b86c735ce81a79b5b8439ef8"
+  },
+  {
+   "file": "routes/gtu/frame3/frame3_fea_results.json",
+   "sha256": "14e2cf86c6b7237863ff8d909460a4f4b4f9713b89a1b6541f9f9a1cc272384d"
+  },
+  {
+   "file": "routes/gtu/platform/fea/materials.json",
+   "sha256": "db46936f3d5181b60010b779da6e762e87f88d2d8b59546ea867ec1c6d10ac76"
+  },
+  {
+   "file": "routes/gtu/platform/fea/disk_results.json",
+   "sha256": "5687c5b66684b76592ee8a6c69f6e6c34792a99e36ec0ed810eb4c171765de6e"
+  },
+  {
+   "file": "routes/gtu/platform/fea/disk.py",
+   "sha256": "8aa757266286781abbc715df24052675e75a562163bdd4016d61f23aa5e41a2c"
+  },
+  {
+   "file": "routes/gtu/gtu_explore.py",
+   "sha256": "98493d2c281c06b35701a68713951715f959f856330d48d644ab85b1b3533a3b"
+  },
+  {
+   "file": "routes/gtu/gtu_family_results.json",
+   "sha256": "ad356f199b04542714a41881c92718a5c89d9872673b4266c0802d1e3fac49e8"
+  },
+  {
+   "file": "отбор уровня 0",
+   "field": "funnel_l0_select_KV-3_n2000.json sha256 fb5bac9c653edd25556930ac39da128cc418710912cacd8ff2798bb29c4d8df7, отпечаток выборки f5fad5c6f4eb42e5, код уровня 0 5f99d76a48e9e6db"
+  }
+ ],
+ "code_sha": "a9adfb18e64ff36c",
+ "starts": 4,
+ "maxfev": 200,
+ "de_gens": 25,
+ "de_pop": 8,
+ "merge_checks": {
+  "files": 10,
+  "shards_expected": 10,
+  "missing": [],
+  "duplicate_same": [],
+  "duplicate_conflict": [],
+  "meta_mismatch": [],
+  "index_errors": [],
+  "unreadable": [],
+  "indices_ok": true,
+  "n_rows": 150,
+  "duplicates": 0
+ },
+ "calibration": {
+  "cc": {
+   "a": 0.01303,
+   "b_per_PR": -0.01136,
+   "PR_ref": 4.5,
+   "tol": 0.006,
+   "max_abs_after": 0.00283,
+   "rows": [
+    {
+     "PR": 2.5,
+     "m": 6.0,
+     "dbl": false,
+     "eta_cs": 0.87651,
+     "eta_model": 0.84058,
+     "phi_model": 0.07903,
+     "M1t": 0.82454,
+     "Z_pfl": 12.67007,
+     "D2_cs": 0.38972,
+     "D2_model": 0.3993,
+     "d_after_shift": -0.00018
+    },
+    {
+     "PR": 2.5,
+     "m": 20.0,
+     "dbl": false,
+     "eta_cs": 0.87682,
+     "eta_model": 0.83824,
+     "phi_model": 0.0786,
+     "M1t": 0.82435,
+     "Z_pfl": 12.65293,
+     "D2_cs": 0.7116,
+     "D2_model": 0.73042,
+     "d_after_shift": -0.00283
+    },
+    {
+     "PR": 2.5,
+     "m": 40.0,
+     "dbl": true,
+     "eta_cs": 0.87682,
+     "eta_model": 0.84039,
+     "phi_model": 0.07895,
+     "M1t": 0.82435,
+     "Z_pfl": 12.70391,
+     "D2_cs": 0.7116,
+     "D2_model": 0.72933,
+     "d_after_shift": -0.00068
+    },
+    {
+     "PR": 3.5,
+     "m": 6.0,
+     "dbl": false,
+     "eta_cs": 0.86562,
+     "eta_model": 0.84265,
+     "phi_model": 0.08091,
+     "M1t": 1.02447,
+     "Z_pfl": 13.06067,
+     "D2_cs": 0.3539,
+     "D2_model": 0.35976,
+     "d_after_shift": 0.00143
+    },
+    {
+     "PR": 3.5,
+     "m": 20.0,
+     "dbl": false,
+     "eta_cs": 0.86637,
+     "eta_model": 0.8411,
+     "phi_model": 0.08051,
+     "M1t": 1.02385,
+     "Z_pfl": 13.04925,
+     "D2_cs": 0.6463,
+     "D2_model": 0.6581,
+     "d_after_shift": -0.00088
+    },
+    {
+     "PR": 3.5,
+     "m": 40.0,
+     "dbl": true,
+     "eta_cs": 0.86637,
+     "eta_model": 0.84324,
+     "phi_model": 0.08089,
+     "M1t": 1.02385,
+     "Z_pfl": 13.1061,
+     "D2_cs": 0.6463,
+     "D2_model": 0.65708,
+     "d_after_shift": 0.00126
+    },
+    {
+     "PR": 4.5,
+     "m": 6.0,
+     "dbl": false,
+     "eta_cs": 0.85488,
+     "eta_model": 0.8435,
+     "phi_model": 0.08286,
+     "M1t": 1.18023,
+     "Z_pfl": 13.43779,
+     "D2_cs": 0.33306,
+     "D2_model": 0.33591,
+     "d_after_shift": 0.00165
+    },
+    {
+     "PR": 4.5,
+     "m": 20.0,
+     "dbl": false,
+     "eta_cs": 0.85601,
+     "eta_model": 0.84262,
+     "phi_model": 0.08248,
+     "M1t": 1.17906,
+     "Z_pfl": 13.43081,
+     "D2_cs": 0.60834,
+     "D2_model": 0.61446,
+     "d_after_shift": -0.00036
+    },
+    {
+     "PR": 4.5,
+     "m": 40.0,
+     "dbl": true,
+     "eta_cs": 0.85601,
+     "eta_model": 0.84476,
+     "phi_model": 0.08288,
+     "M1t": 1.17906,
+     "Z_pfl": 13.49359,
+     "D2_cs": 0.60834,
+     "D2_model": 0.61347,
+     "d_after_shift": 0.00178
+    },
+    {
+     "PR": 6.0,
+     "m": 6.0,
+     "dbl": false,
+     "eta_cs": 0.83895,
+     "eta_model": 0.84376,
+     "phi_model": 0.08597,
+     "M1t": 1.37323,
+     "Z_pfl": 14.00804,
+     "D2_cs": 0.31275,
+     "D2_model": 0.31157,
+     "d_after_shift": 0.00079
+    },
+    {
+     "PR": 6.0,
+     "m": 20.0,
+     "dbl": false,
+     "eta_cs": 0.84058,
+     "eta_model": 0.84378,
+     "phi_model": 0.08565,
+     "M1t": 1.37103,
+     "Z_pfl": 14.00687,
+     "D2_cs": 0.57138,
+     "D2_model": 0.56994,
+     "d_after_shift": -0.00081
+    },
+    {
+     "PR": 6.0,
+     "m": 40.0,
+     "dbl": true,
+     "eta_cs": 0.84058,
+     "eta_model": 0.84594,
+     "phi_model": 0.08608,
+     "M1t": 1.37103,
+     "Z_pfl": 14.07859,
+     "D2_cs": 0.57138,
+     "D2_model": 0.56897,
+     "d_after_shift": 0.00135
+    },
+    {
+     "PR": 7.5,
+     "m": 6.0,
+     "dbl": false,
+     "eta_cs": 0.82318,
+     "eta_model": 0.84345,
+     "phi_model": 0.08938,
+     "M1t": 1.54005,
+     "Z_pfl": 14.60817,
+     "D2_cs": 0.29864,
+     "D2_model": 0.29368,
+     "d_after_shift": -0.00078
+    },
+    {
+     "PR": 7.5,
+     "m": 20.0,
+     "dbl": false,
+     "eta_cs": 0.82523,
+     "eta_model": 0.84432,
+     "phi_model": 0.08911,
+     "M1t": 1.53671,
+     "Z_pfl": 14.61183,
+     "D2_cs": 0.54571,
+     "D2_model": 0.53719,
+     "d_after_shift": -0.00196
+    },
+    {
+     "PR": 7.5,
+     "m": 40.0,
+     "dbl": true,
+     "eta_cs": 0.82523,
+     "eta_model": 0.84649,
+     "phi_model": 0.08958,
+     "M1t": 1.53671,
+     "Z_pfl": 14.69258,
+     "D2_cs": 0.54571,
+     "D2_model": 0.53625,
+     "d_after_shift": 0.00021
+    }
+   ],
+   "basis": "сдвиг a + b·(π - 4,5) к gtu_explore.comp_stage, МНК по сетке CAL_GRID (μ 0,70, φ 0,085, cm2/U2 0,28); вне сетки - не выше eta_cap_l0 (формула уровня 0 той же ступени + TOL_CC)"
+  },
+  "ax": {
+   "shift": 0.0207,
+   "ref": {
+    "eta_p_model": 0.8643,
+    "zn": 66,
+    "zt": 68,
+    "target": 0.885,
+    "AR_N": 1.29961,
+    "AR_R": 1.1399,
+    "M2": 0.77988,
+    "model": "ko"
+   },
+   "basis": "eta_axial(1,2) = 0,885 при φ 0,5, H/b 1,3 (Kacker - Okapuu по TurboFlow 0.1.18 + зазор Kacker - Okapuu)"
+  },
+  "rad": {
+   "shift": -0.00046,
+   "ref": {
+    "eta_is_model": 0.86046,
+    "nu": 0.7,
+    "ns": 0.58749,
+    "target": 0.86,
+    "n": 26410.62198
+   },
+   "basis": "η_is 0,86 при U/C0 0,70 и ns 0,60 (gtu_explore.turb_radial)"
+  }
+ },
+ "strength_facts": {
+  "K_BURST": 1.0,
+  "OVERSPEED": 1.2,
+  "RUPTURE_H": 25000.0,
+  "DT_COOL": 175.0,
+  "WEIBULL_M": 15.0,
+  "SN_MEAN_MPA": 594.0,
+  "WEIBULL_V0_MM3": 1.0,
+  "WEIBULL_VFRAC": 0.02,
+  "PF_MAX": 0.0001,
+  "DISC_RATIO_MAX": 6.0,
+  "k_taper": 0.5629,
+  "k_taper_source": {
+   "AN2": 60280300.0,
+   "sigma_root_MPa": 468.79418,
+   "rho": 7916.0
+  },
+  "lmp_fit": {
+   "C": 20.0,
+   "a": 3.41504,
+   "b": 5e-05,
+   "c": -0.0,
+   "P_range": [
+    23952.5,
+    28873.05
+   ],
+   "n": 5
+  },
+  "sources": {
+   "disk": "../platform/fea/disk_results.json (CalculiX, условные профили; масштаб по ρU²)",
+   "lmp": "../platform/fea/materials.json, in713c.lmp (по выдержкам поиска - см. статусы файла)",
+   "sn282a": "Kyocera SN282A: 594 МПа при 1200 °C - по выдержке поиска (global.kyocera.com/prdct/fc/technologies/021.html); модуль Вейбулла - не найден, оценка",
+   "frame3": "../frame3/frame3_fea_results.json, parts.turb3 - корень лопатки"
+  }
+ },
+ "rules_l1": {
+  "M1T_MAX": 1.5,
+  "DH_MIN": 0.53,
+  "D1D2_MAX": 0.8,
+  "ALPHA2_MAX": 78.0,
+  "BETA2_MAX": 60.0,
+  "M2T_MAX": 1.2,
+  "MW3_MAX": 1.1,
+  "R_MIN": 0.0,
+  "M4_MAX": 1.1,
+  "MW5_MAX": 0.95,
+  "T_TI_MAX": 427.0,
+  "SM_MIN": 0.1,
+  "T_AMB": [
+   -30.0,
+   15.0,
+   45.0
+  ],
+  "LOADS": [
+   1.0,
+   0.75,
+   0.5
+  ],
+  "K_NU": 1.0,
+  "T41_START_C": 900.0,
+  "recuperator": {
+   "DH": 0.0015,
+   "NU": 6.0,
+   "FRE": 20.0,
+   "POROSITY": 0.8,
+   "T_WALL": 0.00015,
+   "K_WALL": 15.0,
+   "basis": "оценка: печатные каналы D_h 1,5 мм, Nu 6 (между квадратным каналом 3,0 и щелью 7,5 с интенсификацией), f·Re 20 (Фаннинг), открытая доля объёма 0,8, стенка IN625 0,15 мм; потери давления - бюджет цикла (воздух 2,5 %, газ 3,5 % - gtu_cycle.recup); коллекторы и корпус ×3 по объёму и массе (REC_HDR уровня 0)"
+  },
+  "penalty": 20.0,
+  "HUB_M2_MAX": 1.2,
+  "R_HUB_MIN": 0.0,
+  "AX_MODEL": "ko",
+  "T_TE": 0.0008,
+  "TMAX_C": 0.2,
+  "STANITZ_K": 0.63,
+  "CC_CAP": "КПД ступени не выше eta_cap_l0 (формула уровня 0 + TOL_CC)",
+  "TOL_CC": 0.006,
+  "OD_ISO_DT41": 3.0,
+  "OD_ISO_DP": 0.005,
+  "OD_COVER": "все режимы T_AMB × LOADS решены",
+  "DINC_STALL": 5.0,
+  "TIP_INC_STALL": 8.0,
+  "ALPHA2_STALL": 78.0,
+  "A1_STEPS": [
+   0.0,
+   15.0,
+   30.0,
+   45.0
+  ],
+  "T1H_STEPS": [
+   -10.0,
+   5.0
+  ],
+  "CHOKE_X_MIN": 0.55,
+  "VIGV_Z": 15,
+  "VIGV_ACT_KG": 15.0,
+  "fixes_15_11": "исправления скептиков уровня 1 (README, раздел «Уровень 1»): счёт всех нерешённых режимов и od_cover, строгий od_iso, ВНА / ветвь запирания / подогрев входа с учётом деталей, граница помпажа по признакам срыва, поправки ступени внутри модели, ограничение КПД компрессора, Kacker - Okapuu и свободный вихрь, число ступеней турбины - ось, Stanitz и цепочка радиальных ступеней, повтор части при слиянии, температура входа колеса в CalculiX, смета по процессорному времени"
+ },
+ "timing": {
+  "calls": [
+   {
+    "shards": [
+     0,
+     2,
+     4,
+     6,
+     8
+    ],
+    "variants": 75,
+    "elapsed_s": 530.98,
+    "s_per_variant_core": 453.099,
+    "s_per_variant_mean": 212.995,
+    "host_cpus": 64,
+    "started": "2026-11-15T09:37:33.841991+00:00",
+    "workers": 64
+   },
+   {
+    "shards": [
+     1,
+     3,
+     5,
+     7,
+     9
+    ],
+    "variants": 75,
+    "elapsed_s": 609.24,
+    "s_per_variant_core": 519.882,
+    "s_per_variant_mean": 237.373,
+    "host_cpus": 64,
+    "started": "2026-11-15T09:37:33.260128+00:00",
+    "workers": 64
+   }
+  ],
+  "s_per_variant": {
+   "mean": 225.184,
+   "p50": 200.015,
+   "max": 530.39,
+   "n": 150
+  },
+  "cpu_s_per_variant": {
+   "mean": 225.105,
+   "p50": 199.765,
+   "max": 530.37,
+   "n": 150,
+   "note": "процессорное время одного процесса на вариант - основа сметы (настенное на общем контейнере завышено чужой нагрузкой)"
+  },
+  "note": "время на вариант - в одном процессе, с оптимизацией (starts × maxfev) и нерасчётными режимами",
+  "scale_s": null,
+  "fea_s": null,
+  "merge_s": 1.2
+ },
+ "timing_detail": {
+  "t_opt_mean": 175.472,
+  "t_od_mean": 49.712,
+  "opt_share": 0.779,
+  "evals_per_start": 3273.9,
+  "note": "t_opt - оптимизация (starts × maxfev); остальное - проверка кандидатов с нерасчётными режимами и запись"
+ },
+ "summary": {
+  "n": 150,
+  "feasible": 32,
+  "eligible": 32,
+  "score_min": 5.0,
+  "reject_reasons": {
+   "soft_G": 92,
+   "tM2h": 67,
+   "tRh": 65,
+   "tMw3t": 49,
+   "blade_t": 32,
+   "creep_bl": 27,
+   "blade_pt": 18,
+   "creep_pt": 16,
+   "od_cover": 16,
+   "size:колесо турбины": 14,
+   "disc_t": 11,
+   "size:колесо компрессора ": 7,
+   "U_comp": 5,
+   "weibull_t": 3,
+   "D1D": 2,
+   "dH": 1
+  },
+  "by_arch": {
+   "традиционная": {
+    "n": 1,
+    "feasible": 0,
+    "first_reject": {
+     "soft_G": 1
+    }
+   },
+   "печатный монолит": {
+    "n": 19,
+    "feasible": 8,
+    "best_j": 20,
+    "best_idx": 910,
+    "best_score": 6.9286,
+    "eta_th": 36.556
+   },
+   "литой монолит": {
+    "n": 8,
+    "feasible": 8,
+    "best_j": 44,
+    "best_idx": 1982,
+    "best_score": 6.3418,
+    "eta_th": 29.591
+   },
+   "гибрид": {
+    "n": 19,
+    "feasible": 0,
+    "first_reject": {
+     "soft_G": 19
+    }
+   },
+   "печатный рекуператор": {
+    "n": 19,
+    "feasible": 4,
+    "best_j": 28,
+    "best_idx": 1322,
+    "best_score": 6.7927,
+    "eta_th": 37.0
+   },
+   "керамика": {
+    "n": 14,
+    "feasible": 0,
+    "first_reject": {
+     "size:колесо турбины": 10,
+     "size:колесо компрессора 2": 2,
+     "size:колесо компрессора 1": 2
+    }
+   },
+   "кластер": {
+    "n": 13,
+    "feasible": 5,
+    "best_j": 8,
+    "best_idx": 1164,
+    "best_score": 6.3898,
+    "eta_th": 29.632
+   },
+   "простой ротор": {
+    "n": 0,
+    "feasible": 0
+   },
+   "безмасляный": {
+    "n": 19,
+    "feasible": 6,
+    "best_j": 75,
+    "best_idx": 360,
+    "best_score": 6.7401,
+    "eta_th": 37.807
+   },
+   "RDC": {
+    "n": 19,
+    "feasible": 1,
+    "best_j": 116,
+    "best_idx": 240,
+    "best_score": 6.5391,
+    "eta_th": 30.414
+   },
+   "волновой ротор": {
+    "n": 19,
+    "feasible": 0,
+    "first_reject": {
+     "soft_G": 13,
+     "od_cover": 3,
+     "U_comp1": 3
+    }
+   }
+  },
+  "l0_feasible_l1_infeasible": 118,
+  "l0_infeasible_l1_feasible": 0,
+  "score_l1": {
+   "p50": 6.3948,
+   "max": 6.9286
+  },
+  "d_score_vs_l0": {
+   "p50": -0.3245
+  },
+  "optimization": {
+   "start_feasible": 0,
+   "n_gain_measured": 0,
+   "gain_p50": null,
+   "gain_negative": 0,
+   "note": "opt_gain - оценка итога минус оценка точки уровня 0 в моделях уровня 1 (только если та точка допустима в расчётной точке; итог может быть ниже, если точка уровня 0 не прошла нерасчётные режимы)"
+  }
+ },
+ "selection": {
+  "file": "funnel_l1_top50_KV-3_m150.json",
+  "n": 26,
+  "note": "отобрано 26 из 50: выше порога 5.0 и допустимых на уровне 1 - 32 (с лимитом 3 на нишу); остальные варианты отсеяны правилами уровня 1 (причины - funnel_l1.csv, reject_detail) или ниже порога",
+  "archetypes": {
+   "печатный монолит": 6,
+   "безмасляный": 6,
+   "кластер": 5,
+   "печатный рекуператор": 4,
+   "литой монолит": 4,
+   "RDC": 1
+  },
+  "niches": 20,
+  "price_of_diversity": {
+   "n_pure": 32,
+   "n_diverse": 26,
+   "mean_pure": 6.3621,
+   "mean_diverse": 6.3927,
+   "mean_loss": 0.0975,
+   "n_displaced": 6,
+   "n_new": 0,
+   "n_new_worse_than_every_displaced": 0,
+   "positions_worse": 16,
+   "loss_max": 0.8507,
+   "loss_by_position": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0212,
+    0.003,
+    0.0725,
+    0.0461,
+    0.0403,
+    0.0295,
+    0.048,
+    0.0518,
+    0.0504,
+    0.0874,
+    0.1068,
+    0.0835,
+    0.0678,
+    0.1946,
+    0.7817,
+    0.8507
+   ],
+   "archetypes": {
+    "pure": 6,
+    "diverse": 6
+   },
+   "niches": {
+    "pure": 20,
+    "diverse": 20
+   },
+   "pairwise": {
+    "pure": {
+     "mean": 0.3627,
+     "min": 0.0283
+    },
+    "diverse": {
+     "mean": 0.3602,
+     "min": 0.029
+    }
+   },
+   "note": "«сумма прячет потерю»: кроме средних - сколько мест по порядку хуже (positions_worse) и наибольшая потеря места; каждый новый вариант (не из чистого топа) хуже любого вытесненного - это видно по n_new_worse_than_every_displaced"
+  },
+  "lambda_sensitivity": [
+   {
+    "lam": 0.5,
+    "mean_diverse": 6.3935,
+    "n_new": 0,
+    "archetypes": 6,
+    "niches": 20,
+    "min_pairwise": 0.029
+   },
+   {
+    "lam": 1.0,
+    "mean_diverse": 6.3927,
+    "n_new": 0,
+    "archetypes": 6,
+    "niches": 20,
+    "min_pairwise": 0.029
+   },
+   {
+    "lam": 2.0,
+    "mean_diverse": 6.3776,
+    "n_new": 0,
+    "archetypes": 6,
+    "niches": 20,
+    "min_pairwise": 0.0553
+   }
+  ]
+ },
+ "convergence": {
+  "rule": "отбор 50 на первых M/4, M/2 и M вариантах в порядке «архетипы по кругу, внутри - ниши по кругу»; сравнение с отбором на всех",
+  "rows": [
+   {
+    "M": 37,
+    "eligible": 9,
+    "selected": 9,
+    "overlap_with_full": 7,
+    "mean_score": 6.3858,
+    "archetypes": 4,
+    "niches": 7
+   },
+   {
+    "M": 75,
+    "eligible": 18,
+    "selected": 14,
+    "overlap_with_full": 14,
+    "mean_score": 6.2789,
+    "archetypes": 4,
+    "niches": 10,
+    "new_vs_half": 7
+   },
+   {
+    "M": 150,
+    "eligible": 32,
+    "selected": 26,
+    "overlap_with_full": 26,
+    "mean_score": 6.3927,
+    "archetypes": 6,
+    "niches": 20,
+    "new_vs_half": 12
+   }
+  ]
+ },
+ "starts_check": null,
+ "scaling": null,
+ "calculix": {
+  "cases": 0,
+  "top": 0,
+  "results": null,
+  "aws": null
+ },
+ "files": {
+  "csv": "funnel_l1_KV-3_m150.csv",
+  "top50": "funnel_l1_top50_KV-3_m150.json",
+  "top50_csv": "funnel_l1_top50_KV-3_m150.csv"
+ }
+}
