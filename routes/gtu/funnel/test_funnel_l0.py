@@ -569,16 +569,15 @@ def test_b2_shift_tries_original_inlet_first(monkeypatch):
             calls.append(c["inlet"])
             if len(calls) == 1 or c["inlet"] != good:
                 return None, dict(m=-0.1, t41=tl, pi=5.0, worst="w")
-            return real(c, tg, tl, FS.MG0)
+            return (tl - 30.0, tl), dict(m=0.01, t41=tl, pi=5.0, worst="w")     # окно нашлось (дальше design - настоящий)
+        c = pre()
         monkeypatch.setattr(FS, "_t41_pi_window", fake)
         monkeypatch.setattr(FS, "closure", lambda c, mg=None: dict(ok=True, mu="mid"))
-        c = pre()
         assert c["inlet"] == "двух"
         FS.design(c, u, tgt)
-        monkeypatch.setattr(FS, "_t41_pi_window", real)
+        monkeypatch.undo()
         if good == "двух":
-            assert calls[:2] == ["двух", "двух"] and c["inlet"] == "двух" and "inlet:" not in c["repair"]
+            assert calls[:2] == ["двух", "двух"] and "(окно T41/π)" not in c["repair"]   # вход дальше может менять только φ и частота
         else:
-            assert calls[:4] == ["двух", "двух", "двух", "одно"] and c["inlet"] == "одно" and "inlet: двух -> одно" in c["repair"]
-    monkeypatch.undo()
+            assert calls[:4] == ["двух", "двух", "двух", "одно"] and "inlet: двух -> одно (окно T41/π)" in c["repair"]
     FS._CLOSURE.clear()
