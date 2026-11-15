@@ -4,12 +4,12 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 484,
-    "total_bytes": 19920869,
-    "results_files": 201,
+    "datasets": 487,
+    "total_bytes": 20446168,
+    "results_files": 203,
     "results_with_script": 65,
     "results_referenced_in_site": 22,
-    "results_with_provenance_fields": 52,
+    "results_with_provenance_fields": 54,
     "by_track": {
       "ammonia": 91,
       "battery-cathode": 1,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 164,
+      "не определён": 167,
       "прочее": 25
     }
   },
@@ -6799,6 +6799,73 @@
       "last_commit": "1325928"
     },
     {
+      "path": "routes/gtu/combustor/comb_l0_v2_beta_sens_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 30554,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "status",
+        "code_hash",
+        "beta",
+        "counts",
+        "by_cell",
+        "nearest"
+      ],
+      "provenance_fields": [
+        "method"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "037e0d5"
+    },
+    {
+      "path": "routes/gtu/combustor/comb_l0_v2_probe_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 475650,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "status",
+        "complete",
+        "completeness",
+        "inputs",
+        "weights",
+        "penalty_k",
+        "hard_targets",
+        "trl_multiplier",
+        "constants",
+        "counts",
+        "timing",
+        "by_scheme_passive",
+        "convergence",
+        "holders",
+        "nearest_to_new_target",
+        "top",
+        "pareto",
+        "pareto_pool",
+        "pareto_objectives",
+        "sensitivity",
+        "feed_to_engine_funnel"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "037e0d5"
+    },
+    {
       "path": "routes/gtu/combustor/comb_l1_smoke_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
@@ -6823,6 +6890,26 @@
       "last_change": "2026-11-15",
       "last_author": "Claude",
       "last_commit": "0c587fa"
+    },
+    {
+      "path": "routes/gtu/combustor/jobs_aws_comb_l0_v2.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 19095,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "_comment",
+        "defaults",
+        "jobs",
+        "estimate",
+        "merge",
+        "plan_check",
+        "mini_check"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "037e0d5"
     },
     {
       "path": "routes/gtu/combustor/jobs_aws_comb_l0.json",
