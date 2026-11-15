@@ -4,12 +4,12 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 456,
-    "total_bytes": 18180481,
-    "results_files": 195,
-    "results_with_script": 62,
+    "datasets": 457,
+    "total_bytes": 18207468,
+    "results_files": 196,
+    "results_with_script": 63,
     "results_referenced_in_site": 22,
-    "results_with_provenance_fields": 46,
+    "results_with_provenance_fields": 47,
     "by_track": {
       "ammonia": 91,
       "battery-cathode": 1,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 136,
+      "не определён": 137,
       "прочее": 25
     }
   },
@@ -8042,6 +8042,33 @@
       "last_commit": "460a5cb"
     },
     {
+      "path": "routes/gtu/organic/structure/ccx_check_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 19191,
+      "referenced_in_site": false,
+      "produced_by": "routes/ccx_check.py",
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "date",
+        "method",
+        "software",
+        "h_ccx_m",
+        "results",
+        "inputs",
+        "note"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "16006df"
+    },
+    {
       "path": "routes/gtu/organic/structure/disk_topo_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
@@ -8153,7 +8180,7 @@
       "path": "routes/gtu/organic/structure/profile_opt_comp2.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 39713,
+      "bytes": 39943,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -8168,7 +8195,8 @@
         "best",
         "history",
         "check_160x24",
-        "seconds"
+        "seconds",
+        "inputs"
       ],
       "provenance_fields": [
         "method",
@@ -8177,7 +8205,7 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "3e14b35"
+      "last_commit": "16006df"
     },
     {
       "path": "routes/gtu/organic/structure/profile_opt_eq.json",
@@ -8284,7 +8312,7 @@
       "path": "routes/gtu/organic/structure/structure_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 28997,
+      "bytes": 28385,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -8309,13 +8337,13 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "3e14b35"
+      "last_commit": "16006df"
     },
     {
       "path": "routes/gtu/organic/structure/topo3d_demo_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 1020,
+      "bytes": 1424,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -8323,21 +8351,24 @@
         "date",
         "method",
         "disk",
-        "frame"
+        "frame",
+        "inputs",
+        "software"
       ],
       "provenance_fields": [
         "method",
+        "software",
         "date"
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "4f8f9af"
+      "last_commit": "16006df"
     },
     {
       "path": "routes/gtu/organic/structure/turb_sizing_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 67204,
+      "bytes": 67410,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -8349,7 +8380,8 @@
         "crit",
         "thickening_runs",
         "blend_runs",
-        "method_blend"
+        "method_blend",
+        "inputs"
       ],
       "provenance_fields": [
         "method",
@@ -8358,7 +8390,7 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "a0afbd1"
+      "last_commit": "16006df"
     },
     {
       "path": "routes/gtu/organic/thermal/feed_thermal.json",
@@ -8994,7 +9026,7 @@
       "path": "routes/gtu/platform/su2/jobs_aws_su2_kv3_sweep.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 45372,
+      "bytes": 52709,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -9006,11 +9038,12 @@
         "success_criteria",
         "outputs_per_job",
         "merge",
-        "estimate"
+        "estimate",
+        "plan_check"
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "d66e3a0"
+      "last_commit": "16006df"
     },
     {
       "path": "routes/gtu/platform/su2/jobs_aws_su2_kv3.json",
@@ -9169,7 +9202,7 @@
       "path": "routes/gtu/platform/su2/plan_sweep_v5_sa.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 2523,
+      "bytes": 2676,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -9187,13 +9220,13 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "d66e3a0"
+      "last_commit": "16006df"
     },
     {
-      "path": "routes/gtu/platform/su2/plan_sweep_v6_riemann.json",
+      "path": "routes/gtu/platform/su2/plan_sweep_v6_massflow.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 4060,
+      "bytes": 4138,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -9210,7 +9243,7 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "d66e3a0"
+      "last_commit": "16006df"
     },
     {
       "path": "routes/gtu/platform/su2/su2_results.json",
