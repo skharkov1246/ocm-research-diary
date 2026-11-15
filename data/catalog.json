@@ -4,8 +4,8 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 422,
-    "total_bytes": 15921051,
+    "datasets": 424,
+    "total_bytes": 16116720,
     "results_files": 186,
     "results_with_script": 57,
     "results_referenced_in_site": 22,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 102,
+      "не определён": 104,
       "прочее": 25
     }
   },
@@ -6948,6 +6948,49 @@
       "last_commit": "493cb81"
     },
     {
+      "path": "routes/gtu/funnel/funnel_l0_results_probe_KV-1_n128.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 115871,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "status",
+        "kv",
+        "target",
+        "n",
+        "seed",
+        "shards",
+        "inputs",
+        "calib_ns",
+        "merge_checks",
+        "timing",
+        "weights",
+        "normalization",
+        "summary",
+        "top",
+        "pareto",
+        "sensitivity",
+        "niches",
+        "selection",
+        "convergence",
+        "cycle_check",
+        "files"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "a0afbd1"
+    },
+    {
       "path": "routes/gtu/funnel/funnel_l0_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
@@ -6990,6 +7033,38 @@
       "last_change": "2026-11-15",
       "last_author": "Claude",
       "last_commit": "e3b87e2"
+    },
+    {
+      "path": "routes/gtu/funnel/funnel_l0_select_probe_KV-1_n128.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 50142,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "kv",
+        "n",
+        "seed",
+        "fingerprint",
+        "code_sha",
+        "weights",
+        "params",
+        "how_to_rebuild",
+        "summary",
+        "selected"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "a0afbd1"
     },
     {
       "path": "routes/gtu/funnel/funnel_l0_select.json",
@@ -7654,7 +7729,7 @@
       "path": "routes/gtu/organic/structure/turb_sizing_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 37548,
+      "bytes": 67204,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -7664,7 +7739,9 @@
         "software",
         "baseline",
         "crit",
-        "runs"
+        "thickening_runs",
+        "blend_runs",
+        "method_blend"
       ],
       "provenance_fields": [
         "method",
@@ -7673,7 +7750,7 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "f7cb330"
+      "last_commit": "a0afbd1"
     },
     {
       "path": "routes/gtu/organic/thermal/jobs_thermal.json",
