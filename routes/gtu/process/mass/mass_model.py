@@ -109,19 +109,23 @@ A = dict(
     dp_comb=0.04, p_exh_k=1.03,
     G_sp={"industrial": 185.0, "aero": 200.0}, htr1=0.50, htr_hp=0.60,
     U_tip_c={"industrial": 380.0, "aero": 420.0},
-    AR_c=2.0, c_min_c=0.015, Lst_c=2.2,
-    AR_t=1.6, c_min_t=0.020, Lst_t=2.4,
+    c0_c=0.012, kc_c=0.30, Lst_c=2.2,
+    c0_t=0.020, kc_t=0.35, Lst_t=2.0, h_Dm_max=0.30,
     psi_t={"industrial": 1.6, "aero": 1.8}, phi_t=0.55,
     lam_cf=0.68, phi_cf=0.085, nu_rt=0.70,
-    sigma_b=1.3, tc_b=0.08, k_prof=0.7, k_taper=0.8, k_vane=1.2, k_ngv=1.5,
-    k_disk_c=0.05, k_disk_t=0.12, k_fill_disk=0.7,
+    sig_c=1.3, karea_c=0.056, taper_c=0.85, datt_c=0.5,
+    sig_t=1.5, karea_t=0.15, karea_t_lp=0.08, hD_karea=(0.10, 0.25), taper_t=0.80, datt_t=0.84,
+    U_ref_disk=420.0, fU_min=0.2,
+    cax_c=0.8, w_rim_cax=1.15, att_fill=0.52,
+    a_disk=None, b_disk=None,
+    k_vane=1.2, k_ngv=1.5,
     k_cf_single=None, k_cf_double=None, k_bore=0.95,
     k_rt=0.099, k_cf_dif=0.03, k_rt_noz=0.02,
     shaft_d=0.15, shaft_fill=0.5,
     U_ref={"annular": 10.0, "can": 12.0, "silo": 8.0}, LH_annular=3.0, LD_can=3.0, H_liner=0.7,
     t_liner={"sheet": 0.0015, "lpbf": 0.0012}, k_liner=1.6, k_tp=0.3,
     m_inj={"industrial": 4.0, "aero": 2.5},
-    k_frame_bh=0.02, k_fastener=0.02, m_pipe_bearing=15.0,
+    k_frame_bh=3.0, k_fastener=0.02, m_pipe_bearing=15.0,
     T_case_hot_C=450.0,
     amb_p=0.4e6, amb_margin=3.0, amb_axial=4.0, amb_ctrl_kg=30.0, amb_backup_kg=3.0,
     foil_kg=2.0, foil_rotor_max_kg=150.0,
@@ -132,17 +136,27 @@ A_BASIS = {
     "thermo": "постоянные cp, γ; КПД политропный компрессора 0,88 / 0,90, турбины 0,88 - оценка (только для размеров проточной части)",
     "G_sp": "удельный расход на входе осевого компрессора 185 / 200 кг/(с·м²), втулочное отношение 0,50 (ВД 0,60) - оценка",
     "U_tip_c": "окружная скорость на периферии первой ступени, если частота не дана, 380 / 420 м/с - оценка",
-    "blades": "лопатки: густота 1,3, t/c 0,08, площадь профиля 0,7·t·c, сужение 0,8; удлинение 2,0 компрессор / 1,6 турбина; хорда не меньше 15 / 20 мм; длина ступени 2,2 / 2,4 хорды - оценка",
-    "disks": "диск осевой ступени: (π/4)·D_обода²·w·0,7, w = 0,05 D_обода (компрессор, барабан) / 0,12 D_обода (турбина) - оценка",
+    "blades": "лопатки: хорда c = 12 мм + 0,30 h (компрессор) / 20 мм + 0,35 h (турбина), длина ступени 2,2 / 2,0 c - оценка; "
+              "венец V = π·Dm·σ·k_пл·c·h·сужение: турбина σ 1,5, k_пл 0,15, сужение 0,80 (frame3_fea: шаг по Цвейфелю 0,826 c_a, "
+              "turb_k_area 0,15, сужение 0,7/0,6/0,4); компрессор σ 1,3, k_пл 0,056 (t/c 0,08 × 0,7), сужение 0,85 - оценка",
+    "disks": "диск осевой ступени: m_диска = a·ρ·D_жив³ + b·m_обода (обод = лопатки + замки: кольцо π·D_обода·1,15 c_a·d_зам·0,52, "
+             "d_зам 0,84 c турбина / 0,5 c компрессор; D_жив = Dm - h - 2 d_зам); a, b - МНК по трём дискам турбины KV-3, "
+             "рассчитанным на прочность (frame3_fea_results.json → parts.turbN.profile, rim_mass_kg; U_m 420 м/с); для компрессора те же a, b - оценка",
+    "disk_U": "диск и замки масштабируются по напряжениям от вращения: × max(0,2; (U_m/420 м/с)²) (σ ∝ ρU²; 420 м/с - средняя скорость "
+              "турбины KV-3, на которой посчитаны диски frame3_fea) - оценка; лопатки турбины тоньше при длинном пере: k_пл 0,15 при h/Dm ≤ 0,10 "
+              "-> 0,08 при h/Dm ≥ 0,25 (лопатки НД/силовой турбины) - оценка",
+    "h_Dm_max": "высота лопатки последней ступени не больше 0,30 Dm: если по ψ выходит больше, диаметр растёт по расходу (тихоходные силовые турбины) - оценка",
     "k_cf": "центробежное колесо m = k·ρ·D2³: k по объёму CAD-тел frame3 (frame3_geom_results.json → stages.stageN.solid.volume_m3 / D2³): одностороннее - ступень 2, двустороннее - ступень 1; без отверстия; с отверстием ×0,95 (оценка)",
     "k_rt": "радиальная турбина m = 0,099·ρ·D³ (0,0825·1,2 - gtu_explore.finalize), аппарат 0,02·ρ·D³ (funnel_space.derive) - оценка",
     "turbine": "коэффициент нагрузки ψ = Δh/U² 1,6 / 1,8, расхода φ = c_a/U 0,55, U/C0 радиальной 0,70 - оценка",
     "centrifugal": "коэффициент работы λ = w/U2² 0,68 (frame3: 0,648 и 0,716 - среднее), оптимальный φ = 0,085 (funnel_space.PHI_OPT['Ц']); осевая длина 0,30 D2 (одност.) / 0,65 D2 (двуст.) - по frame3; корпус ступени 1,45 D2 - оценка",
     "combustor": "площадь отсчёта A = G/(ρ3·U_ref), U_ref 10 (кольцевая) / 12 (трубчатая) / 8 (выносная) м/с; жаровая труба высотой 0,7 H, длиной 3 H; стенка 1,5 мм (лист) / 1,2 мм (печать), ×1,6 на фронтовое устройство и кольца; форсунка 4 / 2,5 кг; переходные патрубки 0,3 массы труб - оценка",
-    "frames": "опоры подшипников: n_опор × 0,02·ρ_стали·D_корпуса³; крепёж 2 % неподвижной части; трубы масла 15 кг на подшипник - оценка",
+    "frames": "опоры подшипников (кольцо, стойки, ступица): 3·ρ·D²·t·k_фланца на опору при местном диаметре корпуса, t - стенка способа "
+              "изготовления; крепёж 2 % неподвижной части; трубы масла 15 кг на подшипник - оценка",
     "case_hot": "металл корпуса турбины 450 °C (охлаждаемый/теплоизолированный) - оценка",
     "amb": "магнитный подшипник: удельная несущая способность 0,4 МПа на проекцию (B²/2μ0 при 1,0-1,2 Тл = 0,40-0,57 МПа × геометрия), запас 3 по весу ротора, осевой - 4 веса ротора; статор 2,2 D; контроллер 30 кг (funnel_space.derive), страховочные подшипники 3 кг - оценка",
     "foil": "лепестковый газовый подшипник 2 кг; опыт - роторы до 150 кг (оценка, не проверено)",
+    "inlet_frame_cf": "у центробежной машины входной корпус 0,9 D2, передняя опора 0,6 D2 (у глаза колеса) - оценка",
     "cradle": "рама модуля: 0,08 опираемой массы + 60 кг на метр длины, сталь - оценка (без калибровки: рамы двигателей в открытых данных не отделены от рам пакетов)",
 }
 
@@ -163,6 +177,39 @@ def _k_cf_from_frame3():
         return {"double": dict(k=0.1176, V=None, D2=None), "single": dict(k=0.0690, V=None, D2=None)}
 
 
+F_FRAME3_FEA = os.path.join(GTU, "frame3", "frame3_fea_results.json")
+
+
+def _disk_from_frame3_fea():
+    """a, b модели диска по трём дискам турбины KV-3 из frame3_fea (МНК без свободного члена):
+    m_диска = a·ρ·D_жив³ + b·m_обода; m_диска = ρ·∫2πr·t(r)dr (профиль parts.turbN.profile), m_обода = rim_mass_kg,
+    D_жив = 2·r_live_rim. Если файла нет - a 0,0719, b 1,13 (те же числа, посчитанные 15.11.2026)"""
+    try:
+        d = json.load(open(F_FRAME3_FEA))
+        X, y, rows = [], [], []
+        for k in ("turb1", "turb2", "turb3"):
+            part = d["parts"][k]
+            r = np.array(part["profile"]["r"])
+            t = np.array(part["profile"]["t"])
+            rho = 7916.0 if "713" in str(part["material"]) else 8190.0
+            m_d = rho * float(np.trapezoid(2 * np.pi * r * t, r))
+            m_rim = part["geometry"]["rim_mass_kg"]
+            Dl = 2 * part["geometry"]["r_live_rim_m"]
+            X.append([rho * Dl ** 3, m_rim])
+            y.append(m_d)
+            rows.append(dict(part=k, disk_kg=round(m_d, 2), rim_kg=round(m_rim, 2), D_live=round(Dl, 4), rho=rho))
+        (a, b), *_ = np.linalg.lstsq(np.array(X), np.array(y), rcond=None)
+        pred = np.array(X) @ np.array([a, b])
+        for rw, pp in zip(rows, pred):
+            rw["fit_kg"] = round(float(pp), 2)
+        return dict(a=float(a), b=float(b), rows=rows, rho_basis="IN-713C 7916 (platform/fea/materials.json)")
+    except (OSError, KeyError, ValueError):
+        return dict(a=0.0719, b=1.13, rows=None)
+
+
+DISK = _disk_from_frame3_fea()
+A["a_disk"] = DISK["a"]
+A["b_disk"] = DISK["b"]
 K_CF = _k_cf_from_frame3()
 A["k_cf_single"] = K_CF["single"]["k"]
 A["k_cf_double"] = K_CF["double"]["k"]
@@ -181,6 +228,17 @@ PRACTICE = {
         comp_rotor="Ti64", turb_rotor="IN718", liner=("HastX", "sheet"), vanes_c="Ti64", vanes_t="K418",
         include_inlet=False, include_diffuser=False),
 }
+
+# способ изготовления неподвижной части концепции (замена материалов и способа во всех корпусах практики): материалы печати LPBF -
+# Ti64, IN718, IN625 (печатаемые сплавы - funnel/make_model.MAT['print']); точное литьё КНР - литая сталь ZG и ZL114A (навык casting-spec)
+PROCESS_SETS = {
+    "cast_sand": None,
+    "cast_invest": dict(cold=("Al", "cast_invest"), warm=("steel", "cast_invest"), comb_case=("steel", "cast_invest"),
+                        hot_case=("steel", "cast_invest"), diffuser=("steel", "cast_invest"), inlet=("Al", "cast_invest")),
+    "lpbf": dict(cold=("Ti64", "lpbf"), warm=("IN718", "lpbf"), comb_case=("IN718", "lpbf"), hot_case=("IN718", "lpbf"),
+                 diffuser=("IN625", "lpbf"), inlet=("Ti64", "lpbf"), liner=("HastX", "lpbf")),
+}
+
 
 GROUPS = ("rotor", "static", "hx", "bearings", "frame")
 GROUP_NAMES = {"rotor": "ротор (по размерам, без множителя)", "static": "неподвижная часть (× K практики)",
@@ -226,26 +284,39 @@ def block_wheel_rt(name, D, mat="K418"):
     return _row(name, "rotor", A["k_rt"] * RHO[mat] * D ** 3, A_BASIS["k_rt"], D=round(D, 4), mat=mat)
 
 
-def _blade_row_volume(Dm, h, c):
-    return A["sigma_b"] * math.pi * Dm * h * c * A["tc_b"] * A["k_prof"] * A["k_taper"]
+def _stage_parts(Dm, h, c, rho, kind, U=None):
+    """одна осевая ступень: (масса лопаток, масса замков, масса диска, D_жив) - модель A_BASIS['blades'], ['disks'], ['disk_U'];
+    U - средняя окружная скорость, м/с (None - как у дисков frame3_fea)"""
+    t = kind != "comp"
+    if t:
+        ka = float(np.interp(h / Dm, A["hD_karea"], (A["karea_t"], A["karea_t_lp"])))
+        sig, tap, datt = A["sig_t"], A["taper_t"], A["datt_t"]
+    else:
+        sig, ka, tap, datt = A["sig_c"], A["karea_c"], A["taper_c"], A["datt_c"]
+    fU = 1.0 if U is None else max(A["fU_min"], (U / A["U_ref_disk"]) ** 2)
+    m_bl = rho * math.pi * Dm * sig * ka * c * h * tap
+    D_rim = max(Dm - h, 0.06)
+    d_att = datt * c
+    m_att = rho * math.pi * D_rim * A["w_rim_cax"] * A["cax_c"] * c * d_att * A["att_fill"] * fU
+    D_live = max(D_rim - 2 * d_att, 0.04)
+    m_disk = (A["a_disk"] * rho * D_live ** 3 + A["b_disk"] * (m_bl + m_att)) * fU
+    return m_bl, m_att, m_disk, D_live
 
 
 def block_axial_rotor(name, stages, mat, kind="comp"):
-    """осевые ступени: диск (π/4·D_обода²·w·0,7) + лопатки; stages - [dict(Dm, h, c, mat?)]"""
-    kd = A["k_disk_c"] if kind == "comp" else A["k_disk_t"]
-    m_d = m_b = 0.0
+    """осевые ступени: лопатки + замки + диск; stages - [dict(Dm, h, c, mat?)]"""
+    mb = ma = md = 0.0
     for s in stages:
-        rho = RHO[s.get("mat", mat)]
-        D_rim = max(s["Dm"] - s["h"], 0.05)
-        m_d += rho * math.pi / 4 * D_rim ** 2 * (kd * D_rim) * A["k_fill_disk"]
-        m_b += rho * _blade_row_volume(s["Dm"], s["h"], s["c"])
-    return _row(name, "rotor", m_d + m_b, A_BASIS["disks"] + "; " + A_BASIS["blades"], n=len(stages),
-                disks_kg=round(m_d, 1), blades_kg=round(m_b, 1), mat=mat, kind=kind)
+        b, a, d, _ = _stage_parts(s["Dm"], s["h"], s["c"], RHO[s.get("mat", mat)], kind, s.get("U"))
+        mb, ma, md = mb + b, ma + a, md + d
+    return _row(name, "rotor", mb + ma + md, A_BASIS["disks"] + "; " + A_BASIS["blades"], n=len(stages),
+                blades_kg=round(mb, 1), attach_kg=round(ma, 1), disks_kg=round(md, 1), mat=mat, kind=kind)
 
 
 def block_vanes(name, stages, mat, kind="comp"):
+    """направляющие и сопловые аппараты: венец как у лопаток × полки (1,2 компрессор / 1,5 турбина)"""
     k = A["k_vane"] if kind == "comp" else A["k_ngv"]
-    m = sum(RHO[s.get("mat", mat)] * _blade_row_volume(s["Dm"], s["h"], s["c"]) * k for s in stages)
+    m = sum(_stage_parts(s["Dm"], s["h"], s["c"], RHO[s.get("mat", mat)], kind)[0] * k for s in stages)
     return _row(name, "static", m, A_BASIS["blades"] + f"; полки ×{k}", n=len(stages), mat=mat, kind=kind)
 
 
@@ -264,8 +335,11 @@ def block_rt_nozzle(name, D, mat="K418"):
     return _row(name, "static", A["k_rt_noz"] * RHO[mat] * D ** 3, A_BASIS["k_rt"], D=round(D, 4), mat=mat)
 
 
-def block_frames(name, n, D_case, mat="steel"):
-    return _row(name, "static", n * A["k_frame_bh"] * RHO[mat] * D_case ** 3, A_BASIS["frames"], n=n, D_case=round(D_case, 4))
+def block_frames(name, Ds, mat="steel", process="cast_sand"):
+    """опоры подшипников: на каждую опору 3·ρ·D²·t·k_фланца (Ds - местные диаметры корпуса), t - стенка способа (A_BASIS['frames'])"""
+    pr = PROC[process]
+    m = sum(A["k_frame_bh"] * RHO[mat] * D ** 2 * max(pr["t_min"], pr["k_D"] * D) * pr["k_flange"] for D in Ds)
+    return _row(name, "static", m, A_BASIS["frames"], n=len(Ds), D=[round(D, 3) for D in Ds], mat=mat, process=process)
 
 
 def block_combustor(c, practice):
@@ -403,7 +477,9 @@ def size_from_passport(spec):
     """размеры проточной части и блоки по паспорту. spec - запись mass_db.json (m_air_kg_s, PR, P_kW, T_exh_C, comp, turb_gg,
     turb_pt, rpm_gg, rpm_pt, combustor, practice) или концепция KV в той же форме. Возвращает geom для evaluate()."""
     pr_name = spec.get("practice", "industrial")
-    P = PRACTICE[pr_name]
+    P = dict(PRACTICE[pr_name])
+    if spec.get("process"):
+        P.update(PROCESS_SETS[spec["process"]] or {})
     eta_pc = A["eta_pc"][pr_name]
     P_shaft = spec["P_kW"] * 1e3
     if spec.get("P_is_electric"):
@@ -485,9 +561,9 @@ def size_from_passport(spec):
             for (Ti, pi_, To, po, w) in g["_states"]:
                 rho = pi_ / (A["R_a"] * Ti)
                 h = Ag * rho_in / rho / (math.pi * Dm)
-                c = max(h / A["AR_c"], A["c_min_c"])
+                c = A["c0_c"] + A["kc_c"] * h
                 mat = P["comp_rotor"] if not (pr_name == "aero" and To - 273.15 > 420) else "IN718"
-                stg.append(dict(Dm=Dm, h=h, c=c, T_C=To - 273.15, p_bar=po / 1e5, mat=mat))
+                stg.append(dict(Dm=Dm, h=h, c=c, T_C=To - 273.15, p_bar=po / 1e5, mat=mat, U=math.pi * Dm * rpm[sp] / 60))
                 L_comp += A["Lst_c"] * c
             g["_geo"] = stg
             comp_stages_geo += stg
@@ -547,30 +623,41 @@ def size_from_passport(spec):
         if t.get("type", "A") == "A":
             nst = int(t.get("n", 1))
             dh = w / nst
+            p_in_grp = p4 * (p5 / p4) ** (w_done / w_t)
+            # состояния по ступеням (не зависят от диаметра)
+            sts, Tg, wd = [], T_in, w_done
+            for i in range(nst):
+                T_out = Tg - dh / A["cp_g"]
+                wd += dh
+                p_out = p4 * (p5 / p4) ** (wd / w_t)
+                sts.append((T_out, p_out / (A["R_g"] * T_out)))
+                Tg = T_out
             U = math.sqrt(dh / A["psi_t"][pr_name])
             Dm = 60 * U / (math.pi * n_rpm)
+            # тихоходная силовая турбина: h последней ступени <= h_Dm_max·Dm -> диаметр по расходу (A_BASIS['h_Dm_max'])
+            Q_last = m / sts[-1][1]
+            Dm_flow = (Q_last / (math.pi * A["h_Dm_max"] * A["phi_t"] * math.pi * n_rpm / 60)) ** (1 / 3)
+            dm_by = "psi"
+            if Dm_flow > Dm:
+                Dm, dm_by = Dm_flow, "flow"
+                U = math.pi * Dm * n_rpm / 60
             stg = []
-            for i in range(nst):
-                T_out = T_in - dh / A["cp_g"]
-                w_done += dh
-                frac = w_done / w_t
-                p_out = p4 * (p5 / p4) ** frac
-                rho = p_out / (A["R_g"] * T_out)
+            for (T_out, rho) in sts:
                 h = (m / rho) / (math.pi * Dm * A["phi_t"] * U)
-                c = max(h / A["AR_t"], A["c_min_t"])
-                stg.append(dict(Dm=Dm, h=h, c=c, T_C=T_out - 273.15))
+                c = A["c0_t"] + A["kc_t"] * h
+                stg.append(dict(Dm=Dm, h=h, c=c, T_C=T_out - 273.15, U=U))
                 L_turb += A["Lst_t"] * c
-                T_in = T_out
+            T_in, w_done = sts[-1][0], wd
             name = "турбина газогенератора" if key == "gg" else "силовая турбина"
             rows.append(block_axial_rotor(f"{name}: диски и лопатки", stg, P["turb_rotor"], "turb"))
             rows.append(block_vanes(f"{name}: сопловые аппараты", stg, P["vanes_t"], "turb"))
             Dcase = (Dm + stg[-1]["h"]) * 1.15
             Lt = sum(A["Lst_t"] * s["c"] for s in stg)
-            rows.append(block_shell(f"{name}: корпус", Dcase, Lt, p4 / 1e5 if key == "gg" else p4 / 1e5 * 0.4, A["T_case_hot_C"], *P["hot_case"]))
+            rows.append(block_shell(f"{name}: корпус", Dcase, Lt, p_in_grp / 1e5, A["T_case_hot_C"], *P["hot_case"]))
             D_tip_t.append(Dm + stg[-1]["h"])
             last_tip = Dm + stg[-1]["h"]
             dims["turb_" + key] = dict(type="A", n=nst, Dm=round(Dm, 4), U=round(U, 1), rpm=round(n_rpm), h1=round(stg[0]["h"], 4),
-                                       h_last=round(stg[-1]["h"], 4))
+                                       h_last=round(stg[-1]["h"], 4), Dm_by=dm_by, psi=round(dh / U ** 2, 3))
         else:  # радиальная турбина
             dhs = w / A["eta_pt"]
             U = A["nu_rt"] * math.sqrt(2 * dhs)
@@ -596,7 +683,8 @@ def size_from_passport(spec):
     crow, cgeo = block_combustor(comb, pr_name)
     rows += crow
     # вход и выхлопной диффузор
-    D_in = (max(D_case_comp[0], 0.3)) * 1.3
+    first = dims.get("comp1", {})
+    D_in = (0.9 * first["D2"]) if first.get("type") == "C" else max(D_case_comp[0] / 1.10, 0.3) * 1.3   # вход: у глаза колеса / у первой ступени
     L_in = 0.4 * D_in
     if P["include_inlet"]:
         rows.append(block_shell("входной корпус", D_in, L_in, 1.013, 20.0, *P["inlet"]))
@@ -607,9 +695,10 @@ def size_from_passport(spec):
                                *P["diffuser"]))
     # опоры
     n_spools = 2 if tp else 1
-    n_frames = n_spools + 1
     D_case_max = max(D_case_comp + [1.15 * d for d in D_tip_t])
-    rows.append(block_frames("опоры подшипников (корпуса, стойки)", n_frames, D_case_max))
+    D_front = (0.6 * first["D2"]) if first.get("type") == "C" else D_case_comp[0]   # передняя опора: у глаза колеса / у первой ступени
+    Ds_fr = [D_front] + [1.15 * d for d in D_tip_t]                                # + опора за каждой турбиной
+    rows.append(block_frames("опоры подшипников (корпуса, стойки)", Ds_fr, *P["warm"]))
     L_eng = (L_in if P["include_inlet"] else 0.0) + L_comp + cgeo["L"] + L_turb + L_dif
     dims.update(L_engine=round(L_eng, 3), D_case_max=round(D_case_max, 3), combustor=dict(kind=comb["kind"], L=round(cgeo["L"], 3),
                                                                                          D=round(cgeo["D"], 3)))
@@ -785,6 +874,17 @@ def calibrate(db):
         base[pr] = dict(power_law=dict(a=float(math.exp(a)), b=float(b), loo=_stats(e_pow)),
                         const_specific=dict(kW_per_kg=float(math.exp(-np.mean(lm - lp))), loo=_stats(e_q)))
     out["baselines"] = base
+    # чувствительность: Taurus 70 = 5107 кг (фунты документа) вместо 5630 кг
+    es = [e for e in engines if e["practice"] == "industrial"]
+    parts = [parts_all[e["id"]][:2] for e in es]
+    ms = [5107.0 if e["id"] == "taurus70_md" else e["mass_kg"] for e in es]
+    K_alt = fit_K(parts, ms)
+    loo_alt = []
+    for i in range(len(es)):
+        Ki = fit_K(parts[:i] + parts[i + 1:], ms[:i] + ms[i + 1:])
+        loo_alt.append(math.log(parts[i][0] + Ki * parts[i][1]) - math.log(ms[i]))
+    out["sensitivity_taurus70_5107"] = dict(K=round(K_alt, 4), loo=_stats(loo_alt),
+                                            note="Taurus 70: 11 260 lb = 5107 кг вместо напечатанных 5630 кг")
     return out
 
 
@@ -865,12 +965,19 @@ def examples(cal):
     с разными сердцевинами - масса, кВт/кг, КПД на тонну, фронт Парето"""
     calk = {k: dict(K=v["K"], sigma_log=v["loo"]["rms_log"]) for k, v in cal["per_practice"].items()}
     items = []
-    for pr in ("industrial", "aero"):
-        for bk in ("oil_pkg", "magnetic"):
-            sp = kv3_spec(pr, bearings=dict(kind=bk, n_radial=2, n_thrust=1))
-            sp["name"] = f"KV-3 простой, {('промышл.' if pr == 'industrial' else 'авиац.')} практика, {('масло пакета' if bk == 'oil_pkg' else 'магнитные')}"
-            ev = evaluate(size_from_passport(sp), cal=calk)
-            items.append(ev)
+    variants = [("industrial", None, "oil_pkg", "промышл. практика, литьё в песок, масло пакета"),
+                ("industrial", None, "magnetic", "промышл. практика, литьё в песок, магнитные"),
+                ("industrial", "cast_invest", "oil_pkg", "промышл. K, точное литьё КНР, масло пакета"),
+                ("industrial", "lpbf", "oil_pkg", "промышл. K, печать LPBF, масло пакета"),
+                ("industrial", "lpbf", "magnetic", "промышл. K, печать LPBF, магнитные"),
+                ("aero", None, "oil_pkg", "авиац. практика, масло пакета"),
+                ("aero", None, "magnetic", "авиац. практика, магнитные")]
+    for pr, proc, bk, label in variants:
+        sp = kv3_spec(pr, bearings=dict(kind=bk, n_radial=2, n_thrust=1), process=proc)
+        sp["name"] = f"KV-3 простой, {label}"
+        ev = evaluate(size_from_passport(sp), cal=calk)
+        ev["process"] = proc or ("cast_sand" if pr == "industrial" else "forged_fab")
+        items.append(ev)
     # «как есть»: компрессор KV-3 π 13,5, рекуператор 0,90 + подогрев (cycles_results.json, key R90-ic-RH-ibc-none-none, pr135)
     try:
         cy = json.load(open(F_CYCLES))

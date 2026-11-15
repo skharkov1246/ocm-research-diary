@@ -442,9 +442,11 @@ def rib_stats(segs, p, R_ref, area):
     wv = A * Ls / area
     Ib = (a[:, 4] + rf) * H ** 3 / 12.0
     wi = Ib * Ls / area
+    # угловое распределение: объём каждого отрезка — по 8 точкам вдоль него (отрезок шире ячейки 5° не даёт ложного «рисунка»)
     ang = np.zeros(72)
-    th = ((0.5 * (a[:, 1] + a[:, 3])) / R_ref) % (2 * math.pi)
-    np.add.at(ang, (th / (2 * math.pi) * 72).astype(int) % 72, A * Ls)
+    tt = (np.arange(8) + 0.5) / 8
+    th = ((a[:, 1:2] + tt[None, :] * (a[:, 3:4] - a[:, 1:2])) / R_ref) % (2 * math.pi)
+    np.add.at(ang, (th / (2 * math.pi) * 72).astype(int).ravel() % 72, np.repeat(A * Ls / 8, 8))
     phi = np.mod(np.arctan2(s, c), math.pi)
     hist, _ = np.histogram(phi, bins=12, range=(0, math.pi), weights=A * Ls)
     pr = hist / max(hist.sum(), 1e-30)

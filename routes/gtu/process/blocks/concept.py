@@ -112,7 +112,7 @@ def label(C):
         return C["name"]
     c, t, hx, cb = C["compressor"], C["turbine"], C["hx"], C["combustor"]
     s = [f"{C['shaft']['drive']}", f"{c['arch']}{c['n_ax'] if c['arch'] == 'ОЦ' else ''} π{c['pi']:.3g}",
-         f"{'осевая' if t['type'] == 'О' else 'радиальная'} ×{t['nt']} {t['cool']}", f"T41 {t['t41']:.0f}", cb["scheme"]]
+         f"{'осевая' if t['type'] == 'О' else 'радиальная'} ×{t.get('nt_used') or t['nt']} {t['cool']}", f"T41 {t['t41']:.0f}", cb["scheme"]]
     if c["intercool"] != "нет":
         s.append("промохлаждение")
     if hx["recup"]:

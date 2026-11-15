@@ -18,8 +18,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REL = "routes/gtu/evo/blades"
 NPROC = 64                     # c7a.16xlarge: 64 vCPU — по острову на ядро
 PIP = ["numpy==2.5.3", "scipy==1.18.1", "cantera==3.2.0"]     # как funnel/jobs_l1.json
-# время оценки на одном ядре (мини-прогон этой сессии, mini_results.json → timing): ступень 1 и 2 ≈ 20 мс, турбина ≈ 50 мс
-T_EVAL_S = {"comp1": 0.020, "comp2": 0.022, "turb": 0.055}
+# время ЦП оценки на одном ядре — мини-прогон 15.11.2026 (blades_mini_results.json → comps.*.timing.ms_per_eval_cpu)
+T_EVAL_S = {"comp1": 0.0214, "comp2": 0.0208, "turb": 0.0374}
 
 
 def build(parts, evals, k_elites, comps=("comp1", "comp2", "turb")):

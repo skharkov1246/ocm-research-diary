@@ -144,6 +144,22 @@ def sizes(C, ch, G):
     return out
 
 
+def funnel_rec(C, sz, rec_funnel):
+    """рекуператор концепции в формате воронки (funnel_space.derive -> g['rec']) по размерам cycles.size_hx выбранной
+    технологии: объём с коллекторами и корпусом ×2 (правило cycles.parts), модули - кубы камеры EP-M2050 1,1 м (как derive),
+    масса - сердцевина size_hx (стенка и коэффициент конструкции технологии). Нужен моделям деталей, обслуживания, Plug&Play
+    и габарита воронки вместо её собственной оценки печатного рекуператора."""
+    s = (sz.get("рекуператор") or {}).get(TECH[C["hx"]["recup_make"]])
+    if not s or not s.get("ok"):
+        return rec_funnel
+    V = 2.0 * s["V_core_m3"]
+    a_max = 1.1
+    mods = max(1, math.ceil(V / a_max ** 3))
+    return dict(A_m2=s["A_m2"], V_m3=V, modules=mods, side=(V / mods) ** (1.0 / 3.0), mass_kg=s["mass_kg"],
+                source=f"cycles.size_hx ({TECH[C['hx']['recup_make']]}), объём ×2, модули по кубу 1,1 м",
+                funnel_estimate=({k: round(v, 3) for k, v in rec_funnel.items()} if rec_funnel else None))
+
+
 def ibc_wheel(C, ch, G, n_shaft):
     """колесо компрессора IBC на валу двигателя (как cycles.ibc_run): коэффициент расхода при частоте вала; больше 0,15
     (cycles A phi_max) - нужен свой вал и редуктор"""

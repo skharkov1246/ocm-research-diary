@@ -160,6 +160,7 @@ def evaluate(concept, detail=False):
         etas = etas_f
         ch = chain.run(chain_spec(C, etas, PRb_obj))
     delta = fuel.reform_delta(C)
+    C["turbine"]["nt_used"], C["turbine"]["npt_used"] = nt, (npt if C["rotors"] == 2 else 0)
     out = dict(name=label(C), kv=C["kv"], package=dict(model=tgt0["model"], variant=tgt0["variant"], P_shaft_kW=tgt0["P_shaft_kW"],
                                                          P_kW=tgt0["P_kW"], G0=tgt0["G0"], W_exh0=tgt0["W_exh0"], EGT0=tgt0["EGT0"],
                                                          eta0_pct=tgt0["eta0"], n_pkg=tgt0["n_pkg_true"], pi0=tgt0["pi0"],
@@ -218,6 +219,9 @@ def evaluate(concept, detail=False):
     else:
         rules.append(dict(code="funnel_solve", hard=True, ok=False, group="воронка",
                           text=f"воронка не построила точку: {sol.get('fail')}"))
+    sz = hx.sizes(C, ch, G)
+    if g2 is not None and C["hx"]["recup"]:
+        g2["rec"] = hx.funnel_rec(C, sz, g2.get("rec"))
     if g2 is not None:
         for r in FS.check(fc, tgt, perf2, g2):
             if r["code"] in ("recup_T",):
@@ -225,7 +229,6 @@ def evaluate(concept, detail=False):
             rules.append(dict(r, hard=True, group="воронка"))
         rules += shaft.rules(C, tgt0, g2["n"])
     # ---------------------------------------------------------------- теплообменники, IBC, добавочные узлы
-    sz = hx.sizes(C, ch, G)
     ibc_w = hx.ibc_wheel(C, ch, G, g2["n"] if g2 else tgt0["n_pkg"]) if C["hx"]["ibc"] else None
     hard_fail = [r for r in rules if r.get("hard") and not r["ok"] and r.get("group") not in RULE_GROUP_SECONDARY]
     aux = hx.aux_parts(C, sz, ibc_w, limits_all=not any(r["code"] in ("soft_G", "soft_EGT", "pkg_Wexh") for r in hard_fail))
@@ -296,7 +299,7 @@ def _finish(out, C, rules, t_start, concept_n):
     out["concept"] = concept_n
     out["runtime_s"] = round(time.time() - t_start, 4)
     out["status"] = "оценка уровня облика: КПД узлов, пределы, потери, детали и TRL - принятые величины трека и оценки"
-    return out
+    return _jsonable(out)
 
 
 def sizing(C, fc, tgt, g, env, sz):

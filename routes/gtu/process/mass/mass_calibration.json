@@ -6,13 +6,13 @@
  "status": "оценка уровня облика: калибровка по 8 двигателям (3 промышленных, 5 авиационных); блоковое деление массы не проверено по реальным машинам (известны только итоги); теплообменники и рама не калиброваны (полоса)",
  "inputs": {
   "db": "routes/gtu/process/mass/mass_db.json",
-  "db_sha16": "6843e9f0f42d7c68",
+  "db_sha16": "c1de7a7a64aca5b6",
   "frame3_point": "routes/gtu/frame3/frame3_point_results.json",
   "frame3_geom": "routes/gtu/frame3/frame3_geom_results.json",
   "cycles": "routes/gtu/organic/cycles/cycles_results.json",
   "fleet": "routes/gtu/fleet",
   "densities": "routes/gtu/funnel/make_model.py: MAT[*].rho",
-  "code_sha16": "33997809a6d2f26d"
+  "code_sha16": "3c7a6fc187187430"
  },
  "assumptions": {
   "A": {
@@ -42,12 +42,13 @@
     "industrial": 380.0,
     "aero": 420.0
    },
-   "AR_c": 2.0,
-   "c_min_c": 0.015,
+   "c0_c": 0.012,
+   "kc_c": 0.3,
    "Lst_c": 2.2,
-   "AR_t": 1.6,
-   "c_min_t": 0.02,
-   "Lst_t": 2.4,
+   "c0_t": 0.02,
+   "kc_t": 0.35,
+   "Lst_t": 2.0,
+   "h_Dm_max": 0.3,
    "psi_t": {
     "industrial": 1.6,
     "aero": 1.8
@@ -56,15 +57,28 @@
    "lam_cf": 0.68,
    "phi_cf": 0.085,
    "nu_rt": 0.7,
-   "sigma_b": 1.3,
-   "tc_b": 0.08,
-   "k_prof": 0.7,
-   "k_taper": 0.8,
+   "sig_c": 1.3,
+   "karea_c": 0.056,
+   "taper_c": 0.85,
+   "datt_c": 0.5,
+   "sig_t": 1.5,
+   "karea_t": 0.15,
+   "karea_t_lp": 0.08,
+   "hD_karea": [
+    0.1,
+    0.25
+   ],
+   "taper_t": 0.8,
+   "datt_t": 0.84,
+   "U_ref_disk": 420.0,
+   "fU_min": 0.2,
+   "cax_c": 0.8,
+   "w_rim_cax": 1.15,
+   "att_fill": 0.52,
+   "a_disk": 0.07371391615683914,
+   "b_disk": 1.1372605839073069,
    "k_vane": 1.2,
    "k_ngv": 1.5,
-   "k_disk_c": 0.05,
-   "k_disk_t": 0.12,
-   "k_fill_disk": 0.7,
    "k_cf_single": 0.06903329580867458,
    "k_cf_double": 0.11756580352010867,
    "k_bore": 0.95,
@@ -91,7 +105,7 @@
     "industrial": 4.0,
     "aero": 2.5
    },
-   "k_frame_bh": 0.02,
+   "k_frame_bh": 3.0,
    "k_fastener": 0.02,
    "m_pipe_bearing": 15.0,
    "T_case_hot_C": 450.0,
@@ -111,17 +125,20 @@
    "thermo": "постоянные cp, γ; КПД политропный компрессора 0,88 / 0,90, турбины 0,88 - оценка (только для размеров проточной части)",
    "G_sp": "удельный расход на входе осевого компрессора 185 / 200 кг/(с·м²), втулочное отношение 0,50 (ВД 0,60) - оценка",
    "U_tip_c": "окружная скорость на периферии первой ступени, если частота не дана, 380 / 420 м/с - оценка",
-   "blades": "лопатки: густота 1,3, t/c 0,08, площадь профиля 0,7·t·c, сужение 0,8; удлинение 2,0 компрессор / 1,6 турбина; хорда не меньше 15 / 20 мм; длина ступени 2,2 / 2,4 хорды - оценка",
-   "disks": "диск осевой ступени: (π/4)·D_обода²·w·0,7, w = 0,05 D_обода (компрессор, барабан) / 0,12 D_обода (турбина) - оценка",
+   "blades": "лопатки: хорда c = 12 мм + 0,30 h (компрессор) / 20 мм + 0,35 h (турбина), длина ступени 2,2 / 2,0 c - оценка; венец V = π·Dm·σ·k_пл·c·h·сужение: турбина σ 1,5, k_пл 0,15, сужение 0,80 (frame3_fea: шаг по Цвейфелю 0,826 c_a, turb_k_area 0,15, сужение 0,7/0,6/0,4); компрессор σ 1,3, k_пл 0,056 (t/c 0,08 × 0,7), сужение 0,85 - оценка",
+   "disks": "диск осевой ступени: m_диска = a·ρ·D_жив³ + b·m_обода (обод = лопатки + замки: кольцо π·D_обода·1,15 c_a·d_зам·0,52, d_зам 0,84 c турбина / 0,5 c компрессор; D_жив = Dm - h - 2 d_зам); a, b - МНК по трём дискам турбины KV-3, рассчитанным на прочность (frame3_fea_results.json → parts.turbN.profile, rim_mass_kg; U_m 420 м/с); для компрессора те же a, b - оценка",
+   "disk_U": "диск и замки масштабируются по напряжениям от вращения: × max(0,2; (U_m/420 м/с)²) (σ ∝ ρU²; 420 м/с - средняя скорость турбины KV-3, на которой посчитаны диски frame3_fea) - оценка; лопатки турбины тоньше при длинном пере: k_пл 0,15 при h/Dm ≤ 0,10 -> 0,08 при h/Dm ≥ 0,25 (лопатки НД/силовой турбины) - оценка",
+   "h_Dm_max": "высота лопатки последней ступени не больше 0,30 Dm: если по ψ выходит больше, диаметр растёт по расходу (тихоходные силовые турбины) - оценка",
    "k_cf": "центробежное колесо m = k·ρ·D2³: k по объёму CAD-тел frame3 (frame3_geom_results.json → stages.stageN.solid.volume_m3 / D2³): одностороннее - ступень 2, двустороннее - ступень 1; без отверстия; с отверстием ×0,95 (оценка)",
    "k_rt": "радиальная турбина m = 0,099·ρ·D³ (0,0825·1,2 - gtu_explore.finalize), аппарат 0,02·ρ·D³ (funnel_space.derive) - оценка",
    "turbine": "коэффициент нагрузки ψ = Δh/U² 1,6 / 1,8, расхода φ = c_a/U 0,55, U/C0 радиальной 0,70 - оценка",
    "centrifugal": "коэффициент работы λ = w/U2² 0,68 (frame3: 0,648 и 0,716 - среднее), оптимальный φ = 0,085 (funnel_space.PHI_OPT['Ц']); осевая длина 0,30 D2 (одност.) / 0,65 D2 (двуст.) - по frame3; корпус ступени 1,45 D2 - оценка",
    "combustor": "площадь отсчёта A = G/(ρ3·U_ref), U_ref 10 (кольцевая) / 12 (трубчатая) / 8 (выносная) м/с; жаровая труба высотой 0,7 H, длиной 3 H; стенка 1,5 мм (лист) / 1,2 мм (печать), ×1,6 на фронтовое устройство и кольца; форсунка 4 / 2,5 кг; переходные патрубки 0,3 массы труб - оценка",
-   "frames": "опоры подшипников: n_опор × 0,02·ρ_стали·D_корпуса³; крепёж 2 % неподвижной части; трубы масла 15 кг на подшипник - оценка",
+   "frames": "опоры подшипников (кольцо, стойки, ступица): 3·ρ·D²·t·k_фланца на опору при местном диаметре корпуса, t - стенка способа изготовления; крепёж 2 % неподвижной части; трубы масла 15 кг на подшипник - оценка",
    "case_hot": "металл корпуса турбины 450 °C (охлаждаемый/теплоизолированный) - оценка",
    "amb": "магнитный подшипник: удельная несущая способность 0,4 МПа на проекцию (B²/2μ0 при 1,0-1,2 Тл = 0,40-0,57 МПа × геометрия), запас 3 по весу ротора, осевой - 4 веса ротора; статор 2,2 D; контроллер 30 кг (funnel_space.derive), страховочные подшипники 3 кг - оценка",
    "foil": "лепестковый газовый подшипник 2 кг; опыт - роторы до 150 кг (оценка, не проверено)",
+   "inlet_frame_cf": "у центробежной машины входной корпус 0,9 D2, передняя опора 0,6 D2 (у глаза колеса) - оценка",
    "cradle": "рама модуля: 0,08 опираемой массы + 60 кг на метр длины, сталь - оценка (без калибровки: рамы двигателей в открытых данных не отделены от рам пакетов)"
   },
   "rho": {
@@ -712,8 +729,8 @@
     "name": "Capstone C65 (рекуператор, воздушные подшипники, высокооборотный генератор, силовая электроника, кожух), сеть",
     "mass_kg": 758,
     "P_kW": 65,
-    "eta_pct": 29.0,
-    "note": "масса всего блока с генератором и электроникой; КПД 29 % - по памяти, не проверено (в выдержке нет)",
+    "eta_pct": null,
+    "note": "масса всего блока с генератором и электроникой; КПД в выдержке нет",
     "source": {
      "url": "https://d1io3yog0oux5.cloudfront.net/_7343c66b0bbfdaf8b5c0fee2d0c8bce7/capstonegreenenergy/db/235/9453/file/Data+Sheet_Digester+Gas.pdf",
      "quote": "Width x Depth x Height 0.76 x 1.95 x 2.08 m ... grid-connect version weighs 758 kg, dual-mode 1,121 kg (выдержка поиска)",
@@ -781,18 +798,18 @@
    "industrial": {
     "name": "промышленная (литые корпуса, тяжёлые диски; Solar)",
     "n": 3,
-    "K": 3.0843,
+    "K": 2.7892,
     "insample": {
-     "rms_log": 0.13857772808521854,
-     "mean_log": -0.0008861595291396185,
-     "max_abs_pct": 20.793432504926244,
-     "rms_pct": 14.4430336966205
+     "rms_log": 0.13839399872300365,
+     "mean_log": -0.00120080158954039,
+     "max_abs_pct": 21.384966103127738,
+     "rms_pct": 14.5723320984837
     },
     "loo": {
-     "rms_log": 0.20933898872284934,
-     "mean_log": -6.604907831449698e-05,
-     "max_abs_pct": 33.185110817140554,
-     "rms_pct": 22.438860067518807
+     "rms_log": 0.20906560006350824,
+     "mean_log": -6.532480182267857e-05,
+     "max_abs_pct": 34.23722700372915,
+     "rms_pct": 22.758821134738277
     },
     "machines": [
      "taurus60_md",
@@ -803,18 +820,18 @@
    "aero": {
     "name": "авиационная (кованые и сварные корпуса из Ti и Ni, лёгкие диски; GE LM, SGT-A05)",
     "n": 5,
-    "K": 0.6741,
+    "K": 0.9848,
     "insample": {
-     "rms_log": 0.5695242097860561,
-     "mean_log": 0.013741640029711455,
-     "max_abs_pct": 87.24961832202432,
-     "rms_pct": 58.76105386226386
+     "rms_log": 0.3131294305545448,
+     "mean_log": 0.015254511607525067,
+     "max_abs_pct": 38.4609223657621,
+     "rms_pct": 31.159377670793877
     },
     "loo": {
-     "rms_log": 0.7135537921613988,
-     "mean_log": 0.008300262354590337,
-     "max_abs_pct": 117.20477310405796,
-     "rms_pct": 75.47975035553091
+     "rms_log": 0.39398841231493964,
+     "mean_log": 0.009082702105769691,
+     "max_abs_pct": 48.85179705932584,
+     "rms_pct": 38.896016410214514
     },
     "machines": [
      "lm2500",
@@ -837,13 +854,13 @@
     ],
     "P_kW": 5740,
     "kW_per_kg": 1.745,
-    "rotor_kg": 205.0,
-    "static_raw_kg": 1222.0,
-    "rotor_share_pct": 5.2,
-    "pred_insample_kg": 3974.1,
-    "K_loo": 3.418,
-    "pred_loo_kg": 4381.8,
-    "err_loo_pct": 33.2,
+    "rotor_kg": 257.0,
+    "static_raw_kg": 1339.6,
+    "rotor_share_pct": 6.4,
+    "pred_insample_kg": 3993.6,
+    "K_loo": 3.1049,
+    "pred_loo_kg": 4416.4,
+    "err_loo_pct": 34.2,
     "within_source_range": false,
     "dims": {
      "m_air": 21.3,
@@ -871,19 +888,23 @@
       "U": 336.7,
       "rpm": 15000,
       "h1": 0.0488,
-      "h_last": 0.0848
+      "h_last": 0.0848,
+      "Dm_by": "psi",
+      "psi": 1.6
      },
      "turb_lp": {
       "type": "A",
       "n": 2,
-      "Dm": 0.3876,
-      "U": 290.2,
+      "Dm": 0.4908,
+      "U": 367.4,
       "rpm": 14300,
-      "h1": 0.1616,
-      "h_last": 0.236
+      "h1": 0.1008,
+      "h_last": 0.1472,
+      "Dm_by": "flow",
+      "psi": 0.998
      },
-     "L_engine": 2.982,
-     "D_case_max": 0.717,
+     "L_engine": 2.608,
+     "D_case_max": 0.734,
      "combustor": {
       "kind": "annular",
       "L": 0.543,
@@ -902,13 +923,13 @@
     ],
     "P_kW": 7690,
     "kW_per_kg": 1.366,
-    "rotor_kg": 298.5,
-    "static_raw_kg": 1493.2,
-    "rotor_share_pct": 6.1,
-    "pred_insample_kg": 4904.0,
-    "K_loo": 2.8639,
-    "pred_loo_kg": 4574.9,
-    "err_loo_pct": -18.7,
+    "rotor_kg": 380.5,
+    "static_raw_kg": 1666.1,
+    "rotor_share_pct": 7.6,
+    "pred_insample_kg": 5027.6,
+    "K_loo": 2.6226,
+    "pred_loo_kg": 4750.0,
+    "err_loo_pct": -15.6,
     "within_source_range": false,
     "dims": {
      "m_air": 26.2,
@@ -936,19 +957,23 @@
       "U": 366.6,
       "rpm": 15200,
       "h1": 0.0438,
-      "h_last": 0.0834
+      "h_last": 0.0834,
+      "Dm_by": "psi",
+      "psi": 1.6
      },
      "turb_lp": {
       "type": "A",
       "n": 2,
-      "Dm": 0.482,
-      "U": 302.9,
+      "Dm": 0.5539,
+      "U": 348.0,
       "rpm": 12000,
-      "h1": 0.147,
-      "h_last": 0.2194
+      "h1": 0.1113,
+      "h_last": 0.1662,
+      "Dm_by": "flow",
+      "psi": 1.212
      },
-     "L_engine": 3.161,
-     "D_case_max": 0.807,
+     "L_engine": 2.846,
+     "D_case_max": 0.828,
      "combustor": {
       "kind": "annular",
       "L": 0.515,
@@ -967,13 +992,13 @@
     ],
     "P_kW": 22370,
     "kW_per_kg": 1.174,
-    "rotor_kg": 1349.1,
-    "static_raw_kg": 5417.1,
-    "rotor_share_pct": 7.5,
-    "pred_insample_kg": 18057.4,
-    "K_loo": 2.9997,
-    "pred_loo_kg": 17598.7,
-    "err_loo_pct": -7.6,
+    "rotor_kg": 1561.4,
+    "static_raw_kg": 5718.3,
+    "rotor_share_pct": 8.9,
+    "pred_insample_kg": 17511.0,
+    "K_loo": 2.6679,
+    "pred_loo_kg": 16817.3,
+    "err_loo_pct": -11.7,
     "within_source_range": false,
     "dims": {
      "m_air": 67.3,
@@ -1001,19 +1026,23 @@
       "U": 330.1,
       "rpm": 10500,
       "h1": 0.0606,
-      "h_last": 0.1659
+      "h_last": 0.1659,
+      "Dm_by": "psi",
+      "psi": 1.6
      },
      "turb_lp": {
       "type": "A",
       "n": 2,
-      "Dm": 0.8793,
-      "U": 322.3,
+      "Dm": 0.8959,
+      "U": 328.4,
       "rpm": 7000,
-      "h1": 0.1824,
-      "h_last": 0.279
+      "h1": 0.1757,
+      "h_last": 0.2688,
+      "Dm_by": "flow",
+      "psi": 1.541
      },
-     "L_engine": 5.026,
-     "D_case_max": 1.332,
+     "L_engine": 4.359,
+     "D_case_max": 1.339,
      "combustor": {
       "kind": "annular",
       "L": 0.71,
@@ -1032,13 +1061,13 @@
     ],
     "P_kW": 23261,
     "kW_per_kg": 4.979,
-    "rotor_kg": 2421.3,
-    "static_raw_kg": 6228.4,
-    "rotor_share_pct": 36.6,
-    "pred_insample_kg": 6620.0,
-    "K_loo": 0.7652,
-    "pred_loo_kg": 7187.0,
-    "err_loo_pct": 53.8,
+    "rotor_kg": 2254.7,
+    "static_raw_kg": 3642.3,
+    "rotor_share_pct": 38.6,
+    "pred_insample_kg": 5841.6,
+    "K_loo": 1.0762,
+    "pred_loo_kg": 6174.7,
+    "err_loo_pct": 32.2,
     "within_source_range": false,
     "dims": {
      "m_air": 68.9,
@@ -1066,19 +1095,23 @@
       "U": 347.2,
       "rpm": 10489,
       "h1": 0.0846,
-      "h_last": 0.1592
+      "h_last": 0.1592,
+      "Dm_by": "psi",
+      "psi": 1.8
      },
      "turb_lp": {
       "type": "A",
       "n": 6,
-      "Dm": 0.938,
-      "U": 176.8,
+      "Dm": 1.1567,
+      "U": 218.0,
       "rpm": 3600,
-      "h1": 0.2471,
-      "h_last": 0.5278
+      "h1": 0.1625,
+      "h_last": 0.347,
+      "Dm_by": "flow",
+      "psi": 1.184
      },
-     "L_engine": 6.167,
-     "D_case_max": 1.686,
+     "L_engine": 3.749,
+     "D_case_max": 1.729,
      "combustor": {
       "kind": "annular",
       "L": 0.862,
@@ -1097,13 +1130,13 @@
     ],
     "P_kW": 30200,
     "kW_per_kg": 5.767,
-    "rotor_kg": 3025.4,
-    "static_raw_kg": 7604.2,
-    "rotor_share_pct": 37.1,
-    "pred_insample_kg": 8151.5,
-    "K_loo": 0.7897,
-    "pred_loo_kg": 9030.4,
-    "err_loo_pct": 72.4,
+    "rotor_kg": 3003.7,
+    "static_raw_kg": 4313.1,
+    "rotor_share_pct": 41.4,
+    "pred_insample_kg": 7251.2,
+    "K_loo": 1.1109,
+    "pred_loo_kg": 7795.4,
+    "err_loo_pct": 48.9,
     "within_source_range": false,
     "dims": {
      "m_air": 84.3,
@@ -1131,19 +1164,23 @@
       "U": 364.6,
       "rpm": 9483,
       "h1": 0.0759,
-      "h_last": 0.1503
+      "h_last": 0.1503,
+      "Dm_by": "psi",
+      "psi": 1.8
      },
      "turb_lp": {
       "type": "A",
       "n": 6,
-      "Dm": 0.9662,
-      "U": 182.1,
+      "Dm": 1.2241,
+      "U": 230.7,
       "rpm": 3600,
-      "h1": 0.2698,
-      "h_last": 0.5895
+      "h1": 0.1681,
+      "h_last": 0.3672,
+      "Dm_by": "flow",
+      "psi": 1.121
      },
-     "L_engine": 6.667,
-     "D_case_max": 1.789,
+     "L_engine": 3.899,
+     "D_case_max": 1.83,
      "combustor": {
       "kind": "annular",
       "L": 0.83,
@@ -1162,13 +1199,13 @@
     ],
     "P_kW": 43679,
     "kW_per_kg": 5.555,
-    "rotor_kg": 5382.4,
-    "static_raw_kg": 13856.6,
-    "rotor_share_pct": 36.6,
-    "pred_insample_kg": 14723.4,
-    "K_loo": 0.8441,
-    "pred_loo_kg": 17078.8,
-    "err_loo_pct": 117.2,
+    "rotor_kg": 4496.2,
+    "static_raw_kg": 5777.2,
+    "rotor_share_pct": 44.1,
+    "pred_insample_kg": 10185.5,
+    "K_loo": 1.0778,
+    "pred_loo_kg": 10723.1,
+    "err_loo_pct": 36.4,
     "within_source_range": false,
     "dims": {
      "m_air": 126.5,
@@ -1184,35 +1221,49 @@
       "Dt1": 1.0362,
       "Dm": 0.7772,
       "h1": 0.2591,
-      "h_last": 0.0301,
-      "rpm": 7741,
+      "h_last": 0.1606,
+      "rpm": 3600,
+      "U_tip1": 195.3,
+      "n": 5
+     },
+     "comp2": {
+      "type": "A",
+      "Dt1": 0.8319,
+      "Dm": 0.6655,
+      "h1": 0.1664,
+      "h_last": 0.0352,
+      "rpm": 9642,
       "U_tip1": 420.0,
-      "n": 19
+      "n": 14
      },
      "turb_gg": {
       "type": "A",
       "n": 2,
-      "Dm": 0.9587,
-      "U": 388.6,
-      "rpm": 7741,
-      "h1": 0.0712,
-      "h_last": 0.1568
+      "Dm": 0.7008,
+      "U": 353.8,
+      "rpm": 9642,
+      "h1": 0.0931,
+      "h_last": 0.1807,
+      "Dm_by": "psi",
+      "psi": 1.8
      },
      "turb_lp": {
       "type": "A",
       "n": 6,
-      "Dm": 0.9486,
-      "U": 178.8,
+      "Dm": 1.3737,
+      "U": 258.9,
       "rpm": 3600,
-      "h1": 0.4044,
-      "h_last": 0.8643
+      "h1": 0.1552,
+      "h_last": 0.4121,
+      "Dm_by": "flow",
+      "psi": 1.089
      },
-     "L_engine": 8.973,
-     "D_case_max": 2.085,
+     "L_engine": 4.512,
+     "D_case_max": 2.054,
      "combustor": {
       "kind": "annular",
-      "L": 0.83,
-      "D": 1.479
+      "L": 0.893,
+      "D": 1.423
      }
     }
    },
@@ -1227,13 +1278,13 @@
     ],
     "P_kW": 4000,
     "kW_per_kg": 5.109,
-    "rotor_kg": 131.0,
-    "static_raw_kg": 406.5,
-    "rotor_share_pct": 32.3,
-    "pred_insample_kg": 405.1,
-    "K_loo": 0.5059,
-    "pred_loo_kg": 336.7,
-    "err_loo_pct": -57.0,
+    "rotor_kg": 174.0,
+    "static_raw_kg": 373.2,
+    "rotor_share_pct": 32.1,
+    "pred_insample_kg": 541.5,
+    "K_loo": 0.8196,
+    "pred_loo_kg": 479.9,
+    "err_loo_pct": -38.7,
     "within_source_range": false,
     "dims": {
      "m_air": 15.4,
@@ -1257,14 +1308,16 @@
      "turb_gg": {
       "type": "A",
       "n": 4,
-      "Dm": 0.3809,
-      "U": 283.2,
+      "Dm": 0.4507,
+      "U": 335.1,
       "rpm": 14200,
-      "h1": 0.0504,
-      "h_last": 0.1893
+      "h1": 0.036,
+      "h_last": 0.1352,
+      "Dm_by": "flow",
+      "psi": 1.285
      },
-     "L_engine": 2.063,
-     "D_case_max": 0.656,
+     "L_engine": 1.831,
+     "D_case_max": 0.674,
      "combustor": {
       "kind": "can",
       "L": 0.638,
@@ -1283,13 +1336,13 @@
     ],
     "P_kW": 5800,
     "kW_per_kg": 5.8,
-    "rotor_kg": 173.6,
-    "static_raw_kg": 486.2,
-    "rotor_share_pct": 34.6,
-    "pred_insample_kg": 501.4,
-    "K_loo": 0.5083,
-    "pred_loo_kg": 420.7,
-    "err_loo_pct": -57.9,
+    "rotor_kg": 269.6,
+    "static_raw_kg": 432.8,
+    "rotor_share_pct": 38.7,
+    "pred_insample_kg": 695.9,
+    "K_loo": 0.8475,
+    "pred_loo_kg": 636.5,
+    "err_loo_pct": -36.4,
     "within_source_range": false,
     "dims": {
      "m_air": 21.4,
@@ -1313,14 +1366,16 @@
      "turb_gg": {
       "type": "A",
       "n": 4,
-      "Dm": 0.3951,
-      "U": 302.0,
+      "Dm": 0.4877,
+      "U": 372.8,
       "rpm": 14600,
-      "h1": 0.0492,
-      "h_last": 0.223
+      "h1": 0.0323,
+      "h_last": 0.1463,
+      "Dm_by": "flow",
+      "psi": 1.181
      },
-     "L_engine": 2.298,
-     "D_case_max": 0.711,
+     "L_engine": 1.969,
+     "D_case_max": 0.729,
      "combustor": {
       "kind": "can",
       "L": 0.671,
@@ -1330,12 +1385,12 @@
    }
   ],
   "single_K_all": {
-   "K": 1.3426,
+   "K": 1.6432,
    "loo": {
-    "rms_log": 0.8642213208635462,
-    "mean_log": 0.028736478597766513,
-    "max_abs_pct": 250.373879779639,
-    "rms_pct": 128.11408520778505
+    "rms_log": 0.5424708035005612,
+    "mean_log": 0.03616267806041984,
+    "max_abs_pct": 106.8378212494995,
+    "rms_pct": 63.927298003267964
    },
    "note": "одна K без деления на практику - для сравнения"
   },
@@ -1382,17 +1437,27 @@
      }
     }
    }
+  },
+  "sensitivity_taurus70_5107": {
+   "K": 2.6925,
+   "loo": {
+    "rms_log": 0.17759552966193384,
+    "mean_log": -2.7799150098317682e-05,
+    "max_abs_pct": 27.693137272944497,
+    "rms_pct": 18.847381788829733
+   },
+   "note": "Taurus 70: 11 260 lb = 5107 кг вместо напечатанных 5630 кг"
   }
  },
  "checks": {
   "kg2_3_radial": {
    "real_kg": 2495,
-   "pred_kg": 2714.9,
+   "pred_kg": 2463.8,
    "band_kg": [
-    2202.1,
-    3347.1
+    1999.0,
+    3036.7
    ],
-   "err_pct": 8.8,
+   "err_pct": -1.3,
    "dims": {
     "m_air": 7.562559485243438,
     "m_basis": "из мощности и принятой T4 (оценка)",
@@ -1417,7 +1482,7 @@
      "U": 608.2,
      "rpm": 25547
     },
-    "L_engine": 2.876,
+    "L_engine": 2.727,
     "D_case_max": 0.549,
     "combustor": {
      "kind": "silo",
@@ -1440,7 +1505,7 @@
     -2.0,
     3.2
    ],
-   "turb_Dm_model": 0.4659,
+   "turb_Dm_model": 0.5022,
    "turb_Dm_frame3": 0.536549,
    "note": "проверка размерного пути: λ 0,68 (среднее двух ступеней frame3) против своих λ ступеней"
   },
@@ -1469,7 +1534,7 @@
   "sgta05_bound": {
    "siemens_upper_kg": 766,
    "centrax_kg": 800,
-   "pred_loo_kg": 336.7
+   "pred_loo_kg": 479.9
   },
   "fleet_packages_kg_per_kW": {
    "min": 2.09,
@@ -1748,201 +1813,289 @@
  "examples": {
   "items": [
    {
-    "name": "KV-3 простой, промышл. практика, масло пакета",
+    "name": "KV-3 простой, промышл. практика, литьё в песок, масло пакета",
     "practice": "industrial",
-    "K": 3.0843,
-    "sigma_log": 0.20933898872284934,
+    "K": 2.7892,
+    "sigma_log": 0.20906560006350824,
     "groups_raw": {
-     "rotor": 546.1,
-     "static": 2295.2,
+     "rotor": 613.1,
+     "static": 1820.8,
      "hx": 0,
      "bearings": 0,
      "frame": 0
     },
-    "engine_kg": 7625.3,
+    "engine_kg": 5691.8,
     "hx_kg": 0,
     "bearings_extra_kg": 0,
-    "frame_kg": 789.0,
-    "total_kg": 8414.3,
-    "total_lo_kg": 6858.8,
-    "total_hi_kg": 10332.0,
-    "kW_per_kg": 0.687,
+    "frame_kg": 609.0,
+    "total_kg": 6300.8,
+    "total_lo_kg": 5141.1,
+    "total_hi_kg": 7730.1,
+    "kW_per_kg": 0.9175,
     "eta_pct": 31.63,
-    "kpd_per_t": 3.759,
+    "kpd_per_t": 5.02,
     "kpd_per_t_range": [
-     3.061,
-     4.612
-    ]
+     4.092,
+     6.152
+    ],
+    "process": "cast_sand"
    },
    {
-    "name": "KV-3 простой, промышл. практика, магнитные",
+    "name": "KV-3 простой, промышл. практика, литьё в песок, магнитные",
     "practice": "industrial",
-    "K": 3.0843,
-    "sigma_log": 0.20933898872284934,
+    "K": 2.7892,
+    "sigma_log": 0.20906560006350824,
     "groups_raw": {
-     "rotor": 546.1,
-     "static": 2249.3,
+     "rotor": 613.1,
+     "static": 1774.9,
      "hx": 0,
-     "bearings": 188.9,
+     "bearings": 214.0,
      "frame": 0
     },
-    "engine_kg": 7483.7,
+    "engine_kg": 5563.7,
     "hx_kg": 0,
-    "bearings_extra_kg": 188.9,
-    "frame_kg": 792.8,
-    "total_kg": 8465.4,
-    "total_lo_kg": 6938.8,
-    "total_hi_kg": 10347.5,
-    "kW_per_kg": 0.6829,
+    "bearings_extra_kg": 214.0,
+    "frame_kg": 615.9,
+    "total_kg": 6393.6,
+    "total_lo_kg": 5260.0,
+    "total_hi_kg": 7790.8,
+    "kW_per_kg": 0.9042,
     "eta_pct": 31.63,
-    "kpd_per_t": 3.736,
+    "kpd_per_t": 4.947,
     "kpd_per_t_range": [
-     3.057,
-     4.558
-    ]
+     4.06,
+     6.013
+    ],
+    "process": "cast_sand"
+   },
+   {
+    "name": "KV-3 простой, промышл. K, точное литьё КНР, масло пакета",
+    "practice": "industrial",
+    "K": 2.7892,
+    "sigma_log": 0.20906560006350824,
+    "groups_raw": {
+     "rotor": 613.1,
+     "static": 1096.4,
+     "hx": 0,
+     "bearings": 0,
+     "frame": 0
+    },
+    "engine_kg": 3671.1,
+    "hx_kg": 0,
+    "bearings_extra_kg": 0,
+    "frame_kg": 447.3,
+    "total_kg": 4118.5,
+    "total_lo_kg": 3370.5,
+    "total_hi_kg": 5040.4,
+    "kW_per_kg": 1.4036,
+    "eta_pct": 31.63,
+    "kpd_per_t": 7.68,
+    "kpd_per_t_range": [
+     6.275,
+     9.384
+    ],
+    "process": "cast_invest"
+   },
+   {
+    "name": "KV-3 простой, промышл. K, печать LPBF, масло пакета",
+    "practice": "industrial",
+    "K": 2.7892,
+    "sigma_log": 0.20906560006350824,
+    "groups_raw": {
+     "rotor": 613.1,
+     "static": 925.9,
+     "hx": 0,
+     "bearings": 0,
+     "frame": 0
+    },
+    "engine_kg": 3195.5,
+    "hx_kg": 0,
+    "bearings_extra_kg": 0,
+    "frame_kg": 409.3,
+    "total_kg": 3604.8,
+    "total_lo_kg": 2953.7,
+    "total_hi_kg": 4407.3,
+    "kW_per_kg": 1.6037,
+    "eta_pct": 31.63,
+    "kpd_per_t": 8.774,
+    "kpd_per_t_range": [
+     7.177,
+     10.709
+    ],
+    "process": "lpbf"
+   },
+   {
+    "name": "KV-3 простой, промышл. K, печать LPBF, магнитные",
+    "practice": "industrial",
+    "K": 2.7892,
+    "sigma_log": 0.20906560006350824,
+    "groups_raw": {
+     "rotor": 613.1,
+     "static": 880.0,
+     "hx": 0,
+     "bearings": 214.0,
+     "frame": 0
+    },
+    "engine_kg": 3067.5,
+    "hx_kg": 0,
+    "bearings_extra_kg": 214.0,
+    "frame_kg": 416.2,
+    "total_kg": 3697.6,
+    "total_lo_kg": 3072.6,
+    "total_hi_kg": 4467.9,
+    "kW_per_kg": 1.5634,
+    "eta_pct": 31.63,
+    "kpd_per_t": 8.554,
+    "kpd_per_t_range": [
+     7.079,
+     10.294
+    ],
+    "process": "lpbf"
    },
    {
     "name": "KV-3 простой, авиац. практика, масло пакета",
     "practice": "aero",
-    "K": 0.6741,
-    "sigma_log": 0.7135537921613988,
+    "K": 0.9848,
+    "sigma_log": 0.39398841231493964,
     "groups_raw": {
-     "rotor": 530.0,
-     "static": 999.0,
+     "rotor": 613.1,
+     "static": 706.4,
      "hx": 0,
      "bearings": 0,
      "frame": 0
     },
-    "engine_kg": 1203.4,
+    "engine_kg": 1308.8,
     "hx_kg": 0,
     "bearings_extra_kg": 0,
-    "frame_kg": 209.6,
-    "total_kg": 1413.0,
-    "total_lo_kg": 750.0,
-    "total_hi_kg": 2766.2,
-    "kW_per_kg": 4.0913,
+    "frame_kg": 204.5,
+    "total_kg": 1513.3,
+    "total_lo_kg": 1053.0,
+    "total_hi_kg": 2195.9,
+    "kW_per_kg": 3.82,
     "eta_pct": 31.63,
-    "kpd_per_t": 22.386,
+    "kpd_per_t": 20.901,
     "kpd_per_t_range": [
-     11.434,
-     42.174
-    ]
+     14.404,
+     30.037
+    ],
+    "process": "forged_fab"
    },
    {
     "name": "KV-3 простой, авиац. практика, магнитные",
     "practice": "aero",
-    "K": 0.6741,
-    "sigma_log": 0.7135537921613988,
+    "K": 0.9848,
+    "sigma_log": 0.39398841231493964,
     "groups_raw": {
-     "rotor": 530.0,
-     "static": 953.1,
+     "rotor": 613.1,
+     "static": 660.5,
      "hx": 0,
-     "bearings": 183.0,
+     "bearings": 214.0,
      "frame": 0
     },
-    "engine_kg": 1172.5,
+    "engine_kg": 1263.6,
     "hx_kg": 0,
-    "bearings_extra_kg": 183.0,
-    "frame_kg": 221.7,
-    "total_kg": 1577.1,
-    "total_lo_kg": 931.2,
-    "total_hi_kg": 2895.6,
-    "kW_per_kg": 3.6654,
+    "bearings_extra_kg": 214.0,
+    "frame_kg": 218.0,
+    "total_kg": 1695.6,
+    "total_lo_kg": 1251.2,
+    "total_hi_kg": 2354.5,
+    "kW_per_kg": 3.4094,
     "eta_pct": 31.63,
-    "kpd_per_t": 20.055,
+    "kpd_per_t": 18.655,
     "kpd_per_t_range": [
-     10.923,
-     33.966
-    ]
+     13.434,
+     25.28
+    ],
+    "process": "forged_fab"
    },
    {
     "name": "KV-3 + рекуператор 0,90 + подогрев (как есть), сердцевина psr",
     "practice": "industrial",
-    "K": 3.0843,
-    "sigma_log": 0.20933898872284934,
+    "K": 2.7892,
+    "sigma_log": 0.20906560006350824,
     "groups_raw": {
-     "rotor": 560.2,
-     "static": 2231.1,
+     "rotor": 618.0,
+     "static": 1764.5,
      "hx": 2098.3,
      "bearings": 0,
      "frame": 0
     },
-    "engine_kg": 7441.6,
+    "engine_kg": 5539.4,
     "hx_kg": 2098.3,
     "bearings_extra_kg": 0,
-    "frame_kg": 937.0,
-    "total_kg": 10476.9,
-    "total_lo_kg": 8392.3,
-    "total_hi_kg": 12914.9,
-    "kW_per_kg": 0.5518,
+    "frame_kg": 761.2,
+    "total_kg": 8398.9,
+    "total_lo_kg": 6703.7,
+    "total_hi_kg": 10356.5,
+    "kW_per_kg": 0.6883,
     "eta_pct": 35.7,
-    "kpd_per_t": 3.408,
+    "kpd_per_t": 4.251,
     "kpd_per_t_range": [
-     2.764,
-     4.254
+     3.447,
+     5.325
     ],
     "note": "межтурбинная камера подогрева не добавлена отдельным блоком; турбина в размерах - перепад до входа в рекуператор; мощность принята равной простому KV-3 (cycles считает на 1 кг/с - масштаб по расходу)"
    },
    {
     "name": "KV-3 + рекуператор 0,90 + подогрев (как есть), сердцевина tpms_print",
     "practice": "industrial",
-    "K": 3.0843,
-    "sigma_log": 0.20933898872284934,
+    "K": 2.7892,
+    "sigma_log": 0.20906560006350824,
     "groups_raw": {
-     "rotor": 560.2,
-     "static": 2231.1,
+     "rotor": 618.0,
+     "static": 1764.5,
      "hx": 5816.6,
      "bearings": 0,
      "frame": 0
     },
-    "engine_kg": 7441.6,
+    "engine_kg": 5539.4,
     "hx_kg": 5816.6,
     "bearings_extra_kg": 0,
-    "frame_kg": 1234.5,
-    "total_kg": 14492.7,
-    "total_lo_kg": 11718.3,
-    "total_hi_kg": 17620.6,
-    "kW_per_kg": 0.3989,
+    "frame_kg": 1058.7,
+    "total_kg": 12414.7,
+    "total_lo_kg": 10029.7,
+    "total_hi_kg": 15062.2,
+    "kW_per_kg": 0.4656,
     "eta_pct": 35.7,
-    "kpd_per_t": 2.463,
+    "kpd_per_t": 2.876,
     "kpd_per_t_range": [
-     2.026,
-     3.047
+     2.37,
+     3.559
     ],
     "note": "межтурбинная камера подогрева не добавлена отдельным блоком; турбина в размерах - перепад до входа в рекуператор; мощность принята равной простому KV-3 (cycles считает на 1 кг/с - масштаб по расходу)"
    },
    {
     "name": "KV-3 + рекуператор 0,90 + подогрев (как есть), сердцевина plate_print",
     "practice": "industrial",
-    "K": 3.0843,
-    "sigma_log": 0.20933898872284934,
+    "K": 2.7892,
+    "sigma_log": 0.20906560006350824,
     "groups_raw": {
-     "rotor": 560.2,
-     "static": 2231.1,
+     "rotor": 618.0,
+     "static": 1764.5,
      "hx": 9839.8,
      "bearings": 0,
      "frame": 0
     },
-    "engine_kg": 7441.6,
+    "engine_kg": 5539.4,
     "hx_kg": 9839.8,
     "bearings_extra_kg": 0,
-    "frame_kg": 1556.3,
-    "total_kg": 18837.7,
-    "total_lo_kg": 15194.3,
-    "total_hi_kg": 22834.6,
-    "kW_per_kg": 0.3069,
+    "frame_kg": 1380.5,
+    "total_kg": 16759.7,
+    "total_lo_kg": 13505.7,
+    "total_hi_kg": 20276.2,
+    "kW_per_kg": 0.3449,
     "eta_pct": 35.7,
-    "kpd_per_t": 1.895,
+    "kpd_per_t": 2.13,
     "kpd_per_t_range": [
-     1.563,
-     2.35
+     1.761,
+     2.643
     ],
     "note": "межтурбинная камера подогрева не добавлена отдельным блоком; турбина в размерах - перепад до входа в рекуператор; мощность принята равной простому KV-3 (cycles считает на 1 кг/с - масштаб по расходу)"
    }
   ],
   "pareto_idx": [
-   2,
-   4
+   5,
+   7
   ],
   "pareto_names": [
    "KV-3 простой, авиац. практика, масло пакета",
@@ -1959,5 +2112,5 @@
   "двухвальный LM6000 сведён к средней линии на каждую группу ступеней; LM2500 и LM2500+ - силовая турбина принята 6-ступенчатой 3600 об/мин",
   "хосты geaerospace.com, wikipedia.org, vericor.com, motorsich.com, trid.trb.org, cloudfront Capstone не разрешены сетью сессии - их числа только по выдержке поиска"
  ],
- "runtime_s": 0.1
+ "runtime_s": 0.09
 }

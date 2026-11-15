@@ -78,8 +78,10 @@ def test_donnell_isotropic_and_rings():
     lam, k = m * math.pi / L, n / R
     w2 = (Dm * (lam ** 2 + k ** 2) ** 2 + E * t * lam ** 4 / (R ** 2 * (lam ** 2 + k ** 2) ** 2)) / (rho * t)
     assert abs(f - math.sqrt(w2) / (2 * math.pi)) < 1e-6 * f
-    f2, _, _ = SM.shell_freq_donnell(R, L, Am, Am + E * 0.004, nu * Am, E * t / (2 * (1 + nu)), Dm, Dm + E * 2e-7, nu * Dm,
-                                     Dm * (1 - nu) / 2, rho * (t + 0.004))
+    # размазанные внешние кольца: площадь 1 мм на единицу длины, эксцентриситет 30 мм (A·e² ≫ t³/12)
+    a_r, e_r = 0.001, 0.03
+    f2, _, _ = SM.shell_freq_donnell(R, L, Am, Am + E * a_r, nu * Am, E * t / (2 * (1 + nu)), Dm, Dm + E * a_r * e_r ** 2, nu * Dm,
+                                     Dm * (1 - nu) / 2, rho * (t + a_r))
     assert f2 > f
     return dict(f_iso_Hz=f, mode=[m, n], f_rings_Hz=f2)
 
