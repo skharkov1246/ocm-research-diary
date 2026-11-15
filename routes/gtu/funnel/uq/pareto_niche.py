@@ -357,7 +357,7 @@ def run_parts(select_path, shard_list, shards, out, pop=DEFAULT_POP, gens=DEFAUL
     for k in ks:
         r = niches[k]
         seeds = sorted(l1_by.get(r["niche"], []), key=lambda cd: -((cd.get("rec") or {}).get("score") or 0.0))[:max(0, pop // 4)]
-        seeds = [dict(concept=cd["concept"], rec=dict(cd.get("rec") or {}, **_l1_scores(cd))) for cd in seeds]
+        seeds = [dict(concept=cd["concept"], rec=dict(cd.get("rec") or {})) for cd in seeds]
         tasks.append((k, r["niche"], kv, r["ref_idx"], n0, seed, r["l0_idx"], seeds, P))
     if workers <= 1 or len(tasks) < 2:
         got = [run_niche(t) for t in tasks]
@@ -383,11 +383,6 @@ def run_parts(select_path, shard_list, shards, out, pop=DEFAULT_POP, gens=DEFAUL
             fh.write(txt)
         paths.append(p)
     return paths, meta, got
-
-
-def _l1_scores(cd):
-    """баллы уровня 1 для сравнения фронта (s_* и КПД - из строки уровня 1; поля добавляются, если есть)"""
-    return {}
 
 
 def main(argv=None):

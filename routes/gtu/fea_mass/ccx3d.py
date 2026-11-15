@@ -65,7 +65,7 @@ def static_deck(N, mat_cards, rpm, fractions, node_ids, T):
     L += ["*TRANSFORM, NSET=NFIX, TYPE=C", "0., 0., 0., 0., 0., 1.", "*BOUNDARY", "NFIX, 2, 3",
           "*INITIAL CONDITIONS, TYPE=TEMPERATURE", "NALL, 20."]
     for k, f in enumerate(fractions):
-        L += ["*STEP, NLGEOM, INC=100", "*STATIC", "*DLOAD", f"EALL, CENTRIF, {omega2(rpm * f):.9e}, 0., 0., 0., 0., 0., 1."]
+        L += ["*STEP, NLGEOM, INC=100", "*STATIC", "0.25, 1." if k == 0 else "1., 1.", "*DLOAD", f"EALL, CENTRIF, {omega2(rpm * f):.9e}, 0., 0., 0., 0., 0., 1."]
         L += temperature_cards(node_ids, T)
         L += ["*NODE FILE", "U", "*EL FILE", "S", "*END STEP"]
     return "\n".join(L) + "\n"
@@ -79,9 +79,10 @@ def freq_deck(N, mat_cards, rpm, fractions, node_ids, T, nmodes, nd_max, cold_ze
     for f in fractions:
         if f <= 0:
             if cold_zero:
-                L += ["*STEP", "*FREQUENCY", str(int(nmodes)), sel, "*END STEP"]
+                L += ["*STEP", "*FREQUENCY", str(int(nmodes)), sel, "*TEMPERATURE", "NALL, 20.", "*END STEP"]
             continue
-        L += ["*STEP, NLGEOM, INC=100", "*STATIC", "*DLOAD", f"EALL, CENTRIF, {omega2(rpm * f):.9e}, 0., 0., 0., 0., 0., 1."]
+        first = not any(x > 0 for x in fractions[:fractions.index(f)])
+        L += ["*STEP, NLGEOM, INC=100", "*STATIC", "0.25, 1." if first else "1., 1.", "*DLOAD", f"EALL, CENTRIF, {omega2(rpm * f):.9e}, 0., 0., 0., 0., 0., 1."]
         L += temperature_cards(node_ids, T)
         L += ["*END STEP", "*STEP, PERTURBATION", "*FREQUENCY", str(int(nmodes)), sel, "*END STEP"]
     return "\n".join(L) + "\n"

@@ -165,12 +165,19 @@ def is_nominal(v):
     return all(abs(float(v[f[0]]) - float(f[4])) < 1e-15 for f in FACTORS)
 
 
-def sample(n, seed=UQ_SEED):
-    """(u - матрица n × D, X - значения n × D, vals - список словарей)"""
-    u = lhs(n, D, seed)
-    vals = [values(r) for r in u]
+DUMMY = "(пустышка)"
+
+
+def sample(n, seed=UQ_SEED, dummy=False):
+    """(u - матрица n × D, X - значения n × D, vals - список словарей); dummy - ещё столбец-пустышка (равномерный, в модели не
+    участвует): его индекс Соболя - уровень шума оценки по той же выборке. Столбцы гиперкуба строятся по порядку, поэтому
+    пустышка не меняет первые D"""
+    u = lhs(n, D + 1, seed)
+    vals = [values(r) for r in u[:, :D]]
     X = np.array([[v[name] for name in NAMES] for v in vals], dtype=float)
-    return u, X, vals
+    if dummy:
+        return u[:, :D], X, vals, u[:, D].copy()
+    return u[:, :D], X, vals
 
 
 def fingerprint(n, seed=UQ_SEED):

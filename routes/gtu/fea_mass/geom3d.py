@@ -551,6 +551,27 @@ def _airfoil(c_ax, beta_in, beta_out, t_max_c, t_te_c, n=36):
     return pts - np.array([xc, 0.0]), chord
 
 
+def _box_wedge(occ, r0, r1, L, a0, da):
+    """клин: прямоугольник r0..r1 × z ±L/2 в плоскости x-z, повёрнутый на угол da от a0"""
+    p = [occ.addPoint(r0, 0, -L / 2), occ.addPoint(r1, 0, -L / 2), occ.addPoint(r1, 0, L / 2), occ.addPoint(r0, 0, L / 2)]
+    f = occ.addPlaneSurface([occ.addCurveLoop([occ.addLine(p[i], p[(i + 1) % 4]) for i in range(4)])])
+    if a0:
+        occ.rotate([(2, f)], 0, 0, 0, 0, 0, 1, a0)
+    return [t for dd, t in occ.revolve([(2, f)], 0, 0, 0, 0, 0, 1, da) if dd == 3][0]
+
+
+def _platform(occ, r0, t, L, w_ang, k_ch):
+    """полка: тонкий слой r0..r0+t, в развёртке (z, θ) - параллелограмм ширины w_ang вдоль хорды пера (θ = z·k_ch/r)"""
+    wires = []
+    for r in (r0, r0 + t):
+        pts = []
+        for z, sgn in ((-L / 2, -1), (-L / 2, 1), (L / 2, 1), (L / 2, -1)):
+            th = sgn * 0.5 * w_ang + z * k_ch / r
+            pts.append(occ.addPoint(r * math.cos(th), r * math.sin(th), z))
+        wires.append(occ.addWire([occ.addLine(pts[i], pts[(i + 1) % 4]) for i in range(4)]))
+    return [x for dd, x in occ.addThruSections(wires, makeSolid=True, makeRuled=True) if dd == 3][0]
+
+
 def axial_sector(spec, level="base", threads=1, keep_step=None):
     """сектор осевого колеса: диск (профиль r, t), обод, (замок, полка) и перо. spec - parts3d.axial_spec"""
     gmsh = _gmsh()
@@ -559,92 +580,65 @@ def axial_sector(spec, level="base", threads=1, keep_step=None):
     pitch = 2 * math.pi / Z
     blisk = bool(spec["blisk"])
     r_h, r_t = spec["r_hub"], spec["r_tip"]
-    bx = spec["bx"]
+    bx, chord = spec["bx"], spec["chord"]
     R = spec["R_live"]
     w_rim = max(A["rim_w_bx"] * bx, spec.get("t_rim") or 0.0)
-    prof_r, prof_t = np.asarray(spec["disc_r"]), np.asarray(spec["disc_t"])
-    t_mid = 0.5 * (A["t_max_c_hub"] + A["t_max_c_tip"]) * spec["chord"]
+    prof_r, prof_t = np.asarray(spec["disc_r"], float), np.asarray(spec["disc_t"], float)
+    t_mid = 0.5 * (A["t_max_c_hub"] + A["t_max_c_tip"]) * chord
     lv = A["levels"][level]
     h_b = lv["k_blade"] * 0.6 * t_mid
     h_hub = lv["k_hub"] * h_b
+    t_plat = A["plat_t_c"] * chord
+    secs = spec["sections"]
+    k_ch = 0.5 * (math.tan(math.radians(secs[0]["beta_in"])) - math.tan(math.radians(secs[0]["beta_out"])))
     _init(gmsh, threads)
     try:
         occ = gmsh.model.occ
         gmsh.model.add("axial")
-        # 1) диск + обод: меридиональный контур (z - ось, r), симметричный относительно z = 0
+        # 1) диск и обод: меридиональный контур, симметричный относительно z = 0
         r_top = r_h if blisk else R
-        pts_up = [(0.5 * max(t, 1e-4), r) for r, t in zip(prof_r, prof_t)]
-        if pts_up[-1][1] < r_top - 1e-9:
-            pts_up.append((0.5 * w_rim, R))
-            pts_up.append((0.5 * w_rim, r_top))
-        else:
-            pts_up[-1] = (0.5 * max(prof_t[-1], w_rim), r_top)
-        contour = pts_up + [(-z, r) for z, r in reversed(pts_up)]
+        up = [(0.5 * max(t, 1e-4), r) for r, t in zip(prof_r, prof_t) if r < r_top - 1e-9]
+        up.append((0.5 * max(prof_t[-1], 1e-4), min(R, r_top)) if prof_r[-1] >= r_top - 1e-9 else (0.5 * prof_t[-1], prof_r[-1]))
+        if r_top > up[-1][1] + 1e-9:
+            up.append((0.5 * w_rim, up[-1][1]))
+            up.append((0.5 * w_rim, r_top))
+        contour = up + [(-z, r) for z, r in reversed(up)]
         tags = [occ.addPoint(r, 0.0, z) for z, r in contour]
-        cl = [occ.addLine(tags[i], tags[(i + 1) % len(tags)]) for i in range(len(tags))]
-        loop = occ.addCurveLoop(cl)
-        face = occ.addPlaneSurface([loop])
+        face = occ.addPlaneSurface([occ.addCurveLoop([occ.addLine(tags[i], tags[(i + 1) % len(tags)]) for i in range(len(tags))])])
         occ.rotate([(2, face)], 0, 0, 0, 0, 0, 1, -0.5 * pitch)
         disc = [t for dd, t in occ.revolve([(2, face)], 0, 0, 0, 0, 0, 1, pitch) if dd == 3][0]
         solids = [(3, disc)]
-        # 2) замок вставной лопатки: хвостовик + ножка (лопатка) и выступ диска - бруски от живого обода
-        att = []
+        r_root = r_h
         if not blisk:
+            # 2) замок: хвостовик + ножка лопатки от живого обода; выступ диска между хвостовиками (половины у границ сектора)
             s_rim = R * pitch
-            h_neck = A["neck_h_c"] * spec["chord"]
-            r_foot_top = max(R + 0.3 * (r_h - R), r_h - h_neck)
+            h_neck = A["neck_h_c"] * chord
+            r_ft = max(R + 0.3 * (r_h - R), r_h - h_neck)
             w_foot, w_neck = A["foot_w_pitch"] * s_rim, A["neck_w_pitch"] * s_rim
             L_att = A["rim_w_bx"] * bx
-            foot = occ.addBox(R - 1e-4, -0.5 * w_foot, -0.5 * L_att, r_foot_top - R + 1e-4, w_foot, L_att)
-            neck = occ.addBox(r_foot_top - 1e-4, -0.5 * w_neck, -0.5 * L_att, r_h - r_foot_top + 2e-4, w_neck, L_att)
+            ov = 1e-4 * R
+            foot = occ.addBox(R - ov, -0.5 * w_foot, -0.5 * L_att, r_ft - R + ov, w_foot, L_att)
+            neck = occ.addBox(r_ft - ov, -0.5 * w_neck, -0.5 * L_att, r_h - r_ft + 2 * ov, w_neck, L_att)
             g_lug = A["lug_gap_pitch"] * s_rim
-            w_lug = s_rim - w_foot - 2 * g_lug
-            lug = occ.addBox(R - 1e-4, 0.5 * w_foot + g_lug, -0.5 * L_att, r_foot_top - R + 1e-4, w_lug, L_att)
-            occ.synchronize()
-            # выступ диска на границе сектора: половины по обе стороны (в секторе [-pitch/2, pitch/2] он разрезан)
+            y0 = 0.5 * w_foot + g_lug
+            lug = occ.addBox(R - ov, y0, -0.5 * L_att, r_ft - R + ov, s_rim - 2 * y0, L_att)
             lug2 = occ.copy([(3, lug)])
             occ.rotate(lug2, 0, 0, 0, 0, 0, 1, -pitch)
-            wedge = occ.revolve([(2, occ.addPlaneSurface([occ.addCurveLoop([
-                occ.addLine(a, b) for a, b in zip(
-                    *(lambda q: (q, q[1:] + q[:1]))([occ.addPoint(R - 2e-4, 0, -L_att), occ.addPoint(r_h + 0.01, 0, -L_att),
-                                                     occ.addPoint(r_h + 0.01, 0, L_att), occ.addPoint(R - 2e-4, 0, L_att)]))])]))],
-                0, 0, 0, 0, 0, 1, pitch)
-            wv = [t for dd, t in wedge if dd == 3][0]
-            occ.rotate([(3, wv)], 0, 0, 0, 0, 0, 1, -0.5 * pitch)
+            wv = _box_wedge(occ, R - 2 * ov, r_h + 0.1 * (r_t - r_h), 2 * L_att, -0.5 * pitch, pitch)
             lugs, _ = occ.intersect([(3, lug)] + lug2, [(3, wv)], removeTool=True)
-            att = [(3, foot), (3, neck)] + [x for x in lugs if x[0] == 3]
-            solids += att
-            # полка
-            r_p0 = r_h
-        else:
-            r_p0 = None
-        # 3) полка (только у вставной лопатки; у блиска перо на ободе)
-        t_plat = A["plat_t_c"] * spec["chord"]
-        if not blisk:
-            w_pl = (1 - A["plat_gap_pitch"]) * pitch
-            L_pl = A["plat_len_bx"] * bx
-            pl = occ.addPoint(r_p0, 0, -0.5 * L_pl)
-            pr_ = occ.addPoint(r_p0 + t_plat, 0, -0.5 * L_pl)
-            pr2 = occ.addPoint(r_p0 + t_plat, 0, 0.5 * L_pl)
-            pl2 = occ.addPoint(r_p0, 0, 0.5 * L_pl)
-            fpl = occ.addPlaneSurface([occ.addCurveLoop([occ.addLine(pl, pr_), occ.addLine(pr_, pr2), occ.addLine(pr2, pl2),
-                                                         occ.addLine(pl2, pl)])])
-            occ.rotate([(2, fpl)], 0, 0, 0, 0, 0, 1, -0.5 * w_pl)
-            plat = [t for dd, t in occ.revolve([(2, fpl)], 0, 0, 0, 0, 0, 1, w_pl) if dd == 3][0]
+            solids += [(3, foot), (3, neck)] + [x for x in lugs if x[0] == 3]
+            # 3) полка
+            plat = _platform(occ, r_h, t_plat, A["plat_len_bx"] * bx, (1 - A["plat_gap_pitch"]) * pitch, k_ch)
             solids.append((3, plat))
             r_root = r_h + t_plat
-        else:
-            r_root = r_h
-        # 4) перо: сечения на радиусах (свободный вихрь - spec["sections"]), центр тяжести на оси x (θ = 0)
+        # 4) перо: сечения (свободный вихрь), центр сечения - на оси x
         wires = []
-        for sec in spec["sections"]:
-            rr = r_root - 0.3 * t_plat if sec is spec["sections"][0] else sec["r"]
-            if sec is spec["sections"][-1]:
-                rr = r_t
+        for i, sec in enumerate(secs):
+            rr = (r_root - 0.3 * t_plat if not blisk else r_root - 0.02 * chord) if i == 0 else (r_t if i == len(secs) - 1 else sec["r"])
             pts, _ = _airfoil(sec["c_ax"], sec["beta_in"], sec["beta_out"], sec["t_max_c"], A["t_te_c"])
+            pts = pts - pts.mean(axis=0)
             ptags = [occ.addPoint(rr * math.cos(yy / rr), rr * math.sin(yy / rr), xx) for xx, yy in pts]
-            sp = occ.addSpline(ptags + [ptags[0]])
-            wires.append(occ.addWire([sp]))
+            wires.append(occ.addWire([occ.addSpline(ptags + [ptags[0]])]))
         foil = [t for dd, t in occ.addThruSections(wires, makeSolid=True, makeRuled=False) if dd == 3]
         if len(foil) != 1:
             raise RuntimeError("перо не построено (addThruSections)")
@@ -654,13 +648,10 @@ def axial_sector(spec, level="base", threads=1, keep_step=None):
         res, _ = occ.fuse([solids[0]], solids[1:])
         occ.synchronize()
         vv = [t for dd, t in res if dd == 3]
-        if blisk and len(vv) != 1:
-            raise RuntimeError(f"блиск: {len(vv)} тел после сплавления")
-        if not blisk and len(vv) != 1:
-            raise RuntimeError(f"диск с лопаткой: {len(vv)} тел после сплавления (замок не связан)")
+        if len(vv) != 1:
+            raise RuntimeError(f"сектор осевого колеса: {len(vv)} тел после сплавления вместо 1")
         vol = vv[0]
-        IM = impeller_module()
-        IM._keep_only(gmsh, [vol])
+        impeller_module()._keep_only(gmsh, [vol])
         V_sector = occ.getMass(3, vol)
         tol = max(1e-6, 1e-4 * r_t)
         master, slave, bore_f = [], [], []
@@ -669,9 +660,9 @@ def axial_sector(spec, level="base", threads=1, keep_step=None):
             P = _face_points(gmsh, f)
             th = np.arctan2(P[:, 1], P[:, 0])
             r = np.hypot(P[:, 0], P[:, 1])
-            if np.all(np.abs(th + 0.5 * pitch) < tol / max(r.min(), 1e-3)):
+            if np.all(np.abs(th + 0.5 * pitch) * r < tol):
                 master.append(f)
-            elif np.all(np.abs(th - 0.5 * pitch) < tol / max(r.min(), 1e-3)):
+            elif np.all(np.abs(th - 0.5 * pitch) * r < tol):
                 slave.append(f)
             elif np.all(np.abs(r - prof_r[0]) < tol):
                 bore_f.append(f)
@@ -681,11 +672,10 @@ def axial_sector(spec, level="base", threads=1, keep_step=None):
         if keep_step:
             gmsh.write(keep_step)
         t_geo = time.time() - t0
-        r_att_top = r_root
 
         def size(x, y, z):
             r = math.hypot(x, y)
-            if r >= r_att_top - 0.5 * t_plat:
+            if r >= r_root - 0.5 * t_plat:
                 return h_b
             if r >= R:
                 return 1.5 * h_b
@@ -702,11 +692,12 @@ def axial_sector(spec, level="base", threads=1, keep_step=None):
         raise RuntimeError(f"узлы периодических граней не совпадают: {per}")
     cen = nodes[elems[:, :4] - 1].mean(axis=1)
     rc = np.hypot(cen[:, 0], cen[:, 1])
-    ecls = np.where(rc < (R if not blisk else r_h), CLASS_HUB, np.where(rc < r_root, CLASS_ATT, CLASS_BLADE))
+    r_disc = r_h if blisk else R
+    ecls = np.where(rc < r_disc, CLASS_HUB, np.where(rc < r_root, CLASS_ATT, CLASS_BLADE))
     nfix = _fix_node(nodes, nb, ns, nm, 0.0)
     sets = dict(NMASTER=nm, NSLAVE=ns, NBORE=[t for t in nb if t not in set(ns)], NFIX=[nfix])
     meta = dict(kind="axial", Z=Z, pitch_rad=pitch, blisk=blisk, r_bore=float(prof_r[0]), R_live=R, r_hub=r_h, r_root=r_root, r_tip=r_t,
-                w_rim=w_rim, chord=spec["chord"], bx=bx, h_blade=h_b, h_hub=h_hub, level=level,
+                w_rim=w_rim, chord=chord, bx=bx, t_plat=t_plat, h_blade=h_b, h_hub=h_hub, level=level,
                 volume=dict(V_sector_occ=V_sector, V_airfoil=V_foil), quality=q, periodic=per, periodic_snap=snap,
                 n_nodes=int(len(ids)), n_elems=int(len(elems)), n_hub_elems=int((ecls == CLASS_HUB).sum()),
                 n_att_elems=int((ecls == CLASS_ATT).sum()), t_geometry_s=round(t_geo, 1), t_mesh_s=round(t_mesh, 1),

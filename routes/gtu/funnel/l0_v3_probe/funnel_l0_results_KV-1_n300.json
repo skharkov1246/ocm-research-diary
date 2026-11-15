@@ -45,7 +45,7 @@
   {
    "file": "routes/gtu/funnel/parts_model.py",
    "field": "код расчёта",
-   "sha256": "e1709c7fecff228a77ce29a2e77c5511f3a7ed5cb04619e8906a7d1747cb958f"
+   "sha256": "2ba68f4ba4ddac6800af920cb3cc32f04adef8dd13ae9eb074571ccfb7ae295e"
   },
   {
    "file": "routes/gtu/funnel/service_model.py",
@@ -89,7 +89,7 @@
   },
   {
    "file": "части уровня 0",
-   "field": "10 файлов, отпечаток выборки 887882d541c806b1, код 910bf84950bd10d9"
+   "field": "10 файлов, отпечаток выборки 887882d541c806b1, код 51950aec6efd197a"
   }
  ],
  "calib_ns": {
@@ -137,7 +137,7 @@
   "n_concepts": 300,
   "duplicates": 0,
   "fingerprint": "887882d541c806b1",
-  "code_sha": "910bf84950bd10d9",
+  "code_sha": "51950aec6efd197a",
   "fingerprint_local": {
    "value": "887882d541c806b1",
    "match": true,
@@ -160,14 +160,14 @@
      9
     ],
     "concepts": 300,
-    "elapsed_s": 16.94,
-    "s_per_concept_core": 0.22584,
+    "elapsed_s": 11.25,
+    "s_per_concept_core": 0.15007,
     "workers": 4,
     "host_cpus": 4
    }
   ],
-  "merge_s": 0.14,
-  "s_per_concept_core": 0.22584
+  "merge_s": 0.11,
+  "s_per_concept_core": 0.15007
  },
  "weights": {
   "owner": {

@@ -66,6 +66,7 @@ def code_sha():
 
 # =========================================================================== кандидаты
 REC_KEYS = ["j", "idx", "kv", "arch", "niche", "feasible", "score", "eta_th_shaft", "eta_el", "V_env", "mass_kg", "t41", "pi", "eps_rec",
+            "s_parts", "s_plugplay", "s_service", "s_effmake",
             "trl_min", "vigv", "inlet_heat", "reject", "n_parts", "n_assemblies", "steps", "L_env", "W_env", "H_env"] + list(M1.DISC_W)
 
 
@@ -101,6 +102,24 @@ def cand_sha(cands):
 
 
 # =========================================================================== расчёт одной выборки
+def margins(rules):
+    """запас по каждому числовому правилу, доля предела: > 0 - выполнено, < 0 - превышено (|val − lim| / |lim|; у правила с двумя
+    пределами - до ближнего, по наибольшему из них)"""
+    out = {}
+    for r in rules:
+        val, lim = r.get("val"), r.get("lim")
+        if isinstance(lim, list) and len(lim) == 2 and isinstance(val, (int, float)):
+            sc = max(abs(lim[0]), abs(lim[1]), 1e-9)
+            m = min(val - lim[0], lim[1] - val) / sc
+        elif isinstance(val, (int, float)) and isinstance(lim, (int, float)) and math.isfinite(val):
+            sc = abs(lim) if abs(lim) > 1e-9 else 1.0
+            m = abs(val - lim) / sc * (1.0 if r["ok"] else -1.0)
+        else:
+            continue
+        out[r["code"]] = float(m)
+    return out
+
+
 def _strength_min(stg):
     bursts, lives = [w["burst_margin_120"] for w in stg["comp"] if w.get("burst_margin_120") is not None], []
     for x in (stg["turb"], stg["pt"]):
@@ -123,8 +142,8 @@ def eval_one(cand, tgt, v, od=False):
     UP.set_variant(c)
     ev = L1.evaluate_point(c, tgt)
     if not ev["ok"]:
-        return dict(ok=0, feas=0, viol=round(float(ev["viol"]), 6), bad=[r["code"] for r in ev["bad"]])
-    out = dict(ok=1)
+        return dict(ok=0, feas=0, viol=round(float(ev["viol"]), 6), bad=[r["code"] for r in ev["bad"]], m={})
+    out = dict(ok=1, m=margins(ev["rules"]))
     vigv, heat = bool(cand.get("vigv")), bool(cand.get("heat"))
     if od and ev["viol"] == 0:
         mx, stt, R = L1.full_check(c, tgt, ev)
@@ -233,9 +252,46 @@ def _r(x, k=5):
     return round(x, k) if math.isfinite(x) else None
 
 
-def summarize_dp(res, X, nom):
+RULE_NEAR = 0.10              # правило в разборе запасов: номинальный запас меньше 10 % предела или нарушалось хотя бы в 1 % выборок
+RULES_MAX = 8
+
+
+def rule_margins(res, nom, Xd):
+    """по правилам, близким к пределу: P(нарушено), номинальный запас, P10/P50/P90 запаса по выборкам, запас, нужный для 90 %
+    выборок (линейно: номинальный − P10 = сдвиг от неопределённостей), главные факторы запаса (Соболь первого порядка)"""
+    N = len(res)
+    codes = set()
+    for r in res:
+        codes.update(k for k, v in r.get("m", {}).items() if v < 0)
+    codes.update(k for k, v in (nom.get("m") or {}).items() if v < RULE_NEAR)
+    out = []
+    names = UF.NAMES + [UF.DUMMY]
+    for code in codes:
+        v = np.array([r.get("m", {}).get(code, np.nan) for r in res], dtype=float)
+        ok = np.isfinite(v)
+        if ok.sum() < max(8, N // 4):
+            continue
+        pf = float((v[ok] < 0).mean())
+        m0 = (nom.get("m") or {}).get(code)
+        if pf < 0.01 and (m0 is None or m0 >= RULE_NEAR):
+            continue
+        p10, p50, p90 = (float(x) for x in np.percentile(v[ok], [10, 50, 90]))
+        S = US.sobol1(Xd[ok], v[ok])
+        need = (m0 - p10) if m0 is not None else None
+        out.append(dict(rule=code, P_fail=round(pf, 4), m_nominal=_r(m0, 4), m_p10_p50_p90=[round(p10, 4), round(p50, 4), round(p90, 4)],
+                        need90=_r(max(0.0, need), 4) if need is not None else None, sobol=US.top(names, S, 3),
+                        noise=_r(S[-1], 4) if S else None))
+    out.sort(key=lambda d: (-d["P_fail"], d["rule"]))
+    return out[:RULES_MAX]
+
+
+def summarize_dp(res, X, nom, dummy=None):
     """выборки расчётной точки одного варианта -> числа"""
     N = len(res)
+    if dummy is None:
+        dummy = np.random.Generator(np.random.PCG64(UF.UQ_SEED + 1)).random(N)
+    Xd = np.column_stack([X, dummy])
+    names = UF.NAMES + [UF.DUMMY]
     ok = np.array([r["ok"] for r in res], dtype=int)
     feas = np.array([r["feas"] for r in res], dtype=int)
     sf = np.array([r.get("score_f", np.nan) if r["ok"] else np.nan for r in res], dtype=float)
@@ -243,10 +299,10 @@ def summarize_dp(res, X, nom):
     eta = np.array([r.get("eta_el", np.nan) if r["ok"] else np.nan for r in res], dtype=float)
     y = np.where(feas == 1, np.nan_to_num(sf), 0.0)
     half = N // 2
-    S_y = US.sobol1(X, y)
-    S_f = US.sobol1(X, feas.astype(float))
+    S_y = US.sobol1(Xd, y)
+    S_f = US.sobol1(Xd, feas.astype(float))
     m = ok == 1
-    S_s = US.sobol1(X[m], sf[m]) if m.sum() >= 16 else None
+    S_s = US.sobol1(Xd[m], sf[m]) if m.sum() >= 16 else None
     bm = [r.get("burst_min") for r in res if r["ok"]]
     lm = [math.log10(r["life_min"]) for r in res if r["ok"] and r.get("life_min") and r["life_min"] > 0 and math.isfinite(r["life_min"])]
     k = int(feas.sum())
@@ -257,9 +313,12 @@ def summarize_dp(res, X, nom):
         life_min_log10_p10=US.q(lm, (10,))[0],
         viol_freq=_freq([r["bad"] for r in res], N),
         half=dict(n=half, P_dp=round(float(feas[:half].mean()), 4), score_f=US.q(sf[:half]), y=US.q(y[:half])),
-        sobol=dict(y=US.top(UF.NAMES, S_y), feas=US.top(UF.NAMES, S_f), score=US.top(UF.NAMES, S_s),
+        sobol=dict(y=US.top(names, S_y), feas=US.top(names, S_f), score=US.top(names, S_s),
                    y_all=[_r(s, 4) for s in S_y] if S_y else None, feas_all=[_r(s, 4) for s in S_f] if S_f else None,
-                   bins=US.bins_default(N)),
+                   score_all=[_r(s, 4) for s in S_s] if S_s else None,
+                   noise=dict(y=_r(S_y[-1], 4) if S_y else None, feas=_r(S_f[-1], 4) if S_f else None, score=_r(S_s[-1], 4) if S_s else None),
+                   names="uq_factors.NAMES + пустышка (последний столбец: уровень шума)", bins=US.bins_default(N)),
+        rules=rule_margins(res, nom, Xd),
         nominal=dict(ok=nom["ok"], feas=nom["feas"], viol=nom["viol"], bad=nom["bad"], score_w=_r(nom.get("score_w")),
                      score_f=_r(nom.get("score_f")), trl=nom.get("trl"), eta_el=_r(nom.get("eta_el")), V_env=_r(nom.get("V_env"))),
     )
@@ -321,14 +380,14 @@ def run_parts(cands, meta_in, shard_list, shards, out, n=DEFAULT_N, n_od=DEFAULT
     c0 = cands[0]["concept"] if cands else None
     if c0:
         L1._prep(int(c0.get("n") or 2000), int(c0.get("seed") or FS.SEED), kv)
-    u, X, vals = UF.sample(n, seed)
+    u, X, vals, dummy = UF.sample(n, seed, dummy=True)
     n_od = min(n_od, n)
     idx_by = {k: FS.shard_indices(K, k, shards) for k in shard_list}
     ids = sorted(i for v in idx_by.values() for i in v)
     t1 = time.time()
     dp, nom, cpu_dp = run_dp(cands, ids, vals, tgt, workers)
     t_dp = time.time() - t1
-    sms = {i: summarize_dp(dp[i], X, nom[i]) for i in ids}
+    sms = {i: summarize_dp(dp[i], X, nom[i], dummy) for i in ids}
     qual = [i for i in ids if od_qualifies(sms[i], od_rule, pdp_min, score_min)]
     tasks = [(i, s) for i in qual for s in range(n_od) if dp[i][s]["feas"]]
     t2 = time.time()
