@@ -1,0 +1,1580 @@
+{
+ "title": "Калибровка пика Мизеса быстрого решателя диска по CalculiX",
+ "method": "тонкий диск (плоское напряжённое состояние, 1D МКЭ 301 узел) против осесимметричной CAX8 disk.py на тех же профилях, полях T, частотах и φ; k_peak — среднее отношение σ/σ0,2; средние окружные напряжения и запас по разрушению определяются равновесием и от k_peak не зависят",
+ "inputs": [
+  "routes/gtu/frame3/frame3_fea_results.json → parts.comp1/comp2.variants.solid (profile, T_C, cases)",
+  "routes/gtu/organic/structure/profile_opt_comp2.json → base.c100, check_160x24.c100"
+ ],
+ "cases": [
+  {
+   "case": "frame3 comp1 solid 100 %",
+   "ccx_yield_ratio": 0.4050085873070209,
+   "fast_yield_ratio": 0.2607908634842508,
+   "ccx_burst": 2.3981225722572233,
+   "fast_burst": 2.3981582313662755,
+   "ratio": 1.5530014429799204
+  },
+  {
+   "case": "frame3 comp1 solid 120 %",
+   "ccx_yield_ratio": 0.5729932297090942,
+   "fast_yield_ratio": 0.3738450604033566,
+   "ccx_burst": 1.9984354876600376,
+   "fast_burst": 1.9984653340499996,
+   "ratio": 1.5327024224711396
+  },
+  {
+   "case": "frame3 comp2 solid 100 %",
+   "ccx_yield_ratio": 0.5530015761906549,
+   "fast_yield_ratio": 0.3623293682386586,
+   "ccx_burst": 1.8957786282342406,
+   "fast_burst": 1.8957695344729404,
+   "ratio": 1.5262400033397365
+  },
+  {
+   "case": "frame3 comp2 solid 120 %",
+   "ccx_yield_ratio": 0.7882060989635227,
+   "fast_yield_ratio": 0.5155243857075655,
+   "ccx_burst": 1.5798155447585678,
+   "fast_burst": 1.5798080327025668,
+   "ratio": 1.5289404746231299
+  },
+  {
+   "case": "organic comp2 кованый профиль frame3 (80×12), 100 %",
+   "ccx_yield_ratio": 0.5536268437267642,
+   "fast_yield_ratio": 0.3634156177315371,
+   "ccx_burst": 1.893472879355553,
+   "fast_burst": 1.8934644117833954,
+   "ratio": 1.5233986012558773,
+   "ccx_mass_kg": 118.7466936223158,
+   "fast_mass_kg": 118.52495715149635,
+   "ccx_J": 3.9436768536151265,
+   "fast_J": 3.928548292420517
+  },
+  {
+   "case": "organic comp2 гладкая доводка (160×24), 100 %",
+   "ccx_yield_ratio": 0.5536275957703982,
+   "fast_yield_ratio": 0.36031855271392565,
+   "ccx_burst": 2.032701403043142,
+   "fast_burst": 2.032687628057149,
+   "ratio": 1.5364948365840878,
+   "ccx_mass_kg": 102.17125864986325,
+   "fast_mass_kg": 101.90657492583995,
+   "ccx_J": 3.0455250317375446,
+   "fast_J": 3.028421537373775
+  }
+ ],
+ "k_peak": 1.5334629635423151,
+ "k_min": 1.5233986012558773,
+ "k_max": 1.5530014429799204,
+ "k_spread_rel": 0.01930456908829423,
+ "note": "все шесть колёс — толстая ступица без отверстия, пик у оси на задней стороне; для профилей с пиком в полотне поправка консервативна; элиты проверяются CalculiX",
+ "zones": {
+  "method": "CalculiX disk.py (CAX8 80×12, 100 % частоты) против тонкого диска на 32 профилях: облик frame3 и варианты задней поверхности, ступицы, втулки, «рыбьей кости»; k — наибольшее из отношений по зонам (консервативно), среднее и разброс — для сведения",
+  "r_split_frac": 0.25,
+  "k_axis": 2.176730778717467,
+  "k_web": 2.120413042279169,
+  "k_axis_mean": 1.8109706339666438,
+  "k_web_mean": 1.6107691163537485,
+  "k_axis_range": [
+   1.5308850685491486,
+   2.176730778717467
+  ],
+  "k_web_range": [
+   1.2898126387372044,
+   2.120413042279169
+  ],
+  "cases": [
+   {
+    "tag": "cal_comp1_base",
+    "comp": "comp1",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.49424546553808946,
+     "yield_at": {
+      "r_mm": 0.0,
+      "z_mm": 203.50101991684483,
+      "T_C": 15.0
+     },
+     "burst_margin": 2.1534476317918294,
+     "gate": true,
+     "seconds": 3.91,
+     "yr_axis": 0.49424546553808946,
+     "r_axis": 0.0,
+     "yr_web": 0.46535673332085087,
+     "r_web": 0.0871002893651169
+    },
+    "fast": {
+     "yr_axis_raw": 0.2528728077016206,
+     "yr_web_raw": 0.3058725102675726,
+     "burst_margin": 2.153957448891535,
+     "r_web_peak": 0.20644412577955726,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 176.9608629439782,
+    "feasible_fast": true,
+    "seconds": 4.8
+   },
+   {
+    "tag": "cal_comp2_base",
+    "comp": "comp2",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.6236681807925182,
+     "yield_at": {
+      "r_mm": 0.0,
+      "z_mm": 280.4767791332803,
+      "T_C": 204.018
+     },
+     "burst_margin": 1.7803717151679188,
+     "gate": true,
+     "seconds": 4.07,
+     "yr_axis": 0.6236681807925182,
+     "r_axis": 0.0,
+     "yr_web": 0.5903648301103286,
+     "r_web": 0.08758065308546047
+    },
+    "fast": {
+     "yr_axis_raw": 0.3803868154836346,
+     "yr_web_raw": 0.40737985968909896,
+     "burst_margin": 1.780097717353356,
+     "r_web_peak": 0.1740100947815863,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 139.6714295157168,
+    "feasible_fast": false,
+    "seconds": 4.6
+   },
+   {
+    "tag": "cal_comp1_00",
+    "comp": "comp1",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.48585755743651754,
+     "yield_at": {
+      "r_mm": 0.0,
+      "z_mm": 203.50101991684483,
+      "T_C": 15.0
+     },
+     "burst_margin": 2.1533482238242856,
+     "gate": true,
+     "seconds": 4.26,
+     "yr_axis": 0.4858575574365175,
+     "r_axis": 0.0,
+     "yr_web": 0.4555068676936582,
+     "r_web": 0.0871002893651169
+    },
+    "fast": {
+     "yr_axis_raw": 0.25147337424216953,
+     "yr_web_raw": 0.2837934001398291,
+     "burst_margin": 2.1537729393125002,
+     "r_web_peak": 0.15418395216048714,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 185.20884742711556,
+    "feasible_fast": true,
+    "seconds": 5.2
+   },
+   {
+    "tag": "cal_comp2_01",
+    "comp": "comp2",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.7600275433388577,
+     "yield_at": {
+      "r_mm": 204.35485719940775,
+      "z_mm": 268.4173249617438,
+      "T_C": 274.403
+     },
+     "burst_margin": 1.6869354268145424,
+     "gate": true,
+     "seconds": 4.38,
+     "yr_axis": 0.6753247435860887,
+     "r_axis": 0.0,
+     "yr_web": 0.7600275433388576,
+     "r_web": 0.20435485719940774
+    },
+    "fast": {
+     "yr_axis_raw": 0.42347923846545354,
+     "yr_web_raw": 0.48539118590386854,
+     "burst_margin": 1.6867018870477828,
+     "r_web_peak": 0.20466332336149745,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 174.89060444902591,
+    "feasible_fast": false,
+    "seconds": 5.1
+   },
+   {
+    "tag": "cal_comp2_02",
+    "comp": "comp2",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.7157681099078045,
+     "yield_at": {
+      "r_mm": 128.451624525342,
+      "z_mm": 272.6701325736881,
+      "T_C": 231.827
+     },
+     "burst_margin": 1.7801360458042605,
+     "gate": true,
+     "seconds": 4.02,
+     "yr_axis": 0.6808205179694532,
+     "r_axis": 0.002919355102848682,
+     "yr_web": 0.7157681099078045,
+     "r_web": 0.128451624525342
+    },
+    "fast": {
+     "yr_axis_raw": 0.3942109422497078,
+     "yr_web_raw": 0.47902846821976586,
+     "burst_margin": 1.7798528308609127,
+     "r_web_peak": 0.1710907396787376,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 141.4508755923088,
+    "feasible_fast": false,
+    "seconds": 4.9
+   },
+   {
+    "tag": "cal_comp1_03",
+    "comp": "comp1",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.5047112454655381,
+     "yield_at": {
+      "r_mm": 0.0,
+      "z_mm": 203.50101991684483,
+      "T_C": 15.0
+     },
+     "burst_margin": 2.109471091798313,
+     "gate": true,
+     "seconds": 4.05,
+     "yr_axis": 0.5047112454655381,
+     "r_axis": 0.0,
+     "yr_web": 0.4761217351018786,
+     "r_web": 0.0871002893651169
+    },
+    "fast": {
+     "yr_axis_raw": 0.2582044927193039,
+     "yr_web_raw": 0.29610238420895335,
+     "burst_margin": 2.109820845839668,
+     "r_web_peak": 0.1614423096075802,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 192.50008498183013,
+    "feasible_fast": true,
+    "seconds": 4.6
+   },
+   {
+    "tag": "cal_comp2_04",
+    "comp": "comp2",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.9401950954591396,
+     "yield_at": {
+      "r_mm": 201.43550209655905,
+      "z_mm": 238.99896380896982,
+      "T_C": 272.406
+     },
+     "burst_margin": 1.8110875493811893,
+     "gate": true,
+     "seconds": 4.52,
+     "yr_axis": 0.6115705961513738,
+     "r_axis": 0.04670968164557891,
+     "yr_web": 0.9401950954591396,
+     "r_web": 0.20143550209655905
+    },
+    "fast": {
+     "yr_axis_raw": 0.3622691685530437,
+     "yr_web_raw": 0.5215944485255599,
+     "burst_margin": 1.8108236830342277,
+     "r_web_peak": 0.21050203356719482,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 126.03320865219845,
+    "feasible_fast": false,
+    "seconds": 5.5
+   },
+   {
+    "tag": "cal_comp2_05",
+    "comp": "comp2",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.8864458032117066,
+     "yield_at": {
+      "r_mm": 192.677436788013,
+      "z_mm": 240.35584655541626,
+      "T_C": 266.589
+     },
+     "burst_margin": 1.8852397491753592,
+     "gate": true,
+     "seconds": 4.41,
+     "yr_axis": 0.6149976580705581,
+     "r_axis": 0.01459677551424341,
+     "yr_web": 0.8864458032117066,
+     "r_web": 0.19267743678801302
+    },
+    "fast": {
+     "yr_axis_raw": 0.3473608288580571,
+     "yr_web_raw": 0.5205022031688293,
+     "burst_margin": 1.8848854599783058,
+     "r_web_peak": 0.20758267846434614,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 118.75288168320048,
+    "feasible_fast": false,
+    "seconds": 5.1
+   },
+   {
+    "tag": "cal_comp1_06",
+    "comp": "comp1",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.5278181378476421,
+     "yield_at": {
+      "r_mm": 0.0,
+      "z_mm": 203.50101991684483,
+      "T_C": 15.0
+     },
+     "burst_margin": 2.069339431267072,
+     "gate": true,
+     "seconds": 4.82,
+     "yr_axis": 0.5278181378476421,
+     "r_axis": 0.0,
+     "yr_web": 0.4979595645318689,
+     "r_web": 0.0871002893651169
+    },
+    "fast": {
+     "yr_axis_raw": 0.27091360419434124,
+     "yr_web_raw": 0.3176000481343866,
+     "burst_margin": 2.0697673288357654,
+     "r_web_peak": 0.16289398109699882,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 194.43640767332977,
+    "feasible_fast": true,
+    "seconds": 5.4
+   },
+   {
+    "tag": "cal_comp2_07",
+    "comp": "comp2",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.6721890622143645,
+     "yield_at": {
+      "r_mm": 2.919355102848682,
+      "z_mm": 228.13327054965782,
+      "T_C": 204.032
+     },
+     "burst_margin": 1.7146768794422733,
+     "gate": true,
+     "seconds": 3.63,
+     "yr_axis": 0.6721890622143644,
+     "r_axis": 0.002919355102848682,
+     "yr_web": 0.6362932235797769,
+     "r_web": 0.1955967918908617
+    },
+    "fast": {
+     "yr_axis_raw": 0.41380897535796923,
+     "yr_web_raw": 0.4807451307073795,
+     "burst_margin": 1.7143521973349556,
+     "r_web_peak": 0.19882461315580008,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 156.40822058164366,
+    "feasible_fast": false,
+    "seconds": 4.1
+   },
+   {
+    "tag": "cal_comp2_08",
+    "comp": "comp2",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.765646257312765,
+     "yield_at": {
+      "r_mm": 58.387102056973646,
+      "z_mm": 267.23199882938866,
+      "T_C": 209.764
+     },
+     "burst_margin": 1.624378453044901,
+     "gate": true,
+     "seconds": 4.84,
+     "yr_axis": 0.7656462573127649,
+     "r_axis": 0.058387102056973644,
+     "yr_web": 0.765329457702368,
+     "r_web": 0.10801613880540123
+    },
+    "fast": {
+     "yr_axis_raw": 0.46322237772731367,
+     "yr_web_raw": 0.5099127835494774,
+     "burst_margin": 1.624154843424922,
+     "r_web_peak": 0.1637923519216159,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 171.34386707107905,
+    "feasible_fast": false,
+    "seconds": 5.4
+   },
+   {
+    "tag": "cal_comp1_09",
+    "comp": "comp1",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.4966788391777509,
+     "yield_at": {
+      "r_mm": 0.0,
+      "z_mm": 203.50101991684483,
+      "T_C": 15.0
+     },
+     "burst_margin": 2.1332210201008324,
+     "gate": true,
+     "seconds": 3.81,
+     "yr_axis": 0.4966788391777509,
+     "r_axis": 0.0,
+     "yr_web": 0.46573491487812896,
+     "r_web": 0.0871002893651169
+    },
+    "fast": {
+     "yr_axis_raw": 0.25740447055993726,
+     "yr_web_raw": 0.29400261187157506,
+     "burst_margin": 2.1336448700951034,
+     "r_web_peak": 0.15563562364990574,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 186.10617217253233,
+    "feasible_fast": true,
+    "seconds": 4.2
+   },
+   {
+    "tag": "cal_comp2_10",
+    "comp": "comp2",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.7282331448844916,
+     "yield_at": {
+      "r_mm": 160.56453065667753,
+      "z_mm": 258.3505873216483,
+      "T_C": 247.47
+     },
+     "burst_margin": 1.8100103814964887,
+     "gate": true,
+     "seconds": 4.65,
+     "yr_axis": 0.6467200696879817,
+     "r_axis": 0.0,
+     "yr_web": 0.7282331448844916,
+     "r_web": 0.16056453065667753
+    },
+    "fast": {
+     "yr_axis_raw": 0.3686069536112452,
+     "yr_web_raw": 0.44585559049130374,
+     "burst_margin": 1.8097706650522585,
+     "r_web_peak": 0.19590525805295142,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 138.14480776619098,
+    "feasible_fast": false,
+    "seconds": 5.2
+   },
+   {
+    "tag": "cal_comp2_11",
+    "comp": "comp2",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.890968407085881,
+     "yield_at": {
+      "r_mm": 81.74194287976309,
+      "z_mm": 268.0955237403434,
+      "T_C": 215.28
+     },
+     "burst_margin": 1.7197432689753447,
+     "gate": true,
+     "seconds": 3.61,
+     "yr_axis": 0.8909684070858811,
+     "r_axis": 0.0817419428797631,
+     "yr_web": 0.879871630861553,
+     "r_web": 0.08758065308546047
+    },
+    "fast": {
+     "yr_axis_raw": 0.4093149303520397,
+     "yr_web_raw": 0.4889402512904274,
+     "burst_margin": 1.7195379769168808,
+     "r_web_peak": 0.20174396825864876,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 145.4668118380958,
+    "feasible_fast": false,
+    "seconds": 4.1
+   },
+   {
+    "tag": "cal_comp1_12",
+    "comp": "comp1",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.5429256349953412,
+     "yield_at": {
+      "r_mm": 2.9033429788372302,
+      "z_mm": 203.50101991684483,
+      "T_C": 15.0131
+     },
+     "burst_margin": 2.0860164260635954,
+     "gate": true,
+     "seconds": 4.51,
+     "yr_axis": 0.5429256349953411,
+     "r_axis": 0.00290334297883723,
+     "yr_web": 0.5166114970980024,
+     "r_web": 0.0871002893651169
+    },
+    "fast": {
+     "yr_axis_raw": 0.27488275468350537,
+     "yr_web_raw": 0.4005322025715244,
+     "burst_margin": 2.0866744441189478,
+     "r_web_peak": 0.2383808985467668,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 173.6693224026269,
+    "feasible_fast": false,
+    "seconds": 5.0
+   },
+   {
+    "tag": "cal_comp2_13",
+    "comp": "comp2",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.8315325300327736,
+     "yield_at": {
+      "r_mm": 198.51614699371038,
+      "z_mm": 244.52450998941143,
+      "T_C": 270.438
+     },
+     "burst_margin": 1.7702689641352227,
+     "gate": true,
+     "seconds": 3.83,
+     "yr_axis": 0.662682676399399,
+     "r_axis": 0.058387102056973644,
+     "yr_web": 0.8315325300327736,
+     "r_web": 0.19851614699371037
+    },
+    "fast": {
+     "yr_axis_raw": 0.3850704138956179,
+     "yr_web_raw": 0.4917348028732657,
+     "burst_margin": 1.7699781716915837,
+     "r_web_peak": 0.2061230009129218,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 128.71578791652075,
+    "feasible_fast": false,
+    "seconds": 4.3
+   },
+   {
+    "tag": "cal_comp2_14",
+    "comp": "comp2",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.7885204771764728,
+     "yield_at": {
+      "r_mm": 116.77420411394729,
+      "z_mm": 277.499385624135,
+      "T_C": 227.001
+     },
+     "burst_margin": 1.6671087970316647,
+     "gate": true,
+     "seconds": 3.58,
+     "yr_axis": 0.7436992151357269,
+     "r_axis": 0.058387102056973644,
+     "yr_web": 0.7885204771764728,
+     "r_web": 0.11677420411394729
+    },
+    "fast": {
+     "yr_axis_raw": 0.44634512684124966,
+     "yr_web_raw": 0.5010953709546544,
+     "burst_margin": 1.6667868663655268,
+     "r_web_peak": 0.16233267437019155,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 156.33877199369218,
+    "feasible_fast": false,
+    "seconds": 4.3
+   },
+   {
+    "tag": "cal_comp1_15",
+    "comp": "comp1",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.49892128174123335,
+     "yield_at": {
+      "r_mm": 0.0,
+      "z_mm": 203.50101991684483,
+      "T_C": 15.0
+     },
+     "burst_margin": 2.1204428921303635,
+     "gate": true,
+     "seconds": 3.39,
+     "yr_axis": 0.49892128174123335,
+     "r_axis": 0.0,
+     "yr_web": 0.4684525515209843,
+     "r_web": 0.0871002893651169
+    },
+    "fast": {
+     "yr_axis_raw": 0.2583341285705282,
+     "yr_web_raw": 0.2908160571856821,
+     "burst_margin": 2.120852582100941,
+     "r_web_peak": 0.15418395216048714,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 191.37064815196646,
+    "feasible_fast": true,
+    "seconds": 3.9
+   },
+   {
+    "tag": "cal_comp2_16",
+    "comp": "comp2",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.8727524275680162,
+     "yield_at": {
+      "r_mm": 198.51614699371038,
+      "z_mm": 244.41232715596294,
+      "T_C": 270.438
+     },
+     "burst_margin": 1.8025559048683653,
+     "gate": true,
+     "seconds": 3.52,
+     "yr_axis": 0.6766347461342338,
+     "r_axis": 0.08612097553403612,
+     "yr_web": 0.8727524275680163,
+     "r_web": 0.19851614699371037
+    },
+    "fast": {
+     "yr_axis_raw": 0.3725999051384693,
+     "yr_web_raw": 0.5429621767607521,
+     "burst_margin": 1.8022943765851327,
+     "r_web_peak": 0.20904235601577048,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 124.88252224395191,
+    "feasible_fast": false,
+    "seconds": 4.1
+   },
+   {
+    "tag": "cal_comp2_17",
+    "comp": "comp2",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.683449147769045,
+     "yield_at": {
+      "r_mm": 148.88711024528277,
+      "z_mm": 260.6579237918367,
+      "T_C": 241.379
+     },
+     "burst_margin": 1.8339357854169915,
+     "gate": true,
+     "seconds": 3.72,
+     "yr_axis": 0.6325877500990088,
+     "r_axis": 0.002919355102848682,
+     "yr_web": 0.683449147769045,
+     "r_web": 0.14888711024528278
+    },
+    "fast": {
+     "yr_axis_raw": 0.36364539891741793,
+     "yr_web_raw": 0.43351303045034484,
+     "burst_margin": 1.8336488228903116,
+     "r_web_peak": 0.17546977233301064,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 134.60730866553155,
+    "feasible_fast": false,
+    "seconds": 4.1
+   },
+   {
+    "tag": "cal_comp1_18",
+    "comp": "comp1",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.4762145102781137,
+     "yield_at": {
+      "r_mm": 0.0,
+      "z_mm": 203.50101991684483,
+      "T_C": 15.0
+     },
+     "burst_margin": 2.1767362175524823,
+     "gate": true,
+     "seconds": 3.5,
+     "yr_axis": 0.4762145102781137,
+     "r_axis": 0.0,
+     "yr_web": 0.4459442030379245,
+     "r_web": 0.0871002893651169
+    },
+    "fast": {
+     "yr_axis_raw": 0.24569186306937843,
+     "yr_web_raw": 0.2746299382272807,
+     "burst_margin": 2.1771111146422055,
+     "r_web_peak": 0.14982893769223127,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 182.92559479540992,
+    "feasible_fast": true,
+    "seconds": 4.0
+   },
+   {
+    "tag": "cal_comp2_19",
+    "comp": "comp2",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.8231307698085027,
+     "yield_at": {
+      "r_mm": 198.51614699371038,
+      "z_mm": 257.76676041963566,
+      "T_C": 270.438
+     },
+     "burst_margin": 1.741902962102925,
+     "gate": true,
+     "seconds": 3.25,
+     "yr_axis": 0.669295856558534,
+     "r_axis": 0.04087097143988155,
+     "yr_web": 0.8231307698085027,
+     "r_web": 0.19851614699371037
+    },
+    "fast": {
+     "yr_axis_raw": 0.40011872315883656,
+     "yr_web_raw": 0.519706816021689,
+     "burst_margin": 1.7415941322805348,
+     "r_web_peak": 0.2061230009129218,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 146.84038141506076,
+    "feasible_fast": false,
+    "seconds": 3.9
+   },
+   {
+    "tag": "cal_comp2_20",
+    "comp": "comp2",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 1.0929039182461047,
+     "yield_at": {
+      "r_mm": 201.43550209655905,
+      "z_mm": 232.3067683701957,
+      "T_C": 272.406
+     },
+     "burst_margin": 1.8179476294244463,
+     "gate": true,
+     "seconds": 3.65,
+     "yr_axis": 0.6638245381084799,
+     "r_axis": 0.08612097553403612,
+     "yr_web": 1.0929039182461047,
+     "r_web": 0.20143550209655905
+    },
+    "fast": {
+     "yr_axis_raw": 0.36132626190302297,
+     "yr_web_raw": 0.5154202961661538,
+     "burst_margin": 1.817608981037329,
+     "r_web_peak": 0.21050203356719482,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 119.34527968703979,
+    "feasible_fast": false,
+    "seconds": 4.3
+   },
+   {
+    "tag": "cal_comp1_21",
+    "comp": "comp1",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.47964715844502237,
+     "yield_at": {
+      "r_mm": 2.9033429788372302,
+      "z_mm": 203.50101991684483,
+      "T_C": 15.0131
+     },
+     "burst_margin": 2.1996780179733477,
+     "gate": true,
+     "seconds": 3.44,
+     "yr_axis": 0.4796471584450223,
+     "r_axis": 0.00290334297883723,
+     "yr_web": 0.4532448524896972,
+     "r_web": 0.0871002893651169
+    },
+    "fast": {
+     "yr_axis_raw": 0.24282104486259454,
+     "yr_web_raw": 0.31962810794492386,
+     "burst_margin": 2.2001995117090063,
+     "r_web_peak": 0.22531585514199926,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 165.80357950488312,
+    "feasible_fast": false,
+    "seconds": 3.9
+   },
+   {
+    "tag": "cal_comp2_22",
+    "comp": "comp2",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.8097044574819956,
+     "yield_at": {
+      "r_mm": 192.677436788013,
+      "z_mm": 239.66194642697548,
+      "T_C": 266.589
+     },
+     "burst_margin": 1.8540201422061733,
+     "gate": true,
+     "seconds": 3.13,
+     "yr_axis": 0.5968187459907155,
+     "r_axis": 0.05254839185127628,
+     "yr_web": 0.8097044574819956,
+     "r_web": 0.19267743678801302
+    },
+    "fast": {
+     "yr_axis_raw": 0.3583086151142741,
+     "yr_web_raw": 0.534131079789407,
+     "burst_margin": 1.8536775292327474,
+     "r_web_peak": 0.20904235601577048,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 113.44461968217757,
+    "feasible_fast": false,
+    "seconds": 3.5
+   },
+   {
+    "tag": "cal_comp2_23",
+    "comp": "comp2",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.9584966151543097,
+     "yield_at": {
+      "r_mm": 198.51614699371038,
+      "z_mm": 238.47869422812806,
+      "T_C": 270.438
+     },
+     "burst_margin": 1.8708392168016377,
+     "gate": true,
+     "seconds": 3.6,
+     "yr_axis": 0.6349763140803169,
+     "r_axis": 0.08612097553403612,
+     "yr_web": 0.9584966151543097,
+     "r_web": 0.19851614699371037
+    },
+    "fast": {
+     "yr_axis_raw": 0.340937909762785,
+     "yr_web_raw": 0.5011907458110151,
+     "burst_margin": 1.8706116109734576,
+     "r_web_peak": 0.21050203356719482,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 117.6923694191988,
+    "feasible_fast": false,
+    "seconds": 4.2
+   },
+   {
+    "tag": "cal_comp1_24",
+    "comp": "comp1",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.5301461910519951,
+     "yield_at": {
+      "r_mm": 0.0,
+      "z_mm": 203.50101991684483,
+      "T_C": 15.0
+     },
+     "burst_margin": 2.0527814819159427,
+     "gate": true,
+     "seconds": 3.46,
+     "yr_axis": 0.5301461910519951,
+     "r_axis": 0.0,
+     "yr_web": 0.5016110461128093,
+     "r_web": 0.0871002893651169
+    },
+    "fast": {
+     "yr_axis_raw": 0.2716177846469683,
+     "yr_web_raw": 0.3160432187785604,
+     "burst_margin": 2.0531561312572224,
+     "r_web_peak": 0.1890240679065339,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 201.22416952656377,
+    "feasible_fast": false,
+    "seconds": 3.9
+   },
+   {
+    "tag": "cal_comp2_25",
+    "comp": "comp2",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.8793954401736541,
+     "yield_at": {
+      "r_mm": 198.51614699371038,
+      "z_mm": 245.5110384742599,
+      "T_C": 270.438
+     },
+     "burst_margin": 1.7709899930622315,
+     "gate": true,
+     "seconds": 3.44,
+     "yr_axis": 0.6772520194691662,
+     "r_axis": 0.0,
+     "yr_web": 0.8793954401736542,
+     "r_web": 0.19851614699371037
+    },
+    "fast": {
+     "yr_axis_raw": 0.3904217251398171,
+     "yr_web_raw": 0.5046701959612496,
+     "burst_margin": 1.7706439200351356,
+     "r_web_peak": 0.20466332336149745,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 136.80033353602468,
+    "feasible_fast": false,
+    "seconds": 4.1
+   },
+   {
+    "tag": "cal_comp2_26",
+    "comp": "comp2",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.919312760713266,
+     "yield_at": {
+      "r_mm": 198.51614699371038,
+      "z_mm": 228.86655356933483,
+      "T_C": 270.438
+     },
+     "burst_margin": 1.8519692752042445,
+     "gate": true,
+     "seconds": 3.7,
+     "yr_axis": 0.6908732936926583,
+     "r_axis": 0.08612097553403612,
+     "yr_web": 0.919312760713266,
+     "r_web": 0.19851614699371037
+    },
+    "fast": {
+     "yr_axis_raw": 0.3526239841716792,
+     "yr_web_raw": 0.43392939959214355,
+     "burst_margin": 1.8516506583656722,
+     "r_web_peak": 0.2061230009129218,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 117.62241710477083,
+    "feasible_fast": false,
+    "seconds": 4.5
+   },
+   {
+    "tag": "cal_comp1_27",
+    "comp": "comp1",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.5022935912938331,
+     "yield_at": {
+      "r_mm": 0.0,
+      "z_mm": 203.50101991684483,
+      "T_C": 15.0
+     },
+     "burst_margin": 2.1227765781596384,
+     "gate": true,
+     "seconds": 3.3,
+     "yr_axis": 0.5022935912938331,
+     "r_axis": 0.0,
+     "yr_web": 0.47036723439628586,
+     "r_web": 0.0871002893651169
+    },
+    "fast": {
+     "yr_axis_raw": 0.26175946570478276,
+     "yr_web_raw": 0.3012179443768022,
+     "burst_margin": 2.1232481126621905,
+     "r_web_peak": 0.15418395216048714,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 185.71160177993772,
+    "feasible_fast": true,
+    "seconds": 3.6
+   },
+   {
+    "tag": "cal_comp2_28",
+    "comp": "comp2",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.7448992004666695,
+     "yield_at": {
+      "r_mm": 0.0,
+      "z_mm": 277.26542841351784,
+      "T_C": 204.018
+     },
+     "burst_margin": 1.5932472485458884,
+     "gate": true,
+     "seconds": 3.55,
+     "yr_axis": 0.7448992004666695,
+     "r_axis": 0.0,
+     "yr_web": 0.7092725618364195,
+     "r_web": 0.08758065308546047
+    },
+    "fast": {
+     "yr_axis_raw": 0.48658074715734595,
+     "yr_web_raw": 0.5091384415988633,
+     "burst_margin": 1.5930421466936735,
+     "r_web_peak": 0.12876009068743172,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 205.31395330483156,
+    "feasible_fast": false,
+    "seconds": 3.9
+   },
+   {
+    "tag": "cal_comp2_29",
+    "comp": "comp2",
+    "rpm": 14950.0,
+    "ccx": {
+     "yield_ratio_max": 0.8543702702245016,
+     "yield_at": {
+      "r_mm": 198.51614699371038,
+      "z_mm": 237.43360392768827,
+      "T_C": 270.438
+     },
+     "burst_margin": 1.8569525979014794,
+     "gate": true,
+     "seconds": 3.1,
+     "yr_axis": 0.6175538071788195,
+     "r_axis": 0.01459677551424341,
+     "yr_web": 0.8543702702245016,
+     "r_web": 0.19851614699371037
+    },
+    "fast": {
+     "yr_axis_raw": 0.36172142902989785,
+     "yr_web_raw": 0.5853743965525189,
+     "burst_margin": 1.8566025550688472,
+     "r_web_peak": 0.21050203356719482,
+     "yield_ratio_cal": null
+    },
+    "mass_kg": 117.35022021559291,
+    "feasible_fast": false,
+    "seconds": 3.7
+   }
+  ],
+  "date": "2026-11-15"
+ },
+ "table": {
+  "comp1": {
+   "x": [
+    0.0,
+    0.071474026827526,
+    0.14066475522087374,
+    0.2648346412296806,
+    0.4191752323567518,
+    0.6133863910795251,
+    0.8697013704163263,
+    1.2314470766816832,
+    1.6824868556763328,
+    2.433131173577296,
+    3.781623183007206,
+    11.681994480166768,
+    1000000.0
+   ],
+   "k": [
+    1.0798798781851797,
+    1.0798798781851797,
+    1.0798798781851797,
+    1.0918033604994986,
+    1.0918033604994986,
+    1.1409499628689126,
+    1.2566117241929669,
+    1.4115446710440578,
+    1.541922501849788,
+    1.7276677085659131,
+    1.9793103798123068,
+    2.211007942311644,
+    2.211007942311644
+   ],
+   "n_points": [
+    248,
+    242,
+    193,
+    124,
+    147,
+    106,
+    133,
+    76,
+    77,
+    76,
+    275
+   ],
+   "bins": [
+    0.0,
+    0.1,
+    0.2,
+    0.35,
+    0.5,
+    0.75,
+    1.0,
+    1.5,
+    2.0,
+    3.0,
+    5.0
+   ],
+   "n_profiles": 11,
+   "quantile": 0.75,
+   "method": "квантиль TABLE_Q отношения ccx/тонкий диск по столбцам сетки в ячейках местного h/r; не убывает с h/r"
+  },
+  "comp2": {
+   "x": [
+    0.0,
+    0.0760524160040359,
+    0.15495101146003804,
+    0.26404003583514085,
+    0.41441889810574845,
+    0.6126680069036567,
+    0.8589745129767061,
+    1.2296681035875348,
+    1.6969927151952695,
+    2.4034227422858967,
+    3.6051538111638988,
+    10.604078644048755,
+    1000000.0
+   ],
+   "k": [
+    1.4896044210852666,
+    1.4896044210852666,
+    1.4896044210852666,
+    1.5709948609429119,
+    1.6964376412497673,
+    1.6964376412497673,
+    1.6964376412497673,
+    1.6964376412497673,
+    1.6964376412497673,
+    1.7700889003110694,
+    1.9601998692834754,
+    2.0985801899271244,
+    2.0985801899271244
+   ],
+   "n_points": [
+    203,
+    449,
+    529,
+    296,
+    307,
+    223,
+    244,
+    143,
+    189,
+    134,
+    401
+   ],
+   "bins": [
+    0.0,
+    0.1,
+    0.2,
+    0.35,
+    0.5,
+    0.75,
+    1.0,
+    1.5,
+    2.0,
+    3.0,
+    5.0
+   ],
+   "n_profiles": 20,
+   "quantile": 0.75,
+   "method": "квантиль TABLE_Q отношения ccx/тонкий диск по столбцам сетки в ячейках местного h/r; не убывает с h/r"
+  }
+ },
+ "domain": {
+  "slope_max_limit": 20.0,
+  "rmin_over_h": 0.1,
+  "rule": "|dh/dr| ≤ 20 на 0,1…0,95·r2; задняя поверхность монотонна (глубина убывает к ободу), R_min/h ≥ 0,3",
+  "out_of_domain": [],
+  "note": "вне области (крутой переход ступицы в тонкое полотно) отношение ccx/тонкий диск неустойчиво — такие профили недопустимы в поиске"
+ },
+ "table_check": {
+  "cases": [
+   {
+    "tag": "cal_comp1_base",
+    "ccx": 0.49424546553808946,
+    "fast_table": 0.5075843308548262,
+    "fast_raw": 0.3058725102675726,
+    "ratio": 0.9737208883216062,
+    "slope_max": 15.761252868680458,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp2_base",
+    "ccx": 0.6236681807925182,
+    "fast_table": 0.7136374145695974,
+    "fast_raw": 0.40737985968909896,
+    "ratio": 0.8739286478815848,
+    "slope_max": 7.163601652497121,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp1_00",
+    "ccx": 0.48585755743651754,
+    "fast_table": 0.5237445386901728,
+    "fast_raw": 0.2837934001398291,
+    "ratio": 0.9276613339999565,
+    "slope_max": 13.382758444496531,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp2_01",
+    "ccx": 0.7600275433388577,
+    "fast_table": 0.823435878498186,
+    "fast_raw": 0.48539118590386854,
+    "ratio": 0.9229954185686263,
+    "slope_max": 6.734061584672816,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp2_02",
+    "ccx": 0.7157681099078045,
+    "fast_table": 0.8126419247182287,
+    "fast_raw": 0.47902846821976586,
+    "ratio": 0.8807915123945719,
+    "slope_max": 9.23100899422056,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp1_03",
+    "ccx": 0.5047112454655381,
+    "fast_table": 0.5436736003537892,
+    "fast_raw": 0.29610238420895335,
+    "ratio": 0.9283350251641853,
+    "slope_max": 11.870685855234882,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp2_04",
+    "ccx": 0.9401950954591396,
+    "fast_table": 0.8164093332526603,
+    "fast_raw": 0.5215944485255599,
+    "ratio": 1.1516221791748802,
+    "slope_max": 7.218827476755351,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": false,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp2_05",
+    "ccx": 0.8864458032117066,
+    "fast_table": 0.8113903770298546,
+    "fast_raw": 0.5205022031688293,
+    "ratio": 1.0925022385113774,
+    "slope_max": 9.162629885538053,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp1_06",
+    "ccx": 0.5278181378476421,
+    "fast_table": 0.5534675432600948,
+    "fast_raw": 0.3176000481343866,
+    "ratio": 0.9536568932997049,
+    "slope_max": 13.774917365095646,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp2_07",
+    "ccx": 0.6721890622143645,
+    "fast_table": 0.8155541355795379,
+    "fast_raw": 0.4807451307073795,
+    "ratio": 0.8242114568356675,
+    "slope_max": 8.362406042342926,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp2_08",
+    "ccx": 0.765646257312765,
+    "fast_table": 0.8650352397677786,
+    "fast_raw": 0.5099127835494774,
+    "ratio": 0.8851041230624375,
+    "slope_max": 7.344965955473754,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp1_09",
+    "ccx": 0.4966788391777509,
+    "fast_table": 0.5282738850565941,
+    "fast_raw": 0.29400261187157506,
+    "ratio": 0.9401919217046695,
+    "slope_max": 14.212290672882304,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp2_10",
+    "ccx": 0.7282331448844916,
+    "fast_table": 0.7563132223087491,
+    "fast_raw": 0.44585559049130374,
+    "ratio": 0.9628724229644707,
+    "slope_max": 7.110718090252021,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp2_11",
+    "ccx": 0.890968407085881,
+    "fast_table": 0.825585591142968,
+    "fast_raw": 0.4889402512904274,
+    "ratio": 1.0791956844261232,
+    "slope_max": 6.3505869413333045,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp1_12",
+    "ccx": 0.5429256349953412,
+    "fast_table": 0.509908692415025,
+    "fast_raw": 0.4005322025715244,
+    "ratio": 1.0647506957058168,
+    "slope_max": 19.764969309386288,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp2_13",
+    "ccx": 0.8315325300327736,
+    "fast_table": 0.80385537191102,
+    "fast_raw": 0.4917348028732657,
+    "ratio": 1.0344305195796057,
+    "slope_max": 7.599238405938053,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp2_14",
+    "ccx": 0.7885204771764728,
+    "fast_table": 0.850077049143491,
+    "fast_raw": 0.5010953709546544,
+    "ratio": 0.927587067514597,
+    "slope_max": 8.494196327919838,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp1_15",
+    "ccx": 0.49892128174123335,
+    "fast_table": 0.5401410422472933,
+    "fast_raw": 0.2908160571856821,
+    "ratio": 0.9236870423055387,
+    "slope_max": 12.771331055503879,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp2_16",
+    "ccx": 0.8727524275680162,
+    "fast_table": 0.8496763748449963,
+    "fast_raw": 0.5429621767607521,
+    "ratio": 1.0271586375780186,
+    "slope_max": 7.8853141212034785,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp2_17",
+    "ccx": 0.683449147769045,
+    "fast_table": 0.7354278228282215,
+    "fast_raw": 0.43351303045034484,
+    "ratio": 0.9293218539661947,
+    "slope_max": 8.180898268572122,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp1_18",
+    "ccx": 0.4762145102781137,
+    "fast_table": 0.5159027526304926,
+    "fast_raw": 0.2746299382272807,
+    "ratio": 0.9230703031724179,
+    "slope_max": 12.98227571417658,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp2_19",
+    "ccx": 0.8231307698085027,
+    "fast_table": 0.8634015774500764,
+    "fast_raw": 0.519706816021689,
+    "ratio": 0.953357963787248,
+    "slope_max": 7.948769777735137,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp2_20",
+    "ccx": 1.0929039182461047,
+    "fast_table": 0.8028543951196557,
+    "fast_raw": 0.5154202961661538,
+    "ratio": 1.361272884460227,
+    "slope_max": 7.223554576728759,
+    "in_domain": true,
+    "used_for_table": false,
+    "verdict_ccx": false,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp1_21",
+    "ccx": 0.47964715844502237,
+    "fast_table": 0.47969672822266524,
+    "fast_raw": 0.31962810794492386,
+    "ratio": 0.9998966643407668,
+    "slope_max": 16.988610261366716,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp2_22",
+    "ccx": 0.8097044574819956,
+    "fast_table": 0.8231619843778096,
+    "fast_raw": 0.534131079789407,
+    "ratio": 0.9836514232299175,
+    "slope_max": 9.6098387686026,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp2_23",
+    "ccx": 0.9584966151543097,
+    "fast_table": 0.7818799411856359,
+    "fast_raw": 0.5011907458110151,
+    "ratio": 1.225887204243728,
+    "slope_max": 6.683957965297296,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": false,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp1_24",
+    "ccx": 0.5301461910519951,
+    "fast_table": 0.5692947117082053,
+    "fast_raw": 0.3160432187785604,
+    "ratio": 0.9312332964788262,
+    "slope_max": 11.707701695523127,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp2_25",
+    "ccx": 0.8793954401736541,
+    "fast_table": 0.8286915620687998,
+    "fast_raw": 0.5046701959612496,
+    "ratio": 1.0611854644426135,
+    "slope_max": 8.207950781931075,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp2_26",
+    "ccx": 0.919312760713266,
+    "fast_table": 0.7129795009683243,
+    "fast_raw": 0.43392939959214355,
+    "ratio": 1.28939578131589,
+    "slope_max": 6.762136156589548,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": false,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp1_27",
+    "ccx": 0.5022935912938331,
+    "fast_table": 0.5292697196919827,
+    "fast_raw": 0.3012179443768022,
+    "ratio": 0.9490314155628462,
+    "slope_max": 15.114235575107529,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   },
+   {
+    "tag": "cal_comp2_28",
+    "ccx": 0.7448992004666695,
+    "fast_table": 0.9120084464356114,
+    "fast_raw": 0.5091384415988633,
+    "ratio": 0.8167678746594371,
+    "slope_max": 7.242430067133583,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": false
+   },
+   {
+    "tag": "cal_comp2_29",
+    "ccx": 0.8543702702245016,
+    "fast_table": 0.890049241289492,
+    "fast_raw": 0.5853743965525189,
+    "ratio": 0.9599134863445317,
+    "slope_max": 10.264110224849631,
+    "in_domain": true,
+    "used_for_table": true,
+    "verdict_ccx": true,
+    "verdict_fast": true
+   }
+  ],
+  "ratio_min": 0.8167678746594371,
+  "ratio_max": 1.361272884460227,
+  "verdict_threshold": "σ/σ0,2 ≤ 0,9 при 100 % (порядок предела 120 %/k: 0,9·σ0,2 при k = 0,9 и запасе 1,2² — справочно)",
+  "verdict_agree_share": 0.84375,
+  "unsafe_cases": [
+   "cal_comp2_04",
+   "cal_comp2_20",
+   "cal_comp2_23",
+   "cal_comp2_26"
+  ],
+  "note": "ratio ≤ 1 — быстрая оценка с таблицей не ниже CalculiX (консервативна) на калибровочных профилях"
+ }
+}

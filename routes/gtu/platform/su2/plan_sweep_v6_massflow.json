@@ -1,0 +1,113 @@
+{
+ "id": "v6_massflow",
+ "axis": "граничное условие",
+ "title": "Расход на выходе (Giles MASS_FLOW_OUTLET) при разгоне, затем переход на давление по измеренному",
+ "mechanism": "Выход Giles MASS_FLOW_OUTLET: SU2 сам двигает давление на выходе так, чтобы расход канала через выход шёл к цели (p_e = p_ср + 0,1 (dp/drho)(m − m_цели)). Лестница по частоте 0 -> 0,5 -> 0,75 -> 1,0, цель на ступени — 0,65 x одномерный расход канала x w (подобие, у core130 — около расхода прогона Б при 0,75 оценки); цель ставится сразу концом ступени — со стороны большого расхода, не помпажа. Затем плавный второй порядок при расходе, переход на давление: выход STATIC_PRESSURE_1D при давлении, измеренном в последней порции (PressureOut_1, без скачка), и рампа до 0,75 оценки за 300.",
+ "hypothesis": "В пробе давление на выходе задавалось при неустановившемся течении и вызвало обратный ток на выходе; управляя расходом, обратного тока на выходе не получить (условие само снижает давление), а на давление переходим уже с установившегося поля. Риск: пока расход не развился, условие опускает давление на выходе ниже p01 (в миниатюре KV-3 — 74 -> 65 кПа за 9 итераций); если цель при этой частоте недостижима, разрежение растёт — тогда гейт ступени не пройдёт или будет NaN.",
+ "differs_from_smoke": "управляемая величина на выходе — расход, а не давление; лестница; переход на давление по замеру",
+ "transforms": [
+  "hist"
+ ],
+ "set": {
+  "OUTPUT_FILES": "RESTART",
+  "WRT_FREQ": "100",
+  "LIMITER": "VENKATAKRISHNAN_WANG",
+  "VENKAT": "0.05"
+ },
+ "steps": [
+  {
+   "name": "a_mf050",
+   "frac": 0.5,
+   "load": null,
+   "iter": 300,
+   "ramp": 200,
+   "pramp": 0,
+   "muscl": false,
+   "gate": "intermediate",
+   "hold": {
+    "iter": 200,
+    "max": 2
+   },
+   "outlet": "massflow",
+   "m_frac": 0.65
+  },
+  {
+   "name": "b_mf075",
+   "frac": 0.75,
+   "load": null,
+   "iter": 250,
+   "ramp": 150,
+   "pramp": 0,
+   "muscl": false,
+   "gate": "intermediate",
+   "hold": {
+    "iter": 200,
+    "max": 2
+   },
+   "outlet": "massflow",
+   "m_frac": 0.65
+  },
+  {
+   "name": "c_mf100",
+   "frac": 1.0,
+   "load": null,
+   "iter": 250,
+   "ramp": 150,
+   "pramp": 0,
+   "muscl": false,
+   "gate": "intermediate",
+   "hold": {
+    "iter": 200,
+    "max": 3
+   },
+   "outlet": "massflow",
+   "m_frac": 0.65
+  },
+  {
+   "name": "d_order2",
+   "frac": 1.0,
+   "load": null,
+   "iter": 350,
+   "ramp": 0,
+   "pramp": 0,
+   "muscl": true,
+   "gate": "intermediate",
+   "hold": {
+    "iter": 200,
+    "max": 2
+   },
+   "muscl_ramp": 250,
+   "outlet": "massflow",
+   "m_frac": 0.65
+  },
+  {
+   "name": "e_to_p",
+   "frac": 1.0,
+   "load": "measured",
+   "iter": 200,
+   "ramp": 0,
+   "pramp": 0,
+   "muscl": true,
+   "gate": "intermediate",
+   "hold": {
+    "iter": 200,
+    "max": 3
+   }
+  },
+  {
+   "name": "f_base",
+   "frac": 1.0,
+   "load": 0.75,
+   "iter": 500,
+   "ramp": 0,
+   "pramp": 300,
+   "muscl": true,
+   "gate": "final",
+   "hold": {
+    "iter": 300,
+    "max": 40
+   }
+  }
+ ],
+ "_comment": "Стратегия разгона базовой точки для sweep_ramp.py run (перебор jobs_aws_su2_kv3_sweep.json). Сгенерировано make_jobs_su2_kv3_sweep.py; правки — в нём. load — доля оценки давления на выходе при номинальной частоте (char_points.p_out_estimate); при частоте w < 1 давление — по линии дросселя p_нач + w^2 (load x оценка − p_нач); load null — давление прежнее. set — поля шаблона run_case.py (--set), transforms — правки производного шаблона (sweep_ramp.py rc)."
+}

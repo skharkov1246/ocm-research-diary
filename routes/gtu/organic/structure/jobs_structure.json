@@ -1,0 +1,49 @@
+{
+ "_comment": "Задачи узла routes/gtu/organic/structure (README узла, раздел «AWS»). Раннер берёт только defaults и jobs. Код — ветка claude/lucid-allen-yvps5d; перед прогоном закоммитить узел вместе с lattice_results.json и disk_topo_results.json (цель по загрузке 3D-диска). Сгенерировано make_jobs_structure.py; правки — в нём.",
+ "defaults": {
+  "instance_type": "c7a.16xlarge",
+  "fallback_types": [
+   "c7i.16xlarge"
+  ],
+  "image": "al2023",
+  "disk_gb": 40,
+  "python": "3.13",
+  "pip": [
+   "numpy==2.5.3",
+   "scipy==1.18.1",
+   "scikit-image==0.26.0",
+   "trimesh==5.2.1",
+   "shapely==2.2.0",
+   "matplotlib==3.11.2",
+   "pypardiso==0.4.7",
+   "pyamg==5.4.1"
+  ]
+ },
+ "jobs": [
+  {
+   "name": "struct-lattice-n80",
+   "max_min": 90,
+   "command": "python -u routes/gtu/organic/structure/lattice.py --N 80 --n-dense 80 --conv --out \"$GTU_OUT/lattice_results_n80.json\""
+  },
+  {
+   "name": "struct-axi-fine",
+   "max_min": 300,
+   "command": "ORGANIC_OUT=\"$GTU_OUT\" python -u routes/gtu/organic/structure/disk_topo.py --all --h-t 0.5e-3 --h-c 0.75e-3 --r-filter-t 2.5e-3 --r-filter-c 3.75e-3 --workers 9 --results \"$GTU_OUT/disk_topo_results_fine.json\""
+  },
+  {
+   "name": "struct-topo3d-disk-h20",
+   "max_min": 360,
+   "command": "python -u routes/gtu/organic/structure/topo3d.py --problem disk --h 2.0e-3 --iters 160 --out \"$GTU_OUT\""
+  },
+  {
+   "name": "struct-topo3d-disk-h15",
+   "max_min": 720,
+   "command": "python -u routes/gtu/organic/structure/topo3d.py --problem disk --h 1.5e-3 --iters 160 --out \"$GTU_OUT\""
+  },
+  {
+   "name": "struct-topo3d-frame-n160",
+   "max_min": 480,
+   "command": "python -u routes/gtu/organic/structure/topo3d.py --problem frame --n 160 --iters 150 --out \"$GTU_OUT\""
+  }
+ ]
+}

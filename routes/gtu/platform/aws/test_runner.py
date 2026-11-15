@@ -1,25 +1,31 @@
-"""Тесты runner.py без сети: botocore Stubber вместо AWS, user-data — на подменённых командах.
+"""Тесты runner.py без сети: botocore Stubber и свои заглушки вместо AWS, user-data — на подменённых командах.
 
   python3 -m pytest -q routes/gtu/platform/aws/test_runner.py
 
 Ключи в тестах поддельные (ставятся в окружение на время теста); любой вызов AWS,
 для которого нет заготовленного ответа, Stubber превращает в ошибку — сети нет.
+Выдуманные значения помечены словами SYNTHETIC / FIXTURE / EXAMPLE (сканер gate.yml).
 """
 import datetime as dt
 import io
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
+from collections import deque
 from pathlib import Path
 
 import botocore.session
 import pytest
+from botocore.exceptions import ClientError
 from botocore.response import StreamingBody
 from botocore.stub import ANY, Stubber
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+HERE = Path(__file__).resolve().parent
+REPO = HERE.parents[3]
+sys.path.insert(0, str(HERE))
 import runner as R  # noqa: E402
 
 FAKE_AKID = "AKIASYNTHETIC0000000"  # выдуманный ключ: пометка SYNTHETIC по правилу gate.yml
@@ -29,6 +35,11 @@ PREFIX = "alpha-o"
 RUN = "20261114T000000Z-ab12"
 T0 = 1_800_000_000.0
 UTC = dt.timezone.utc
+AMI = "ami-0123456789abcdef0"
+# Подсети по умолчанию — выдуманные id (FIXTURE).
+SUBNETS = {az: f"subnet-0fixture000000{az[-2:]}" for az in ("us-east-1a", "us-east-1b", "us-east-1c")}
+# Цены спота c7a.16xlarge по зонам из живого прогона 14.11.2026 (1a — 0,955; 1b — 0,748; 1c — 0,706).
+LIVE_C7A = {"us-east-1a": 0.955, "us-east-1b": 0.748, "us-east-1c": 0.706}
 
 
 @pytest.fixture(autouse=True)
@@ -99,6 +110,11 @@ def spot_resp(itype, prices):
     return {"SpotPriceHistory": items}
 
 
+def flat(prices):
+    """{зона: цена} -> вход spot_resp с одной записью на зону."""
+    return {az: [(p, -60)] for az, p in prices.items()}
+
+
 def body(b):
     return StreamingBody(io.BytesIO(b), len(b))
 
@@ -126,6 +142,11 @@ def reap_filters(run=RUN):
                         {"Name": "instance-state-name", "Values": R.LIVE_STATES}]}
 
 
+def ledger(tmp_path, ev=None):
+    recs = R.Ledger(tmp_path / "ledger.jsonl").records()
+    return [x for x in recs if ev is None or x["ev"] == ev]
+
+
 PRICES_C7A = {"us-east-1a": [(0.9, -3000), (1.1, -100)], "us-east-1b": [(1.3, -2000), (1.2, -50)]}
 HIST = [
     # закрытая: (1.00 + 0.01) долл./ч × 1 ч = 1.01
@@ -136,6 +157,52 @@ HIST = [
     {"ev": "launch", "run_id": "old", "job": "y", "iid": "i-open", "itype": "c7a.16xlarge", "az": "us-east-1a",
      "spot_usd_h": 1.0, "max_usd_h": 2.0, "ebs_usd_h": 0.01, "t_launch": T0 - 600, "allot_min": 70},
 ]
+
+
+# ----------------------------------------------------------------------------- заготовки run_instances
+def expected_run_params(itype="c7a.16xlarge", maxp="1.5600", job="su2-comp130", disk=50, root="/dev/xvda",
+                        az="us-east-1a", how="subnet", ami=AMI):
+    tags = [{"Key": "Project", "Value": R.DEFAULT_TAG}, {"Key": "RunId", "Value": RUN},
+            {"Key": "Job", "Value": job}, {"Key": "Name", "Value": f"gtu-{job}"}]
+    p = {
+        "ImageId": ami, "InstanceType": itype, "MinCount": 1, "MaxCount": 1,
+        "IamInstanceProfile": {"Name": "gtu-test-profile"},
+        "InstanceInitiatedShutdownBehavior": "terminate",
+        "InstanceMarketOptions": {"MarketType": "spot",
+                                  "SpotOptions": {"MaxPrice": maxp, "SpotInstanceType": "one-time",
+                                                  "InstanceInterruptionBehavior": "terminate"}},
+        "MetadataOptions": {"HttpTokens": "required", "HttpPutResponseHopLimit": 1, "HttpEndpoint": "enabled"},
+        "BlockDeviceMappings": [{"DeviceName": root, "Ebs": {"VolumeSize": disk, "VolumeType": "gp3",
+                                                             "DeleteOnTermination": True}}],
+        "TagSpecifications": [{"ResourceType": "instance", "Tags": tags}, {"ResourceType": "volume", "Tags": tags}],
+        "UserData": ANY, "ClientToken": ANY,
+    }
+    if how == "subnet":
+        p["SubnetId"] = SUBNETS[az]
+    elif how == "eni":
+        p["NetworkInterfaces"] = [{"DeviceIndex": 0, "SubnetId": SUBNETS[az], "AssociatePublicIpAddress": True,
+                                   "DeleteOnTermination": True}]
+    elif how == "placement":
+        p["Placement"] = {"AvailabilityZone": az}
+    return p
+
+
+def add_ami(aws, image="al2023"):
+    aws.st["ssm"].add_response("get_parameter",
+                               {"Parameter": {"Name": R.IMAGES[image]["ssm"], "Type": "String",
+                                              "Value": AMI, "Version": 1}},
+                               {"Name": R.IMAGES[image]["ssm"]})
+
+
+def add_subnets(aws, azs=tuple(SUBNETS), public=True):
+    aws.st["ec2"].add_response("describe_subnets", {"Subnets": [
+        {"SubnetId": SUBNETS[az], "AvailabilityZone": az, "MapPublicIpOnLaunch": public, "State": "available"}
+        for az in azs]}, {"Filters": [{"Name": "default-for-az", "Values": ["true"]}]})
+
+
+def run_resp(iid, itype="c7a.16xlarge", az="us-east-1a"):
+    return {"Instances": [{"InstanceId": iid, "InstanceType": itype, "Placement": {"AvailabilityZone": az},
+                           "State": {"Name": "pending"}}]}
 
 
 # ----------------------------------------------------------------------------- бюджет
@@ -157,7 +224,7 @@ def test_budget_estimate_numbers(tmp_path):
     assert nums["committed"] == pytest.approx(2.345, abs=1e-4)
     assert nums["new"] == pytest.approx(new, abs=1e-4)
     assert nums["total"] == pytest.approx(1.01 + 2.345 + new, abs=1e-3)
-    rec = [x for x in R.Ledger(tmp_path / "ledger.jsonl").records() if x["ev"] == "budget"][-1]
+    rec = ledger(tmp_path, "budget")[-1]
     assert rec["ok"] is True and rec["max_usd_h"] == pytest.approx(1.56) and rec["job"] == job.name
     aws.done()
 
@@ -174,14 +241,15 @@ def test_budget_refusal_blocks_launch(tmp_path):
     e.add_response("describe_spot_price_history", spot_resp("c7i.16xlarge", {"us-east-1a": [(1.4, -60)]}),
                    spot_params("c7i.16xlarge"))
     e.add_response("describe_instances", {"Reservations": []}, reap_filters())   # сборщик в finally
-    # run_instances НЕ заготовлен: если исполнитель попробует запустить машину, Stubber упадёт.
-    r = R.Runner(make_cfg(tmp_path), aws.ec2, aws.s3, aws.ssm, clock=clk, sleep=clk.sleep, out=lambda m: None)
+    # run_instances и образ НЕ заготовлены: если исполнитель попробует запустить машину, Stubber упадёт.
+    # потолок задан явно: тест проверяет отказ при превышении, а не значение по умолчанию
+    r = R.Runner(make_cfg(tmp_path, ceiling=300.0), aws.ec2, aws.s3, aws.ssm, clock=clk, sleep=clk.sleep, out=lambda m: None)
     res = r.run([make_job()])
     assert res == {"su2-comp130": {"status": "refused", "attempts": 1}}
-    budget = [x for x in R.Ledger(tmp_path / "ledger.jsonl").records() if x["ev"] == "budget"]
+    budget = ledger(tmp_path, "budget")
     assert [(b["itype"], b["ok"]) for b in budget] == [("c7a.16xlarge", False), ("c7i.16xlarge", False)]
     assert all(b["total"] > b["ceiling"] for b in budget)
-    assert not [x for x in R.Ledger(tmp_path / "ledger.jsonl").records() if x["ev"] == "launch" and x["run_id"] == RUN]
+    assert not [x for x in ledger(tmp_path, "launch") if x["run_id"] == RUN]
     aws.done()
 
 
@@ -193,23 +261,198 @@ def test_ceiling_counts_open_instances_and_parallel_launches(tmp_path):
     assert s["spent"] == pytest.approx(1.01) and s["committed"] == pytest.approx(2.345)
 
 
-def test_second_parallel_launch_refused_by_first_commitment(tmp_path):
-    """Потолок 3 долл.: первая задача (≈1.83) запущена, вторая с её верхней границей — отказ."""
+def test_second_launch_waits_for_budget_then_starts(tmp_path):
+    """Потолок 3 долл.: первая (≈1.83) запущена; вторая с её верхней границей — отказ, но не снята:
+    ждёт в очереди и запускается, когда первая закрылась (верхняя граница сменилась фактом)."""
     aws, clk = Aws(), Clock()
     e = aws.st["ec2"]
     e.add_response("describe_spot_price_history", spot_resp("c7a.16xlarge", PRICES_C7A), spot_params("c7a.16xlarge"))
     add_ami(aws)
+    add_subnets(aws)
     e.add_response("run_instances", run_resp("i-a"), expected_run_params(job="a"))
     e.add_response("describe_spot_price_history", spot_resp("c7i.16xlarge", {"us-east-1a": [(1.4, -60)]}),
                    spot_params("c7i.16xlarge"))
+    e.add_response("run_instances", run_resp("i-b"), expected_run_params(job="b"))
     r = R.Runner(make_cfg(tmp_path, ceiling=3.0), aws.ec2, aws.s3, aws.ssm, clock=clk, out=lambda m: None)
-    from collections import deque
     pending = deque([(make_job(name="a"), 1), (make_job(name="b"), 1)])
-    r._launch_some(pending)
-    assert list(r.active) == ["i-a"] and r.results["b"]["status"] == "refused"
-    budget = [x for x in R.Ledger(tmp_path / "ledger.jsonl").records() if x["ev"] == "budget"]
+    assert r._launch_some(pending) is False
+    assert list(r.active) == ["i-a"] and "b" not in r.results and pending[0][0].name == "b"
+    budget = ledger(tmp_path, "budget")
     assert [(b["job"], b["ok"]) for b in budget] == [("a", True), ("b", False), ("b", False)]
     assert budget[1]["committed"] == pytest.approx(budget[0]["new"], abs=1e-3)
+    r._launch_some(pending)                                  # ничего не закрылось — бюджет не пересчитывается
+    assert len(ledger(tmp_path, "budget")) == 3
+    clk.sleep(60)
+    r._close(r.active["i-a"], "done")                        # первая закончилась за 60 с
+    r._launch_some(pending)
+    assert list(r.active) == ["i-b"] and not pending
+    assert [(b["job"], b["ok"]) for b in ledger(tmp_path, "budget")][-1] == ("b", True)
+    aws.done()
+
+
+# ----------------------------------------------------------------------------- зоны (пункт А)
+def test_cheapest_zone_first_subnet_and_ledger(tmp_path):
+    """Зоны по возрастанию цены: машина просится в 1c (0,706), подсеть 1c; бюджет и MaxPrice — по максимуму."""
+    aws, clk, out = Aws(), Clock(), []
+    e = aws.st["ec2"]
+    e.add_response("describe_spot_price_history", spot_resp("c7a.16xlarge", flat(LIVE_C7A)), spot_params("c7a.16xlarge"))
+    add_ami(aws)
+    add_subnets(aws)
+    e.add_response("run_instances", run_resp("i-c", az="us-east-1c"),
+                   expected_run_params(az="us-east-1c", maxp="1.1460"))   # ceil(0.955 × 1.2) — максимум, не 1c
+    r = R.Runner(make_cfg(tmp_path), aws.ec2, aws.s3, aws.ssm, clock=clk, out=out.append)
+    status, act = r.launch(make_job())
+    assert status == "launched" and act.az == "us-east-1c" and act.az_rank == 0 and act.az_cheapest == "us-east-1c"
+    ud = r.last_params["UserData"]
+    assert "GTU_AZ=us-east-1c GTU_AZ_CHEAPEST=us-east-1c" in ud
+    rec = ledger(tmp_path, "launch")[0]
+    assert (rec["az"], rec["az_req"], rec["az_rank"], rec["spot_usd_h"]) == ("us-east-1c", "us-east-1c", 0, 0.706)
+    assert rec["zones"] == [["us-east-1c", 0.706], ["us-east-1b", 0.748], ["us-east-1a", 0.955]]
+    assert rec["max_usd_h"] == pytest.approx(1.146) and rec["net"] == "subnet"
+    assert not any(s in json.dumps(rec) for s in SUBNETS.values())          # id подсети в журнал не попадает
+    b = ledger(tmp_path, "budget")[0]
+    assert b["max_usd_h"] == pytest.approx(1.146) and b["spot_usd_h"] == pytest.approx(0.955)
+    assert any("us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550" in m for m in out)
+    aws.done()
+
+
+def test_zone_fallback_then_type_fallback(tmp_path):
+    """1c — нет ёмкости, 1b — SpotMaxPriceTooLow, 1a — Unsupported → запасной c7i в его самой дешёвой зоне."""
+    aws, clk = Aws(), Clock()
+    e = aws.st["ec2"]
+    e.add_response("describe_spot_price_history", spot_resp("c7a.16xlarge", flat(LIVE_C7A)), spot_params("c7a.16xlarge"))
+    add_ami(aws)
+    add_subnets(aws)
+    for az, code in (("us-east-1c", "InsufficientInstanceCapacity"), ("us-east-1b", "SpotMaxPriceTooLow"),
+                     ("us-east-1a", "Unsupported")):
+        e.add_client_error("run_instances", service_error_code=code, http_status_code=500,
+                           expected_params=expected_run_params(az=az, maxp="1.1460"))
+    e.add_response("describe_spot_price_history", spot_resp("c7i.16xlarge", flat({"us-east-1b": 0.80, "us-east-1c": 0.78})),
+                   spot_params("c7i.16xlarge"))
+    e.add_response("run_instances", run_resp("i-i", "c7i.16xlarge", "us-east-1c"),
+                   expected_run_params(itype="c7i.16xlarge", az="us-east-1c", maxp="0.9600"))
+    r = R.Runner(make_cfg(tmp_path), aws.ec2, aws.s3, aws.ssm, clock=clk, out=lambda m: None)
+    status, act = r.launch(make_job())
+    assert status == "launched" and (act.itype, act.az, act.az_rank) == ("c7i.16xlarge", "us-east-1c", 0)
+    errs = [(x["itype"], x["az"], x["code"]) for x in ledger(tmp_path, "launch_error")]
+    assert errs == [("c7a.16xlarge", "us-east-1c", "InsufficientInstanceCapacity"),
+                    ("c7a.16xlarge", "us-east-1b", "SpotMaxPriceTooLow"),
+                    ("c7a.16xlarge", "us-east-1a", "Unsupported")]
+    # зоны со сбоем ёмкости — в конце очереди для следующих задач (на avoid_s)
+    assert [z for z, _ in r.zone_order("c7a.16xlarge", r.price("c7a.16xlarge"))][-1] in ("us-east-1a", "us-east-1b", "us-east-1c")
+    assert all(r._avoided("c7a.16xlarge", z) for z in LIVE_C7A)
+    aws.done()
+
+
+def test_fallback_type_on_capacity_error(tmp_path):
+    """Старый сценарий: обе зоны c7a без ёмкости — запасной тип со своей проверкой бюджета."""
+    aws, clk = Aws(), Clock()
+    e = aws.st["ec2"]
+    e.add_response("describe_spot_price_history", spot_resp("c7a.16xlarge", PRICES_C7A), spot_params("c7a.16xlarge"))
+    add_ami(aws)
+    add_subnets(aws)
+    for az in ("us-east-1a", "us-east-1b"):
+        e.add_client_error("run_instances", service_error_code="InsufficientInstanceCapacity",
+                           service_message="no capacity", http_status_code=500,
+                           expected_params=expected_run_params(az=az))
+    e.add_response("describe_spot_price_history", spot_resp("c7i.16xlarge", {"us-east-1c": [(1.0, -60)]}),
+                   spot_params("c7i.16xlarge"))
+    e.add_response("run_instances", run_resp("i-0bbb", "c7i.16xlarge", "us-east-1c"),
+                   expected_run_params(itype="c7i.16xlarge", maxp="1.2000", az="us-east-1c"))
+    r = R.Runner(make_cfg(tmp_path), aws.ec2, aws.s3, aws.ssm, clock=clk, out=lambda m: None)
+    status, act = r.launch(make_job())
+    assert status == "launched" and act.itype == "c7i.16xlarge"
+    evs = [(x["ev"], x.get("itype"), x.get("code")) for x in ledger(tmp_path)]
+    assert ("launch_error", "c7a.16xlarge", "InsufficientInstanceCapacity") in evs
+    assert ("launch", "c7i.16xlarge", None) in evs
+    aws.done()
+
+
+def test_subnets_denied_falls_back_to_placement(tmp_path):
+    """Нет прав на DescribeSubnets — зона задаётся Placement.AvailabilityZone (подсеть выберет EC2)."""
+    aws, clk = Aws(), Clock()
+    e = aws.st["ec2"]
+    e.add_response("describe_spot_price_history", spot_resp("c7a.16xlarge", flat(LIVE_C7A)), spot_params("c7a.16xlarge"))
+    add_ami(aws)
+    e.add_client_error("describe_subnets", service_error_code="UnauthorizedOperation", http_status_code=403,
+                       expected_params={"Filters": [{"Name": "default-for-az", "Values": ["true"]}]})
+    e.add_response("run_instances", run_resp("i-p", az="us-east-1c"),
+                   expected_run_params(az="us-east-1c", maxp="1.1460", how="placement"))
+    r = R.Runner(make_cfg(tmp_path), aws.ec2, aws.s3, aws.ssm, clock=clk, out=lambda m: None)
+    assert r.launch(make_job())[0] == "launched"
+    assert "SubnetId" not in r.last_params
+    assert ledger(tmp_path, "subnets")[0]["code"] == "UnauthorizedOperation"
+    assert ledger(tmp_path, "launch")[0]["net"] == "placement"
+    aws.done()
+
+
+def test_private_default_subnet_gets_explicit_public_ip(tmp_path):
+    """Подсеть без MapPublicIpOnLaunch: сетевой интерфейс с публичным IPv4 — машине нужен интернет."""
+    aws, clk = Aws(), Clock()
+    e = aws.st["ec2"]
+    e.add_response("describe_spot_price_history", spot_resp("c7a.16xlarge", flat(LIVE_C7A)), spot_params("c7a.16xlarge"))
+    add_ami(aws)
+    add_subnets(aws, public=False)
+    e.add_response("run_instances", run_resp("i-n", az="us-east-1c"),
+                   expected_run_params(az="us-east-1c", maxp="1.1460", how="eni"))
+    r = R.Runner(make_cfg(tmp_path), aws.ec2, aws.s3, aws.ssm, clock=clk, out=lambda m: None)
+    assert r.launch(make_job())[0] == "launched"
+    aws.done()
+
+
+def test_zone_without_default_subnet_is_skipped(tmp_path):
+    aws, clk = Aws(), Clock()
+    e = aws.st["ec2"]
+    e.add_response("describe_spot_price_history", spot_resp("c7a.16xlarge", flat(LIVE_C7A)), spot_params("c7a.16xlarge"))
+    add_ami(aws)
+    add_subnets(aws, azs=("us-east-1a", "us-east-1b"))
+    e.add_response("run_instances", run_resp("i-s", az="us-east-1b"),
+                   expected_run_params(az="us-east-1b", maxp="1.1460"))
+    r = R.Runner(make_cfg(tmp_path), aws.ec2, aws.s3, aws.ssm, clock=clk, out=lambda m: None)
+    status, act = r.launch(make_job())
+    assert status == "launched" and act.az == "us-east-1b" and act.az_rank == 1 and act.az_cheapest == "us-east-1c"
+    aws.done()
+
+
+# ----------------------------------------------------------------------------- образ (пункт Б)
+def test_ubuntu_image_via_describe_images_when_ssm_denied(tmp_path):
+    aws, clk = Aws(), Clock()
+    e = aws.st["ec2"]
+    e.add_response("describe_spot_price_history", spot_resp("c7a.16xlarge", flat(LIVE_C7A)), spot_params("c7a.16xlarge"))
+    aws.st["ssm"].add_client_error("get_parameter", service_error_code="AccessDeniedException", http_status_code=400,
+                                   expected_params={"Name": R.IMAGES["ubuntu2404"]["ssm"]})
+    img = R.IMAGES["ubuntu2404"]
+    e.add_response("describe_images", {"Images": [
+        {"ImageId": "ami-0fixture0000000old", "CreationDate": "2026-10-01T00:00:00.000Z", "Name": "noble-old-FIXTURE"},
+        {"ImageId": "ami-0fixture0000000new", "CreationDate": "2026-11-01T00:00:00.000Z", "Name": "noble-new-FIXTURE"}]},
+        {"Owners": [img["owner"]], "Filters": [{"Name": "name", "Values": [img["name"]]},
+                                               {"Name": "state", "Values": ["available"]},
+                                               {"Name": "architecture", "Values": ["x86_64"]}]})
+    add_subnets(aws)
+    e.add_response("run_instances", run_resp("i-u", az="us-east-1c"),
+                   expected_run_params(az="us-east-1c", maxp="1.1460", root="/dev/sda1", ami="ami-0fixture0000000new"))
+    r = R.Runner(make_cfg(tmp_path), aws.ec2, aws.s3, aws.ssm, clock=clk, out=lambda m: None)
+    assert r.launch(make_job(image="ubuntu2404", apt=["gmsh"]))[0] == "launched"
+    aws.done()
+
+
+def test_unavailable_image_fails_only_its_job(tmp_path):
+    aws, clk = Aws(), Clock()
+    e = aws.st["ec2"]
+    e.add_response("describe_spot_price_history", spot_resp("c7a.16xlarge", flat(LIVE_C7A)), spot_params("c7a.16xlarge"))
+    aws.st["ssm"].add_client_error("get_parameter", service_error_code="AccessDeniedException", http_status_code=400,
+                                   expected_params={"Name": R.IMAGES["ubuntu2404"]["ssm"]})
+    e.add_client_error("describe_images", service_error_code="UnauthorizedOperation", http_status_code=403)
+    add_ami(aws, "al2023")
+    add_subnets(aws)
+    e.add_response("run_instances", run_resp("i-ok", az="us-east-1c"),
+                   expected_run_params(job="b", az="us-east-1c", maxp="1.1460"))
+    r = R.Runner(make_cfg(tmp_path), aws.ec2, aws.s3, aws.ssm, clock=clk, out=lambda m: None)
+    pending = deque([(make_job(name="a", apt=["gmsh"]), 1), (make_job(name="b"), 1)])
+    r._launch_some(pending)
+    assert r.results["a"]["status"] == "image_unavailable"
+    assert "al2023" in r.results["a"]["detail"] and "container" in r.results["a"]["detail"]
+    assert list(r.active) == ["i-ok"]
     aws.done()
 
 
@@ -230,6 +473,7 @@ def test_userdata_watchdog_first_and_no_keys():
     assert "poweroff" in ud and "trap finish EXIT" in ud
     assert f"s3_key={PREFIX}/gtu/{RUN}/{job.name}".lower() in low.replace("'", "")
     assert len(ud.encode()) <= R.USERDATA_LIMIT
+    assert "@@" not in ud                                       # все подстановки сделаны
 
 
 @pytest.mark.parametrize("image", ["ubuntu2404", "al2023"])
@@ -244,6 +488,46 @@ def test_userdata_bash_syntax(tmp_path, image):
     assert "'numpy>=1.26'" in ud                                # спецификации пакетов закавычены
 
 
+def test_userdata_python_mode_lines(tmp_path):
+    job = make_job(python="3.12", pip=["cantera", "numpy"], requirements="routes/gtu/req.txt")
+    ud = R.build_userdata(job, run_id=RUN, attempt=1, repo=R.DEFAULT_REPO, branch="main", bucket=BUCKET,
+                          key_prefix="p/gtu/r/j", az="us-east-1c", az_cheapest="us-east-1c", itype="c7a.16xlarge")
+    (tmp_path / "ud.sh").write_text(ud)
+    assert subprocess.run(["bash", "-n", str(tmp_path / "ud.sh")]).returncode == 0
+    for s in ('timeout 20m dnf -q install -y git python3-pip || exit 11',       # al2023 по умолчанию
+              'python3 -m venv "$G/uvboot" && timeout 10m "$G/uvboot/bin/pip" install -q uv',
+              'releases/latest/download/uv-$(uname -m)-unknown-linux-gnu.tar.gz',
+              'timeout 15m "$UV" python install 3.12 || exit 19',
+              'timeout 10m "$UV" venv --seed -q --python 3.12 "$G/venv" || exit 12',
+              'timeout 20m "$UV" pip install -q --python "$G/venv/bin/python" boto3 || exit 13',
+              'timeout 40m "$UV" pip install -q --python "$G/venv/bin/python" cantera numpy || exit 17',
+              'timeout 40m "$UV" pip install -q --python "$G/venv/bin/python" -r routes/gtu/req.txt || exit 23',
+              'export PATH="$G/venv/bin:$PATH" OMP_NUM_THREADS="$NPROC"', "NPROC=$(nproc)", "GTU_ITYPE=c7a.16xlarge"):
+        assert s in ud, s
+    assert ud.index("phase clone") < ud.index("phase requirements") < ud.index("phase command")
+    assert "docker" not in ud
+
+
+def test_userdata_container_mode_lines(tmp_path):
+    job = make_job(container="ubuntu:24.04", container_setup=["apt-get update -q", "apt-get install -y -q calculix-ccx"])
+    ud = R.build_userdata(job, run_id=RUN, attempt=1, repo=R.DEFAULT_REPO, branch="main", bucket=BUCKET,
+                          key_prefix="p/gtu/r/j")
+    (tmp_path / "ud.sh").write_text(ud)
+    assert subprocess.run(["bash", "-n", str(tmp_path / "ud.sh")]).returncode == 0
+    for s in ("timeout 20m dnf -q install -y git python3-pip docker || exit 11",
+              "timeout 5m systemctl start docker || exit 21",
+              "timeout 30m docker pull -q ubuntu:24.04 || exit 22",
+              "docker run --rm --name gtu-job --user 0:0 --entrypoint /bin/bash",
+              '--cpus "$NPROC" --shm-size "$((MEM_KB / 2))k"',
+              '-v "$G/repo:/gtu/repo" -v "$OUT:/gtu/out"', "-e GTU_OUT=/gtu/out", "-e NPROC",
+              "ubuntu:24.04 /gtu/ctr/entry.sh", "apt-get install -y -q calculix-ccx",
+              'cat >"$G/ctr/cmd.sh" <<\'GTU_CMD_EOF\''):
+        assert s in ud, s
+    fin = ud[ud.index("finish() {"):ud.index("trap finish EXIT")]
+    assert fin.index("docker kill gtu-job") < fin.index('up "$OUT"')     # контейнер снят до выгрузки
+    assert "uvboot" not in ud and "venv/bin/pip\" install -q --upgrade pip boto3" in ud   # boto3 — снаружи
+
+
 def test_secrets_refused():
     with pytest.raises(R.RunnerError):
         make_job(command=f"export AWS_ACCESS_KEY_ID={FAKE_AKID}; run")
@@ -251,6 +535,8 @@ def test_secrets_refused():
         make_job(command=f"echo {FAKE_SECRET}")
     with pytest.raises(R.RunnerError):
         make_job(command="echo AKIAEXAMPLE000000000")
+    with pytest.raises(R.RunnerError):
+        make_job(container="ubuntu:24.04", container_setup=[f"echo {FAKE_SECRET}"])
     job = R.Job(name="j", command="echo ok", max_min=60)
     R.validate_job(job)
     job.command = f"echo {FAKE_SECRET}"                         # в обход проверки задачи
@@ -270,13 +556,43 @@ SHIMS = {
     "poweroff": 'echo poweroff >> "$CALLS"\n',
     "timeout": 'echo "timeout $*" >> "$CALLS"\nexec "$REALTIMEOUT" "$@"\n',
     "apt-get": 'echo "apt-get $*" >> "$CALLS"\ncase " $* " in *" failpkg "*) exit 100;; esac\n',
-    "git": 'echo "git $*" >> "$CALLS"\nfor last; do :; done\n[ "$1" = clone ] && mkdir -p "$last"\nexit 0\n',
+    "dnf": 'echo "dnf $*" >> "$CALLS"\ncase " $* " in *" failpkg "*) exit 1;; esac\n',
+    "systemctl": 'echo "systemctl $*" >> "$CALLS"\n',
+    "git": ('echo "git $*" >> "$CALLS"\nfor last; do :; done\n'
+            'if [ "$1" = clone ]; then mkdir -p "$last"; [ -n "${FAKE_REQ:-}" ] && echo numpy > "$last/$FAKE_REQ"; fi\n'
+            'exit 0\n'),
+    # IMDS: токен и зона — выдуманные (FIXTURE); прочие адреса недоступны
+    "curl": ('case "$*" in\n  *api/token*) echo TOKEN-FIXTURE;;\n  *placement/availability-zone*) echo us-east-1c;;\n'
+             '  *instance-type*) echo c7a.16xlarge;;\n  *) exit 22;;\nesac\n'),
     "python3": ('if [ "$1" = -m ] && [ "$2" = venv ]; then\n'
                 '  mkdir -p "$3/bin"\n'
                 "  printf '#!/bin/bash\\nexec env PYTHONPATH=\"$FAKEMODS\" \"$REALPY\" \"$@\"\\n' > \"$3/bin/python\"\n"
                 "  printf '#!/bin/bash\\necho \"pip $*\" >> \"$CALLS\"\\n' > \"$3/bin/pip\"\n"
                 '  chmod +x "$3/bin/python" "$3/bin/pip"; echo venv >> "$CALLS"; exit 0\n'
                 'fi\nexec "$REALPY" "$@"\n'),
+    "uv": ('echo "uv $*" >> "$CALLS"\n'
+           'if [ "$1" = venv ]; then\n  for last; do :; done\n  mkdir -p "$last/bin"\n'
+           "  printf '#!/bin/bash\\nexec env PYTHONPATH=\"$FAKEMODS\" \"$REALPY\" \"$@\"\\n' > \"$last/bin/python\"\n"
+           "  printf '#!/bin/bash\\necho \"pip $*\" >> \"$CALLS\"\\n' > \"$last/bin/pip\"\n"
+           '  chmod +x "$last/bin/python" "$last/bin/pip"\nfi\n'
+           '[ "$1" = --version ] && echo "uv 0.0.0-FIXTURE"\nexit 0\n'),
+    # docker: тома -v — символьные ссылки, -e — окружение, команда — bash на хосте (точка входа /bin/bash)
+    "docker": ('echo "docker $*" >> "$CALLS"\n'
+               'case "$1" in\n'
+               '  pull) [ -n "${FAIL_PULL:-}" ] && exit 1; exit 0;;\n'
+               '  run) shift; envs=(); wd=/\n'
+               '    while [ $# -gt 0 ]; do\n'
+               '      case "$1" in\n'
+               '        -v) src=${2%%:*}; rest=${2#*:}; dst=${rest%%:*}; mkdir -p "$(dirname "$dst")"; ln -sfn "$src" "$dst"; shift 2;;\n'
+               '        -e) case "$2" in *=*) envs+=("$2");; *) envs+=("$2=${!2}");; esac; shift 2;;\n'
+               '        -w) wd=$2; shift 2;;\n'
+               '        --entrypoint|--name|--cpus|--shm-size|--user) shift 2;;\n'
+               '        --rm|--init) shift;;\n'
+               '        *) break;;\n'
+               '      esac\n'
+               '    done\n'
+               '    shift; cd "$wd" || exit 125; exec env "${envs[@]}" bash "$@";;\n'
+               'esac\nexit 0\n'),
 }
 FAKE_BOTO3 = '''import os, shutil
 class _S3:
@@ -292,42 +608,61 @@ def client(name, *a, **k):
 '''
 
 
-def run_box(tmp_path, job):
-    """Выполнить user-data локально: shutdown/poweroff/apt-get/git/python3 подменены, boto3 — поддельный."""
+def run_box(tmp_path, job, env_extra=None, skip=(), **ud_kw):
+    """Выполнить user-data локально: системные команды подменены, boto3 — поддельный."""
     shims, mods, s3dir, calls = tmp_path / "shims", tmp_path / "mods" / "boto3", tmp_path / "s3", tmp_path / "calls"
-    shims.mkdir()
+    shims.mkdir(parents=True)
     mods.mkdir(parents=True)
     for name, text in SHIMS.items():
+        if name in skip:
+            continue
         (shims / name).write_text("#!/bin/bash\n" + text)
         (shims / name).chmod(0o755)
     (mods / "__init__.py").write_text(FAKE_BOTO3)
     kp = f"pfx/gtu/rid1/{job.name}"
     ud = R.build_userdata(job, run_id="rid1", attempt=1, repo=R.DEFAULT_REPO, branch="main", bucket="bkt",
-                          key_prefix=kp, _root=str(tmp_path / "box"), _log=str(tmp_path / "box.log"))
+                          key_prefix=kp, _root=str(tmp_path / "box"), _log=str(tmp_path / "box.log"),
+                          _ctr_root=str(tmp_path / "ctrroot"), **ud_kw)
     (tmp_path / "ud.sh").write_text(ud)
-    env = {"PATH": f"{shims}:{os.environ['PATH']}", "CALLS": str(calls), "S3DIR": str(s3dir),
+    path = os.environ["PATH"]
+    if "uv" in skip:                                            # настоящий uv в PATH не должен подхватиться
+        path = ":".join(p for p in path.split(":") if not (Path(p) / "uv").exists())
+    env = {"PATH": f"{shims}:{path}", "CALLS": str(calls), "S3DIR": str(s3dir),
            "FAKEMODS": str(tmp_path / "mods"), "REALPY": sys.executable, "HOME": str(tmp_path),
            "REALTIMEOUT": shutil.which("timeout")}
+    env.update(env_extra or {})
     subprocess.run(["bash", str(tmp_path / "ud.sh")], env=env, timeout=120, check=False)
     return calls.read_text().splitlines(), s3dir / "bkt" / kp
+
+
+def _done(s3):
+    d = json.loads((s3 / "_DONE.json").read_text())
+    return d["phase"], d["exit_code"]
 
 
 def test_userdata_runs_locally_success(tmp_path):
     job = make_job(name="box-ok", max_min=30, pip=["cantera"],
                    command='echo hello > "$GTU_OUT/result.txt"\nmkdir -p "$GTU_OUT/sub"\n'
-                           'echo 42 > "$GTU_OUT/sub/x.txt"\npwd > "$GTU_OUT/pwd.txt"')
-    calls, s3 = run_box(tmp_path, job)
+                           'echo 42 > "$GTU_OUT/sub/x.txt"\npwd > "$GTU_OUT/pwd.txt"\necho "$NPROC" > "$GTU_OUT/nproc.txt"')
+    calls, s3 = run_box(tmp_path, job, az="us-east-1c", az_cheapest="us-east-1c")
     assert calls[0] == "shutdown -P +30"                       # сторож первым
     assert calls[-1] == "poweroff"                              # гасится сама
     assert calls[-2] == "upload pfx/gtu/rid1/box-ok/_DONE.json" # метка — последней
     assert any(c.startswith("git clone -q --depth 1 -b main https://github.com/") for c in calls)
+    assert "dnf -q install -y git python3-pip" in calls         # al2023 — образ по умолчанию
     assert "pip install -q cantera" in calls
     assert (s3 / "result.txt").read_text() == "hello\n"
     assert (s3 / "sub" / "x.txt").read_text() == "42\n"
     assert (s3 / "pwd.txt").read_text().strip() == str(tmp_path / "box" / "repo")
+    assert (s3 / "nproc.txt").read_text().strip() == subprocess.run(["nproc"], capture_output=True, text=True).stdout.strip()
     assert (s3 / "_job.log").exists() and (s3 / "_stdout.log").exists()
     done = json.loads((s3 / "_DONE.json").read_text())
     assert done["phase"] == "done" and done["exit_code"] == 0 and done["run_id"] == "rid1"
+    assert done["az"] == "us-east-1c" and done["az_planned"] == "us-east-1c" and done["itype"] == "c7a.16xlarge"
+    assert done["t_start"] <= done["t_cmd"] <= done["t_end"]
+    log = (s3 / "_job.log").read_text()
+    for ph in ("base", "venv", "packages", "clone", "command"):  # время каждой фазы — в журнале машины
+        assert re.search(rf"\[gtu-time\] {ph} \d+s total=\d+s", log), ph
     # выгрузка укладывается до сторожа: результаты — не дольше (срок − прошло − 120 с), метка — 60 с
     ups = [c.split()[1] for c in calls if c.startswith("timeout ") and "upload.py" in c]
     assert len(ups) == 2 and ups[1] == "60s"
@@ -337,75 +672,111 @@ def test_userdata_runs_locally_success(tmp_path):
 def test_upload_window_fits_inside_watchdog():
     """Худший случай: команда снята по timeout -k 60 в последний момент — метка всё равно до сторожа."""
     for max_min in (20, 60, 720):
-        job = make_job(max_min=max_min)
-        ud = R.build_userdata(job, run_id=RUN, attempt=1, repo=R.DEFAULT_REPO, branch="main",
-                              bucket=BUCKET, key_prefix="p/gtu/r/j")
-        reserve = 8 * 60
-        cmd_end = max_min * 60 - reserve + 60                   # DEADLINE + -k 60 (от T0)
-        left = min(1800, max(30, max_min * 60 - cmd_end - 120))  # как в finish()
-        assert cmd_end + left + 60 <= max_min * 60 - 60         # результаты + метка, минута до сторожа
-        assert 'up "$OUT" "$LEFT"' in ud and 'up "$G/_DONE.json" 60' in ud
-        assert f"WD_END=$((T0 + {max_min} * 60))" in ud
+        for kw in ({}, {"python": "3.12"}, {"container": "ubuntu:24.04"}):
+            job = make_job(max_min=max_min, **kw)
+            ud = R.build_userdata(job, run_id=RUN, attempt=1, repo=R.DEFAULT_REPO, branch="main",
+                                  bucket=BUCKET, key_prefix="p/gtu/r/j")
+            reserve = 8 * 60
+            cmd_end = max_min * 60 - reserve + 60                   # DEADLINE + -k 60 (от T0)
+            left = min(1800, max(30, max_min * 60 - cmd_end - 120))  # как в finish()
+            assert cmd_end + left + 60 <= max_min * 60 - 60         # результаты + метка, минута до сторожа
+            assert 'up "$OUT" "$LEFT"' in ud and 'up "$G/_DONE.json" 60' in ud
+            assert f"WD_END=$((T0 + {max_min} * 60))" in ud
 
 
 def test_userdata_runs_locally_failures(tmp_path):
-    calls, s3 = run_box(tmp_path / "a", _mk(tmp_path / "a", make_job(name="box-fail", max_min=30, command="exit 3")))
-    done = json.loads((s3 / "_DONE.json").read_text())
-    assert (done["phase"], done["exit_code"]) == ("done", 3)
+    calls, s3 = run_box(tmp_path / "a", make_job(name="box-fail", max_min=30, command="exit 3"))
+    assert _done(s3) == ("done", 3)
     assert calls[0] == "shutdown -P +30" and calls[-1] == "poweroff"
     # сбой пакетов задачи: журнал и метка всё равно выгружены, клонирования нет
-    calls, s3 = run_box(tmp_path / "b", _mk(tmp_path / "b", make_job(name="box-pkg", max_min=30, apt=["failpkg"])))
-    done = json.loads((s3 / "_DONE.json").read_text())
-    assert (done["phase"], done["exit_code"]) == ("packages", 16)
+    calls, s3 = run_box(tmp_path / "b", make_job(name="box-pkg", max_min=30, apt=["failpkg"]))
+    assert _done(s3) == ("packages", 16)
     assert not any(c.startswith("git clone") for c in calls)
     assert (s3 / "_job.log").exists() and calls[-1] == "poweroff"
 
 
-def _mk(path, job):
-    path.mkdir(parents=True)
-    return job
+def test_userdata_python_mode_runs_locally(tmp_path):
+    job = make_job(name="box-py", max_min=30, python="3.12", pip=["cantera"], requirements="req.txt",
+                   command='command -v python > "$GTU_OUT/which.txt"\necho "$NPROC" > "$GTU_OUT/nproc.txt"')
+    calls, s3 = run_box(tmp_path, job, env_extra={"FAKE_REQ": "req.txt"})
+    venv = tmp_path / "box" / "venv"
+    assert _done(s3) == ("done", 0) and calls[-1] == "poweroff"
+    assert "uv python install 3.12" in calls
+    assert f"uv venv --seed -q --python 3.12 {venv}" in calls
+    assert f"uv pip install -q --python {venv}/bin/python boto3" in calls
+    assert f"uv pip install -q --python {venv}/bin/python cantera" in calls
+    assert f"uv pip install -q --python {venv}/bin/python -r req.txt" in calls
+    assert calls.index(f"uv pip install -q --python {venv}/bin/python -r req.txt") > \
+        next(i for i, c in enumerate(calls) if c.startswith("git clone"))        # requirements — после клона
+    assert (s3 / "which.txt").read_text().strip() == f"{venv}/bin/python"        # PATH — на venv
+    assert int((s3 / "nproc.txt").read_text()) >= 1
+    log = (s3 / "_job.log").read_text()
+    assert "uv 0.0.0-FIXTURE" in log and re.search(r"\[gtu-time\] venv \d+s", log)
+    assert re.search(r"\[gtu-time\] requirements \d+s", log)
+
+
+def test_userdata_python_mode_without_uv_fails_cleanly(tmp_path):
+    """uv не поставился ни из PyPI, ни из выпуска GitHub: фаза venv, код 18, журнал выгружен, машина гаснет."""
+    job = make_job(name="box-nouv", max_min=30, python="3.12")
+    calls, s3 = run_box(tmp_path, job, skip=("uv",))
+    assert "pip install -q uv" in calls                          # сначала PyPI в отдельный venv
+    assert calls[-1] == "poweroff"
+    # boto3 в venv задачи не поставлен — выгрузка через aws cli или «UPLOAD-UNAVAILABLE»: метки в S3 может не быть
+    log = (tmp_path / "box.log").read_text()
+    assert "finish phase=venv rc=18" in log and "GitHub release" in log
+
+
+def _ctr_job(**kw):
+    base = dict(name="box-ctr", max_min=30, container="ubuntu:24.04", container_setup=["echo setup-ok"],
+                command='echo "inside nproc=$NPROC" > "$GTU_OUT/inside.txt"\npwd > "$GTU_OUT/pwd.txt"')
+    base.update(kw)
+    return make_job(**base)
+
+
+def test_userdata_container_runs_locally(tmp_path):
+    calls, s3 = run_box(tmp_path, _ctr_job())
+    assert _done(s3) == ("done", 0)
+    assert calls[0] == "shutdown -P +30" and calls[-1] == "poweroff"
+    assert calls[-2] == "upload pfx/gtu/rid1/box-ctr/_DONE.json"
+    assert "dnf -q install -y git python3-pip docker" in calls and "systemctl start docker" in calls
+    assert "docker pull -q ubuntu:24.04" in calls
+    run = next(c for c in calls if c.startswith("docker run"))
+    assert "--cpus" in run and "--shm-size" in run and "-e NPROC" in run
+    assert "docker kill gtu-job" in calls                         # снаружи, в finish
+    nproc = subprocess.run(["nproc"], capture_output=True, text=True).stdout.strip()
+    assert (s3 / "inside.txt").read_text().strip() == f"inside nproc={nproc}"
+    assert (s3 / "pwd.txt").read_text().strip() == str(tmp_path / "ctrroot" / "repo")
+    assert (s3 / "_container_setup.log").read_text().strip() == "setup-ok"
+    assert re.search(r"\[gtu-time\] container_setup \d+s", (s3 / "_job.log").read_text())
+
+
+@pytest.mark.parametrize("case,kw,env,expect", [
+    ("setup-fails", {"container_setup": ["false"]}, {}, ("container", 20)),
+    ("command-fails", {"command": "exit 7"}, {}, ("done", 7)),
+    ("pull-fails", {}, {"FAIL_PULL": "1"}, ("pull", 22)),
+])
+def test_container_failure_still_uploads_and_powers_off(tmp_path, case, kw, env, expect):
+    calls, s3 = run_box(tmp_path, _ctr_job(**kw), env_extra=env)
+    assert _done(s3) == expect
+    assert calls[-1] == "poweroff" and calls[-2].endswith("/_DONE.json")
+    assert (s3 / "_job.log").exists()
+    if case == "setup-fails":
+        assert not (s3 / "inside.txt").exists()
+    if case == "pull-fails":
+        assert not any(c.startswith("git clone") for c in calls) and not any(c.startswith("docker run") for c in calls)
 
 
 # ----------------------------------------------------------------------------- run_instances
-def expected_run_params(itype="c7a.16xlarge", maxp="1.5600", job="su2-comp130", disk=50, root="/dev/sda1"):
-    tags = [{"Key": "Project", "Value": R.DEFAULT_TAG}, {"Key": "RunId", "Value": RUN},
-            {"Key": "Job", "Value": job}, {"Key": "Name", "Value": f"gtu-{job}"}]
-    return {
-        "ImageId": "ami-0123456789abcdef0", "InstanceType": itype, "MinCount": 1, "MaxCount": 1,
-        "IamInstanceProfile": {"Name": "gtu-test-profile"},
-        "InstanceInitiatedShutdownBehavior": "terminate",
-        "InstanceMarketOptions": {"MarketType": "spot",
-                                  "SpotOptions": {"MaxPrice": maxp, "SpotInstanceType": "one-time",
-                                                  "InstanceInterruptionBehavior": "terminate"}},
-        "MetadataOptions": {"HttpTokens": "required", "HttpPutResponseHopLimit": 1, "HttpEndpoint": "enabled"},
-        "BlockDeviceMappings": [{"DeviceName": root, "Ebs": {"VolumeSize": disk, "VolumeType": "gp3",
-                                                             "DeleteOnTermination": True}}],
-        "TagSpecifications": [{"ResourceType": "instance", "Tags": tags}, {"ResourceType": "volume", "Tags": tags}],
-        "UserData": ANY, "ClientToken": ANY,
-    }
-
-
-def add_ami(aws, image="ubuntu2404"):
-    aws.st["ssm"].add_response("get_parameter",
-                               {"Parameter": {"Name": R.IMAGES[image]["ssm"], "Type": "String",
-                                              "Value": "ami-0123456789abcdef0", "Version": 1}},
-                               {"Name": R.IMAGES[image]["ssm"]})
-
-
-def run_resp(iid, itype="c7a.16xlarge", az="us-east-1b"):
-    return {"Instances": [{"InstanceId": iid, "InstanceType": itype, "Placement": {"AvailabilityZone": az},
-                           "State": {"Name": "pending"}}]}
-
-
 def test_run_instances_params(tmp_path):
     aws, clk = Aws(), Clock()
     aws.st["ec2"].add_response("describe_spot_price_history", spot_resp("c7a.16xlarge", PRICES_C7A),
                                spot_params("c7a.16xlarge"))
     add_ami(aws)
+    add_subnets(aws)
     aws.st["ec2"].add_response("run_instances", run_resp("i-0aaa"), expected_run_params())
     r = R.Runner(make_cfg(tmp_path), aws.ec2, aws.s3, aws.ssm, clock=clk, out=lambda m: None)
     status, act = r.launch(make_job())
-    assert status == "launched" and act.iid == "i-0aaa" and act.az == "us-east-1b"
+    assert status == "launched" and act.iid == "i-0aaa" and act.az == "us-east-1a"
     assert act.deadline == T0 + 70 * 60
     p = r.last_params
     assert p["InstanceMarketOptions"]["MarketType"] == "spot"
@@ -413,29 +784,9 @@ def test_run_instances_params(tmp_path):
     assert p["InstanceInitiatedShutdownBehavior"] == "terminate"
     assert p["UserData"].splitlines()[1] == "shutdown -P +60"
     assert len(p["ClientToken"]) <= 64 and "KeyName" not in p
-    rec = [x for x in R.Ledger(tmp_path / "ledger.jsonl").records() if x["ev"] == "launch"][0]
-    assert rec["iid"] == "i-0aaa" and rec["spot_usd_h"] == 1.2 and rec["max_usd_h"] == pytest.approx(1.56)
-    assert rec["allot_min"] == 70
-    aws.done()
-
-
-def test_fallback_type_on_capacity_error(tmp_path):
-    aws, clk = Aws(), Clock()
-    e = aws.st["ec2"]
-    e.add_response("describe_spot_price_history", spot_resp("c7a.16xlarge", PRICES_C7A), spot_params("c7a.16xlarge"))
-    add_ami(aws)
-    e.add_client_error("run_instances", service_error_code="InsufficientInstanceCapacity",
-                       service_message="no capacity", http_status_code=500, expected_params=expected_run_params())
-    e.add_response("describe_spot_price_history", spot_resp("c7i.16xlarge", {"us-east-1c": [(1.0, -60)]}),
-                   spot_params("c7i.16xlarge"))
-    e.add_response("run_instances", run_resp("i-0bbb", "c7i.16xlarge", "us-east-1c"),
-                   expected_run_params(itype="c7i.16xlarge", maxp="1.2000"))
-    r = R.Runner(make_cfg(tmp_path), aws.ec2, aws.s3, aws.ssm, clock=clk, out=lambda m: None)
-    status, act = r.launch(make_job())
-    assert status == "launched" and act.itype == "c7i.16xlarge"
-    evs = [(x["ev"], x.get("itype"), x.get("code")) for x in R.Ledger(tmp_path / "ledger.jsonl").records()]
-    assert ("launch_error", "c7a.16xlarge", "InsufficientInstanceCapacity") in evs
-    assert ("launch", "c7i.16xlarge", None) in evs
+    rec = ledger(tmp_path, "launch")[0]
+    assert rec["iid"] == "i-0aaa" and rec["spot_usd_h"] == 1.1 and rec["max_usd_h"] == pytest.approx(1.56)
+    assert rec["allot_min"] == 70 and rec["az_rank"] == 0 and rec["image"] == "al2023" and rec["mode"] == "system"
     aws.done()
 
 
@@ -444,6 +795,7 @@ def test_dryrun_does_not_launch(tmp_path):
     aws.st["ec2"].add_response("describe_spot_price_history", spot_resp("c7a.16xlarge", PRICES_C7A),
                                spot_params("c7a.16xlarge"))
     add_ami(aws)
+    add_subnets(aws)
     exp = dict(expected_run_params(), DryRun=True)
     aws.st["ec2"].add_client_error("run_instances", service_error_code="DryRunOperation",
                                    service_message="Request would have succeeded", http_status_code=412,
@@ -454,7 +806,7 @@ def test_dryrun_does_not_launch(tmp_path):
     assert res["su2-comp130"]["status"] == "dryrun_ok"
     assert not (tmp_path / "ledger.jsonl").exists()             # общий журнал не тронут
     side = R.Ledger(cfg.out_dir / RUN / "journal.dryrun.jsonl").records()
-    assert any(x["ev"] == "dryrun" and x["ok"] for x in side)
+    assert any(x["ev"] == "dryrun" and x["ok"] and x["az"] == "us-east-1a" for x in side)
     aws.done()                                                  # ни terminate, ни сборщика не было
 
 
@@ -557,6 +909,14 @@ def test_collector_downloads_and_rejects_traversal(tmp_path):
     aws.done()
 
 
+def test_attempt_prefixes_do_not_collide_with_jobs(tmp_path):
+    r = R.Runner(make_cfg(tmp_path), out=lambda m: None)
+    assert r.key_prefix("a") == f"{PREFIX}/gtu/{RUN}/a"
+    assert r.key_prefix("a", attempt=2) == f"{PREFIX}/gtu/{RUN}/_attempt2/a"
+    with pytest.raises(R.RunnerError):                          # задача не может называться «_attempt2»
+        make_job(name="_attempt2")
+
+
 # ----------------------------------------------------------------------------- полный цикл
 def test_full_cycle_launch_poll_collect_reap_no_secrets(tmp_path):
     aws, clk, out = Aws(), Clock(), []
@@ -564,6 +924,7 @@ def test_full_cycle_launch_poll_collect_reap_no_secrets(tmp_path):
     pfx = f"{PREFIX}/gtu/{RUN}/su2-comp130/"
     e.add_response("describe_spot_price_history", spot_resp("c7a.16xlarge", PRICES_C7A), spot_params("c7a.16xlarge"))
     add_ami(aws)
+    add_subnets(aws)
     e.add_response("run_instances", run_resp("i-0ccc"), expected_run_params())
     filt = {"Filters": [{"Name": "instance-id", "Values": ["i-0ccc"]}]}
     # опрос 1: машина работает, метки нет
@@ -572,7 +933,8 @@ def test_full_cycle_launch_poll_collect_reap_no_secrets(tmp_path):
                        expected_params={"Bucket": BUCKET, "Key": pfx + "_DONE.json"})
     # опрос 2: метка есть -> сбор -> гашение
     e.add_response("describe_instances", {"Reservations": [{"Instances": [inst("i-0ccc", tags=own_tags())]}]}, filt)
-    done = json.dumps({"run_id": RUN, "job": "su2-comp130", "phase": "done", "exit_code": 0}).encode()
+    done = json.dumps({"run_id": RUN, "job": "su2-comp130", "attempt": 1, "phase": "done", "exit_code": 0,
+                       "az": "us-east-1a"}).encode()
     s.add_response("get_object", {"Body": body(done)}, {"Bucket": BUCKET, "Key": pfx + "_DONE.json"})
     s.add_response("list_objects_v2", {"IsTruncated": False, "Contents": [
         {"Key": pfx + "a.txt"}, {"Key": pfx + "_DONE.json"}]}, {"Bucket": BUCKET, "Prefix": pfx})
@@ -584,11 +946,13 @@ def test_full_cycle_launch_poll_collect_reap_no_secrets(tmp_path):
         inst("i-sibling", tags=own_tags(run="other-run"))]}]}, reap_filters())
     r = R.Runner(make_cfg(tmp_path), aws.ec2, aws.s3, aws.ssm, clock=clk, sleep=clk.sleep, out=out.append)
     res = r.run([make_job()])
-    assert res["su2-comp130"]["status"] == "ok" and res["su2-comp130"]["files"] == 2
+    j = res["su2-comp130"]
+    assert j["status"] == "ok" and j["files"] == 2
+    assert (j["az"], j["az_rank"], j["cheapest_zone"], j["az_machine"]) == ("us-east-1a", 0, True, "us-east-1a")
     assert (tmp_path / "runs" / RUN / "su2-comp130" / "a.txt").read_text() == "hi\n"
     s_ = R.Ledger(tmp_path / "ledger.jsonl").summary()
     assert s_["open"] == [] and s_["closed"] == 1
-    assert s_["spent"] == pytest.approx((1.2 + 50 * 0.08 / 730 + 0.005) * 120 / 3600, abs=1e-4)   # 2 опроса по 60 с
+    assert s_["spent"] == pytest.approx((1.1 + 50 * 0.08 / 730 + 0.005) * 120 / 3600, abs=1e-4)   # 2 опроса по 60 с
     aws.done()
     # ключи и имя бакета (в нём номер аккаунта) нигде не напечатаны и не записаны
     texts = ["\n".join(out), (tmp_path / "ledger.jsonl").read_text(),
@@ -603,6 +967,7 @@ def test_deadline_reaps_hung_instance(tmp_path):
     pfx = f"{PREFIX}/gtu/{RUN}/su2-comp130/"
     e.add_response("describe_spot_price_history", spot_resp("c7a.16xlarge", PRICES_C7A), spot_params("c7a.16xlarge"))
     add_ami(aws)
+    add_subnets(aws)
     e.add_response("run_instances", run_resp("i-0ddd"), expected_run_params())
     e.add_response("describe_instances", {"Reservations": [{"Instances": [inst("i-0ddd", tags=own_tags())]}]},
                    {"Filters": [{"Name": "instance-id", "Values": ["i-0ddd"]}]})
@@ -619,35 +984,39 @@ def test_deadline_reaps_hung_instance(tmp_path):
 
 
 def test_lost_instance_is_retried_once(tmp_path):
-    """Машина погашена без метки (прерывание спота) -> одна повторная попытка."""
+    """Машина погашена без метки (прерывание спота) -> одна повторная попытка в свой префикс и в другую зону."""
     aws, clk = Aws(), Clock()
     e, s = aws.st["ec2"], aws.st["s3"]
     pfx = f"{PREFIX}/gtu/{RUN}/su2-comp130/"
+    pfx2 = f"{PREFIX}/gtu/{RUN}/_attempt2/su2-comp130/"
     e.add_response("describe_spot_price_history", spot_resp("c7a.16xlarge", PRICES_C7A), spot_params("c7a.16xlarge"))
     add_ami(aws)
-    e.add_response("run_instances", run_resp("i-1"), expected_run_params())
+    add_subnets(aws)
+    e.add_response("run_instances", run_resp("i-1", az="us-east-1a"), expected_run_params())
     e.add_response("describe_instances", {"Reservations": [{"Instances": [
-        inst("i-1", "terminated", own_tags(), reason="Server.SpotInstanceTermination")]}]},
+        inst("i-1", "terminated", own_tags(), az="us-east-1a", reason="Server.SpotInstanceTermination")]}]},
         {"Filters": [{"Name": "instance-id", "Values": ["i-1"]}]})
     s.add_client_error("get_object", service_error_code="NoSuchKey", http_status_code=404,
                        expected_params={"Bucket": BUCKET, "Key": pfx + "_DONE.json"})
     s.add_response("list_objects_v2", {"IsTruncated": False}, {"Bucket": BUCKET, "Prefix": pfx})
-    # повтор: прошло 60 с < 300 с — цена берётся из кэша (без нового запроса), запуск второй машины
-    e.add_response("run_instances", run_resp("i-2"), expected_run_params())
+    # повтор: цена из кэша (60 с < 300 с); зона 1a после прерывания — в конце, просимся в 1b
+    e.add_response("run_instances", run_resp("i-2", az="us-east-1b"), expected_run_params(az="us-east-1b"))
     e.add_response("describe_instances", {"Reservations": [{"Instances": [inst("i-2", tags=own_tags())]}]},
                    {"Filters": [{"Name": "instance-id", "Values": ["i-2"]}]})
     done = json.dumps({"phase": "done", "exit_code": 0}).encode()
-    s.add_response("get_object", {"Body": body(done)}, {"Bucket": BUCKET, "Key": pfx + "_DONE.json"})
-    s.add_response("list_objects_v2", {"IsTruncated": False, "Contents": [{"Key": pfx + "_DONE.json"}]},
-                   {"Bucket": BUCKET, "Prefix": pfx})
-    s.add_response("get_object", {"Body": body(done)}, {"Bucket": BUCKET, "Key": pfx + "_DONE.json"})
+    s.add_response("get_object", {"Body": body(done)}, {"Bucket": BUCKET, "Key": pfx2 + "_DONE.json"})
+    s.add_response("list_objects_v2", {"IsTruncated": False, "Contents": [{"Key": pfx2 + "_DONE.json"}]},
+                   {"Bucket": BUCKET, "Prefix": pfx2})
+    s.add_response("get_object", {"Body": body(done)}, {"Bucket": BUCKET, "Key": pfx2 + "_DONE.json"})
     e.add_response("terminate_instances", {"TerminatingInstances": []}, {"InstanceIds": ["i-2"]})
     e.add_response("describe_instances", {"Reservations": []}, reap_filters())
     r = R.Runner(make_cfg(tmp_path), aws.ec2, aws.s3, aws.ssm, clock=clk, sleep=clk.sleep, out=lambda m: None)
     res = r.run([make_job()])
     assert res["su2-comp130"]["status"] == "ok" and res["su2-comp130"]["attempts"] == 2
-    ends = [x for x in R.Ledger(tmp_path / "ledger.jsonl").records() if x["ev"] == "end"]
+    assert res["su2-comp130"]["az"] == "us-east-1b" and res["su2-comp130"]["az_rank"] == 1
+    ends = [x for x in ledger(tmp_path, "end")]
     assert [(x["iid"], x["outcome"]) for x in ends] == [("i-1", "lost"), ("i-2", "done")]
+    assert "GTU_ATTEMPT=2" in r.last_params["UserData"] and f"S3_KEY={pfx2.rstrip('/')}" in r.last_params["UserData"]
     aws.done()
 
 
@@ -665,6 +1034,206 @@ def test_reconcile_closes_dead_instances_from_crashed_session(tmp_path):
     aws.done()
 
 
+# ----------------------------------------------------------------------------- очередь (пункт Г): своя заглушка AWS
+def cerr(code, op="Op"):
+    return ClientError({"Error": {"Code": code, "Message": code}}, op)
+
+
+class FakeCloud:
+    """Своя заглушка EC2/S3/SSM: машина «работает» run_s секунд и выгружает результат и метку, как user-data;
+    прерывание спота — по таблице interrupt {(задача, попытка): через сколько секунд}."""
+
+    def __init__(self, clock, run_s=300, prices=None, fail=(), interrupt=None, irq_reason=R.SPOT_REASON):
+        self.clock, self.run_s, self.irq_reason = clock, run_s, irq_reason
+        self.prices = prices or {"c7a.16xlarge": LIVE_C7A, "c7i.16xlarge": {"us-east-1b": 0.80, "us-east-1c": 0.78}}
+        self.fail, self.interrupt = list(fail), dict(interrupt or {})
+        self.inst, self.objects, self.runs, self.max_live, self.max_vcpu = {}, {}, [], 0, 0
+        self.ec2, self.s3, self.ssm = _FakeEc2(self), _FakeS3(self), _FakeSsm()
+
+    def live(self):
+        return [i for i in self.inst.values() if i["state"] in ("pending", "running")]
+
+    def tick(self):
+        now = self.clock()
+        for i in self.inst.values():
+            if i["state"] != "running" or i["uploaded"]:
+                continue
+            irq = self.interrupt.get((i["job"], i["attempt"]))
+            if irq is not None and now - i["t"] >= irq:
+                i["state"], i["reason"], i["uploaded"] = "terminated", self.irq_reason, True
+                self.objects[i["key"] + "/partial.txt"] = b"partial"
+                self.objects[i["key"] + "/_DONE.json"] = json.dumps(
+                    {"attempt": i["attempt"], "phase": "command", "exit_code": 143}).encode()
+            elif now - i["t"] >= self.run_s:
+                i["uploaded"] = True
+                self.objects[i["key"] + "/result.txt"] = f"{i['job']} a{i['attempt']}".encode()
+                self.objects[i["key"] + "/_DONE.json"] = json.dumps(
+                    {"attempt": i["attempt"], "phase": "done", "exit_code": 0, "az": i["az"]}).encode()
+
+
+class _FakeEc2:
+    def __init__(self, c):
+        self.c = c
+
+    def describe_spot_price_history(self, InstanceTypes, **kw):
+        t = dt.datetime.fromtimestamp(self.c.clock() - 60, tz=UTC)
+        return {"SpotPriceHistory": [{"AvailabilityZone": az, "InstanceType": InstanceTypes[0], "SpotPrice": f"{p:.4f}",
+                                      "Timestamp": t} for az, p in self.c.prices.get(InstanceTypes[0], {}).items()]}
+
+    def describe_subnets(self, **kw):
+        return {"Subnets": [{"SubnetId": s, "AvailabilityZone": az, "MapPublicIpOnLaunch": True, "State": "available"}
+                            for az, s in SUBNETS.items()]}
+
+    def run_instances(self, **p):
+        self.c.runs.append(p)
+        if self.c.fail:
+            code = self.c.fail.pop(0)
+            if code:
+                raise cerr(code, "RunInstances")
+        az = next(a for a, s in SUBNETS.items() if s == p["SubnetId"])
+        tags = {t["Key"]: t["Value"] for t in p["TagSpecifications"][0]["Tags"]}
+        key = re.search(r"S3_KEY=(\S+)", p["UserData"]).group(1).strip("'")
+        attempt = int(re.search(r"GTU_ATTEMPT=(\d+)", p["UserData"]).group(1))
+        iid = f"i-{len(self.c.inst) + 1:04d}"
+        self.c.inst[iid] = dict(state="running", t=self.c.clock(), job=tags["Job"], attempt=attempt, az=az, key=key,
+                                tags=tags, reason="", uploaded=False, vcpu=R.VCPU[p["InstanceType"]],
+                                token=p["ClientToken"])
+        live = self.c.live()
+        self.c.max_live = max(self.c.max_live, len(live))
+        self.c.max_vcpu = max(self.c.max_vcpu, sum(i["vcpu"] for i in live))
+        return {"Instances": [{"InstanceId": iid, "Placement": {"AvailabilityZone": az}}]}
+
+    def describe_instances(self, Filters, **kw):
+        self.c.tick()
+        f = {x["Name"]: x["Values"] for x in Filters}
+        out = []
+        for iid, i in self.c.inst.items():
+            if "instance-id" in f and iid not in f["instance-id"]:
+                continue
+            if "client-token" in f and i["token"] not in f["client-token"]:
+                continue
+            if "tag:RunId" in f and (i["tags"]["RunId"] not in f["tag:RunId"]
+                                     or i["state"] not in f["instance-state-name"]):
+                continue
+            d = {"InstanceId": iid, "State": {"Name": i["state"]}, "Placement": {"AvailabilityZone": i["az"]},
+                 "Tags": [{"Key": k, "Value": v} for k, v in i["tags"].items()]}
+            if i["reason"]:
+                d["StateReason"] = {"Code": i["reason"]}
+            out.append(d)
+        return {"Reservations": [{"Instances": out}]}
+
+    def terminate_instances(self, InstanceIds):
+        for iid in InstanceIds:
+            self.c.inst[iid]["state"] = "terminated"
+        return {}
+
+
+class _FakeS3:
+    def __init__(self, c):
+        self.c = c
+
+    def get_object(self, Bucket, Key):
+        self.c.tick()
+        if Key not in self.c.objects:
+            raise cerr("NoSuchKey", "GetObject")
+        return {"Body": io.BytesIO(self.c.objects[Key])}
+
+    def list_objects_v2(self, Bucket, Prefix, **kw):
+        return {"IsTruncated": False, "Contents": [{"Key": k} for k in sorted(self.c.objects) if k.startswith(Prefix)]}
+
+
+class _FakeSsm:
+    def get_parameter(self, Name):
+        return {"Parameter": {"Value": "ami-0fixture000000000"}}
+
+
+def fake_runner(tmp_path, cloud, clk, **kw):
+    return R.Runner(make_cfg(tmp_path, **kw), cloud.ec2, cloud.s3, cloud.ssm, clock=clk, sleep=clk.sleep,
+                    out=lambda m: None)
+
+
+def test_queue_runs_batch_under_vcpu_quota(tmp_path):
+    """10 частей × 64 vCPU при квоте 384: одновременно не больше 6, остальные — по мере освобождения;
+    бюджет проверяется перед каждым запуском; все части в самой дешёвой зоне."""
+    clk = Clock()
+    cloud = FakeCloud(clk)
+    r = fake_runner(tmp_path, cloud, clk, max_parallel=10, vcpu_quota=384)
+    res = r.run([make_job(name=f"part{i:02d}") for i in range(10)])
+    assert all(v["status"] == "ok" for v in res.values()) and len(res) == 10
+    assert cloud.max_live == 6 and cloud.max_vcpu == 384
+    recs = ledger(tmp_path)
+    launches = [x for x in recs if x["ev"] == "launch"]
+    assert len(launches) == 10 and sum(1 for x in launches if x["t_launch"] > T0) == 4   # 4 — после освобождения
+    for L in launches:                                          # перед каждым запуском — проверка бюджета этой части
+        i = recs.index(L)
+        assert recs[i - 1]["ev"] == "budget" and recs[i - 1]["job"] == L["job"] and recs[i - 1]["ok"]
+    assert {x["az"] for x in launches} == {"us-east-1c"} and all(v["cheapest_zone"] for v in res.values())
+    assert R.Ledger(tmp_path / "ledger.jsonl").summary()["open"] == []
+
+
+def test_queue_waits_on_quota_error_without_own_machines(tmp_path):
+    clk = Clock()
+    cloud = FakeCloud(clk, fail=["VcpuLimitExceeded", "VcpuLimitExceeded"])   # квоту держат чужие машины
+    r = fake_runner(tmp_path, cloud, clk)
+    res = r.run([make_job(name="solo")])
+    assert res["solo"]["status"] == "ok"
+    assert [x["code"] for x in ledger(tmp_path, "launch_error")] == ["VcpuLimitExceeded"] * 2
+    assert ledger(tmp_path, "launch")[0]["t_launch"] == T0 + 120             # две паузы по poll_s
+    # предел ожидания исчерпан — задача снимается со статусом quota
+    clk2 = Clock()
+    cloud2 = FakeCloud(clk2, fail=["VcpuLimitExceeded"] * 5)
+    r2 = fake_runner(tmp_path / "b", cloud2, clk2, quota_wait_polls=2)
+    assert r2.run([make_job(name="solo")])["solo"]["status"] == "quota"
+
+
+def test_queue_budget_wait_without_spamming_checks(tmp_path):
+    clk = Clock()
+    cloud = FakeCloud(clk)
+    r = fake_runner(tmp_path, cloud, clk, ceiling=2.0)
+    res = r.run([make_job(name="a"), make_job(name="b")])
+    assert res["a"]["status"] == "ok" and res["b"]["status"] == "ok"
+    budget = [(x["job"], x["itype"], x["ok"]) for x in ledger(tmp_path, "budget")]
+    assert budget == [("a", "c7a.16xlarge", True), ("b", "c7a.16xlarge", False), ("b", "c7i.16xlarge", False),
+                      ("b", "c7a.16xlarge", True)]                    # пересчёт — только после закрытия «a»
+    la, lb = ledger(tmp_path, "launch")
+    end_a = next(x for x in ledger(tmp_path, "end") if x["job"] == "a")
+    assert lb["t_launch"] >= end_a["t_end"]
+
+
+@pytest.mark.parametrize("reason", [R.SPOT_REASON, ""])        # "" — код причины не пришёл: решает метка 143
+def test_spot_interruption_retry_without_duplicate_results(tmp_path, reason):
+    """Прерывание: метка 143 первой попытки — не итог; повтор — в префикс _attempt2 и в другую зону;
+    итог задачи — только из второй попытки, частичные файлы первой — отдельно в _lost/a1."""
+    clk = Clock()
+    cloud = FakeCloud(clk, interrupt={("a", 1): 120}, irq_reason=reason)
+    r = fake_runner(tmp_path, cloud, clk)
+    res = r.run([make_job(name="a")])
+    a = res["a"]
+    assert a["status"] == "ok" and a["attempts"] == 2 and "interrupted" not in a
+    assert (a["az"], a["az_rank"], a["az_cheapest"], a["cheapest_zone"]) == ("us-east-1b", 1, "us-east-1c", False)
+    run_dir = tmp_path / "runs" / RUN
+    assert (run_dir / "a" / "result.txt").read_text() == "a a2"
+    assert not (run_dir / "a" / "partial.txt").exists()
+    assert (run_dir / "_lost" / "a1" / "a" / "partial.txt").read_text() == "partial"
+    assert sorted(k for k in cloud.objects if "/_attempt2/" in k) == [
+        f"{PREFIX}/gtu/{RUN}/_attempt2/a/_DONE.json", f"{PREFIX}/gtu/{RUN}/_attempt2/a/result.txt"]
+    assert [(x["iid"], x["outcome"]) for x in ledger(tmp_path, "end")] == [("i-0001", "lost"), ("i-0002", "done")]
+    assert len(cloud.runs) == 2 and cloud.runs[1]["SubnetId"] == SUBNETS["us-east-1b"]
+
+
+def test_marker_of_other_attempt_is_ignored(tmp_path):
+    clk = Clock()
+    cloud = FakeCloud(clk, run_s=10 ** 9)
+    r = fake_runner(tmp_path, cloud, clk)
+    job = make_job(name="a")
+    st, act = r.launch(job, attempt=2)
+    r.active[act.iid] = act
+    cloud.objects[r.key_prefix("a", attempt=2) + "/_DONE.json"] = json.dumps(
+        {"attempt": 1, "phase": "done", "exit_code": 0}).encode()          # чужая (старая) метка
+    r._poll(deque())
+    assert "a" not in r.results and act.iid in r.active
+
+
 # ----------------------------------------------------------------------------- параллельность и задачи
 def test_parallel_limit_and_vcpu_quota(tmp_path):
     def fake_launch(self, job, attempt=1):
@@ -675,10 +1244,16 @@ def test_parallel_limit_and_vcpu_quota(tmp_path):
     for quota, limit, expect in ((384, 6, 6), (128, 6, 2), (384, 3, 3)):
         r = R.Runner(make_cfg(tmp_path, vcpu_quota=quota, max_parallel=limit), out=lambda m: None)
         r.launch = fake_launch.__get__(r)
-        from collections import deque
         pending = deque((j, 1) for j in jobs)
         r._launch_some(pending)
         assert len(r.active) == expect and len(pending) == 8 - expect
+
+
+def test_max_vcpu_cli_alias():
+    p = R.build_parser()
+    assert p.parse_args(["run", "j.json", "--max-vcpu", "128"]).vcpu_quota == 128
+    assert p.parse_args(["run", "j.json", "--vcpu-quota", "64"]).vcpu_quota == 64
+    assert p.parse_args(["plan", "j.json", "--assume-price", "1"]).vcpu_quota == 384
 
 
 def test_load_jobs_validation(tmp_path):
@@ -688,18 +1263,45 @@ def test_load_jobs_validation(tmp_path):
                                       {"name": "b", "command": "true", "instance_type": "c7i.8xlarge",
                                        "fallback_types": []}]}))
     jobs = R.load_jobs(f)
-    assert [(j.name, j.max_min, j.vcpu, j.types) for j in jobs] == [
-        ("a", 45, 64, ["c7a.16xlarge", "c7i.16xlarge"]), ("b", 45, 32, ["c7i.8xlarge"])]
+    assert [(j.name, j.max_min, j.vcpu, j.types, j.image) for j in jobs] == [
+        ("a", 45, 64, ["c7a.16xlarge", "c7i.16xlarge"], "al2023"), ("b", 45, 32, ["c7i.8xlarge"], "al2023")]
     for bad in ([{"name": "a", "command": "true", "typo": 1}],
                 [{"name": "a", "command": "true"}, {"name": "a", "command": "true"}],
                 [{"name": "a b", "command": "true"}],
                 [{"name": "a", "command": "true", "max_min": 5}],
                 [{"name": "a", "command": "true", "instance_type": "x9.huge"}],
                 [{"name": "a", "command": "true", "pip": ["numpy; rm -rf /"]}],
-                [{"name": "a", "command": "true", "dnf": ["gcc"]}]):
+                [{"name": "a", "command": "true", "image": "ubuntu2404", "dnf": ["gcc"]}],
+                [{"name": "a", "command": "true", "image": "al2023", "apt": ["gmsh"]}]):
         f.write_text(json.dumps(bad))
         with pytest.raises(R.RunnerError):
             R.load_jobs(f)
+
+
+@pytest.mark.parametrize("bad", [
+    {"python": 3.12},                                            # число, а не строка (3.10 стало бы 3.1)
+    {"python": "python3.12"},
+    {"requirements": "../secret.txt"},
+    {"requirements": "/etc/passwd"},
+    {"container": "Ubuntu:24.04;rm"},
+    {"container": "ubuntu:24.04", "pip": ["numpy"]},             # пакеты — внутри контейнера
+    {"container": "ubuntu:24.04", "python": "3.12"},
+    {"container": "ubuntu:24.04", "image": "ubuntu2404"},        # контейнер — на al2023
+    {"container_setup": ["apt-get install -y x"]},               # без container
+    {"container": "ubuntu:24.04", "container_setup": ["GTU_CMD_EOF"]},
+    {"container": "ubuntu:24.04", "container_setup": ["  "]},
+])
+def test_new_fields_validation(bad):
+    with pytest.raises(R.RunnerError):
+        make_job(**bad)
+
+
+def test_new_fields_accepted():
+    j = make_job(container="opencfd/openfoam-default:2406", container_setup=["true"])
+    assert (j.mode, j.image) == ("container", "al2023")
+    assert make_job(container="public.ecr.aws/docker/library/ubuntu:24.04").mode == "container"
+    assert make_job(python="3.12.7", requirements="routes/gtu/platform/docker/requirements.txt").mode == "python"
+    assert make_job(python="3.12", image="ubuntu2404").image == "ubuntu2404"
 
 
 def test_job_and_config_guards(tmp_path):
@@ -721,15 +1323,112 @@ def test_job_and_config_guards(tmp_path):
     with pytest.raises(R.RunnerError):
         R.load_jobs(f)
     for kw in ({"spent_before": -1000.0}, {"grace_min": -30}, {"poll_s": 0.0}, {"retries": -1},
-               {"ebs_usd_gb_month": -1.0}, {"ipv4_usd_h": -1.0}, {"price_margin": 0.5}, {"ceiling": 0.0}):
+               {"ebs_usd_gb_month": -1.0}, {"ipv4_usd_h": -1.0}, {"price_margin": 0.5}, {"ceiling": 0.0},
+               {"quota_wait_polls": -1}, {"vcpu_quota": 0}):
         with pytest.raises(R.RunnerError):
             R.validate_config(make_cfg(tmp_path, **kw))
     R.validate_config(make_cfg(tmp_path))
 
 
 def test_example_jobs_file_is_valid():
-    jobs = R.load_jobs(Path(__file__).resolve().parent / "jobs.example.json")
+    jobs = R.load_jobs(HERE / "jobs.example.json")
     assert {j.name for j in jobs} == {"smoke", "explore-249"}
+    assert {j.image for j in jobs} == {"al2023"}
+
+
+# ----------------------------------------------------------------------------- совместимость старых задач
+LEGACY_EXAMPLE = {   # jobs.example.json до v2 (коммит 55d1e8c): Ubuntu, системный Python
+    "defaults": {"instance_type": "c7a.16xlarge", "fallback_types": ["c7i.16xlarge"], "image": "ubuntu2404",
+                 "disk_gb": 50, "max_min": 30},
+    "jobs": [{"name": "smoke", "max_min": 20,
+              "command": "nproc > \"$GTU_OUT/nproc.txt\"\npython -c 'import sys, boto3; print(sys.version, "
+                         "boto3.__version__)' > \"$GTU_OUT/python.txt\"\ngit rev-parse HEAD > \"$GTU_OUT/commit.txt\""},
+             {"name": "explore-249", "command": "python routes/gtu/gtu_explore.py \"$GTU_OUT/gtu_explore_results.json\"",
+              "pip": ["cantera", "scipy", "numpy"], "max_min": 40}]}
+LEGACY_APT_NO_IMAGE = [{"name": "su2-old", "command": "true", "apt": ["build-essential", "openmpi-bin"],
+                        "pip": ["numpy"], "max_min": 60}]                 # раньше образ по умолчанию был Ubuntu
+
+
+def test_legacy_jobs_still_load_and_plan(tmp_path, capsys):
+    for i, data in enumerate((LEGACY_EXAMPLE, LEGACY_APT_NO_IMAGE)):
+        f = tmp_path / f"legacy{i}.json"
+        f.write_text(json.dumps(data))
+        jobs = R.load_jobs(f)
+        assert {j.image for j in jobs} == {"ubuntu2404"} and {j.mode for j in jobs} == {"system"}
+        for j in jobs:
+            ud = R.build_userdata(j, run_id=RUN, attempt=1, repo=R.DEFAULT_REPO, branch="main", bucket=BUCKET,
+                                  key_prefix="p/gtu/r/j")
+            assert "apt-get -o DPkg::Lock::Timeout=600 -q update || exit 10" in ud
+            assert 'python3 -m venv "$G/venv" || exit 12' in ud
+        assert R.main(["plan", str(f), "--assume-price", "1.5", "--run-id", f"legacy{i}",
+                       "--ledger", str(tmp_path / "l.jsonl"), "--out", str(tmp_path / "runs")]) == 0
+    out = capsys.readouterr().out
+    assert "canonical/ubuntu/server/24.04" in out and "/dev/sda1" in out
+
+
+def _repo_job_files():
+    pats = ("jobs*.json", "*aws_job*.json", "*runner_jobs*.json")
+    return sorted({p for pat in pats for p in (REPO / "routes" / "gtu").rglob(pat) if "/runs/" not in str(p)})
+
+
+def test_all_repo_job_files_plan(tmp_path):
+    files = _repo_job_files()
+    assert HERE / "jobs.example.json" in files and HERE / "jobs.smoke2.json" in files
+    for f in files:
+        assert R.main(["plan", str(f), "--assume-price", "1.5", "--run-id", "repo-plan",
+                       "--ledger", str(tmp_path / "l.jsonl"), "--out", str(tmp_path / "runs")]) == 0, f
+    assert not (tmp_path / "l.jsonl").exists()
+
+
+# ----------------------------------------------------------------------------- второй пробный прогон (пункт Е)
+def test_smoke2_jobs_file():
+    jobs = {j.name: j for j in R.load_jobs(HERE / "jobs.smoke2.json")}
+    assert set(jobs) == {"smoke-py", "smoke-ccx"}
+    py, ccx = jobs["smoke-py"], jobs["smoke-ccx"]
+    assert (py.mode, py.image, py.python, py.pip) == ("python", "al2023", "3.12", ["cantera", "numpy", "scipy"])
+    assert (ccx.mode, ccx.image, ccx.container) == ("container", "al2023", "ubuntu:24.04")
+    assert any("calculix-ccx" in c for c in ccx.container_setup) and ccx.container_setup[0].startswith("apt-get update")
+    for j in (py, ccx):
+        assert "routes/gtu/platform/aws/smoke2.py" in j.command and j.max_min <= 30
+        ud = R.build_userdata(j, run_id=RUN, attempt=1, repo=R.DEFAULT_REPO, branch="main", bucket=BUCKET,
+                              key_prefix=f"{PREFIX}/gtu/{RUN}/{j.name}", az="us-east-1c", az_cheapest="us-east-1c")
+        p = subprocess.run(["bash", "-n"], input=ud, text=True)
+        assert p.returncode == 0 and len(ud.encode()) < R.USERDATA_LIMIT
+    for rel in ("routes/gtu/platform/aws/smoke2.py", "routes/gtu/gtu_cycle.py", "routes/gtu/platform/fea/disk.py"):
+        assert (REPO / rel).exists(), rel
+
+
+def test_plan_shows_zone_order_and_expected_price(tmp_path, capsys, monkeypatch):
+    monkeypatch.setenv("ALPHA_O_S3", f"s3://{BUCKET}/{PREFIX}")
+    rc = R.main(["plan", str(HERE / "jobs.smoke2.json"), "--assume-price", "0.955",
+                 "--assume-zone-prices", "us-east-1a=0.955,us-east-1b=0.748,us-east-1c=0.706",
+                 "--run-id", "plan-zones", "--ledger", str(tmp_path / "l.jsonl"), "--out", str(tmp_path / "runs")])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert out.count("us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550") == 2
+    assert "ожидается us-east-1c по 0.7060" in out and "MaxPrice 1.1460" in out
+    assert '"SubnetId": "<подсеть по умолчанию us-east-1c>"' in out
+    assert "Python 3.12 (uv)" in out and "контейнер ubuntu:24.04" in out
+    new = 2 * (1.146 + 30 * 0.08 / 730 + 0.005) * (25 + 10) / 60          # две задачи по максимуму цены
+    assert f"прогноз пакета {new:.2f}" in out
+    assert BUCKET not in out
+
+
+def test_smoke2_az_check_logic(tmp_path):
+    def run(env, mode="ccx"):
+        e = {"PATH": os.environ["PATH"], "GTU_OUT": str(tmp_path / mode), "NPROC": "2", **env}
+        p = subprocess.run([sys.executable, str(HERE / "smoke2.py"), mode], env=e, capture_output=True, text=True,
+                           timeout=300, cwd=tmp_path)
+        return p.returncode, json.loads((tmp_path / mode / "az_check.json").read_text())
+
+    if not shutil.which("ccx"):
+        pytest.skip("ccx нет в контейнере")
+    rc, az = run({"GTU_AZ": "us-east-1c", "GTU_AZ_CHEAPEST": "us-east-1c", "GTU_AZ_MACHINE": "us-east-1c"})
+    assert rc == 0 and az["ok"]
+    smoke = json.loads((tmp_path / "ccx" / "smoke_ccx.json").read_text())
+    assert "Version" in smoke["ccx_version"] and smoke["disk"]["burst_margin"] > 1
+    rc, az = run({"GTU_AZ": "us-east-1b", "GTU_AZ_CHEAPEST": "us-east-1c", "GTU_AZ_MACHINE": "us-east-1b"})
+    assert rc == 3 and not az["ok"] and "не самую дешёвую" in az["why"]
 
 
 # ----------------------------------------------------------------------------- маскирование и CLI
@@ -752,24 +1451,25 @@ def test_redactor_and_ledger_guard(tmp_path):
 
 def test_cli_plan_offline_and_status(tmp_path, capsys, monkeypatch):
     monkeypatch.setenv("ALPHA_O_S3", f"s3://{BUCKET}/{PREFIX}")
-    jobs = str(Path(__file__).resolve().parent / "jobs.example.json")
+    jobs = str(HERE / "jobs.example.json")
     rc = R.main(["plan", jobs, "--assume-price", "1.5", "--show-userdata", "--run-id", "cli-plan",
                  "--ledger", str(tmp_path / "ledger.jsonl"), "--out", str(tmp_path / "runs")])
     out = capsys.readouterr().out
     assert rc == 0 and "shutdown -P +20" in out and '"MarketType": "spot"' in out
     assert BUCKET not in out and FAKE_SECRET not in out and FAKE_AKID not in out
     assert "прогноз пакета 2.41" in out                       # (1.8 + диск) × (20+10 и 40+10 мин)
+    assert "цены по зонам неизвестны" in out                  # без --assume-zone-prices зону выберет EC2
     assert not (tmp_path / "ledger.jsonl").exists()           # план не пишет в общий журнал
     write_ledger(tmp_path / "ledger.jsonl", HIST)
     assert R.main(["status", "--ledger", str(tmp_path / "ledger.jsonl")]) == 0
     out = capsys.readouterr().out
-    assert "израсходовано ≈ 1.01" in out and "по ним 2.34" in out and "остаток 296.64" in out   # 2.345 → 2.34 (float)
+    assert "израсходовано ≈ 1.01" in out and "по ним 2.34" in out and "остаток 1996.64" in out   # 2.345 → 2.34 (float); потолок по умолчанию 2000 (решение 14.11.2026)
 
 
 def test_cli_run_refuses_without_env_before_any_aws_call(tmp_path, capsys, monkeypatch):
     monkeypatch.delenv("ALPHA_O_S3", raising=False)
     monkeypatch.delenv("ALPHA_O_INSTANCE_PROFILE", raising=False)
-    jobs = str(Path(__file__).resolve().parent / "jobs.example.json")
+    jobs = str(HERE / "jobs.example.json")
     rc = R.main(["run", jobs, "--dryrun", "--ledger", str(tmp_path / "l.jsonl")])
     err = capsys.readouterr().err
     assert rc == 2 and "ALPHA_O_S3" in err and FAKE_SECRET not in err and FAKE_AKID not in err
@@ -791,7 +1491,8 @@ def test_cli_run_without_live_is_dryrun(tmp_path, capsys, monkeypatch):
                                {"InstanceTypes": ["c7a.16xlarge"], "ProductDescriptions": ["Linux/UNIX"],
                                 "StartTime": ANY, "EndTime": ANY})
     add_ami(aws)
-    exp = dict(expected_run_params(), DryRun=True, ImageId="ami-0123456789abcdef0")
+    add_subnets(aws)
+    exp = dict(expected_run_params(), DryRun=True)
     exp["TagSpecifications"] = ANY                              # run_id генерируется
     aws.st["ec2"].add_client_error("run_instances", service_error_code="DryRunOperation",
                                    service_message="Request would have succeeded", http_status_code=412,
@@ -807,3 +1508,1259 @@ def test_cli_run_without_live_is_dryrun(tmp_path, capsys, monkeypatch):
     assert not (tmp_path / "ledger.jsonl").exists()
     aws.done()
     st_sts.assert_no_pending_responses()
+
+
+def test_default_ceiling_is_owner_decision():
+    # Решение владельца 14.11.2026: потолок 2000 долл., отчёт после каждых 500 долл.
+    import dataclasses
+    f = {x.name: x.default for x in dataclasses.fields(R.Config)}
+    assert f["ceiling"] == 2000.0 and f["report_step"] == 500.0 and f["vcpu_quota"] == 384
+
+
+# ----------------------------------------------------------------------------- правки по проверке v2 (скептики)
+# Деньги и гашение: неподтверждённое гашение, сеть в сборщике, машина за ошибкой 5xx, сверка, DryRun, user-data повторов.
+class _DenyCloud(FakeCloud):
+    """Задачи из deny не выдают метку («зависли»); гашение их машин AWS отвергает (код — FIXTURE):
+    deny_n — сколько вызовов отвергнуть (None — всегда)."""
+
+    def __init__(self, clock, deny=("hang",), deny_n=None, **kw):
+        super().__init__(clock, **kw)
+        self.deny, self.deny_n = set(deny), deny_n
+        c = self
+
+        class Ec2(_FakeEc2):
+            def terminate_instances(self, InstanceIds):
+                if any(c.inst[i]["job"] in c.deny for i in InstanceIds) and (c.deny_n is None or c.deny_n > 0):
+                    if c.deny_n is not None:
+                        c.deny_n -= 1
+                    raise cerr("UnauthorizedOperation", "TerminateInstances")
+                return super().terminate_instances(InstanceIds)
+        self.ec2 = Ec2(self)
+
+    def tick(self):
+        for i in self.inst.values():
+            if i["job"] in self.deny:
+                i["uploaded"] = True                    # метки не будет никогда
+        super().tick()
+
+
+def test_unconfirmed_termination_halts_queue_within_max_vcpu(tmp_path):
+    """Гашение зависшей машины отвергнуто: она, возможно, жива — новые машины не запускаются (иначе
+    живых vCPU стало бы больше --max-vcpu), остаток очереди — halted, владельцу — команда ручного гашения."""
+    clk, out = Clock(), []
+    cloud = _DenyCloud(clk, run_s=300)
+    jobs = [make_job(name="hang", max_min=20)] + [make_job(name=f"p{i:02d}", max_min=20) for i in range(12)]
+    r = R.Runner(make_cfg(tmp_path, vcpu_quota=128), cloud.ec2, cloud.s3, cloud.ssm, clock=clk, sleep=clk.sleep,
+                 out=out.append)
+    res = r.run(jobs)
+    assert cloud.max_vcpu <= 128 and cloud.max_live <= 2
+    hang = res["hang"]
+    assert hang["status"] == "deadline" and cloud.inst[hang["iid"]]["state"] == "running"
+    halted = [k for k, v in res.items() if v["status"] == "halted"]
+    assert halted and all("не подтверждено" in res[k]["detail"] for k in halted)
+    assert {v["status"] for k, v in res.items() if k != "hang"} <= {"ok", "halted"}
+    assert any("terminate-instances" in m and hang["iid"] in m for m in out)
+    assert R.Ledger(tmp_path / "ledger.jsonl").summary()["open"] == [hang["iid"]]   # в бюджете верхней границей
+
+
+def test_unconfirmed_termination_retried_then_queue_continues(tmp_path):
+    clk = Clock()
+    cloud = _DenyCloud(clk, run_s=300, deny_n=1)        # один отказ (сбой) — повтор гашения проходит
+    jobs = [make_job(name="hang", max_min=20)] + [make_job(name=f"p{i}", max_min=20) for i in range(8)]
+    res = fake_runner(tmp_path, cloud, clk, vcpu_quota=128).run(jobs)
+    assert cloud.max_vcpu <= 128
+    assert res["hang"]["status"] == "deadline" and all(res[f"p{i}"]["status"] == "ok" for i in range(8))
+    ends = {x["iid"]: x["outcome"] for x in ledger(tmp_path, "end")}
+    assert ends[res["hang"]["iid"]] == "reaped" and R.Ledger(tmp_path / "ledger.jsonl").summary()["open"] == []
+
+
+def test_final_reap_closes_unconfirmed_record(tmp_path):
+    clk = Clock()
+    cloud = _DenyCloud(clk, deny_n=1)                   # отказ на сроке; сборщик в finally гасит успешно
+    res = fake_runner(tmp_path, cloud, clk).run([make_job(name="hang", max_min=20)])
+    iid = res["hang"]["iid"]
+    assert res["hang"]["status"] == "deadline" and cloud.inst[iid]["state"] == "terminated"
+    assert [(x["iid"], x["outcome"]) for x in ledger(tmp_path, "end")] == [(iid, "reaped")]
+
+
+def test_reaper_network_error_still_prints_manual_kill(tmp_path):
+    """Сеть пропала: EndpointConnectionError (BotoCoreError) у TerminateInstances не уходит из finally —
+    команда ручного гашения напечатана, run_end и summary.json записаны."""
+    from botocore.exceptions import EndpointConnectionError
+    clk, out = Clock(), []
+    cloud = FakeCloud(clk, run_s=10 ** 9)
+    cloud.net_down = False
+    c = cloud
+
+    class Ec2(_FakeEc2):
+        def terminate_instances(self, InstanceIds):
+            raise EndpointConnectionError(endpoint_url="https://ec2.us-east-1.amazonaws.com")
+
+        def describe_instances(self, Filters, **kw):
+            if c.net_down:
+                raise EndpointConnectionError(endpoint_url="https://ec2.us-east-1.amazonaws.com")
+            return super().describe_instances(Filters, **kw)
+    cloud.ec2 = Ec2(cloud)
+    r = R.Runner(make_cfg(tmp_path), cloud.ec2, cloud.s3, cloud.ssm, clock=clk, sleep=clk.sleep, out=out.append)
+
+    def boom(pending):
+        cloud.net_down = True
+        raise KeyboardInterrupt("сигнал 15")
+    r._poll = boom
+    raised = None
+    try:
+        r.run([make_job(name="a")])
+    except KeyboardInterrupt as e:
+        raised = e
+    assert raised is not None and [i for i, v in cloud.inst.items() if v["state"] == "running"] == ["i-0001"]
+    assert any("terminate-instances" in m and "i-0001" in m and "EndpointConnectionError" in m for m in out)
+    assert json.loads((tmp_path / "runs" / RUN / "summary.json").read_text())["run_id"] == RUN
+
+
+class _GhostEc2(_FakeEc2):
+    """RunInstances создаёт машину, но отвечает InternalError (5xx после повторов botocore) — в первый раз."""
+
+    def run_instances(self, **p):
+        r = super().run_instances(**p)
+        if not getattr(self.c, "ghosted", False):
+            self.c.ghosted = True
+            raise cerr("InternalError", "RunInstances")
+        return r
+
+
+def test_machine_created_behind_internal_error_is_accounted(tmp_path):
+    clk = Clock()
+    cloud = FakeCloud(clk, run_s=600)
+    cloud.ec2 = _GhostEc2(cloud)
+    r = fake_runner(tmp_path, cloud, clk)
+    st, act = r.launch(make_job(name="a"))
+    assert st == "launched" and act.iid == "i-0001" and len(cloud.inst) == 1      # найдена по ClientToken
+    assert ledger(tmp_path, "launch")[0]["iid"] == "i-0001"
+    assert [x["code"] for x in ledger(tmp_path, "launch_error")] == ["InternalError"]
+    # машины по токену нет — failed с пояснением, без лишних запусков
+    clk2 = Clock()
+    cloud2 = FakeCloud(clk2)
+
+    class Ec2(_FakeEc2):
+        def run_instances(self, **p):
+            self.c.runs.append(p)
+            raise cerr("InternalError", "RunInstances")
+    cloud2.ec2 = Ec2(cloud2)
+    r2 = fake_runner(tmp_path / "b", cloud2, clk2)
+    assert r2.launch(make_job(name="b")) == ("failed", None) and len(cloud2.runs) == 1
+    assert r2._why["b"] == "RunInstances: InternalError"
+    # полный прогон: все части ok, журнал закрыт, лишних машин нет
+    clk3 = Clock()
+    cloud3 = FakeCloud(clk3, run_s=600)
+    cloud3.ec2 = _GhostEc2(cloud3)
+    res = fake_runner(tmp_path / "c", cloud3, clk3).run([make_job(name="a"), make_job(name="b")])
+    assert all(v["status"] == "ok" for v in res.values()) and len(cloud3.inst) == 2
+    assert R.Ledger(tmp_path / "c" / "ledger.jsonl").summary()["open"] == []
+
+
+@pytest.mark.parametrize("deny", [False, True])
+def test_reconcile_overdue_live_machine(tmp_path, deny):
+    """Машина прошлого прогона жива через 5 ч при сроке 70 мин: сверка гасит её и считает по факту;
+    не погасилась — бюджет живого прогона считает её по фактическому времени (status — по сроку)."""
+    write_ledger(tmp_path / "ledger.jsonl", [
+        {"ev": "launch", "run_id": "old", "job": "y", "iid": "i-zombie", "itype": "c7a.16xlarge", "az": "us-east-1c",
+         "spot_usd_h": 0.706, "max_usd_h": 1.146, "ebs_usd_h": 0.0, "ip_usd_h": 0.0, "t_launch": T0, "allot_min": 70}])
+    clk, calls = Clock(T0 + 5 * 3600), []
+
+    class Ec2:
+        def describe_instances(self, Filters, **kw):
+            return {"Reservations": [{"Instances": [inst("i-zombie", az="us-east-1c")]}]}
+
+        def terminate_instances(self, InstanceIds):
+            calls.append(InstanceIds)
+            if deny:
+                raise cerr("UnauthorizedOperation", "TerminateInstances")
+            return {}
+    r = R.Runner(make_cfg(tmp_path), Ec2(), None, None, clock=clk, out=lambda m: None)
+    r.reconcile()
+    led = R.Ledger(tmp_path / "ledger.jsonl")
+    assert calls == [["i-zombie"]]
+    if not deny:
+        end = ledger(tmp_path, "end")[0]
+        assert (end["outcome"], end["t_end"]) == ("reaped_overdue", T0 + 5 * 3600)
+        assert led.summary()["spent"] == pytest.approx(0.706 * 5)
+    else:
+        assert led.summary()["open"] == ["i-zombie"]
+        assert led.summary()["committed"] == pytest.approx(1.146 * 70 / 60)
+        assert led.summary(now=clk())["committed"] == pytest.approx(1.146 * 5)
+        ok, _maxp, nums = r.budget_check(make_job(), "c7a.16xlarge", R.PriceInfo("c7a.16xlarge", dict(LIVE_C7A), 0.955))
+        assert nums["committed"] == pytest.approx(1.146 * 5)
+
+
+def test_dryrun_unexpected_success_is_terminated(tmp_path):
+    clk = Clock()
+    cloud = FakeCloud(clk)                              # заглушка не знает DryRun и создаёт машину
+    res = fake_runner(tmp_path, cloud, clk, dryrun=True).run([make_job(name="a")])
+    assert res["a"]["status"] == "dryrun_denied"
+    assert [v["state"] for v in cloud.inst.values()] == ["terminated"]   # в DryRun сборщика в finally нет
+
+
+def test_userdata_of_retry_checked_before_first_launch(tmp_path, capsys, monkeypatch):
+    """Попытка 1 укладывается в 16 КБ, повтор (префикс _attempt2) — нет: отказ до первого запуска, а не
+    посреди пакета (иначе сборщик в finally погасил бы работающие машины)."""
+    cfg = make_cfg(tmp_path)
+    r = R.Runner(cfg, out=lambda m: None)
+
+    def ud_len(job, att):
+        return len(R.build_userdata(job, run_id=RUN, attempt=att, repo=cfg.repo, branch=cfg.branch, bucket=BUCKET,
+                                    key_prefix=r.key_prefix(job.name, attempt=att), az="us-east-1a",
+                                    az_cheapest="us-east-1a", itype="c7a.16xlarge").encode())
+    pad = R.USERDATA_LIMIT - ud_len(make_job(name="big", command="#"), 1) - 2
+    big = make_job(name="big", command="#" + "x" * pad)
+    assert ud_len(big, 1) <= R.USERDATA_LIMIT
+    with pytest.raises(R.RunnerError, match="байт >"):
+        ud_len(big, 2)
+    clk = Clock()
+    cloud = FakeCloud(clk)
+    with pytest.raises(R.RunnerError):
+        fake_runner(tmp_path, cloud, clk).run([make_job(name="ok"), big])
+    assert cloud.runs == []
+    f = tmp_path / "jobs.json"
+    f.write_text(json.dumps([{"name": "big", "command": big.command, "max_min": 60}]))
+    monkeypatch.setenv("ALPHA_O_S3", f"s3://{BUCKET}/{PREFIX}")
+    rc = R.main(["plan", str(f), "--assume-price", "1.5", "--run-id", RUN,
+                 "--ledger", str(tmp_path / "l.jsonl"), "--out", str(tmp_path / "runs")])
+    assert rc == 2 and str(R.USERDATA_LIMIT) in capsys.readouterr().err
+
+
+def test_budget_precedes_every_launch_on_all_paths(tmp_path):
+    """Запись бюджета (ok, та же задача и тип) — перед каждым RunInstances: откат по зонам, запасной тип,
+    квотная ошибка, повтор после прерывания; в журнале — фактическая зона и её цена."""
+    clk = Clock()
+    cloud = FakeCloud(clk, run_s=600, interrupt={("b", 1): 120},
+                      fail=["InsufficientInstanceCapacity"] * 3 + [None, "VcpuLimitExceeded"])
+    res = fake_runner(tmp_path, cloud, clk).run([make_job(name="a"), make_job(name="b"), make_job(name="c")])
+    assert all(v["status"] == "ok" for v in res.values())
+    last, n_run = {}, 0
+    for x in ledger(tmp_path):
+        if x["ev"] == "budget":
+            last[x["job"]] = (x, 0)
+        elif x["ev"] in ("launch", "launch_error"):
+            n_run += 1
+            b, k = last[x["job"]]
+            assert b["ok"] and b["itype"] == x["itype"]
+            if x["ev"] == "launch":
+                assert k == 0, "два запуска на одну проверку бюджета"
+                last[x["job"]] = (b, 1)
+                assert x["az"] == cloud.inst[x["iid"]]["az"]
+                assert x["spot_usd_h"] == pytest.approx(cloud.prices[x["itype"]][x["az"]])
+                assert x["max_usd_h"] >= max(cloud.prices[x["itype"]].values())
+    assert n_run == len(cloud.runs) and R.Ledger(tmp_path / "ledger.jsonl").summary()["open"] == []
+
+
+# Зоны и очередь: ёмкость, подсети, цены, plan; прерывание или собственное гашение машины.
+def test_capacity_everywhere_waits_then_launches(tmp_path):
+    clk = Clock()
+    cloud = FakeCloud(clk, fail=["InsufficientInstanceCapacity"] * 5)       # круг: 3 зоны c7a + 2 зоны c7i
+    res = fake_runner(tmp_path, cloud, clk).run([make_job(name="p0")])
+    assert res["p0"]["status"] == "ok" and len(cloud.runs) == 6
+    assert ledger(tmp_path, "launch")[0]["t_launch"] == T0 + 60            # одна пауза poll_s
+    # предел повторов исчерпан — статус capacity с пояснением (не безликий failed)
+    clk2 = Clock()
+    cloud2 = FakeCloud(clk2, fail=["InsufficientInstanceCapacity"] * 100)
+    res2 = fake_runner(tmp_path / "b", cloud2, clk2, capacity_wait_polls=2).run([make_job(name="p0")])
+    assert res2["p0"]["status"] == "capacity" and len(cloud2.runs) == 15    # 3 круга по 5 зон
+    assert res2["p0"]["detail"].startswith("нет ёмкости спота: c7a.16xlarge@us-east-1c:InsufficientInstanceCapacity")
+    # в очереди при своих машинах: часть не снимается, а запускается после освобождения
+    clk3 = Clock()
+    cloud3 = FakeCloud(clk3, fail=[None] * 6 + ["InsufficientInstanceCapacity"] * 5)
+    res3 = fake_runner(tmp_path / "c", cloud3, clk3).run([make_job(name=f"q{i}") for i in range(7)])
+    assert all(v["status"] == "ok" for v in res3.values()) and len(cloud3.runs) == 12 and cloud3.max_live == 6
+
+
+def test_zone_skip_journaled_and_no_subnet_detail(tmp_path):
+    aws, clk = Aws(), Clock()
+    e = aws.st["ec2"]
+    e.add_response("describe_spot_price_history", spot_resp("c7a.16xlarge", flat(LIVE_C7A)), spot_params("c7a.16xlarge"))
+    add_ami(aws)
+    add_subnets(aws, azs=("us-east-1a",))
+    e.add_response("run_instances", run_resp("i-a", az="us-east-1a"), expected_run_params(az="us-east-1a", maxp="1.1460"))
+    r = R.Runner(make_cfg(tmp_path), aws.ec2, aws.s3, aws.ssm, clock=clk, out=lambda m: None)
+    assert r.launch(make_job())[0] == "launched"
+    assert [(x["az"], x["reason"]) for x in ledger(tmp_path, "zone_skip")] == [
+        ("us-east-1c", "no_default_subnet"), ("us-east-1b", "no_default_subnet")]
+    aws.done()
+    # подсеть по умолчанию есть только в зоне без цены — пояснение в итоге задачи
+    aws, clk = Aws(), Clock()
+    e = aws.st["ec2"]
+    e.add_response("describe_spot_price_history", spot_resp("c7a.16xlarge", flat(LIVE_C7A)), spot_params("c7a.16xlarge"))
+    add_ami(aws)
+    e.add_response("describe_subnets", {"Subnets": [
+        {"SubnetId": "subnet-0fixture00000001d", "AvailabilityZone": "us-east-1d", "MapPublicIpOnLaunch": True,
+         "State": "available"}]}, {"Filters": [{"Name": "default-for-az", "Values": ["true"]}]})
+    e.add_response("describe_spot_price_history", spot_resp("c7i.16xlarge", flat({"us-east-1b": 0.80, "us-east-1c": 0.78})),
+                   spot_params("c7i.16xlarge"))
+    e.add_response("describe_instances", {"Reservations": []}, reap_filters())
+    r = R.Runner(make_cfg(tmp_path / "b"), aws.ec2, aws.s3, aws.ssm, clock=clk, sleep=clk.sleep, out=lambda m: None)
+    res = r.run([make_job()])["su2-comp130"]
+    assert res["status"] == "failed" and res["detail"].startswith("нет подсети по умолчанию: c7a.16xlarge@us-east-1c")
+    aws.done()
+
+
+def test_no_spot_price_status_and_journal(tmp_path):
+    aws, clk = Aws(), Clock()
+    e = aws.st["ec2"]
+    e.add_response("describe_spot_price_history", {"SpotPriceHistory": []}, spot_params("c7a.16xlarge"))
+    e.add_response("describe_spot_price_history", {"SpotPriceHistory": []}, spot_params("c7i.16xlarge"))
+    e.add_response("describe_instances", {"Reservations": []}, reap_filters())
+    # ни SSM, ни describe_subnets, ни run_instances не заготовлены: вслепую машина не запускается
+    r = R.Runner(make_cfg(tmp_path), aws.ec2, aws.s3, aws.ssm, clock=clk, sleep=clk.sleep, out=lambda m: None)
+    res = r.run([make_job()])["su2-comp130"]
+    assert res["status"] == "no_price" and "нет истории цены спота" in res["detail"]
+    assert [x["code"] for x in ledger(tmp_path, "launch_error")] == ["NoSpotPrice", "NoSpotPrice"]
+    aws.done()
+
+
+def test_plan_refuses_zero_price_and_fails_when_job_not_planned(tmp_path, capsys, monkeypatch):
+    monkeypatch.delenv("ALPHA_O_S3", raising=False)
+    common = ["--ledger", str(tmp_path / "l.jsonl"), "--out", str(tmp_path / "runs")]
+    assert R.main(["plan", str(HERE / "jobs.example.json"), "--assume-price", "0", *common]) == 2
+    assert "--assume-price" in capsys.readouterr().err
+    assert R.main(["plan", str(HERE / "jobs.example.json"), "--assume-price", "1.5", "--ceiling", "0.5", *common]) == 1
+    assert "НЕ спланированы" in capsys.readouterr().out
+
+
+class _SelfStopCloud(FakeCloud):
+    """Машина гаснет через run_s с причиной reason; ловушка TERM успела выгрузить метку с кодом 143."""
+
+    def __init__(self, clock, reason, **kw):
+        super().__init__(clock, **kw)
+        self.reason = reason
+
+    def tick(self):
+        now = self.clock()
+        for i in self.inst.values():
+            if i["state"] == "running" and not i["uploaded"] and now - i["t"] >= self.run_s:
+                i["state"], i["reason"], i["uploaded"] = "terminated", self.reason, True
+                self.objects[i["key"] + "/_DONE.json"] = json.dumps(
+                    {"attempt": i["attempt"], "phase": "command", "exit_code": 143}).encode()
+
+
+@pytest.mark.parametrize("reason,retried", [
+    ("Client.InstanceInitiatedShutdown", False),     # сторож shutdown -P или poweroff после кода 143 команды
+    ("Client.UserInitiatedShutdown", False),         # погашена командой terminate
+    ("Server.SpotInstanceShutdown", True),           # прерывание спота (второй код Server.Spot…)
+])
+def test_own_shutdown_with_143_is_not_spot_interruption(tmp_path, reason, retried):
+    clk = Clock()
+    cloud = _SelfStopCloud(clk, reason, run_s=1500)
+    res = fake_runner(tmp_path, cloud, clk).run([make_job(name="hang")])["hang"]
+    assert len(cloud.runs) == (2 if retried else 1) and res["status"] == "failed" and res["exit_code"] == 143
+    assert res.get("interrupted", False) is retried
+
+
+class _RaceCloud(FakeCloud):
+    """Метка 143 первой попытки уже в S3, а EC2 ещё race_s секунд показывает running (None — так и остаётся)."""
+
+    def __init__(self, clock, race_s=60, **kw):
+        super().__init__(clock, **kw)
+        self.race_s = race_s
+
+    def tick(self):
+        now = self.clock()
+        for i in self.inst.values():
+            if i["state"] != "running":
+                continue
+            if i.get("race") and self.race_s is not None and now - i["race"] >= self.race_s:
+                i["state"], i["reason"] = "terminated", R.SPOT_REASON
+            elif not i["uploaded"] and i["attempt"] == 1 and now - i["t"] >= 120:
+                i["uploaded"], i["race"] = True, now
+                self.objects[i["key"] + "/_DONE.json"] = json.dumps(
+                    {"attempt": 1, "phase": "command", "exit_code": 143}).encode()
+            elif not i["uploaded"] and now - i["t"] >= self.run_s:
+                i["uploaded"] = True
+                self.objects[i["key"] + "/_DONE.json"] = json.dumps(
+                    {"attempt": i["attempt"], "phase": "done", "exit_code": 0}).encode()
+
+
+def test_marker_143_while_running_waits_for_reason(tmp_path):
+    clk = Clock()
+    cloud = _RaceCloud(clk, run_s=600)
+    res = fake_runner(tmp_path, cloud, clk).run([make_job(name="a")])["a"]
+    assert res["status"] == "ok" and res["attempts"] == 2 and len(cloud.runs) == 2
+    # причина так и не пришла: не ждём вечно — после трёх опросов метка принимается как итог
+    clk2 = Clock()
+    cloud2 = _RaceCloud(clk2, race_s=None, run_s=600)
+    res2 = fake_runner(tmp_path / "b", cloud2, clk2).run([make_job(name="a")])["a"]
+    assert (res2["status"], res2["exit_code"], len(cloud2.runs)) == ("failed", 143, 1)
+    end = ledger(tmp_path / "b", "end")[0]
+    assert end["t_end"] - ledger(tmp_path / "b", "launch")[0]["t_launch"] <= 120 + 4 * 60
+
+
+# user-data: окружение OpenFOAM в контейнере; предупреждение об apt-get на al2023; флаг ожидания ёмкости.
+def test_container_entry_sources_openfoam_env(tmp_path):
+    ud = R.build_userdata(_ctr_job(), run_id=RUN, attempt=1, repo=R.DEFAULT_REPO, branch="main", bucket=BUCKET,
+                          key_prefix="p/gtu/r/j")
+    entry = ud[ud.index('cat >"$G/ctr/entry.sh"'):ud.index("GTU_ENTRY_EOF\nchmod")]
+    line = next(x for x in entry.splitlines() if "/openfoam/bash.rc" in x)
+    assert entry.index(line) < entry.index("setup.sh")          # окружение видят и container_setup, и команда
+    rc = tmp_path / "bash.rc"                                    # как у образов opencfd: PATH и переменные, код ≠ 0
+    rc.write_text('export FOAM_FIXTURE=1\nexport PATH="/opt/foam-EXAMPLE/bin:$PATH"\nfalse\n')
+    script = "set -u\n" + line.replace("/openfoam/bash.rc", str(rc)) + '\necho "$FOAM_FIXTURE:${PATH%%:*}"\n'
+    p = subprocess.run(["bash", "-c", script], capture_output=True, text=True)
+    assert p.returncode == 0 and p.stdout.strip() == "1:/opt/foam-EXAMPLE/bin"
+    p = subprocess.run(["bash", "-c", "set -u\n" + line.replace("/openfoam/", str(tmp_path / "none") + "/")
+                        + "\necho ok"], capture_output=True, text=True)
+    assert p.stdout.strip() == "ok"                              # файла нет — без следа
+
+
+def test_apt_get_on_al2023_warns(tmp_path, capsys, monkeypatch):
+    j = make_job(command="apt-get update\napt-get -y install openfoam2606-default\nfoamRun")
+    assert j.image == "al2023" and len(R.job_warnings(j)) == 1 and "container" in R.job_warnings(j)[0]
+    for ok in (make_job(command="echo apt-get is not called here; python3 x.py"),
+               make_job(container="ubuntu:24.04", container_setup=["apt-get install -y calculix-ccx"], command="ccx -v"),
+               make_job(apt=["calculix-ccx"], command="sudo apt-get install -y gmsh")):
+        assert R.job_warnings(ok) == [], ok.command
+    monkeypatch.delenv("ALPHA_O_S3", raising=False)
+    f = tmp_path / "jobs.json"
+    f.write_text(json.dumps([{"name": "of-old", "command": "apt-get install -y openfoam", "max_min": 60}]))
+    assert R.main(["plan", str(f), "--assume-price", "1.5", "--ledger", str(tmp_path / "l.jsonl"),
+                   "--out", str(tmp_path / "runs")]) == 0                # предупреждение, не отказ
+    assert "[внимание] of-old: команда вызывает apt-get" in capsys.readouterr().out
+
+
+def test_capacity_wait_cli_flag_and_guard(tmp_path):
+    p = R.build_parser()
+    assert p.parse_args(["run", "j.json"]).capacity_wait_polls == 15
+    assert p.parse_args(["plan", "j.json", "--assume-price", "1", "--capacity-wait-polls", "3"]).capacity_wait_polls == 3
+    with pytest.raises(R.RunnerError):
+        R.validate_config(make_cfg(tmp_path, capacity_wait_polls=-1))
+
+
+# ============================================================================= версия 3: соседние мощности
+# Регионы, зоны и цены спота — из проверки сессии с ключами 15.11.2026 (без трат): c7a.16xlarge us-east-1 1c 0,703 /
+# 1b 0,747 / 1d 0,879; us-east-2 2b 0,601 / 2a 0,606 / 2c 0,940; us-west-2 2a 0,866 / 2d 0,952 / 2c 1,422.
+# Квоты в тестах задаются явно; id машин, подсетей и образов выдуманы (FIXTURE).
+V3_PRICES = {
+    "us-east-1": {"c7a.16xlarge": {"us-east-1c": 0.703, "us-east-1b": 0.747, "us-east-1d": 0.879},
+                  "c7i.16xlarge": {"us-east-1f": 1.213}},
+    "us-east-2": {"c7a.16xlarge": {"us-east-2b": 0.601, "us-east-2a": 0.606, "us-east-2c": 0.940},
+                  "c7i.16xlarge": {"us-east-2c": 0.676}},
+    "us-west-2": {"c7a.16xlarge": {"us-west-2a": 0.866, "us-west-2d": 0.952, "us-west-2c": 1.422},
+                  "c7i.16xlarge": {"us-west-2a": 0.888}},
+}
+V3_WMAX = 1.422                                     # максимум по всем зонам всех трёх регионов
+V3_MAXP = "1.7064"                                  # ceil(1.422 × 1.2, 4 знака) — MaxPrice в любом регионе
+AL2023_FALLBACK = {"Owners": ["amazon"], "Filters": [{"Name": "name", "Values": ["al2023-ami-2023*-x86_64"]},
+                                                     {"Name": "state", "Values": ["available"]},
+                                                     {"Name": "architecture", "Values": ["x86_64"]}]}
+
+
+class _RegionEc2(_FakeEc2):
+    """EC2 одного региона: свои зоны и подсети, квоты спота и по требованию (vCPU живых машин), отказы в правах."""
+
+    def describe_spot_price_history(self, InstanceTypes, **kw):
+        self.c.calls.append(("describe_spot_price_history", InstanceTypes[0]))
+        if "price" in self.c.deny:
+            raise cerr("UnauthorizedOperation", "DescribeSpotPriceHistory")
+        return super().describe_spot_price_history(InstanceTypes, **kw)
+
+    def describe_subnets(self, **kw):
+        self.c.calls.append(("describe_subnets", None))
+        return {"Subnets": [{"SubnetId": s, "AvailabilityZone": az, "MapPublicIpOnLaunch": True, "State": "available"}
+                            for az, s in sorted(self.c.subnets.items())]}
+
+    def describe_images(self, **kw):
+        self.c.calls.append(("describe_images", kw))
+        return {"Images": [
+            {"ImageId": "ami-0fixture00000old0", "CreationDate": "2026-10-01T00:00:00.000Z", "Name": "al2023-old-FIXTURE"},
+            {"ImageId": "ami-0fixture00000new0", "CreationDate": "2026-11-10T00:00:00.000Z", "Name": "al2023-new-FIXTURE"}]}
+
+    def run_instances(self, **p):
+        c = self.c
+        market = "spot" if "InstanceMarketOptions" in p else "on-demand"
+        c.runs.append(p)
+        c.calls.append(("run_instances", market))
+        if "run" in c.deny or (market == "on-demand" and "od" in c.deny):
+            raise cerr("UnauthorizedOperation", "RunInstances")
+        fails = c.fail_m.get(market) or []
+        if fails:
+            code = fails.pop(0)
+            if code:
+                raise cerr(code, "RunInstances")
+        vcpu = R.VCPU[p["InstanceType"]]
+        used = sum(i["vcpu"] for i in c.live() if i["market"] == market)
+        q = c.spot_q if market == "spot" else c.od_q
+        if q is not None and used + vcpu > q:
+            raise cerr("MaxSpotInstanceCountExceeded" if market == "spot" else "VcpuLimitExceeded", "RunInstances")
+        if "SubnetId" in p:
+            az = next(a for a, s in c.subnets.items() if s == p["SubnetId"])
+        else:
+            az = p.get("Placement", {}).get("AvailabilityZone") or sorted(c.subnets)[0]
+        tags = {t["Key"]: t["Value"] for t in p["TagSpecifications"][0]["Tags"]}
+        key = re.search(r"S3_KEY=(\S+)", p["UserData"]).group(1).strip("'")
+        attempt = int(re.search(r"GTU_ATTEMPT=(\d+)", p["UserData"]).group(1))
+        c.sky.n += 1
+        iid = f"i-{c.region[-6:].replace('-', '')}{c.sky.n:04d}"
+        c.inst[iid] = dict(state="running", t=c.clock(), job=tags["Job"], attempt=attempt, az=az, key=key, tags=tags,
+                           reason="", uploaded=False, vcpu=vcpu, token=p["ClientToken"], market=market,
+                           maxp=p.get("InstanceMarketOptions", {}).get("SpotOptions", {}).get("MaxPrice"))
+        live = c.live()
+        c.max_live = max(c.max_live, len(live))
+        c.max_vcpu = max(c.max_vcpu, sum(i["vcpu"] for i in live))
+        return {"Instances": [{"InstanceId": iid, "Placement": {"AvailabilityZone": az}}]}
+
+    def describe_instances(self, Filters=None, DryRun=False, **kw):
+        if DryRun:                                  # проверка наблюдения в соседнем регионе (версия 3)
+            self.c.calls.append(("describe_instances_dry", None))
+            raise cerr("UnauthorizedOperation" if "observe" in self.c.deny else "DryRunOperation", "DescribeInstances")
+        if "observe" in self.c.deny:
+            raise cerr("UnauthorizedOperation", "DescribeInstances")
+        self.c.calls.append(("describe_instances", sorted(x["Name"] for x in Filters)))
+        return super().describe_instances(Filters, **kw)
+
+    def terminate_instances(self, InstanceIds, DryRun=False):
+        if DryRun:                                  # проверка гашения на первой машине соседнего региона (версия 3)
+            self.c.calls.append(("terminate_dry", list(InstanceIds)))
+            if InstanceIds[0] not in self.c.inst:
+                raise cerr("InvalidInstanceID.NotFound", "TerminateInstances")
+            raise cerr("UnauthorizedOperation" if "terminate" in self.c.deny else "DryRunOperation", "TerminateInstances")
+        self.c.calls.append(("terminate_instances", list(InstanceIds)))
+        if "terminate" in self.c.deny:
+            raise cerr("UnauthorizedOperation", "TerminateInstances")
+        return super().terminate_instances(InstanceIds)
+
+
+class _RegionSsm:
+    def __init__(self, c):
+        self.c = c
+
+    def get_parameter(self, Name):
+        self.c.calls.append(("get_parameter", Name))
+        if self.c.ssm_denied:
+            raise cerr("AccessDeniedException", "GetParameter")
+        return {"Parameter": {"Value": f"ami-0fixture{self.c.region[-1]}0000000"}}
+
+
+class _RegionSq:
+    def __init__(self, c):
+        self.c = c
+
+    def get_service_quota(self, ServiceCode, QuotaCode):
+        self.c.calls.append(("get_service_quota", QuotaCode))
+        v = self.c.sq.get(QuotaCode) if self.c.sq is not None else None
+        if v is None:
+            raise cerr("AccessDeniedException", "GetServiceQuota")
+        return {"Quota": {"ServiceCode": ServiceCode, "QuotaCode": QuotaCode, "Value": float(v)}}
+
+
+class RegionCloud(FakeCloud):
+    def __init__(self, clock, region, sky, spot_q=None, od_q=None, sq=None, deny=(), ssm_denied=False,
+                 fail_spot=(), fail_od=(), **kw):
+        super().__init__(clock, prices=V3_PRICES[region], **kw)
+        self.region, self.sky, self.objects = region, sky, sky.objects        # бакет один на все регионы
+        zones = sorted({z for m in V3_PRICES[region].values() for z in m})
+        self.subnets = {z: f"subnet-0fixture{region[-1]}{z[-1]}000000" for z in zones}
+        self.spot_q, self.od_q, self.sq, self.deny, self.ssm_denied = spot_q, od_q, sq, set(deny), ssm_denied
+        self.fail_m = {"spot": list(fail_spot), "on-demand": list(fail_od)}
+        self.calls = []
+        self.ec2, self.ssm, self.sqc = _RegionEc2(self), _RegionSsm(self), _RegionSq(self)
+
+
+class _SkyS3(_FakeS3):
+    def get_object(self, Bucket, Key):
+        for cl in self.c.clouds.values():
+            cl.tick()
+        if Key not in self.c.objects:
+            raise cerr("NoSuchKey", "GetObject")
+        return {"Body": io.BytesIO(self.c.objects[Key])}
+
+
+class Sky:
+    """Несколько регионов одной заглушкой: общие часы и бакет (в us-east-1), клиенты регионов по запросу."""
+
+    def __init__(self, clock, **spec):
+        self.clock, self.objects, self.n, self.asked = clock, {}, 0, []
+        self.clouds = {}
+        for r, kw in spec.items():
+            self.clouds[r.replace("_", "-")] = RegionCloud(clock, r.replace("_", "-"), self, **kw)
+        self.s3 = _SkyS3(self)
+
+    def clients(self, region):
+        self.asked.append(region)
+        c = self.clouds[region]
+        return {"ec2": c.ec2, "ssm": c.ssm, "servicequotas": c.sqc}
+
+    def runner(self, tmp_path, out=None, **kw):
+        home = self.clouds["us-east-1"]
+        cfg = make_cfg(tmp_path, regions=kw.pop("regions", list(self.clouds)), **kw)
+        return R.Runner(cfg, home.ec2, self.s3, home.ssm, clock=self.clock, sleep=self.clock.sleep,
+                        out=(out.append if out is not None else (lambda m: None)), region_clients=self.clients)
+
+
+def sq_vals(spot=None, od=None):
+    return {R.QUOTA_CODES["spot"]: spot, R.QUOTA_CODES["on-demand"]: od}
+
+
+def test_v3_region_by_price_and_quota_full_batch(tmp_path):
+    """Квоты — из service-quotas каждого региона (us-east-2 — одна машина, us-west-2 — две). Первая часть — в
+    us-east-2 (0,601 × 1,05 < 0,703), шесть — в us-east-1, две — в us-west-2; квота ни одного региона не превышена,
+    MaxPrice и бюджет — по максимуму цены по всем регионам, журнал пишет регион, рынок и смету передачи."""
+    clk = Clock()
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(384, 384)), us_east_2=dict(sq=sq_vals(64, 5)),
+              us_west_2=dict(sq=sq_vals(128, 300)))
+    r = sky.runner(tmp_path, max_parallel=20)
+    res = r.run([make_job(name=f"p{i}") for i in range(9)])
+    assert all(v["status"] == "ok" and v["market"] == "spot" for v in res.values())
+    by = {}
+    for v in res.values():
+        by[v["region"]] = by.get(v["region"], 0) + 1
+    assert by == {"us-east-2": 1, "us-east-1": 6, "us-west-2": 2}
+    assert res["p0"]["region"] == "us-east-2" and res["p0"]["az"] == "us-east-2b"
+    for reg, q in (("us-east-1", 384), ("us-east-2", 64), ("us-west-2", 128)):
+        cl = sky.clouds[reg]
+        assert cl.max_vcpu <= q
+        assert {i["maxp"] for i in cl.inst.values()} == {V3_MAXP}             # MaxPrice — максимум по всем регионам
+        for prm in cl.runs:                                                   # гашение тремя способами — в любом регионе
+            assert prm["InstanceInitiatedShutdownBehavior"] == "terminate"
+            assert prm["InstanceMarketOptions"]["SpotOptions"]["InstanceInterruptionBehavior"] == "terminate"
+            assert prm["UserData"].splitlines()[1] == "shutdown -P +60"
+            assert "AWS_DEFAULT_REGION=us-east-1" in prm["UserData"]           # бакет — в us-east-1 для всех машин
+            tags = {t["Key"]: t["Value"] for t in prm["TagSpecifications"][0]["Tags"]}
+            assert (tags["Project"], tags["RunId"]) == (R.DEFAULT_TAG, RUN)
+        assert all(i["state"] == "terminated" for i in cl.inst.values())       # сборщик и гашение после итога
+    launches = ledger(tmp_path, "launch")
+    assert {(x["region"], x["market"]) for x in launches} == {("us-east-1", "spot"), ("us-east-2", "spot"),
+                                                              ("us-west-2", "spot")}
+    assert {x["region"]: x["xfer_usd"] for x in launches} == {"us-east-1": 0.0, "us-east-2": 0.2, "us-west-2": 0.2}
+    budget = ledger(tmp_path, "budget")
+    assert all(b["max_usd_h"] == float(V3_MAXP) and b["market"] == "spot" for b in budget)
+    assert budget[0]["regions"] == ["us-east-1", "us-east-2", "us-west-2"] and budget[0]["xfer_usd"] == 0.2
+    q = {(a, b): v for a, b, v, _src in ledger(tmp_path, "quotas")[0]["quotas"]}
+    assert q == {("us-east-1", "spot"): 384, ("us-east-2", "spot"): 64, ("us-west-2", "spot"): 128}
+    s = R.Ledger(tmp_path / "ledger.jsonl").summary()
+    assert s["open"] == [] and s["closed"] == 9
+    # закрытая машина соседнего региона несёт и смету передачи (разово)
+    one = next(x for x in launches if x["region"] == "us-east-2")
+    end = next(x for x in ledger(tmp_path, "end") if x["iid"] == one["iid"])
+    assert end["region"] == "us-east-2" and end["market"] == "spot"
+
+
+def test_v3_region_fallback_denied_capacity_and_image_from_describe_images(tmp_path):
+    """us-east-2 дешевле, но RunInstances — отказ в правах: регион исключён до конца прогона; в us-east-1 нет ёмкости
+    ни в одной зоне — следующий регион us-west-2, где SSM запрещён: образ al2023 — через DescribeImages (amazon,
+    самый свежий)."""
+    clk, out = Clock(), []
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(384), fail_spot=["InsufficientInstanceCapacity"] * 3),
+              us_east_2=dict(sq=sq_vals(384), deny=("run",)),
+              us_west_2=dict(sq=sq_vals(384), ssm_denied=True))
+    r = sky.runner(tmp_path, out=out)
+    r.load_quotas()
+    st, act = r.launch(make_job(name="a"))
+    assert st == "launched" and (act.region, act.az, act.market) == ("us-west-2", "us-west-2a", "spot")
+    w2 = sky.clouds["us-west-2"]
+    assert ("describe_images", AL2023_FALLBACK) in w2.calls
+    assert w2.runs[-1]["ImageId"] == "ami-0fixture00000new0"
+    assert sky.clouds["us-east-1"].runs[0]["ImageId"] == "ami-0fixture10000000"      # свой образ из SSM своего региона
+    assert ledger(tmp_path, "region_denied") and ledger(tmp_path, "region_denied")[0]["region"] == "us-east-2"
+    errs = [(x["region"], x["az"], x["code"]) for x in ledger(tmp_path, "launch_error")]
+    assert errs == [("us-east-2", "us-east-2b", "UnauthorizedOperation"),
+                    ("us-east-1", "us-east-1c", "InsufficientInstanceCapacity"),
+                    ("us-east-1", "us-east-1b", "InsufficientInstanceCapacity"),
+                    ("us-east-1", "us-east-1d", "InsufficientInstanceCapacity")]
+    assert any("регион исключён до конца прогона" in m for m in out)
+    # следующая задача в us-east-2 больше не просится; у us-east-1 все зоны только что отказали по ёмкости —
+    # регион в конце очереди (на avoid_s), задача идёт в us-west-2
+    n_e2, n_e1 = len(sky.clouds["us-east-2"].runs), len(sky.clouds["us-east-1"].runs)
+    st2, act2 = r.launch(make_job(name="b"))
+    assert st2 == "launched" and act2.region == "us-west-2"
+    assert len(sky.clouds["us-east-2"].runs) == n_e2 and len(sky.clouds["us-east-1"].runs) == n_e1
+    assert any("us-east-1 0.7030 (зоны после сбоя)" in m for m in out)
+    clk.sleep(R.Config.avoid_s + 1)                                          # срок «после сбоя» прошёл — снова us-east-1
+    st3, act3 = r.launch(make_job(name="c"))
+    assert st3 == "launched" and (act3.region, act3.az) == ("us-east-1", "us-east-1c")
+
+
+def test_v3_image_fallback_only_in_v3_mode(tmp_path):
+    """Без новых флагов запасного DescribeImages для al2023 нет (как в версии 2): отказ SSM — image_unavailable."""
+    clk = Clock()
+    sky = Sky(clk, us_east_1=dict(ssm_denied=True))
+    home = sky.clouds["us-east-1"]
+    r = R.Runner(make_cfg(tmp_path), home.ec2, sky.s3, home.ssm, clock=clk, out=lambda m: None)
+    assert not r.v3 and r.launch(make_job())[0] == "image_unavailable"
+    assert not [c for c in home.calls if c[0] == "describe_images"] and home.runs == []
+
+
+def test_v3_on_demand_when_spot_unavailable_everywhere(tmp_path):
+    """--on-demand-fallback: спот нигде не дал машину (ёмкость во всех зонах всех регионов, оба типа) — машина по
+    требованию по цене справочника: без InstanceMarketOptions, тег Market, журнал market=on-demand, бюджет — по
+    максимуму цены справочника × запас; квота по требованию своя (us-east-1 — одна машина, вторая — в us-west-2)."""
+    clk = Clock()
+    per_job = 3 + 1                # попыток спота на задачу в регионе: три зоны c7a и одна зона c7i
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(384, 64), fail_spot=["InsufficientInstanceCapacity"] * (2 * per_job)),
+              us_west_2=dict(sq=sq_vals(384, 300), fail_spot=["InsufficientInstanceCapacity"] * (2 * per_job)))
+    r = sky.runner(tmp_path, regions=["us-east-1", "us-west-2"], on_demand_fallback=True)
+    r.load_quotas()
+    st, act = r.launch(make_job(name="a"))
+    assert st == "launched" and (act.region, act.market, act.itype) == ("us-east-1", "on-demand", "c7a.16xlarge")
+    p = sky.clouds["us-east-1"].runs[-1]
+    assert "InstanceMarketOptions" not in p and p["InstanceInitiatedShutdownBehavior"] == "terminate"
+    assert {"Key": "Market", "Value": "on-demand"} in p["TagSpecifications"][0]["Tags"]
+    assert p["UserData"].splitlines()[1] == "shutdown -P +60"                # сторож — тот же
+    L = ledger(tmp_path, "launch")[-1]
+    assert (L["market"], L["region"], L["spot_usd_h"], L["max_usd_h"]) == ("on-demand", "us-east-1", 3.2845, 3.9414)
+    b = ledger(tmp_path, "budget")[-1]
+    assert (b["market"], b["max_usd_h"], b["ok"]) == ("on-demand", 3.9414, True)
+    r.active[act.iid] = act
+    st2, act2 = r.launch(make_job(name="b"))                                   # квота по требованию us-east-1 занята
+    assert st2 == "launched" and (act2.region, act2.market) == ("us-west-2", "on-demand")
+    # без --on-demand-fallback — машины по требованию нет, статус capacity с пояснением по регионам
+    clk3 = Clock()
+    sky3 = Sky(clk3, us_east_1=dict(sq=sq_vals(384, 384), fail_spot=["InsufficientInstanceCapacity"] * 100),
+               us_west_2=dict(sq=sq_vals(384, 300), fail_spot=["InsufficientInstanceCapacity"] * 100))
+    r3 = sky3.runner(tmp_path / "c", regions=["us-east-1", "us-west-2"])
+    assert r3.v3 and r3.launch(make_job(name="c"))[0] == "capacity"
+    assert "нет ёмкости: c7a.16xlarge@us-east-1c:InsufficientInstanceCapacity" in r3._why["c"]
+    for cl in sky3.clouds.values():
+        assert all(c[1] == "spot" for c in cl.calls if c[0] == "run_instances")
+
+
+def test_v3_on_demand_when_own_spot_quota_exhausted(tmp_path):
+    """Квота спота занята своими машинами, квота по требованию есть: при --on-demand-fallback очередь занимает и её
+    (решение владельца 15.11.2026: «займи соседние мощности»); бюджет — перед каждым запуском."""
+    clk = Clock()
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(128, 128)))
+    r = sky.runner(tmp_path, regions=["us-east-1"], on_demand_fallback=True, max_parallel=10)
+    res = r.run([make_job(name=f"p{i}") for i in range(4)])
+    assert all(v["status"] == "ok" for v in res.values())
+    mk = sorted(v["market"] for v in res.values())
+    assert mk == ["on-demand", "on-demand", "spot", "spot"]
+    cl = sky.clouds["us-east-1"]
+    assert [i["market"] for i in cl.inst.values()].count("spot") == 2 and cl.max_live == 4   # все четыре — сразу
+    recs = ledger(tmp_path)
+    for L in [x for x in recs if x["ev"] == "launch"]:
+        prev = recs[recs.index(L) - 1]
+        assert prev["ev"] == "budget" and prev["job"] == L["job"] and prev["market"] == L["market"] and prev["ok"]
+
+
+def test_v3_budget_by_max_across_regions_is_conservative(tmp_path):
+    """Потолок пропускает задачу по ценам одного us-east-1, но не по максимуму по всем разрешённым регионам."""
+    clk = Clock()
+    job = make_job()
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(384)), us_west_2=dict(sq=sq_vals(384)))
+    ebs_h = 50 * 0.08 / 730
+    only_e1 = (math_ceil4(0.879 * 1.2) + ebs_h + 0.005) * 70 / 60
+    with_w2 = (math_ceil4(V3_WMAX * 1.2) + ebs_h + 0.005) * 70 / 60 + 10 * 0.02
+    ceiling = round((only_e1 + with_w2) / 2, 2)
+    r = sky.runner(tmp_path, regions=["us-east-1", "us-west-2"], ceiling=ceiling)
+    r.load_quotas()
+    assert r.launch(job)[0] == "refused"
+    b = ledger(tmp_path, "budget")
+    assert b[0]["new"] == pytest.approx(with_w2, abs=1e-3) and not b[0]["ok"] and b[0]["xfer_usd"] == 0.2
+    v2 = R.Runner(make_cfg(tmp_path / "v2", ceiling=ceiling), sky.clouds["us-east-1"].ec2, sky.s3,
+                  sky.clouds["us-east-1"].ssm, clock=clk, out=lambda m: None)
+    assert v2.launch(make_job())[0] == "launched"                             # один регион — по своему максимуму
+
+
+def math_ceil4(x):
+    import math
+    return math.ceil(x * 10000) / 10000.0
+
+
+def test_v3_reap_and_final_reaper_cover_all_regions(tmp_path):
+    """Сборщик ищет машины прогона по тегам в каждом регионе прогона и гасит каждую клиентом её региона;
+    соседний прогон в том же регионе не трогается."""
+    clk, out = Clock(), []
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(64)), us_east_2=dict(sq=sq_vals(64)), us_west_2=dict(sq=sq_vals(64)))
+    r = sky.runner(tmp_path, out=out, max_parallel=10)
+    r.load_quotas()
+    acts = []
+    for n in ("a", "b", "c"):
+        st, act = r.launch(make_job(name=n))
+        assert st == "launched"
+        r.active[act.iid] = act
+        acts.append(act)
+    assert sorted(a.region for a in acts) == ["us-east-1", "us-east-2", "us-west-2"]
+    stray = sky.clouds["us-west-2"]
+    stray.inst["i-stray0001"] = dict(state="running", t=T0, job="x", attempt=1, az="us-west-2a", key="k",
+                                     tags=own_tags(run="other-run-FIXTURE"), reason="", uploaded=True, vcpu=64,
+                                     token="t", market="spot", maxp=None)
+    got = r.reap("тест", known=list(r.active))
+    assert sorted(got) == sorted(a.iid for a in acts)
+    for a in acts:
+        cl = sky.clouds[a.region]
+        assert ("terminate_instances", [a.iid]) in cl.calls and cl.inst[a.iid]["state"] == "terminated"
+        assert sum(1 for c in cl.calls if c[0] == "describe_instances" and "tag:RunId" in c[1]) == 1
+    assert stray.inst["i-stray0001"]["state"] == "running"
+    assert R.Ledger(tmp_path / "ledger.jsonl").summary()["open"] == []
+
+
+def test_v3_reconcile_and_cli_reap_by_ledger_regions(tmp_path, monkeypatch):
+    """Сверка ищет открытые машины в их регионах (поле region журнала): погашенная в us-west-2 — закрыта, живая после
+    срока в us-east-2 — погашена клиентом us-east-2. Ручной reap без --regions находит регионы прогона по журналу —
+    и так же работает раннер без новых флагов (журнал с записями версии 3)."""
+    clk = Clock(T0 + 5 * 3600)
+    sky = Sky(clk, us_east_1=dict(), us_east_2=dict(), us_west_2=dict())
+    e2 = sky.clouds["us-east-2"]
+    e2.inst["i-zombie0001"] = dict(state="running", t=T0, job="y", attempt=1, az="us-east-2b", key="k",
+                                   tags=own_tags(job="y"), reason="", uploaded=True, vcpu=64, token="t",
+                                   market="spot", maxp=None)
+    base = {"ev": "launch", "run_id": RUN, "itype": "c7a.16xlarge", "spot_usd_h": 0.6, "max_usd_h": 1.7,
+            "ebs_usd_h": 0.0, "ip_usd_h": 0.0, "t_launch": T0, "allot_min": 70, "market": "spot", "xfer_usd": 0.2}
+    write_ledger(tmp_path / "ledger.jsonl", [dict(base, job="x", iid="i-gone0001", az="us-west-2a", region="us-west-2"),
+                                             dict(base, job="y", iid="i-zombie0001", az="us-east-2b", region="us-east-2")])
+    home = sky.clouds["us-east-1"]
+    r = R.Runner(make_cfg(tmp_path), home.ec2, sky.s3, home.ssm, clock=clk, out=lambda m: None,
+                 region_clients=sky.clients)
+    assert not r.v3
+    r.reconcile()
+    ends = {x["iid"]: x["outcome"] for x in ledger(tmp_path, "end")}
+    assert ends == {"i-gone0001": "reconciled", "i-zombie0001": "reaped_overdue"}
+    assert ("terminate_instances", ["i-zombie0001"]) in e2.calls
+    assert not [c for c in home.calls if c[0] in ("describe_instances", "terminate_instances")]
+    s = R.Ledger(tmp_path / "ledger.jsonl").summary()
+    assert s["open"] == [] and s["spent"] == pytest.approx(0.6 * 70 / 60 + 0.2 + 0.6 * 5 + 0.2)
+    # CLI reap: регионы прогона — из журнала; машина в us-west-2 найдена по тегам и погашена там
+    monkeypatch.setenv("ALPHA_O_S3", f"s3://{BUCKET}/{PREFIX}")
+    monkeypatch.setenv("ALPHA_O_INSTANCE_PROFILE", "gtu-test-profile")
+    w2 = sky.clouds["us-west-2"]
+    w2.inst["i-late0001"] = dict(state="running", t=T0, job="z", attempt=1, az="us-west-2a", key="k",
+                                 tags=own_tags(job="z"), reason="", uploaded=True, vcpu=64, token="t", market="spot",
+                                 maxp=None)
+    monkeypatch.setattr(R, "_clients", lambda region: (home.ec2, sky.s3, home.ssm, None))
+    monkeypatch.setattr(R, "_region_clients", sky.clients)
+    assert R.main(["reap", "--run-id", RUN, "--ledger", str(tmp_path / "ledger.jsonl")]) == 0
+    assert w2.inst["i-late0001"]["state"] == "terminated" and ("terminate_instances", ["i-late0001"]) in w2.calls
+    assert sorted(set(sky.asked)) == ["us-east-2", "us-west-2"]                # клиент us-east-1 — из _clients
+
+
+def test_v3_backward_compat_no_flags_same_calls_and_ledger(tmp_path):
+    """Без новых флагов: клиенты соседних регионов не запрашиваются, service-quotas и справочник цен не читаются,
+    в журнале нет полей версии 3, последовательность вызовов — как в версии 2 (сверено с кодом версии 2
+    дифференциально: 22 сценария заглушки и plan по всем файлам задач — вызовы, журнал и вывод совпали)."""
+    clk = Clock()
+    cloud = FakeCloud(clk)
+    calls = []
+
+    class Rec:
+        def __init__(self, inner, name):
+            self.i, self.n = inner, name
+
+        def __getattr__(self, op):
+            f = getattr(self.i, op)
+
+            def call(**kw):
+                calls.append(f"{self.n}.{op}")
+                return f(**kw)
+            return call
+
+    def no_region(region):
+        raise AssertionError(f"клиент региона {region} запрошен без новых флагов")
+    cfg = make_cfg(tmp_path, price_ref=tmp_path / "нет-такого-файла.json")
+    assert not cfg.multi and cfg.region_list == ["us-east-1"]
+    r = R.Runner(cfg, Rec(cloud.ec2, "ec2"), Rec(cloud.s3, "s3"), Rec(cloud.ssm, "ssm"), clock=clk, sleep=clk.sleep,
+                 out=lambda m: None, region_clients=no_region)
+    res = r.run([make_job(name="a")])
+    assert res["a"]["status"] == "ok" and "region" not in res["a"] and "market" not in res["a"]
+    # последовательность записана с кода версии 2 (коммит 303e81c) на этой же заглушке
+    assert calls == ["ec2.describe_spot_price_history", "ssm.get_parameter", "ec2.describe_subnets",
+                     "ec2.run_instances", "ec2.describe_instances", "s3.get_object", "ec2.describe_instances",
+                     "s3.get_object", "ec2.describe_instances", "s3.get_object", "ec2.describe_instances",
+                     "s3.get_object", "ec2.describe_instances", "s3.get_object", "s3.list_objects_v2",
+                     "s3.get_object", "s3.get_object", "ec2.terminate_instances", "ec2.describe_instances"]
+    v3_fields = {"region", "market", "xfer_usd", "regions", "quotas", "on_demand_fallback"}
+    for x in ledger(tmp_path):
+        assert not (v3_fields & set(x)), x
+        assert x["ev"] not in ("quotas", "region_denied")
+
+
+def test_v3_quota_sources_and_zero_quota_region_unused(tmp_path):
+    """Квота: service-quotas; флаг ниже фактической — флаг; выше — фактическая (сверх неё не запускаем);
+    service-quotas не ответил — флаг, иначе запасное (region — --max-vcpu, соседний — 0: регион не используется)."""
+    clk, out = Clock(), []
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(384, 384)), us_east_2=dict(sq=sq_vals(5, 5)),
+              us_west_2=dict(sq=None))
+    r = sky.runner(tmp_path, out=out, vcpu_quota_region={"us-east-1": 128, "us-east-2": 1536},
+                   on_demand_fallback=True)
+    r.load_quotas()
+    src = {(a, b): (v, s) for a, b, v, s in ledger(tmp_path, "quotas")[0]["quotas"]}
+    assert src[("us-east-1", "spot")][0] == 128 and src[("us-east-1", "spot")][1].startswith("флаг (service-quotas")
+    assert src[("us-east-2", "spot")][0] == 5 and "взята фактическая" in src[("us-east-2", "spot")][1]
+    assert src[("us-west-2", "spot")] == (0, "запасное (service-quotas: AccessDeniedException)")
+    assert src[("us-east-1", "on-demand")][0] == 384
+    assert any("us-west-2 спот: 0 vCPU" in m and "регион не используется" in m for m in out)
+    st, act = r.launch(make_job(name="a"))
+    assert st == "launched" and act.region == "us-east-1"                   # us-east-2: 5 vCPU, машина 64 не влезает
+    assert not [c for c in sky.clouds["us-east-2"].calls if c[0] == "run_instances"]
+    assert not [c for c in sky.clouds["us-west-2"].calls if c[0] == "run_instances"]
+    # флаг выше фактической и без service-quotas: --vcpu-quota-per-region us-west-2=384 — по флагу
+    r2 = Sky(Clock(), us_east_1=dict(sq=None), us_west_2=dict(sq=None)).runner(
+        tmp_path / "b", vcpu_quota_region={"us-west-2": 384}, vcpu_quota=384, vcpu_quota_explicit=True)
+    assert r2.quota("us-west-2") == 384 and r2._quota[("us-west-2", "spot")][1] == "флаг (service-quotas: AccessDeniedException)"
+    assert r2.quota("us-east-1") == 384
+
+
+def test_v3_max_parallel_auto_and_queue_waits_per_region_quota(tmp_path):
+    """--max-parallel не задан: машин — по сумме квот / 64; очередь ждёт, пока освободится квота любого региона."""
+    clk = Clock()
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(128)), us_west_2=dict(sq=sq_vals(64)))
+    r = sky.runner(tmp_path, regions=["us-east-1", "us-west-2"], max_parallel_auto=True)
+    res = r.run([make_job(name=f"p{i}") for i in range(5)])
+    assert r.cfg.max_parallel == 6                                          # max(6, 192 // 64)
+    assert all(v["status"] == "ok" for v in res.values())
+    assert sky.clouds["us-east-1"].max_vcpu <= 128 and sky.clouds["us-west-2"].max_vcpu <= 64
+    late = [x for x in ledger(tmp_path, "launch") if x["t_launch"] > T0]
+    assert len(late) == 2                                                   # 3 сразу (2 + 1), 2 — после освобождения
+    clk2 = Clock()
+    sky2 = Sky(clk2, us_east_1=dict(sq=sq_vals(1024)), us_west_2=dict(sq=sq_vals(1024)))
+    r2 = sky2.runner(tmp_path / "b", regions=["us-east-1", "us-west-2"], max_parallel_auto=True)
+    r2.load_quotas()
+    assert r2.cfg.max_parallel == 32
+
+
+def test_v3_dryrun_spreads_waves_and_skips_denied_region(tmp_path):
+    """DryRun версии 3: задачи пакета раскладываются по регионам «волнами» квот — права проверяются в каждом регионе;
+    отказ в правах в регионе — следующий регион, итог задачи dryrun_ok."""
+    clk = Clock()
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(128)), us_east_2=dict(sq=sq_vals(64), deny=("run",)),
+              us_west_2=dict(sq=sq_vals(64)))
+
+    class DryEc2(_RegionEc2):
+        def run_instances(self, **p):
+            if p.pop("DryRun", False):
+                self.c.calls.append(("run_instances_dry", None))
+                if "run" in self.c.deny:
+                    raise cerr("UnauthorizedOperation", "RunInstances")
+                raise cerr("DryRunOperation", "RunInstances")
+            return super().run_instances(**p)
+    for cl in sky.clouds.values():
+        cl.ec2 = DryEc2(cl)
+    r = sky.runner(tmp_path, dryrun=True)
+    res = r.run([make_job(name=f"p{i}") for i in range(5)])
+    assert all(v["status"] == "dryrun_ok" for v in res.values())
+    dry = {reg: sum(1 for c in cl.calls if c[0] == "run_instances_dry") for reg, cl in sky.clouds.items()}
+    assert dry == {"us-east-1": 4, "us-east-2": 1, "us-west-2": 1}          # us-east-2 — один отказ, затем исключён
+    assert [w for w, *_ in r._placements] == [1, 1, 1, 2, 2]
+    assert not (tmp_path / "ledger.jsonl").exists()                          # общий журнал не тронут
+
+
+def test_v3_plan_cli_regions_waves_and_on_demand(tmp_path, capsys, monkeypatch):
+    monkeypatch.setenv("ALPHA_O_S3", f"s3://{BUCKET}/{PREFIX}")
+    f = tmp_path / "jobs.json"
+    f.write_text(json.dumps([{"name": f"p{i}", "command": "true", "max_min": 60} for i in range(8)]))
+    common = ["--ledger", str(tmp_path / "l.jsonl"), "--out", str(tmp_path / "runs")]
+    rc = R.main(["plan", str(f), "--assume-price", "0.9", "--regions", "us-east-1,us-east-2,us-west-2",
+                 "--assume-zone-prices", "us-east-1c=0.703,us-east-1b=0.747,us-east-2b=0.601,us-west-2a=0.866",
+                 "--vcpu-quota-per-region", "us-east-1=256,us-east-2=64,us-west-2=128", *common])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "[регион] p0: us-east-2, спот (волна 1)" in out and "[регион] p1: us-east-1, спот (волна 1)" in out
+    assert "[план] волна 1: us-east-2 спот ×1, us-east-1 спот ×4, us-west-2 спот ×2" in out
+    assert "[план] волна 2: us-east-2 спот ×1" in out
+    assert "MaxPrice 1.0800" in out                                          # ceil(0.9 × 1.2): assume-price — максимум окна
+    assert '"SubnetId": "<подсеть по умолчанию us-east-2b>"' in out
+    assert "@us-east-2; отказ — DescribeImages amazon al2023-ami-2023*-x86_64" in out
+    assert "--max-parallel не задан: 7 машин" in out
+    assert not (tmp_path / "l.jsonl").exists() and BUCKET not in out
+    rc = R.main(["plan", str(f), "--assume-price", "0.9", "--regions", "us-east-1,us-west-2", "--on-demand-fallback",
+                 "--assume-no-spot", "--od-vcpu-quota-per-region", "us-east-1=128,us-west-2=300", *common])
+    out = capsys.readouterr().out
+    assert rc == 0 and '"MarketType"' not in out and '"Value": "on-demand"' in out
+    assert "[план] волна 1: us-east-1 по требованию ×2, us-west-2 по требованию ×4" in out
+    assert "цена справочника 3.2845" in out and "верхняя граница 3.9414" in out
+    assert R.main(["plan", str(f), "--assume-price", "0.9", "--assume-no-spot", *common]) == 2   # без --on-demand-fallback
+    assert "--assume-no-spot" in capsys.readouterr().err
+
+
+def test_v3_price_ref_file_and_guards(tmp_path):
+    ref = R.load_price_ref(R.PRICE_REF)
+    assert ref["date"] == "2026-11-15" and "предварительно" in ref["status"]
+    od = ref["on_demand_usd_h"]
+    assert set(od["c7a.16xlarge"]) == {"us-east-1", "us-east-2", "us-west-2"} and od["c7i.16xlarge"]["us-east-1"] > 0
+    assert ref["xfer_usd_gb"]["default"] == pytest.approx(0.02)
+    raw = json.loads(R.PRICE_REF.read_text(encoding="utf-8"))
+    assert set(raw["sources"]) >= {"c7a.16xlarge", "c7i.16xlarge", "xfer_usd_gb"}
+    bad = tmp_path / "ref.json"
+    for data in ({"on_demand_usd_h": {}}, {"on_demand_usd_h": {"c7a.16xlarge": {"us-east-1": 0}}, "xfer_usd_gb": {"default": 0.02}},
+                 {"on_demand_usd_h": {}, "xfer_usd_gb": {}}):
+        bad.write_text(json.dumps(data))
+        with pytest.raises(R.RunnerError):
+            R.load_price_ref(bad)
+    # битый справочник в режиме версии 3 — отказ до первого запуска
+    clk = Clock()
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(384)), us_west_2=dict(sq=sq_vals(384)))
+    r = sky.runner(tmp_path, regions=["us-east-1", "us-west-2"], price_ref=bad)
+    with pytest.raises(R.RunnerError):
+        r.run([make_job(name="a")])
+    assert sky.clouds["us-east-1"].runs == [] and sky.clouds["us-west-2"].runs == []
+
+
+def test_v3_flags_parse_and_validation(tmp_path):
+    assert R.parse_regions("us-east-1, us-west-2,us-east-1") == ["us-east-1", "us-west-2"]
+    assert R.parse_region_ints("us-east-1=384,us-west-2=300", "--x") == {"us-east-1": 384, "us-west-2": 300}
+    for bad in ("", "us-east", "US-EAST-1", "us-east-1;rm"):
+        with pytest.raises(R.RunnerError):
+            R.parse_regions(bad)
+    for bad in ("us-east-1=-1", "us-east-1=x", "nope=5", ""):
+        with pytest.raises(R.RunnerError):
+            R.parse_region_ints(bad, "--x")
+    p = R.build_parser()
+    a = p.parse_args(["run", "j.json"])
+    assert a.regions is None and not a.on_demand_fallback and a.max_parallel == 6 and a.vcpu_quota == 384
+    cfg = R._config_from_args(a, need_env=False)
+    assert not cfg.multi and cfg.max_parallel_auto and not cfg.vcpu_quota_explicit
+    a = p.parse_args(["run", "j.json", "--regions", "us-east-1,us-west-2", "--max-vcpu", "384", "--max-parallel", "8",
+                      "--vcpu-quota-per-region", "us-west-2=384", "--on-demand-fallback", "--xfer-gb", "2"])
+    cfg = R._config_from_args(a, need_env=False)
+    assert cfg.multi and cfg.region_list == ["us-east-1", "us-west-2"] and cfg.on_demand_fallback
+    assert cfg.vcpu_quota_explicit and not cfg.max_parallel_auto and cfg.max_parallel == 8 and cfg.xfer_gb == 2
+    assert R._config_from_args(p.parse_args(["run", "j.json", "--on-demand-fallback"]), need_env=False).multi
+    for kw in ({"region_price_margin": -0.1}, {"xfer_gb": -1.0}, {"vcpu_quota_fallback": -1}, {"regions": ["bad"]}):
+        with pytest.raises(R.RunnerError):
+            R.validate_config(make_cfg(tmp_path, **kw))
+
+
+def test_v3_status_breakdown_by_region_and_market(tmp_path, capsys):
+    led = tmp_path / "ledger.jsonl"
+    base = {"ev": "launch", "run_id": RUN, "itype": "c7a.16xlarge", "ebs_usd_h": 0.0, "ip_usd_h": 0.0,
+            "t_launch": T0, "allot_min": 60, "job": "j"}
+    write_ledger(led, [
+        dict(HIST[0]), dict(HIST[1]),                                                    # запись версии 2
+        dict(base, iid="i-a", region="us-east-2", market="spot", spot_usd_h=0.6, max_usd_h=1.7, xfer_usd=0.2),
+        {"ev": "end", "run_id": RUN, "job": "j", "iid": "i-a", "t_end": T0 + 3600},
+        dict(base, iid="i-b", region="us-east-1", market="on-demand", spot_usd_h=3.2845, max_usd_h=3.9414, xfer_usd=0.0)])
+    assert R.main(["status", "--ledger", str(led)]) == 0
+    out = capsys.readouterr().out
+    assert "us-east-2 спот: закрыто 1, ≈ 0.80 долл.; открыто 0" in out
+    assert "us-east-1 по требованию: закрыто 0, ≈ 0.00 долл.; открыто 1, верхняя граница 3.94 долл." in out
+    assert "us-east-1 (журнал v2) спот: закрыто 1" in out
+    s = R.Ledger(led).summary()
+    assert s["spent"] == pytest.approx(1.01 + 0.6 + 0.2) and s["committed"] == pytest.approx(3.9414)
+
+
+def test_v3_lost_on_demand_machine_retried_and_terminated_in_its_region(tmp_path):
+    """Машина по требованию в соседнем регионе пропала без метки — повтор (в свой префикс), гашение итоговой
+    машины — клиентом её региона; зона после сбоя по требованию не мешает споту той же зоны."""
+    clk = Clock()
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(0, 0)), us_west_2=dict(sq=sq_vals(0, 300)))
+    w2 = sky.clouds["us-west-2"]
+    w2.interrupt = {("a", 1): 120}
+    r = sky.runner(tmp_path, regions=["us-east-1", "us-west-2"], on_demand_fallback=True)
+    res = r.run([make_job(name="a")])["a"]
+    assert (res["status"], res["attempts"], res["region"], res["market"]) == ("ok", 2, "us-west-2", "on-demand")
+    assert all(c[1] == "on-demand" for c in w2.calls if c[0] == "run_instances")
+    assert r._avoided("c7a.16xlarge/od", "us-west-2a") and not r._avoided("c7a.16xlarge", "us-west-2a")
+    term = [c for c in w2.calls if c[0] == "terminate_instances"]
+    assert term and not [c for c in sky.clouds["us-east-1"].calls if c[0] == "terminate_instances"]
+
+
+def test_v3_quota_error_pauses_region_and_price_denied_region_skipped(tmp_path):
+    """service-quotas показал свободную квоту, но AWS ответил квотной ошибкой (квоту держат чужие машины аккаунта):
+    регион — на паузу, задача — в следующий регион; через паузу регион снова пробуется. Регион без права на цену
+    спота — исключён (в бюджет и MaxPrice не входит)."""
+    clk, out = Clock(), []
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(384)), us_east_2=dict(sq=sq_vals(384), fail_spot=["MaxSpotInstanceCountExceeded"]),
+              us_west_2=dict(sq=sq_vals(384), deny=("price",)))
+    r = sky.runner(tmp_path, out=out)
+    r.load_quotas()
+    st, act = r.launch(make_job(name="a"))
+    assert st == "launched" and act.region == "us-east-1"
+    assert [(x["region"], x["code"]) for x in ledger(tmp_path, "launch_error")] == [("us-east-2", "MaxSpotInstanceCountExceeded")]
+    assert r._blocked("us-east-2", "spot").startswith("квота")
+    assert ("us-west-2", "spot") in r._denied and not sky.clouds["us-west-2"].runs
+    b = ledger(tmp_path, "budget")[0]
+    assert b["regions"] == ["us-east-1", "us-east-2"] and b["max_usd_h"] == pytest.approx(math_ceil4(0.940 * 1.2))
+    r.active[act.iid] = act
+    st, act2 = r.launch(make_job(name="b"))                                  # пауза ещё идёт — снова us-east-1
+    assert st == "launched" and act2.region == "us-east-1" and len(sky.clouds["us-east-2"].runs) == 1
+    clk.sleep(5 * 60 + 1)                                                    # пауза min(avoid_s, 5 × poll_s) прошла
+    st, act3 = r.launch(make_job(name="c"))
+    assert st == "launched" and act3.region == "us-east-2"
+    # все регионы на паузе или без прав, своих машин нет — defer: очередь подождёт, а не снимет задачу
+    clk2 = Clock()
+    sky2 = Sky(clk2, us_east_1=dict(sq=sq_vals(384), fail_spot=["VcpuLimitExceeded"] * 9),
+               us_east_2=dict(sq=sq_vals(384), fail_spot=["VcpuLimitExceeded"] * 9))
+    r2 = sky2.runner(tmp_path / "b", regions=["us-east-1", "us-east-2"], quota_wait_polls=1)
+    res = r2.run([make_job(name="solo")])["solo"]
+    assert res["status"] == "quota" and "us-east-1 спот: квота (пауза после ошибки)" in res["detail"]
+    assert sorted((x["region"], x["code"]) for x in ledger(tmp_path / "b", "launch_error")) == [
+        ("us-east-1", "VcpuLimitExceeded"), ("us-east-2", "VcpuLimitExceeded")]   # на паузе AWS не дёргается
+
+
+# ----------------------------------------------------------------------------- версия 3: проверки скептика «деньги и гашение»
+def test_v3_neighbor_region_without_describe_is_excluded_before_any_machine(tmp_path):
+    """Шаблон политики ключа агента закрепляет DescribeInstances и TerminateInstances за одним регионом
+    (aws:RequestedRegion). Соседний регион без DescribeInstances исключается ДО первой машины (DescribeInstances
+    DryRun): иначе опрос уронил бы прогон, а сборщик не нашёл бы и не погасил машины региона."""
+    clk, out = Clock(), []
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(64)), us_west_2=dict(sq=sq_vals(384), deny=("observe", "terminate")))
+    r = sky.runner(tmp_path, out=out, regions=["us-east-1", "us-west-2"], max_parallel=4)
+    res = r.run([make_job(name=f"p{i}") for i in range(3)])
+    assert all(v["status"] == "ok" and v["region"] == "us-east-1" for v in res.values())   # очередь под квоту us-east-1
+    w2 = sky.clouds["us-west-2"]
+    assert not w2.runs and ("describe_instances_dry", None) in w2.calls
+    assert sum(1 for c in w2.calls if c[0] == "describe_instances_dry") == 1                # проверка — один раз
+    chk = ledger(tmp_path, "region_check")
+    assert [(x["region"], x["op"], x["ok"], x["code"]) for x in chk] == [
+        ("us-west-2", "DescribeInstances", False, "UnauthorizedOperation")]
+    assert {(x["region"], x["market"]) for x in ledger(tmp_path, "region_denied")} == {("us-west-2", "spot"),
+                                                                                       ("us-west-2", "on-demand")}
+    assert all(b["regions"] == ["us-east-1"] for b in ledger(tmp_path, "budget"))           # не входит и в MaxPrice
+    assert R.Ledger(tmp_path / "ledger.jsonl").summary()["open"] == []
+
+
+def test_v3_terminate_denied_in_neighbor_region_limits_exposure_to_one_machine(tmp_path):
+    """DescribeInstances разрешён, TerminateInstances — нет: проверить до машины нельзя (право завязано на её тег),
+    поэтому первая машина соседнего региона сразу проходит TerminateInstances DryRun; отказ — регион исключён,
+    второй машины там нет, машина без подтверждённого гашения остаётся в бюджете верхней границей."""
+    clk, out = Clock(), []
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(64)), us_west_2=dict(sq=sq_vals(384), deny=("terminate",)))
+    r = sky.runner(tmp_path, out=out, regions=["us-east-1", "us-west-2"], max_parallel=10)
+    res = r.run([make_job(name=f"p{i}") for i in range(4)])
+    w2 = sky.clouds["us-west-2"]
+    assert len(w2.runs) == 1 and ("terminate_dry", list(w2.inst)) in w2.calls
+    chk = [(x["region"], x["op"], x["ok"]) for x in ledger(tmp_path, "region_check")]
+    assert chk == [("us-west-2", "DescribeInstances", True), ("us-west-2", "TerminateInstances", False)]
+    assert ("us-west-2", "spot") in r._denied and ("us-west-2", "on-demand") in r._denied
+    assert any("TerminateInstances запрещён" in m and "новых машин в регионе не будет" in m for m in out)
+    assert any("погасите вручную: aws ec2 terminate-instances --region us-west-2" in m for m in out)
+    iid = next(iter(w2.inst))
+    s = R.Ledger(tmp_path / "ledger.jsonl").summary()
+    assert iid in s["open"] and s["committed"] > 0                                            # в бюджете — до сверки
+    assert all(v["status"] in ("ok", "halted") for v in res.values())
+
+
+def test_v3_unverified_region_takes_one_machine_and_waits_instead_of_on_demand(tmp_path):
+    """Проверка гашения сразу после запуска не прошла (InvalidInstanceID.NotFound — машина ещё не видна): пока гашение
+    в регионе не проверено, там одна машина; задача ждёт опроса, а не уходит в дорогую машину по требованию
+    (спот в регионе есть — просто не проверен); после проверки на опросе — вторая машина в регионе."""
+    clk = Clock()
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(64, 384)), us_west_2=dict(sq=sq_vals(384, 300)))
+    w2 = sky.clouds["us-west-2"]
+    lag = {"n": 1}
+    orig = w2.ec2.terminate_instances
+
+    def lagging(InstanceIds, DryRun=False):
+        if DryRun and lag["n"]:
+            lag["n"] -= 1
+            w2.calls.append(("terminate_dry", list(InstanceIds)))
+            raise cerr("InvalidInstanceID.NotFound", "TerminateInstances")
+        return orig(InstanceIds, DryRun=DryRun)
+    w2.ec2.terminate_instances = lagging
+    r = sky.runner(tmp_path, regions=["us-east-1", "us-west-2"], on_demand_fallback=True)
+    r.load_quotas()
+    for name, reg in (("a", "us-east-1"), ("b", "us-west-2")):
+        st, act = r.launch(make_job(name=name))
+        assert st == "launched" and (act.region, act.market) == (reg, "spot")
+        r.active[act.iid] = act
+    st, _ = r.launch(make_job(name="c"))                    # us-east-1 занят, us-west-2 ждёт проверки гашения
+    assert st == "defer" and "ждём" in r._why["c"]
+    assert not [c for cl in sky.clouds.values() for c in cl.calls if c == ("run_instances", "on-demand")]
+    r._poll(deque())                                        # опрос: DryRun-гашение прошло
+    assert "us-west-2" in r._term_ok
+    st, act = r.launch(make_job(name="c"))
+    assert st == "launched" and (act.region, act.market) == ("us-west-2", "spot")
+    chk = [(x["op"], x["ok"]) for x in ledger(tmp_path, "region_check")]
+    assert chk == [("DescribeInstances", True), ("TerminateInstances", True)]
+
+
+def test_v3_terminate_survives_client_factory_error_and_reconcile_keeps_region(tmp_path):
+    """Сбой получения клиента одного региона (не RunnerError) в гашении не обрывает гашение остальных регионов и
+    печатает команду вручную; запись end сверки несёт регион и рынок записи launch."""
+    clk, out = Clock(), []
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(64)), us_east_2=dict(sq=sq_vals(64)), us_west_2=dict(sq=sq_vals(64)))
+    r = sky.runner(tmp_path, out=out, max_parallel=10)
+    r.load_quotas()
+    acts = []
+    for n in ("a", "b", "c"):
+        st, a = r.launch(make_job(name=n))
+        r.active[a.iid] = a
+        acts.append(a)
+    assert sorted(a.region for a in acts) == ["us-east-1", "us-east-2", "us-west-2"]
+    r._rc.pop("us-east-2")
+
+    def factory(region):
+        if region == "us-east-2":
+            raise ValueError("FIXTURE: client factory failed")
+        return sky.clients(region)
+    r.region_clients = factory
+    done = r._terminate([a.iid for a in acts], "проба")
+    states = {a.region: sky.clouds[a.region].inst[a.iid]["state"] for a in acts}
+    assert states == {"us-east-1": "terminated", "us-east-2": "running", "us-west-2": "terminated"}
+    e2 = next(a for a in acts if a.region == "us-east-2")
+    assert e2.iid not in done and any(f"--region us-east-2 --instance-ids {e2.iid}" in m for m in out)
+    # сверка: закрытые записи end — с регионом и рынком (by_region и разбор журнала по регионам)
+    clk2 = Clock(T0 + 5 * 3600)
+    sky2 = Sky(clk2, us_east_1=dict(), us_west_2=dict())
+    write_ledger(tmp_path / "l2.jsonl", [{"ev": "launch", "run_id": RUN, "job": "x", "iid": "i-gone0001",
+                                          "itype": "c7a.16xlarge", "az": "us-west-2a", "spot_usd_h": 3.2845,
+                                          "max_usd_h": 3.9414, "ebs_usd_h": 0.0, "ip_usd_h": 0.0, "t_launch": T0,
+                                          "allot_min": 70, "region": "us-west-2", "market": "on-demand",
+                                          "xfer_usd": 0.2}])
+    home = sky2.clouds["us-east-1"]
+    r2 = R.Runner(make_cfg(tmp_path, ledger_path=tmp_path / "l2.jsonl"), home.ec2, sky2.s3, home.ssm, clock=clk2,
+                  out=lambda m: None, region_clients=sky2.clients)
+    r2.reconcile()
+    end = [x for x in R.Ledger(tmp_path / "l2.jsonl").records() if x["ev"] == "end"]
+    assert [(x["outcome"], x["region"], x["market"]) for x in end] == [("reconciled", "us-west-2", "on-demand")]
+
+
+def test_v3_ambiguous_launch_error_fails_job_instead_of_second_region(tmp_path, monkeypatch):
+    """RunInstances ответил InternalError (5xx после повторов botocore), а машина всё же создана и по ClientToken ещё
+    не видна: следующий регион запустил бы вторую машину той же задачи (вне журнала и бюджета, в тот же префикс S3).
+    Как в версии 2 — задача снимается со статусом failed, в другие регионы и рынки не идёт; сборщик по тегам в finally
+    гасит возможную машину."""
+    clk = Clock()
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(384, 384)), us_west_2=dict(sq=sq_vals(384, 300)))
+    e1 = sky.clouds["us-east-1"]
+    orig = e1.ec2.run_instances
+
+    def ghost(**p):
+        orig(**p)                                       # машина создана
+        raise cerr("InternalError", "RunInstances")
+    monkeypatch.setattr(e1.ec2, "run_instances", ghost)
+    monkeypatch.setattr(R.Runner, "_find_by_token", lambda self, tok, region=None: None)   # описание запаздывает
+    r = sky.runner(tmp_path, regions=["us-east-1", "us-west-2"], on_demand_fallback=True)
+    r.load_quotas()
+    assert r.launch(make_job(name="a")) == ("failed", None)
+    assert len(e1.inst) == 1 and not sky.clouds["us-west-2"].runs                      # второй машины нет
+    assert "InternalError" in r._why["a"] and "другие регионы и типы не пробуются" in r._why["a"]
+    assert [(x["region"], x["code"]) for x in ledger(tmp_path, "launch_error")] == [("us-east-1", "InternalError")]
+    # полный прогон: задача failed, «призрак» погашен сборщиком по тегам в finally, журнал без открытых записей
+    clk2 = Clock()
+    sky2 = Sky(clk2, us_east_1=dict(sq=sq_vals(384, 384)), us_west_2=dict(sq=sq_vals(384, 300)))
+    g1 = sky2.clouds["us-east-1"]
+    orig2 = g1.ec2.run_instances
+
+    def ghost2(**p):
+        orig2(**p)
+        raise cerr("InternalError", "RunInstances")
+    monkeypatch.setattr(g1.ec2, "run_instances", ghost2)
+    r2 = sky2.runner(tmp_path / "b", regions=["us-east-1", "us-west-2"])
+    res = r2.run([make_job(name="b")])
+    assert res["b"]["status"] == "failed" and not sky2.clouds["us-west-2"].runs
+    assert [i["state"] for i in g1.inst.values()] == ["terminated"]
+    assert R.Ledger(tmp_path / "b" / "ledger.jsonl").summary()["open"] == []
+
+
+def test_v3_dryrun_reveals_neighbor_region_without_describe(tmp_path):
+    """`run` без --live (первый шаг сессии с ключами): DescribeInstances DryRun соседнего региона — до цены и запуска;
+    отказ в правах исключает регион для обоих рынков (журнал DryRun), задачи раскладываются по остальным регионам,
+    общий журнал не тронут."""
+    clk = Clock()
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(128)), us_east_2=dict(sq=sq_vals(64)),
+              us_west_2=dict(sq=sq_vals(384), deny=("observe",)))
+
+    class DryEc2(_RegionEc2):
+        def run_instances(self, **p):
+            if p.pop("DryRun", False):
+                self.c.calls.append(("run_instances_dry", None))
+                raise cerr("DryRunOperation", "RunInstances")
+            return super().run_instances(**p)
+    for cl in sky.clouds.values():
+        cl.ec2 = DryEc2(cl)
+    r = sky.runner(tmp_path, dryrun=True)
+    res = r.run([make_job(name=f"p{i}") for i in range(5)])
+    assert all(v["status"] == "dryrun_ok" for v in res.values())
+    assert {reg for _w, _n, reg, _m in r._placements} == {"us-east-1", "us-east-2"}
+    assert [c[0] for c in sky.clouds["us-west-2"].calls] == ["get_service_quota", "describe_instances_dry"]
+    jr = [json.loads(x) for x in (tmp_path / "runs" / RUN / "journal.dryrun.jsonl").read_text().splitlines()]
+    assert [(x["region"], x["ok"]) for x in jr if x["ev"] == "region_check"] == [("us-east-2", True), ("us-west-2", False)]
+    assert {(x["region"], x["market"]) for x in jr if x["ev"] == "region_denied"} == {("us-west-2", "spot"),
+                                                                                      ("us-west-2", "on-demand")}
+    assert not (tmp_path / "ledger.jsonl").exists()

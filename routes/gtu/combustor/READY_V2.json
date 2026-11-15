@@ -1,0 +1,354 @@
+{
+ "schema": "kv.combustor.ready/1",
+ "title": "Камера сгорания KV-3, уровень 0 v2: готовность к AWS после исправлений проверок скептиков 15.11.2026",
+ "date": "2026-11-15",
+ "ready_for_aws": true,
+ "ready_note": "готово: тесты, проба, plan (код 0) и мини-проверка команд прошли на одном коде",
+ "code": {
+  "code_hash_v2": "ce00c977bea5cca0",
+  "data_hash": "39396a12e5ed0369",
+  "bc_key": "825fed627e97b080",
+  "v1_code_hash": "fae37b9aadf85961",
+  "v1_note": "comb_space.py и comb_crn.py не менялись: прогон AWS v1 20261115T001745Z-f1da (262 144, отпечаток fae37b9aadf85961) остаётся итогом v1; исправления этого выпуска - только v2",
+  "commit_first": [
+   "routes/gtu/combustor/comb_v2.py",
+   "routes/gtu/combustor/comb_l0_v2.py",
+   "routes/gtu/combustor/merge_l0_v2.py",
+   "routes/gtu/combustor/comb_bc_v2_results.json",
+   "routes/gtu/combustor/targets_v2.json",
+   "routes/gtu/combustor/test_comb_l0_v2.py",
+   "routes/gtu/combustor/beta_sens_v2.py",
+   "routes/gtu/combustor/make_jobs_l0_v2.py",
+   "routes/gtu/combustor/ready_v2.py",
+   "routes/gtu/combustor/jobs_aws_comb_l0_v2.json",
+   "routes/gtu/combustor/comb_l0_v2_probe_results.json",
+   "routes/gtu/combustor/comb_l0_v2_beta_sens_results.json",
+   "routes/gtu/combustor/README.md",
+   "routes/gtu/combustor/READY_V2.json"
+  ],
+  "commit_note": "после коммита: python3 -c 'import sys; sys.path.insert(0, \"routes/gtu/combustor\"); import comb_v2 as V; print(V.code_hash())' должен дать code_hash_v2; иначе - заново make_jobs_l0_v2.py --mini и ready_v2.py"
+ },
+ "checks": {
+  "tests": {
+   "summary": "test_comb_l0_v2.py: 23 passed (76 с); test_comb_l0.py: 23 passed (20 с); локально, gate не запускался",
+   "ok": true
+  },
+  "probe": {
+   "file": "comb_l0_v2_probe_results.json",
+   "complete": true,
+   "code_hash": "ce00c977bea5cca0",
+   "data_hash": "39396a12e5ed0369",
+   "bc_key": "825fed627e97b080",
+   "same_code": true,
+   "counts": {
+    "n": 300,
+    "feasible": 108,
+    "stable_30_100": 35,
+    "stable_30_100_in_domain": 24,
+    "stable_0_100": 18,
+    "lowem_30_100_1valve": 0,
+    "hard_ok": 0,
+    "load_range_base": 0,
+    "reject_codes": {
+     "ГАБАРИТ": 1,
+     "ОБРАТНЫЙ_ТОК": 38,
+     "ОХЛАЖДЕНИЕ": 23,
+     "ЭЛЕМЕНТОВ_НА_ТРУБУ": 10,
+     "ТОПЛИВО": 48,
+     "ПОГАСАНИЕ_100": 29,
+     "ЭЛЕМЕНТ": 28,
+     "ДИЗЕЛЬ_ФОРСУНКИ": 16,
+     "ВОЗДУХ": 32,
+     "САМОВОСПЛАМЕНЕНИЕ": 6,
+     "ПРОСКОК": 11,
+     "ЭЛЕМЕНТЫ_КОНТУРОВ": 3
+    },
+    "cross_ignition_upper": {
+     "note": "каналы: группа B поджигается горячим газом группы A - верхняя оценка (отбор - без неё)",
+     "evaluated": 21,
+     "stable_30_100": 1,
+     "lowem": 0
+    }
+   },
+   "cpu_variant_mean_s": 1.6629
+  },
+  "beta_sensitivity": {
+   "file": "comb_l0_v2_beta_sens_results.json",
+   "same_code": true,
+   "code_hash": {
+    "0": "ce00c977bea5cca0",
+    "1": "ce00c977bea5cca0",
+    "2": "ce00c977bea5cca0"
+   },
+   "complete": {
+    "0": true,
+    "1": true,
+    "2": true
+   },
+   "stable_30_100": {
+    "0": 35,
+    "1": 35,
+    "2": 36
+   },
+   "lowem": {
+    "0": 0,
+    "1": 0,
+    "2": 0
+   }
+  },
+  "plan": {
+   "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/combustor/jobs_aws_comb_l0_v2.json --assume-price 0.75 --assume-zone-prices us-east-1a=0.9554,us-east-1b=0.7478,us-east-1c=0.7064,us-east-1d=0.8576,us-east-1f=1.1804",
+   "exit_code": 0,
+   "forecast_usd": 26.12
+  },
+  "mini": {
+   "n": 96,
+   "jobs_exit": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "merge": {
+    "parts": 48,
+    "exit_code": 0,
+    "tail": [
+     "полнота: True; строк 96 из 96; ошибок 0; допустимых 37; держат 30-100 % 12 (в области облика 7, 0-100 % 7, при поджигании группы B 0); новая цель 0; все жёсткие v2 0; запись <копия>/merged.json"
+    ]
+   },
+   "merged": {
+    "complete": true,
+    "counts": {
+     "n": 96,
+     "rows": 96,
+     "status": {
+      "ok": 37,
+      "отсев": 59
+     },
+     "reject_codes": {
+      "ЭЛЕМЕНТОВ_НА_ТРУБУ": 3,
+      "ПОГАСАНИЕ_100": 6,
+      "ОБРАТНЫЙ_ТОК": 14,
+      "ПРОСКОК": 4,
+      "ДИЗЕЛЬ_ФОРСУНКИ": 5,
+      "САМОВОСПЛАМЕНЕНИЕ": 2,
+      "ЭЛЕМЕНТ": 12,
+      "ГАБАРИТ": 1,
+      "ВОЗДУХ": 9,
+      "ОХЛАЖДЕНИЕ": 7,
+      "ТОПЛИВО": 13,
+      "ЭЛЕМЕНТЫ_КОНТУРОВ": 1
+     },
+     "feasible": 37,
+     "stable_30_100": 12,
+     "lowem_30_100_1valve": 0,
+     "lowem_strict_all_zones": 0,
+     "load_range_base": 0,
+     "stable_0_100": 7,
+     "stable_30_100_in_domain": 7,
+     "lowem_in_domain": 0,
+     "in_domain": 22,
+     "cross_ignition_upper": {
+      "note": "каналы: группа B поджигается горячим газом группы A - верхняя оценка (отбор - без неё)",
+      "evaluated": 5,
+      "stable_30_100": 0,
+      "lowem": 0
+     },
+     "hard_ok": 0,
+     "binding_term_among_feasible": {
+      "eta": 17,
+      "CO": 8,
+      "NOx": 10,
+      "lbo": 2
+     }
+    },
+    "code_hash": "ce00c977bea5cca0"
+   }
+  },
+  "package_code_hash": "ce00c977bea5cca0",
+  "package_same_code": true
+ },
+ "series_order": [
+  {
+   "order": 1,
+   "series": "основная",
+   "jobs": [
+    "comb-l0v2-m0",
+    "comb-l0v2-m1",
+    "comb-l0v2-m2",
+    "comb-l0v2-m3",
+    "comb-l0v2-m4",
+    "comb-l0v2-m5"
+   ],
+   "n": 524288,
+   "shards": 48,
+   "beta": 1.0,
+   "max_min": 100,
+   "why": "доля «держит 30-100 %» и держатели новой цели до сходимости (правила К1-К3)"
+  },
+  {
+   "order": 2,
+   "series": "чувствительность β = 0",
+   "jobs": [
+    "comb-l0v2-b0-m0",
+    "comb-l0v2-b0-m1",
+    "comb-l0v2-b0-m2",
+    "comb-l0v2-b0-m3"
+   ],
+   "n": 131072,
+   "shards": 48,
+   "beta": 0.0,
+   "max_min": 45,
+   "why": "закон затухания при малом J - оценка; серия показывает, держится ли вывод"
+  },
+  {
+   "order": 3,
+   "series": "чувствительность β = 2",
+   "jobs": [
+    "comb-l0v2-b2-m0",
+    "comb-l0v2-b2-m1",
+    "comb-l0v2-b2-m2",
+    "comb-l0v2-b2-m3"
+   ],
+   "n": 131072,
+   "shards": 48,
+   "beta": 2.0,
+   "max_min": 45,
+   "why": "закон затухания при малом J - оценка; серия показывает, держится ли вывод"
+  }
+ ],
+ "commands": {
+  "plan": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/combustor/jobs_aws_comb_l0_v2.json --assume-price 0.75 --assume-zone-prices us-east-1a=0.9554,us-east-1b=0.7478,us-east-1c=0.7064,us-east-1d=0.8576,us-east-1f=1.1804",
+  "run_check": "python3 routes/gtu/platform/aws/runner.py run routes/gtu/combustor/jobs_aws_comb_l0_v2.json --branch <ветка с коммитом>",
+  "run_live": "python3 routes/gtu/platform/aws/runner.py run routes/gtu/combustor/jobs_aws_comb_l0_v2.json --branch <ветка с коммитом> --live",
+  "status": "python3 routes/gtu/platform/aws/runner.py status",
+  "merge": [
+   "bash -euo pipefail -c 'for S in main b0 b2; do D=/tmp/comb_l0v2_<run_id>_$S; mkdir -p \"$D\"; done; find routes/gtu/platform/aws/runs/<run_id> -path \"*/_lost\" -prune -o -name \"comb_l0v2_*.json.gz\" -print | while read -r f; do b=$(basename \"$f\"); case \"$b\" in *_b0_*) S=b0;; *_b2_*) S=b2;; *) S=main;; esac; cp \"$f\" /tmp/comb_l0v2_<run_id>_$S/; done; ls /tmp/comb_l0v2_<run_id>_main | wc -l'",
+   "mkdir -p routes/gtu/combustor/l0_aws_v2",
+   "python3 routes/gtu/combustor/merge_l0_v2.py /tmp/comb_l0v2_<run_id>_main --out routes/gtu/combustor/l0_aws_v2/comb_l0v2_KV-3_n524288_results.json --top 100",
+   "python3 routes/gtu/combustor/merge_l0_v2.py /tmp/comb_l0v2_<run_id>_b0 --out routes/gtu/combustor/l0_aws_v2/comb_l0v2_KV-3_n131072_b0_results.json --top 30",
+   "python3 routes/gtu/combustor/merge_l0_v2.py /tmp/comb_l0v2_<run_id>_b2 --out routes/gtu/combustor/l0_aws_v2/comb_l0v2_KV-3_n131072_b2_results.json --top 30"
+  ],
+  "merge_expect": "первая команда печатает 48; каждое слияние - «полнота: True», код 0; код 2 - потеряна или задвоена часть, индекс, или разные отпечатки (fingerprint, code_hash, bc_key, beta): разбор, не публикация",
+  "beta_sens_after_merge": "python3 routes/gtu/combustor/beta_sens_v2.py <слияние b0> <слияние основной> <слияние b2> --out routes/gtu/combustor/l0_aws_v2/comb_l0v2_beta_sens_results.json (основная серия при β = 1 - своя выборка N, серии β - N/4: сравнение долей, не строк)"
+ },
+ "estimate": {
+  "core_hours": 405.5,
+  "core_hours_by_series": [
+   270.4,
+   67.6,
+   67.6
+  ],
+  "machine_hours_expected": 7.5,
+  "usd_expected": 5.57,
+  "usd_expected_basis": "машино-часы (подготовка + счёт + выгрузка) × 0,7064 долл./ч (us-east-1c) × 1,05 (диск, IPv4) - оценка",
+  "usd_plan_forecast_upper": 26.12,
+  "ceiling_usd": 2000.0,
+  "share_of_ceiling": 0.0131,
+  "time_per_variant": {
+   "cpu_v2_session_s": 1.6629,
+   "k_c7a": 1.1163562386980108,
+   "s_v2_aws": 1.8563887893309223,
+   "basis": {
+    "v1_session_cpu_s": 0.553,
+    "v1_aws_wall_per_variant_s": 0.617345,
+    "note": "время варианта на машине AWS v1 (стена процесса в пуле 64) / процессорное время в сессии"
+   }
+  },
+  "note": "CPU-серия в пределах 2000 долл. - без отдельного вопроса (решение владельца 15.11.2026); отчёт после каждых 500 долл. - навык aws-gtu-runs"
+ },
+ "fixes": [
+  {
+   "src": "физика",
+   "what": "пилот «гидравлика» - время пребывания = tau_pz (часть смесителей того же купола); своё время - только у полости TVC",
+   "status": "принято"
+  },
+  {
+   "src": "физика",
+   "what": "эжектор - меньшее из уноса Ricou - Spalding и струйного насоса в трубе не шире ячейки элемента (баланс импульса, zeta = 1 - оценка, трение, выброс в жаровую трубу)",
+   "status": "принято"
+  },
+  {
+   "src": "физика",
+   "what": "жёсткость подачи в индексе пульсаций - по отклику расхода (закон контура)",
+   "status": "принято"
+  },
+  {
+   "src": "физика",
+   "what": "разброс сопротивления пористой вставки -20 % (оценка) - правило ОБРАТНЫЙ_ТОК_РАЗБРОС",
+   "status": "принято"
+  },
+  {
+   "src": "физика",
+   "what": "холостой ход 0 % (экстраполяция цикла, оценка): ОБРАТНЫЙ_ТОК и запас опорной зоны в load_range; новая цель - 30-100 % (решение владельца 2)",
+   "status": "принято"
+  },
+  {
+   "src": "физика",
+   "what": "README: предел роста доли пилота - закон расхода, не правило обратного тока; физический довод против каталитической схемы (2,84 раза при пределе 1,9)",
+   "status": "принято"
+  },
+  {
+   "src": "физика",
+   "what": "узлы неравномерности без прибавки топлива при срезе бедного узла",
+   "status": "принято"
+  },
+  {
+   "src": "физика",
+   "what": "запас по срыву ниже 1 - лестница до 1000 времён и 7 шагов бисекции (v1: 1/3, 1/10, 1/30)",
+   "status": "принято"
+  },
+  {
+   "src": "физика",
+   "what": "времена зон на частичной нагрузке - при неизменном объёме (было постоянное время)",
+   "status": "принято"
+  },
+  {
+   "src": "физика",
+   "what": "каналы: поджигание группы B газом группы A",
+   "status": "частично",
+   "why": "истина между пределами: отбор - без поджигания, верхняя оценка с поджиганием - рядом (gas_cross, value_cross, счётчики слияния); проверка - уровень 1"
+  },
+  {
+   "src": "физика",
+   "what": "варианты вне области корреляций (S по корреляции выше среза, C/C_OPT, расслоение)",
+   "status": "частично",
+   "why": "границы области - оценка: пометка in_domain и счётчики «в области облика» вместо отсева; такие варианты уровень 1 (RANS) проверяет первыми"
+  },
+  {
+   "src": "код",
+   "what": "сброс состояния Cantera перед каждым вариантом (итог не зависит от порядка в пуле)",
+   "status": "принято"
+  },
+  {
+   "src": "код",
+   "what": "data_hash (targets.json, targets_basis_results.json) в частях и в сверке слияния",
+   "status": "принято"
+  },
+  {
+   "src": "код",
+   "what": "слияние: только файлы частей (не итоги, не _lost), повтор части с другим содержимым - проблема полноты, код 3 при строках «ошибка»",
+   "status": "принято"
+  }
+ ],
+ "rejected": [],
+ "limitations": [
+  "все числа уровня 0 - облик (0D + корреляции), оценка для отбора на уровень 1, не прогноз конструкции",
+  "закон затухания неравномерности и расслоения при малом J (BETA_LOWJ) - оценка; серии β = 0 и 2 - чувствительность",
+  "холостой ход - экстраполяция цикла по 50 и 30 % (модель цикла ниже доли топлива 0,005 не считает)",
+  "времена зон при неизменном объёме: плотность - равновесие по таблице 100 % × p3(L)/p3(100), сдвиг T3 не учтён",
+  "эжектор: потери возвратного канала zeta = 1 и скорость в трубе ~ скорость канала - оценка",
+  "разброс пористой вставки -20 % и константа жёсткости 0,03 p3 - оценка; TRL элементов - оценка",
+  "каналы: отбор без поджигания группы B газом группы A (нижний предел), верхняя оценка - рядом",
+  "область облика (S до 0,6, C/C_OPT 0,25-4, доля воздуха с топливом >= 0,5) - оценка; вне неё - пометка без отсева",
+  "стенка - только на 100 %; горячее пятно пилота на малой нагрузке не моделируется",
+  "слиянию 2^19 строк нужно не меньше 6 ГБ свободной памяти (экстраполяция замера, оценка)"
+ ],
+ "after_aws": [
+  "слияние трёх серий (команды merge), сходимость доли по префиксам 2^k",
+  "если держателей нет и на 2^19 - уровень 1 (RANS) для ближайших вариантов каждой ячейки, вне области облика - первыми; верхняя оценка каналов (value_cross) - отдельный список",
+  "решение владельца о постановке - только окном, через основную сессию"
+ ]
+}

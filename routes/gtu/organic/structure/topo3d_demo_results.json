@@ -1,0 +1,63 @@
+{
+ "title": "topo3d: демонстрация на грубой сетке (проверка кода перед AWS)",
+ "date": "2026-11-14",
+ "method": "воксельный SIMP/RAMP, MMA, PARDISO; см. docstring",
+ "disk": {
+  "problem": "disk",
+  "part": "turb1",
+  "h": 0.006,
+  "n": 37,
+  "nz": 7,
+  "elements": 6680,
+  "dofs": 24864,
+  "blades_quarter": 17,
+  "F_blade_half_N": 55286.249311992375,
+  "r_live": 0.21890730000000005,
+  "r_b": 0.20165730000000007,
+  "w": 0.034499999999999996,
+  "t_max": 0.07245,
+  "u_target": [
+   0.7394422310521456,
+   0.987900726073333
+  ],
+  "mass_eighth_kg": 9.007521407999997,
+  "mass_full_kg": 72.06017126399998,
+  "u_binary": [
+   1.3491568974387351,
+   0.9792807834318921
+  ],
+  "iterations": 40,
+  "seconds": 133.1
+ },
+ "frame": {
+  "problem": "frame",
+  "n": 40,
+  "nz": 6,
+  "h": 0.0333706975,
+  "Lz": 0.200224185,
+  "elements": 7404,
+  "dofs": 27972,
+  "iterations": 40,
+  "Cmax_rel_final": 0.21101516815659413,
+  "seconds": 134.4,
+  "mass_kg": 441.1988510620822
+ },
+ "inputs": [
+  {
+   "file": "routes/gtu/frame3/frame3_fea_results.json",
+   "field": "parts.turb1 (геометрия, cooled_750)"
+  },
+  {
+   "file": "routes/gtu/frame3/frame3_point_results.json",
+   "field": "D2 (рама)"
+  },
+  {
+   "file": "routes/gtu/platform/fea/materials.json",
+   "field": "in713c"
+  }
+ ],
+ "software": {
+  "python": "3.13.18",
+  "solver": "pypardiso 0.4.7 (MKL PARDISO)"
+ }
+}

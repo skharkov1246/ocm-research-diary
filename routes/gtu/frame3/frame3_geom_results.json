@@ -1,0 +1,1045 @@
+{
+ "title": "Типоразмер № 3: геометрия и сетки колёс компрессора ступеней 1 и 2",
+ "method": "impeller.py (Gmsh / Open CASCADE): меридиональный контур - кубические Безье, линейчатая лопатка, закон углов beta(m), полулопатки; размеры D2, D1, b2, осевая длина, углы лопатки на входе и выходе, число лопаток, зазор, частота, полные параметры на входе - из согласованной точки; ступень 1 - двусторонний вход: канал и сетка одной стороны на половину расхода, STEP - обе стороны зеркально. Тетраэдрическая сетка одного межлопаточного канала (основная лопатка + полулопатка) с периодическими гранями, формат SU2. Файлы проверены независимо: SU2 разобран numpy, STEP прочитан обратно Gmsh",
+ "software": {
+  "python": "3.13.18",
+  "numpy": "2.5.3",
+  "scipy": "1.18.1",
+  "gmsh": "4.15.2",
+  "cantera": "3.2.0",
+  "os": "Linux-6.18.44-fc-v470-x86_64-with-glibc2.39"
+ },
+ "date": "2026-11-14",
+ "status": "геометрия уровня облика по одномерной точке (оценка): контуры, толщины, закон углов - принятые значения узла; расчёта течения (SU2) и прочности (CalculiX) по этим файлам нет",
+ "inputs": [
+  {
+   "file": "routes/gtu/frame3/frame3_point_results.json",
+   "sha256": "0440ba7e4a7a290b7ebbba371c7f3d7140007f5bf928119c6bfeddbfd905069f",
+   "field": "stage1, stage2: m ← m_total_kg_s; PR ← PR; rpm ← n_rpm; D2 ← D2_m; T01 ← T01_C (+273,15 К); p01 ← p01_kPa (·1000 Па); Z ← blades_full; splitters ← blades_splitter > 0; nu ← D1_hub_m / D1_tip_m; D1s ← D1_tip_m; b2 ← b2_m; Lz ← axial_length_m; beta2b ← beta2_blade_from_radial_deg; beta1h ← beta1_hub_deg; beta1s ← beta1_tip_deg; gap ← tip_clearance_m; double_sided ← inlet == «двусторонний»",
+   "note": "точка проверена (pass_after_fixes); при пересчёте точки по замечаниям проверяющего (π1 около 4,70) геометрию надо перестроить этим скриптом"
+  },
+  {
+   "file": "routes/gtu/platform/geom/impeller.py",
+   "sha256": "923c8bb72add1cb56889b99bad10a95815ee58e185eebaa83b93eabd329754b5",
+   "field": "DEFAULTS (толщины, контуры Безье, m_split 0,30, длины участков области), LEVELS",
+   "used": {
+    "DEFAULTS": {
+     "Z": 9,
+     "splitters": true,
+     "m_split": 0.3,
+     "nu": 0.35,
+     "incidence": 0.0,
+     "beta2b": null,
+     "beta_law": [
+      0.0,
+      1.0
+     ],
+     "hub_bz": [
+      0.5,
+      0.5
+     ],
+     "sh_bz": [
+      0.5,
+      0.5
+     ],
+     "t_hub": 0.011,
+     "t_tip": 0.0045,
+     "le_ratio": 0.4,
+     "le_len": 0.08,
+     "te_ratio": 0.7,
+     "te_len": 0.05,
+     "gap": null,
+     "rake": 0.0,
+     "L_in": 1.0,
+     "r_out": 1.3,
+     "t_back": 0.03,
+     "r_bore": 0.35,
+     "n_st": 28,
+     "n_sheet": 44,
+     "double_sided": false,
+     "D1s": null,
+     "b2": null,
+     "Lz": null,
+     "beta1h": null,
+     "beta1s": null
+    },
+    "LEVELS": {
+     "coarse": {
+      "h0": 0.3333333333333333,
+      "hb": 0.14285714285714285,
+      "n_gap": 1
+     },
+     "medium": {
+      "h0": 0.2,
+      "hb": 0.08333333333333333,
+      "n_gap": 2
+     },
+     "fine": {
+      "h0": 0.125,
+      "hb": 0.05,
+      "n_gap": 3
+     }
+    }
+   }
+  }
+ ],
+ "assumptions": {
+  "r_bore": "0: колёса без сквозного отверстия (frame3_point_results.json → stage*.material: со сквозным отверстием vm_bore_to_ys 1,05 и 1,36, без него 0,58 и 0,75). В точке nu = 0,4 принят под вал, проходящий через оба колеса (frame3_point.py, A['nu']) - противоречие точки, крепление колёс без отверстия (фланцы, хирт) не прорабатывалось",
+  "double_sided": "ступень 1: две стороны зеркально относительно средней плоскости общего диска, лопатки сторон напротив друг друга (принято); толщина общего диска у r2 - max(0,03 D2; 0,75 b2) = 2·solid.t_back; канал и сетка - одна сторона на m/2; безлопаточный участок за колесом шириной b2 одной стороны, стенка z = Lz - в маркере hub",
+  "m_split": "0,30 (полулопатка - 0,70 длины): совпадает с весом разделительной лопатки spl = 0,7 точки",
+  "inlet_angles": "углы лопатки на входе - углы потока точки (угол атаки 0; в точке загромождение входа k1 = 0,97); свой треугольник impeller без загромождения - в d1.beta1*_flow",
+  "other": "толщины лопаток (0,011 и 0,0045 D2), контуры Безье 0,5/0,5, закон углов, входной участок 1,0 r1s, выход области 1,3 r2 - значения узла по умолчанию, не результат оптимизации и не проверены прочностью"
+ },
+ "stages": {
+  "stage1": {
+   "label": "ступень 1",
+   "inlet": "двусторонний",
+   "params_from_point": {
+    "m": 25.55,
+    "PR": 4.49,
+    "rpm": 14950.0,
+    "D2": 0.694575,
+    "T01": 288.15,
+    "p01": 101325.0,
+    "Z": 9,
+    "splitters": true,
+    "nu": 0.40000059550039896,
+    "D1s": 0.335852,
+    "b2": 0.0203443,
+    "Lz": 0.195863,
+    "beta2b": 50.0,
+    "beta1h": 32.9437,
+    "beta1s": 58.3141,
+    "gap": 0.000486202,
+    "double_sided": true
+   },
+   "accepted": {
+    "r_bore": 0.0
+   },
+   "levels": {
+    "coarse": {
+     "n_cells": 1200627,
+     "n_nodes": 258565,
+     "minSICN": 0.33266950918397914,
+     "min_gamma": 0.2253043549008285,
+     "mesh": {
+      "level": "coarse",
+      "h0": 0.006781433333333333,
+      "h_blade": 0.0029063285714285713,
+      "h_gap": 0.000486202,
+      "h_edge": 0.0012502350000000001,
+      "tol_classify": 4.06886e-06,
+      "tip_faces": [
+       34,
+       37,
+       41
+      ],
+      "le_faces": [
+       45,
+       56
+      ],
+      "te_faces": [
+       53,
+       58
+      ],
+      "quality": {
+       "n_cells": 1200627,
+       "cell_types": [
+        4
+       ],
+       "n_nodes": 258565,
+       "minSICN": 0.33266950918397914,
+       "p01SICN": 0.41095432451413244,
+       "meanSICN": 0.800530483679069,
+       "min_gamma": 0.2253043549008285,
+       "mean_gamma": 0.7689924078086826,
+       "n_SICN_below_0_1": 0
+      },
+      "periodic_snap": {
+       "n_nodes": 7088,
+       "max_shift_m": 1.2356571555212926e-08
+      },
+      "volume_fluid_occ_m3": 0.003940688861924372,
+      "passage_volume_vs_body_over_Z": -3.180276263048398e-05,
+      "t_geometry_s": 11.1,
+      "t_mesh_s": 47.3,
+      "phi1_rad": -0.17453292519943295,
+      "phi2_rad": 0.5235987755982988,
+      "sector_lo_hi_rad": [
+       -2.5711502724634396,
+       1.340468087133241
+      ]
+     },
+     "n_gmsh_warnings": 0,
+     "t_build_s": 180.8,
+     "check_su2": {
+      "n_cells": 1200627,
+      "n_nodes": 258565,
+      "only_tetrahedra": true,
+      "markers": {
+       "inlet": 2308,
+       "outlet": 1820,
+       "hub": 22368,
+       "shroud": 102082,
+       "blade": 101980,
+       "periodic_1": 13569,
+       "periodic_2": 13569
+      },
+      "n_markers": 7,
+      "cell_volume_min_m3": 4.505566015642038e-12,
+      "cells_volume_sum_m3": 0.003940801947252972,
+      "mean_ratio_min": 0.3911353479632521,
+      "boundary_closed_and_tagged": true,
+      "D2_from_blade_nodes_m": 0.6945750000666182,
+      "b2_from_outlet_z_extent_m": 0.02034430000000001,
+      "r_outlet_m": 0.45147375000000006,
+      "D1h_from_inlet_m": 0.13434099999999996,
+      "D1s_from_inlet_m": 0.3358520000000001,
+      "z_inlet_m": -0.167926,
+      "gap_min_from_blade_nodes_m": 0.0004861321291247268,
+      "periodic": {
+       "n_nodes_1": 7088,
+       "n_nodes_2": 7088,
+       "angle_deg": 40.0,
+       "max_dist_after_rotation_m": 1.7085044840333034e-16,
+       "one_to_one": true,
+       "triangles_match": true
+      },
+      "t_s": 2.7
+     },
+     "files": {
+      "passage_su2": {
+       "path": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/frame3/geom/stage1_coarse/passage_custom_coarse.su2",
+       "sha256": "9ba3cb402ff208d94aee0fde2826d83d2cfc197f1d5cff3c4f14163f2e624d67",
+       "bytes": 66866045
+      },
+      "passage_step": {
+       "path": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/frame3/geom/stage1_coarse/passage_custom.step",
+       "sha256": "d4b486aa2f1c9e20bb429f42e5fb8d6191766d0e6b32e486fae0ac93449ae0db",
+       "bytes": 753333
+      },
+      "impeller_json": {
+       "path": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/frame3/geom/stage1_coarse/impeller_custom_coarse.json",
+       "sha256": "e633bf71543a86bdd3f947f326bfebffb9c7a1ec65c5d412b19a09efc63253fa",
+       "bytes": 6112
+      }
+     }
+    },
+    "medium": {
+     "n_cells": 5819064,
+     "n_nodes": 1137992,
+     "minSICN": 0.32869071697105834,
+     "min_gamma": 0.2147304671371249,
+     "mesh": {
+      "level": "medium",
+      "h0": 0.00406886,
+      "h_blade": 0.0016953583333333333,
+      "h_gap": 0.000243101,
+      "h_edge": 0.0012502350000000001,
+      "tol_classify": 4.06886e-06,
+      "tip_faces": [
+       34,
+       37,
+       41
+      ],
+      "le_faces": [
+       45,
+       56
+      ],
+      "te_faces": [
+       53,
+       58
+      ],
+      "quality": {
+       "n_cells": 5819064,
+       "cell_types": [
+        4
+       ],
+       "n_nodes": 1137992,
+       "minSICN": 0.32869071697105834,
+       "p01SICN": 0.41108456409590377,
+       "meanSICN": 0.8012899860986172,
+       "min_gamma": 0.2147304671371249,
+       "mean_gamma": 0.7702627674575486,
+       "n_SICN_below_0_1": 0
+      },
+      "periodic_snap": {
+       "n_nodes": 20279,
+       "max_shift_m": 3.282421442982889e-08
+      },
+      "volume_fluid_occ_m3": 0.003940688861924372,
+      "passage_volume_vs_body_over_Z": -3.180276263048398e-05,
+      "t_geometry_s": 6.7,
+      "t_mesh_s": 95.8,
+      "phi1_rad": -0.17453292519943295,
+      "phi2_rad": 0.5235987755982988,
+      "sector_lo_hi_rad": [
+       -2.5711502724634396,
+       1.340468087133241
+      ]
+     },
+     "n_gmsh_warnings": 0,
+     "t_build_s": 119.1,
+     "check_su2": {
+      "n_cells": 5819064,
+      "n_nodes": 1137992,
+      "only_tetrahedra": true,
+      "markers": {
+       "inlet": 6740,
+       "outlet": 5246,
+       "hub": 63876,
+       "shroud": 326440,
+       "blade": 324020,
+       "periodic_1": 39519,
+       "periodic_2": 39519
+      },
+      "n_markers": 7,
+      "cell_volume_min_m3": 7.133868284079701e-13,
+      "cells_volume_sum_m3": 0.003940782846409007,
+      "mean_ratio_min": 0.3595713234797234,
+      "boundary_closed_and_tagged": true,
+      "D2_from_blade_nodes_m": 0.694575000066363,
+      "b2_from_outlet_z_extent_m": 0.02034430000000001,
+      "r_outlet_m": 0.45147375000000006,
+      "D1h_from_inlet_m": 0.13434099999999996,
+      "D1s_from_inlet_m": 0.3358520000000001,
+      "z_inlet_m": -0.167926,
+      "gap_min_from_blade_nodes_m": 0.0004861354753013846,
+      "periodic": {
+       "n_nodes_1": 20279,
+       "n_nodes_2": 20279,
+       "angle_deg": 40.0,
+       "max_dist_after_rotation_m": 1.7554167342883506e-16,
+       "one_to_one": true,
+       "triangles_match": true
+      },
+      "t_s": 10.2
+     },
+     "files": {
+      "passage_su2": {
+       "path": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/frame3/geom/stage1_medium/passage_custom_medium.su2",
+       "sha256": "48e38bf673e19c12877954eb6d3993fcd0d64011bf906bf46d0fed86721cfa80",
+       "bytes": 321577684,
+       "stored_as": {
+        "path": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/frame3/geom/stage1_medium/passage_custom_medium.su2.gz",
+        "sha256": "a79b0f1d2ad226908b0062f2459c91681dfec143a3599764d8e905bdebdddf46",
+        "bytes": 106233899
+       }
+      },
+      "passage_step": {
+       "path": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/frame3/geom/stage1_medium/passage_custom.step",
+       "sha256": "16d6a5a338be123b8dda91e353402d905c828ea04b0700e03b6f2c5c6436f35d",
+       "bytes": 753333
+      },
+      "impeller_json": {
+       "path": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/frame3/geom/stage1_medium/impeller_custom_medium.json",
+       "sha256": "f8923f8d0e60c4baececa3706ec2d57c8c0a619bb4f3cdac9b61535a8b8ea3aa",
+       "bytes": 5225
+      }
+     }
+    }
+   },
+   "d1": {
+    "m": 25.55,
+    "m_side": 12.775,
+    "double_sided": true,
+    "PR": 4.49,
+    "rpm": 14950.0,
+    "D2": 0.694575,
+    "r2": 0.3472875,
+    "U2": 543.6995362439768,
+    "omega": 1565.5603390389138,
+    "T01": 288.15,
+    "p01": 101325.0,
+    "b2": 0.0203443,
+    "gap": 0.000486202,
+    "r1s": 0.167926,
+    "r1h": 0.0671705,
+    "D1s_D2": 0.4835359752366554,
+    "Lz": 0.195863,
+    "Ls": 0.1755187,
+    "beta1h": 32.9437,
+    "beta1s": 58.3141,
+    "beta2b": 50.0,
+    "beta1h_flow": 33.984940731434435,
+    "beta1s_flow": 59.3167327758466,
+    "C1": 155.99375191842785,
+    "M1s_rel": 0.9172404221478762,
+    "Z_exit": 18,
+    "wiesner_eps_lim": 0.7472189360385852
+   },
+   "d1_comp_stage_not_used_for_geometry": {
+    "w": 188170.24141703203,
+    "T2": 473.83134686439723,
+    "psi": 0.6365507247816462,
+    "psi_euler": 0.5602999313303503,
+    "eta_comp_stage": 0.8561167244028014,
+    "slip_wiesner": 0.8939909372567292,
+    "phi": 0.05061982952814548
+   },
+   "geometry": {
+    "wrap_hub_deg": 100.65460808139424,
+    "wrap_shroud_deg": 100.65460808139427,
+    "hub_beta_bump_deg": -12.247713223534845,
+    "beta_hub_min_deg": 27.860519458465856,
+    "beta_hub_max_deg": 50.0,
+    "beta_shroud_min_deg": 50.0,
+    "beta_shroud_max_deg": 58.3141,
+    "L_hub": 0.3718091275271685,
+    "L_shroud": 0.2748401912105573
+   },
+   "area": {
+    "A1": 0.07441573898233585,
+    "A2": 0.044392721639632135,
+    "A2_A1": 0.5965501686433523,
+    "min_over_A1": 0.5866496404053538,
+    "m_at_min": 0.96
+   },
+   "contours": {
+    "hub_bezier_zr": [
+     [
+      0.0,
+      0.0671705
+     ],
+     [
+      0.0979315,
+      0.0671705
+     ],
+     [
+      0.195863,
+      0.207229
+     ],
+     [
+      0.195863,
+      0.3472875
+     ]
+    ],
+    "shroud_bezier_zr": [
+     [
+      0.0,
+      0.167926
+     ],
+     [
+      0.08775935,
+      0.167926
+     ],
+     [
+      0.1755187,
+      0.25760675
+     ],
+     [
+      0.1755187,
+      0.3472875
+     ]
+    ],
+    "z_in": -0.167926,
+    "r_out": 0.45147375000000006
+   },
+   "warnings": [],
+   "solid": {
+    "volume_m3": 0.039394760018745076,
+    "mass_kg": {
+     "ti_6al_4v": 174.5187868830407,
+     "al_2618": 108.72953765173641
+    },
+    "volume_parts_m3": {
+     "hub": 0.017868746453955447,
+     "blade_pair": 0.00022997934355909494,
+     "blade_pair_inside_hub": 2.6797837401640547e-05
+    },
+    "sides": 2,
+    "z_mid_plane": 0.20628162500000002,
+    "t_back": 0.010418625,
+    "r_bore": 0.0,
+    "z_nose": -0.020151149999999996,
+    "n_faces": 208
+   },
+   "solid_file": {
+    "path": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/frame3/geom/stage1_coarse/impeller_custom.step",
+    "sha256": "08cb64bf7f62788b6dca74cd4bcecc3d1a1d65ef284e82c6087725058e6d0d7d",
+    "bytes": 6268470
+   },
+   "su2": {
+    "markers": [
+     "inlet",
+     "outlet",
+     "hub",
+     "shroud",
+     "blade",
+     "periodic_1",
+     "periodic_2"
+    ],
+    "volume": "fluid",
+    "periodic": {
+     "master": "periodic_1",
+     "slave": "periodic_2",
+     "axis": [
+      0,
+      0,
+      1
+     ],
+     "center": [
+      0,
+      0,
+      0
+     ],
+     "angle_deg": 40.0,
+     "note": "periodic_2 = поворот periodic_1 на +360/Z вокруг +z"
+    },
+    "rotation_rate_rad_s": [
+     0.0,
+     0.0,
+     1565.5603390389138
+    ],
+    "inlet_total": {
+     "p01_Pa": 101325.0,
+     "T01_K": 288.15
+    },
+    "mass_flow_passage_kg_s": 1.4194444444444445
+   },
+   "solid_check": {
+    "n_volumes": 1,
+    "volume_occ_step_m3": 0.039390620809785316,
+    "volume_by_parts_m3": 0.039394760018745076,
+    "volume_rel_diff": -0.00010507003870030562,
+    "volume_tet_mesh_m3": 0.03939443874178567,
+    "n_tet_check": 298739,
+    "volume_tet_rel_diff": -8.155322160918743e-06,
+    "r_max_edge_nodes_m": 0.34728750003180037,
+    "r_max_tet_nodes_m": 0.347287500020393,
+    "z_min_m": -0.02015115,
+    "z_max_m": 0.4327144000000001,
+    "z_mid_plane_m": 0.20628162500000002,
+    "z_symmetry_error_m": 5.551115123125783e-17,
+    "mirror_edge_nodes_median_dist_m": 5.468215405659674e-14,
+    "t_s": 21.3
+   }
+  },
+  "stage2": {
+   "label": "ступень 2",
+   "inlet": "односторонний",
+   "params_from_point": {
+    "m": 25.55,
+    "PR": 3.00668,
+    "rpm": 14950.0,
+    "D2": 0.702541,
+    "T01": 477.168,
+    "p01": 454949.0,
+    "Z": 9,
+    "splitters": true,
+    "nu": 0.40000068744586365,
+    "D1s": 0.290932,
+    "b2": 0.0186299,
+    "Lz": 0.21102,
+    "beta2b": 40.0,
+    "beta1h": 31.1224,
+    "beta1s": 56.4755,
+    "gap": 0.000491779,
+    "double_sided": false
+   },
+   "accepted": {
+    "r_bore": 0.0
+   },
+   "levels": {
+    "coarse": {
+     "n_cells": 1223051,
+     "n_nodes": 263032,
+     "minSICN": 0.33000499176220155,
+     "min_gamma": 0.23656762864888317,
+     "mesh": {
+      "level": "coarse",
+      "h0": 0.006209966666666667,
+      "h_blade": 0.002661414285714286,
+      "h_gap": 0.000491779,
+      "h_edge": 0.0012645738,
+      "tol_classify": 3.7259800000000003e-06,
+      "tip_faces": [
+       34,
+       37,
+       41
+      ],
+      "le_faces": [
+       45,
+       56
+      ],
+      "te_faces": [
+       53,
+       58
+      ],
+      "quality": {
+       "n_cells": 1223051,
+       "cell_types": [
+        4
+       ],
+       "n_nodes": 263032,
+       "minSICN": 0.33000499176220155,
+       "p01SICN": 0.4099094385587795,
+       "meanSICN": 0.8004224132065424,
+       "min_gamma": 0.23656762864888317,
+       "mean_gamma": 0.768971887390554,
+       "n_SICN_below_0_1": 0
+      },
+      "periodic_snap": {
+       "n_nodes": 6988,
+       "max_shift_m": 2.1450594038340815e-08
+      },
+      "volume_fluid_occ_m3": 0.003220884082698121,
+      "passage_volume_vs_body_over_Z": 0.0005956627729601927,
+      "t_geometry_s": 3.1,
+      "t_mesh_s": 25.9,
+      "phi1_rad": -0.17453292519943295,
+      "phi2_rad": 0.5235987755982988,
+      "sector_lo_hi_rad": [
+       -2.5144258020794497,
+       1.3051821573715359
+      ]
+     },
+     "n_gmsh_warnings": 0,
+     "t_build_s": 61.7,
+     "check_su2": {
+      "n_cells": 1223051,
+      "n_nodes": 263032,
+      "only_tetrahedra": true,
+      "markers": {
+       "inlet": 2069,
+       "outlet": 2008,
+       "hub": 26518,
+       "shroud": 103977,
+       "blade": 100144,
+       "periodic_1": 13356,
+       "periodic_2": 13356
+      },
+      "n_markers": 7,
+      "cell_volume_min_m3": 5.034477514711415e-12,
+      "cells_volume_sum_m3": 0.0032192155543386983,
+      "mean_ratio_min": 0.4057727115989088,
+      "boundary_closed_and_tagged": true,
+      "D2_from_blade_nodes_m": 0.7025410000341387,
+      "b2_from_outlet_z_extent_m": 0.018629900000000005,
+      "r_outlet_m": 0.45665164999999996,
+      "D1h_from_inlet_m": 0.116373,
+      "D1s_from_inlet_m": 0.29093200000000013,
+      "z_inlet_m": -0.145466,
+      "gap_min_from_blade_nodes_m": 0.0004917767891942526,
+      "periodic": {
+       "n_nodes_1": 6988,
+       "n_nodes_2": 6988,
+       "angle_deg": 40.0,
+       "max_dist_after_rotation_m": 1.7554167342883506e-16,
+       "one_to_one": true,
+       "triangles_match": true
+      },
+      "t_s": 2.9
+     },
+     "files": {
+      "passage_su2": {
+       "path": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/frame3/geom/stage2_coarse/passage_custom_coarse.su2",
+       "sha256": "f2db60b78a859488817b5bf86dfd7c2d493fd00e42d12904495638d8e1c5c771",
+       "bytes": 68138803
+      },
+      "passage_step": {
+       "path": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/frame3/geom/stage2_coarse/passage_custom.step",
+       "sha256": "cf3b1e9dda0ff5af581324ed14e91451d299d5630a67d92dc54761b8e2535c04",
+       "bytes": 752624
+      },
+      "impeller_json": {
+       "path": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/frame3/geom/stage2_coarse/impeller_custom_coarse.json",
+       "sha256": "f4b7e038cde8c98ff7099ae87b43454f2ea13d65f7a8b15b2a499dc364cc12b0",
+       "bytes": 6114
+      }
+     }
+    },
+    "medium": {
+     "n_cells": 5947436,
+     "n_nodes": 1162082,
+     "minSICN": 0.33269382573374556,
+     "min_gamma": 0.1887208976892516,
+     "mesh": {
+      "level": "medium",
+      "h0": 0.0037259800000000003,
+      "h_blade": 0.0015524916666666668,
+      "h_gap": 0.0002458895,
+      "h_edge": 0.0012645738,
+      "tol_classify": 3.7259800000000003e-06,
+      "tip_faces": [
+       34,
+       37,
+       41
+      ],
+      "le_faces": [
+       45,
+       56
+      ],
+      "te_faces": [
+       53,
+       58
+      ],
+      "quality": {
+       "n_cells": 5947436,
+       "cell_types": [
+        4
+       ],
+       "n_nodes": 1162082,
+       "minSICN": 0.33269382573374556,
+       "p01SICN": 0.4113115589258543,
+       "meanSICN": 0.8016080619190294,
+       "min_gamma": 0.1887208976892516,
+       "mean_gamma": 0.7707535845795463,
+       "n_SICN_below_0_1": 0
+      },
+      "periodic_snap": {
+       "n_nodes": 20096,
+       "max_shift_m": 2.036720791038818e-08
+      },
+      "volume_fluid_occ_m3": 0.003220884082698121,
+      "passage_volume_vs_body_over_Z": 0.0005956627729601927,
+      "t_geometry_s": 5.6,
+      "t_mesh_s": 92.5,
+      "phi1_rad": -0.17453292519943295,
+      "phi2_rad": 0.5235987755982988,
+      "sector_lo_hi_rad": [
+       -2.5144258020794497,
+       1.3051821573715359
+      ]
+     },
+     "n_gmsh_warnings": 0,
+     "t_build_s": 115.4,
+     "check_su2": {
+      "n_cells": 5947436,
+      "n_nodes": 1162082,
+      "only_tetrahedra": true,
+      "markers": {
+       "inlet": 6031,
+       "outlet": 5798,
+       "hub": 76084,
+       "shroud": 333018,
+       "blade": 320067,
+       "periodic_1": 39133,
+       "periodic_2": 39133
+      },
+      "n_markers": 7,
+      "cell_volume_min_m3": 5.943821013824544e-13,
+      "cells_volume_sum_m3": 0.003219199234980921,
+      "mean_ratio_min": 0.36549401043444857,
+      "boundary_closed_and_tagged": true,
+      "D2_from_blade_nodes_m": 0.7025410000340523,
+      "b2_from_outlet_z_extent_m": 0.018629900000000005,
+      "r_outlet_m": 0.4566516500000001,
+      "D1h_from_inlet_m": 0.116373,
+      "D1s_from_inlet_m": 0.29093200000000013,
+      "z_inlet_m": -0.14546600000000004,
+      "gap_min_from_blade_nodes_m": 0.0004917687670794219,
+      "periodic": {
+       "n_nodes_1": 20096,
+       "n_nodes_2": 20096,
+       "angle_deg": 40.0,
+       "max_dist_after_rotation_m": 1.8619006149354548e-16,
+       "one_to_one": true,
+       "triangles_match": true
+      },
+      "t_s": 11.1
+     },
+     "files": {
+      "passage_su2": {
+       "path": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/frame3/geom/stage2_medium/passage_custom_medium.su2",
+       "sha256": "ce6dd2d2de53a8dbc13bc0cb4754d2b28f29fb8db73ec17dc8e3771830d2d8a0",
+       "bytes": 329234876,
+       "stored_as": {
+        "path": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/frame3/geom/stage2_medium/passage_custom_medium.su2.gz",
+        "sha256": "a77ba3fe84c9de45524f2d5cf854915d71cc5a83c3d0656609f066bf08a8d16f",
+        "bytes": 108604928
+       }
+      },
+      "passage_step": {
+       "path": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/frame3/geom/stage2_medium/passage_custom.step",
+       "sha256": "e73c4cb6c0a0137cf2bca1ce99f9ae404ab0c5530028d12ac6d759e90d123e12",
+       "bytes": 752624
+      },
+      "impeller_json": {
+       "path": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/frame3/geom/stage2_medium/impeller_custom_medium.json",
+       "sha256": "88a7a039d8cfce7bedbd0d20b15903ae5358f71049d0e565b31dbc2bc67b9ab3",
+       "bytes": 5258
+      }
+     }
+    }
+   },
+   "d1": {
+    "m": 25.55,
+    "m_side": 25.55,
+    "double_sided": false,
+    "PR": 3.00668,
+    "rpm": 14950.0,
+    "D2": 0.702541,
+    "r2": 0.3512705,
+    "U2": 549.9351630743687,
+    "omega": 1565.5603390389138,
+    "T01": 477.168,
+    "p01": 454949.0,
+    "b2": 0.0186299,
+    "gap": 0.000491779,
+    "r1s": 0.145466,
+    "r1h": 0.05818650000000001,
+    "D1s_D2": 0.4141139093661438,
+    "Lz": 0.21102,
+    "Ls": 0.1923901,
+    "beta1h": 31.1224,
+    "beta1s": 56.4755,
+    "beta2b": 40.0,
+    "beta1h_flow": 32.00495802035321,
+    "beta1s_flow": 57.38028268617739,
+    "C1": 145.75356927561947,
+    "M1s_rel": 0.6267910112178188,
+    "Z_exit": 18,
+    "wiesner_eps_lim": 0.7066120569433716
+   },
+   "d1_comp_stage_not_used_for_geometry": {
+    "w": 207104.8789529979,
+    "T2": 675.166698548604,
+    "psi": 0.6848056754985554,
+    "psi_euler": 0.6493246943201747,
+    "eta_comp_stage": 0.8713162889373645,
+    "slip_wiesner": 0.884272591049813,
+    "phi": 0.036082754037485856
+   },
+   "geometry": {
+    "wrap_hub_deg": 103.16674229660312,
+    "wrap_shroud_deg": 103.16674229660326,
+    "hub_beta_bump_deg": -7.427905933573196,
+    "beta_hub_min_deg": 27.525375279569445,
+    "beta_hub_max_deg": 40.0,
+    "beta_shroud_min_deg": 40.0,
+    "beta_shroud_max_deg": 56.4755,
+    "L_hub": 0.3932558991496345,
+    "L_shroud": 0.30847211568046307
+   },
+   "area": {
+    "A1": 0.055840830414820915,
+    "A2": 0.041118008406257595,
+    "A2_A1": 0.7363430683391899,
+    "min_over_A1": 0.7206111680681613,
+    "m_at_min": 0.96
+   },
+   "contours": {
+    "hub_bezier_zr": [
+     [
+      0.0,
+      0.05818650000000001
+     ],
+     [
+      0.10551,
+      0.05818650000000001
+     ],
+     [
+      0.21102,
+      0.2047285
+     ],
+     [
+      0.21102,
+      0.3512705
+     ]
+    ],
+    "shroud_bezier_zr": [
+     [
+      0.0,
+      0.145466
+     ],
+     [
+      0.09619505,
+      0.145466
+     ],
+     [
+      0.1923901,
+      0.24836825
+     ],
+     [
+      0.1923901,
+      0.3512705
+     ]
+    ],
+    "z_in": -0.145466,
+    "r_out": 0.45665165
+   },
+   "warnings": [],
+   "solid": {
+    "volume_m3": 0.02393721561833611,
+    "mass_kg": {
+     "ti_6al_4v": 106.04186518922896,
+     "al_2618": 66.06671510660766
+    },
+    "volume_parts_m3": {
+     "hub": 0.02229192922472677,
+     "blade_pair": 0.00020833115505968934,
+     "blade_pair_inside_hub": 2.5521555769762716e-05
+    },
+    "sides": 1,
+    "z_mid_plane": null,
+    "t_back": 0.021076229999999998,
+    "r_bore": 0.0,
+    "z_nose": -0.01745595,
+    "n_faces": 124
+   },
+   "solid_file": {
+    "path": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/frame3/geom/stage2_coarse/impeller_custom.step",
+    "sha256": "5f5aa905afc33dc2ea80ba9d7d3703f4d4e047caafcacdcecc048c47e36577ee",
+    "bytes": 3517238
+   },
+   "su2": {
+    "markers": [
+     "inlet",
+     "outlet",
+     "hub",
+     "shroud",
+     "blade",
+     "periodic_1",
+     "periodic_2"
+    ],
+    "volume": "fluid",
+    "periodic": {
+     "master": "periodic_1",
+     "slave": "periodic_2",
+     "axis": [
+      0,
+      0,
+      1
+     ],
+     "center": [
+      0,
+      0,
+      0
+     ],
+     "angle_deg": 40.0,
+     "note": "periodic_2 = поворот periodic_1 на +360/Z вокруг +z"
+    },
+    "rotation_rate_rad_s": [
+     0.0,
+     0.0,
+     1565.5603390389138
+    ],
+    "inlet_total": {
+     "p01_Pa": 454949.0,
+     "T01_K": 477.168
+    },
+    "mass_flow_passage_kg_s": 2.838888888888889
+   },
+   "solid_check": {
+    "n_volumes": 1,
+    "volume_occ_step_m3": 0.023937112851275182,
+    "volume_by_parts_m3": 0.02393721561833611,
+    "volume_rel_diff": -4.293191930293538e-06,
+    "volume_tet_mesh_m3": 0.02393650332555643,
+    "n_tet_check": 130476,
+    "volume_tet_rel_diff": -2.9756709846173734e-05,
+    "r_max_edge_nodes_m": 0.35127050001697624,
+    "r_max_tet_nodes_m": 0.3512705000099474,
+    "z_min_m": -0.01745595,
+    "z_max_m": 0.23209623,
+    "t_s": 6.5
+   }
+  }
+ },
+ "checks": {
+  "stage1": {
+   "coarse": {
+    "D2_rel_err": 9.591216709736727e-11,
+    "b2_rel_err": 4.440892098500626e-16,
+    "D1s_rel_err": 2.220446049250313e-16,
+    "D1h_rel_err": -2.220446049250313e-16,
+    "gap_rel_err": -0.00014370750279335542,
+    "r_outlet_over_r2": 1.3,
+    "cells_volume_vs_occ_rel": 2.8696842750752793e-05,
+    "minSICN_gmsh_vs_mean_ratio_numpy": [
+     0.33266950918397914,
+     0.3911353479632521
+    ],
+    "n_cells_gmsh_vs_file": [
+     1200627,
+     1200627
+    ],
+    "markers_7": true,
+    "ok": true
+   },
+   "medium": {
+    "D2_rel_err": 9.554468327621635e-11,
+    "b2_rel_err": 4.440892098500626e-16,
+    "D1s_rel_err": 2.220446049250313e-16,
+    "D1h_rel_err": -2.220446049250313e-16,
+    "gap_rel_err": -0.0001368252261723102,
+    "r_outlet_over_r2": 1.3,
+    "cells_volume_vs_occ_rel": 2.38497602649268e-05,
+    "minSICN_gmsh_vs_mean_ratio_numpy": [
+     0.32869071697105834,
+     0.3595713234797234
+    ],
+    "n_cells_gmsh_vs_file": [
+     5819064,
+     5819064
+    ],
+    "markers_7": true,
+    "ok": true
+   },
+   "solid": {
+    "one_body": true,
+    "volume_occ_rel_diff": -0.00010507003870030562,
+    "volume_tet_rel_diff": -8.155322160918743e-06,
+    "r_max_over_r2": 1.0000000000915679,
+    "ok": true
+   }
+  },
+  "stage2": {
+   "coarse": {
+    "D2_rel_err": 4.859312952021355e-11,
+    "b2_rel_err": 2.220446049250313e-16,
+    "D1s_rel_err": 4.440892098500626e-16,
+    "D1h_rel_err": 0.0,
+    "gap_rel_err": -4.495526949033213e-06,
+    "r_outlet_over_r2": 1.3,
+    "cells_volume_vs_occ_rel": -0.0005180342777270086,
+    "minSICN_gmsh_vs_mean_ratio_numpy": [
+     0.33000499176220155,
+     0.4057727115989088
+    ],
+    "n_cells_gmsh_vs_file": [
+     1223051,
+     1223051
+    ],
+    "markers_7": true,
+    "ok": true
+   },
+   "medium": {
+    "D2_rel_err": 4.8470116809085084e-11,
+    "b2_rel_err": 2.220446049250313e-16,
+    "D1s_rel_err": 4.440892098500626e-16,
+    "D1h_rel_err": 0.0,
+    "gap_rel_err": -2.0807965728897315e-05,
+    "r_outlet_over_r2": 1.3000000000000003,
+    "cells_volume_vs_occ_rel": -0.0005231010101390821,
+    "minSICN_gmsh_vs_mean_ratio_numpy": [
+     0.33269382573374556,
+     0.36549401043444857
+    ],
+    "n_cells_gmsh_vs_file": [
+     5947436,
+     5947436
+    ],
+    "markers_7": true,
+    "ok": true
+   },
+   "solid": {
+    "one_body": true,
+    "volume_occ_rel_diff": -4.293191930293538e-06,
+    "volume_tet_rel_diff": -2.9756709846173734e-05,
+    "r_max_over_r2": 1.0000000000483282,
+    "ok": true
+   }
+  }
+ },
+ "t_total_s": 586.5,
+ "not_done": [
+  "SU2 эти сетки не читал (в среде нет сошедшихся расчётов колеса, см. навык su2-turbo, раздел 4); формат проверен своим разбором",
+  "пристенных призматических слоёв нет (как в узле): для RANS с y+ ≈ 1 сетку надо дополнять",
+  "маркер hub включает неподвижную стенку безлопаточного участка (z = Lz, r2 < r ≤ 1,3 r2): во вращающейся системе она будет вращаться. У ступени 1 вопрос проверяющего о ширине диффузора (общий 2·b2 или две половины) не решён: сетка одной стороны отвечает «двум половинам» со стенкой z = Lz; для общего диффузора с тонкой кромкой диска эту стенку нужно задать плоскостью симметрии - для этого маркер надо разделить",
+  "входной участок - прямой осевой, как в узле; подвод к двустороннему колесу (кольцевые камеры с двух сторон) не моделируется",
+  "уровень fine не строился (по росту coarse → medium - порядка 2·10⁷ ячеек и более, для AWS)",
+  "прочность колёс без отверстия и частоты по этим STEP - узел CalculiX, не сделано"
+ ]
+}

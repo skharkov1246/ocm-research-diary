@@ -1,0 +1,861 @@
+{
+ "title": "SU2: пробный прогон узла su2_case.py — колесо компрессора ступени 1 типоразмера № 3 (KV-3), сетка coarse, расчётная частота",
+ "method": "su2_case.py: сжимаемый RANS SU2 v8.6.0 (SST V2003m), вращающаяся система координат (ROTATING_FRAME, ось z), один канал (основная лопатка + полулопатка) с периодичностью поворотом узел в узел, Giles: полные p0, T0 на входе по нормали, статическое давление на выходе r_out = 1,3 r2 (оценка по точке × доля); разгон частоты и давления рампами первым порядком, затем точка вторым порядком (MUSCL); π и η полн./полн. — по средним по расходу p0 и T0 входа и выхода (MARKER_ANALYZE_AVERAGE= MASSFLUX), идеальный газ γ = 1,4",
+ "software": {
+  "python": "3.13.18",
+  "os": "Linux-6.18.44-fc-v470-x86_64-with-glibc2.39",
+  "su2": "SU2 v8.6.0 \"Harrier\", The Open-Source CFD Code",
+  "su2_exe": "<scratchpad>/frame3/su2/opt/bin/SU2_CFD",
+  "su2_src_commit": "7048fd35f56d4bf52e586429d6746a36a10255f8",
+  "su2_src_tag": "v8.6.0",
+  "mpirun": "mpirun (Open MPI) 4.1.6"
+ },
+ "date": "2026-11-14",
+ "inputs": [
+  {
+   "file": "routes/gtu/frame3/frame3_point_results.json",
+   "key": "stage1",
+   "sha256": "0440ba7e4a7a290b7ebbba371c7f3d7140007f5bf928119c6bfeddbfd905069f",
+   "fields": {
+    "PR": "PR",
+    "p01": "p01_kPa (·1000 Па)",
+    "T01": "T01_C (+273,15 К)",
+    "T02": "T02_C (+273,15 К)",
+    "m_total": "m_total_kg_s",
+    "m_side": "m_per_side_kg_s",
+    "n_sides": "inlet («двусторонний» → 2)",
+    "rpm": "n_rpm",
+    "r2": "D2_m / 2",
+    "c_theta2": "c2_m_s · sin(alpha2_flow_from_radial_deg)",
+    "Z": "blades_full",
+    "eta_is": "eta_is",
+    "eta_p": "eta_p"
+   }
+  },
+  {
+   "file": "<scratchpad>/frame3/geom/stage1_coarse/passage_custom_coarse.su2",
+   "sha256": "9ba3cb402ff208d94aee0fde2826d83d2cfc197f1d5cff3c4f14163f2e624d67",
+   "source": "routes/gtu/frame3/frame3_geom_results.json → stages.stage1.levels.coarse.files",
+   "note": "сетка канала узла геометрии (не в репозитории — scratchpad)"
+  },
+  {
+   "file": "<scratchpad>/frame3/geom/stage1_coarse/impeller_custom_coarse.json",
+   "fields": "su2.periodic, su2.rotation_rate_rad_s, d1.p01, d1.T01, d1.r2, d1.b2, contours.r_out"
+  }
+ ],
+ "runs": [
+  {
+   "created_utc": "2026-11-14T23:39:34Z",
+   "run_dir": "<scratchpad>/frame3/su2/runs/trial_stage1_coarse",
+   "np": 4,
+   "mpi_args": "--mca mpi_yield_when_idle 1",
+   "mesh": {
+    "source": "routes/gtu/frame3/frame3_geom_results.json → stages.stage1.levels.coarse.files",
+    "file": "<scratchpad>/frame3/geom/stage1_coarse/passage_custom_coarse.su2",
+    "sha256": "9ba3cb402ff208d94aee0fde2826d83d2cfc197f1d5cff3c4f14163f2e624d67",
+    "sha256_expected": "9ba3cb402ff208d94aee0fde2826d83d2cfc197f1d5cff3c4f14163f2e624d67",
+    "staged_as": "mesh_split.su2",
+    "vaneless_split_faces": {
+     "hub_vaneless": 8220,
+     "shroud_vaneless": 8782
+    },
+    "NPOIN": 258565,
+    "NELEM": 1200627,
+    "markers": {
+     "inlet": 2308,
+     "outlet": 1820,
+     "hub": 22368,
+     "shroud": 102082,
+     "blade": 101980,
+     "periodic_1": 13569,
+     "periodic_2": 13569
+    }
+   },
+   "consistency": {
+    "omega_mesh_rad_s": 1565.5603390389138,
+    "omega_point_rad_s": 1565.5603390389138,
+    "omega_rel_diff": 0.0,
+    "rotation_axis_z": true,
+    "p01_rel_diff": 0.0,
+    "T01_rel_diff": 0.0,
+    "n_passages": 9,
+    "Z_point": 9,
+    "n_passages_eq_Z": true,
+    "mesh_double_sided": true,
+    "point_double_sided": true,
+    "m_passage_point_kg_s": 1.4194444444444445,
+    "m_passage_mesh_json_kg_s": 1.4194444444444445,
+    "markers_present": [
+     "blade",
+     "hub",
+     "inlet",
+     "outlet",
+     "periodic_1",
+     "periodic_2",
+     "shroud"
+    ],
+    "markers_missing": [],
+    "ok": true
+   },
+   "setup": {
+    "n_passages": 9,
+    "n_sides": 2,
+    "r_out": 0.45147375000000006,
+    "b_out": 0.0203443,
+    "gamma": 1.4,
+    "R": 287.058,
+    "speed_frac": 1.0,
+    "rpm": 14950.0,
+    "p_out_estimate_design": 338312.07971495786,
+    "p_out_estimate_by_frac": {
+     "0.6": 159956.74347571604,
+     "1.0": 338312.07971495786
+    },
+    "p_out_design_given": null,
+    "shroud": "slip",
+    "vaneless_walls": "slip",
+    "points": [
+     [
+      0.75,
+      3000
+     ]
+    ],
+    "time_limit_s": 2400.0,
+    "restart_from": null,
+    "restart_state": null,
+    "numerics": {
+     "turb": "SST",
+     "init_mach": 0.4,
+     "aoa": 90.0,
+     "tu": 0.03,
+     "mut_ratio": 10.0,
+     "gamma": 1.4,
+     "R": 287.058,
+     "mu_ref": 1.716e-05,
+     "mu_t_ref": 273.15,
+     "sutherland": 110.4,
+     "relax_in": 0.3,
+     "relax_out": 0.3,
+     "nspan": 10,
+     "scheme": "ROE",
+     "limiter": "VENKATAKRISHNAN",
+     "venkat": 0.05,
+     "entropy_fix": 0.05,
+     "cfl": 5.0,
+     "cfl_adapt": "YES",
+     "cfl_adapt_param": "0.5, 1.1, 1.0, 20.0, 0.1",
+     "lin_prec": "ILU",
+     "lin_iter": 10,
+     "lin_error": 0.0001,
+     "res_min": -10,
+     "wrt_freq": 500,
+     "ramp_freq": 5,
+     "output_files": "RESTART, PARAVIEW"
+    },
+    "extra": []
+   },
+   "key_check": {
+    "cconfig": "<scratchpad>/SU2/Common/src/CConfig.cpp",
+    "registered_keys": 770,
+    "unknown": []
+   },
+   "stages": [
+    {
+     "name": "s1_ramp",
+     "status": "finished",
+     "seconds": 932.8,
+     "frac": 0.6,
+     "rpm": 8970.0,
+     "pfrac": 0.95,
+     "p_out": 151958.90630193023,
+     "p_out_ramp_from": 90748.12736236273,
+     "ramp_rot": 80,
+     "ramp_p": 160,
+     "iter": 170,
+     "muscl": false,
+     "restart_from": null,
+     "loadavg_start": null,
+     "loadavg_end": null,
+     "rows": 170,
+     "sec_per_iter_median": 4.828774396,
+     "sec_per_iter_p10": 4.049286638,
+     "residuals": {
+      "rms[Rho]": {
+       "first": -3.810410846,
+       "max_stage": -3.810410846,
+       "last": -5.50340265,
+       "max_run": -3.810410846,
+       "drop_from_run_max": 1.692991804,
+       "nan": false
+      },
+      "rms[RhoU]": {
+       "first": -2.102469714,
+       "max_stage": -1.414456664,
+       "last": -3.15253631,
+       "max_run": -1.414456664,
+       "drop_from_run_max": 1.7380796459999999,
+       "nan": false
+      },
+      "rms[RhoV]": {
+       "first": -1.82936475,
+       "max_stage": -1.453866317,
+       "last": -3.067045038,
+       "max_run": -1.453866317,
+       "drop_from_run_max": 1.613178721,
+       "nan": false
+      },
+      "rms[RhoW]": {
+       "first": -2.3294467,
+       "max_stage": -1.803236675,
+       "last": -3.645378734,
+       "max_run": -1.803236675,
+       "drop_from_run_max": 1.842142059,
+       "nan": false
+      },
+      "rms[RhoE]": {
+       "first": 1.609890167,
+       "max_stage": 1.609890167,
+       "last": 0.01320812371,
+       "max_run": 1.609890167,
+       "drop_from_run_max": 1.5966820432900002,
+       "nan": false
+      },
+      "rms[k]": {
+       "first": -2.036278126,
+       "max_stage": -2.036278126,
+       "last": -3.314425502,
+       "max_run": -2.036278126,
+       "drop_from_run_max": 1.2781473760000002,
+       "nan": false
+      },
+      "rms[w]": {
+       "first": 1.749648498,
+       "max_stage": 1.749648498,
+       "last": -1.314184162,
+       "max_run": 1.749648498,
+       "drop_from_run_max": 3.06383266,
+       "nan": false
+      }
+     },
+     "performance": {
+      "m_in_passage": 0.2837622623,
+      "m_out_passage": -0.001047682126,
+      "mass_imbalance": 0.9963078877455088,
+      "mass_sign_ok": true,
+      "m_side": 2.5538603607,
+      "m_wheel": 5.1077207214,
+      "PR_tt": 1.4477960062477253,
+      "TR_tt": 1.1271435516080504,
+      "eta_tt_isentropic": 0.8771009117676879,
+      "pt_in": 102004.2887,
+      "pt_out": 147681.4018,
+      "tt_in": 289.0409182,
+      "tt_out": 325.7906071,
+      "m_wheel_corrected": 5.081543829179805,
+      "PRTT_su2": 1.499500322,
+      "TotTotEff_su2": 89.11261466,
+      "PRTS_su2": 1.393759478,
+      "TotStaticEff_su2": 72.06903705
+     },
+     "stability": {
+      "window": 500,
+      "rows_in_stage": 170
+     },
+     "convergence": {
+      "no_nan": true,
+      "forward_flow": true,
+      "rms_rho_drop_orders": 1.692991804,
+      "residual_drop_ok": false,
+      "mass_imbalance": 0.9963078877455088,
+      "mass_ok": false,
+      "PR_window_rel_change": null,
+      "eta_window_rel_change": null,
+      "stability_ok": false,
+      "criteria": {
+       "orders": 4.0,
+       "mass_tol": 0.005,
+       "window": 500,
+       "stab_tol": 0.001
+      },
+      "stability_note": "в стадии 170 итераций < окна 500 — устойчивость не оценивается",
+      "converged": false
+     },
+     "vs_point": {
+      "note": "сравнение, не проверка: точка — одномерная модель ступени с диффузором (frame3_point.py), SU2 — колесо с безлопаточным участком до r_out; одномерную модель под SU2 не подгонять",
+      "m_wheel_su2": 5.1077207214,
+      "m_wheel_point": 25.55,
+      "m_ratio": 0.199910791444227,
+      "PR_su2": 1.4477960062477253,
+      "PR_point_stage": 4.49,
+      "PR_ratio": 0.3224489991643041,
+      "TR_su2": 1.1271435516080504,
+      "TR_point": 1.6559708485163978,
+      "eta_su2": 0.8771009117676879,
+      "eta_point_is_stage": 0.809131,
+      "d_eta_points": 0.06796991176768785
+     },
+     "log": {
+      "periodic_matched_points": 14176,
+      "periodic_max_distance": 2.37144e-16,
+      "bad_match": 0,
+      "nan": false,
+      "exit_success": true,
+      "error": null
+     }
+    },
+    {
+     "name": "s2_ramp",
+     "status": "timeout",
+     "seconds": 1476.2,
+     "frac": 1.0,
+     "rpm": 14950.0,
+     "pfrac": 0.75,
+     "p_out": 253734.0597862184,
+     "p_out_ramp_from": 151958.90630193023,
+     "ramp_rot": 80,
+     "ramp_p": 160,
+     "iter": 200,
+     "muscl": false,
+     "restart_from": "restart_s1_ramp.dat",
+     "loadavg_start": null,
+     "loadavg_end": null,
+     "rows": 145,
+     "sec_per_iter_median": 9.668550682,
+     "sec_per_iter_p10": 7.622817801,
+     "residuals": {
+      "rms[Rho]": {
+       "first": -5.513835232,
+       "max_stage": -4.620624007,
+       "last": -5.184099504,
+       "max_run": -3.810410846,
+       "drop_from_run_max": 1.3736886579999998,
+       "nan": false
+      },
+      "rms[RhoU]": {
+       "first": -3.156156303,
+       "max_stage": -2.244309626,
+       "last": -2.480622052,
+       "max_run": -1.414456664,
+       "drop_from_run_max": 1.0661653880000002,
+       "nan": false
+      },
+      "rms[RhoV]": {
+       "first": -3.088839192,
+       "max_stage": -2.594000596,
+       "last": -2.763349587,
+       "max_run": -1.453866317,
+       "drop_from_run_max": 1.30948327,
+       "nan": false
+      },
+      "rms[RhoW]": {
+       "first": -3.645321722,
+       "max_stage": -2.532013543,
+       "last": -3.375193731,
+       "max_run": -1.803236675,
+       "drop_from_run_max": 1.571957056,
+       "nan": false
+      },
+      "rms[RhoE]": {
+       "first": 0.002824806727,
+       "max_stage": 0.8334039386,
+       "last": 0.403231177,
+       "max_run": 1.609890167,
+       "drop_from_run_max": 1.2066589900000002,
+       "nan": false
+      },
+      "rms[k]": {
+       "first": -3.315565215,
+       "max_stage": -2.238692616,
+       "last": -2.238692616,
+       "max_run": -2.036278126,
+       "drop_from_run_max": 0.20241448999999978,
+       "nan": false
+      },
+      "rms[w]": {
+       "first": -1.31305893,
+       "max_stage": -0.7580960347,
+       "last": -0.8224366616,
+       "max_run": 1.749648498,
+       "drop_from_run_max": 2.5720851596,
+       "nan": false
+      }
+     },
+     "performance": {
+      "m_in_passage": 0.5362724436,
+      "m_out_passage": -0.3726920284,
+      "mass_imbalance": 0.30503229683383276,
+      "mass_sign_ok": true,
+      "m_side": 4.8264519924,
+      "m_wheel": 9.6529039848,
+      "PR_tt": 2.2213755883375694,
+      "TR_tt": 1.3215455393215032,
+      "eta_tt_isentropic": 0.7965614294268399,
+      "pt_in": 101250.9282,
+      "pt_out": 224916.3402,
+      "tt_in": 288.1283354,
+      "tt_out": 380.7747164,
+      "m_wheel_corrected": 9.659602577410846,
+      "PRTT_su2": 2.22385094,
+      "TotTotEff_su2": 79.71572328,
+      "PRTS_su2": 2.200701897,
+      "TotStaticEff_su2": 78.49025241
+     },
+     "stability": {
+      "window": 500,
+      "rows_in_stage": 145
+     },
+     "convergence": {
+      "no_nan": true,
+      "forward_flow": true,
+      "rms_rho_drop_orders": 1.3736886579999998,
+      "residual_drop_ok": false,
+      "mass_imbalance": 0.30503229683383276,
+      "mass_ok": false,
+      "PR_window_rel_change": null,
+      "eta_window_rel_change": null,
+      "stability_ok": false,
+      "criteria": {
+       "orders": 4.0,
+       "mass_tol": 0.005,
+       "window": 500,
+       "stab_tol": 0.001
+      },
+      "stability_note": "в стадии 145 итераций < окна 500 — устойчивость не оценивается",
+      "converged": false
+     },
+     "vs_point": {
+      "note": "сравнение, не проверка: точка — одномерная модель ступени с диффузором (frame3_point.py), SU2 — колесо с безлопаточным участком до r_out; одномерную модель под SU2 не подгонять",
+      "m_wheel_su2": 9.6529039848,
+      "m_wheel_point": 25.55,
+      "m_ratio": 0.37780446124461836,
+      "PR_su2": 2.2213755883375694,
+      "PR_point_stage": 4.49,
+      "PR_ratio": 0.4947384383825321,
+      "TR_su2": 1.3215455393215032,
+      "TR_point": 1.6559708485163978,
+      "eta_su2": 0.7965614294268399,
+      "eta_point_is_stage": 0.809131,
+      "d_eta_points": -0.012569570573160105
+     },
+     "log": {
+      "periodic_matched_points": 14176,
+      "periodic_max_distance": 2.37144e-16,
+      "bad_match": 0,
+      "nan": false,
+      "exit_success": true,
+      "error": null
+     }
+    }
+   ],
+   "final": {
+    "stage": "s2_ramp",
+    "status": "timeout",
+    "pfrac": 0.75,
+    "p_out": 253734.0597862184,
+    "rows": 145,
+    "converged": false,
+    "convergence": {
+     "no_nan": true,
+     "forward_flow": true,
+     "rms_rho_drop_orders": 1.3736886579999998,
+     "residual_drop_ok": false,
+     "mass_imbalance": 0.30503229683383276,
+     "mass_ok": false,
+     "PR_window_rel_change": null,
+     "eta_window_rel_change": null,
+     "stability_ok": false,
+     "criteria": {
+      "orders": 4.0,
+      "mass_tol": 0.005,
+      "window": 500,
+      "stab_tol": 0.001
+     },
+     "stability_note": "в стадии 145 итераций < окна 500 — устойчивость не оценивается",
+     "converged": false
+    },
+    "performance": {
+     "m_in_passage": 0.5362724436,
+     "m_out_passage": -0.3726920284,
+     "mass_imbalance": 0.30503229683383276,
+     "mass_sign_ok": true,
+     "m_side": 4.8264519924,
+     "m_wheel": 9.6529039848,
+     "PR_tt": 2.2213755883375694,
+     "TR_tt": 1.3215455393215032,
+     "eta_tt_isentropic": 0.7965614294268399,
+     "pt_in": 101250.9282,
+     "pt_out": 224916.3402,
+     "tt_in": 288.1283354,
+     "tt_out": 380.7747164,
+     "m_wheel_corrected": 9.659602577410846,
+     "PRTT_su2": 2.22385094,
+     "TotTotEff_su2": 79.71572328,
+     "PRTS_su2": 2.200701897,
+     "TotStaticEff_su2": 78.49025241
+    },
+    "vs_point": {
+     "note": "сравнение, не проверка: точка — одномерная модель ступени с диффузором (frame3_point.py), SU2 — колесо с безлопаточным участком до r_out; одномерную модель под SU2 не подгонять",
+     "m_wheel_su2": 9.6529039848,
+     "m_wheel_point": 25.55,
+     "m_ratio": 0.37780446124461836,
+     "PR_su2": 2.2213755883375694,
+     "PR_point_stage": 4.49,
+     "PR_ratio": 0.4947384383825321,
+     "TR_su2": 1.3215455393215032,
+     "TR_point": 1.6559708485163978,
+     "eta_su2": 0.7965614294268399,
+     "eta_point_is_stage": 0.809131,
+     "d_eta_points": -0.012569570573160105
+    }
+   },
+   "iterations_total": 315,
+   "seconds_total": 2409.0,
+   "sec_per_iter_weighted_median": 7.05660792447619
+  }
+ ],
+ "status": "ПРОВЕРКА РАБОТОСПОСОБНОСТИ ЦЕПОЧКИ (сетка → конфигурация → SU2_CFD → разбор), НЕ РЕЗУЛЬТАТ ПРОЕКТА: грубая тетраэдрическая сетка без пристенных призм (в зазоре одна ячейка), покрышка и стенки за колесом без трения, давление на выходе — 0,75 одномерной оценки, 40 минут счёта на 4 ядрах, общих с чужими задачами; числа расхода, π и η — не характеристика колеса и не для публикации",
+ "install": {
+  "target_prefix": "<scratchpad>/frame3/su2/opt",
+  "release_binaries": {
+   "tried": [
+    {
+     "url": "https://github.com/su2code/SU2/releases/download/v8.6.0/SU2-v8.6.0-linux64.zip",
+     "http": 404
+    },
+    {
+     "url": "https://github.com/su2code/SU2/releases/download/v8.6.0/SU2-v8.6.0-linux64-mpi.zip",
+     "http": 404
+    },
+    {
+     "url": "https://github.com/su2code/SU2/releases/download/v8.6.0/SU2-v8.6.0-linux64-omp.zip",
+     "http": 404
+    },
+    {
+     "url": "https://github.com/su2code/SU2/releases/download/v8.6.0/SU2-8.6.0-linux64-mpi.zip",
+     "http": 404
+    },
+    {
+     "url": "https://github.com/su2code/SU2/releases/download/v8.6.0/SU2-v8.6.0-macos64.zip",
+     "http": 404
+    },
+    {
+     "url": "https://github.com/su2code/SU2/releases/download/v8.6.0/SU2-v8.6.0-win64-mpi.zip",
+     "http": 404
+    }
+   ],
+   "body_of_404": "Not Found (ответ github.com на отсутствующий файл выпуска)",
+   "control": "те же адреса у прошлых выпусков отвечают 206 (файл есть): v8.5.0 -linux64-mpi и -linux64-omp; v8.0.0…v8.4.0 -linux64 и -linux64-mpi; у v8.5.0 -linux64 и у v8.0.0…v8.4.0 -linux64-omp — 404",
+   "asset_naming_source": ".github/workflows/release-management.yml тега v8.6.0: SU2-<тег>-{linux64-omp, linux64-mpi, macos64, macos64-mpi, win64-omp, win64-mpi}.zip",
+   "api": {
+    "url": "https://api.github.com/repos/su2code/SU2/releases/tags/v8.6.0",
+    "http": 403,
+    "reason": "прокси сессии: доступ к API GitHub для этого репозитория не включён"
+   },
+   "release_page": {
+    "url": "https://github.com/su2code/SU2/releases/tag/v8.6.0",
+    "http": 403
+   },
+   "verdict": "готовых архивов v8.6.0 нет (404 под всеми именами схемы выпусков) — сборка из исходника"
+  },
+  "build": {
+   "source": "клон тега v8.6.0 в scratchpad сессии (сделан ранее в этой сессии, git status чист)",
+   "tag": "v8.6.0",
+   "commit": "7048fd35f56d4bf52e586429d6746a36a10255f8",
+   "commands": [
+    "./meson.py setup <build> -Dwith-mpi=enabled -Dbuildtype=release --prefix=<opt>",
+    "./ninja -C <build> -j4 install"
+   ],
+   "meson": "1.8.2 (из meson.py)",
+   "compiler": "g++ 13.3.0 (Ubuntu 13.3.0-6ubuntu2~24.04.1)",
+   "mpi": "OpenMPI 4.1.6 (apt libopenmpi-dev)",
+   "setup_s": 7,
+   "build_install_s": 771,
+   "ninja_steps": 835,
+   "exit_code": 0,
+   "machine": "4 ядра, общие с другими задачами (средняя загрузка 10–13 во время сборки)",
+   "binary_sha256": "80cc996ca4f0e7d0070bf9cc16f6b0699546ddbed5790c610aa8b0e2f8bd70fb",
+   "version_line": "SU2 v8.6.0 \"Harrier\", The Open-Source CFD Code",
+   "ldd_mpi": "libmpi.so.40, libmpi_cxx.so.40"
+  },
+  "note": "сборка лежит в scratchpad сессии и пропадёт с контейнером; заново — install_su2.sh (~10–13 мин на 4 ядрах)"
+ },
+ "load_during_trial": {
+  "samples": 39,
+  "loadavg_1min_min": 10.19,
+  "loadavg_1min_max": 34.22,
+  "loadavg_1min_mean": 20.035641025641024,
+  "su2_processes_on_machine_max": 12,
+  "su2_processes_on_machine_min": 4,
+  "note": "4 ядра; кроме 4 процессов пробного прогона на машине шли чужие задачи: другие прогоны SU2 (до 8 чужих процессов SU2_CFD одновременно), расчёты Python — время итерации завышено, оценка AWS по нему — с запасом"
+ },
+ "trial_outcome": {
+  "label": "проверка работоспособности цепочки, не результат проекта",
+  "chain_works": {
+   "config_keys_registered": true,
+   "registered_keys_v860": 770,
+   "periodic_match": {
+    "periodic_matched_points": 14176,
+    "periodic_max_distance": 2.37144e-16,
+    "bad_match": 0
+   },
+   "stages_run": [
+    {
+     "name": "s1_ramp",
+     "status": "finished",
+     "rows": 170,
+     "seconds": 932.8
+    },
+    {
+     "name": "s2_ramp",
+     "status": "timeout",
+     "rows": 145,
+     "seconds": 1476.2
+    }
+   ],
+   "history_parsed": true
+  },
+  "final_stage": "s2_ramp",
+  "final_status": "timeout",
+  "p_out_Pa": 253734.0597862184,
+  "pfrac_of_estimate": 0.75,
+  "p_out_estimate_design_Pa": 338312.07971495786,
+  "iterations_total": 315,
+  "seconds_total": 2409.0,
+  "converged": false,
+  "convergence": {
+   "no_nan": true,
+   "forward_flow": true,
+   "rms_rho_drop_orders": 1.3736886579999998,
+   "residual_drop_ok": false,
+   "mass_imbalance": 0.30503229683383276,
+   "mass_ok": false,
+   "PR_window_rel_change": null,
+   "eta_window_rel_change": null,
+   "stability_ok": false,
+   "criteria": {
+    "orders": 4.0,
+    "mass_tol": 0.005,
+    "window": 500,
+    "stab_tol": 0.001
+   },
+   "stability_note": "в стадии 145 итераций < окна 500 — устойчивость не оценивается",
+   "converged": false
+  },
+  "mass_flow": {
+   "m_in_passage": 0.5362724436,
+   "m_out_passage": -0.3726920284,
+   "mass_imbalance": 0.30503229683383276,
+   "mass_sign_ok": true,
+   "m_side": 4.8264519924,
+   "m_wheel": 9.6529039848,
+   "m_wheel_corrected": 9.659602577410846
+  },
+  "PR_tt_massavg": 2.2213755883375694,
+  "TR_tt_massavg": 1.3215455393215032,
+  "eta_tt_isentropic_massavg": 0.7965614294268399,
+  "PRTT_su2_mixedout": 2.22385094,
+  "TotTotEff_su2_pct": 79.71572328,
+  "vs_point": {
+   "note": "сравнение, не проверка: точка — одномерная модель ступени с диффузором (frame3_point.py), SU2 — колесо с безлопаточным участком до r_out; одномерную модель под SU2 не подгонять",
+   "m_wheel_su2": 9.6529039848,
+   "m_wheel_point": 25.55,
+   "m_ratio": 0.37780446124461836,
+   "PR_su2": 2.2213755883375694,
+   "PR_point_stage": 4.49,
+   "PR_ratio": 0.4947384383825321,
+   "TR_su2": 1.3215455393215032,
+   "TR_point": 1.6559708485163978,
+   "eta_su2": 0.7965614294268399,
+   "eta_point_is_stage": 0.809131,
+   "d_eta_points": -0.012569570573160105
+  },
+  "point_reference": {
+   "file": "routes/gtu/frame3/frame3_point_results.json",
+   "key": "stage1",
+   "PR": 4.49,
+   "m_total_kg_s": 25.55,
+   "eta_is": 0.809131,
+   "T02_C": 204.018
+  },
+  "sec_per_iter_weighted_median": 7.05660792447619,
+  "p_out_ramp": {
+   "from_Pa": 151958.90630193023,
+   "to_Pa": 253734.0597862184,
+   "length_iter": 160,
+   "update_every_iter": 5,
+   "last_iter": 144,
+   "last_update_iter": 140,
+   "value_at_stop_Pa": 241012.16560068238,
+   "value_at_stop_over_estimate": 0.7123959800777592,
+   "note": "рампа давления не дошла до конца: значение по формуле CFluidIteration::UpdateRamps SU2 v8.6.0 (начало + итерация × (конец − начало)/длина, обновление каждые 5 итераций)"
+  },
+  "speed_ramp": {
+   "length_iter": 80,
+   "last_iter": 144,
+   "full_speed_reached": true
+  },
+  "outlet_static_pressure_massavg_Pa": 222527.092,
+  "inlet_total_massavg": {
+   "p0_Pa": 101250.9282,
+   "T0_K": 288.1283354,
+   "imposed_p01_Pa": 101325.0,
+   "imposed_T01_K": 288.15
+  },
+  "independent_check": {
+   "script": ".claude/skills/su2-turbo/scripts/su2_pr_eta.py (отдельный разбор последней строки истории)",
+   "output": "PR_tt 2.2214  eta_tt 0.7966  m_in +0.5363  m_out -0.3727  дисбаланс 30.503%"
+  }
+ },
+ "aws_plan": {
+  "jobs_file": "routes/gtu/platform/su2/jobs_frame3.json",
+  "n_jobs": 10,
+  "speeds": [
+   0.7,
+   0.8,
+   0.9,
+   1.0,
+   1.05
+  ],
+  "pfracs": [
+   0.45,
+   0.52,
+   0.58,
+   0.64,
+   0.7,
+   0.76,
+   0.83,
+   0.9
+  ],
+  "iterations": {
+   "startup": 740,
+   "first_point": 2500,
+   "next_point": 1500,
+   "per_line": 13740
+  },
+  "t_ref_s_per_iter": 4.049286638,
+  "t_ref_source": "sec_per_iter_p10 (Time(sec) = ITER_TIME истории) по стадиям пробного прогона ['s1_ramp'], взвешенное по итерациям",
+  "t_ref_by_kind": {
+   "median": 7.05660792447619,
+   "p10": 5.69424542731746
+  },
+  "trial_stage_timing": [
+   {
+    "name": "s1_ramp",
+    "rows": 170,
+    "sec_per_iter_median": 4.828774396,
+    "sec_per_iter_p10": 4.049286638,
+    "loadavg_start": null,
+    "loadavg_end": null
+   },
+   {
+    "name": "s2_ramp",
+    "rows": 145,
+    "sec_per_iter_median": 9.668550682,
+    "sec_per_iter_p10": 7.622817801,
+    "loadavg_start": null,
+    "loadavg_end": null
+   }
+  ],
+  "n_ref_nodes": 258565,
+  "np_ref": 4,
+  "procs_aws": 64,
+  "parallel_eff": 0.6,
+  "parallel_eff_note": "EXAMPLE: принято (как batch/cost_estimate.toml), не замер — ускорение 4 → 64 процесса не мерилось",
+  "setup_min": 15.0,
+  "mesh_min": 10.0,
+  "upload_min": 3.0,
+  "time_margin": 1.5,
+  "max_min_formula": "setup_min + mesh_min + su2_time_limit/60 + 8 (выгрузка runner.py) + slack_min",
+  "slack_min": 5.0,
+  "assumption_notes": {
+   "setup_min": "оценка: apt + pip + сборка SU2 install_su2.sh на 64 ядрах (на 4 ядрах здесь сборка шла ~8–10 мин, см. software)",
+   "mesh_min": "оценка: frame3_geom.py medium одной ступени с STEP (здесь 115–181 с на 4 ядрах)"
+  },
+  "price_usd_h": 0.71,
+  "price_note": "спот c7a.16xlarge ~0,71 долл./ч — допущение задания (цена 1c 14.11.2026 — 0,706)",
+  "per_stage": [
+   {
+    "stage": "stage1",
+    "level": "medium",
+    "nodes": 1137992,
+    "jobs": 5,
+    "t_iter_s_estimate": 1.856422224485339,
+    "iterations_per_line": 13740,
+    "compute_min_per_line": 425.12068940714266,
+    "su2_time_limit_s": 38261,
+    "max_min": 676,
+    "expected_hours_per_line": 7.552011490119044,
+    "cap_hours_per_line": 11.266666666666667
+   },
+   {
+    "stage": "stage2",
+    "level": "medium",
+    "nodes": 1162082,
+    "jobs": 5,
+    "t_iter_s_estimate": 1.8957205775386574,
+    "iterations_per_line": 13740,
+    "compute_min_per_line": 434.12001225635254,
+    "su2_time_limit_s": 39071,
+    "max_min": 690,
+    "expected_hours_per_line": 7.702000204272542,
+    "cap_hours_per_line": 11.5
+   }
+  ],
+  "machine_hours_expected": 76.27005847195792,
+  "usd_expected": 54.15174151509012,
+  "machine_hours_cap": 113.83333333333334,
+  "usd_cap_at_price": 80.82166666666667,
+  "usd_runner_budget_bound": 99.74295205479453,
+  "pessimistic_median_speed": {
+   "per_stage": [
+    {
+     "stage": "stage1",
+     "t_iter_s": 3.235148546299814,
+     "hours_per_line_uncapped": 12.81415028504429,
+     "iterations_within_time_limit": 11826,
+     "jobs": 5
+    },
+    {
+     "stage": "stage2",
+     "t_iter_s": 3.3036329719199964,
+     "hours_per_line_uncapped": 13.075532509494652,
+     "iterations_within_time_limit": 11826,
+     "jobs": 5
+    }
+   ],
+   "usd_uncapped": 91.90837392061324,
+   "note": "время итерации — медиана пробного прогона на общей машине; линии, не успевшие за лимит счёта, обрываются с записью рестарта (расход ограничен max_min, то есть usd_runner_budget_bound)"
+  },
+  "runner_bound_note": "верхняя граница предохранителя runner.py: (MaxPrice = цена × 1,2 + диск + IPv4) × (max_min + grace 10 мин) по всем задачам",
+  "ceiling_usd": 300.0,
+  "within_ceiling": true,
+  "launch": "не запускалось: AWS здесь не вызывается; проверка файла — runner.py plan (без AWS)",
+  "runner_plan_check": {
+   "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/platform/su2/jobs_frame3.json --assume-price 0.71 --assume-zone-prices us-east-1c=0.706,us-east-1b=0.748,us-east-1a=0.955 --out <scratchpad>",
+   "exit_code": 0,
+   "jobs_accepted": 10,
+   "budget_ok_lines": 10,
+   "forecast_usd": 133.7,
+   "forecast_note": "прогноз предохранителя runner.py: MaxPrice = максимум цены по зонам (допущение 0,955 у us-east-1a) × 1,2, весь срок max_min + 10 мин по каждой задаче — верхняя граница; AWS не вызывался",
+   "mpi_args_fix": "проверка 15.11.2026: в командах задач было --mpi-args \"\"; на запасном типе c7i.16xlarge (32 ядра при 64 vCPU) OpenMPI 4.1 считает слоты по физическим ядрам и mpirun -np 64 отказал бы («not enough slots»; механизм проверен локально: на 4 ядрах -np 5 — отказ; то же в ../bench/README.md). Теперь --mpi-args=--use-hwthread-cpus (su2_case.py, MPI_ARGS_AWS), jobs_frame3.json пересобран той же командой generated_by: отличие только в этом ключе, числа сметы не изменились; runner.py plan той же командой — код 0, 10 задач, бюджет «можно» у всех 10, прогноз 133,70 долл."
+  },
+  "generated_by": "python3 routes/gtu/platform/su2/su2_case.py aws-plan --trial-results su2_trial_results.json --out jobs_frame3.json --t-ref-kind p10 --t-ref-stages s1_ramp --pfracs 0.45,0.52,0.58,0.64,0.70,0.76,0.83,0.90 --first-iter 2500 --next-iter 1500 (остальное — умолчания: частоты 0.7,0.8,0.9,1.0,1.05; medium; 64 процесса; эффективность 0,6; 0,71 долл./ч; потолок 300)",
+  "t_ref_choice_note": "t_ref — нижний дециль стадии s1 (средняя загрузка машины ~10–13); стадия s2 шла при загрузке 20–34 (медиана 9,67 с) и в t_ref не взята; её влияние — в pessimistic_median_speed"
+ },
+ "tests": {
+  "result": "41 passed: test_su2_case.py — 20 (с SU2: SU2_CFD -d на собранной конфигурации — Exit Success; сверка ключей с Common/src/CConfig.cpp v8.6.0 — неизвестных нет), test_run_case.py — 21 (функции run_case.py, которыми пользуется su2_case.py, не менялись)",
+  "command": "SU2_RUN=<opt>/bin SU2_HOME=<исходник SU2 v8.6.0> python3 -m pytest -q test_su2_case.py test_run_case.py"
+ },
+ "not_done": [
+  "пробный прогон не сошёлся и до точки не дошёл: за 2409 с счёта (лимит 2400 с) прошло 315 итераций — разгон s1 (170) и 145 из 200 итераций s2; частота вышла на расчётную (рампа 80 итераций), рампа давления на выходе — нет (остановка на 144-й итерации из 160, 241,0 кПа = 0,712 оценки вместо 0,75); стадия второго порядка p1 не запускалась. Причина — машина: 4 ядра при средней загрузке 10–34 (в среднем 20) от чужих задач (другой прогон SU2 на 4 процессах, расчёты Python), 4,8–9,7 с на итерацию",
+  "критерии сходимости навыка su2-turbo не выполнены: rms[Rho] ниже максимума на 1,37 порядка (нужно 4), дисбаланс расхода 30,5 % (нужно ≤ 0,5 %), устойчивость π и η не оценивается (145 итераций < окна 500)",
+  "давление на выходе — 0,75 одномерной оценки (как в прошедшем дымовом прогоне core130 Б); при 1,0 оценки на core130 был обратный ток — здесь не проверялось",
+  "покрышка и стенки безлопаточного участка без трения (slip): на сетке coarse с одной ячейкой в зазоре неподвижная покрышка расходится (README узла, диагностика); для открытого колеса нужна сетка с призмами и разрешённым зазором (узел geom)",
+  "сравнение с точкой — колесо до r = 1,3 r2 в переходном состоянии против одномерной ступени с диффузором: не проверка и не вывод о колесе",
+  "сетка medium и характеристика (5 частот × 8 точек) — только план jobs_frame3.json, AWS не вызывался",
+  "время итерации на AWS — пересчёт замера с перегруженной общей машины с принятой эффективностью 0,6 (EXAMPLE), не замер; ускорение 4 → 64 процесса не мерилось",
+  "продолжить пробный прогон можно с сохранённого рестарта: su2_case.py run ... --restart-from <папка>/restart_s2_ramp.dat --restart-state 1.0,241012 --points 0.75:1500 (рестарт в scratchpad сессии)"
+ ],
+ "code_note": "пробный прогон шёл версией su2_case.py до трёх правок: (1) разгон s1 теперь до min(0,95; доля первой точки) оценки (в прогоне — 0,95: к концу s1 расход на выходе почти нулевой, дисбаланс 99,6 %); (2) в сводку стадии добавлены загрузка машины и нижний дециль времени итерации; (3) parse --record. Разбор и запись в этот файл — текущей версией (su2_case.py parse --record) по файлам прогона",
+ "paths_note": "<scratchpad> — рабочая папка сессии (эфемерная): сетки, сборка SU2 и папка прогона там, не в репозитории"
+}

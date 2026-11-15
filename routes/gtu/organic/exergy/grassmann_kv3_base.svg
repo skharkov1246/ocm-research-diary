@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 562" width="1120" height="562" role="img" aria-labelledby="gt gd" font-family="Times New Roman, Times, serif">
+<title id="gt">KV-3 (Taurus 60 GS), расчётная точка: горение 30,3 %, выхлоп 26,8 %, на клеммах 28,9 % эксергии топлива</title>
+<desc id="gd">Диаграмма Грассмана, ширина полосы пропорциональна потоку эксергии. Топливо 100 % (19141 кВт). Разрушение: горение 30,3 %, смешение 1,7 %, компрессор 5,4 %, турбина 3,3 %, механика, редуктор и генератор 2,1 %. Уходит с выхлопом 26,8 %, с утечками 0,7 %. На клеммах 28,9 %.</desc>
+<rect width="1120" height="562" fill="#ffffff"/>
+<text x="30" y="28" font-size="16" fill="#0b0b0b">KV-3 (Taurus 60 GS), расчётная точка: горение 30,3 %, выхлоп 26,8 %, на клеммах 28,9 % эксергии топлива</text>
+<text x="30" y="47" font-size="12" fill="#52514e">π 13,5, T41 1000 °C, расход 25,55 кг/с; КПД на клеммах 30,3 % (по LHV), эксергетический 28,9 %; доли — от эксергии топлива; ISO 15 °C, 60 %</text>
+<text x="18.0" y="315.7" font-size="11" fill="#52514e">воздух</text>
+<text x="18.0" y="329.7" font-size="11" fill="#52514e">0,1 %</text>
+<rect x="164.2" y="293.1" width="40.0" height="57.1" fill="#3987e5" fill-opacity="0.9"><title>сжатый воздух в камеру: 9268 кВт</title></rect>
+<rect x="374.2" y="253.5" width="50.0" height="136.3" fill="#3987e5" fill-opacity="0.9"><title>газ за камерой: 22127 кВт</title></rect>
+<rect x="554.9" y="305.8" width="511.1" height="31.7" fill="#3987e5" fill-opacity="0.9"><title>газ за турбиной: 5139 кВт</title></rect>
+<path d="M1066.0,301.8 L1084.0,321.7 L1066.0,341.5 Z" fill="#7d7c78"/>
+<text x="1086.0" y="283.8" font-size="11" text-anchor="end" fill="#0b0b0b">выхлоп</text>
+<text x="1086.0" y="297.8" font-size="11" text-anchor="end" fill="#0b0b0b">26,8 %</text>
+<rect x="70.0" y="281.5" width="94.2" height="80.3" rx="4" fill="#ecebe7" stroke="#52514e" stroke-width="1"/>
+<text x="117.1" y="325.7" text-anchor="middle" font-size="12" fill="#0b0b0b">компрессор</text>
+<rect x="204.2" y="226.2" width="170.0" height="191.0" rx="4" fill="#ecebe7" stroke="#52514e" stroke-width="1"/>
+<text x="289.2" y="325.7" text-anchor="middle" font-size="12" fill="#0b0b0b">камера</text>
+<rect x="424.2" y="245.5" width="130.8" height="152.3" rx="4" fill="#ecebe7" stroke="#52514e" stroke-width="1"/>
+<text x="489.5" y="325.7" text-anchor="middle" font-size="12" fill="#0b0b0b">турбина</text>
+<path d="M289.2,190.2 V226.2" stroke="#0d366b" stroke-width="117.91" fill="none" stroke-opacity="0.9"><title>эксергия топлива: 19141 кВт</title></path>
+<text x="289.2" y="168.2" text-anchor="middle" font-size="12" fill="#0b0b0b">топливо 100 % = 19141 кВт</text>
+<text x="289.2" y="182.2" text-anchor="middle" font-size="11" fill="#52514e">(химическая + давление подачи)</text>
+<path d="M471.2,245.5 L471.2,112.1 L117.1,112.1 L117.1,281.5" stroke="#6250d6" stroke-width="64.16" fill="none" stroke-linejoin="miter" stroke-opacity="0.9"><title>работа на привод компрессора: 10415 кВт</title></path>
+<text x="294.2" y="74.0" text-anchor="middle" font-size="11" fill="#52514e">работа на компрессор 10415 кВт (54,4 %)</text>
+<path d="M521.6,245.5 L521.6,152.1 L1070.0,152.1" stroke="#6250d6" stroke-width="36.62" fill="none" stroke-linejoin="miter" stroke-opacity="0.9"><title>работа турбины сверх компрессора: 5944 кВт</title></path>
+<path d="M569.9,133.8 V99.8" stroke="#eb6834" stroke-width="1.01" fill="none" stroke-opacity="0.9"><title>механика: 164 кВт, 0,9 %</title></path>
+<text x="569.9" y="79.8" text-anchor="middle" font-size="10.5" fill="#0b0b0b">механика</text>
+<text x="569.9" y="92.8" text-anchor="middle" font-size="10.5" fill="#52514e">0,9 %</text>
+<path d="M639.9,133.8 V99.8" stroke="#eb6834" stroke-width="0.80" fill="none" stroke-opacity="0.9"><title>редуктор: 87 кВт, 0,5 %</title></path>
+<text x="639.9" y="79.8" text-anchor="middle" font-size="10.5" fill="#0b0b0b">редуктор</text>
+<text x="639.9" y="92.8" text-anchor="middle" font-size="10.5" fill="#52514e">0,5 %</text>
+<path d="M709.9,133.8 V99.8" stroke="#eb6834" stroke-width="0.98" fill="none" stroke-opacity="0.9"><title>генератор: 159 кВт, 0,8 %</title></path>
+<text x="709.9" y="79.8" text-anchor="middle" font-size="10.5" fill="#0b0b0b">генератор</text>
+<text x="709.9" y="92.8" text-anchor="middle" font-size="10.5" fill="#52514e">0,8 %</text>
+<path d="M1070.0,129.8 L1086.0,152.1 L1070.0,174.4 Z" fill="#6250d6"/>
+<text x="1086.0" y="188.4" font-size="12" text-anchor="end" fill="#0b0b0b">на клеммах 5535 кВт = 28,9 %</text>
+<path d="M114.6,361.8 V407.8" stroke="#eb6834" stroke-width="6.32" fill="none" stroke-opacity="0.9"><title>компрессор: 1027 кВт, 5,4 % эксергии топлива</title></path>
+<path d="M111.5,407.8 L117.8,407.8 L114.6,415.8 Z" fill="#eb6834"/>
+<path d="M122.2,361.8 V407.8" stroke="#7d7c78" stroke-width="0.87" fill="none" stroke-opacity="0.9"><title>утечки: 141 кВт, 0,7 % эксергии топлива</title></path>
+<path d="M119.2,407.8 L125.2,407.8 L122.2,415.8 Z" fill="#7d7c78"/>
+<path d="M264.5,417.2 V463.2" stroke="#eb6834" stroke-width="2.02" fill="none" stroke-opacity="0.9"><title>смешение: 329 кВт, 1,7 % эксергии топлива</title></path>
+<path d="M261.5,463.2 L267.5,463.2 L264.5,471.2 Z" fill="#eb6834"/>
+<path d="M287.4,417.2 V463.2" stroke="#eb6834" stroke-width="35.70" fill="none" stroke-opacity="0.9"><title>горение: 5795 кВт, 30,3 % эксергии топлива</title></path>
+<path d="M269.5,463.2 L305.2,463.2 L287.4,471.2 Z" fill="#eb6834"/>
+<path d="M309.6,417.2 V463.2" stroke="#eb6834" stroke-width="0.80" fill="none" stroke-opacity="0.9"><title>Δp камеры: 87 кВт, 0,5 % эксергии топлива</title></path>
+<path d="M306.6,463.2 L312.6,463.2 L309.6,471.2 Z" fill="#eb6834"/>
+<path d="M314.4,417.2 V463.2" stroke="#eb6834" stroke-width="0.80" fill="none" stroke-opacity="0.9"><title>недожог: 71 кВт, 0,4 % эксергии топлива</title></path>
+<path d="M311.4,463.2 L317.4,463.2 L314.4,471.2 Z" fill="#eb6834"/>
+<path d="M489.5,397.8 V443.8" stroke="#eb6834" stroke-width="3.87" fill="none" stroke-opacity="0.9"><title>турбина: 629 кВт, 3,3 % эксергии топлива</title></path>
+<path d="M486.5,443.8 L492.5,443.8 L489.5,451.8 Z" fill="#eb6834"/>
+<path d="M114.6,417.8 L114.6,487.2" stroke="#d6d5d0" stroke-width="1" fill="none"/>
+<text x="114.6" y="499.2" text-anchor="middle" font-size="10.5" fill="#0b0b0b" stroke="#ffffff" stroke-width="3" paint-order="stroke">компрессор</text>
+<text x="114.6" y="512.2" text-anchor="middle" font-size="10.5" fill="#52514e" stroke="#ffffff" stroke-width="3" paint-order="stroke">5,4 %</text>
+<path d="M122.2,417.8 L180.6,487.2" stroke="#d6d5d0" stroke-width="1" fill="none"/>
+<text x="180.6" y="499.2" text-anchor="middle" font-size="10.5" fill="#0b0b0b" stroke="#ffffff" stroke-width="3" paint-order="stroke">утечки</text>
+<text x="180.6" y="512.2" text-anchor="middle" font-size="10.5" fill="#52514e" stroke="#ffffff" stroke-width="3" paint-order="stroke">0,7 %</text>
+<path d="M264.5,473.2 L264.5,487.2" stroke="#d6d5d0" stroke-width="1" fill="none"/>
+<text x="264.5" y="499.2" text-anchor="middle" font-size="10.5" fill="#0b0b0b" stroke="#ffffff" stroke-width="3" paint-order="stroke">смешение</text>
+<text x="264.5" y="512.2" text-anchor="middle" font-size="10.5" fill="#52514e" stroke="#ffffff" stroke-width="3" paint-order="stroke">1,7 %</text>
+<path d="M287.4,473.2 L330.5,487.2" stroke="#d6d5d0" stroke-width="1" fill="none"/>
+<text x="330.5" y="499.2" text-anchor="middle" font-size="10.5" fill="#0b0b0b" stroke="#ffffff" stroke-width="3" paint-order="stroke">горение</text>
+<text x="330.5" y="512.2" text-anchor="middle" font-size="10.5" fill="#52514e" stroke="#ffffff" stroke-width="3" paint-order="stroke">30,3 %</text>
+<path d="M309.6,473.2 L396.5,487.2" stroke="#d6d5d0" stroke-width="1" fill="none"/>
+<text x="396.5" y="499.2" text-anchor="middle" font-size="10.5" fill="#0b0b0b" stroke="#ffffff" stroke-width="3" paint-order="stroke">Δp камеры</text>
+<text x="396.5" y="512.2" text-anchor="middle" font-size="10.5" fill="#52514e" stroke="#ffffff" stroke-width="3" paint-order="stroke">0,5 %</text>
+<path d="M314.4,473.2 L462.5,487.2" stroke="#d6d5d0" stroke-width="1" fill="none"/>
+<text x="462.5" y="499.2" text-anchor="middle" font-size="10.5" fill="#0b0b0b" stroke="#ffffff" stroke-width="3" paint-order="stroke">недожог</text>
+<text x="462.5" y="512.2" text-anchor="middle" font-size="10.5" fill="#52514e" stroke="#ffffff" stroke-width="3" paint-order="stroke">0,4 %</text>
+<path d="M489.5,453.8 L528.5,487.2" stroke="#d6d5d0" stroke-width="1" fill="none"/>
+<text x="528.5" y="499.2" text-anchor="middle" font-size="10.5" fill="#0b0b0b" stroke="#ffffff" stroke-width="3" paint-order="stroke">турбина</text>
+<text x="528.5" y="512.2" text-anchor="middle" font-size="10.5" fill="#52514e" stroke="#ffffff" stroke-width="3" paint-order="stroke">3,3 %</text>
+<rect x="30" y="535" width="14" height="10" fill="#0d366b"/>
+<text x="49" y="544" font-size="11" fill="#52514e">топливо</text>
+<rect x="115.6" y="535" width="14" height="10" fill="#3987e5"/>
+<text x="134.6" y="544" font-size="11" fill="#52514e">эксергия потока воздуха и газа</text>
+<rect x="334.6" y="535" width="14" height="10" fill="#6250d6"/>
+<text x="353.6" y="544" font-size="11" fill="#52514e">работа</text>
+<rect x="414.40000000000003" y="535" width="14" height="10" fill="#eb6834"/>
+<text x="433.40000000000003" y="544" font-size="11" fill="#52514e">разрушение эксергии</text>
+<rect x="569.6" y="535" width="14" height="10" fill="#7d7c78"/>
+<text x="588.6" y="544" font-size="11" fill="#52514e">уходит с потоком</text>
+</svg>

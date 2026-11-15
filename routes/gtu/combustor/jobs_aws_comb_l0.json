@@ -1,0 +1,265 @@
+{
+ "_comment": "Камера сгорания KV-3, уровень 0 воронки, полный перебор на AWS: 262 144 варианта (2^18) сетями реакторов Cantera, 48 частей по индексу (i % 48), 6 задач по 8 частей. Раннер берёт только defaults и jobs; блоки estimate, merge, mini_check, plan_check - для сессии с ключами. Код - ветка claude/lucid-allen-yvps5d. Дополняет jobs_l0.json потока камеры (N = 30 000, 30 задач по части, make_jobs_l0.py): тот же comb_l0.py, другой объём и раскладка по машинам.",
+ "defaults": {
+  "instance_type": "c7a.16xlarge",
+  "fallback_types": [
+   "c7i.16xlarge"
+  ],
+  "image": "al2023",
+  "disk_gb": 30,
+  "python": "3.12",
+  "pip": [
+   "cantera==3.2.0",
+   "numpy==2.5.3",
+   "scipy==1.18.1"
+  ]
+ },
+ "jobs": [
+  {
+   "name": "comb-l0-m0",
+   "command": "set -e\nfor S in 0 6 12 18 24 30 36 42; do\n  python -u routes/gtu/combustor/comb_l0.py --kv KV-3 --n 262144 --shards 48 --shard \"$S\" --workers \"$NPROC\" --out \"$GTU_OUT\"\n  gzip -6 \"$GTU_OUT\"/comb_l0_KV-3_n262144_s*.json\ndone\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 45
+  },
+  {
+   "name": "comb-l0-m1",
+   "command": "set -e\nfor S in 1 7 13 19 25 31 37 43; do\n  python -u routes/gtu/combustor/comb_l0.py --kv KV-3 --n 262144 --shards 48 --shard \"$S\" --workers \"$NPROC\" --out \"$GTU_OUT\"\n  gzip -6 \"$GTU_OUT\"/comb_l0_KV-3_n262144_s*.json\ndone\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 45
+  },
+  {
+   "name": "comb-l0-m2",
+   "command": "set -e\nfor S in 2 8 14 20 26 32 38 44; do\n  python -u routes/gtu/combustor/comb_l0.py --kv KV-3 --n 262144 --shards 48 --shard \"$S\" --workers \"$NPROC\" --out \"$GTU_OUT\"\n  gzip -6 \"$GTU_OUT\"/comb_l0_KV-3_n262144_s*.json\ndone\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 45
+  },
+  {
+   "name": "comb-l0-m3",
+   "command": "set -e\nfor S in 3 9 15 21 27 33 39 45; do\n  python -u routes/gtu/combustor/comb_l0.py --kv KV-3 --n 262144 --shards 48 --shard \"$S\" --workers \"$NPROC\" --out \"$GTU_OUT\"\n  gzip -6 \"$GTU_OUT\"/comb_l0_KV-3_n262144_s*.json\ndone\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 45
+  },
+  {
+   "name": "comb-l0-m4",
+   "command": "set -e\nfor S in 4 10 16 22 28 34 40 46; do\n  python -u routes/gtu/combustor/comb_l0.py --kv KV-3 --n 262144 --shards 48 --shard \"$S\" --workers \"$NPROC\" --out \"$GTU_OUT\"\n  gzip -6 \"$GTU_OUT\"/comb_l0_KV-3_n262144_s*.json\ndone\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 45
+  },
+  {
+   "name": "comb-l0-m5",
+   "command": "set -e\nfor S in 5 11 17 23 29 35 41 47; do\n  python -u routes/gtu/combustor/comb_l0.py --kv KV-3 --n 262144 --shards 48 --shard \"$S\" --workers \"$NPROC\" --out \"$GTU_OUT\"\n  gzip -6 \"$GTU_OUT\"/comb_l0_KV-3_n262144_s*.json\ndone\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 45
+  }
+ ],
+ "merge": {
+  "where": "сессия с ключами после run (результаты уже в routes/gtu/platform/aws/runs/<run_id>/comb-l0-mK/, иначе collect --run-id <run_id> --job comb-l0-mK по каждой); тот же коммит, что в _job.log задач (слияние берёт цели и веса из comb_crn того же кода); Python с cantera==3.2.0, numpy==2.5.3, scipy==1.18.1; свободной памяти не меньше 6 ГБ (замер: ~4,3 ГБ на 262 144 строки)",
+  "commands": [
+   "bash -euo pipefail -c 'D=/tmp/comb_l0_aws_<run_id>; mkdir -p \"$D\"; find routes/gtu/platform/aws/runs/<run_id> -path \"*/_lost\" -prune -o -name \"comb_l0_KV-3_n262144_s*of048.json.gz\" -print | while read -r f; do gunzip -c \"$f\" > \"$D/$(basename \"${f%.gz}\")\"; done; ls \"$D\" | wc -l'",
+   "mkdir -p routes/gtu/combustor/l0_aws",
+   "python3 routes/gtu/combustor/merge_l0.py /tmp/comb_l0_aws_<run_id> --out routes/gtu/combustor/l0_aws/comb_l0_KV-3_n262144_results.json --top 100",
+   "python3 -c \"import os,sys; s=os.path.getsize('routes/gtu/combustor/l0_aws/comb_l0_KV-3_n262144_results.json'); print(s); sys.exit(0 if s <= 5e6 else 3)\" || gzip -9 -f routes/gtu/combustor/l0_aws/comb_l0_KV-3_n262144_results.json"
+  ],
+  "expect": "первая команда печатает 48 (частей); merge_l0 - «полнота: True; строк 262144 из 262144», код 0; код 2 - потеряна или задвоена часть или индекс, или у частей разные отпечатки (fingerprint, code_hash, bc_key): разбор, не публикация",
+  "to_branch": "routes/gtu/combustor/l0_aws/comb_l0_KV-3_n262144_results.json (рейтинг, фронт Парето, чувствительность, feed_to_engine_funnel; если больше 5 МБ - .json.gz) и ledger.jsonl",
+  "stays_in_s3": "части comb_l0_KV-3_n262144_s0NNof048.json.gz (~0,25 ГБ, все строки со всеми полями): s3://<бакет>/<префикс>/gtu/<run_id>/comb-l0-mK/ и runs/<run_id>/ (в .gitignore) - в ветку не класть"
+ },
+ "estimate": {
+  "variants": 262144,
+  "why_n": "2^18: последовательность Соболя сбалансирована на степенях двойки; 4236 допустимых сочетаний дискретных осей (LPP и TVC - по 1296), на схему ~37 450 вариантов -> ~29 вариантов на сочетание в самых широких схемах (при N = 30 000 - около 3); допустимых в отладке 45 % (comb_l0_debug_results.json: 135 из 300). 2^19 (524 288) упрётся в память слияния (~9 ГБ по замеру ниже) - нужно потоковое слияние; уровень 0 - облик (0D + корреляции), его погрешность больше выигрыша от ещё более плотной выборки",
+  "shards": 48,
+  "jobs": 6,
+  "shards_per_job": 8,
+  "variants_per_job": 43690.666666666664,
+  "s_cpu_per_variant": 0.553,
+  "safety": 2.0,
+  "core_hours": 40.27,
+  "core_hours_planning": 80.54,
+  "compute_min_per_job": {
+   "expected": 6.29,
+   "planning": 12.58
+  },
+  "setup_min": 2.0,
+  "upload_min": 1.0,
+  "machine_min_per_job": {
+   "expected": 9.29,
+   "planning": 15.58
+  },
+  "machine_hours": {
+   "expected": 0.929,
+   "planning": 1.558
+  },
+  "max_min": 45,
+  "max_min_why": "команда до старт + max_min - 8 = 37 мин против 15.6 мин по плану (запас ~2,4x; при несовпадении ключа границ части пересчитывают таблицы, +~5 мин на машину)",
+  "parts": {
+   "gb_raw": 1.162,
+   "gb_gz": 0.248,
+   "part_mb_raw": 24.2
+  },
+  "usd": {
+   "machine_hours_x_0_75": 1.169,
+   "disk_ipv4": 0.0129,
+   "s3_month": 0.0057,
+   "transfer_to_session": 0.0223,
+   "total_planning": 1.21,
+   "total_expected_spot_0_706": 0.697
+  },
+  "price": {
+   "planning": 0.75,
+   "expected": 0.7064,
+   "basis": "0,75 долл./ч - верх диапазона задачи владельца 14.11.2026 (0,71-0,75); 0,7064 - спот c7a.16xlarge us-east-1c, ledger.jsonl прогона smoke2 20261114T231610Z-9b64 (23:16 UTC)"
+  },
+  "upper_bound_rule": "раннер: (MaxPrice + диск + IPv4) x (max_min + 10) / 60 на машину - см. plan_check",
+  "measurements": {
+   "cpu_per_variant": [
+    {
+     "value_s": 0.55,
+     "how": "time.process_time вокруг comb_crn.evaluate, по одному процессу; 96 вариантов i = 5 (mod 2731) выборки n = 262144; код 39f054d = f3cd3e4 (code_hash 90a15bd14dfa6979, тот же, что в миниатюре): ok 38, отсев 58",
+     "where": "контейнер сессии, 4 общих ядра, python 3.12.16 (uv), cantera 3.2.0, numpy 2.5.3, scipy 1.18.1"
+    },
+    {
+     "value_s": 0.553,
+     "how": "то же на тех же 96 вариантах, прежний код 51adce7 (code_hash 6749ba46e54e90e5); в смету берётся большее из двух"
+    },
+    {
+     "value_s": 0.497,
+     "how": "то же, 41 вариант i = 17 (mod 6553) выборки n = 262144"
+    },
+    {
+     "value_s": 0.662,
+     "how": "comb_l0_debug_results.json, timing.t_variant_mean_s (N = 300, пул 4 процессов, поток камеры) - стена в пуле, включает чужую нагрузку"
+    }
+   ],
+   "pool_wall_note": "comb_l0.py --n 262144 --shards 2731 --shard 5 --workers 4: 96 вариантов за 50,0 с, t_variant_mean 1,95 с - в 3,5 раза больше ЦП-времени тех же вариантов: средняя нагрузка контейнера 12-15 (соседние потоки) на 4 ядрах; для сметы не берётся",
+   "status_mix": "96 вариантов (код 51adce7): ok 44, отсев 52; стена в пуле под нагрузкой: ok 3,1 с, отсев 1,0 с",
+   "output_size": "часть 96 строк: 425 481 байт JSON, 90 680 байт gzip -6 (x4,69)",
+   "setup": "ledger.jsonl (живые прогоны 14.11.2026, al2023 + uv + Python 3.12 + pip cantera/numpy/scipy + клон): запуск -> конец машины 62,5 с (smoke-py), 61,5 и 124 с (l0-debug-m1/m0, вместе со счётом и выгрузкой)",
+   "merge_memory": "merge_l0.py, пик ru_maxrss: 125,7 МБ на 64 настоящих строках, 460 МБ на 20 000 синтетических (строки настоящей части, размноженные по индексам) -> ~16,7 КБ на строку; на 262144: ~4.3 ГБ"
+  },
+  "assumptions": {
+   "c7a_core": "ядро c7a.16xlarge (1 vCPU = 1 ядро Zen 4) принято не медленнее ядра контейнера сессии; запас 2 покрывает и это, и 64 процесса на общей памяти - не проверено до живого прогона",
+   "disk_ipv4": "ставки раннера (0,08 долл./ГБ-мес gp3, 0,005 долл./ч IPv4) - допущения кода",
+   "s3": "0.023 долл./ГБ-мес, выход в интернет 0.09 долл./ГБ - допущения"
+  }
+ },
+ "mini_check": {
+  "how": "копия ветки git archive HEAD (только отслеживаемые файлы) в scratch; те же команды задач с n = 96 вместо 262 144 (48 частей и 6 задач - как в боевом пакете, по 2 варианта в части); каждая команда - `bash cmd.sh` из корня копии с GTU_OUT, NPROC = 4, python 3.12 из venv uv; затем команды merge с путями scratch; runner.py plan по мини-файлу",
+  "commit": "39f054d20eaadca6eadd5454d0cdfe4e75d8f5e4",
+  "python": "3.12.16 3.2.0 2.5.3 1.18.1",
+  "jobs": [
+   {
+    "job": "comb-l0-m0",
+    "exit_code": 0,
+    "wall_s": 40.5,
+    "files": 10
+   },
+   {
+    "job": "comb-l0-m1",
+    "exit_code": 0,
+    "wall_s": 34.3,
+    "files": 10
+   },
+   {
+    "job": "comb-l0-m2",
+    "exit_code": 0,
+    "wall_s": 39.0,
+    "files": 10
+   },
+   {
+    "job": "comb-l0-m3",
+    "exit_code": 0,
+    "wall_s": 31.0,
+    "files": 10
+   },
+   {
+    "job": "comb-l0-m4",
+    "exit_code": 0,
+    "wall_s": 34.3,
+    "files": 10
+   },
+   {
+    "job": "comb-l0-m5",
+    "exit_code": 0,
+    "wall_s": 32.7,
+    "files": 10
+   }
+  ],
+  "merge": [
+   {
+    "cmd": "bash -euo pipefail -c 'D=/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/offload/comb-organic/mini/comb_merge_parts; mkdir -p \"$D\"; fin",
+    "exit_code": 0,
+    "wall_s": 0.4,
+    "tail": [
+     "48"
+    ]
+   },
+   {
+    "cmd": "mkdir -p /tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/offload/comb-organic/mini/comb_merged",
+    "exit_code": 0,
+    "wall_s": 0.0,
+    "tail": []
+   },
+   {
+    "cmd": "python3 routes/gtu/combustor/merge_l0.py /tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/offload/comb-organic/mini/comb_merge_parts --o",
+    "exit_code": 0,
+    "wall_s": 1.2,
+    "tail": [
+     "полнота: True; строк 96 из 96; допустимых 42; все жёсткие цели - 0; запись /tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/offload/comb-organic/mini/comb_merged/comb_l0_KV-3_n96_results.json"
+    ]
+   },
+   {
+    "cmd": "python3 -c \"import os,sys; s=os.path.getsize('/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/offload/comb-organic/mini/comb_merged/com",
+    "exit_code": 0,
+    "wall_s": 0.0,
+    "tail": [
+     "109088"
+    ]
+   }
+  ],
+  "merged": {
+   "complete": true,
+   "counts": {
+    "n": 96,
+    "rows": 96,
+    "status": {
+     "отсев": 54,
+     "ok": 42
+    },
+    "reject_codes": {
+     "ВОЗДУХ": 11,
+     "ОХЛАЖДЕНИЕ": 8,
+     "ПОГАСАНИЕ_100": 16,
+     "ЭЛЕМЕНТОВ_НА_ТРУБУ": 4,
+     "ЭЛЕМЕНТ": 4,
+     "ТОПЛИВО": 16,
+     "ДИЗЕЛЬ_ФОРСУНКИ": 2,
+     "ПРОСКОК": 2
+    },
+    "feasible": 42,
+    "hard_ok": 0
+   },
+   "timing": 1.24115
+  },
+  "date": "2026-11-14"
+ },
+ "plan_check": {
+  "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/combustor/jobs_aws_comb_l0.json --assume-price 0.75 --assume-zone-prices us-east-1a=0.9554,us-east-1b=0.7478,us-east-1c=0.7064,us-east-1d=0.8576,us-east-1f=1.1804",
+  "exit_code": 0,
+  "forecast_usd": 7.84,
+  "lines": [
+   "[задача] comb-l0-m0: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 45 мин",
+   "[бюджет] comb-l0-m0 на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 0.00 + новая 1.31 = 1.47 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[зоны] comb-l0-m0 c7a.16xlarge: us-east-1c 0.7064 → us-east-1b 0.7478 → us-east-1d 0.8576 → us-east-1a 0.9554 → us-east-1f 1.1804 (допущение plan); ожидается us-east-1c по 0.7064 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.4165 и бюджет — по максимуму цены за окно",
+   "[задача] comb-l0-m1: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 45 мин",
+   "[бюджет] comb-l0-m1 на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 1.31 + новая 1.31 = 2.78 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[зоны] comb-l0-m1 c7a.16xlarge: us-east-1c 0.7064 → us-east-1b 0.7478 → us-east-1d 0.8576 → us-east-1a 0.9554 → us-east-1f 1.1804 (допущение plan); ожидается us-east-1c по 0.7064 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.4165 и бюджет — по максимуму цены за окно",
+   "[задача] comb-l0-m2: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 45 мин",
+   "[бюджет] comb-l0-m2 на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 2.61 + новая 1.31 = 4.09 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[зоны] comb-l0-m2 c7a.16xlarge: us-east-1c 0.7064 → us-east-1b 0.7478 → us-east-1d 0.8576 → us-east-1a 0.9554 → us-east-1f 1.1804 (допущение plan); ожидается us-east-1c по 0.7064 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.4165 и бюджет — по максимуму цены за окно",
+   "[задача] comb-l0-m3: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 45 мин",
+   "[бюджет] comb-l0-m3 на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 3.92 + новая 1.31 = 5.39 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[зоны] comb-l0-m3 c7a.16xlarge: us-east-1c 0.7064 → us-east-1b 0.7478 → us-east-1d 0.8576 → us-east-1a 0.9554 → us-east-1f 1.1804 (допущение plan); ожидается us-east-1c по 0.7064 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.4165 и бюджет — по максимуму цены за окно",
+   "[задача] comb-l0-m4: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 45 мин",
+   "[бюджет] comb-l0-m4 на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 5.22 + новая 1.31 = 6.70 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[зоны] comb-l0-m4 c7a.16xlarge: us-east-1c 0.7064 → us-east-1b 0.7478 → us-east-1d 0.8576 → us-east-1a 0.9554 → us-east-1f 1.1804 (допущение plan); ожидается us-east-1c по 0.7064 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.4165 и бюджет — по максимуму цены за окно",
+   "[задача] comb-l0-m5: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 45 мин",
+   "[бюджет] comb-l0-m5 на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 6.53 + новая 1.31 = 8.00 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[зоны] comb-l0-m5 c7a.16xlarge: us-east-1c 0.7064 → us-east-1b 0.7478 → us-east-1d 0.8576 → us-east-1a 0.9554 → us-east-1f 1.1804 (допущение plan); ожидается us-east-1c по 0.7064 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.4165 и бюджет — по максимуму цены за окно",
+   "[план] прогноз пакета 7.84 долл. (цена спота — допущение 0.75/ч)"
+  ]
+ }
+}

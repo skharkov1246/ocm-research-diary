@@ -2,7 +2,7 @@
   "defaults": {
     "instance_type": "c7a.16xlarge",
     "fallback_types": ["c7i.16xlarge"],
-    "image": "ubuntu2404",
+    "image": "al2023",
     "disk_gb": 50,
     "max_min": 30
   },
@@ -15,6 +15,7 @@
     {
       "name": "explore-249",
       "command": "python routes/gtu/gtu_explore.py \"$GTU_OUT/gtu_explore_results.json\"",
+      "python": "3.12",
       "pip": ["cantera", "scipy", "numpy"],
       "max_min": 40
     }

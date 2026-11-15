@@ -1,0 +1,80 @@
+# Конфигурация серий AWS Batch трека «Простая литая ГТУ-заменитель».
+# Читают render.py (шаблоны Batch, план, manifest.json) и cost_estimate.py (смета серии) — одни и те же числа.
+# Ничего в AWS не создаётся: render.py только пишет JSON-файлы запросов и команды для владельца.
+# Заглушки помечены словом PLACEHOLDER (заполняет владелец; ключей и секретов здесь нет и не должно быть).
+
+[run]
+run_id = "gtu-EXAMPLE-kv3-char"          # ключ прогона: [A-Za-z0-9._-], до 48 знаков (как у runner.py)
+project_tag = "PLACEHOLDER-project-tag"   # значение тега Project = ALPHA_O_TAG окружения Coldun
+region = "us-east-1"                      # решение владельца 14.11.2026
+fallback_region = "eu-north-1"            # только запасной вариант: render.py --region eu-north-1
+mode = "line"                             # line — дочернее задание считает линию частоты; point — одну точку
+
+[aws]
+account_id = "000000000000"               # PLACEHOLDER: номер аккаунта (в файлы репозитория не писать настоящий)
+bucket = "PLACEHOLDER-bucket"             # бакет из ALPHA_O_S3 (уже есть, us-east-1)
+s3_prefix = "PLACEHOLDER-prefix"          # префикс из ALPHA_O_S3; итог: s3://<бакет>/<префикс>/gtu/<run_id>/
+subnets = ["subnet-PLACEHOLDER"]          # подсети VPC по умолчанию с выходом в интернет (ECR, S3)
+security_group_ids = ["sg-PLACEHOLDER"]   # без входящих правил, исходящие — все
+instance_role = "PLACEHOLDER-ecsInstanceRole"   # профиль экземпляра ECS (роль машин Batch), см. README
+job_role_arn = "arn:aws:iam::000000000000:role/PLACEHOLDER-gtu-batch-job"        # S3 из контейнера
+spot_fleet_role_arn = "arn:aws:iam::000000000000:role/PLACEHOLDER-gtu-spot-fleet" # см. README: разночтение
+ecr_repository = "gtu-platform"
+image_tag = "PLACEHOLDER-gitsha12"        # тег образа = первые 12 знаков git sha коммита сборки
+
+[quota]
+vcpu_quota = 384                          # квоты us-east-1 обычные и спот, одобрены (решение владельца 14.11.2026)
+
+[compute]
+# Только размеры 16xlarge: задание занимает машину целиком, MPI на все 64 vCPU, время точки не зависит
+# от соседей. Batch выбирает тип сам (SPOT_PRICE_CAPACITY_OPTIMIZED).
+instance_types = ["c7a.16xlarge", "c7i.16xlarge", "c8i.16xlarge"]
+max_instance_vcpu = 64
+minv_cpus = 0                             # среда сжимается до нуля после заданий
+maxv_cpus = 320                           # 320 + 64 (Batch может превысить maxvCpus на одну машину) = 384 = квота
+root_volume_gb = 30                       # EXAMPLE: корневой том ECS AL2023 по умолчанию — не проверено; для сметы
+
+[job]
+vcpu = 64
+memory_mib = 32768                        # SU2 на сетке ~6·10⁵ узлов — единицы ГБ; запас; < памяти машины (128 ГиБ)
+shared_memory_mib = 4096                  # /dev/shm для OpenMPI (обмен через общую память, см. Dockerfile)
+attempt_duration_s = 12600                # 3,5 ч на попытку (тайм-аут Batch; по нему же верхняя граница сметы)
+internal_margin_s = 600                   # точка входа сама останавливает расчёт за 10 мин до тайм-аута и выгружает
+retry_attempts = 2                        # 1 повтор — только при прерывании спота («Host EC2*»), как --retries 1 у раннера
+runnable_timeout_s = 7200                 # очередь отменяет задание, простоявшее RUNNABLE 2 ч (нет ёмкости/квоты)
+log_stream_prefix = "gtu"
+
+[plan]
+# Серия характеристики: 2 ступени × 5 частот × 8 точек = 80 точек; в режиме line — 10 дочерних заданий.
+# Ступени — два центробежных колеса расчётной точки KV-3 (Taurus 60 генераторный: один ротор, два колеса,
+# README трека). Доли частоты и противодавления — EXAMPLE (план-заготовка до одномерной оценки линий).
+stages = ["kv3-c1", "kv3-c2"]
+case_by_stage = ["taurus60", "taurus60"]  # EXAMPLE: сетки второго колеса в узле geom нет — пока то же колесо
+# EXAMPLE: расчётное статическое давление на выходе ступени, Па: π ступени ≈ √13,5 ≈ 3,67 при π 13,5 (README
+# трека), выход ступени 1 ≈ 0,8 × 3,67 × 101 325 ≈ 3,0·10⁵ Па, ступени 2 ≈ 0,8 × 13,5 × 101 325 ≈ 1,1·10⁶ Па.
+# Владелец данных — узел gtu-cycle/su2 (одномерная оценка d1 из JSON сетки); влияет на положение точек линии.
+# ВНИМАНИЕ (скептик 14.11.2026): давление одно для всех частот, а случай taurus60 — одно колесо PR 6,75 с входом
+# 101 325 Па: оценка estimate_p_out — 2,2·10⁵…5,2·10⁵ Па при доле частоты 0,70…1,05. Ступень 2 при 1,1·10⁶ Па
+# этим колесом недостижима. До живой серии — давление линии от оценки на её частоте (README, «План-заготовка»).
+p_out_design_pa = [300000.0, 1100000.0]
+speed_frac = [0.70, 0.80, 0.90, 1.00, 1.05]   # EXAMPLE: доля номинальной частоты вращения, 1
+points_per_line = 8
+p_out_frac_first = 0.85                   # EXAMPLE: давление на выходе / расчётное, от запирания…
+p_out_frac_last = 1.12                    # EXAMPLE: …до границы устойчивости стационарного расчёта
+level = "medium"                          # уровень сетки узла geom (impeller.py --level)
+plan = "design"                           # план стадий run_case.py
+iters_first = 6800                        # итераций плана design: 800 (разгон, рампа 400) + 6000 (PLANS["design"] в run_case.py)
+iters_next = 1000                         # EXAMPLE: точка линии с рестарта от соседней (--iter-scale = 1000/6800)
+# Ключи — из run_case.py узла su2 на 14.11.2026 (--case --level --plan --iter-scale --frac --p-out --np
+# --time-limit --out --restart-from --restart-state). Поля {…} — из строки плана; $GTU_* задаёт entrypoint.py.
+command = "python routes/gtu/platform/su2/run_case.py --case {case} --level {level} --plan {plan} --iter-scale {iter_scale} --frac {speed_frac} --p-out {p_out_pa} --np \"$GTU_NP\" --time-limit \"$GTU_TIME_LEFT\" --out \"$GTU_OUT\" ${GTU_PREV_RESTART:+--restart-from \"$GTU_PREV_RESTART\" --restart-state \"$GTU_PREV_STATE\"}"
+
+[solver]
+# Настройки решателя — в manifest.json прогона (для повторяемости).
+name = "SU2"
+version = "v8.6.0"
+commit = "7048fd35f56d4bf52e586429d6746a36a10255f8"
+build = "meson -Dwith-mpi=enabled -Dbuildtype=release; OpenMPI 4.1.6 (Ubuntu 24.04)"
+plan = "design"                           # стадии run_case.py: 800 итераций разгона (рампа 400), 6000 второго порядка
+convergence = "невязки −4 порядка, дисбаланс расхода ≤ 0,5 %, π и η за 500 итераций < 0,1 % (навык su2-turbo, разд. 6)"
+turbulence = "SST"

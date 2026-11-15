@@ -1,0 +1,367 @@
+{
+ "_comment": "Камера сгорания KV-3, уровень 0 v2 (решение владельца 15.11.2026: один клапан на топливо, без приводов, частичную нагрузку держит пассивный элемент): основная серия N = 524288 (6 задач × 8 частей) и две серии чувствительности к закону затухания при малом J (β = 0 и 2, по N/4 = 131072, 4 задачи × 12 частей). Раннер берёт только defaults и jobs; остальные блоки - для сессии с ключами. Код - ветка с comb_v2.py, comb_l0_v2.py, merge_l0_v2.py, comb_bc_v2_results.json (code_hash v2 ce00c977bea5cca0).",
+ "defaults": {
+  "instance_type": "c7a.16xlarge",
+  "fallback_types": [
+   "c7i.16xlarge"
+  ],
+  "image": "al2023",
+  "disk_gb": 30,
+  "python": "3.12",
+  "pip": [
+   "cantera==3.2.0",
+   "numpy==2.5.3",
+   "scipy==1.18.1"
+  ]
+ },
+ "jobs": [
+  {
+   "name": "comb-l0v2-m0",
+   "command": "set -e\nfor S in 0 6 12 18 24 30 36 42; do\n  python -u routes/gtu/combustor/comb_l0_v2.py --kv KV-3 --n 524288 --shards 48 --shard \"$S\" --workers \"$NPROC\" --out \"$GTU_OUT\"\n  gzip -6 \"$GTU_OUT\"/comb_l0v2_KV-3_n524288_s*.json\ndone\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 100
+  },
+  {
+   "name": "comb-l0v2-m1",
+   "command": "set -e\nfor S in 1 7 13 19 25 31 37 43; do\n  python -u routes/gtu/combustor/comb_l0_v2.py --kv KV-3 --n 524288 --shards 48 --shard \"$S\" --workers \"$NPROC\" --out \"$GTU_OUT\"\n  gzip -6 \"$GTU_OUT\"/comb_l0v2_KV-3_n524288_s*.json\ndone\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 100
+  },
+  {
+   "name": "comb-l0v2-m2",
+   "command": "set -e\nfor S in 2 8 14 20 26 32 38 44; do\n  python -u routes/gtu/combustor/comb_l0_v2.py --kv KV-3 --n 524288 --shards 48 --shard \"$S\" --workers \"$NPROC\" --out \"$GTU_OUT\"\n  gzip -6 \"$GTU_OUT\"/comb_l0v2_KV-3_n524288_s*.json\ndone\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 100
+  },
+  {
+   "name": "comb-l0v2-m3",
+   "command": "set -e\nfor S in 3 9 15 21 27 33 39 45; do\n  python -u routes/gtu/combustor/comb_l0_v2.py --kv KV-3 --n 524288 --shards 48 --shard \"$S\" --workers \"$NPROC\" --out \"$GTU_OUT\"\n  gzip -6 \"$GTU_OUT\"/comb_l0v2_KV-3_n524288_s*.json\ndone\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 100
+  },
+  {
+   "name": "comb-l0v2-m4",
+   "command": "set -e\nfor S in 4 10 16 22 28 34 40 46; do\n  python -u routes/gtu/combustor/comb_l0_v2.py --kv KV-3 --n 524288 --shards 48 --shard \"$S\" --workers \"$NPROC\" --out \"$GTU_OUT\"\n  gzip -6 \"$GTU_OUT\"/comb_l0v2_KV-3_n524288_s*.json\ndone\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 100
+  },
+  {
+   "name": "comb-l0v2-m5",
+   "command": "set -e\nfor S in 5 11 17 23 29 35 41 47; do\n  python -u routes/gtu/combustor/comb_l0_v2.py --kv KV-3 --n 524288 --shards 48 --shard \"$S\" --workers \"$NPROC\" --out \"$GTU_OUT\"\n  gzip -6 \"$GTU_OUT\"/comb_l0v2_KV-3_n524288_s*.json\ndone\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 100
+  },
+  {
+   "name": "comb-l0v2-b0-m0",
+   "command": "set -e\nfor S in 0 4 8 12 16 20 24 28 32 36 40 44; do\n  python -u routes/gtu/combustor/comb_l0_v2.py --kv KV-3 --n 131072 --shards 48 --shard \"$S\" --beta 0 --workers \"$NPROC\" --out \"$GTU_OUT\"\n  gzip -6 \"$GTU_OUT\"/comb_l0v2_KV-3_n131072_b0_s*.json\ndone\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 45
+  },
+  {
+   "name": "comb-l0v2-b0-m1",
+   "command": "set -e\nfor S in 1 5 9 13 17 21 25 29 33 37 41 45; do\n  python -u routes/gtu/combustor/comb_l0_v2.py --kv KV-3 --n 131072 --shards 48 --shard \"$S\" --beta 0 --workers \"$NPROC\" --out \"$GTU_OUT\"\n  gzip -6 \"$GTU_OUT\"/comb_l0v2_KV-3_n131072_b0_s*.json\ndone\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 45
+  },
+  {
+   "name": "comb-l0v2-b0-m2",
+   "command": "set -e\nfor S in 2 6 10 14 18 22 26 30 34 38 42 46; do\n  python -u routes/gtu/combustor/comb_l0_v2.py --kv KV-3 --n 131072 --shards 48 --shard \"$S\" --beta 0 --workers \"$NPROC\" --out \"$GTU_OUT\"\n  gzip -6 \"$GTU_OUT\"/comb_l0v2_KV-3_n131072_b0_s*.json\ndone\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 45
+  },
+  {
+   "name": "comb-l0v2-b0-m3",
+   "command": "set -e\nfor S in 3 7 11 15 19 23 27 31 35 39 43 47; do\n  python -u routes/gtu/combustor/comb_l0_v2.py --kv KV-3 --n 131072 --shards 48 --shard \"$S\" --beta 0 --workers \"$NPROC\" --out \"$GTU_OUT\"\n  gzip -6 \"$GTU_OUT\"/comb_l0v2_KV-3_n131072_b0_s*.json\ndone\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 45
+  },
+  {
+   "name": "comb-l0v2-b2-m0",
+   "command": "set -e\nfor S in 0 4 8 12 16 20 24 28 32 36 40 44; do\n  python -u routes/gtu/combustor/comb_l0_v2.py --kv KV-3 --n 131072 --shards 48 --shard \"$S\" --beta 2 --workers \"$NPROC\" --out \"$GTU_OUT\"\n  gzip -6 \"$GTU_OUT\"/comb_l0v2_KV-3_n131072_b2_s*.json\ndone\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 45
+  },
+  {
+   "name": "comb-l0v2-b2-m1",
+   "command": "set -e\nfor S in 1 5 9 13 17 21 25 29 33 37 41 45; do\n  python -u routes/gtu/combustor/comb_l0_v2.py --kv KV-3 --n 131072 --shards 48 --shard \"$S\" --beta 2 --workers \"$NPROC\" --out \"$GTU_OUT\"\n  gzip -6 \"$GTU_OUT\"/comb_l0v2_KV-3_n131072_b2_s*.json\ndone\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 45
+  },
+  {
+   "name": "comb-l0v2-b2-m2",
+   "command": "set -e\nfor S in 2 6 10 14 18 22 26 30 34 38 42 46; do\n  python -u routes/gtu/combustor/comb_l0_v2.py --kv KV-3 --n 131072 --shards 48 --shard \"$S\" --beta 2 --workers \"$NPROC\" --out \"$GTU_OUT\"\n  gzip -6 \"$GTU_OUT\"/comb_l0v2_KV-3_n131072_b2_s*.json\ndone\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 45
+  },
+  {
+   "name": "comb-l0v2-b2-m3",
+   "command": "set -e\nfor S in 3 7 11 15 19 23 27 31 35 39 43 47; do\n  python -u routes/gtu/combustor/comb_l0_v2.py --kv KV-3 --n 131072 --shards 48 --shard \"$S\" --beta 2 --workers \"$NPROC\" --out \"$GTU_OUT\"\n  gzip -6 \"$GTU_OUT\"/comb_l0v2_KV-3_n131072_b2_s*.json\ndone\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 45
+  }
+ ],
+ "estimate": {
+  "date": "2026-11-15",
+  "main": {
+   "n": 524288,
+   "shards": 48,
+   "jobs": 6,
+   "beta": null,
+   "variants_per_job": 87381.33333333333,
+   "compute_min_per_job": 42.24315822833032,
+   "max_min": 100,
+   "core_hours": 270.35621266131403,
+   "machine_hours_expected": 4.724315822833033
+  },
+  "beta_sensitivity": [
+   {
+    "n": 131072,
+    "shards": 48,
+    "jobs": 4,
+    "beta": 0.0,
+    "variants_per_job": 32768.0,
+    "compute_min_per_job": 15.84118433562387,
+    "max_min": 45,
+    "core_hours": 67.58905316532851,
+    "machine_hours_expected": 1.3894122890415914
+   },
+   {
+    "n": 131072,
+    "shards": 48,
+    "jobs": 4,
+    "beta": 2.0,
+    "variants_per_job": 32768.0,
+    "compute_min_per_job": 15.84118433562387,
+    "max_min": 45,
+    "core_hours": 67.58905316532851,
+    "machine_hours_expected": 1.3894122890415914
+   }
+  ],
+  "volume": {
+   "N": 524288,
+   "need": 361500,
+   "criteria": {
+    "K1_zero_bound": {
+     "n_min": 300000,
+     "applies": true,
+     "rule": "3 / P_MIN, P_MIN = 1e-5"
+    },
+    "K2_holders": {
+     "n_min": null,
+     "applies": false,
+     "rule": "100 / доля"
+    },
+    "K3_stable_per_cell": {
+     "n_min": 361500,
+     "applies": true,
+     "p_stable_non_rql": 0.004149377593360996,
+     "events": 1,
+     "of": 241,
+     "f_cell": 0.016666666666666666,
+     "rule": "25 / (p_s · f_ячейки)"
+    }
+   },
+   "cap": 1048576,
+   "probe": {
+    "file": "routes/gtu/combustor/comb_l0_v2_probe_results.json",
+    "counts": {
+     "n": 300,
+     "rows": 300,
+     "status": {
+      "ok": 108,
+      "отсев": 192
+     },
+     "reject_codes": {
+      "ГАБАРИТ": 1,
+      "ОБРАТНЫЙ_ТОК": 38,
+      "ОХЛАЖДЕНИЕ": 23,
+      "ЭЛЕМЕНТОВ_НА_ТРУБУ": 10,
+      "ТОПЛИВО": 48,
+      "ПОГАСАНИЕ_100": 29,
+      "ЭЛЕМЕНТ": 28,
+      "ДИЗЕЛЬ_ФОРСУНКИ": 16,
+      "ВОЗДУХ": 32,
+      "САМОВОСПЛАМЕНЕНИЕ": 6,
+      "ПРОСКОК": 11,
+      "ЭЛЕМЕНТЫ_КОНТУРОВ": 3
+     },
+     "feasible": 108,
+     "stable_30_100": 35,
+     "lowem_30_100_1valve": 0,
+     "lowem_strict_all_zones": 0,
+     "load_range_base": 0,
+     "stable_0_100": 18,
+     "stable_30_100_in_domain": 24,
+     "lowem_in_domain": 0,
+     "in_domain": 64,
+     "cross_ignition_upper": {
+      "note": "каналы: группа B поджигается горячим газом группы A - верхняя оценка (отбор - без неё)",
+      "evaluated": 21,
+      "stable_30_100": 1,
+      "lowem": 0
+     },
+     "hard_ok": 0,
+     "binding_term_among_feasible": {
+      "eta": 46,
+      "NOx": 33,
+      "CO": 25,
+      "lbo": 4
+     }
+    },
+    "code_hash": "ce00c977bea5cca0"
+   }
+  },
+  "time_per_variant": {
+   "cpu_v2_session_s": 1.6629,
+   "k_c7a": 1.1163562386980108,
+   "s_v2_aws": 1.8563887893309223,
+   "basis": {
+    "v1_session_cpu_s": 0.553,
+    "v1_aws_wall_per_variant_s": 0.617345,
+    "note": "время варианта на машине AWS v1 (стена процесса в пуле 64) / процессорное время в сессии"
+   }
+  },
+  "price": {
+   "planning": 0.75,
+   "zones": "us-east-1a=0.9554,us-east-1b=0.7478,us-east-1c=0.7064,us-east-1d=0.8576,us-east-1f=1.1804",
+   "basis": "0,75 долл./ч - верх диапазона задачи владельца 14.11.2026; цены по зонам - ledger.jsonl прогона камеры v1 20261115T001745Z-f1da (00:17 UTC 15.11.2026)"
+  },
+  "usd_expected": 5.57,
+  "usd_expected_basis": "машино-часы (подготовка + счёт + выгрузка) × 0,7064 долл./ч (us-east-1c) × 1,05 (диск, IPv4) - оценка",
+  "status": "оценка; живой запуск - сессия с ключами (окружение Coldun, навык aws-gtu-runs); CPU-серия в пределах 2000 долл. - без отдельного вопроса (решение владельца 15.11.2026)"
+ },
+ "merge": {
+  "where": "сессия с ключами после run (runs/<run_id>/<задача>/); тот же коммит, что в _job.log задач; Python с cantera==3.2.0, numpy==2.5.3, scipy==1.18.1; слияние потоковое, свободной памяти не меньше 6 ГБ (замер: пик 0,47 ГБ на 40 000 строк, 0,89 ГБ на 88 000 -> ~4-5 ГБ на 524 288, экстраполяция) и ~10-15 мин (88 000 строк - 88 с)",
+  "commands": [
+   "bash -euo pipefail -c 'for S in main b0 b2; do D=/tmp/comb_l0v2_<run_id>_$S; mkdir -p \"$D\"; done; find routes/gtu/platform/aws/runs/<run_id> -path \"*/_lost\" -prune -o -name \"comb_l0v2_*.json.gz\" -print | while read -r f; do b=$(basename \"$f\"); case \"$b\" in *_b0_*) S=b0;; *_b2_*) S=b2;; *) S=main;; esac; cp \"$f\" /tmp/comb_l0v2_<run_id>_$S/; done; ls /tmp/comb_l0v2_<run_id>_main | wc -l'",
+   "mkdir -p routes/gtu/combustor/l0_aws_v2",
+   "python3 routes/gtu/combustor/merge_l0_v2.py /tmp/comb_l0v2_<run_id>_main --out routes/gtu/combustor/l0_aws_v2/comb_l0v2_KV-3_n524288_results.json --top 100",
+   "python3 routes/gtu/combustor/merge_l0_v2.py /tmp/comb_l0v2_<run_id>_b0 --out routes/gtu/combustor/l0_aws_v2/comb_l0v2_KV-3_n131072_b0_results.json --top 30",
+   "python3 routes/gtu/combustor/merge_l0_v2.py /tmp/comb_l0v2_<run_id>_b2 --out routes/gtu/combustor/l0_aws_v2/comb_l0v2_KV-3_n131072_b2_results.json --top 30"
+  ],
+  "expect": "первая команда печатает 48; каждое слияние - «полнота: True», код 0; код 2 - потеряна или задвоена часть, индекс, или разные отпечатки (fingerprint, code_hash, bc_key, beta): разбор, не публикация",
+  "convergence": "доля новой цели по префиксам 2^k (convergence в итоге слияния): сошлась, если доля на N/2 и N различается меньше двух стандартных ошибок; при нуле - верхняя граница 3/N",
+  "to_branch": "l0_aws_v2/*.json (рейтинг, держатели новой цели, ближайшие, сходимость, Парето) и ledger.jsonl",
+  "stays_in_s3": "части comb_l0v2_*.json.gz - в S3 и runs/<run_id>/ (в .gitignore)"
+ },
+ "plan_check": {
+  "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/combustor/jobs_aws_comb_l0_v2.json --assume-price 0.75 --assume-zone-prices us-east-1a=0.9554,us-east-1b=0.7478,us-east-1c=0.7064,us-east-1d=0.8576,us-east-1f=1.1804",
+  "exit_code": 0,
+  "forecast_usd": 26.12,
+  "lines": [
+   "[задача] comb-l0v2-m0: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 100 мин",
+   "[бюджет] comb-l0v2-m0 на c7a.16xlarge: израсходовано 6.66 + в работе 33.12 + пакет 0.00 + новая 2.61 = 42.39 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[задача] comb-l0v2-m1: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 100 мин",
+   "[бюджет] comb-l0v2-m1 на c7a.16xlarge: израсходовано 6.66 + в работе 33.12 + пакет 2.61 + новая 2.61 = 45.00 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[задача] comb-l0v2-m2: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 100 мин",
+   "[бюджет] comb-l0v2-m2 на c7a.16xlarge: израсходовано 6.66 + в работе 33.12 + пакет 5.22 + новая 2.61 = 47.62 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[задача] comb-l0v2-m3: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 100 мин",
+   "[бюджет] comb-l0v2-m3 на c7a.16xlarge: израсходовано 6.66 + в работе 33.12 + пакет 7.84 + новая 2.61 = 50.23 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[задача] comb-l0v2-m4: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 100 мин",
+   "[бюджет] comb-l0v2-m4 на c7a.16xlarge: израсходовано 6.66 + в работе 33.12 + пакет 10.45 + новая 2.61 = 52.84 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[задача] comb-l0v2-m5: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 100 мин",
+   "[бюджет] comb-l0v2-m5 на c7a.16xlarge: израсходовано 6.66 + в работе 33.12 + пакет 13.06 + новая 2.61 = 55.45 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[задача] comb-l0v2-b0-m0: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 45 мин",
+   "[бюджет] comb-l0v2-b0-m0 на c7a.16xlarge: израсходовано 6.66 + в работе 33.12 + пакет 15.67 + новая 1.31 = 56.76 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[задача] comb-l0v2-b0-m1: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 45 мин",
+   "[бюджет] comb-l0v2-b0-m1 на c7a.16xlarge: израсходовано 6.66 + в работе 33.12 + пакет 16.98 + новая 1.31 = 58.06 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[задача] comb-l0v2-b0-m2: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 45 мин",
+   "[бюджет] comb-l0v2-b0-m2 на c7a.16xlarge: израсходовано 6.66 + в работе 33.12 + пакет 18.28 + новая 1.31 = 59.37 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[задача] comb-l0v2-b0-m3: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 45 мин",
+   "[бюджет] comb-l0v2-b0-m3 на c7a.16xlarge: израсходовано 6.66 + в работе 33.12 + пакет 19.59 + новая 1.31 = 60.68 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[задача] comb-l0v2-b2-m0: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 45 мин",
+   "[бюджет] comb-l0v2-b2-m0 на c7a.16xlarge: израсходовано 6.66 + в работе 33.12 + пакет 20.90 + новая 1.31 = 61.98 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[задача] comb-l0v2-b2-m1: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 45 мин",
+   "[бюджет] comb-l0v2-b2-m1 на c7a.16xlarge: израсходовано 6.66 + в работе 33.12 + пакет 22.20 + новая 1.31 = 63.29 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[задача] comb-l0v2-b2-m2: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 45 мин",
+   "[бюджет] comb-l0v2-b2-m2 на c7a.16xlarge: израсходовано 6.66 + в работе 33.12 + пакет 23.51 + новая 1.31 = 64.59 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[задача] comb-l0v2-b2-m3: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 45 мин",
+   "[бюджет] comb-l0v2-b2-m3 на c7a.16xlarge: израсходовано 6.66 + в работе 33.12 + пакет 24.82 + новая 1.31 = 65.90 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[очередь] пакет 896 vCPU > квоты 384: одновременно не больше 384 vCPU и 6 машин, остальные ждут освобождения",
+   "[план] прогноз пакета 26.12 долл. (цена спота — допущение 0.75/ч)"
+  ]
+ },
+ "mini_check": {
+  "n": 96,
+  "how": "копия: git archive HEAD (routes/gtu/combustor, routes/gtu/gtu_cycle.py, routes/gtu/funnel/make_model.py, routes/gtu/frame3/frame3_point_results.json) + файлы v2 рабочей папки (comb_v2.py, comb_l0_v2.py, merge_l0_v2.py, comb_bc_v2_results.json, targets_v2.json); команды задач пакета с n = 96, из корня копии, GTU_OUT - своя папка задачи, NPROC = 4",
+  "jobs": [
+   {
+    "job": "comb-l0v2-m0",
+    "exit_code": 0,
+    "wall_s": 42.0,
+    "files": 8
+   },
+   {
+    "job": "comb-l0v2-m1",
+    "exit_code": 0,
+    "wall_s": 43.6,
+    "files": 8
+   },
+   {
+    "job": "comb-l0v2-m2",
+    "exit_code": 0,
+    "wall_s": 33.3,
+    "files": 8
+   },
+   {
+    "job": "comb-l0v2-m3",
+    "exit_code": 0,
+    "wall_s": 30.4,
+    "files": 8
+   },
+   {
+    "job": "comb-l0v2-m4",
+    "exit_code": 0,
+    "wall_s": 31.4,
+    "files": 8
+   },
+   {
+    "job": "comb-l0v2-m5",
+    "exit_code": 0,
+    "wall_s": 42.4,
+    "files": 8
+   }
+  ],
+  "merge": {
+   "parts": 48,
+   "exit_code": 0,
+   "tail": [
+    "полнота: True; строк 96 из 96; ошибок 0; допустимых 37; держат 30-100 % 12 (в области облика 7, 0-100 % 7, при поджигании группы B 0); новая цель 0; все жёсткие v2 0; запись <копия>/merged.json"
+   ]
+  },
+  "merged": {
+   "complete": true,
+   "counts": {
+    "n": 96,
+    "rows": 96,
+    "status": {
+     "ok": 37,
+     "отсев": 59
+    },
+    "reject_codes": {
+     "ЭЛЕМЕНТОВ_НА_ТРУБУ": 3,
+     "ПОГАСАНИЕ_100": 6,
+     "ОБРАТНЫЙ_ТОК": 14,
+     "ПРОСКОК": 4,
+     "ДИЗЕЛЬ_ФОРСУНКИ": 5,
+     "САМОВОСПЛАМЕНЕНИЕ": 2,
+     "ЭЛЕМЕНТ": 12,
+     "ГАБАРИТ": 1,
+     "ВОЗДУХ": 9,
+     "ОХЛАЖДЕНИЕ": 7,
+     "ТОПЛИВО": 13,
+     "ЭЛЕМЕНТЫ_КОНТУРОВ": 1
+    },
+    "feasible": 37,
+    "stable_30_100": 12,
+    "lowem_30_100_1valve": 0,
+    "lowem_strict_all_zones": 0,
+    "load_range_base": 0,
+    "stable_0_100": 7,
+    "stable_30_100_in_domain": 7,
+    "lowem_in_domain": 0,
+    "in_domain": 22,
+    "cross_ignition_upper": {
+     "note": "каналы: группа B поджигается горячим газом группы A - верхняя оценка (отбор - без неё)",
+     "evaluated": 5,
+     "stable_30_100": 0,
+     "lowem": 0
+    },
+    "hard_ok": 0,
+    "binding_term_among_feasible": {
+     "eta": 17,
+     "CO": 8,
+     "NOx": 10,
+     "lbo": 2
+    }
+   },
+   "code_hash": "ce00c977bea5cca0"
+  }
+ }
+}

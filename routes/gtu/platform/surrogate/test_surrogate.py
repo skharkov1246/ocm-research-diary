@@ -320,6 +320,55 @@ class SurrogateTest(unittest.TestCase):
             sur = S.Surrogate.load(model)
             self.assertEqual(sur.outputs, OUT)
 
+    # ------------------------------------------------------------------ дефекты, найденные проверкой
+    def test_09_robustness(self):
+        """модель из `python surrogate.py fit` грузится через import; повторённые точки не ломают
+        штраф за дыры; next.csv несёт режим и EI; ошибки имён — понятные"""
+        sp = S.Space({"x": [0.0, 1.0], "y": [0.0, 1.0]})
+        X, _ = S.design(sp, 32, "sobol", seed=1)
+        Y = np.column_stack([-(X[:, 0] - 0.3) ** 2 - (X[:, 1] - 0.6) ** 2, X[:, 0] + X[:, 1] + 1.0])
+        # 1) запуск скриптом: классы в model.joblib — surrogate.*, а не __main__.*
+        import subprocess
+        with tempfile.TemporaryDirectory() as td:
+            prob = os.path.join(td, "problem.json")
+            with open(prob, "w") as fh:
+                json.dump(dict(inputs=sp.bounds(), outputs=["f", "g"]), fh)
+            runs, model, nxt = (os.path.join(td, n) for n in ("runs.csv", "model.joblib", "next.csv"))
+            S.write_table(runs, X, sp.names, {"f": Y[:, 0], "g": Y[:, 1]})
+            script = os.path.join(HERE, "surrogate.py")
+            for args in (["fit", "--problem", prob, "--data", runs, "--kinds", "gp", "--folds", "4", "--n-blocks", "8",
+                          "--jobs", "1", "--out", model],
+                         ["next", "--model", model, "--objective", "f", "--k", "3", "--constraint", "g<=2.2",
+                          "--out", nxt]):
+                p = subprocess.run([sys.executable, script] + args, cwd=td, capture_output=True, text=True, timeout=600)
+                self.assertEqual(p.returncode, 0, p.stderr[-2000:])
+            sur = S.Surrogate.load(model)
+            self.assertEqual(type(sur).__module__, "surrogate")
+            with open(nxt, encoding="utf-8") as fh:
+                head = fh.readline().strip().split(",")
+            self.assertIn("mode", head)
+            self.assertIn("ei", head)
+            Xn, _, _, _ = S.read_table(nxt, sp.names, [])
+            self.assertEqual(Xn.shape, (3, 2))
+        # 2) каждая точка посчитана дважды: медиана расстояний по различным точкам, оптимум не прикован к данным
+        Xd, Yd = np.vstack([X, X]), np.vstack([Y, Y + 1e-4])
+        s1 = S.Surrogate(sp, ["f", "g"], kinds=("gp",), seed=0).fit(X, Y)
+        s2 = S.Surrogate(sp, ["f", "g"], kinds=("gp",), seed=0).fit(Xd, Yd)
+        self.assertAlmostEqual(s2.nn_med, s1.nn_med)
+        self.assertEqual(s2.n_unique, 32)
+        r = S.optimize(s2, "f", True, [], kind="gp", tol=0.01)
+        RESULTS["robustness"] = dict(dup_nn_med=s2.nn_med, dup_opt=r["x"], dup_flags=r["flags"])
+        self.assertLess(abs(r["x"]["x"] - 0.3) + abs(r["x"]["y"] - 0.6), 0.05, r["x"])
+        self.assertFalse(r["uncertain"], r["notes"])
+        # 3) разбор ограничений и проверка имён в propose
+        self.assertEqual(S.parse_constraint("PR>=5."), ("PR", ">=", 5.0))
+        with self.assertRaisesRegex(ValueError, "нет таких входов"):
+            S.propose(s1, 2, "f", True, [], fixed={"z": 0.5})
+        with self.assertRaisesRegex(ValueError, "цель"):
+            S.propose(s1, 2, "h", True, [])
+        with self.assertRaisesRegex(ValueError, "неизвестной величине"):
+            S.propose(s1, 2, "f", True, ["h>=1"])
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -1,0 +1,337 @@
+{
+ "about": "Линии частоты колёс в SU2 (char_points.py run на AWS, runner.py): база smoke075, точки — рестарт от базы с рампой давления на выходе. Сетки узла geom — тетраэдры без пристенных призм; покрышка и стенки за колесом — по settings (slip — без трения). Числа — проверка постановки и сходимости по сетке, не паспортная характеристика; «converged» — π и η меняются < 0,1 % за 500 итераций, «usable» — без NaN, прямое течение, дисбаланс расхода ≤ 5 %.",
+ "run_id": null,
+ "created_utc": "2026-11-15T00:35:27Z",
+ "jobs": [
+  {
+   "job": "su2-kv3-core130-smoke",
+   "file": "../out/core130/char_summary.json",
+   "label": "core130",
+   "level": "coarse",
+   "verdict": "base_failed",
+   "itype": "c7a.16xlarge",
+   "az": "us-east-1c",
+   "t_total_s": null,
+   "budget": {
+    "time_s": 2544.8,
+    "uptime_at_start_s": 275.2,
+    "job_max_min": 60,
+    "reserve_s": 300.0,
+    "base_max_frac": 0.3
+   }
+  },
+  {
+   "job": "su2-kv3-core130-smoke",
+   "file": "../out/kv3_stage1/char_summary.json",
+   "label": "kv3_stage1",
+   "level": "coarse",
+   "verdict": "base_failed",
+   "itype": "c7a.16xlarge",
+   "az": "us-east-1c",
+   "t_total_s": null,
+   "budget": {
+    "time_s": 2572.2,
+    "uptime_at_start_s": 247.8,
+    "job_max_min": 60,
+    "reserve_s": 300.0,
+    "base_max_frac": 0.3
+   }
+  }
+ ],
+ "lines": {
+  "core130/coarse": {
+   "label": "core130",
+   "case": "core130",
+   "level": "coarse",
+   "mesh_nodes": 139087,
+   "mesh_cells": 616711,
+   "double_sided": false,
+   "estimate": {
+    "p_out_estimate": 311427.257614276,
+    "double_sided": false,
+    "m_for_estimate": 9.95,
+    "r_out": 0.28275,
+    "p_out_estimate_run_case": 311427.257614276,
+    "note": "оценка run_case.estimate_p_out"
+   },
+   "d1_reference": {
+    "m": 9.95,
+    "m_side": 9.95,
+    "PR": 4.25,
+    "rpm": 22197.0,
+    "D2": 0.435,
+    "U2": 505.57100795506165,
+    "b2": 0.02341520477246604,
+    "T01": 288.15,
+    "p01": 101325.0,
+    "eta_comp_stage": 0.8585973705037672
+   },
+   "settings": {
+    "shroud": "slip",
+    "vaneless": "slip",
+    "turb": "SST",
+    "output_files": "RESTART, SURFACE_PARAVIEW",
+    "extra": [
+     "MARKER_PLOTTING= (blade, hub)"
+    ],
+    "mpi_args": "--use-hwthread-cpus"
+   },
+   "plans": {
+    "base": "smoke075",
+    "point": [
+     {
+      "name": "c1_point",
+      "frac": 1.0,
+      "pfrac": 1.0,
+      "ramp": 0,
+      "pramp": 10,
+      "iter": 40,
+      "muscl": true
+     }
+    ],
+    "iter_scale_base": 0.1,
+    "iter_scale_point": 1.0
+   },
+   "assigned": [
+    0.7,
+    0.9,
+    1.0,
+    1.1
+   ],
+   "points": [],
+   "bases": [
+    {
+     "job": "su2-kv3-core130-smoke",
+     "restart_ok": false,
+     "statuses": [
+      "finished",
+      "diverged"
+     ],
+     "su2_version": "SU2 v8.6.0 \"Harrier\", The Open-Source CFD Code",
+     "record": {
+      "pfrac": 0.75,
+      "p_out_Pa": 233570.44321070702,
+      "statuses": [
+       "finished",
+       "diverged"
+      ],
+      "status": "diverged",
+      "dir": "base",
+      "stage": "s2_ramp100_p075",
+      "history_rows": 10,
+      "seconds": 4.6,
+      "sec_per_iter": 0.45999999999999996,
+      "rms_rho": {
+       "first": -4.342050683,
+       "max": -3.896969641,
+       "last": -4.150198186,
+       "slope_per_100_last_half": null
+      },
+      "performance": {
+       "m_in_passage": 0.1634761283,
+       "m_out_passage": 0.1593794179,
+       "mass_imbalance": 1.9749400084122253,
+       "mass_sign_ok": false,
+       "m_wheel": 1.4712851546999999,
+       "PR_tt": 1.1120417986635085,
+       "TR_tt": 1.0511631576748623,
+       "eta_tt_isentropic": 0.6021372004809876,
+       "m_wheel_corrected": 1.4056927869745357,
+       "PRTT_su2": 1.099461567,
+       "TotTotEff_su2": 53.75204711,
+       "PRTS_su2": 1.093090228,
+       "TotStaticEff_su2": 50.34328666,
+       "MassFlowIn_turbo": 0.1634761283,
+       "MassFlowOut_turbo": -0.1593790442,
+       "EulerianWork_su2": 15110.34321,
+       "window_iters": 50,
+       "window_rel_change": {
+        "m_in": null,
+        "pt_out": null,
+        "tt_out": null
+       },
+       "m_wheel_total": 1.4712851546999999,
+       "m_wheel_corrected_total": 1.4056927869745357
+      },
+      "mass_sign_ok": false,
+      "periodic": {
+       "periodic_matched_points": 6270,
+       "periodic_max_distance": 1.70109e-16,
+       "bad_match": 0
+      },
+      "nan": true,
+      "su2_error": "MPI_ABORT was invoked on rank 10 in communicator MPI_COMM_WORLD",
+      "window": {
+       "window_iters": 500,
+       "rows": 10,
+       "rel_change": {
+        "m_in": null,
+        "PR_tt": null,
+        "tt_out": null,
+        "eta_tt": null
+       },
+       "converged_pi_eta": false
+      },
+      "usable": false,
+      "converged": false
+     }
+    }
+   ],
+   "missing": [
+    0.7,
+    0.9,
+    1.0,
+    1.1
+   ],
+   "usable": 0,
+   "converged": 0
+  },
+  "kv3_stage1/coarse": {
+   "label": "kv3_stage1",
+   "case": "custom",
+   "level": "coarse",
+   "mesh_nodes": 258411,
+   "mesh_cells": 1199874,
+   "double_sided": true,
+   "estimate": {
+    "p_out_estimate": 338198.73873178364,
+    "double_sided": true,
+    "m_for_estimate": 12.775,
+    "r_out": 0.45147375000000006,
+    "p_out_estimate_run_case": 306594.9663595105,
+    "note": "двустороннее колесо: оценка по расходу стороны d1.m_side (run_case.py берёт d1.m — расход колеса)"
+   },
+   "d1_reference": {
+    "m": 25.55,
+    "m_side": 12.775,
+    "PR": 4.49,
+    "rpm": 14950.0,
+    "D2": 0.694575,
+    "U2": 543.6995362439768,
+    "b2": 0.0203443,
+    "T01": 288.15,
+    "p01": 101325.0,
+    "eta_comp_stage": 0.8561167244028014
+   },
+   "settings": {
+    "shroud": "slip",
+    "vaneless": "slip",
+    "turb": "SST",
+    "output_files": "RESTART, SURFACE_PARAVIEW",
+    "extra": [
+     "MARKER_PLOTTING= (blade, hub)"
+    ],
+    "mpi_args": "--use-hwthread-cpus"
+   },
+   "plans": {
+    "base": "smoke075",
+    "point": [
+     {
+      "name": "c1_point",
+      "frac": 1.0,
+      "pfrac": 1.0,
+      "ramp": 0,
+      "pramp": 10,
+      "iter": 40,
+      "muscl": true
+     }
+    ],
+    "iter_scale_base": 0.1,
+    "iter_scale_point": 1.0
+   },
+   "assigned": [
+    0.7,
+    0.9,
+    1.0,
+    1.1
+   ],
+   "points": [],
+   "bases": [
+    {
+     "job": "su2-kv3-core130-smoke",
+     "restart_ok": false,
+     "statuses": [
+      "finished",
+      "diverged"
+     ],
+     "su2_version": "SU2 v8.6.0 \"Harrier\", The Open-Source CFD Code",
+     "record": {
+      "pfrac": 0.75,
+      "p_out_Pa": 253649.05404883774,
+      "statuses": [
+       "finished",
+       "diverged"
+      ],
+      "status": "diverged",
+      "dir": "base",
+      "stage": "s2_ramp100_p075",
+      "history_rows": 9,
+      "seconds": 7.1,
+      "sec_per_iter": 0.7888888888888889,
+      "rms_rho": {
+       "first": -4.290562757,
+       "max": -3.928321248,
+       "last": -4.32465182,
+       "slope_per_100_last_half": null
+      },
+      "performance": {
+       "m_in_passage": 0.3285046374,
+       "m_out_passage": 0.493601189,
+       "mass_imbalance": 2.5025699268865176,
+       "mass_sign_ok": false,
+       "m_wheel": 2.9565417366,
+       "PR_tt": 0.9918613569284487,
+       "TR_tt": 1.0040477554459364,
+       "eta_tt_isentropic": -0.5761506990255011,
+       "m_wheel_corrected": 2.833912407635307,
+       "PRTT_su2": 0.970838208,
+       "TotTotEff_su2": -199.8286505,
+       "PRTS_su2": 0.8812320749,
+       "TotStaticEff_su2": -877.4425543,
+       "MassFlowIn_turbo": 0.3285046374,
+       "MassFlowOut_turbo": -0.4936011754,
+       "EulerianWork_su2": 1192.552759,
+       "window_iters": 50,
+       "window_rel_change": {
+        "m_in": null,
+        "pt_out": null,
+        "tt_out": null
+       },
+       "m_wheel_total": 5.9130834732,
+       "m_wheel_corrected_total": 5.667824815270614
+      },
+      "mass_sign_ok": false,
+      "periodic": {
+       "periodic_matched_points": 14176,
+       "periodic_max_distance": 2.37144e-16,
+       "bad_match": 0
+      },
+      "nan": true,
+      "su2_error": "SU2 has diverged (NaN detected).",
+      "window": {
+       "window_iters": 500,
+       "rows": 9,
+       "rel_change": {
+        "m_in": null,
+        "PR_tt": null,
+        "tt_out": null,
+        "eta_tt": null
+       },
+       "converged_pi_eta": false
+      },
+      "usable": false,
+      "converged": false
+     }
+    }
+   ],
+   "missing": [
+    0.7,
+    0.9,
+    1.0,
+    1.1
+   ],
+   "usable": 0,
+   "converged": 0
+  }
+ }
+}

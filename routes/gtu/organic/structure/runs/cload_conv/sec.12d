@@ -1,0 +1,1848 @@
+ ELEMENT            1 with label "CAX6    " and with nodes:
+        189        145        215        246        247        248
+  is expanded into a "C3D15 A " element with topology:
+       1242       1110       1320       1244       1112       1322       1413       1416       1419       1415
+       1418       1421       1243       1111       1321
+
+ ELEMENT            2 with label "CAX6    " and with nodes:
+        144        176        213        249        250        251
+  is expanded into a "C3D15 A " element with topology:
+       1107       1203       1314       1109       1205       1316       1422       1425       1428       1424
+       1427       1430       1108       1204       1315
+
+ ELEMENT            3 with label "CAX6    " and with nodes:
+        195        212        216        252        253        254
+  is expanded into a "C3D15 A " element with topology:
+       1260       1311       1323       1262       1313       1325       1431       1434       1437       1433
+       1436       1439       1261       1312       1324
+
+ ELEMENT            4 with label "CAX6    " and with nodes:
+        196        214        217        255        256        257
+  is expanded into a "C3D15 A " element with topology:
+       1263       1317       1326       1265       1319       1328       1440       1443       1446       1442
+       1445       1448       1264       1318       1327
+
+ ELEMENT            5 with label "CAX6    " and with nodes:
+        189        215        244        248        258        259
+  is expanded into a "C3D15 A " element with topology:
+       1242       1320       1407       1244       1322       1409       1419       1449       1452       1421
+       1451       1454       1243       1321       1408
+
+ ELEMENT            6 with label "CAX6    " and with nodes:
+        213        176        245        250        260        261
+  is expanded into a "C3D15 A " element with topology:
+       1314       1203       1410       1316       1205       1412       1425       1455       1458       1427
+       1457       1460       1315       1204       1411
+
+ ELEMENT            7 with label "CAX6    " and with nodes:
+        216        212        243        253        262        263
+  is expanded into a "C3D15 A " element with topology:
+       1323       1311       1404       1325       1313       1406       1434       1461       1464       1436
+       1463       1466       1324       1312       1405
+
+ ELEMENT            8 with label "CAX6    " and with nodes:
+        196        217        242        257        264        265
+  is expanded into a "C3D15 A " element with topology:
+       1263       1326       1401       1265       1328       1403       1446       1467       1470       1448
+       1469       1472       1264       1327       1402
+
+ ELEMENT            9 with label "CAX6    " and with nodes:
+        174        176        209        266        267        268
+  is expanded into a "C3D15 A " element with topology:
+       1197       1203       1302       1199       1205       1304       1473       1476       1479       1475
+       1478       1481       1198       1204       1303
+
+ ELEMENT           10 with label "CAX6    " and with nodes:
+        176        144        209        249        269        267
+  is expanded into a "C3D15 A " element with topology:
+       1203       1107       1302       1205       1109       1304       1422       1482       1476       1424
+       1484       1478       1204       1108       1303
+
+ ELEMENT           11 with label "CAX6    " and with nodes:
+        122        172        174        270        271        272
+  is expanded into a "C3D15 A " element with topology:
+       1041       1191       1197       1043       1193       1199       1485       1488       1491       1487
+       1490       1493       1042       1192       1198
+
+ ELEMENT           12 with label "CAX6    " and with nodes:
+        122        174        209        272        268        273
+  is expanded into a "C3D15 A " element with topology:
+       1041       1197       1302       1043       1199       1304       1491       1479       1494       1493
+       1481       1496       1042       1198       1303
+
+ ELEMENT           13 with label "CAX6    " and with nodes:
+        170        172        207        274        275        276
+  is expanded into a "C3D15 A " element with topology:
+       1185       1191       1296       1187       1193       1298       1497       1500       1503       1499
+       1502       1505       1186       1192       1297
+
+ ELEMENT           14 with label "CAX6    " and with nodes:
+        172        122        207        270        277        275
+  is expanded into a "C3D15 A " element with topology:
+       1191       1041       1296       1193       1043       1298       1485       1506       1500       1487
+       1508       1502       1192       1042       1297
+
+ ELEMENT           15 with label "CAX6    " and with nodes:
+        123        168        170        278        279        280
+  is expanded into a "C3D15 A " element with topology:
+       1044       1179       1185       1046       1181       1187       1509       1512       1515       1511
+       1514       1517       1045       1180       1186
+
+ ELEMENT           16 with label "CAX6    " and with nodes:
+        123        170        207        280        276        281
+  is expanded into a "C3D15 A " element with topology:
+       1044       1185       1296       1046       1187       1298       1515       1503       1518       1517
+       1505       1520       1045       1186       1297
+
+ ELEMENT           17 with label "CAX6    " and with nodes:
+        166        168        205        282        283        284
+  is expanded into a "C3D15 A " element with topology:
+       1173       1179       1290       1175       1181       1292       1521       1524       1527       1523
+       1526       1529       1174       1180       1291
+
+ ELEMENT           18 with label "CAX6    " and with nodes:
+        168        123        205        278        285        283
+  is expanded into a "C3D15 A " element with topology:
+       1179       1044       1290       1181       1046       1292       1509       1530       1524       1511
+       1532       1526       1180       1045       1291
+
+ ELEMENT           19 with label "CAX6    " and with nodes:
+        125        164        166        286        287        288
+  is expanded into a "C3D15 A " element with topology:
+       1050       1167       1173       1052       1169       1175       1533       1536       1539       1535
+       1538       1541       1051       1168       1174
+
+ ELEMENT           20 with label "CAX6    " and with nodes:
+        125        166        205        288        284        289
+  is expanded into a "C3D15 A " element with topology:
+       1050       1173       1290       1052       1175       1292       1539       1527       1542       1541
+       1529       1544       1051       1174       1291
+
+ ELEMENT           21 with label "CAX6    " and with nodes:
+        162        164        211        290        291        292
+  is expanded into a "C3D15 A " element with topology:
+       1161       1167       1308       1163       1169       1310       1545       1548       1551       1547
+       1550       1553       1162       1168       1309
+
+ ELEMENT           22 with label "CAX6    " and with nodes:
+        164        125        211        286        293        291
+  is expanded into a "C3D15 A " element with topology:
+       1167       1050       1308       1169       1052       1310       1533       1554       1548       1535
+       1556       1550       1168       1051       1309
+
+ ELEMENT           23 with label "CAX6    " and with nodes:
+        127        160        162        294        295        296
+  is expanded into a "C3D15 A " element with topology:
+       1056       1155       1161       1058       1157       1163       1557       1560       1563       1559
+       1562       1565       1057       1156       1162
+
+ ELEMENT           24 with label "CAX6    " and with nodes:
+        127        162        211        296        292        297
+  is expanded into a "C3D15 A " element with topology:
+       1056       1161       1308       1058       1163       1310       1563       1551       1566       1565
+       1553       1568       1057       1162       1309
+
+ ELEMENT           25 with label "CAX6    " and with nodes:
+        158        160        206        298        299        300
+  is expanded into a "C3D15 A " element with topology:
+       1149       1155       1293       1151       1157       1295       1569       1572       1575       1571
+       1574       1577       1150       1156       1294
+
+ ELEMENT           26 with label "CAX6    " and with nodes:
+        160        127        206        294        301        299
+  is expanded into a "C3D15 A " element with topology:
+       1155       1056       1293       1157       1058       1295       1557       1578       1572       1559
+       1580       1574       1156       1057       1294
+
+ ELEMENT           27 with label "CAX6    " and with nodes:
+        130        156        158        302        303        304
+  is expanded into a "C3D15 A " element with topology:
+       1065       1143       1149       1067       1145       1151       1581       1584       1587       1583
+       1586       1589       1066       1144       1150
+
+ ELEMENT           28 with label "CAX6    " and with nodes:
+        130        158        206        304        300        305
+  is expanded into a "C3D15 A " element with topology:
+       1065       1149       1293       1067       1151       1295       1587       1575       1590       1589
+       1577       1592       1066       1150       1294
+
+ ELEMENT           29 with label "CAX6    " and with nodes:
+        156        130        203        302        306        307
+  is expanded into a "C3D15 A " element with topology:
+       1143       1065       1284       1145       1067       1286       1581       1593       1596       1583
+       1595       1598       1144       1066       1285
+
+ ELEMENT           30 with label "CAX6    " and with nodes:
+        184        151        202        308        309        310
+  is expanded into a "C3D15 A " element with topology:
+       1227       1128       1281       1229       1130       1283       1599       1602       1605       1601
+       1604       1607       1228       1129       1282
+
+ ELEMENT           31 with label "CAX6    " and with nodes:
+        154        156        203        311        307        312
+  is expanded into a "C3D15 A " element with topology:
+       1137       1143       1284       1139       1145       1286       1608       1596       1611       1610
+       1598       1613       1138       1144       1285
+
+ ELEMENT           32 with label "CAX6    " and with nodes:
+        183        184        202        313        310        314
+  is expanded into a "C3D15 A " element with topology:
+       1224       1227       1281       1226       1229       1283       1614       1605       1617       1616
+       1607       1619       1225       1228       1282
+
+ ELEMENT           33 with label "CAX6    " and with nodes:
+        152        139        198        315        316        317
+  is expanded into a "C3D15 A " element with topology:
+       1131       1092       1269       1133       1094       1271       1620       1623       1626       1622
+       1625       1628       1132       1093       1270
+
+ ELEMENT           34 with label "CAX6    " and with nodes:
+        137        183        202        318        314        319
+  is expanded into a "C3D15 A " element with topology:
+       1086       1224       1281       1088       1226       1283       1629       1617       1632       1631
+       1619       1634       1087       1225       1282
+
+ ELEMENT           35 with label "CAX6    " and with nodes:
+        139        154        203        320        312        321
+  is expanded into a "C3D15 A " element with topology:
+       1092       1137       1284       1094       1139       1286       1635       1611       1638       1637
+       1613       1640       1093       1138       1285
+
+ ELEMENT           36 with label "CAX6    " and with nodes:
+        139        152        154        315        322        320
+  is expanded into a "C3D15 A " element with topology:
+       1092       1131       1137       1094       1133       1139       1620       1641       1635       1622
+       1643       1637       1093       1132       1138
+
+ ELEMENT           37 with label "CAX6    " and with nodes:
+        191        182        197        323        324        325
+  is expanded into a "C3D15 A " element with topology:
+       1248       1221       1266       1250       1223       1268       1644       1647       1650       1646
+       1649       1652       1249       1222       1267
+
+ ELEMENT           38 with label "CAX6    " and with nodes:
+        183        137        200        318        326        327
+  is expanded into a "C3D15 A " element with topology:
+       1224       1086       1275       1226       1088       1277       1629       1653       1656       1631
+       1655       1658       1225       1087       1276
+
+ ELEMENT           39 with label "CAX6    " and with nodes:
+        137         22        200        328        329        326
+  is expanded into a "C3D15 A " element with topology:
+       1086        741       1275       1088        743       1277       1659       1662       1653       1661
+       1664       1655       1087        742       1276
+
+ ELEMENT           40 with label "CAX6    " and with nodes:
+        140         20        146        330        331        332
+  is expanded into a "C3D15 A " element with topology:
+       1095        735       1113       1097        737       1115       1665       1668       1671       1667
+       1670       1673       1096        736       1114
+
+ ELEMENT           41 with label "CAX6    " and with nodes:
+         25        132        177        333        334        335
+  is expanded into a "C3D15 A " element with topology:
+        750       1071       1206        752       1073       1208       1674       1677       1680       1676
+       1679       1682        751       1072       1207
+
+ ELEMENT           42 with label "CAX6    " and with nodes:
+        186        191        197        336        325        337
+  is expanded into a "C3D15 A " element with topology:
+       1233       1248       1266       1235       1250       1268       1683       1650       1686       1685
+       1652       1688       1234       1249       1267
+
+ ELEMENT           43 with label "CAX6    " and with nodes:
+        141         77        187        338        339        340
+  is expanded into a "C3D15 A " element with topology:
+       1098        906       1236       1100        908       1238       1689       1692       1695       1691
+       1694       1697       1099        907       1237
+
+ ELEMENT           44 with label "CAX6    " and with nodes:
+        132         26        185        341        342        343
+  is expanded into a "C3D15 A " element with topology:
+       1071        753       1230       1073        755       1232       1698       1701       1704       1700
+       1703       1706       1072        754       1231
+
+ ELEMENT           45 with label "CAX6    " and with nodes:
+        132        186        197        344        337        345
+  is expanded into a "C3D15 A " element with topology:
+       1071       1233       1266       1073       1235       1268       1707       1686       1710       1709
+       1688       1712       1072       1234       1267
+
+ ELEMENT           46 with label "CAX6    " and with nodes:
+        134         83        188        346        347        348
+  is expanded into a "C3D15 A " element with topology:
+       1077        924       1239       1079        926       1241       1713       1716       1719       1715
+       1718       1721       1078        925       1240
+
+ ELEMENT           47 with label "CAX6    " and with nodes:
+        140        146        147        332        349        350
+  is expanded into a "C3D15 A " element with topology:
+       1095       1113       1116       1097       1115       1118       1671       1722       1725       1673
+       1724       1727       1096       1114       1117
+
+ ELEMENT           48 with label "CAX6    " and with nodes:
+        135         81        193        351        352        353
+  is expanded into a "C3D15 A " element with topology:
+       1080        918       1254       1082        920       1256       1728       1731       1734       1730
+       1733       1736       1081        919       1255
+
+ ELEMENT           49 with label "CAX6    " and with nodes:
+        131         75        192        354        355        356
+  is expanded into a "C3D15 A " element with topology:
+       1068        900       1251       1070        902       1253       1737       1740       1743       1739
+       1742       1745       1069        901       1252
+
+ ELEMENT           50 with label "CAX6    " and with nodes:
+         80        135        194        357        358        359
+  is expanded into a "C3D15 A " element with topology:
+        915       1080       1257        917       1082       1259       1746       1749       1752       1748
+       1751       1754        916       1081       1258
+
+ ELEMENT           51 with label "CAX6    " and with nodes:
+        140        148        198        360        361        362
+  is expanded into a "C3D15 A " element with topology:
+       1095       1119       1269       1097       1121       1271       1755       1758       1761       1757
+       1760       1763       1096       1120       1270
+
+ ELEMENT           52 with label "CAX6    " and with nodes:
+        132        185        186        343        363        344
+  is expanded into a "C3D15 A " element with topology:
+       1071       1230       1233       1073       1232       1235       1704       1764       1707       1706
+       1766       1709       1072       1231       1234
+
+ ELEMENT           53 with label "CAX6    " and with nodes:
+        177        132        197        334        345        364
+  is expanded into a "C3D15 A " element with topology:
+       1206       1071       1266       1208       1073       1268       1677       1710       1767       1679
+       1712       1769       1207       1072       1267
+
+ ELEMENT           54 with label "CAX6    " and with nodes:
+        148        152        198        365        317        361
+  is expanded into a "C3D15 A " element with topology:
+       1119       1131       1269       1121       1133       1271       1770       1626       1758       1772
+       1628       1760       1120       1132       1270
+
+ ELEMENT           55 with label "CAX6    " and with nodes:
+        139         18        198        366        367        316
+  is expanded into a "C3D15 A " element with topology:
+       1092        729       1269       1094        731       1271       1773       1776       1623       1775
+       1778       1625       1093        730       1270
+
+ ELEMENT           56 with label "CAX6    " and with nodes:
+         74         75        131         99        354        368
+  is expanded into a "C3D15 A " element with topology:
+        897        900       1068        899        902       1070        972       1737       1779        974
+       1739       1781        898        901       1069
+
+ ELEMENT           57 with label "CAX6    " and with nodes:
+         65         66        201         90        369        370
+  is expanded into a "C3D15 A " element with topology:
+        870        873       1278        872        875       1280        945       1782       1785        947
+       1784       1787        871        874       1279
+
+ ELEMENT           58 with label "CAX6    " and with nodes:
+         17         18        139         42        366        371
+  is expanded into a "C3D15 A " element with topology:
+        726        729       1092        728        731       1094        801       1773       1788        803
+       1775       1790        727        730       1093
+
+ ELEMENT           59 with label "CAX6    " and with nodes:
+        185        145        189        372        246        373
+  is expanded into a "C3D15 A " element with topology:
+       1230       1110       1242       1232       1112       1244       1791       1413       1794       1793
+       1415       1796       1231       1111       1243
+
+ ELEMENT           60 with label "CAX6    " and with nodes:
+        178        177        197        374        364        375
+  is expanded into a "C3D15 A " element with topology:
+       1209       1206       1266       1211       1208       1268       1797       1767       1800       1799
+       1769       1802       1210       1207       1267
+
+ ELEMENT           61 with label "CAX6    " and with nodes:
+         21        137        146        376        377        378
+  is expanded into a "C3D15 A " element with topology:
+        738       1086       1113        740       1088       1115       1803       1806       1809       1805
+       1808       1811        739       1087       1114
+
+ ELEMENT           62 with label "CAX6    " and with nodes:
+        182        178        197        379        375        324
+  is expanded into a "C3D15 A " element with topology:
+       1221       1209       1266       1223       1211       1268       1812       1800       1647       1814
+       1802       1649       1222       1210       1267
+
+ ELEMENT           63 with label "CAX6    " and with nodes:
+         27        145        185        380        372        381
+  is expanded into a "C3D15 A " element with topology:
+        756       1110       1230        758       1112       1232       1815       1791       1818       1817
+       1793       1820        757       1111       1231
+
+ ELEMENT           64 with label "CAX6    " and with nodes:
+        179        183        200        382        327        383
+  is expanded into a "C3D15 A " element with topology:
+       1212       1224       1275       1214       1226       1277       1821       1656       1824       1823
+       1658       1826       1213       1225       1276
+
+ ELEMENT           65 with label "CAX6    " and with nodes:
+        136         24        177        384        385        386
+  is expanded into a "C3D15 A " element with topology:
+       1083        747       1206       1085        749       1208       1827       1830       1833       1829
+       1832       1835       1084        748       1207
+
+ ELEMENT           66 with label "CAX6    " and with nodes:
+         76        141        192        387        388        389
+  is expanded into a "C3D15 A " element with topology:
+        903       1098       1251        905       1100       1253       1836       1839       1842       1838
+       1841       1844        904       1099       1252
+
+ ELEMENT           67 with label "CAX6    " and with nodes:
+        136        179        200        390        383        391
+  is expanded into a "C3D15 A " element with topology:
+       1083       1212       1275       1085       1214       1277       1845       1824       1848       1847
+       1826       1850       1084       1213       1276
+
+ ELEMENT           68 with label "CAX6    " and with nodes:
+         84        133        188        392        393        394
+  is expanded into a "C3D15 A " element with topology:
+        927       1074       1239        929       1076       1241       1851       1854       1857       1853
+       1856       1859        928       1075       1240
+
+ ELEMENT           69 with label "CAX6    " and with nodes:
+         82        134        193        395        396        397
+  is expanded into a "C3D15 A " element with topology:
+        921       1077       1254        923       1079       1256       1860       1863       1866       1862
+       1865       1868        922       1078       1255
+
+ ELEMENT           70 with label "CAX6    " and with nodes:
+         78        138        187        398        399        400
+  is expanded into a "C3D15 A " element with topology:
+        909       1089       1236        911       1091       1238       1869       1872       1875       1871
+       1874       1877        910       1090       1237
+
+ ELEMENT           71 with label "CAX6    " and with nodes:
+        133         85        196        401        402        403
+  is expanded into a "C3D15 A " element with topology:
+       1074        930       1263       1076        932       1265       1878       1881       1884       1880
+       1883       1886       1075        931       1264
+
+ ELEMENT           72 with label "CAX6    " and with nodes:
+        138         79        194        404        405        406
+  is expanded into a "C3D15 A " element with topology:
+       1089        912       1257       1091        914       1259       1887       1890       1893       1889
+       1892       1895       1090        913       1258
+
+ ELEMENT           73 with label "CAX6    " and with nodes:
+         19        140        198        407        362        408
+  is expanded into a "C3D15 A " element with topology:
+        732       1095       1269        734       1097       1271       1896       1761       1899       1898
+       1763       1901        733       1096       1270
+
+ ELEMENT           74 with label "CAX6    " and with nodes:
+         74        131        199        368        409        410
+  is expanded into a "C3D15 A " element with topology:
+        897       1068       1272        899       1070       1274       1779       1902       1905       1781
+       1904       1907        898       1069       1273
+
+ ELEMENT           75 with label "CAX6    " and with nodes:
+        147        146        202        349        411        412
+  is expanded into a "C3D15 A " element with topology:
+       1116       1113       1281       1118       1115       1283       1722       1908       1911       1724
+       1910       1913       1117       1114       1282
+
+ ELEMENT           76 with label "CAX6    " and with nodes:
+         21         22        137         46        328        376
+  is expanded into a "C3D15 A " element with topology:
+        738        741       1086        740        743       1088        813       1659       1803        815
+       1661       1805        739        742       1087
+
+ ELEMENT           77 with label "CAX6    " and with nodes:
+         64         65        128         89        413        414
+  is expanded into a "C3D15 A " element with topology:
+        867        870       1059        869        872       1061        942       1914       1917        944
+       1916       1919        868        871       1060
+
+ ELEMENT           78 with label "CAX6    " and with nodes:
+         66        121        201        415        416        369
+  is expanded into a "C3D15 A " element with topology:
+        873       1038       1278        875       1040       1280       1920       1923       1782       1922
+       1925       1784        874       1039       1279
+
+ ELEMENT           79 with label "CAX6    " and with nodes:
+         55         56        142         60        417        418
+  is expanded into a "C3D15 A " element with topology:
+        840        843       1101        842        845       1103        855       1926       1929        857
+       1928       1931        841        844       1102
+
+ ELEMENT           80 with label "CAX6    " and with nodes:
+         23         24        136         48        384        419
+  is expanded into a "C3D15 A " element with topology:
+        744        747       1083        746        749       1085        819       1827       1932        821
+       1829       1934        745        748       1084
+
+ ELEMENT           81 with label "CAX6    " and with nodes:
+         27         28        145         52        420        380
+  is expanded into a "C3D15 A " element with topology:
+        756        759       1110        758        761       1112        831       1935       1815        833
+       1937       1817        757        760       1111
+
+ ELEMENT           82 with label "CAX6    " and with nodes:
+         19         20        140         44        330        407
+  is expanded into a "C3D15 A " element with topology:
+        732        735       1095        734        737       1097        807       1665       1896        809
+       1667       1898        733        736       1096
+
+ ELEMENT           83 with label "CAX6    " and with nodes:
+         25         26        132         50        341        333
+  is expanded into a "C3D15 A " element with topology:
+        750        753       1071        752        755       1073        825       1698       1674        827
+       1700       1676        751        754       1072
+
+ ELEMENT           84 with label "CAX6    " and with nodes:
+         76         77        141        101        338        387
+  is expanded into a "C3D15 A " element with topology:
+        903        906       1098        905        908       1100        978       1689       1836        980
+       1691       1838        904        907       1099
+
+ ELEMENT           85 with label "CAX6    " and with nodes:
+         78         79        138        103        404        398
+  is expanded into a "C3D15 A " element with topology:
+        909        912       1089        911        914       1091        984       1887       1869        986
+       1889       1871        910        913       1090
+
+ ELEMENT           86 with label "CAX6    " and with nodes:
+         82         83        134        107        346        395
+  is expanded into a "C3D15 A " element with topology:
+        921        924       1077        923        926       1079        996       1713       1860        998
+       1715       1862        922        925       1078
+
+ ELEMENT           87 with label "CAX6    " and with nodes:
+         16         17        203         41        421        422
+  is expanded into a "C3D15 A " element with topology:
+        723        726       1284        725        728       1286        798       1938       1941        800
+       1940       1943        724        727       1285
+
+ ELEMENT           88 with label "CAX6    " and with nodes:
+         84         85        133        109        401        392
+  is expanded into a "C3D15 A " element with topology:
+        927        930       1074        929        932       1076       1002       1878       1851       1004
+       1880       1853        928        931       1075
+
+ ELEMENT           89 with label "CAX6    " and with nodes:
+        136        177        178        386        374        423
+  is expanded into a "C3D15 A " element with topology:
+       1083       1206       1209       1085       1208       1211       1833       1797       1944       1835
+       1799       1946       1084       1207       1210
+
+ ELEMENT           90 with label "CAX6    " and with nodes:
+         73         74        199         98        410        424
+  is expanded into a "C3D15 A " element with topology:
+        894        897       1272        896        899       1274        969       1905       1947        971
+       1907       1949        895        898       1273
+
+ ELEMENT           91 with label "CAX6    " and with nodes:
+         75         76        192        100        389        355
+  is expanded into a "C3D15 A " element with topology:
+        900        903       1251        902        905       1253        975       1842       1740        977
+       1844       1742        901        904       1252
+
+ ELEMENT           92 with label "CAX6    " and with nodes:
+         81         82        193        106        397        352
+  is expanded into a "C3D15 A " element with topology:
+        918        921       1254        920        923       1256        993       1866       1731        995
+       1868       1733        919        922       1255
+
+ ELEMENT           93 with label "CAX6    " and with nodes:
+        151        147        202        425        412        309
+  is expanded into a "C3D15 A " element with topology:
+       1128       1116       1281       1130       1118       1283       1950       1911       1602       1952
+       1913       1604       1129       1117       1282
+
+ ELEMENT           94 with label "CAX6    " and with nodes:
+         23        136        200        419        391        426
+  is expanded into a "C3D15 A " element with topology:
+        744       1083       1275        746       1085       1277       1932       1848       1953       1934
+       1850       1955        745       1084       1276
+
+ ELEMENT           95 with label "CAX6    " and with nodes:
+         80         81        135        105        351        357
+  is expanded into a "C3D15 A " element with topology:
+        915        918       1080        917        920       1082        990       1728       1746        992
+       1730       1748        916        919       1081
+
+ ELEMENT           96 with label "CAX6    " and with nodes:
+         79         80        194        104        359        405
+  is expanded into a "C3D15 A " element with topology:
+        912        915       1257        914        917       1259        987       1752       1890        989
+       1754       1892        913        916       1258
+
+ ELEMENT           97 with label "CAX6    " and with nodes:
+         24         25        177         49        335        385
+  is expanded into a "C3D15 A " element with topology:
+        747        750       1206        749        752       1208        822       1680       1830        824
+       1682       1832        748        751       1207
+
+ ELEMENT           98 with label "CAX6    " and with nodes:
+         20         21        146         45        378        331
+  is expanded into a "C3D15 A " element with topology:
+        735        738       1113        737        740       1115        810       1809       1668        812
+       1811       1670        736        739       1114
+
+ ELEMENT           99 with label "CAX6    " and with nodes:
+         77         78        187        102        400        339
+  is expanded into a "C3D15 A " element with topology:
+        906        909       1236        908        911       1238        981       1875       1692        983
+       1877       1694        907        910       1237
+
+ ELEMENT          100 with label "CAX6    " and with nodes:
+        146        137        202        377        319        411
+  is expanded into a "C3D15 A " element with topology:
+       1113       1086       1281       1115       1088       1283       1806       1632       1908       1808
+       1634       1910       1114       1087       1282
+
+ ELEMENT          101 with label "CAX6    " and with nodes:
+        130         16        203        427        422        306
+  is expanded into a "C3D15 A " element with topology:
+       1065        723       1284       1067        725       1286       1956       1941       1593       1958
+       1943       1595       1066        724       1285
+
+ ELEMENT          102 with label "CAX6    " and with nodes:
+         83         84        188        108        394        347
+  is expanded into a "C3D15 A " element with topology:
+        924        927       1239        926        929       1241        999       1857       1716       1001
+       1859       1718        925        928       1240
+
+ ELEMENT          103 with label "CAX6    " and with nodes:
+         26         27        185         51        381        342
+  is expanded into a "C3D15 A " element with topology:
+        753        756       1230        755        758       1232        828       1818       1701        830
+       1820       1703        754        757       1231
+
+ ELEMENT          104 with label "CAX6    " and with nodes:
+         85         86        196        110        428        402
+  is expanded into a "C3D15 A " element with topology:
+        930        933       1263        932        935       1265       1005       1959       1881       1007
+       1961       1883        931        934       1264
+
+ ELEMENT          105 with label "CAX6    " and with nodes:
+        129         73        199        429        424        430
+  is expanded into a "C3D15 A " element with topology:
+       1062        894       1272       1064        896       1274       1962       1947       1965       1964
+       1949       1967       1063        895       1273
+
+ ELEMENT          106 with label "CAX6    " and with nodes:
+         18         19        198         43        408        367
+  is expanded into a "C3D15 A " element with topology:
+        729        732       1269        731        734       1271        804       1899       1776        806
+       1901       1778        730        733       1270
+
+ ELEMENT          107 with label "CAX6    " and with nodes:
+        186        185        189        363        373        431
+  is expanded into a "C3D15 A " element with topology:
+       1233       1230       1242       1235       1232       1244       1764       1794       1968       1766
+       1796       1970       1234       1231       1243
+
+ ELEMENT          108 with label "CAX6    " and with nodes:
+        140        147        148        350        432        360
+  is expanded into a "C3D15 A " element with topology:
+       1095       1116       1119       1097       1118       1121       1725       1971       1755       1727
+       1973       1757       1096       1117       1120
+
+ ELEMENT          109 with label "CAX6    " and with nodes:
+         22         23        200         47        426        329
+  is expanded into a "C3D15 A " element with topology:
+        741        744       1275        743        746       1277        816       1953       1662        818
+       1955       1664        742        745       1276
+
+ ELEMENT          110 with label "CAX6    " and with nodes:
+         17        139        203        371        321        421
+  is expanded into a "C3D15 A " element with topology:
+        726       1092       1284        728       1094       1286       1788       1638       1938       1790
+       1640       1940        727       1093       1285
+
+ ELEMENT          111 with label "CAX6    " and with nodes:
+        180        178        182        433        379        434
+  is expanded into a "C3D15 A " element with topology:
+       1215       1209       1221       1217       1211       1223       1974       1812       1977       1976
+       1814       1979       1216       1210       1222
+
+ ELEMENT          112 with label "CAX6    " and with nodes:
+        186        190        191        435        436        336
+  is expanded into a "C3D15 A " element with topology:
+       1233       1245       1248       1235       1247       1250       1980       1983       1683       1982
+       1985       1685       1234       1246       1249
+
+ ELEMENT          113 with label "CAX6    " and with nodes:
+        186        189        190        431        437        435
+  is expanded into a "C3D15 A " element with topology:
+       1233       1242       1245       1235       1244       1247       1968       1986       1980       1970
+       1988       1982       1234       1243       1246
+
+ ELEMENT          114 with label "CAX6    " and with nodes:
+        154        155        156        438        439        311
+  is expanded into a "C3D15 A " element with topology:
+       1137       1140       1143       1139       1142       1145       1989       1992       1608       1991
+       1994       1610       1138       1141       1144
+
+ ELEMENT          115 with label "CAX6    " and with nodes:
+        162        163        164        440        441        290
+  is expanded into a "C3D15 A " element with topology:
+       1161       1164       1167       1163       1166       1169       1995       1998       1545       1997
+       2000       1547       1162       1165       1168
+
+ ELEMENT          116 with label "CAX6    " and with nodes:
+        136        178        179        423        442        390
+  is expanded into a "C3D15 A " element with topology:
+       1083       1209       1212       1085       1211       1214       1944       2001       1845       1946
+       2003       1847       1084       1210       1213
+
+ ELEMENT          117 with label "CAX6    " and with nodes:
+        164        165        166        443        444        287
+  is expanded into a "C3D15 A " element with topology:
+       1167       1170       1173       1169       1172       1175       2004       2007       1536       2006
+       2009       1538       1168       1171       1174
+
+ ELEMENT          118 with label "CAX6    " and with nodes:
+        113        114        143        118        445        446
+  is expanded into a "C3D15 A " element with topology:
+       1014       1017       1104       1016       1019       1106       1029       2010       2013       1031
+       2012       2015       1015       1018       1105
+
+ ELEMENT          119 with label "CAX6    " and with nodes:
+        160        161        162        447        448        295
+  is expanded into a "C3D15 A " element with topology:
+       1155       1158       1161       1157       1160       1163       2016       2019       1560       2018
+       2021       1562       1156       1159       1162
+
+ ELEMENT          120 with label "CAX6    " and with nodes:
+        154        153        155        449        450        438
+  is expanded into a "C3D15 A " element with topology:
+       1137       1134       1140       1139       1136       1142       2022       2025       1989       2024
+       2027       1991       1138       1135       1141
+
+ ELEMENT          121 with label "CAX6    " and with nodes:
+        170        171        172        451        452        274
+  is expanded into a "C3D15 A " element with topology:
+       1185       1188       1191       1187       1190       1193       2028       2031       1497       2030
+       2033       1499       1186       1189       1192
+
+ ELEMENT          122 with label "CAX6    " and with nodes:
+        166        167        168        453        454        282
+  is expanded into a "C3D15 A " element with topology:
+       1173       1176       1179       1175       1178       1181       2034       2037       1521       2036
+       2039       1523       1174       1177       1180
+
+ ELEMENT          123 with label "CAX6    " and with nodes:
+        172        173        174        455        456        271
+  is expanded into a "C3D15 A " element with topology:
+       1191       1194       1197       1193       1196       1199       2040       2043       1488       2042
+       2045       1490       1192       1195       1198
+
+ ELEMENT          124 with label "CAX6    " and with nodes:
+        148        147        149        432        457        458
+  is expanded into a "C3D15 A " element with topology:
+       1119       1116       1122       1121       1118       1124       1971       2046       2049       1973
+       2048       2051       1120       1117       1123
+
+ ELEMENT          125 with label "CAX6    " and with nodes:
+        158        159        160        459        460        298
+  is expanded into a "C3D15 A " element with topology:
+       1149       1152       1155       1151       1154       1157       2052       2055       1569       2054
+       2057       1571       1150       1153       1156
+
+ ELEMENT          126 with label "CAX6    " and with nodes:
+        179        180        181        461        462        463
+  is expanded into a "C3D15 A " element with topology:
+       1212       1215       1218       1214       1217       1220       2058       2061       2064       2060
+       2063       2066       1213       1216       1219
+
+ ELEMENT          127 with label "CAX6    " and with nodes:
+        152        153        154        464        449        322
+  is expanded into a "C3D15 A " element with topology:
+       1131       1134       1137       1133       1136       1139       2067       2022       1641       2069
+       2024       1643       1132       1135       1138
+
+ ELEMENT          128 with label "CAX6    " and with nodes:
+        174        175        176        465        466        266
+  is expanded into a "C3D15 A " element with topology:
+       1197       1200       1203       1199       1202       1205       2070       2073       1473       2072
+       2075       1475       1198       1201       1204
+
+ ELEMENT          129 with label "CAX6    " and with nodes:
+        168        169        170        467        468        279
+  is expanded into a "C3D15 A " element with topology:
+       1179       1182       1185       1181       1184       1187       2076       2079       1512       2078
+       2081       1514       1180       1183       1186
+
+ ELEMENT          130 with label "CAX6    " and with nodes:
+        152        150        153        469        470        464
+  is expanded into a "C3D15 A " element with topology:
+       1131       1125       1134       1133       1127       1136       2082       2085       2067       2084
+       2087       2069       1132       1126       1135
+
+ ELEMENT          131 with label "CAX6    " and with nodes:
+        156        157        158        471        472        303
+  is expanded into a "C3D15 A " element with topology:
+       1143       1146       1149       1145       1148       1151       2088       2091       1584       2090
+       2093       1586       1144       1147       1150
+
+ ELEMENT          132 with label "CAX6    " and with nodes:
+        179        178        180        442        433        461
+  is expanded into a "C3D15 A " element with topology:
+       1212       1209       1215       1214       1211       1217       2001       1974       2058       2003
+       1976       2060       1213       1210       1216
+
+ ELEMENT          133 with label "CAX6    " and with nodes:
+        149        147        151        457        425        473
+  is expanded into a "C3D15 A " element with topology:
+       1122       1116       1128       1124       1118       1130       2046       1950       2094       2048
+       1952       2096       1123       1117       1129
+
+ ELEMENT          134 with label "CAX6    " and with nodes:
+        148        149        150        458        474        475
+  is expanded into a "C3D15 A " element with topology:
+       1119       1122       1125       1121       1124       1127       2049       2097       2100       2051
+       2099       2102       1120       1123       1126
+
+ ELEMENT          135 with label "CAX6    " and with nodes:
+         56         57        195         61        476        477
+  is expanded into a "C3D15 A " element with topology:
+        843        846       1260        845        848       1262        858       2103       2106        860
+       2105       2108        844        847       1261
+
+ ELEMENT          136 with label "CAX6    " and with nodes:
+        148        150        152        475        469        365
+  is expanded into a "C3D15 A " element with topology:
+       1119       1125       1131       1121       1127       1133       2100       2082       1770       2102
+       2084       1772       1120       1126       1132
+
+ ELEMENT          137 with label "CAX6    " and with nodes:
+        183        181        184        478        479        313
+  is expanded into a "C3D15 A " element with topology:
+       1224       1218       1227       1226       1220       1229       2109       2112       1614       2111
+       2114       1616       1225       1219       1228
+
+ ELEMENT          138 with label "CAX6    " and with nodes:
+        179        181        183        463        478        382
+  is expanded into a "C3D15 A " element with topology:
+       1212       1218       1224       1214       1220       1226       2064       2109       1821       2066
+       2111       1823       1213       1219       1225
+
+ ELEMENT          139 with label "CAX6    " and with nodes:
+        156        155        157        439        480        471
+  is expanded into a "C3D15 A " element with topology:
+       1143       1140       1146       1145       1142       1148       1992       2115       2088       1994
+       2117       2090       1144       1141       1147
+
+ ELEMENT          140 with label "CAX6    " and with nodes:
+        128         65        201        413        370        481
+  is expanded into a "C3D15 A " element with topology:
+       1059        870       1278       1061        872       1280       1914       1785       2118       1916
+       1787       2120       1060        871       1279
+
+ ELEMENT          141 with label "CAX6    " and with nodes:
+        164        163        165        441        482        443
+  is expanded into a "C3D15 A " element with topology:
+       1167       1164       1170       1169       1166       1172       1998       2121       2004       2000
+       2123       2006       1168       1165       1171
+
+ ELEMENT          142 with label "CAX6    " and with nodes:
+        162        161        163        448        483        440
+  is expanded into a "C3D15 A " element with topology:
+       1161       1158       1164       1163       1160       1166       2019       2124       1995       2021
+       2126       1997       1162       1159       1165
+
+ ELEMENT          143 with label "CAX6    " and with nodes:
+        166        165        167        444        484        453
+  is expanded into a "C3D15 A " element with topology:
+       1173       1170       1176       1175       1172       1178       2007       2127       2034       2009
+       2129       2036       1174       1171       1177
+
+ ELEMENT          144 with label "CAX6    " and with nodes:
+        172        171        173        452        485        455
+  is expanded into a "C3D15 A " element with topology:
+       1191       1188       1194       1193       1190       1196       2031       2130       2040       2033
+       2132       2042       1192       1189       1195
+
+ ELEMENT          145 with label "CAX6    " and with nodes:
+        160        159        161        460        486        447
+  is expanded into a "C3D15 A " element with topology:
+       1155       1152       1158       1157       1154       1160       2055       2133       2016       2057
+       2135       2018       1156       1153       1159
+
+ ELEMENT          146 with label "CAX6    " and with nodes:
+        174        173        175        456        487        465
+  is expanded into a "C3D15 A " element with topology:
+       1197       1194       1200       1199       1196       1202       2043       2136       2070       2045
+       2138       2072       1198       1195       1201
+
+ ELEMENT          147 with label "CAX6    " and with nodes:
+        168        167        169        454        488        467
+  is expanded into a "C3D15 A " element with topology:
+       1179       1176       1182       1181       1178       1184       2037       2139       2076       2039
+       2141       2078       1180       1177       1183
+
+ ELEMENT          148 with label "CAX6    " and with nodes:
+        170        169        171        468        489        451
+  is expanded into a "C3D15 A " element with topology:
+       1185       1182       1188       1187       1184       1190       2079       2142       2028       2081
+       2144       2030       1186       1183       1189
+
+ ELEMENT          149 with label "CAX6    " and with nodes:
+        158        157        159        472        490        459
+  is expanded into a "C3D15 A " element with topology:
+       1149       1146       1152       1151       1148       1154       2091       2145       2052       2093
+       2147       2054       1150       1147       1153
+
+ ELEMENT          150 with label "CAX6    " and with nodes:
+         11         12        125         36        491        492
+  is expanded into a "C3D15 A " element with topology:
+        708        711       1050        710        713       1052        783       2148       2151        785
+       2150       2153        709        712       1051
+
+ ELEMENT          151 with label "CAX6    " and with nodes:
+         10         11        205         35        493        494
+  is expanded into a "C3D15 A " element with topology:
+        705        708       1290        707        710       1292        780       2154       2157        782
+       2156       2159        706        709       1291
+
+ ELEMENT          152 with label "CAX6    " and with nodes:
+          9         10        123         34        495        496
+  is expanded into a "C3D15 A " element with topology:
+        702        705       1044        704        707       1046        777       2160       2163        779
+       2162       2165        703        706       1045
+
+ ELEMENT          153 with label "CAX6    " and with nodes:
+         67         68        204         92        497        498
+  is expanded into a "C3D15 A " element with topology:
+        876        879       1287        878        881       1289        951       2166       2169        953
+       2168       2171        877        880       1288
+
+ ELEMENT          154 with label "CAX6    " and with nodes:
+         15         16        130         40        427        499
+  is expanded into a "C3D15 A " element with topology:
+        720        723       1065        722        725       1067        795       1956       2172        797
+       1958       2174        721        724       1066
+
+ ELEMENT          155 with label "CAX6    " and with nodes:
+          7          8        122         32        500        501
+  is expanded into a "C3D15 A " element with topology:
+        696        699       1041        698        701       1043        771       2175       2178        773
+       2177       2180        697        700       1042
+
+ ELEMENT          156 with label "CAX6    " and with nodes:
+         13         14        127         38        502        503
+  is expanded into a "C3D15 A " element with topology:
+        714        717       1056        716        719       1058        789       2181       2184        791
+       2183       2186        715        718       1057
+
+ ELEMENT          157 with label "CAX6    " and with nodes:
+         68         69        124         93        504        505
+  is expanded into a "C3D15 A " element with topology:
+        879        882       1047        881        884       1049        954       2187       2190        956
+       2189       2192        880        883       1048
+
+ ELEMENT          158 with label "CAX6    " and with nodes:
+          8          9        207         33        506        507
+  is expanded into a "C3D15 A " element with topology:
+        699        702       1296        701        704       1298        774       2193       2196        776
+       2195       2198        700        703       1297
+
+ ELEMENT          159 with label "CAX6    " and with nodes:
+         72         73        129         97        429        508
+  is expanded into a "C3D15 A " element with topology:
+        891        894       1062        893        896       1064        966       1962       2199        968
+       1964       2201        892        895       1063
+
+ ELEMENT          160 with label "CAX6    " and with nodes:
+        142         56        195        417        477        509
+  is expanded into a "C3D15 A " element with topology:
+       1101        843       1260       1103        845       1262       1926       2106       2202       1928
+       2108       2204       1102        844       1261
+
+ ELEMENT          161 with label "CAX6    " and with nodes:
+         70         71        126         95        510        511
+  is expanded into a "C3D15 A " element with topology:
+        885        888       1053        887        890       1055        960       2205       2208        962
+       2207       2210        886        889       1054
+
+ ELEMENT          162 with label "CAX6    " and with nodes:
+          5          6        144         30        512        513
+  is expanded into a "C3D15 A " element with topology:
+        690        693       1107        692        695       1109        765       2211       2214        767
+       2213       2216        691        694       1108
+
+ ELEMENT          163 with label "CAX6    " and with nodes:
+         14         15        206         39        514        515
+  is expanded into a "C3D15 A " element with topology:
+        717        720       1293        719        722       1295        792       2217       2220        794
+       2219       2222        718        721       1294
+
+ ELEMENT          164 with label "CAX6    " and with nodes:
+          6          7        209         31        516        517
+  is expanded into a "C3D15 A " element with topology:
+        693        696       1302        695        698       1304        768       2223       2226        770
+       2225       2228        694        697       1303
+
+ ELEMENT          165 with label "CAX6    " and with nodes:
+         12         13        211         37        518        519
+  is expanded into a "C3D15 A " element with topology:
+        711        714       1308        713        716       1310        786       2229       2232        788
+       2231       2234        712        715       1309
+
+ ELEMENT          166 with label "CAX6    " and with nodes:
+         71         72        208         96        520        521
+  is expanded into a "C3D15 A " element with topology:
+        888        891       1299        890        893       1301        963       2235       2238        965
+       2237       2240        889        892       1300
+
+ ELEMENT          167 with label "CAX6    " and with nodes:
+         69         70        210         94        522        523
+  is expanded into a "C3D15 A " element with topology:
+        882        885       1305        884        887       1307        957       2241       2244        959
+       2243       2246        883        886       1306
+
+ ELEMENT          168 with label "CAX6    " and with nodes:
+         66         67        121         91        524        415
+  is expanded into a "C3D15 A " element with topology:
+        873        876       1038        875        878       1040        948       2247       1920        950
+       2249       1922        874        877       1039
+
+ ELEMENT          169 with label "CAX6    " and with nodes:
+         68        124        204        505        525        497
+  is expanded into a "C3D15 A " element with topology:
+        879       1047       1287        881       1049       1289       2190       2250       2166       2192
+       2252       2168        880       1048       1288
+
+ ELEMENT          170 with label "CAX6    " and with nodes:
+         11        125        205        492        289        493
+  is expanded into a "C3D15 A " element with topology:
+        708       1050       1290        710       1052       1292       2151       1542       2154       2153
+       1544       2156        709       1051       1291
+
+ ELEMENT          171 with label "CAX6    " and with nodes:
+        123         10        205        495        494        285
+  is expanded into a "C3D15 A " element with topology:
+       1044        705       1290       1046        707       1292       2160       2157       1530       2162
+       2159       1532       1045        706       1291
+
+ ELEMENT          172 with label "CAX6    " and with nodes:
+        125         12        211        491        519        293
+  is expanded into a "C3D15 A " element with topology:
+       1050        711       1308       1052        713       1310       2148       2232       1554       2150
+       2234       1556       1051        712       1309
+
+ ELEMENT          173 with label "CAX6    " and with nodes:
+         15        130        206        499        305        514
+  is expanded into a "C3D15 A " element with topology:
+        720       1065       1293        722       1067       1295       2172       1590       2217       2174
+       1592       2219        721       1066       1294
+
+ ELEMENT          174 with label "CAX6    " and with nodes:
+        122          8        207        500        507        277
+  is expanded into a "C3D15 A " element with topology:
+       1041        699       1296       1043        701       1298       2175       2196       1506       2177
+       2198       1508       1042        700       1297
+
+ ELEMENT          175 with label "CAX6    " and with nodes:
+          9        123        207        496        281        506
+  is expanded into a "C3D15 A " element with topology:
+        702       1044       1296        704       1046       1298       2163       1518       2193       2165
+       1520       2195        703       1045       1297
+
+ ELEMENT          176 with label "CAX6    " and with nodes:
+        126         71        208        510        521        526
+  is expanded into a "C3D15 A " element with topology:
+       1053        888       1299       1055        890       1301       2205       2238       2253       2207
+       2240       2255       1054        889       1300
+
+ ELEMENT          177 with label "CAX6    " and with nodes:
+         13        127        211        503        297        518
+  is expanded into a "C3D15 A " element with topology:
+        714       1056       1308        716       1058       1310       2184       1566       2229       2186
+       1568       2231        715       1057       1309
+
+ ELEMENT          178 with label "CAX6    " and with nodes:
+          7        122        209        501        273        516
+  is expanded into a "C3D15 A " element with topology:
+        696       1041       1302        698       1043       1304       2178       1494       2223       2180
+       1496       2225        697       1042       1303
+
+ ELEMENT          179 with label "CAX6    " and with nodes:
+        127         14        206        502        515        301
+  is expanded into a "C3D15 A " element with topology:
+       1056        717       1293       1058        719       1295       2181       2220       1578       2183
+       2222       1580       1057        718       1294
+
+ ELEMENT          180 with label "CAX6    " and with nodes:
+        124         69        210        504        523        527
+  is expanded into a "C3D15 A " element with topology:
+       1047        882       1305       1049        884       1307       2187       2244       2256       2189
+       2246       2258       1048        883       1306
+
+ ELEMENT          181 with label "CAX6    " and with nodes:
+        144          6        209        512        517        269
+  is expanded into a "C3D15 A " element with topology:
+       1107        693       1302       1109        695       1304       2211       2226       1482       2213
+       2228       1484       1108        694       1303
+
+ ELEMENT          182 with label "CAX6    " and with nodes:
+         72        129        208        508        528        520
+  is expanded into a "C3D15 A " element with topology:
+        891       1062       1299        893       1064       1301       2199       2259       2235       2201
+       2261       2237        892       1063       1300
+
+ ELEMENT          183 with label "CAX6    " and with nodes:
+         70        126        210        511        529        522
+  is expanded into a "C3D15 A " element with topology:
+        885       1053       1305        887       1055       1307       2208       2262       2241       2210
+       2264       2243        886       1054       1306
+
+ ELEMENT          184 with label "CAX6    " and with nodes:
+        121         67        204        524        498        530
+  is expanded into a "C3D15 A " element with topology:
+       1038        876       1287       1040        878       1289       2247       2169       2265       2249
+       2171       2267       1039        877       1288
+
+ ELEMENT          185 with label "CAX6    " and with nodes:
+        114        115        213        119        531        532
+  is expanded into a "C3D15 A " element with topology:
+       1017       1020       1314       1019       1022       1316       1032       2268       2271       1034
+       2270       2273       1018       1021       1315
+
+ ELEMENT          186 with label "CAX6    " and with nodes:
+         63         64        212         88        533        534
+  is expanded into a "C3D15 A " element with topology:
+        864        867       1311        866        869       1313        939       2274       2277        941
+       2276       2279        865        868       1312
+
+ ELEMENT          187 with label "CAX6    " and with nodes:
+         54         55        215         59        535        536
+  is expanded into a "C3D15 A " element with topology:
+        837        840       1320        839        842       1322        852       2280       2283        854
+       2282       2285        838        841       1321
+
+ ELEMENT          188 with label "CAX6    " and with nodes:
+        112        113        214        117        537        538
+  is expanded into a "C3D15 A " element with topology:
+       1011       1014       1317       1013       1016       1319       1026       2286       2289       1028
+       2288       2291       1012       1015       1318
+
+ ELEMENT          189 with label "CAX6    " and with nodes:
+         64        128        212        414        539        533
+  is expanded into a "C3D15 A " element with topology:
+        867       1059       1311        869       1061       1313       1917       2292       2274       1919
+       2294       2276        868       1060       1312
+
+ ELEMENT          190 with label "CAX6    " and with nodes:
+         55        142        215        418        540        535
+  is expanded into a "C3D15 A " element with topology:
+        840       1101       1320        842       1103       1322       1929       2295       2280       1931
+       2297       2282        841       1102       1321
+
+ ELEMENT          191 with label "CAX6    " and with nodes:
+        143        114        213        445        532        541
+  is expanded into a "C3D15 A " element with topology:
+       1104       1017       1314       1106       1019       1316       2010       2271       2298       2012
+       2273       2300       1105       1018       1315
+
+ ELEMENT          192 with label "CAX6    " and with nodes:
+        113        143        214        446        542        537
+  is expanded into a "C3D15 A " element with topology:
+       1014       1104       1317       1016       1106       1319       2013       2301       2286       2015
+       2303       2288       1015       1105       1318
+
+ ELEMENT          193 with label "CAX6    " and with nodes:
+        142        195        216        509        254        543
+  is expanded into a "C3D15 A " element with topology:
+       1101       1260       1323       1103       1262       1325       2202       1437       2304       2204
+       1439       2306       1102       1261       1324
+
+ ELEMENT          194 with label "CAX6    " and with nodes:
+         57          3        238         62        544        545
+  is expanded into a "C3D15 A " element with topology:
+        846        684       1389        848        686       1391        861       2307       2310        863
+       2309       2312        847        685       1390
+
+ ELEMENT          195 with label "CAX6    " and with nodes:
+          3         63        238         87        546        544
+  is expanded into a "C3D15 A " element with topology:
+        684        864       1389        686        866       1391        936       2313       2307        938
+       2315       2309        685        865       1390
+
+ ELEMENT          196 with label "CAX6    " and with nodes:
+          4        112        239        116        547        548
+  is expanded into a "C3D15 A " element with topology:
+        687       1011       1392        689       1013       1394       1023       2316       2319       1025
+       2318       2321        688       1012       1393
+
+ ELEMENT          197 with label "CAX6    " and with nodes:
+          2         54        240         58        549        550
+  is expanded into a "C3D15 A " element with topology:
+        681        837       1395        683        839       1397        849       2322       2325        851
+       2324       2327        682        838       1396
+
+ ELEMENT          198 with label "CAX6    " and with nodes:
+         86          4        239        111        548        551
+  is expanded into a "C3D15 A " element with topology:
+        933        687       1392        935        689       1394       1008       2319       2328       1010
+       2321       2330        934        688       1393
+
+ ELEMENT          199 with label "CAX6    " and with nodes:
+         28          2        240         53        550        552
+  is expanded into a "C3D15 A " element with topology:
+        759        681       1395        761        683       1397        834       2325       2331        836
+       2327       2333        760        682       1396
+
+ ELEMENT          200 with label "CAX6    " and with nodes:
+        115          1        241        120        553        554
+  is expanded into a "C3D15 A " element with topology:
+       1020        678       1398       1022        680       1400       1035       2334       2337       1037
+       2336       2339       1021        679       1399
+
+ ELEMENT          201 with label "CAX6    " and with nodes:
+          1          5        241         29        555        553
+  is expanded into a "C3D15 A " element with topology:
+        678        690       1398        680        692       1400        762       2340       2334        764
+       2342       2336        679        691       1399
+
+ ELEMENT          202 with label "CAX6    " and with nodes:
+        133        196        242        403        265        556
+  is expanded into a "C3D15 A " element with topology:
+       1074       1263       1401       1076       1265       1403       1884       1470       2343       1886
+       1472       2345       1075       1264       1402
+
+ ELEMENT          203 with label "CAX6    " and with nodes:
+        157        228        230        557        558        559
+  is expanded into a "C3D15 A " element with topology:
+       1146       1359       1365       1148       1361       1367       2346       2349       2352       2348
+       2351       2354       1147       1360       1366
+
+ ELEMENT          204 with label "CAX6    " and with nodes:
+        228        192        230        560        561        558
+  is expanded into a "C3D15 A " element with topology:
+       1359       1251       1365       1361       1253       1367       2355       2358       2349       2357
+       2360       2351       1360       1252       1366
+
+ ELEMENT          205 with label "CAX6    " and with nodes:
+        233        165        234        562        563        564
+  is expanded into a "C3D15 A " element with topology:
+       1374       1170       1377       1376       1172       1379       2361       2364       2367       2363
+       2366       2369       1375       1171       1378
+
+ ELEMENT          206 with label "CAX6    " and with nodes:
+        194        233        234        565        564        566
+  is expanded into a "C3D15 A " element with topology:
+       1257       1374       1377       1259       1376       1379       2370       2367       2373       2372
+       2369       2375       1258       1375       1378
+
+ ELEMENT          207 with label "CAX6    " and with nodes:
+        151        184        223        308        567        568
+  is expanded into a "C3D15 A " element with topology:
+       1128       1227       1344       1130       1229       1346       1599       2376       2379       1601
+       2378       2381       1129       1228       1345
+
+ ELEMENT          208 with label "CAX6    " and with nodes:
+        153        150        226        470        569        570
+  is expanded into a "C3D15 A " element with topology:
+       1134       1125       1353       1136       1127       1355       2085       2382       2385       2087
+       2384       2387       1135       1126       1354
+
+ ELEMENT          209 with label "CAX6    " and with nodes:
+        150        149        225        474        571        572
+  is expanded into a "C3D15 A " element with topology:
+       1125       1122       1350       1127       1124       1352       2097       2388       2391       2099
+       2390       2393       1126       1123       1351
+
+ ELEMENT          210 with label "CAX6    " and with nodes:
+        153        226        227        570        573        574
+  is expanded into a "C3D15 A " element with topology:
+       1134       1353       1356       1136       1355       1358       2385       2394       2397       2387
+       2396       2399       1135       1354       1357
+
+ ELEMENT          211 with label "CAX6    " and with nodes:
+        149        151        224        473        575        576
+  is expanded into a "C3D15 A " element with topology:
+       1122       1128       1347       1124       1130       1349       2094       2400       2403       2096
+       2402       2405       1123       1129       1348
+
+ ELEMENT          212 with label "CAX6    " and with nodes:
+        182        191        218        323        577        578
+  is expanded into a "C3D15 A " element with topology:
+       1221       1248       1329       1223       1250       1331       1644       2406       2409       1646
+       2408       2411       1222       1249       1330
+
+ ELEMENT          213 with label "CAX6    " and with nodes:
+        155        153        227        450        574        579
+  is expanded into a "C3D15 A " element with topology:
+       1140       1134       1356       1142       1136       1358       2025       2397       2412       2027
+       2399       2414       1141       1135       1357
+
+ ELEMENT          214 with label "CAX6    " and with nodes:
+        155        227        228        579        580        581
+  is expanded into a "C3D15 A " element with topology:
+       1140       1356       1359       1142       1358       1361       2412       2415       2418       2414
+       2417       2420       1141       1357       1360
+
+ ELEMENT          215 with label "CAX6    " and with nodes:
+        149        224        225        576        582        571
+  is expanded into a "C3D15 A " element with topology:
+       1122       1347       1350       1124       1349       1352       2403       2421       2388       2405
+       2423       2390       1123       1348       1351
+
+ ELEMENT          216 with label "CAX6    " and with nodes:
+        151        223        224        568        583        575
+  is expanded into a "C3D15 A " element with topology:
+       1128       1344       1347       1130       1346       1349       2379       2424       2400       2381
+       2426       2402       1129       1345       1348
+
+ ELEMENT          217 with label "CAX6    " and with nodes:
+        157        155        228        480        581        557
+  is expanded into a "C3D15 A " element with topology:
+       1146       1140       1359       1148       1142       1361       2115       2418       2346       2117
+       2420       2348       1147       1141       1360
+
+ ELEMENT          218 with label "CAX6    " and with nodes:
+        150        225        226        572        584        569
+  is expanded into a "C3D15 A " element with topology:
+       1125       1350       1353       1127       1352       1355       2391       2427       2382       2393
+       2429       2384       1126       1351       1354
+
+ ELEMENT          219 with label "CAX6    " and with nodes:
+        181        180        221        462        585        586
+  is expanded into a "C3D15 A " element with topology:
+       1218       1215       1338       1220       1217       1340       2061       2430       2433       2063
+       2432       2435       1219       1216       1339
+
+ ELEMENT          220 with label "CAX6    " and with nodes:
+        180        182        220        434        587        588
+  is expanded into a "C3D15 A " element with topology:
+       1215       1221       1335       1217       1223       1337       1977       2436       2439       1979
+       2438       2441       1216       1222       1336
+
+ ELEMENT          221 with label "CAX6    " and with nodes:
+        192        141        230        388        589        561
+  is expanded into a "C3D15 A " element with topology:
+       1251       1098       1365       1253       1100       1367       1839       2442       2358       1841
+       2444       2360       1252       1099       1366
+
+ ELEMENT          222 with label "CAX6    " and with nodes:
+        181        221        222        586        590        591
+  is expanded into a "C3D15 A " element with topology:
+       1218       1338       1341       1220       1340       1343       2433       2445       2448       2435
+       2447       2450       1219       1339       1342
+
+ ELEMENT          223 with label "CAX6    " and with nodes:
+        184        181        222        479        591        592
+  is expanded into a "C3D15 A " element with topology:
+       1227       1218       1341       1229       1220       1343       2112       2448       2451       2114
+       2450       2453       1228       1219       1342
+
+ ELEMENT          224 with label "CAX6    " and with nodes:
+        141        187        229        340        593        594
+  is expanded into a "C3D15 A " element with topology:
+       1098       1236       1362       1100       1238       1364       1695       2454       2457       1697
+       2456       2459       1099       1237       1363
+
+ ELEMENT          225 with label "CAX6    " and with nodes:
+        218        191        219        577        595        596
+  is expanded into a "C3D15 A " element with topology:
+       1329       1248       1332       1331       1250       1334       2406       2460       2463       2408
+       2462       2465       1330       1249       1333
+
+ ELEMENT          226 with label "CAX6    " and with nodes:
+        184        222        223        592        597        567
+  is expanded into a "C3D15 A " element with topology:
+       1227       1341       1344       1229       1343       1346       2451       2466       2376       2453
+       2468       2378       1228       1342       1345
+
+ ELEMENT          227 with label "CAX6    " and with nodes:
+        163        232        234        598        599        600
+  is expanded into a "C3D15 A " element with topology:
+       1164       1371       1377       1166       1373       1379       2469       2472       2475       2471
+       2474       2477       1165       1372       1378
+
+ ELEMENT          228 with label "CAX6    " and with nodes:
+        191        190        219        436        601        595
+  is expanded into a "C3D15 A " element with topology:
+       1248       1245       1332       1250       1247       1334       1983       2478       2460       1985
+       2480       2462       1249       1246       1333
+
+ ELEMENT          229 with label "CAX6    " and with nodes:
+        180        220        221        588        602        585
+  is expanded into a "C3D15 A " element with topology:
+       1215       1335       1338       1217       1337       1340       2439       2481       2430       2441
+       2483       2432       1216       1336       1339
+
+ ELEMENT          230 with label "CAX6    " and with nodes:
+        141        229        230        594        603        589
+  is expanded into a "C3D15 A " element with topology:
+       1098       1362       1365       1100       1364       1367       2457       2484       2442       2459
+       2486       2444       1099       1363       1366
+
+ ELEMENT          231 with label "CAX6    " and with nodes:
+        163        161        232        483        604        598
+  is expanded into a "C3D15 A " element with topology:
+       1164       1158       1371       1166       1160       1373       2124       2487       2469       2126
+       2489       2471       1165       1159       1372
+
+ ELEMENT          232 with label "CAX6    " and with nodes:
+        194        135        233        358        605        565
+  is expanded into a "C3D15 A " element with topology:
+       1257       1080       1374       1259       1082       1376       1749       2490       2370       1751
+       2492       2372       1258       1081       1375
+
+ ELEMENT          233 with label "CAX6    " and with nodes:
+        182        218        220        578        606        587
+  is expanded into a "C3D15 A " element with topology:
+       1221       1329       1335       1223       1331       1337       2409       2493       2436       2411
+       2495       2438       1222       1330       1336
+
+ ELEMENT          234 with label "CAX6    " and with nodes:
+        165        163        234        482        600        563
+  is expanded into a "C3D15 A " element with topology:
+       1170       1164       1377       1172       1166       1379       2121       2475       2364       2123
+       2477       2366       1171       1165       1378
+
+ ELEMENT          235 with label "CAX6    " and with nodes:
+        135        193        231        353        607        608
+  is expanded into a "C3D15 A " element with topology:
+       1080       1254       1368       1082       1256       1370       1734       2496       2499       1736
+       2498       2501       1081       1255       1369
+
+ ELEMENT          236 with label "CAX6    " and with nodes:
+        201        218        219        609        596        610
+  is expanded into a "C3D15 A " element with topology:
+       1278       1329       1332       1280       1331       1334       2502       2463       2505       2504
+       2465       2507       1279       1330       1333
+
+ ELEMENT          237 with label "CAX6    " and with nodes:
+        201        121        218        416        611        609
+  is expanded into a "C3D15 A " element with topology:
+       1278       1038       1329       1280       1040       1331       1923       2508       2502       1925
+       2510       2504       1279       1039       1330
+
+ ELEMENT          238 with label "CAX6    " and with nodes:
+        135        231        233        608        612        605
+  is expanded into a "C3D15 A " element with topology:
+       1080       1368       1374       1082       1370       1376       2499       2511       2490       2501
+       2513       2492       1081       1369       1375
+
+ ELEMENT          239 with label "CAX6    " and with nodes:
+        193        134        236        396        613        614
+  is expanded into a "C3D15 A " element with topology:
+       1254       1077       1383       1256       1079       1385       1863       2514       2517       1865
+       2516       2519       1255       1078       1384
+
+ ELEMENT          240 with label "CAX6    " and with nodes:
+        231        193        236        607        614        615
+  is expanded into a "C3D15 A " element with topology:
+       1368       1254       1383       1370       1256       1385       2496       2517       2520       2498
+       2519       2522       1369       1255       1384
+
+ ELEMENT          241 with label "CAX6    " and with nodes:
+        128        201        219        481        610        616
+  is expanded into a "C3D15 A " element with topology:
+       1059       1278       1332       1061       1280       1334       2118       2505       2523       2120
+       2507       2525       1060       1279       1333
+
+ ELEMENT          242 with label "CAX6    " and with nodes:
+        173        235        237        617        618        619
+  is expanded into a "C3D15 A " element with topology:
+       1194       1380       1386       1196       1382       1388       2526       2529       2532       2528
+       2531       2534       1195       1381       1387
+
+ ELEMENT          243 with label "CAX6    " and with nodes:
+        173        171        235        485        620        617
+  is expanded into a "C3D15 A " element with topology:
+       1194       1188       1380       1196       1190       1382       2130       2535       2526       2132
+       2537       2528       1195       1189       1381
+
+ ELEMENT          244 with label "CAX6    " and with nodes:
+        218        121        220        611        621        606
+  is expanded into a "C3D15 A " element with topology:
+       1329       1038       1335       1331       1040       1337       2508       2538       2493       2510
+       2540       2495       1330       1039       1336
+
+ ELEMENT          245 with label "CAX6    " and with nodes:
+        121        204        220        530        622        621
+  is expanded into a "C3D15 A " element with topology:
+       1038       1287       1335       1040       1289       1337       2265       2541       2538       2267
+       2543       2540       1039       1288       1336
+
+ ELEMENT          246 with label "CAX6    " and with nodes:
+        175        173        237        487        619        623
+  is expanded into a "C3D15 A " element with topology:
+       1200       1194       1386       1202       1196       1388       2136       2532       2544       2138
+       2534       2546       1201       1195       1387
+
+ ELEMENT          247 with label "CAX6    " and with nodes:
+        204        124        221        525        624        625
+  is expanded into a "C3D15 A " element with topology:
+       1287       1047       1338       1289       1049       1340       2250       2547       2550       2252
+       2549       2552       1288       1048       1339
+
+ ELEMENT          248 with label "CAX6    " and with nodes:
+        221        124        222        624        626        590
+  is expanded into a "C3D15 A " element with topology:
+       1338       1047       1341       1340       1049       1343       2547       2553       2445       2549
+       2555       2447       1339       1048       1342
+
+ ELEMENT          249 with label "CAX6    " and with nodes:
+        220        204        221        622        625        602
+  is expanded into a "C3D15 A " element with topology:
+       1335       1287       1338       1337       1289       1340       2541       2550       2481       2543
+       2552       2483       1336       1288       1339
+
+ ELEMENT          250 with label "CAX6    " and with nodes:
+        124        210        222        527        627        626
+  is expanded into a "C3D15 A " element with topology:
+       1047       1305       1341       1049       1307       1343       2256       2556       2553       2258
+       2558       2555       1048       1306       1342
+
+ ELEMENT          251 with label "CAX6    " and with nodes:
+        222        210        223        627        628        597
+  is expanded into a "C3D15 A " element with topology:
+       1341       1305       1344       1343       1307       1346       2556       2559       2466       2558
+       2561       2468       1342       1306       1345
+
+ ELEMENT          252 with label "CAX6    " and with nodes:
+        210        126        223        529        629        628
+  is expanded into a "C3D15 A " element with topology:
+       1305       1053       1344       1307       1055       1346       2262       2562       2559       2264
+       2564       2561       1306       1054       1345
+
+ ELEMENT          253 with label "CAX6    " and with nodes:
+        223        126        224        629        630        583
+  is expanded into a "C3D15 A " element with topology:
+       1344       1053       1347       1346       1055       1349       2562       2565       2424       2564
+       2567       2426       1345       1054       1348
+
+ ELEMENT          254 with label "CAX6    " and with nodes:
+        126        208        224        526        631        630
+  is expanded into a "C3D15 A " element with topology:
+       1053       1299       1347       1055       1301       1349       2253       2568       2565       2255
+       2570       2567       1054       1300       1348
+
+ ELEMENT          255 with label "CAX6    " and with nodes:
+        224        208        225        631        632        582
+  is expanded into a "C3D15 A " element with topology:
+       1347       1299       1350       1349       1301       1352       2568       2571       2421       2570
+       2573       2423       1348       1300       1351
+
+ ELEMENT          256 with label "CAX6    " and with nodes:
+        208        129        225        528        633        632
+  is expanded into a "C3D15 A " element with topology:
+       1299       1062       1350       1301       1064       1352       2259       2574       2571       2261
+       2576       2573       1300       1063       1351
+
+ ELEMENT          257 with label "CAX6    " and with nodes:
+        226        199        227        634        635        573
+  is expanded into a "C3D15 A " element with topology:
+       1353       1272       1356       1355       1274       1358       2577       2580       2394       2579
+       2582       2396       1354       1273       1357
+
+ ELEMENT          258 with label "CAX6    " and with nodes:
+        131        192        228        356        560        636
+  is expanded into a "C3D15 A " element with topology:
+       1068       1251       1359       1070       1253       1361       1743       2355       2583       1745
+       2357       2585       1069       1252       1360
+
+ ELEMENT          259 with label "CAX6    " and with nodes:
+        129        199        226        430        634        637
+  is expanded into a "C3D15 A " element with topology:
+       1062       1272       1353       1064       1274       1355       1965       2577       2586       1967
+       2579       2588       1063       1273       1354
+
+ ELEMENT          260 with label "CAX6    " and with nodes:
+        225        129        226        633        637        584
+  is expanded into a "C3D15 A " element with topology:
+       1350       1062       1353       1352       1064       1355       2574       2586       2427       2576
+       2588       2429       1351       1063       1354
+
+ ELEMENT          261 with label "CAX6    " and with nodes:
+        199        131        227        409        638        635
+  is expanded into a "C3D15 A " element with topology:
+       1272       1068       1356       1274       1070       1358       1902       2589       2580       1904
+       2591       2582       1273       1069       1357
+
+ ELEMENT          262 with label "CAX6    " and with nodes:
+        134        188        235        348        639        640
+  is expanded into a "C3D15 A " element with topology:
+       1077       1239       1380       1079       1241       1382       1719       2592       2595       1721
+       2594       2597       1078       1240       1381
+
+ ELEMENT          263 with label "CAX6    " and with nodes:
+        227        131        228        638        636        580
+  is expanded into a "C3D15 A " element with topology:
+       1356       1068       1359       1358       1070       1361       2589       2583       2415       2591
+       2585       2417       1357       1069       1360
+
+ ELEMENT          264 with label "CAX6    " and with nodes:
+        232        138        234        641        642        599
+  is expanded into a "C3D15 A " element with topology:
+       1371       1089       1377       1373       1091       1379       2598       2601       2472       2600
+       2603       2474       1372       1090       1378
+
+ ELEMENT          265 with label "CAX6    " and with nodes:
+        187        138        232        399        641        643
+  is expanded into a "C3D15 A " element with topology:
+       1236       1089       1371       1238       1091       1373       1872       2598       2604       1874
+       2600       2606       1237       1090       1372
+
+ ELEMENT          266 with label "CAX6    " and with nodes:
+        138        194        234        406        566        642
+  is expanded into a "C3D15 A " element with topology:
+       1089       1257       1377       1091       1259       1379       1893       2373       2601       1895
+       2375       2603       1090       1258       1378
+
+ ELEMENT          267 with label "CAX6    " and with nodes:
+        235        188        237        639        644        618
+  is expanded into a "C3D15 A " element with topology:
+       1380       1239       1386       1382       1241       1388       2592       2607       2529       2594
+       2609       2531       1381       1240       1387
+
+ ELEMENT          268 with label "CAX6    " and with nodes:
+        161        159        229        486        645        646
+  is expanded into a "C3D15 A " element with topology:
+       1158       1152       1362       1160       1154       1364       2133       2610       2613       2135
+       2612       2615       1159       1153       1363
+
+ ELEMENT          269 with label "CAX6    " and with nodes:
+        188        133        237        393        647        644
+  is expanded into a "C3D15 A " element with topology:
+       1239       1074       1386       1241       1076       1388       1854       2616       2607       1856
+       2618       2609       1240       1075       1387
+
+ ELEMENT          270 with label "CAX6    " and with nodes:
+        229        159        230        645        648        603
+  is expanded into a "C3D15 A " element with topology:
+       1362       1152       1365       1364       1154       1367       2610       2619       2484       2612
+       2621       2486       1363       1153       1366
+
+ ELEMENT          271 with label "CAX6    " and with nodes:
+        159        157        230        490        559        648
+  is expanded into a "C3D15 A " element with topology:
+       1152       1146       1365       1154       1148       1367       2145       2352       2619       2147
+       2354       2621       1153       1147       1366
+
+ ELEMENT          272 with label "CAX6    " and with nodes:
+        169        167        231        488        649        650
+  is expanded into a "C3D15 A " element with topology:
+       1182       1176       1368       1184       1178       1370       2139       2622       2625       2141
+       2624       2627       1183       1177       1369
+
+ ELEMENT          273 with label "CAX6    " and with nodes:
+        231        167        233        649        651        612
+  is expanded into a "C3D15 A " element with topology:
+       1368       1176       1374       1370       1178       1376       2622       2628       2511       2624
+       2630       2513       1369       1177       1375
+
+ ELEMENT          274 with label "CAX6    " and with nodes:
+        167        165        233        484        562        651
+  is expanded into a "C3D15 A " element with topology:
+       1176       1170       1374       1178       1172       1376       2127       2361       2628       2129
+       2363       2630       1177       1171       1375
+
+ ELEMENT          275 with label "CAX6    " and with nodes:
+        169        231        236        650        615        652
+  is expanded into a "C3D15 A " element with topology:
+       1182       1368       1383       1184       1370       1385       2625       2520       2631       2627
+       2522       2633       1183       1369       1384
+
+ ELEMENT          276 with label "CAX6    " and with nodes:
+        171        169        236        489        652        653
+  is expanded into a "C3D15 A " element with topology:
+       1188       1182       1383       1190       1184       1385       2142       2631       2634       2144
+       2633       2636       1189       1183       1384
+
+ ELEMENT          277 with label "CAX6    " and with nodes:
+        134        235        236        640        654        613
+  is expanded into a "C3D15 A " element with topology:
+       1077       1380       1383       1079       1382       1385       2595       2637       2514       2597
+       2639       2516       1078       1381       1384
+
+ ELEMENT          278 with label "CAX6    " and with nodes:
+        235        171        236        620        653        654
+  is expanded into a "C3D15 A " element with topology:
+       1380       1188       1383       1382       1190       1385       2535       2634       2637       2537
+       2636       2639       1381       1189       1384
+
+ ELEMENT          279 with label "CAX6    " and with nodes:
+        161        229        232        646        655        604
+  is expanded into a "C3D15 A " element with topology:
+       1158       1362       1371       1160       1364       1373       2613       2640       2487       2615
+       2642       2489       1159       1363       1372
+
+ ELEMENT          280 with label "CAX6    " and with nodes:
+        229        187        232        593        643        655
+  is expanded into a "C3D15 A " element with topology:
+       1362       1236       1371       1364       1238       1373       2454       2604       2640       2456
+       2606       2642       1363       1237       1372
+
+ ELEMENT          281 with label "CAX6    " and with nodes:
+        214        143        217        542        656        256
+  is expanded into a "C3D15 A " element with topology:
+       1317       1104       1326       1319       1106       1328       2301       2643       1443       2303
+       2645       1445       1318       1105       1327
+
+ ELEMENT          282 with label "CAX6    " and with nodes:
+        176        175        245        466        657        260
+  is expanded into a "C3D15 A " element with topology:
+       1203       1200       1410       1205       1202       1412       2073       2646       1455       2075
+       2648       1457       1204       1201       1411
+
+ ELEMENT          283 with label "CAX6    " and with nodes:
+        190        189        244        437        259        658
+  is expanded into a "C3D15 A " element with topology:
+       1245       1242       1407       1247       1244       1409       1986       1452       2649       1988
+       1454       2651       1246       1243       1408
+
+ ELEMENT          284 with label "CAX6    " and with nodes:
+        212        128        243        539        659        262
+  is expanded into a "C3D15 A " element with topology:
+       1311       1059       1404       1313       1061       1406       2292       2652       1461       2294
+       2654       1463       1312       1060       1405
+
+ ELEMENT          285 with label "CAX6    " and with nodes:
+        215        142        244        540        660        258
+  is expanded into a "C3D15 A " element with topology:
+       1320       1101       1407       1322       1103       1409       2295       2655       1449       2297
+       2657       1451       1321       1102       1408
+
+ ELEMENT          286 with label "CAX6    " and with nodes:
+        143        213        245        541        261        661
+  is expanded into a "C3D15 A " element with topology:
+       1104       1314       1410       1106       1316       1412       2298       1458       2658       2300
+       1460       2660       1105       1315       1411
+
+ ELEMENT          287 with label "CAX6    " and with nodes:
+        175        217        245        662        663        657
+  is expanded into a "C3D15 A " element with topology:
+       1200       1326       1410       1202       1328       1412       2661       2664       2646       2663
+       2666       2648       1201       1327       1411
+
+ ELEMENT          288 with label "CAX6    " and with nodes:
+        216        190        244        664        658        665
+  is expanded into a "C3D15 A " element with topology:
+       1323       1245       1407       1325       1247       1409       2667       2649       2670       2669
+       2651       2672       1324       1246       1408
+
+ ELEMENT          289 with label "CAX6    " and with nodes:
+        213        115        241        531        554        666
+  is expanded into a "C3D15 A " element with topology:
+       1314       1020       1398       1316       1022       1400       2268       2337       2673       2270
+       2339       2675       1315       1021       1399
+
+ ELEMENT          290 with label "CAX6    " and with nodes:
+         54        215        240        536        667        549
+  is expanded into a "C3D15 A " element with topology:
+        837       1320       1395        839       1322       1397       2283       2676       2322       2285
+       2678       2324        838       1321       1396
+
+ ELEMENT          291 with label "CAX6    " and with nodes:
+         63        212        238        534        668        546
+  is expanded into a "C3D15 A " element with topology:
+        864       1311       1389        866       1313       1391       2277       2679       2313       2279
+       2681       2315        865       1312       1390
+
+ ELEMENT          292 with label "CAX6    " and with nodes:
+        112        214        239        538        669        547
+  is expanded into a "C3D15 A " element with topology:
+       1011       1317       1392       1013       1319       1394       2289       2682       2316       2291
+       2684       2318       1012       1318       1393
+
+ ELEMENT          293 with label "CAX6    " and with nodes:
+        145         28        240        420        552        670
+  is expanded into a "C3D15 A " element with topology:
+       1110        759       1395       1112        761       1397       1935       2331       2685       1937
+       2333       2687       1111        760       1396
+
+ ELEMENT          294 with label "CAX6    " and with nodes:
+        196         86        239        428        551        671
+  is expanded into a "C3D15 A " element with topology:
+       1263        933       1392       1265        935       1394       1959       2328       2688       1961
+       2330       2690       1264        934       1393
+
+ ELEMENT          295 with label "CAX6    " and with nodes:
+        195         57        238        476        545        672
+  is expanded into a "C3D15 A " element with topology:
+       1260        846       1389       1262        848       1391       2103       2310       2691       2105
+       2312       2693       1261        847       1390
+
+ ELEMENT          296 with label "CAX6    " and with nodes:
+          5        144        241        513        673        555
+  is expanded into a "C3D15 A " element with topology:
+        690       1107       1398        692       1109       1400       2214       2694       2340       2216
+       2696       2342        691       1108       1399
+
+ ELEMENT          297 with label "CAX6    " and with nodes:
+        144        213        241        251        666        673
+  is expanded into a "C3D15 A " element with topology:
+       1107       1314       1398       1109       1316       1400       1428       2673       2694       1430
+       2675       2696       1108       1315       1399
+
+ ELEMENT          298 with label "CAX6    " and with nodes:
+        212        195        238        252        672        668
+  is expanded into a "C3D15 A " element with topology:
+       1311       1260       1389       1313       1262       1391       1431       2691       2679       1433
+       2693       2681       1312       1261       1390
+
+ ELEMENT          299 with label "CAX6    " and with nodes:
+        215        145        240        247        670        667
+  is expanded into a "C3D15 A " element with topology:
+       1320       1110       1395       1322       1112       1397       1416       2685       2676       1418
+       2687       2678       1321       1111       1396
+
+ ELEMENT          300 with label "CAX6    " and with nodes:
+        214        196        239        255        671        669
+  is expanded into a "C3D15 A " element with topology:
+       1317       1263       1392       1319       1265       1394       1440       2688       2682       1442
+       2690       2684       1318       1264       1393
+
+ ELEMENT          301 with label "CAX6    " and with nodes:
+        190        216        243        664        263        674
+  is expanded into a "C3D15 A " element with topology:
+       1245       1323       1404       1247       1325       1406       2667       1464       2697       2669
+       1466       2699       1246       1324       1405
+
+ ELEMENT          302 with label "CAX6    " and with nodes:
+        217        175        242        662        675        264
+  is expanded into a "C3D15 A " element with topology:
+       1326       1200       1401       1328       1202       1403       2661       2700       1467       2663
+       2702       1469       1327       1201       1402
+
+ ELEMENT          303 with label "CAX6    " and with nodes:
+        175        237        242        623        676        675
+  is expanded into a "C3D15 A " element with topology:
+       1200       1386       1401       1202       1388       1403       2544       2703       2700       2546
+       2705       2702       1201       1387       1402
+
+ ELEMENT          304 with label "CAX6    " and with nodes:
+        219        190        243        601        674        677
+  is expanded into a "C3D15 A " element with topology:
+       1332       1245       1404       1334       1247       1406       2478       2697       2706       2480
+       2699       2708       1333       1246       1405
+
+ ELEMENT          305 with label "CAX6    " and with nodes:
+        142        216        244        543        665        660
+  is expanded into a "C3D15 A " element with topology:
+       1101       1323       1407       1103       1325       1409       2304       2670       2655       2306
+       2672       2657       1102       1324       1408
+
+ ELEMENT          306 with label "CAX6    " and with nodes:
+        217        143        245        656        661        663
+  is expanded into a "C3D15 A " element with topology:
+       1326       1104       1410       1328       1106       1412       2643       2658       2664       2645
+       2660       2666       1327       1105       1411
+
+ ELEMENT          307 with label "CAX6    " and with nodes:
+        237        133        242        647        556        676
+  is expanded into a "C3D15 A " element with topology:
+       1386       1074       1401       1388       1076       1403       2616       2343       2703       2618
+       2345       2705       1387       1075       1402
+
+ ELEMENT          308 with label "CAX6    " and with nodes:
+        128        219        243        616        677        659
+  is expanded into a "C3D15 A " element with topology:
+       1059       1332       1404       1061       1334       1406       2523       2706       2652       2525
+       2708       2654       1060       1333       1405
+

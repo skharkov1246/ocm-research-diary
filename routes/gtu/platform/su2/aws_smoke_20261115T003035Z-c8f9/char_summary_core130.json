@@ -1,0 +1,208 @@
+{
+ "created_utc": "2026-11-15T00:35:18Z",
+ "label": "core130",
+ "case": "core130",
+ "level": "coarse",
+ "job": "su2-kv3-core130-smoke",
+ "run_id": "20261115T003035Z-c8f9",
+ "itype": "c7a.16xlarge",
+ "az": "us-east-1c",
+ "mesh": {
+  "file": "passage_core130_coarse.su2",
+  "json": "impeller_core130_coarse.json",
+  "header": {
+   "NDIME": 3,
+   "NELEM": 616711,
+   "NPOIN": 139087,
+   "NMARK": 7,
+   "markers": {
+    "inlet": 1213,
+    "outlet": 996,
+    "hub": 7669,
+    "shroud": 64637,
+    "blade": 69749,
+    "periodic_1": 5954,
+    "periodic_2": 5954
+   }
+  },
+  "double_sided": false
+ },
+ "d1_reference": {
+  "m": 9.95,
+  "m_side": 9.95,
+  "PR": 4.25,
+  "rpm": 22197.0,
+  "D2": 0.435,
+  "U2": 505.57100795506165,
+  "b2": 0.02341520477246604,
+  "T01": 288.15,
+  "p01": 101325.0,
+  "eta_comp_stage": 0.8585973705037672
+ },
+ "estimate": {
+  "p_out_estimate": 311427.257614276,
+  "double_sided": false,
+  "m_for_estimate": 9.95,
+  "r_out": 0.28275,
+  "p_out_estimate_run_case": 311427.257614276,
+  "note": "оценка run_case.estimate_p_out"
+ },
+ "base_pfrac": 0.75,
+ "p_base_Pa": 233570.44321070702,
+ "pfracs_assigned": [
+  0.7,
+  0.9,
+  1.0,
+  1.1
+ ],
+ "nproc": 64,
+ "np_per_point": 16,
+ "budget": {
+  "time_s": 2544.8,
+  "uptime_at_start_s": 275.2,
+  "job_max_min": 60,
+  "reserve_s": 300.0,
+  "base_max_frac": 0.3
+ },
+ "plans": {
+  "base": "smoke075",
+  "point": [
+   {
+    "name": "c1_point",
+    "frac": 1.0,
+    "pfrac": 1.0,
+    "ramp": 0,
+    "pramp": 10,
+    "iter": 40,
+    "muscl": true
+   }
+  ],
+  "iter_scale_base": 0.1,
+  "iter_scale_point": 1.0
+ },
+ "settings": {
+  "shroud": "slip",
+  "vaneless": "slip",
+  "turb": "SST",
+  "output_files": "RESTART, SURFACE_PARAVIEW",
+  "extra": [
+   "MARKER_PLOTTING= (blade, hub)"
+  ],
+  "mpi_args": "--use-hwthread-cpus"
+ },
+ "base": {
+  "returncode": 0,
+  "dir": "base",
+  "statuses": [
+   "finished",
+   "diverged"
+  ],
+  "smoke_checks": {
+   "statuses": [
+    "finished",
+    "diverged"
+   ],
+   "all_stages_finished": false,
+   "iterations_in_run": 27,
+   "no_divergence": false,
+   "rms_rho_first_stage_start": -3.801338728,
+   "rms_rho_last": -4.150198186,
+   "rms_rho_drop_over_run": 0.34885945799999973,
+   "rms_rho_last_stage_drop_from_max": 0.2532285449999998,
+   "rms_rho_slope_last_half_per_100": null,
+   "slope_max_per_100": -0.1,
+   "mass_imbalance": 1.9749400084122253,
+   "mass_sign_ok": false,
+   "residuals_falling": false,
+   "mass_within_tol": false,
+   "mass_tol": 0.05,
+   "passed": false
+  },
+  "record": {
+   "pfrac": 0.75,
+   "p_out_Pa": 233570.44321070702,
+   "statuses": [
+    "finished",
+    "diverged"
+   ],
+   "status": "diverged",
+   "dir": "base",
+   "stage": "s2_ramp100_p075",
+   "history_rows": 10,
+   "seconds": 4.6,
+   "sec_per_iter": 0.45999999999999996,
+   "rms_rho": {
+    "first": -4.342050683,
+    "max": -3.896969641,
+    "last": -4.150198186,
+    "slope_per_100_last_half": null
+   },
+   "performance": {
+    "m_in_passage": 0.1634761283,
+    "m_out_passage": 0.1593794179,
+    "mass_imbalance": 1.9749400084122253,
+    "mass_sign_ok": false,
+    "m_wheel": 1.4712851546999999,
+    "PR_tt": 1.1120417986635085,
+    "TR_tt": 1.0511631576748623,
+    "eta_tt_isentropic": 0.6021372004809876,
+    "m_wheel_corrected": 1.4056927869745357,
+    "PRTT_su2": 1.099461567,
+    "TotTotEff_su2": 53.75204711,
+    "PRTS_su2": 1.093090228,
+    "TotStaticEff_su2": 50.34328666,
+    "MassFlowIn_turbo": 0.1634761283,
+    "MassFlowOut_turbo": -0.1593790442,
+    "EulerianWork_su2": 15110.34321,
+    "window_iters": 50,
+    "window_rel_change": {
+     "m_in": null,
+     "pt_out": null,
+     "tt_out": null
+    },
+    "m_wheel_total": 1.4712851546999999,
+    "m_wheel_corrected_total": 1.4056927869745357
+   },
+   "mass_sign_ok": false,
+   "periodic": {
+    "periodic_matched_points": 6270,
+    "periodic_max_distance": 1.70109e-16,
+    "bad_match": 0
+   },
+   "nan": true,
+   "su2_error": "MPI_ABORT was invoked on rank 10 in communicator MPI_COMM_WORLD",
+   "window": {
+    "window_iters": 500,
+    "rows": 10,
+    "rel_change": {
+     "m_in": null,
+     "PR_tt": null,
+     "tt_out": null,
+     "eta_tt": null
+    },
+    "converged_pi_eta": false
+   },
+   "usable": false,
+   "converged": false
+  },
+  "su2_version": "SU2 v8.6.0 \"Harrier\", The Open-Source CFD Code",
+  "key_check": {
+   "cconfig": "/opt/SU2-src/Common/src/CConfig.cpp",
+   "registered_keys": 770,
+   "unknown": []
+  },
+  "files": [
+   "run_summary.json",
+   "history_s1_ramp60.csv",
+   "history_s2_ramp100_p075.csv",
+   "su2_s1_ramp60.log",
+   "su2_s2_ramp100_p075.log",
+   "case_s1_ramp60.cfg",
+   "case_s2_ramp100_p075.cfg",
+   "surface.vtu"
+  ],
+  "restart_ok": false
+ },
+ "points": [],
+ "verdict": "base_failed"
+}

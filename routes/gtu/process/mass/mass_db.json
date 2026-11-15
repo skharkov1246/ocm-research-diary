@@ -1,0 +1,241 @@
+{
+ "title": "База реальных машин для модели массы агрегата: масса двигателя или модуля, мощность, параметры для размеров",
+ "date": "2026-11-15",
+ "status": "собрано вручную из открытых источников; каждое число - с адресом и статусом; хосты, не разрешённые в сессии, - только по выдержке поиска",
+ "status_legend": {
+  "открыт": "документ открыт в этой сессии (manualsdir.com, assets.siemens-energy.com) или в паспорте fleet/ того же трека (адрес и цитата там)",
+  "по выдержке поиска": "число видно только в выдержке поисковой системы; документ не открывался (хост не разрешён сетью сессии: geaerospace.com, wikipedia.org, vericor.com, motorsich.com, trid.trb.org, capstone cloudfront и др.)",
+  "конфликт": "источники расходятся; принятое значение и разброс указаны",
+  "оценка": "допущение модели, не из источника"
+ },
+ "hosts_blocked_in_session": ["www.geaerospace.com", "en.wikipedia.org", "www.vericor.com", "motorsich.com", "trid.trb.org", "d1io3yog0oux5.cloudfront.net", "pdf.directindustry.com", "www.scribd.com", "global.kawasaki.com", "destinus.ch"],
+ "engines": [
+  {
+   "id": "taurus60_md",
+   "name": "Solar Taurus 60, двухвальный (компрессорный агрегат / механический привод)",
+   "practice": "industrial",
+   "use": "calibration",
+   "mass_kg": 3290,
+   "mass_range_kg": [3290, 3290],
+   "mass_basis": "'Gas Turbine Assembly (SoLoNOx) 3290 kg (7250 lb)' - двигатель с камерой, без пускового устройства (AC Start Motor Assembly 370 kg указан отдельно)",
+   "P_kW": 5740, "P_basis": "на валу силовой турбины, ISO, 'Output Power 5740 kW (7700 hp)'",
+   "eta_pct": 32.0,
+   "m_air_kg_s": 21.3, "PR": 12.2, "T_exh_C": 510,
+   "comp": [{"type": "A", "n": 12}],
+   "turb_gg": {"type": "A", "n": 2}, "turb_pt": {"type": "A", "n": 2},
+   "rpm_gg": 15000, "rpm_pt": 14300,
+   "combustor": {"kind": "annular", "n_inj": 12},
+   "sources": {
+    "mass_kg": {"url": "https://www.manualsdir.com/manuals/214702/taurus-group-60.html?page=9", "quote": "Gas Turbine Assembly ( SoLoNOx ) 3290 kg (7250 lb)", "status": "открыт", "doc": "TPS60CSMD/309, Table 1"},
+    "comp/PR/m_air/rpm_gg": {"url": "https://www.manualsdir.com/manuals/214702/taurus-group-60.html?page=12", "quote": "Axial Flow Number of Stages 12 / 12.2:1 (Compressor Set) / 21.3 kg/sec (47.0 lb/sec) (Compressor Set) / Combustion Chamber Type Annular ... Number of Fuel Injectors 12 / Gas Producer Turbine Type Reaction Number of Stages 2 Maximum Speed 15,000 rpm", "status": "открыт"},
+    "P_kW/eta/T_exh/PT": {"url": "routes/gtu/fleet/gtu_fleet_taurus60.json (records[MD]: DS60MD/713 и TPS60CSMD/309)", "quote": "Output Power 5740 kW (7700 hp); 'Engine efficiency: 32%'; 510°C; 'Power Turbine - 2 Stage, Reaction - Max. Speed: 14,300 rpm'", "status": "открыт"}
+   }
+  },
+  {
+   "id": "taurus70_md",
+   "name": "Solar Taurus 70, двухвальный (компрессорный агрегат / механический привод), редакция TPS70CSMD/309",
+   "practice": "industrial",
+   "use": "calibration",
+   "mass_kg": 5630,
+   "mass_range_kg": [5107, 5630],
+   "mass_basis": "'Gas Turbine Assembly ( SoLoNOx ) 5630 kg (11,260 lb)': 11 260 lb = 5107 кг, т. е. кг и фунты в документе расходятся (5630 = 11 260 / 2). Принято напечатанное 5630 кг (как в паспорте fleet), разброс 5107-5630 кг - конфликт не снят",
+   "P_kW": 7690, "P_basis": "'Output Power 7690 kW (10,300 hp)' (редакция 2009; текущий паспорт fleet - 8290 кВт)",
+   "eta_pct": 34.8, "eta_basis": "3600 / 10 340 кДж/кВт·ч ('Heat Rate 10,340 kJ/ kW-hr') - пересчёт",
+   "m_air_kg_s": 26.2, "PR": 16.5, "T_exh_C": 495,
+   "comp": [{"type": "A", "n": 14}],
+   "turb_gg": {"type": "A", "n": 2}, "turb_pt": {"type": "A", "n": 2},
+   "rpm_gg": 15200, "rpm_pt": 12000,
+   "combustor": {"kind": "annular", "n_inj": 12},
+   "sources": {
+    "mass_kg": {"url": "https://www.manualsdir.com/manuals/66910/caterpillar-taurus-70.html?page=9", "quote": "Gas Turbine Assembly ( SoLoNOx ) 5630 kg (11,260 lb) ... Total Driver (unenclosed package, without oil) 24 494 kg (54,000 lb)", "status": "открыт; конфликт кг/фунты"},
+    "comp/PR/m_air/turbines": {"url": "https://www.manualsdir.com/manuals/66910/caterpillar-taurus-70.html?page=12", "quote": "Axial Flow Number of Stages 14 Compression Ratio 16.5:1 Inlet Air Flow (Nominal) 26.2 kg/sec (57.7 lb/sec) ... Gas Producer Turbine Type Reaction Number of Stages 2 Maximum Speed 15,200 rpm Power Turbine Type Reaction Number of Stages 2 Maximum Speed 12,000 rpm", "status": "открыт"},
+    "P_kW/HR/T_exh": {"url": "https://www.manualsdir.com/manuals/66910/caterpillar-taurus-70.html?page=13", "quote": "Output Power 7690 kW (10,300 hp) ... Heat Rate 10,340 kJ/ kW-hr ... Exhaust Flow 95 630 kg/hr (210,830 lb/hr) Exhaust Temperature 495°C (920°F)", "status": "открыт"}
+   }
+  },
+  {
+   "id": "titan250_gs",
+   "name": "Solar Titan 250, двухвальный, генераторный агрегат (предварительная редакция TPS250GS/908)",
+   "practice": "industrial",
+   "use": "calibration",
+   "mass_kg": 19050,
+   "mass_range_kg": [19050, 19050],
+   "mass_basis": "'Approximate Weight Gas Turbine Assembly 19 050 kg (42,000 lb)' (42 000 lb = 19 051 кг - согласовано); документ помечен 'Preliminary'",
+   "P_kW": 22370, "P_basis": "'Output Power 22 370 kW (30,000 hp)' (единица hp - мощность на валу)",
+   "eta_pct": 40.0, "eta_basis": "3600 / 9000 кДж/кВт·ч ('Heat Rate 9000 kJ/ kW-hr') - пересчёт",
+   "m_air_kg_s": 67.3, "PR": 24.0, "T_exh_C": 465,
+   "comp": [{"type": "A", "n": 16}],
+   "turb_gg": {"type": "A", "n": 3}, "turb_pt": {"type": "A", "n": 2},
+   "rpm_gg": 10500, "rpm_pt": 7000,
+   "combustor": {"kind": "annular", "n_inj": 14},
+   "sources": {
+    "mass_kg/P_kW/HR/T_exh": {"url": "https://www.manualsdir.com/manuals/59759/cat-titan-250.html?page=13", "quote": "Approximate Weight Gas Turbine Assembly 19 050 kg (42,000 lb) Performance Output Power Note (a) 22 370 kW (30,000 hp) Heat Rate 9000 kJ/ kW-hr ... Exhaust Flow 245 660 kg/hr ... Exhaust Temperature 465°C (865°F)", "status": "открыт"},
+    "comp/PR/m_air/turbines": {"url": "https://www.manualsdir.com/manuals/59759/cat-titan-250.html?page=12", "quote": "Axial Flow Number of Stages 16 Compression Ratio 24:1 Flow (Nominal) 67.3 kg/sec (148 lb/sec) Speed, Maximum 10,500 rpm ... Gas Generator Type Axial Number of Stages 3 Power Turbine Type Axial Number of Stages 2 Speed 7000 rpm", "status": "открыт (число ступеней газогенератора - как напечатано)"},
+    "skid": {"url": "https://www.manualsdir.com/manuals/59759/cat-titan-250.html?page=9", "quote": "Gas Turbine Assembly 19 050 kg (42,000 lb) Total Driver (unenclosed package, without oil) 49 900 kg (110,000 lb)", "status": "открыт"}
+   }
+  },
+  {
+   "id": "lm2500",
+   "name": "GE LM2500 (газогенератор 16 ступеней + силовая турбина 6 ступеней, 3600 об/мин)",
+   "practice": "aero",
+   "use": "calibration",
+   "mass_kg": 4672,
+   "mass_range_kg": [4672, 4700],
+   "mass_basis": "'Weight: 10,300 lbs' (пресс-релиз GE) = 4672 кг; таблица Википедии - 4,7 т; что именно входит (газогенератор + силовая турбина) - по выдержке не уточнено, принято: двигатель с силовой турбиной без пакета",
+   "P_kW": 23261, "P_basis": "PGT25 (газогенератор LM2500 + промышленная силовая турбина) - механический привод ISO; морской LM2500 - 25 060 кВт (33 600 л. с., по выдержке поиска)",
+   "eta_pct": 37.7,
+   "m_air_kg_s": 68.9, "m_air_basis": "расход выхлопа PGT25 (воздух меньше на долю топлива - в размерах не учитывается, оценка)",
+   "PR": 17.9, "T_exh_C": 525,
+   "comp": [{"type": "A", "n": 16}],
+   "turb_gg": {"type": "A", "n": 2}, "turb_pt": {"type": "A", "n": 6},
+   "rpm_gg": null, "rpm_pt": 3600,
+   "combustor": {"kind": "annular", "n_inj": 30},
+   "sources": {
+    "mass_kg": {"url": "https://www.ge.com/news/press-releases/ge-delivers-200th-lm2500-aeroderivative-gas-turbine", "quote": "Weight: 10,300 lbs (выдержка поиска); Википедия: 'LM2500 ... 4.7 ton'", "status": "по выдержке поиска"},
+    "PT 6 ступеней, 3600": {"url": "https://geaerospace.com/sites/default/files/datasheet-lm2500.pdf", "quote": "6-stage power turbine ... 3600 rpm (выдержка поиска)", "status": "по выдержке поиска"},
+    "comp/PR/flow/P/eta/T_exh": {"url": "https://www.manualsdir.com/manuals/106729/ge-gas-turbine.html?page=15", "quote": "The LM2500 gas generator incorporates a 16-stage axial-flow compressor ... Two stage Gas Generator turbine; таблица стр. 29: PGT25 23,261 kW ... 37.7 % 17.9 68.9 kg/sec ... 6,500 RPM 525 °C", "status": "открыт (GE Oil & Gas / Nuovo Pignone, 2005)", "url_table": "https://www.manualsdir.com/manuals/106729/ge-gas-turbine.html?page=29"}
+   }
+  },
+  {
+   "id": "lm2500plus",
+   "name": "GE LM2500+ (газогенератор 17 ступеней + силовая турбина)",
+   "practice": "aero",
+   "use": "calibration",
+   "mass_kg": 5237,
+   "mass_range_kg": [5237, 5237],
+   "mass_basis": "'Weight (lb/kg) 11,545/5,237' в таблице сравнения GE для двигателя 40 500 л. с. (= мощность LM2500+); привязка строки к модели - по выдержке, документ не открыт; силовая турбина принята 6-ступенчатой 3600 об/мин, как у LM2500 (оценка)",
+   "P_kW": 30200, "P_basis": "40 500 л. с. = 30 200 кВт (выдержка поиска); PGT25+ (тот же газогенератор, своя силовая турбина) - 31 364 кВт, открыт",
+   "eta_pct": 41.1,
+   "m_air_kg_s": 84.3, "PR": 21.6, "T_exh_C": 500,
+   "comp": [{"type": "A", "n": 17}],
+   "turb_gg": {"type": "A", "n": 2}, "turb_pt": {"type": "A", "n": 6},
+   "rpm_gg": null, "rpm_pt": 3600,
+   "combustor": {"kind": "annular", "n_inj": 30},
+   "sources": {
+    "mass_kg": {"url": "https://www.geaerospace.com/sites/default/files/datasheet-lm2500plusg4.pdf", "quote": "Weight (lb/kg) 11,545/5,237 (выдержка поиска: таблица сравнения GE; к какой модели строка - не проверено)", "status": "по выдержке поиска"},
+    "comp/PR/flow/T_exh": {"url": "https://www.manualsdir.com/manuals/106729/ge-gas-turbine.html?page=16", "quote": "Seventeen stage axial compressor ... Two stage Gas Generator turbine; таблица стр. 29: PGT25+ 31,364 kW ... 41.1 % 21.6 84.3 kg/sec 6,100 RPM 500 °C", "status": "открыт", "url_table": "https://www.manualsdir.com/manuals/106729/ge-gas-turbine.html?page=29"}
+   }
+  },
+  {
+   "id": "lm6000",
+   "name": "GE LM6000 (компрессоры НД 5 + ВД 14, турбины ВД 2 + НД, выход 3600 об/мин)",
+   "practice": "aero",
+   "use": "calibration",
+   "mass_kg": 7863,
+   "mass_range_kg": [7337, 7863],
+   "mass_basis": "'The LM6000 weighs only 17,336 pounds (7,863 kilograms)' (каталог GE Marine); в другой выдержке 16 180 lb (7337 кг) без ясной привязки - нижняя граница разброса",
+   "P_kW": 43679, "P_basis": "механический привод ISO (таблица GE Oil & Gas)",
+   "eta_pct": 41.9,
+   "m_air_kg_s": 126.5, "PR": 27.9, "T_exh_C": 455,
+   "comp": [{"type": "A", "n": 5, "spool": "lp"}, {"type": "A", "n": 14, "spool": "hp"}],
+   "comp_note": "компрессор НД (5 ступеней) - на валу турбины НД (3600 об/мин), ВД (14) - своя частота по окружной скорости; π ступеней равные (оценка)",
+   "turb_gg": {"type": "A", "n": 2}, "turb_pt": {"type": "A", "n": 6},
+   "turb_pt_note": "в брошюре GE Oil & Gas 2005 напечатано 'Six stage LPT' - принято как напечатано",
+   "rpm_gg": null, "rpm_pt": 3600,
+   "combustor": {"kind": "annular", "n_inj": 30},
+   "sources": {
+    "mass_kg": {"url": "https://pdf.aeroexpo.online/pdf/ge-aviation/lm6000pc/169836-1974.html", "quote": "The LM6000 weighs only 17,336 pounds (7,863 kilograms) which is less than half the weight of other large aeroderivative gas turbines (выдержка поиска)", "status": "по выдержке поиска"},
+    "comp/turb/PR": {"url": "https://www.manualsdir.com/manuals/106729/ge-gas-turbine.html?page=17", "quote": "LPC five stage - HPC fourteen stage - Pressure ratio 28,5:1 ... Two stage HPT - Six stage LPT (3600 RPM)", "status": "открыт"},
+    "P/eta/flow/T_exh": {"url": "https://www.manualsdir.com/manuals/106729/ge-gas-turbine.html?page=29", "quote": "LM6000 43,679 kW ... 41.9 % 27.9 126.5 kg/sec ... 3,600 RPM 455 °C", "status": "открыт"}
+   }
+  },
+  {
+   "id": "sgta05_kb5",
+   "name": "Siemens SGT-A05 KB5S (Allison 501-K), одновальный",
+   "practice": "aero",
+   "use": "calibration",
+   "mass_kg": 783,
+   "mass_range_kg": [766, 800],
+   "mass_basis": "конфликт: Siemens - семейство SGT-A05 'weighs less than 766 Kg (1,690 pounds)'; Centrax (упаковщик) - KB5 '800kg (1764lb)'. Принята середина 783 кг, разброс 766-800 кг",
+   "P_kW": 4000, "P_basis": "4,0 МВт на клеммах генератора (Siemens); на вал двигателя пересчёт по сноске брошюры: 'Assumes 98.5% generator efficiency and 60 kw shaft gearbox power loss'",
+   "P_is_electric": true, "eta_gen": 0.985, "loss_gear_kW": 60,
+   "eta_pct": 29.7,
+   "m_air_kg_s": 15.4, "PR": 10.3, "T_exh_C": 560,
+   "comp": [{"type": "A", "n": 14}],
+   "turb_gg": {"type": "A", "n": 4}, "turb_pt": null,
+   "rpm_gg": 14200, "rpm_pt": null,
+   "combustor": {"kind": "can", "n_cans": 6, "n_inj": 6},
+   "combustor_note": "у семейства 501-K - трубчато-кольцевая камера (6 жаровых труб) - по памяти, не проверено (оценка)",
+   "sources": {
+    "mass_kg (Siemens)": {"url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf", "quote": "The SGT-A05 measures less than 2.7 meters (8 feet) long and weighs less than 766 Kg (1,690 pounds).", "status": "открыт (брошюра, стр. 11)"},
+    "mass_kg (Centrax)": {"url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB5-web.pdf", "quote": "Aero-derivative single shaft design 800kg (1764lb)", "status": "открыт в паспорте routes/gtu/fleet/gtu_fleet_sgta05.json (sources.engine_kg_alt_centrax)"},
+    "P/eta/PR/flow/rpm/T_exh": {"url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf", "quote": "SGT-A05 KB5S 4.0 MW(e) ... 29.7% ... 14,200 rpm ... 10.3 : 1 ... 15.4 kg/s ... 560 °C", "status": "открыт (стр. 5)"},
+    "stages": {"url": "routes/gtu/fleet/gtu_fleet_sgta05.json", "quote": "comp_stages 14; turb_stages 4 (Centrax KB5)", "status": "открыт в паспорте fleet"}
+   }
+  },
+  {
+   "id": "sgta05_kb7he",
+   "name": "Siemens SGT-A05 KB7HE, одновальный (14 ступеней + нулевая)",
+   "practice": "aero",
+   "use": "calibration",
+   "mass_kg": 1000,
+   "mass_range_kg": [766, 1000],
+   "mass_basis": "Centrax - KB7HE '1000kg (2205lb)'; Siemens для семейства - '< 766 кг' (конфликт не снят, паспорт fleet оставил engine_kg = null). Принято 1000 кг (единственное число для этого исполнения)",
+   "P_kW": 5800, "P_basis": "5,8 МВт на клеммах (Siemens); на вал - по сноске брошюры (генератор 98,5 %, редуктор 60 кВт)",
+   "P_is_electric": true, "eta_gen": 0.985, "loss_gear_kW": 60,
+   "eta_pct": 33.2,
+   "m_air_kg_s": 21.4, "PR": 14.4, "T_exh_C": 508,
+   "comp": [{"type": "A", "n": 15}],
+   "turb_gg": {"type": "A", "n": 4}, "turb_pt": null,
+   "rpm_gg": 14600, "rpm_pt": null,
+   "combustor": {"kind": "can", "n_cans": 6, "n_inj": 6},
+   "sources": {
+    "mass_kg": {"url": "https://centraxgt.com/wp-content/uploads/2025/07/Datasheet-CXA05-KB7-web.pdf", "quote": "Aero-derivative single shaft design 1000kg (2205lb)", "status": "открыт в паспорте routes/gtu/fleet/gtu_fleet_sgta05.json; конфликт с Siemens '< 766 Kg'"},
+    "P/eta/PR/flow/rpm/T_exh": {"url": "https://assets.siemens-energy.com/dam/9007e5e8-18a5-430f-ad70-b03d0189a8d7/sgt-a05-brochure-2018-v8-web-pdf_Original%20file.pdf", "quote": "SGT-A05 KB7HE 5.8 MW(e) ... 33.2% ... 14,600 rpm ... 14.4 : 1 ... 21.4 kg/s ... 508 °C", "status": "открыт (стр. 5)"}
+   }
+  },
+  {
+   "id": "kg2_3",
+   "name": "Kongsberg KG2-3 (всё радиальное: одно центробежное колесо + радиальная турбина), 1970-е",
+   "practice": "industrial",
+   "use": "check",
+   "use_note": "проверка, не калибровка: расход и степень сжатия в открытых источниках не найдены - для размеров приняты π 4,0 и температура выхлопа 560 °C (оценка), частота из оптимального коэффициента расхода",
+   "mass_kg": 2495,
+   "mass_range_kg": [2495, 2495],
+   "mass_basis": "'weight at 5500 lb (2495 kg)' при 'maximum output of 1700 bhp ... normal rating 1600 bhp'; что входит в массу - по выдержке не уточнено",
+   "P_kW": 1193, "P_basis": "1600 bhp × 0,7457 (нормальный режим)",
+   "eta_pct": null,
+   "m_air_kg_s": null, "PR": 4.0, "PR_basis": "оценка", "T_exh_C": 560, "T_exh_basis": "оценка",
+   "comp": [{"type": "C", "sides": 1}],
+   "turb_gg": {"type": "R"}, "turb_pt": null,
+   "rpm_gg": null, "rpm_pt": null,
+   "combustor": {"kind": "silo", "n_inj": 1},
+   "sources": {
+    "mass_kg/P": {"url": "https://trid.trb.org/View/2450", "quote": "KG 2-3 ... maximum output of 1700 bhp at 20 C inlet air temperature (normal rating 1600 bhp) ... weight at 5500 lb (2495 kg) (выдержка поиска)", "status": "по выдержке поиска"}
+   }
+  }
+ ],
+ "reference_only": [
+  {"id": "d336", "name": "Мотор Сич Д-336 (газотурбинный привод ГПА, авиационный)", "practice": "aero", "mass_kg": 1470, "P_kW": 6300, "eta_pct": 31.0,
+   "note": "расход и степень сжатия в выдержке нет - в калибровку не входит; 'масса привода' - что входит, не уточнено",
+   "source": {"url": "https://motorsich.com/eng/products/land/seriynaya/ge/d-336/", "quote": "Номинальная мощность 6300 кВт; масса 1470 кг; эффективный КПД не менее 31 % (выдержка поиска)", "status": "по выдержке поиска"}},
+  {"id": "ase40b", "name": "Vericor ASE40B (промышленный вариант Lycoming T55)", "practice": "aero", "mass_kg": 601, "P_kW": 3200, "eta_pct": null,
+   "note": "турбовальный авиационный - нижняя граница удельной массы; в калибровку не входит",
+   "source": {"url": "https://www.vericor.com/products/ase40/", "quote": "Continuous Power 4,291 shp 3,200 kW ... Weight 1,325 lb 601 kg (выдержка поиска)", "status": "по выдержке поиска"}},
+  {"id": "ase50b", "name": "Vericor ASE50B", "practice": "aero", "mass_kg": 654, "P_kW": 3682, "eta_pct": null,
+   "source": {"url": "https://www.vericor.com/wp-content/uploads/2023/12/04-23-ASE40-ASE50B-ENG-P03.pdf", "quote": "ASE50B 4,938 shp 3,682 kW ... Weight 1,440 lb 654 kg (выдержка поиска)", "status": "по выдержке поиска"}}
+ ],
+ "packages": [
+  {"id": "taurus60_md_skid", "name": "Solar Taurus 60 MD - приводной модуль (рама, двигатель, маслосистема, пуск), без кожуха, без масла", "mass_kg": 15422, "engine_kg": 3290, "P_kW": 5740,
+   "source": {"url": "https://www.manualsdir.com/manuals/214702/taurus-group-60.html?page=9", "quote": "Total Driver (unenclosed package, without oil) 15 422 kg (34,000 lb)", "status": "открыт"}},
+  {"id": "taurus70_md_skid", "name": "Solar Taurus 70 MD - приводной модуль без кожуха, без масла", "mass_kg": 24494, "engine_kg": 5630, "P_kW": 7690,
+   "source": {"url": "https://www.manualsdir.com/manuals/66910/caterpillar-taurus-70.html?page=9", "quote": "Total Driver (unenclosed package, without oil) 24 494 kg (54,000 lb)", "status": "открыт"}},
+  {"id": "titan250_gs_skid", "name": "Solar Titan 250 GS - приводной модуль без кожуха, без масла (без генератора)", "mass_kg": 49900, "engine_kg": 19050, "P_kW": 22370,
+   "source": {"url": "https://www.manualsdir.com/manuals/59759/cat-titan-250.html?page=9", "quote": "Total Driver (unenclosed package, without oil) 49 900 kg (110,000 lb)", "status": "открыт"}},
+  {"id": "mercury50_vs_centaur50", "name": "Solar Mercury 50 GS (рекуператор первичной поверхности) против Centaur 50 GS - пакеты одной мощности 4600 кВт", "mass_kg": 45700, "ref_mass_kg": 37785, "P_kW": 4600,
+   "note": "разность 7915 кг = рекуператор с газоходами + более длинный пакет (11,1 м против 9,8 м) + разница двигателей (Mercury: 10 ступеней, π 9,9; Centaur 50: 11 ступеней, π 10,6). Верхняя граница массы системы рекуператора, не её масса",
+   "source": {"url": "routes/gtu/fleet/gtu_fleet_mercury50.json; routes/gtu/fleet/gtu_fleet_centaur50.json", "quote": "Mercury 50 GS pkg_kg 45 700 (DSM50PG/1118); Centaur 50 GS pkg_kg 37 785", "status": "открыт в паспортах fleet"}},
+  {"id": "capstone_c65", "name": "Capstone C65 (рекуператор, воздушные подшипники, высокооборотный генератор, силовая электроника, кожух), сеть", "mass_kg": 758, "P_kW": 65, "eta_pct": null,
+   "note": "масса всего блока с генератором и электроникой; КПД в выдержке нет",
+   "source": {"url": "https://d1io3yog0oux5.cloudfront.net/_7343c66b0bbfdaf8b5c0fee2d0c8bce7/capstonegreenenergy/db/235/9453/file/Data+Sheet_Digester+Gas.pdf", "quote": "Width x Depth x Height 0.76 x 1.95 x 2.08 m ... grid-connect version weighs 758 kg, dual-mode 1,121 kg (выдержка поиска)", "status": "по выдержке поиска"}},
+  {"id": "capstone_c200", "name": "Capstone C200 (сеть)", "mass_kg": 2270, "mass_range_kg": [2270, 2776], "P_kW": 200,
+   "source": {"url": "https://d1io3yog0oux5.cloudfront.net/_18a8265537239cb4513d1501f53d28d1/capstoneturbine/db/235/7016/file/C200+HPNG_331043A_lowres.pdf", "quote": "1700 x 3660 x 2490 mm ... 2270 kg (grid connect); другая редакция 2730 kg; HPNG 2,776 kg (выдержки поиска)", "status": "по выдержке поиска; конфликт редакций"}},
+  {"id": "capstone_c1000", "name": "Capstone C1000 (5 ядер по 200 кВт), сеть, старая редакция", "mass_kg": 7711, "P_kW": 1000,
+   "source": {"url": "https://pdf.directindustry.com/pdf/capstone-turbine/c1000-product-literature/22062-58086.html", "quote": "2438 x 8534 x 2896 mm, weight 7,711 kg (grid connect) (выдержка поиска); C1000S - 17 100 kg", "status": "по выдержке поиска"}}
+ ],
+ "not_used": [
+  {"what": "GE Oil & Gas 2005, стр. 30: массы рам газовых турбин без кожуха (28 000 ... 217 500 кг)", "why": "в тексте страницы 14 строк масс на 15 моделей - соответствие строк моделям неоднозначно", "url": "https://www.manualsdir.com/manuals/106729/ge-gas-turbine.html?page=30"},
+  {"what": "SGT-A65 (Industrial Trent 60): пакеты 190 512 и 106 000 кг", "why": "масса пакета с генератором, двигатель отдельно не найден", "url": "https://pdf.directindustry.com/pdf/siemens-power-genereration/sgt-a65-gas-turbine/23116-773844.html"},
+  {"what": "Kawasaki M1A/M5A/M7A: массы пакетов в таблице gtgs.pdf", "why": "текст таблицы перемешан в выдержке, хост не разрешён", "url": "https://global.kawasaki.com/assets/pdf/en/gtgs.pdf"},
+  {"what": "OPRA OP16, Solar Saturn 20 / Centaur / Mars, MAN MGT6000, АЛ-31СТ, ПС-90ГП-2, НК-16СТ", "why": "масса двигателя в открытых выдержках не найдена (есть только массы пакетов или авиационных прототипов)", "url": null}
+ ]
+}

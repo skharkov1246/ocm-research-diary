@@ -1,0 +1,84 @@
+{
+ "_comment": "Устойчивый отбор, отладка: Монте-Карло 150 вариантов отладочного уровня 1 (aws/l1_debug - после прогона jobs_l1_debug.json). Сгенерировано make_jobs_uq.py.",
+ "defaults": {
+  "instance_type": "c7a.16xlarge",
+  "fallback_types": [
+   "c7i.16xlarge"
+  ],
+  "image": "al2023",
+  "disk_gb": 30,
+  "python": "3.12",
+  "pip": [
+   "cantera==3.2.0",
+   "scipy==1.18.1",
+   "numpy==2.5.3"
+  ]
+ },
+ "jobs": [
+  {
+   "name": "uq-l1_debug-m0",
+   "command": "python routes/gtu/funnel/uq/uq_l1.py --l1-in routes/gtu/funnel/aws/l1_debug --l1-kv KV-3 --l1-m 150 --l1-shards 10 --n 500 --n-od 100 --od auto --od-pdp-min 0.2 --od-score-min 4.5 --shards 10 --shard 0,1,2,3,4,5,6,7,8,9 --tag _l1_debug --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 45
+  }
+ ],
+ "merge": {
+  "uq-l1_debug": "python3 routes/gtu/funnel/uq/merge_uq.py --kv KV-3 --shards 10 --tag _l1_debug --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/uq/aws/l1_debug --suffix _l1_debug"
+ },
+ "estimate": {
+  "machine_hours": 0.346,
+  "usd": {
+   "spot_expected": 0.244,
+   "spot_alt": 0.259,
+   "disk_ipv4": 0.0029,
+   "s3_month": 0.0011,
+   "transfer": 0.0045,
+   "total_expected": 0.268
+  },
+  "upper_bound_usd": 1.31,
+  "core_hours": 15.76,
+  "machines": 1,
+  "groups": {
+   "uq-l1_debug": {
+    "core_hours": 15.76,
+    "machines": 1,
+    "compute_min_per_machine": 14.8,
+    "max_min": 45,
+    "kv": "KV-3",
+    "candidates_assumed": 150,
+    "n": 500,
+    "n_od": 100,
+    "od_rule": {
+     "pdp_min": 0.2,
+     "score_min": 4.5
+    },
+    "assume": {
+     "od_frac": 0.2,
+     "p_dp_at_od": 0.4
+    },
+    "core_s_basis": "SAFETY × (K·(N + 1)·t_расч + K·доля·N_od·P·t_нерасч)"
+   }
+  },
+  "safety": 1.5,
+  "price": {
+   "expected": 0.706,
+   "alt": 0.748,
+   "upper": 1.4206,
+   "basis": "ожидаемая: спот c7a.16xlarge us-east-1c 0,706 долл./ч, us-east-1b 0,748 (замер сессии с ключами 22:08 14.11.2026, задача владельца); верхняя граница: MaxPrice раннера 1,4206 долл./ч (максимум по зонам × 1,2, ledger.jsonl живого прогона smoke 22:14 14.11.2026)"
+  },
+  "upper_bound_rule": "раннер: (MaxPrice + диск + IPv4) × (max_min + 10) / 60 на машину"
+ },
+ "needs": [
+  "routes/gtu/funnel/aws/l1_debug/funnel_l1_KV-3_m150_s*of010.json.gz в ветке"
+ ],
+ "plan_check": {
+  "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/funnel/uq/jobs_uq_debug.json --branch claude/lucid-allen-yvps5d --assume-price 0.748 --assume-zone-prices us-east-1a=0.955,us-east-1b=0.748,us-east-1c=0.706",
+  "exit_code": 0,
+  "lines": [
+   "[задача] uq-l1_debug-m0: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 45 мин",
+   "[бюджет] uq-l1_debug-m0 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 0.00 + новая 1.06 = 2.37 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] uq-l1_debug-m0 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[план] прогноз пакета 1.06 долл. (цена спота — допущение 0.748/ч)"
+  ],
+  "runner_note": "раннер v2 в ветке claude/lucid-allen-yvps5d (поля python, pip, NPROC, самая дешёвая зона); run - с --branch claude/lucid-allen-yvps5d (без него раннер клонирует main); при правке раннера повторить plan"
+ }
+}

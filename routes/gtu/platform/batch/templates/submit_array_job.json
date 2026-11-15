@@ -1,0 +1,13 @@
+{
+  "jobName": "${JOB_NAME}",
+  "jobQueue": "${JQ_NAME}",
+  "jobDefinition": "${JD_NAME}",
+  "arrayProperties": {"size": "${ARRAY_SIZE}"},
+  "parameters": {"job_uri": "${JOB_URI}"},
+  "timeout": {"attemptDurationSeconds": "${ATTEMPT_DURATION_S}"},
+  "propagateTags": true,
+  "tags": {
+    "Project": "${PROJECT_TAG}",
+    "RunId": "${RUN_ID}"
+  }
+}

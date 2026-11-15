@@ -14,6 +14,9 @@
 
 Система координат: ось z - ось вращения, поток входит вдоль +z; колесо вращается в сторону +theta
 (вектор угловой скорости +z); periodic_2 = поворот periodic_1 на +360/Z вокруг z.
+Размеры из внешнего одномерного расчёта можно задать (D1s, nu, b2, Lz, beta1h, beta1s, beta2b, Z, gap), как и
+полные параметры на входе (T01, p01; по умолчанию стандартные). Двустороннее колесо (double_sided): m - расход
+колеса, одна сторона (1D-увязка, канал, сетка) - на m/2, STEP - обе стороны зеркально на общем диске.
 Запуск: python impeller.py --case core130 --level coarse
 """
 import argparse
@@ -63,6 +66,14 @@ DEFAULTS = dict(
     r_bore=0.35,          # радиус центрального отверстия / r1h (твёрдотельная модель)
     n_st=28,              # сечений лофта лопатки
     n_sheet=44,           # сечений лофта периодической поверхности
+    # заданные размеры из внешнего одномерного расчёта (None - как раньше, из формул узла)
+    double_sided=False,   # двусторонний вход: две зеркальные стороны на общем диске; m - расход колеса,
+                          # одна сторона (1D-увязка, канал, сетка) - на m/2; твёрдое тело - обе стороны
+    D1s=None,             # диаметр периферии входа, м; None - по минимуму относительной скорости
+    b2=None,              # ширина канала на выходе (одной стороны), м; None - формула comp_stage
+    Lz=None,              # осевая длина колеса по втулке, м; None - корреляция Аунгира
+    beta1h=None,          # угол лопатки на входе у втулки, град от осевого; None - треугольник + incidence
+    beta1s=None,          # то же на периферии
 )
 
 
@@ -161,13 +172,15 @@ def _seg_dist(pts, poly):
 class Impeller:
     """Параметры, одномерная увязка и описание поверхностей колеса (без Gmsh)."""
 
-    def __init__(self, m, PR, rpm=None, D2=None, case="custom", material="ti", source="задано вручную", **over):
+    def __init__(self, m, PR, rpm=None, D2=None, case="custom", material="ti", source="задано вручную",
+                 T01=None, p01=None, **over):
         unknown = set(over) - set(DEFAULTS)
         if unknown:
             raise ValueError(f"неизвестные параметры: {sorted(unknown)}")
         self.p = dict(DEFAULTS)
         self.p.update({k: v for k, v in over.items() if v is not None or k in ("beta2b", "gap")})
         self.case, self.material, self.source = case, material, source
+        self.T01_in, self.p01_in = T01, p01  # полные параметры на входе; None - стандартные (gtu_explore.T0, P0)
         self._check_inputs(m, PR, rpm, D2)
         self.warnings = []
         self._size_1d(m, PR, rpm, D2)
@@ -196,6 +209,16 @@ class Impeller:
             bad.append(f"beta2b = {p['beta2b']} (нужно 0 <= beta2b < 70 град)")
         if self.material not in ("ti", "al"):
             bad.append(f"материал {self.material!r} (ti или al)")
+        for k, v in (("T01", self.T01_in), ("p01", self.p01_in), ("D1s", p["D1s"]), ("b2", p["b2"]), ("Lz", p["Lz"])):
+            if v is not None and not v > 0:
+                bad.append(f"{k} = {v} (нужно > 0)")
+        if p["D1s"] is not None and D2 is not None and p["D1s"] >= D2:
+            bad.append(f"D1s = {p['D1s']} не меньше D2 = {D2}")
+        if p["b2"] is not None and p["Lz"] is not None and p["Lz"] <= p["b2"]:
+            bad.append(f"Lz = {p['Lz']} не больше b2 = {p['b2']}")
+        for k in ("beta1h", "beta1s"):
+            if p[k] is not None and not 0.0 < p[k] < 90.0:
+                bad.append(f"{k} = {p[k]} (нужно 0 < {k} < 90 град)")
         if bad:
             raise ValueError("недопустимые исходные данные: " + "; ".join(bad))
 
@@ -203,8 +226,12 @@ class Impeller:
     def _size_1d(self, m, PR, rpm, D2):
         E = load_explore()
         p = self.p
-        T01, p01 = E.T0, E.P0
-        st = E.comp_stage(T01, p01, PR, m, "ti")
+        T01 = E.T0 if self.T01_in is None else float(self.T01_in)
+        p01 = E.P0 if self.p01_in is None else float(self.p01_in)
+        dbl = bool(p["double_sided"])
+        ms = m / 2 if dbl else m  # расход одной стороны: по нему вход, b2, коэффициент расхода и канал
+        given = [k for k in ("D1s", "b2", "Lz", "beta1h", "beta1s") if p[k] is not None]
+        st = E.comp_stage(T01, p01, PR, m, "ti", dbl)
         src = "comp_stage"
         if D2 is None and rpm is None:
             D2, rpm = st["D2"], st["rpm"]
@@ -224,7 +251,7 @@ class Impeller:
         # плотность и Cm2/U2 на выходе - те же допущения, что в comp_stage
         rho2 = rho01 * PR ** 0.62 / ((T01 + 0.6 * (T2 - T01)) / T01)
         phi2 = 0.28
-        b2 = m / (math.pi * D2 * rho2 * phi2 * U2)
+        b2 = ms / (math.pi * D2 * rho2 * phi2 * U2) if p["b2"] is None else float(p["b2"])
         gap = p["gap"] if p["gap"] is not None else max(0.3e-3, 0.0007 * D2)
 
         # вход: D1s - минимум относительной скорости на периферии при заданном nu (без закрутки)
@@ -245,9 +272,9 @@ class Impeller:
                 g = cp(T1) / (cp(T1) - RA)
                 Cs = math.sqrt(g * RA * T1)
             T1, p1 = stat(Cs)
-            if p1 / (RA * T1) * Cs * A < m:
+            if p1 / (RA * T1) * Cs * A < ms:
                 return None
-            f = lambda C: stat(C)[1] / (RA * stat(C)[0]) * C * A - m
+            f = lambda C: stat(C)[1] / (RA * stat(C)[0]) * C * A - ms
             C = brentq(f, 1e-3, Cs)
             T1, p1 = stat(C)
             return C, T1, p1
@@ -256,12 +283,19 @@ class Impeller:
             fl = flow(r1s)
             return 1e9 if fl is None else math.hypot(fl[0], Om * r1s)
 
-        grid = np.linspace(0.15 * r2, 0.95 * r2, 161)
-        vals = [W1s(x) for x in grid]
-        k = int(np.argmin(vals))
-        res = minimize_scalar(W1s, bounds=(grid[max(k - 1, 0)], grid[min(k + 1, len(grid) - 1)]), method="bounded",
-                              options=dict(xatol=1e-6))
-        r1s = float(res.x)
+        if p["D1s"] is None:
+            grid = np.linspace(0.15 * r2, 0.95 * r2, 161)
+            vals = [W1s(x) for x in grid]
+            k = int(np.argmin(vals))
+            res = minimize_scalar(W1s, bounds=(grid[max(k - 1, 0)], grid[min(k + 1, len(grid) - 1)]), method="bounded",
+                                  options=dict(xatol=1e-6))
+            r1s = float(res.x)
+        else:
+            r1s = 0.5 * float(p["D1s"])
+            if r1s >= r2:
+                raise ValueError(f"D1s = {2 * r1s} не меньше D2 = {D2}")
+            if flow(r1s) is None:
+                raise ValueError(f"заданный вход D1s = {2 * r1s} м (nu = {nu}) запирается при расходе {ms} кг/с")
         C1, T1, p1 = flow(r1s)
         r1h = nu * r1s
         g1 = cp(T1) / (cp(T1) - RA)
@@ -272,8 +306,10 @@ class Impeller:
         if W1 / a1 > 1.3:
             self.warnings.append(f"относительное число Маха на периферии входа {W1 / a1:.2f} > 1,3: "
                                  "трансзвуковой вход, потери и запас по помпажу - проверять расчётом SU2")
-        b1h = math.degrees(math.atan(Om * r1h / C1)) + p["incidence"]
-        b1s = math.degrees(math.atan(Om * r1s / C1)) + p["incidence"]
+        # углы потока на входе по своему треугольнику (без загромождения); заданные углы лопатки - как есть
+        b1h_flow, b1s_flow = math.degrees(math.atan(Om * r1h / C1)), math.degrees(math.atan(Om * r1s / C1))
+        b1h = b1h_flow + p["incidence"] if p["beta1h"] is None else float(p["beta1h"])
+        b1s = b1s_flow + p["incidence"] if p["beta1s"] is None else float(p["beta1s"])
 
         # выход: загиб назад по формуле Визнера. У Визнера коэффициент проскальзывания определён через скорость
         # проскальзывания: sigma = 1 - Cслип/U2 = 1 - sqrt(cos b)/Z^0.7, поэтому при входе без закрутки
@@ -301,14 +337,15 @@ class Impeller:
                                  "проскальзывание занижено, загиб назад - проверять расчётом SU2")
 
         # осевая длина: корреляция Аунгира (по вторичным источникам)
-        phi = m / (rho01 * math.pi * r2 ** 2 * U2)
-        Lz = D2 * (0.014 + 0.023 * D2 / (2 * r1h) + 1.58 * phi)
+        phi = ms / (rho01 * math.pi * r2 ** 2 * U2)
+        Lz = D2 * (0.014 + 0.023 * D2 / (2 * r1h) + 1.58 * phi) if p["Lz"] is None else float(p["Lz"])
         Ls = Lz - b2
         if Ls < 0.5 * (r2 - r1s):
             self.warnings.append("осевая длина покрышки мала, увеличена до 0,5 (r2 - r1s)")
             Ls = 0.5 * (r2 - r1s); Lz = Ls + b2
 
         self.d1 = dict(m=m, PR=PR, rpm=rpm, D2=D2, r2=r2, U2=U2, omega=Om, sizing=src,
+                       double_sided=dbl, m_side=ms, given=given, beta1h_flow=b1h_flow, beta1s_flow=b1s_flow,
                        T01=T01, p01=p01, w=w, T2=T2, psi=psi, eta_comp_stage=st["eta"],
                        comp_stage=dict(D2=st["D2"], rpm=st["rpm"], U2=st["U2"], b2=st["b2"]),
                        phi=phi, phi2=phi2, rho01=rho01, rho2=rho2, b2=b2, gap=gap,
@@ -610,14 +647,21 @@ def _init(gmsh, threads, verbose):
 
 
 def build_solid(imp, path, threads=4, verbose=False):
-    """твёрдотельная модель колеса: втулка с задним диском + Z основных лопаток + Z полулопаток -> STEP"""
+    """твёрдотельная модель колеса: втулка с задним диском + Z основных лопаток + Z полулопаток -> STEP.
+    Двустороннее колесо (double_sided): та же сторона, отражённая зеркально относительно средней плоскости
+    общего диска; лопатки сторон - напротив друг друга (принято). Общий диск толщиной
+    max(t_back D2; 2 * 1,5 * 0,25 b2) - корни лопаток обеих сторон (0,25 b2) в него входят и не встречаются."""
     gmsh = _gmsh()
     _init(gmsh, threads, verbose)
     try:
         occ = gmsh.model.occ
         gmsh.model.add("impeller")
         d, p = imp.d1, imp.p
-        t_back = max(p["t_back"] * d["D2"], 1.5 * 0.25 * d["b2"])
+        dbl = bool(p["double_sided"])
+        if dbl:  # t_back - от плоскости втулки на выходе до средней плоскости общего диска (половина его толщины)
+            t_back = 0.5 * max(p["t_back"] * d["D2"], 2 * 1.5 * 0.25 * d["b2"])
+        else:
+            t_back = max(p["t_back"] * d["D2"], 1.5 * 0.25 * d["b2"])
         z_n, z_bk, r_b = -0.3 * d["r1h"], d["Lz"] + t_back, p["r_bore"] * d["r1h"]
         P0, P1 = _merid_pt(occ, z_n, r_b), _merid_pt(occ, z_n, d["r1h"])
         hb = _bezier_curve(occ, imp.Ph)
@@ -638,7 +682,7 @@ def build_solid(imp, path, threads=4, verbose=False):
         occ.synchronize()
         V_ov = sum(occ.getMass(3, t) for dd, t in ov if dd == 3)
         occ.remove(ov, recursive=True)
-        V = V_hub + p["Z"] * (V_bl - V_ov)
+        V = (V_hub + p["Z"] * (V_bl - V_ov)) * (2 if dbl else 1)
         tools = [(3, b) for b in base]
         for k in range(1, p["Z"]):
             cp = occ.copy([(3, b) for b in base])
@@ -646,6 +690,13 @@ def build_solid(imp, path, threads=4, verbose=False):
             tools += cp
         out, _ = occ.fuse([(3, hub)], tools)
         vols = [t for dd, t in out if dd == 3]
+        if dbl and len(vols) == 1:
+            # вторая сторона - зеркало готовой стороны относительно z = z_bk (средняя плоскость общего диска);
+            # два тела сплавляются быстрее, чем 2 + 4Z тел сразу
+            mir = occ.copy([(3, vols[0])])
+            occ.mirror(mir, 0, 0, 1, -z_bk)
+            out, _ = occ.fuse([(3, vols[0])], mir)
+            vols = [t for dd, t in out if dd == 3]
         _keep_only(gmsh, vols)
         if len(vols) != 1:
             raise RuntimeError(f"твёрдое тело колеса: {len(vols)} тел вместо 1")
@@ -653,6 +704,7 @@ def build_solid(imp, path, threads=4, verbose=False):
         gmsh.write(path)
         return dict(step=path, volume_m3=V, mass_kg=dict(ti_6al_4v=V * 4430.0, al_2618=V * 2760.0),
                     volume_parts_m3=dict(hub=V_hub, blade_pair=V_bl, blade_pair_inside_hub=V_ov),
+                    sides=2 if dbl else 1, z_mid_plane=z_bk if dbl else None,
                     bbox_occ=list(bbox), t_back=t_back, r_bore=r_b, z_nose=z_n,
                     n_faces=len(gmsh.model.getEntities(2)))
     finally:
@@ -912,16 +964,22 @@ def _quality(gmsh):
 
 # ----------------------------------------------------------------------------- верхний уровень
 def build(case="core130", level="coarse", out_dir=None, m=None, PR=None, rpm=None, D2=None,
-          step=True, mesh=True, msh=False, threads=4, verbose=False, **over):
+          step=True, mesh=True, msh=False, threads=4, verbose=False, T01=None, p01=None, **over):
     if case == "custom":
         if m is None or PR is None:
             raise ValueError("для --case custom нужны --m и --pr")
-        inp = dict(case="custom", m=m, PR=PR, rpm=rpm, D2=D2, material=over.pop("material", "ti"), source="задано вручную")
+        inp = dict(case="custom", m=m, PR=PR, rpm=rpm, D2=D2, material=over.pop("material", "ti"),
+                   source=over.pop("source", "задано вручную"))
     else:
         inp = case_inputs(case)
         for k, v in (("m", m), ("PR", PR), ("rpm", rpm), ("D2", D2)):
             if v is not None:
                 inp[k] = v; inp["source"] += f"; {k} переопределён: {v}"
+    for k, v in (("T01", T01), ("p01", p01)):
+        if v is not None:
+            inp[k] = v
+            if case != "custom":
+                inp["source"] += f"; {k} переопределён: {v}"
     imp = Impeller(**inp, **over)
     out_dir = out_dir or os.path.join(HERE, "out", f"{case}_{level}")
     os.makedirs(out_dir, exist_ok=True)
@@ -949,7 +1007,9 @@ def build(case="core130", level="coarse", out_dir=None, m=None, PR=None, rpm=Non
                           periodic=dict(master="periodic_1", slave="periodic_2", axis=[0, 0, 1], center=[0, 0, 0],
                                         angle_deg=360.0 / imp.p["Z"],
                                         note="periodic_2 = поворот periodic_1 на +360/Z вокруг +z"),
-                          rotation_rate_rad_s=[0.0, 0.0, imp.d1["omega"]])
+                          rotation_rate_rad_s=[0.0, 0.0, imp.d1["omega"]],
+                          inlet_total=dict(p01_Pa=imp.d1["p01"], T01_K=imp.d1["T01"]),
+                          mass_flow_passage_kg_s=imp.d1["m_side"] / imp.p["Z"])
     res["t_total_s"] = round(time.time() - t0, 1)
     jf = os.path.join(out_dir, f"impeller_{case}_{level}.json")
     with open(jf, "w", encoding="utf-8") as fh:
@@ -1001,6 +1061,17 @@ def main(argv=None):
     ap.add_argument("--beta2b", type=float, help="загиб назад, град от радиали")
     ap.add_argument("--gap", type=float, help="радиальный зазор, м")
     ap.add_argument("--incidence", type=float)
+    ap.add_argument("--t01", type=float, help="полная температура на входе, К (по умолчанию стандартная)")
+    ap.add_argument("--p01", type=float, help="полное давление на входе, Па (по умолчанию стандартное)")
+    ap.add_argument("--double-sided", action="store_true",
+                    help="двусторонний вход: --m - расход колеса, канал и сетка - одной стороны на m/2")
+    ap.add_argument("--d1s", type=float, help="диаметр периферии входа, м")
+    ap.add_argument("--nu", type=float, help="D1h/D1s на входе")
+    ap.add_argument("--b2", type=float, help="ширина канала на выходе (одной стороны), м")
+    ap.add_argument("--lz", type=float, help="осевая длина колеса по втулке, м")
+    ap.add_argument("--beta1h", type=float, help="угол лопатки на входе у втулки, град от осевого")
+    ap.add_argument("--beta1s", type=float, help="угол лопатки на входе на периферии, град от осевого")
+    ap.add_argument("--r-bore", type=float, help="радиус центрального отверстия / r1h (0 - без отверстия)")
     ap.add_argument("--no-step", action="store_true")
     ap.add_argument("--no-mesh", action="store_true")
     ap.add_argument("--msh", action="store_true", help="также записать .msh")
@@ -1008,7 +1079,8 @@ def main(argv=None):
     ap.add_argument("--verbose", action="store_true")
     ap.add_argument("--record", action="store_true", help="дописать краткий итог в impeller_results.json")
     a = ap.parse_args(argv)
-    over = dict(Z=a.z, m_split=a.m_split, incidence=a.incidence)
+    over = dict(Z=a.z, m_split=a.m_split, incidence=a.incidence, D1s=a.d1s, nu=a.nu, b2=a.b2, Lz=a.lz,
+                beta1h=a.beta1h, beta1s=a.beta1s, r_bore=a.r_bore)
     over = {k: v for k, v in over.items() if v is not None}
     if a.beta2b is not None:
         over["beta2b"] = a.beta2b
@@ -1016,9 +1088,13 @@ def main(argv=None):
         over["gap"] = a.gap
     if a.no_splitters:
         over["splitters"] = False
+    if a.double_sided:
+        over["double_sided"] = True
     res = build(a.case, a.level, a.out, a.m, a.pr, a.rpm, a.d2, step=not a.no_step, mesh=not a.no_mesh,
-                msh=a.msh, threads=a.threads, verbose=a.verbose, **over)
+                msh=a.msh, threads=a.threads, verbose=a.verbose, T01=a.t01, p01=a.p01, **over)
     d = res["d1"]
+    if d["double_sided"]:
+        print(f"[{res['case']}] двусторонний вход: сторона на {d['m_side']:.3f} кг/с")
     print(f"[{res['case']}] m={d['m']:.2f} кг/с PR={d['PR']:.2f} n={d['rpm']:.0f} об/мин D2={d['D2']:.4f} м "
           f"U2={d['U2']:.0f} м/с b2={d['b2'] * 1e3:.1f} мм D1s/D2={d['D1s_D2']:.3f} M1s,отн={d['M1s_rel']:.2f} "
           f"beta2b={d['beta2b']:.1f} Lz={d['Lz'] * 1e3:.0f} мм зазор={d['gap'] * 1e3:.2f} мм")

@@ -1,0 +1,215 @@
+{
+ "_comment": "Замер скорости машин для сметы уровней 2–3 воронки (узел bench): SU2 medium/fine на c7a.16xlarge и c7i.16xlarge, CalculiX 3D на c7a.16xlarge. Раннер берёт только defaults и jobs; блоки estimate, merge, plan_check — для сессии с ключами. Код — ветка claude/lucid-allen-yvps5d. Сгенерировано make_jobs_bench.py; правки — в нём. Запускать до длинных серий SU2 узла su2: замер уточняет их max_min и смету.",
+ "defaults": {
+  "instance_type": "c7a.16xlarge",
+  "fallback_types": [],
+  "image": "al2023",
+  "container": "ubuntu:24.04",
+  "disk_gb": 60
+ },
+ "jobs": [
+  {
+   "name": "bench-su2-c7a16",
+   "instance_type": "c7a.16xlarge",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+    "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+    "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+    "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+   ],
+   "max_min": 90,
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\n{ cat /opt/su2/VERSION; mpirun --version | head -n 1; python -V; echo \"nproc $(nproc) NPROC $NPROC itype ${GTU_ITYPE:-} az ${GTU_AZ_MACHINE:-}\"; lscpu | head -n 20; free -g; df -h /tmp; } > \"$GTU_OUT/env.txt\" 2>&1 || true\ngit rev-parse HEAD > \"$GTU_OUT/commit.txt\" 2>/dev/null || true\npython routes/gtu/platform/bench/speed_su2.py run --case core130 --levels medium,fine --config medium=64x1,32x2,16x4 --config fine=64x1,32x2 --warm 40 --iters 100 --nproc \"$NPROC\" --mpi-args=--use-hwthread-cpus --job-max-min 90 --su2-src /opt/SU2-src --work /tmp/gtu_speed_su2 --out \"$GTU_OUT\""
+  },
+  {
+   "name": "bench-su2-c7i16",
+   "instance_type": "c7i.16xlarge",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+    "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+    "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+    "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+   ],
+   "max_min": 90,
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\n{ cat /opt/su2/VERSION; mpirun --version | head -n 1; python -V; echo \"nproc $(nproc) NPROC $NPROC itype ${GTU_ITYPE:-} az ${GTU_AZ_MACHINE:-}\"; lscpu | head -n 20; free -g; df -h /tmp; } > \"$GTU_OUT/env.txt\" 2>&1 || true\ngit rev-parse HEAD > \"$GTU_OUT/commit.txt\" 2>/dev/null || true\npython routes/gtu/platform/bench/speed_su2.py run --case core130 --levels medium,fine --config medium=64x1,32x2,16x4 --config fine=64x1,32x2 --warm 40 --iters 100 --nproc \"$NPROC\" --mpi-args=--use-hwthread-cpus --job-max-min 90 --su2-src /opt/SU2-src --work /tmp/gtu_speed_su2 --out \"$GTU_OUT\""
+  },
+  {
+   "name": "bench-ccx-c7a16",
+   "instance_type": "c7a.16xlarge",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv git ca-certificates libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt pytest==9.2.0",
+    "/opt/venv/bin/python -c 'import numpy, scipy, gmsh; print(\"py ok\", numpy.__version__, gmsh.__version__)'",
+    "{ ccx -v || true; } > /opt/ccx_version.txt 2>&1",
+    "grep -q 'Version 2.21' /opt/ccx_version.txt"
+   ],
+   "max_min": 100,
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:$PATH\" PYTHONDONTWRITEBYTECODE=1\n{ cat /opt/ccx_version.txt; python -V; echo \"nproc $(nproc) NPROC $NPROC itype ${GTU_ITYPE:-} az ${GTU_AZ_MACHINE:-}\"; lscpu | head -n 20; free -g; df -h /tmp; } > \"$GTU_OUT/env.txt\" 2>&1 || true\ngit rev-parse HEAD > \"$GTU_OUT/commit.txt\" 2>/dev/null || true\npython routes/gtu/platform/bench/speed_ccx.py run --case core130 --targets 50000,150000,450000 --threads 1,8,64 --pack 8 --freq-max-nodes 250000 --nproc \"$NPROC\" --job-max-min 100 --work /tmp/gtu_speed_ccx --out \"$GTU_OUT\""
+  }
+ ],
+ "what": {
+  "bench-su2-c7a16": "секунды на итерацию канала core130 (medium 584 357 узлов, fine — уровень impeller.py) при 64x1, 32x2, 16x4 (medium) и 64x1, 32x2 (fine); время сетки; память SU2",
+  "bench-su2-c7i16": "то же на запасном типе раннера (c7i: 64 vCPU = 32 ядра × 2 потока)",
+  "bench-ccx-c7a16": "CalculiX: колесо core130, C3D10 на 50/150/450 тыс. узлов — статика CENTRIF при 1/8/64 потоках, упаковка 8×8, частоты (10 форм) до 250 тыс. узлов; время, память, max|U| для сверки",
+  "fallback_types": "пусто нарочно: замер должен идти на заданном типе (иначе сравнение типов теряет смысл)"
+ },
+ "merge": {
+  "where": "сессия с ключами после run: результаты в routes/gtu/platform/aws/runs/<run_id>/<задача>/ (или runner.py collect --run-id <run_id> --job <задача>)",
+  "commands": [
+   "python3 routes/gtu/platform/bench/speed_merge.py --in routes/gtu/platform/aws/runs/<run_id> --run-id <run_id> --out routes/gtu/platform/bench/speed_aws_results.json"
+  ],
+  "to_branch": [
+   "routes/gtu/platform/bench/speed_aws_results.json",
+   "routes/gtu/platform/aws/ledger.jsonl"
+  ],
+  "not_to_branch": "runs/<run_id>/ целиком (speed_*.json задач — копия в сводке с sha256; журналы SU2 и ccx, сетки и поля в S3 не выгружаются вовсе: остаются в /tmp машины)",
+  "checks": "speed_merge.py откажет (код 2) без замеров и не запишет сводку больше 5 МБ; в сводке — max_disp_rel_spread (разброс max|U| статики при разных потоках: > 1e-6 — многопоточный SPOOLES дал другое решение, см. disk.py: однажды 4 потока дали невязку равновесия 1,6 %), C и с/итер по каждой конфигурации; в README узла — таблица «модель узла su2 против замера»",
+  "after": "пересчитать max_min и смету задач узла su2 (make_jobs_su2_kv3.py — C_us и EFF) по C и с/итер замера; без замера их смета держится на C = 35,24 мкс с общей 4-ядерной машины"
+ },
+ "estimate": {
+  "price": {
+   "expected": 0.75,
+   "upper": 1.4206,
+   "basis": "ожидаемая — задача владельца 14.11.2026 (спот c7a.16xlarge 0,71–0,75 долл./ч; ledger smoke2 20261114T231610Z-9b64 us-east-1c 0,7064); для c7i взята та же — живой цены c7i нет; верхняя — MaxPrice раннера 1,4206 в ledger.jsonl"
+  },
+  "jobs": {
+   "bench-su2-c7a16": {
+    "machine_min_expected": 64.4,
+    "usd_expected": 0.817,
+    "usd_upper": 2.387
+   },
+   "bench-su2-c7i16": {
+    "machine_min_expected": 64.4,
+    "usd_expected": 0.817,
+    "usd_upper": 2.387
+   },
+   "bench-ccx-c7a16": {
+    "machine_min_expected": 71.1,
+    "usd_expected": 0.902,
+    "usd_upper": 2.626
+   }
+  },
+  "total_usd_expected": 2.54,
+  "total_usd_upper": 7.4,
+  "upper_bound_rule": "раннер: (MaxPrice + диск + IPv4) × (max_min + 10) / 60 на машину — если задача дойдёт до сторожа",
+  "machines_parallel": 3,
+  "su2_time_model": {
+   "formula": "t_итер = C·узлы/NP/EFF; задача = загрузка+сборка SU2 + сетки + Σ(140 итераций·t_итер + 2 стадии × накладные) + выгрузка",
+   "C_us": 35.24,
+   "EFF": 0.8,
+   "nodes": {
+    "medium": 584357,
+    "fine": 2455000
+   },
+   "stage_overhead_s": {
+    "medium": 60,
+    "fine": 120
+   },
+   "mesh_min": {
+    "medium": 4,
+    "fine": 12
+   },
+   "boot_setup_min": 15.0,
+   "rows": [
+    {
+     "level": "medium",
+     "cfg": "64x1",
+     "s_iter_model": 0.402,
+     "min": 2.9
+    },
+    {
+     "level": "medium",
+     "cfg": "32x2",
+     "s_iter_model": 0.804,
+     "min": 3.9
+    },
+    {
+     "level": "medium",
+     "cfg": "16x4",
+     "s_iter_model": 1.609,
+     "min": 5.8
+    },
+    {
+     "level": "fine",
+     "cfg": "64x1",
+     "s_iter_model": 1.69,
+     "min": 7.9
+    },
+    {
+     "level": "fine",
+     "cfg": "32x2",
+     "s_iter_model": 3.379,
+     "min": 11.9
+    }
+   ],
+   "total_min": 64.4,
+   "source": "C и EFF — модель узла su2 (C из cost_estimate.toml: core130 coarse, 4 общих ядра, 1,2255 с/итер); загрузка+сборка 15 мин — оценка узла su2 (сборка SU2 на 64 ядрах не мерилась); накладные стадии и сетки — оценки"
+  },
+  "ccx_time_model": {
+   "rows": [
+    {
+     "nodes": 50000,
+     "mesh_min": 0.8,
+     "t1_min": 0.8,
+     "t8_min": 0.4,
+     "t64_min": 0.3,
+     "pack_min": 0.6,
+     "freq_min": 1.1,
+     "min": 3.9
+    },
+    {
+     "nodes": 150000,
+     "mesh_min": 1.2,
+     "t1_min": 5.9,
+     "t8_min": 3.0,
+     "t64_min": 2.0,
+     "pack_min": 4.4,
+     "freq_min": 7.9,
+     "min": 24.4
+    },
+    {
+     "nodes": 450000,
+     "mesh_min": 2.8,
+     "t1_min": 0.0,
+     "t8_min": 21.3,
+     "t64_min": 14.2,
+     "pack_min": 0.0,
+     "freq_min": 0,
+     "min": 38.3
+    }
+   ],
+   "total_min": 71.1,
+   "source": "Время ccx по локальному замеру (контейнер сессии, 4 общих ядра под нагрузкой ~11, 15.11.2026):\nстатика 1 поток — 3,52 с при 12 100 узлах и 8,6 с при 19 016 узлах → t ∝ N^1,8 (две точки, вне диапазона —\nэкстраполяция; на своей машине c7a ожидается быстрее). Многопоточность SPOOLES — допущение: 64 потока в 3 раза\nбыстрее одного.",
+   "boot_setup_min": 3.0,
+   "boot_setup_source": "ledger.jsonl: smoke-ccx (20261114T231610Z-9b64, контейнер ubuntu:24.04 + apt calculix-ccx + disk.py) — 2,05 мин машины от запуска до гашения (опрос раз в 60 с); сверху pip пакетов образа ~1 мин — оценка"
+  },
+  "guard": "каждый скрипт сам держит срок (--job-max-min): что не успевает — пропускается с пометкой, итог выгружается",
+  "share_of_ceiling": "из 2000 долл. предохранителя раннера (уровни 0–1 — до 1500): ожидаемо ~2–3, верхняя граница ~7"
+ },
+ "plan_check": {
+  "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/platform/bench/jobs_aws_bench.json --assume-price 0.748 --assume-zone-prices us-east-1a=0.955,us-east-1b=0.748,us-east-1c=0.706",
+  "exit_code": 0,
+  "lines": [
+   "[задача] bench-su2-c7a16: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 90 мин",
+   "[бюджет] bench-su2-c7a16 на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 0.00 + новая 1.93 = 2.10 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] bench-su2-c7a16 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] bench-su2-c7i16: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 90 мин",
+   "[бюджет] bench-su2-c7i16 на c7i.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 1.93 + новая 1.93 = 4.03 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] bench-su2-c7i16 c7i.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] bench-ccx-c7a16: образ al2023, контейнер ubuntu:24.04, команд container_setup: 7, 64 vCPU, сторож 100 мин",
+   "[бюджет] bench-ccx-c7a16 на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 3.86 + новая 2.12 = 6.15 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] bench-ccx-c7a16 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[план] прогноз пакета 5.98 долл. (цена спота — допущение 0.748/ч)"
+  ],
+  "runner_note": "раннер v2 (container, container_setup, NPROC); plan не вызывает AWS, цены — допущение"
+ }
+}

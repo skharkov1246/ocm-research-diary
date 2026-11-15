@@ -1,0 +1,539 @@
+{
+ "_comment": "Уровень 3 воронки (README узла funnel, «Уровни 2-3»). Раннер берёт только defaults и jobs. Задачи - по одной ступени и половине точек (a/b) на машину: 4 точки по 16 процессов, сетка medium; вариант с одним колесом - задачи st2 завершаются сразу. Сгенерировано make_jobs_l23.py.",
+ "defaults": {
+  "instance_type": "c7a.16xlarge",
+  "fallback_types": [
+   "c7i.16xlarge"
+  ],
+  "image": "al2023",
+  "disk_gb": 60
+ },
+ "jobs": [
+  {
+   "name": "l3-su2-v0-st1a",
+   "max_min": 518,
+   "disk_gb": 60,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+    "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+    "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+    "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+   ],
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/funnel/funnel_l2.py run --cases routes/gtu/funnel/aws/l3/l3_cases_KV-3.json --what su2 --level medium --shards 5 --shard 0 --stage 1 --pfracs 0.5,0.7,0.9,1.1 --tag a --workers \"$NPROC\" --job-max-min 518 --base-strategy routes/gtu/platform/su2/plan_sweep_WINNER.json --work \"$W\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "l3-su2-v0-st1b",
+   "max_min": 518,
+   "disk_gb": 60,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+    "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+    "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+    "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+   ],
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/funnel/funnel_l2.py run --cases routes/gtu/funnel/aws/l3/l3_cases_KV-3.json --what su2 --level medium --shards 5 --shard 0 --stage 1 --pfracs 0.6,0.8,1.0,1.2 --tag b --workers \"$NPROC\" --job-max-min 518 --base-strategy routes/gtu/platform/su2/plan_sweep_WINNER.json --work \"$W\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "l3-su2-v0-st2a",
+   "max_min": 518,
+   "disk_gb": 60,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+    "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+    "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+    "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+   ],
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/funnel/funnel_l2.py run --cases routes/gtu/funnel/aws/l3/l3_cases_KV-3.json --what su2 --level medium --shards 5 --shard 0 --stage 2 --pfracs 0.5,0.7,0.9,1.1 --tag a --workers \"$NPROC\" --job-max-min 518 --base-strategy routes/gtu/platform/su2/plan_sweep_WINNER.json --work \"$W\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "l3-su2-v0-st2b",
+   "max_min": 518,
+   "disk_gb": 60,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+    "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+    "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+    "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+   ],
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/funnel/funnel_l2.py run --cases routes/gtu/funnel/aws/l3/l3_cases_KV-3.json --what su2 --level medium --shards 5 --shard 0 --stage 2 --pfracs 0.6,0.8,1.0,1.2 --tag b --workers \"$NPROC\" --job-max-min 518 --base-strategy routes/gtu/platform/su2/plan_sweep_WINNER.json --work \"$W\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "l3-su2-v1-st1a",
+   "max_min": 518,
+   "disk_gb": 60,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+    "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+    "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+    "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+   ],
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/funnel/funnel_l2.py run --cases routes/gtu/funnel/aws/l3/l3_cases_KV-3.json --what su2 --level medium --shards 5 --shard 1 --stage 1 --pfracs 0.5,0.7,0.9,1.1 --tag a --workers \"$NPROC\" --job-max-min 518 --base-strategy routes/gtu/platform/su2/plan_sweep_WINNER.json --work \"$W\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "l3-su2-v1-st1b",
+   "max_min": 518,
+   "disk_gb": 60,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+    "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+    "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+    "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+   ],
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/funnel/funnel_l2.py run --cases routes/gtu/funnel/aws/l3/l3_cases_KV-3.json --what su2 --level medium --shards 5 --shard 1 --stage 1 --pfracs 0.6,0.8,1.0,1.2 --tag b --workers \"$NPROC\" --job-max-min 518 --base-strategy routes/gtu/platform/su2/plan_sweep_WINNER.json --work \"$W\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "l3-su2-v1-st2a",
+   "max_min": 518,
+   "disk_gb": 60,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+    "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+    "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+    "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+   ],
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/funnel/funnel_l2.py run --cases routes/gtu/funnel/aws/l3/l3_cases_KV-3.json --what su2 --level medium --shards 5 --shard 1 --stage 2 --pfracs 0.5,0.7,0.9,1.1 --tag a --workers \"$NPROC\" --job-max-min 518 --base-strategy routes/gtu/platform/su2/plan_sweep_WINNER.json --work \"$W\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "l3-su2-v1-st2b",
+   "max_min": 518,
+   "disk_gb": 60,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+    "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+    "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+    "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+   ],
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/funnel/funnel_l2.py run --cases routes/gtu/funnel/aws/l3/l3_cases_KV-3.json --what su2 --level medium --shards 5 --shard 1 --stage 2 --pfracs 0.6,0.8,1.0,1.2 --tag b --workers \"$NPROC\" --job-max-min 518 --base-strategy routes/gtu/platform/su2/plan_sweep_WINNER.json --work \"$W\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "l3-su2-v2-st1a",
+   "max_min": 518,
+   "disk_gb": 60,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+    "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+    "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+    "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+   ],
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/funnel/funnel_l2.py run --cases routes/gtu/funnel/aws/l3/l3_cases_KV-3.json --what su2 --level medium --shards 5 --shard 2 --stage 1 --pfracs 0.5,0.7,0.9,1.1 --tag a --workers \"$NPROC\" --job-max-min 518 --base-strategy routes/gtu/platform/su2/plan_sweep_WINNER.json --work \"$W\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "l3-su2-v2-st1b",
+   "max_min": 518,
+   "disk_gb": 60,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+    "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+    "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+    "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+   ],
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/funnel/funnel_l2.py run --cases routes/gtu/funnel/aws/l3/l3_cases_KV-3.json --what su2 --level medium --shards 5 --shard 2 --stage 1 --pfracs 0.6,0.8,1.0,1.2 --tag b --workers \"$NPROC\" --job-max-min 518 --base-strategy routes/gtu/platform/su2/plan_sweep_WINNER.json --work \"$W\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "l3-su2-v2-st2a",
+   "max_min": 518,
+   "disk_gb": 60,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+    "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+    "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+    "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+   ],
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/funnel/funnel_l2.py run --cases routes/gtu/funnel/aws/l3/l3_cases_KV-3.json --what su2 --level medium --shards 5 --shard 2 --stage 2 --pfracs 0.5,0.7,0.9,1.1 --tag a --workers \"$NPROC\" --job-max-min 518 --base-strategy routes/gtu/platform/su2/plan_sweep_WINNER.json --work \"$W\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "l3-su2-v2-st2b",
+   "max_min": 518,
+   "disk_gb": 60,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+    "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+    "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+    "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+   ],
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/funnel/funnel_l2.py run --cases routes/gtu/funnel/aws/l3/l3_cases_KV-3.json --what su2 --level medium --shards 5 --shard 2 --stage 2 --pfracs 0.6,0.8,1.0,1.2 --tag b --workers \"$NPROC\" --job-max-min 518 --base-strategy routes/gtu/platform/su2/plan_sweep_WINNER.json --work \"$W\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "l3-su2-v3-st1a",
+   "max_min": 518,
+   "disk_gb": 60,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+    "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+    "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+    "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+   ],
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/funnel/funnel_l2.py run --cases routes/gtu/funnel/aws/l3/l3_cases_KV-3.json --what su2 --level medium --shards 5 --shard 3 --stage 1 --pfracs 0.5,0.7,0.9,1.1 --tag a --workers \"$NPROC\" --job-max-min 518 --base-strategy routes/gtu/platform/su2/plan_sweep_WINNER.json --work \"$W\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "l3-su2-v3-st1b",
+   "max_min": 518,
+   "disk_gb": 60,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+    "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+    "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+    "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+   ],
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/funnel/funnel_l2.py run --cases routes/gtu/funnel/aws/l3/l3_cases_KV-3.json --what su2 --level medium --shards 5 --shard 3 --stage 1 --pfracs 0.6,0.8,1.0,1.2 --tag b --workers \"$NPROC\" --job-max-min 518 --base-strategy routes/gtu/platform/su2/plan_sweep_WINNER.json --work \"$W\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "l3-su2-v3-st2a",
+   "max_min": 518,
+   "disk_gb": 60,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+    "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+    "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+    "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+   ],
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/funnel/funnel_l2.py run --cases routes/gtu/funnel/aws/l3/l3_cases_KV-3.json --what su2 --level medium --shards 5 --shard 3 --stage 2 --pfracs 0.5,0.7,0.9,1.1 --tag a --workers \"$NPROC\" --job-max-min 518 --base-strategy routes/gtu/platform/su2/plan_sweep_WINNER.json --work \"$W\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "l3-su2-v3-st2b",
+   "max_min": 518,
+   "disk_gb": 60,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+    "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+    "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+    "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+   ],
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/funnel/funnel_l2.py run --cases routes/gtu/funnel/aws/l3/l3_cases_KV-3.json --what su2 --level medium --shards 5 --shard 3 --stage 2 --pfracs 0.6,0.8,1.0,1.2 --tag b --workers \"$NPROC\" --job-max-min 518 --base-strategy routes/gtu/platform/su2/plan_sweep_WINNER.json --work \"$W\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "l3-su2-v4-st1a",
+   "max_min": 518,
+   "disk_gb": 60,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+    "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+    "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+    "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+   ],
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/funnel/funnel_l2.py run --cases routes/gtu/funnel/aws/l3/l3_cases_KV-3.json --what su2 --level medium --shards 5 --shard 4 --stage 1 --pfracs 0.5,0.7,0.9,1.1 --tag a --workers \"$NPROC\" --job-max-min 518 --base-strategy routes/gtu/platform/su2/plan_sweep_WINNER.json --work \"$W\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "l3-su2-v4-st1b",
+   "max_min": 518,
+   "disk_gb": 60,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+    "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+    "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+    "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+   ],
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/funnel/funnel_l2.py run --cases routes/gtu/funnel/aws/l3/l3_cases_KV-3.json --what su2 --level medium --shards 5 --shard 4 --stage 1 --pfracs 0.6,0.8,1.0,1.2 --tag b --workers \"$NPROC\" --job-max-min 518 --base-strategy routes/gtu/platform/su2/plan_sweep_WINNER.json --work \"$W\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "l3-su2-v4-st2a",
+   "max_min": 518,
+   "disk_gb": 60,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+    "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+    "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+    "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+   ],
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/funnel/funnel_l2.py run --cases routes/gtu/funnel/aws/l3/l3_cases_KV-3.json --what su2 --level medium --shards 5 --shard 4 --stage 2 --pfracs 0.5,0.7,0.9,1.1 --tag a --workers \"$NPROC\" --job-max-min 518 --base-strategy routes/gtu/platform/su2/plan_sweep_WINNER.json --work \"$W\" --out \"$GTU_OUT\""
+  },
+  {
+   "name": "l3-su2-v4-st2b",
+   "max_min": 518,
+   "disk_gb": 60,
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1 libgomp1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q --no-cache-dir -r routes/gtu/platform/docker/requirements.txt",
+    "/opt/venv/bin/python -c 'import cantera, numpy, scipy, gmsh; print(\"py ok\", cantera.__version__, gmsh.__version__)'",
+    "JOBS=\"$(nproc)\" bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src > \"$GTU_OUT/_su2_build.log\" 2>&1 || { tail -n 40 \"$GTU_OUT/_su2_build.log\"; exit 1; }",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8",
+    "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION"
+   ],
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/funnel/funnel_l2.py run --cases routes/gtu/funnel/aws/l3/l3_cases_KV-3.json --what su2 --level medium --shards 5 --shard 4 --stage 2 --pfracs 0.6,0.8,1.0,1.2 --tag b --workers \"$NPROC\" --job-max-min 518 --base-strategy routes/gtu/platform/su2/plan_sweep_WINNER.json --work \"$W\" --out \"$GTU_OUT\""
+  }
+ ],
+ "input": {
+  "cases": "routes/gtu/funnel/aws/l3/l3_cases_KV-3.json",
+  "make_cases": "python3 routes/gtu/funnel/funnel_l2.py prepare --input routes/gtu/funnel/aws/l1_full/funnel_l1_top50_KV-3_m3983.json --select routes/gtu/funnel/aws/l2/funnel_l2_results.json --top 5 --out routes/gtu/funnel/aws/l3/l3_cases_KV-3.json",
+  "note": "l3_select - прошедшие уровень 2 (не больше 2 на архетип, до 10); меньше 5 - точка остановки"
+ },
+ "gates": {
+  "su2": "уровень 2 SU2 прошёл (линия coarse получена у >= 3 из 4 точек и расхождение с одномерной моделью в пределах); сверка постановки на открытом эталоне (Rotor 37 или CC3, узел su2) - до того числа medium - не характеристика"
+ },
+ "merge": {
+  "command": "python3 routes/gtu/funnel/funnel_l2.py merge --cases routes/gtu/funnel/aws/l3/l3_cases_KV-3.json --in routes/gtu/platform/aws/runs/<run_id> --what su2 --shards 5 --out-dir routes/gtu/funnel/aws/l3"
+ },
+ "pending_jobs": [
+  {
+   "name": "l3-turb-cfd",
+   "what": "характеристики ступеней турбины на сетке medium (SU2)",
+   "ready": "НЕ готово: нет геометрии и сетки турбинной решётки (как l2-turb-cfd)",
+   "machine_hours": {
+    "expected": 48.3,
+    "sizing": 132.7
+   },
+   "basis": "3 ступени × одна задача (4 точки по 16 процессов) × время задачи medium, как у колеса (оценка)",
+   "usd": {
+    "expected": 36.13,
+    "planning": 99.26
+   }
+  },
+  {
+   "name": "l3-ccx3d",
+   "what": "трёхмерная прочность, частоты с преднагружением, диаграмма Кэмпбелла и ползучесть колёс и дисков (CalculiX, сектор из STEP impeller.py через Gmsh, циклическая симметрия; навык calculix-rotor)",
+   "ready": "НЕ готово: кода узла 3D-прочности нет (platform/fea - осесимметричный disk.py; platform/bench/speed_ccx.py - только замер скорости ccx на C3D10); STEP колёс есть (impeller.py), турбинных лопаток - нет",
+   "machine_hours": {
+    "expected": 10.0,
+    "sizing": 20.0
+   },
+   "basis": "2 машино-часа на вариант: ~4 колеса × (статика 3 частоты + частоты 10 форм на 5 частотах + ползучесть), сектор ~450 тыс. узлов C3D10 (оценка; замера ccx на AWS нет)",
+   "usd": {
+    "expected": 7.48,
+    "planning": 14.96
+   }
+  },
+  {
+   "name": "l3-cht",
+   "what": "сопряжённый теплообмен печатной/литой горячей части (сопловой аппарат и корпус с каналами охлаждения; OpenFOAM chtMultiRegionFoam, навык openfoam-combustor)",
+   "ready": "НЕ готово: нет геометрии каналов охлаждения горячей части и словарей областей (у воронки камеры тот же пробел - comb-l2-cht); свойства печатных сплавов k(T), cp(T) не собраны",
+   "machine_hours": {
+    "expected": 8.5,
+    "sizing": 25.5
+   },
+   "basis": "3 млн ячеек × 5000 итераций × 2e-5 ядро-с на ячейку·итерацию / (64 × 0,75) ≈ 1,7 ч на вариант (оценка, замера нет)",
+   "usd": {
+    "expected": 6.36,
+    "planning": 19.07
+   }
+  },
+  {
+   "name": "l3-comb",
+   "what": "камера сгорания (OpenFOAM: RANS/LES элемента, NOx и CO, температура стенки)",
+   "ready": "пакет воронки камеры ../combustor/jobs_l3.json (comb_l23.py --level L3) по входу l3_inputs_KV-3.json; связь с вариантами двигателя - по типу камеры и p3/T3/T41 (стык не написан); смета - в воронке камеры",
+   "machine_hours": {
+    "expected": 0.0,
+    "sizing": 0.0
+   },
+   "basis": "считается в смете воронки камеры (comb_budget_results.json)",
+   "usd": {
+    "expected": 0.0,
+    "planning": 0.0
+   }
+  }
+ ],
+ "estimate": {
+  "level": "L3",
+  "slots": 5,
+  "su2": {
+   "level": "medium",
+   "pfracs": [
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.9,
+    1.0,
+    1.1,
+    1.2
+   ],
+   "halves": {
+    "a": [
+     0.5,
+     0.7,
+     0.9,
+     1.1
+    ],
+    "b": [
+     0.6,
+     0.8,
+     1.0,
+     1.2
+    ]
+   },
+   "stage_min": {
+    "expected": 178.1,
+    "sizing": 489.6
+   },
+   "nodes": {
+    "expected": 584357,
+    "sizing": 1137992,
+    "basis": "core130 medium 584 357 (mesh_stats.json) и KV-3 ступень 1 medium 1 137 992 (frame3_geom) - узел su2"
+   },
+   "point_iter": 6000,
+   "base_iters": 2000,
+   "jobs": 20,
+   "jobs_with_wheel_expected": 16.9
+  },
+  "machine_hours": {
+   "expected": 55.0,
+   "sizing": 142.6
+  },
+  "outputs_gb": 9.3,
+  "usd": {
+   "spot_expected": 38.86,
+   "spot_alt": 41.17,
+   "disk_ipv4": 0.456,
+   "s3_3months": 0.64,
+   "transfer": 0.835,
+   "total_expected": 43.1
+  },
+  "usd_planning": 109.3,
+  "upper_bound_usd": {
+   "total": 252.06
+  },
+  "pending_usd": {
+   "expected": 49.97,
+   "planning": 133.29
+  },
+  "extension_10": {
+   "note": "расширение до 10 вариантов - make_jobs_l23.py --l3-slots 10 (задач вдвое больше, смета ~×2)",
+   "usd_expected": 86.2,
+   "upper_bound_usd": 504.12
+  }
+ },
+ "plan_check": {
+  "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/funnel/jobs_l3.json --branch claude/lucid-allen-yvps5d --assume-price 0.748 --assume-zone-prices us-east-1a=0.955,us-east-1b=0.748,us-east-1c=0.706",
+  "exit_code": 0,
+  "lines": [
+   "[задача] l3-su2-v0-st1a: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 518 мин",
+   "[бюджет] l3-su2-v0-st1a на c7a.16xlarge: израсходовано 1.20 + в работе 0.00 + пакет 0.00 + новая 10.19 = 11.38 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] l3-su2-v0-st1a c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] l3-su2-v0-st1b: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 518 мин",
+   "[бюджет] l3-su2-v0-st1b на c7a.16xlarge: израсходовано 1.20 + в работе 0.00 + пакет 10.19 + новая 10.19 = 21.57 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] l3-su2-v0-st1b c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] l3-su2-v0-st2a: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 518 мин",
+   "[бюджет] l3-su2-v0-st2a на c7a.16xlarge: израсходовано 1.20 + в работе 0.00 + пакет 20.37 + новая 10.19 = 31.76 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] l3-su2-v0-st2a c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] l3-su2-v0-st2b: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 518 мин",
+   "[бюджет] l3-su2-v0-st2b на c7a.16xlarge: израсходовано 1.20 + в работе 0.00 + пакет 30.56 + новая 10.19 = 41.94 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] l3-su2-v0-st2b c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] l3-su2-v1-st1a: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 518 мин",
+   "[бюджет] l3-su2-v1-st1a на c7a.16xlarge: израсходовано 1.20 + в работе 0.00 + пакет 40.75 + новая 10.19 = 52.13 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] l3-su2-v1-st1a c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] l3-su2-v1-st1b: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 518 мин",
+   "[бюджет] l3-su2-v1-st1b на c7a.16xlarge: израсходовано 1.20 + в работе 0.00 + пакет 50.93 + новая 10.19 = 62.32 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] l3-su2-v1-st1b c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] l3-su2-v1-st2a: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 518 мин",
+   "[бюджет] l3-su2-v1-st2a на c7a.16xlarge: израсходовано 1.20 + в работе 0.00 + пакет 61.12 + новая 10.19 = 72.50 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] l3-su2-v1-st2a c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] l3-su2-v1-st2b: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 518 мин",
+   "[бюджет] l3-su2-v1-st2b на c7a.16xlarge: израсходовано 1.20 + в работе 0.00 + пакет 71.31 + новая 10.19 = 82.69 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] l3-su2-v1-st2b c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] l3-su2-v2-st1a: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 518 мин",
+   "[бюджет] l3-su2-v2-st1a на c7a.16xlarge: израсходовано 1.20 + в работе 0.00 + пакет 81.49 + новая 10.19 = 92.88 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] l3-su2-v2-st1a c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] l3-su2-v2-st1b: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 518 мин",
+   "[бюджет] l3-su2-v2-st1b на c7a.16xlarge: израсходовано 1.20 + в работе 0.00 + пакет 91.68 + новая 10.19 = 103.06 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] l3-su2-v2-st1b c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] l3-su2-v2-st2a: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 518 мин",
+   "[бюджет] l3-su2-v2-st2a на c7a.16xlarge: израсходовано 1.20 + в работе 0.00 + пакет 101.87 + новая 10.19 = 113.25 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] l3-su2-v2-st2a c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] l3-su2-v2-st2b: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 518 мин",
+   "[бюджет] l3-su2-v2-st2b на c7a.16xlarge: израсходовано 1.20 + в работе 0.00 + пакет 112.05 + новая 10.19 = 123.44 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] l3-su2-v2-st2b c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] l3-su2-v3-st1a: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 518 мин",
+   "[бюджет] l3-su2-v3-st1a на c7a.16xlarge: израсходовано 1.20 + в работе 0.00 + пакет 122.24 + новая 10.19 = 133.62 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] l3-su2-v3-st1a c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] l3-su2-v3-st1b: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 518 мин"
+  ],
+  "runner_note": "раннер v2 в ветке claude/lucid-allen-yvps5d (поля python, pip, NPROC, самая дешёвая зона); run - с --branch claude/lucid-allen-yvps5d (без него раннер клонирует main); при правке раннера повторить plan"
+ }
+}

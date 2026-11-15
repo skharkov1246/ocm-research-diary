@@ -1,0 +1,234 @@
+{
+ "_comment": "Перебор сквозных концепций «топливо -> вал» (routes/gtu/process, README): MAP-Elites, ниши «топология × камера × архитектура × изготовление», цель - КПД на тонну, фронты КПД - масса в нишах. Острова по машинам: машина j считает остров j точек KV-3, KV-1, KV-6 (часть j из 12). Раннер берёт только defaults и jobs; блоки merge, estimate, plan_check - для сессии с ключами. Код - ветка claude/lucid-allen-yvps5d. Сгенерировано make_jobs_process.py; правки - в нём.",
+ "defaults": {
+  "instance_type": "c7a.16xlarge",
+  "fallback_types": [
+   "c7i.16xlarge"
+  ],
+  "image": "al2023",
+  "disk_gb": 30,
+  "python": "3.12",
+  "pip": [
+   "cantera==3.2.0",
+   "scipy==1.18.1",
+   "numpy==2.5.3"
+  ]
+ },
+ "jobs": [
+  {
+   "name": "process-m00",
+   "command": "rc=0\npython routes/gtu/process/process_elites.py part --kv KV-3 --n-islands 12 --n-parts 12 --part 0 --evals 400000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-1 --n-islands 12 --n-parts 12 --part 0 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-6 --n-islands 12 --n-parts 12 --part 0 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 30
+  },
+  {
+   "name": "process-m01",
+   "command": "rc=0\npython routes/gtu/process/process_elites.py part --kv KV-3 --n-islands 12 --n-parts 12 --part 1 --evals 400000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-1 --n-islands 12 --n-parts 12 --part 1 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-6 --n-islands 12 --n-parts 12 --part 1 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 30
+  },
+  {
+   "name": "process-m02",
+   "command": "rc=0\npython routes/gtu/process/process_elites.py part --kv KV-3 --n-islands 12 --n-parts 12 --part 2 --evals 400000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-1 --n-islands 12 --n-parts 12 --part 2 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-6 --n-islands 12 --n-parts 12 --part 2 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 30
+  },
+  {
+   "name": "process-m03",
+   "command": "rc=0\npython routes/gtu/process/process_elites.py part --kv KV-3 --n-islands 12 --n-parts 12 --part 3 --evals 400000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-1 --n-islands 12 --n-parts 12 --part 3 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-6 --n-islands 12 --n-parts 12 --part 3 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 30
+  },
+  {
+   "name": "process-m04",
+   "command": "rc=0\npython routes/gtu/process/process_elites.py part --kv KV-3 --n-islands 12 --n-parts 12 --part 4 --evals 400000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-1 --n-islands 12 --n-parts 12 --part 4 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-6 --n-islands 12 --n-parts 12 --part 4 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 30
+  },
+  {
+   "name": "process-m05",
+   "command": "rc=0\npython routes/gtu/process/process_elites.py part --kv KV-3 --n-islands 12 --n-parts 12 --part 5 --evals 400000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-1 --n-islands 12 --n-parts 12 --part 5 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-6 --n-islands 12 --n-parts 12 --part 5 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 30
+  },
+  {
+   "name": "process-m06",
+   "command": "rc=0\npython routes/gtu/process/process_elites.py part --kv KV-3 --n-islands 12 --n-parts 12 --part 6 --evals 400000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-1 --n-islands 12 --n-parts 12 --part 6 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-6 --n-islands 12 --n-parts 12 --part 6 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 30
+  },
+  {
+   "name": "process-m07",
+   "command": "rc=0\npython routes/gtu/process/process_elites.py part --kv KV-3 --n-islands 12 --n-parts 12 --part 7 --evals 400000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-1 --n-islands 12 --n-parts 12 --part 7 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-6 --n-islands 12 --n-parts 12 --part 7 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 30
+  },
+  {
+   "name": "process-m08",
+   "command": "rc=0\npython routes/gtu/process/process_elites.py part --kv KV-3 --n-islands 12 --n-parts 12 --part 8 --evals 400000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-1 --n-islands 12 --n-parts 12 --part 8 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-6 --n-islands 12 --n-parts 12 --part 8 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 30
+  },
+  {
+   "name": "process-m09",
+   "command": "rc=0\npython routes/gtu/process/process_elites.py part --kv KV-3 --n-islands 12 --n-parts 12 --part 9 --evals 400000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-1 --n-islands 12 --n-parts 12 --part 9 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-6 --n-islands 12 --n-parts 12 --part 9 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 30
+  },
+  {
+   "name": "process-m10",
+   "command": "rc=0\npython routes/gtu/process/process_elites.py part --kv KV-3 --n-islands 12 --n-parts 12 --part 10 --evals 400000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-1 --n-islands 12 --n-parts 12 --part 10 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-6 --n-islands 12 --n-parts 12 --part 10 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 30
+  },
+  {
+   "name": "process-m11",
+   "command": "rc=0\npython routes/gtu/process/process_elites.py part --kv KV-3 --n-islands 12 --n-parts 12 --part 11 --evals 400000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-1 --n-islands 12 --n-parts 12 --part 11 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/process/process_elites.py part --kv KV-6 --n-islands 12 --n-parts 12 --part 11 --evals 100000 --init-frac 0.3 --batch 1024 --workers \"$NPROC\" --out \"$GTU_OUT\" || rc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 30
+  }
+ ],
+ "merge": {
+  "where": "сессия с ключами после run: результаты - routes/gtu/platform/aws/runs/<run_id>/<задача>/ (или collect по каждой); Python с теми же версиями пакетов (pip install cantera==3.2.0 scipy==1.18.1 numpy==2.5.3) - иначе отпечаток конфигурации не совпадёт",
+  "commands": [
+   "python3 routes/gtu/process/process_elites.py merge --kv KV-3 --n-islands 12 --evals 400000 --init-frac 0.3 --batch 1024 --in routes/gtu/platform/aws/runs/<run_id> --out-json routes/gtu/process/process_aws_KV-3.json --archive-out routes/gtu/platform/aws/runs/<run_id>/merged/process_KV-3_archive.json.gz",
+   "python3 routes/gtu/process/process_elites.py merge --kv KV-1 --n-islands 12 --evals 100000 --init-frac 0.3 --batch 1024 --in routes/gtu/platform/aws/runs/<run_id> --out-json routes/gtu/process/process_aws_KV-1.json --archive-out routes/gtu/platform/aws/runs/<run_id>/merged/process_KV-1_archive.json.gz",
+   "python3 routes/gtu/process/process_elites.py merge --kv KV-6 --n-islands 12 --evals 100000 --init-frac 0.3 --batch 1024 --in routes/gtu/platform/aws/runs/<run_id> --out-json routes/gtu/process/process_aws_KV-6.json --archive-out routes/gtu/platform/aws/runs/<run_id>/merged/process_KV-6_archive.json.gz"
+  ],
+  "checks": "слияние откажет (код 2), если нет хоть одного острова, остров пришёл дважды, у части другая конфигурация (отпечаток: версия, гены, окна, сетка, сиды, опорные родители) или остров недосчитан",
+  "into_branch": "в ветку - только сводки routes/gtu/process/process_aws_KV-*.json; слитые архивы (*.json.gz) - в runs/ (вне ветки) и S3",
+  "next": "эпоха 2 (по желанию): слитый архив эпохи 1 - начальные родители (--parents <архив>), тот же файл задач с новым сидом (--seed); острова внутри эпохи не обмениваются (итог не зависит от деления на части)"
+ },
+ "estimate": {
+  "concepts_total": 7200000,
+  "concepts_by_kv": {
+   "KV-3": 4800000,
+   "KV-1": 1200000,
+   "KV-6": 1200000
+  },
+  "cpu_s_per_concept_measured": {
+   "KV-3": 0.00971,
+   "KV-1": 0.0128,
+   "KV-6": 0.01197
+  },
+  "feasible_share_measured": {
+   "KV-3": 0.2854,
+   "KV-1": 0.388,
+   "KV-6": 0.0405
+  },
+  "safety": 1.5,
+  "pool_efficiency": 0.8,
+  "core_hours": 31.8,
+  "machines": 12,
+  "vcpu_per_machine": 64,
+  "compute_min_per_machine": 3.1,
+  "setup_min": 6.0,
+  "upload_min": 1.0,
+  "machine_min": 10.1,
+  "machine_hours": 2.02,
+  "watchdog_max_min": 30,
+  "parts_gb_gz": 0.006,
+  "usd": {
+   "spot": 1.617,
+   "disk_ipv4": 0.0168,
+   "s3_month": 0.0001,
+   "xfer": 0.0001,
+   "total_expected": 1.634
+  },
+  "upper_bound_usd": 9.21,
+  "upper_bound_rule": "раннер: (MaxPrice + диск + IPv4) × (max_min + 10) / 60 на машину",
+  "price": {
+   "expected": 0.8,
+   "upper": 1.1423999999999999,
+   "basis": "спот c7a.16xlarge (замер сессии с ключами 15.11.2026 10:45 UTC, README раннера): us-east-1c 0,703, 1b 0,747, 1d 0,879; us-west-2a 0,866, 2d 0,952; us-east-2b 0,601 (квота 5 vCPU); ожидаемая - 0,80 (6 машин us-east-1 по 0,70-0,75 и 6 - us-west-2 по 0,87-0,95); верхняя - MaxPrice раннера: максимум по зонам × 1,2"
+  },
+  "cap_2000_usd_ok": true,
+  "note": "ожидаемо единицы долларов, а не десятки: концепция считается за десятки миллисекунд (быстрые модели уровня облика); при той же цене N можно поднять в разы (флаги --evals-*), верхняя граница растёт линейно со сторожем"
+ },
+ "run": {
+  "dryrun": "python3 routes/gtu/platform/aws/runner.py run routes/gtu/process/jobs_process.json --branch claude/lucid-allen-yvps5d --regions us-east-1,us-east-2,us-west-2",
+  "live": "python3 routes/gtu/platform/aws/runner.py run routes/gtu/process/jobs_process.json --branch claude/lucid-allen-yvps5d --regions us-east-1,us-east-2,us-west-2 --live",
+  "on_demand": "+ --on-demand-fallback: если спот не даст машину ни в одном регионе - машины по требованию (us-east-1 384, us-west-2 300 vCPU; цена справочника, дороже спота) - по решению владельца",
+  "note": "раннер v3: квоты регионов - фактические (service-quotas или флаг --vcpu-quota-per-region); us-east-2 при квоте 5 vCPU машину не получит, после одобрения заявки - получит без правки файла"
+ },
+ "plan_check": {
+  "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/process/jobs_process.json --branch claude/lucid-allen-yvps5d --assume-price 0.8 --regions us-east-1,us-east-2,us-west-2 --assume-zone-prices us-east-1c=0.703,us-east-1b=0.747,us-east-1d=0.879,us-east-2b=0.601,us-east-2a=0.606,us-west-2a=0.866,us-west-2d=0.952 --vcpu-quota-per-region us-east-1=384,us-east-2=5,us-west-2=384 --out <папка>",
+  "exit_code": 0,
+  "lines": [
+   "[квоты] us-east-1 спот: 384 vCPU (флаг (plan: service-quotas не вызывается))",
+   "[квоты] us-east-2 спот: 5 vCPU (флаг (plan: service-quotas не вызывается))",
+   "[квоты] us-west-2 спот: 384 vCPU (флаг (plan: service-quotas не вызывается))",
+   "[очередь] --max-parallel не задан: 12 машин (сумма квот по регионам / 64 vCPU)",
+   "[задача] process-m00: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 30 мин",
+   "[регион] process-m00 c7a.16xlarge спот: us-east-1 0.7030 → us-west-2 0.8660 (с запасом 0.9093); не годятся: us-east-2 — квота 0/5 vCPU",
+   "[бюджет] process-m00 на c7a.16xlarge: израсходовано 6.66 + в работе 33.12 + пакет 0.00 + новая 0.97 (в т. ч. передача 0.20) = 40.75 из 2000.00 долл. (MaxPrice 1.1424/ч) — можно",
+   "[зоны] process-m00 c7a.16xlarge @us-east-1: us-east-1c 0.7030 → us-east-1b 0.7470 → us-east-1d 0.8790 (допущение plan); ожидается us-east-1c по 0.7030 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1424 и бюджет — по максимуму цены по всем регионам",
+   "[регион] process-m00: us-east-1, спот (волна 1)",
+   "[задача] process-m01: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 30 мин",
+   "[регион] process-m01 c7a.16xlarge спот: us-east-1 0.7030 → us-west-2 0.8660 (с запасом 0.9093); не годятся: us-east-2 — квота 0/5 vCPU",
+   "[бюджет] process-m01 на c7a.16xlarge: израсходовано 6.66 + в работе 33.12 + пакет 0.97 + новая 0.97 (в т. ч. передача 0.20) = 41.71 из 2000.00 долл. (MaxPrice 1.1424/ч) — можно",
+   "[зоны] process-m01 c7a.16xlarge @us-east-1: us-east-1c 0.7030 → us-east-1b 0.7470 → us-east-1d 0.8790 (допущение plan); ожидается us-east-1c по 0.7030 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1424 и бюджет — по максимуму цены по всем регионам",
+   "[регион] process-m01: us-east-1, спот (волна 1)",
+   "[задача] process-m02: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 30 мин",
+   "[регион] process-m02 c7a.16xlarge спот: us-east-1 0.7030 → us-west-2 0.8660 (с запасом 0.9093); не годятся: us-east-2 — квота 0/5 vCPU",
+   "[бюджет] process-m02 на c7a.16xlarge: израсходовано 6.66 + в работе 33.12 + пакет 1.93 + новая 0.97 (в т. ч. передача 0.20) = 42.68 из 2000.00 долл. (MaxPrice 1.1424/ч) — можно",
+   "[зоны] process-m02 c7a.16xlarge @us-east-1: us-east-1c 0.7030 → us-east-1b 0.7470 → us-east-1d 0.8790 (допущение plan); ожидается us-east-1c по 0.7030 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1424 и бюджет — по максимуму цены по всем регионам",
+   "[регион] process-m02: us-east-1, спот (волна 1)",
+   "[задача] process-m03: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 30 мин",
+   "[регион] process-m03 c7a.16xlarge спот: us-east-1 0.7030 → us-west-2 0.8660 (с запасом 0.9093); не годятся: us-east-2 — квота 0/5 vCPU",
+   "[бюджет] process-m03 на c7a.16xlarge: израсходовано 6.66 + в работе 33.12 + пакет 2.90 + новая 0.97 (в т. ч. передача 0.20) = 43.65 из 2000.00 долл. (MaxPrice 1.1424/ч) — можно",
+   "[зоны] process-m03 c7a.16xlarge @us-east-1: us-east-1c 0.7030 → us-east-1b 0.7470 → us-east-1d 0.8790 (допущение plan); ожидается us-east-1c по 0.7030 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1424 и бюджет — по максимуму цены по всем регионам",
+   "[регион] process-m03: us-east-1, спот (волна 1)",
+   "[задача] process-m04: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 30 мин",
+   "[регион] process-m04 c7a.16xlarge спот: us-east-1 0.7030 → us-west-2 0.8660 (с запасом 0.9093); не годятся: us-east-2 — квота 0/5 vCPU",
+   "[бюджет] process-m04 на c7a.16xlarge: израсходовано 6.66 + в работе 33.12 + пакет 3.87 + новая 0.97 (в т. ч. передача 0.20) = 44.61 из 2000.00 долл. (MaxPrice 1.1424/ч) — можно",
+   "[зоны] process-m04 c7a.16xlarge @us-east-1: us-east-1c 0.7030 → us-east-1b 0.7470 → us-east-1d 0.8790 (допущение plan); ожидается us-east-1c по 0.7030 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1424 и бюджет — по максимуму цены по всем регионам",
+   "[регион] process-m04: us-east-1, спот (волна 1)",
+   "[задача] process-m05: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 30 мин",
+   "[регион] process-m05 c7a.16xlarge спот: us-east-1 0.7030 → us-west-2 0.8660 (с запасом 0.9093); не годятся: us-east-2 — квота 0/5 vCPU",
+   "[бюджет] process-m05 на c7a.16xlarge: израсходовано 6.66 + в работе 33.12 + пакет 4.84 + новая 0.97 (в т. ч. передача 0.20) = 45.58 из 2000.00 долл. (MaxPrice 1.1424/ч) — можно",
+   "[зоны] process-m05 c7a.16xlarge @us-east-1: us-east-1c 0.7030 → us-east-1b 0.7470 → us-east-1d 0.8790 (допущение plan); ожидается us-east-1c по 0.7030 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1424 и бюджет — по максимуму цены по всем регионам",
+   "[регион] process-m05: us-east-1, спот (волна 1)",
+   "[задача] process-m06: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 30 мин",
+   "[регион] process-m06 c7a.16xlarge спот: us-west-2 0.8660 (с запасом 0.9093); не годятся: us-east-1 — квота 384/384 vCPU, us-east-2 — квота 0/5 vCPU",
+   "[бюджет] process-m06 на c7a.16xlarge: израсходовано 6.66 + в работе 33.12 + пакет 5.80 + новая 0.97 (в т. ч. передача 0.20) = 46.55 из 2000.00 долл. (MaxPrice 1.1424/ч) — можно",
+   "[зоны] process-m06 c7a.16xlarge @us-west-2: us-west-2a 0.8660 → us-west-2d 0.9520 (допущение plan); ожидается us-west-2a по 0.8660 долл./ч, самая дешёвая us-west-2a; MaxPrice 1.1424 и бюджет — по максимуму цены по всем регионам",
+   "[регион] process-m06: us-west-2, спот (волна 1)",
+   "[задача] process-m07: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 30 мин"
+  ]
+ },
+ "plan_check_on_demand": {
+  "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/process/jobs_process.json --branch claude/lucid-allen-yvps5d --assume-price 0.8 --regions us-east-1,us-east-2,us-west-2 --assume-zone-prices us-east-1c=0.703,us-east-1b=0.747,us-east-1d=0.879,us-east-2b=0.601,us-east-2a=0.606,us-west-2a=0.866,us-west-2d=0.952 --vcpu-quota-per-region us-east-1=384,us-east-2=5,us-west-2=384 --out <папка> --on-demand-fallback --assume-no-spot --od-vcpu-quota-per-region us-east-1=384,us-east-2=5,us-west-2=300",
+  "exit_code": 0,
+  "lines": [
+   "[квоты] us-east-1 спот: 384 vCPU (флаг (plan: service-quotas не вызывается))",
+   "[квоты] us-east-1 по требованию: 384 vCPU (флаг (plan: service-quotas не вызывается))",
+   "[квоты] us-east-2 спот: 5 vCPU (флаг (plan: service-quotas не вызывается))",
+   "[квоты] us-east-2 по требованию: 5 vCPU (флаг (plan: service-quotas не вызывается))",
+   "[квоты] us-west-2 спот: 384 vCPU (флаг (plan: service-quotas не вызывается))",
+   "[квоты] us-west-2 по требованию: 300 vCPU (флаг (plan: service-quotas не вызывается))",
+   "[очередь] --max-parallel не задан: 22 машин (сумма квот по регионам / 64 vCPU)",
+   "[задача] process-m00: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 30 мин",
+   "[регион] process-m00 c7a.16xlarge по требованию: us-east-1 3.2845 → us-west-2 3.2845 (с запасом 3.4487); не годятся: us-east-2 — квота 0/5 vCPU",
+   "[бюджет] process-m00 на c7a.16xlarge (по требованию): израсходовано 6.66 + в работе 33.12 + пакет 0.00 + новая 2.83 (в т. ч. передача 0.20) = 42.61 из 2000.00 долл. (по требованию — верхняя граница 3.9414/ч: справочник × запас 1.2) — можно",
+   "[зоны] process-m00 c7a.16xlarge @us-east-1 по требованию: us-east-1b → us-east-1c → us-east-1d; цена справочника 3.2845 долл./ч (от 2026-11-15), в бюджете — верхняя граница 3.9414",
+   "[регион] process-m00: us-east-1, по требованию (волна 1)",
+   "[задача] process-m01: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 30 мин",
+   "[регион] process-m01 c7a.16xlarge по требованию: us-east-1 3.2845 → us-west-2 3.2845 (с запасом 3.4487); не годятся: us-east-2 — квота 0/5 vCPU",
+   "[бюджет] process-m01 на c7a.16xlarge (по требованию): израсходовано 6.66 + в работе 33.12 + пакет 2.83 + новая 2.83 (в т. ч. передача 0.20) = 45.45 из 2000.00 долл. (по требованию — верхняя граница 3.9414/ч: справочник × запас 1.2) — можно",
+   "[зоны] process-m01 c7a.16xlarge @us-east-1 по требованию: us-east-1b → us-east-1c → us-east-1d; цена справочника 3.2845 долл./ч (от 2026-11-15), в бюджете — верхняя граница 3.9414",
+   "[регион] process-m01: us-east-1, по требованию (волна 1)",
+   "[задача] process-m02: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 30 мин",
+   "[регион] process-m02 c7a.16xlarge по требованию: us-east-1 3.2845 → us-west-2 3.2845 (с запасом 3.4487); не годятся: us-east-2 — квота 0/5 vCPU",
+   "[бюджет] process-m02 на c7a.16xlarge (по требованию): израсходовано 6.66 + в работе 33.12 + пакет 5.67 + новая 2.83 (в т. ч. передача 0.20) = 48.28 из 2000.00 долл. (по требованию — верхняя граница 3.9414/ч: справочник × запас 1.2) — можно",
+   "[зоны] process-m02 c7a.16xlarge @us-east-1 по требованию: us-east-1b → us-east-1c → us-east-1d; цена справочника 3.2845 долл./ч (от 2026-11-15), в бюджете — верхняя граница 3.9414",
+   "[регион] process-m02: us-east-1, по требованию (волна 1)",
+   "[задача] process-m03: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 30 мин",
+   "[регион] process-m03 c7a.16xlarge по требованию: us-east-1 3.2845 → us-west-2 3.2845 (с запасом 3.4487); не годятся: us-east-2 — квота 0/5 vCPU",
+   "[бюджет] process-m03 на c7a.16xlarge (по требованию): израсходовано 6.66 + в работе 33.12 + пакет 8.50 + новая 2.83 (в т. ч. передача 0.20) = 51.11 из 2000.00 долл. (по требованию — верхняя граница 3.9414/ч: справочник × запас 1.2) — можно",
+   "[зоны] process-m03 c7a.16xlarge @us-east-1 по требованию: us-east-1b → us-east-1c → us-east-1d; цена справочника 3.2845 долл./ч (от 2026-11-15), в бюджете — верхняя граница 3.9414",
+   "[регион] process-m03: us-east-1, по требованию (волна 1)",
+   "[задача] process-m04: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 30 мин",
+   "[регион] process-m04 c7a.16xlarge по требованию: us-east-1 3.2845 → us-west-2 3.2845 (с запасом 3.4487); не годятся: us-east-2 — квота 0/5 vCPU",
+   "[бюджет] process-m04 на c7a.16xlarge (по требованию): израсходовано 6.66 + в работе 33.12 + пакет 11.33 + новая 2.83 (в т. ч. передача 0.20) = 53.94 из 2000.00 долл. (по требованию — верхняя граница 3.9414/ч: справочник × запас 1.2) — можно",
+   "[зоны] process-m04 c7a.16xlarge @us-east-1 по требованию: us-east-1b → us-east-1c → us-east-1d; цена справочника 3.2845 долл./ч (от 2026-11-15), в бюджете — верхняя граница 3.9414",
+   "[регион] process-m04: us-east-1, по требованию (волна 1)",
+   "[задача] process-m05: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 30 мин",
+   "[регион] process-m05 c7a.16xlarge по требованию: us-east-1 3.2845 → us-west-2 3.2845 (с запасом 3.4487); не годятся: us-east-2 — квота 0/5 vCPU",
+   "[бюджет] process-m05 на c7a.16xlarge (по требованию): израсходовано 6.66 + в работе 33.12 + пакет 14.17 + новая 2.83 (в т. ч. передача 0.20) = 56.78 из 2000.00 долл. (по требованию — верхняя граница 3.9414/ч: справочник × запас 1.2) — можно",
+   "[зоны] process-m05 c7a.16xlarge @us-east-1 по требованию: us-east-1b → us-east-1c → us-east-1d; цена справочника 3.2845 долл./ч (от 2026-11-15), в бюджете — верхняя граница 3.9414",
+   "[регион] process-m05: us-east-1, по требованию (волна 1)",
+   "[задача] process-m06: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 30 мин",
+   "[регион] process-m06 c7a.16xlarge по требованию: us-west-2 3.2845 (с запасом 3.4487); не годятся: us-east-1 — квота 384/384 vCPU, us-east-2 — квота 0/5 vCPU",
+   "[бюджет] process-m06 на c7a.16xlarge (по требованию): израсходовано 6.66 + в работе 33.12 + пакет 17.00 + новая 2.83 (в т. ч. передача 0.20) = 59.61 из 2000.00 долл. (по требованию — верхняя граница 3.9414/ч: справочник × запас 1.2) — можно"
+  ]
+ }
+}

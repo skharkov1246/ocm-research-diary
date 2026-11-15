@@ -1,0 +1,115 @@
+{
+ "_comment": "Уровень 3 воронки камеры KV-3 (README, «Уровень 3»). Раннер берёт только defaults и jobs. Перед запуском: PRECCINSTA пройден (pending), l3_inputs_KV-3.json (3-5 лучших L2) в ветке.",
+ "defaults": {
+  "instance_type": "c7a.16xlarge",
+  "fallback_types": [
+   "c7i.16xlarge"
+  ],
+  "image": "al2023",
+  "disk_gb": 100,
+  "max_min": 610,
+  "container": "opencfd/openfoam-default:2512",
+  "container_setup": [
+   "apt-get update -q",
+   "apt-get install -y -q --no-install-recommends python3 python3-numpy curl ca-certificates"
+  ]
+ },
+ "jobs": [
+  {
+   "name": "comb-l3-p00",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L3 --inputs routes/gtu/combustor/l3_inputs_KV-3.json --n 5 --shard 0 --shards 10 --out \"$GTU_OUT\" --np 64 --workers 64 --timeout-min 579"
+  },
+  {
+   "name": "comb-l3-p01",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L3 --inputs routes/gtu/combustor/l3_inputs_KV-3.json --n 5 --shard 1 --shards 10 --out \"$GTU_OUT\" --np 64 --workers 64 --timeout-min 579"
+  },
+  {
+   "name": "comb-l3-p02",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L3 --inputs routes/gtu/combustor/l3_inputs_KV-3.json --n 5 --shard 2 --shards 10 --out \"$GTU_OUT\" --np 64 --workers 64 --timeout-min 579"
+  },
+  {
+   "name": "comb-l3-p03",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L3 --inputs routes/gtu/combustor/l3_inputs_KV-3.json --n 5 --shard 3 --shards 10 --out \"$GTU_OUT\" --np 64 --workers 64 --timeout-min 579"
+  },
+  {
+   "name": "comb-l3-p04",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L3 --inputs routes/gtu/combustor/l3_inputs_KV-3.json --n 5 --shard 4 --shards 10 --out \"$GTU_OUT\" --np 64 --workers 64 --timeout-min 579"
+  },
+  {
+   "name": "comb-l3-p05",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L3 --inputs routes/gtu/combustor/l3_inputs_KV-3.json --n 5 --shard 5 --shards 10 --out \"$GTU_OUT\" --np 64 --workers 64 --timeout-min 579"
+  },
+  {
+   "name": "comb-l3-p06",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L3 --inputs routes/gtu/combustor/l3_inputs_KV-3.json --n 5 --shard 6 --shards 10 --out \"$GTU_OUT\" --np 64 --workers 64 --timeout-min 579"
+  },
+  {
+   "name": "comb-l3-p07",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L3 --inputs routes/gtu/combustor/l3_inputs_KV-3.json --n 5 --shard 7 --shards 10 --out \"$GTU_OUT\" --np 64 --workers 64 --timeout-min 579"
+  },
+  {
+   "name": "comb-l3-p08",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L3 --inputs routes/gtu/combustor/l3_inputs_KV-3.json --n 5 --shard 8 --shards 10 --out \"$GTU_OUT\" --np 64 --workers 64 --timeout-min 579"
+  },
+  {
+   "name": "comb-l3-p09",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L3 --inputs routes/gtu/combustor/l3_inputs_KV-3.json --n 5 --shard 9 --shards 10 --out \"$GTU_OUT\" --np 64 --workers 64 --timeout-min 579"
+  }
+ ],
+ "pending_jobs": [
+  {
+   "name": "calib-preccinsta-les",
+   "what": "эталон PRECCINSTA (LES), устойчивый и неустойчивый режимы",
+   "ready": "НЕ готово: геометрия (по Meier et al., 2007 - не открыт) и данные DLR/TNF не загружены",
+   "core_hours": 13801.402113633985,
+   "basis": "1 млн ячеек × 45 000 шагов × 1,5·t_хим / 0,75 на режим (оценка)"
+  }
+ ],
+ "estimate": {
+  "level": "L3 (LES элемента: собственный режим и с возбуждением)",
+  "variants": 5,
+  "np_per_case": 64,
+  "steps": 50000,
+  "s_per_cell_step": 0.00041404206340901956,
+  "parallel_eff": 0.75,
+  "mean_cells": 62442.0,
+  "max_cells": 143220,
+  "core_hours": 4787.70639321963,
+  "max_min": 610,
+  "machine_hours": {
+   "expected": 78.64124572739004,
+   "planning": 117.96186859108506
+  },
+  "outputs_gb": 2.0,
+  "usd": {
+   "spot_expected": 55.55217598182833,
+   "spot_planning": 58.98093429554253,
+   "disk": 0.8618218709850963,
+   "ipv4": 0.3932062286369502,
+   "s3_3months": 0.138,
+   "transfer_to_session": 0.18,
+   "total_expected": 57.12520408145037,
+   "total_planning": 60.553962395164575
+  },
+  "usd_planning_hours": 90.67194359274687,
+  "note": "задача - один кейс (вариант × вид) на всех 64 ядрах машины; кейс должен уложиться в сторож 720 мин (машина не читает S3 - продолжения с контрольной точки на другой машине нет); сторож 720 мин - если LES не уложится, раннер получит код 124: продолжение с последней записи вторым пакетом (контрольные точки в $GTU_OUT)",
+  "session_side": [
+   "comb_acoustic.py: сеть элементов с F(ω) из LES (identify_ftf) - секунды",
+   "CalculiX: прочность и ползучесть картриджа (навык calculix-rotor) - минуты, AWS не нужен"
+  ]
+ },
+ "plan_check": {
+  "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/combustor/jobs_l3.json --assume-price 0.75 --assume-zone-prices us-east-1a=0.9554,us-east-1b=0.7478,us-east-1c=0.7064,us-east-1d=0.8576,us-east-1f=1.1804",
+  "exit_code": 0,
+  "forecast_usd": 148.02,
+  "spent_in_ledger": 0.91,
+  "lines": [
+   "[зоны] comb-l3-p07 c7a.16xlarge: us-east-1c 0.7064 → us-east-1b 0.7478 → us-east-1d 0.8576 → us-east-1a 0.9554 → us-east-1f 1.1804 (допущение plan); ожидается us-east-1c по 0.7064 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.4165 и бюджет — по максимуму цены за окно",
+   "[бюджет] comb-l3-p08 на c7a.16xlarge: израсходовано 0.91 + в работе 0.00 + пакет 118.42 + новая 14.80 = 134.13 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[зоны] comb-l3-p08 c7a.16xlarge: us-east-1c 0.7064 → us-east-1b 0.7478 → us-east-1d 0.8576 → us-east-1a 0.9554 → us-east-1f 1.1804 (допущение plan); ожидается us-east-1c по 0.7064 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.4165 и бюджет — по максимуму цены за окно",
+   "[бюджет] comb-l3-p09 на c7a.16xlarge: израсходовано 0.91 + в работе 0.00 + пакет 133.22 + новая 14.80 = 148.93 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[зоны] comb-l3-p09 c7a.16xlarge: us-east-1c 0.7064 → us-east-1b 0.7478 → us-east-1d 0.8576 → us-east-1a 0.9554 → us-east-1f 1.1804 (допущение plan); ожидается us-east-1c по 0.7064 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.4165 и бюджет — по максимуму цены за окно",
+   "[план] прогноз пакета 148.02 долл. (цена спота — допущение 0.75/ч)"
+  ]
+ }
+}

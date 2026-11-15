@@ -1,0 +1,989 @@
+{
+ "cycles": {
+  "source": "routes/gtu/organic/cycles/cycles_results.json",
+  "date": "2026-11-14",
+  "status": "оценка уровня облика (0D-цикл); числа — из cycles_results.json",
+  "key_finding": "при T41 1000 °C (класс U) мягкий допуск по расходу требует удельной работы ≥ 230.5 кДж/кг; простой цикл KV-3 на пределе, рекуператор сам по себе её снижает (потери давления) и не проходит; проходит рекуператор вместе с повторным подогревом (или с промохлаждением) — см. representative",
+  "recommended": {
+   "note": "рекомендуемое для KV: рекуператор 0,90 + межтурбинный подогрев; as_is — с компрессором KV-3 (π 13,5)",
+   "opt": {
+    "key": "R90-ic-RH-ibc-none-none",
+    "name": "рекуператор 0.90 + подогрев",
+    "PR": 8.22,
+    "eff_el": 0.3952,
+    "W_air": 22.2,
+    "EGT_C": 362.9,
+    "T_rec_in_C": 699.9,
+    "added_lpbf": 12,
+    "V_added_m3_lpbf": 4.56,
+    "mass_hx_kg_lpbf": 7974,
+    "mass_hx_kg_foil": 2131,
+    "limits_ok": true,
+    "T41_for_G_cap_C": null,
+    "prm": {
+     "x_rh": 0.35,
+     "sc": 2.0,
+     "R_egr": 1.0
+    }
+   },
+   "as_is": {
+    "key": "R90-ic-RH-ibc-none-none",
+    "name": "рекуператор 0.90 + подогрев",
+    "PR": 13.5,
+    "eff_el": 0.357,
+    "W_air": 20.96,
+    "EGT_C": 443.8,
+    "T_rec_in_C": 634.8,
+    "added_lpbf": 11,
+    "V_added_m3_lpbf": 4.13,
+    "mass_hx_kg_lpbf": 7238,
+    "mass_hx_kg_foil": 1935,
+    "limits_ok": true,
+    "T41_for_G_cap_C": null,
+    "prm": {
+     "x_rh": 0.35,
+     "sc": 2.0,
+     "R_egr": 1.0
+    }
+   }
+  },
+  "representative": {
+   "simple": {
+    "key": "R00-ic-rh-ibc-none-none",
+    "name": "простой",
+    "PR": 12.55,
+    "eff_el": 0.3006,
+    "W_air": 25.68,
+    "EGT_C": 471.0,
+    "T_rec_in_C": null,
+    "added_lpbf": 0,
+    "V_added_m3_lpbf": 0.0,
+    "mass_hx_kg_lpbf": 0,
+    "mass_hx_kg_foil": 0,
+    "limits_ok": true,
+    "T41_for_G_cap_C": null,
+    "prm": {
+     "x_rh": 0.5,
+     "sc": 2.0,
+     "R_egr": 1.0
+    }
+   },
+   "recup_only_out_of_limits": {
+    "key": "R92-ic-rh-ibc-none-none",
+    "name": "рекуператор 0.92",
+    "PR": 3.44,
+    "eff_el": 0.4099,
+    "W_air": 35.46,
+    "EGT_C": 225.7,
+    "T_rec_in_C": 728.9,
+    "added_lpbf": 8,
+    "V_added_m3_lpbf": 10.16,
+    "mass_hx_kg_lpbf": 17793,
+    "mass_hx_kg_foil": 4756,
+    "limits_ok": false,
+    "T41_for_G_cap_C": 1244.3813772222238,
+    "prm": {
+     "x_rh": 0.5,
+     "sc": 2.0,
+     "R_egr": 1.0
+    }
+   },
+   "recup_reheat": {
+    "key": "R92-ic-RH-ibc-none-none",
+    "name": "рекуператор 0.92 + подогрев",
+    "PR": 8.22,
+    "eff_el": 0.4005,
+    "W_air": 22.22,
+    "EGT_C": 354.8,
+    "T_rec_in_C": 699.8,
+    "added_lpbf": 12,
+    "V_added_m3_lpbf": 5.61,
+    "mass_hx_kg_lpbf": 9817,
+    "mass_hx_kg_foil": 2624,
+    "limits_ok": true,
+    "T41_for_G_cap_C": null,
+    "prm": {
+     "x_rh": 0.35,
+     "sc": 2.0,
+     "R_egr": 1.0
+    }
+   },
+   "recup_reheat_fuelheat": {
+    "key": "R92-ic-RH-ibc-none-fh",
+    "name": "рекуператор 0.92 + подогрев + подогрев топлива",
+    "PR": 7.58,
+    "eff_el": 0.406,
+    "W_air": 22.7,
+    "EGT_C": 340.8,
+    "T_rec_in_C": 699.6,
+    "added_lpbf": 14,
+    "V_added_m3_lpbf": 5.82,
+    "mass_hx_kg_lpbf": 10187,
+    "mass_hx_kg_foil": 2723,
+    "limits_ok": true,
+    "T41_for_G_cap_C": null,
+    "prm": {
+     "x_rh": 0.35,
+     "sc": 2.0,
+     "R_egr": 1.0
+    }
+   },
+   "recup_intercool": {
+    "key": "R92-IC-rh-ibc-none-none",
+    "name": "рекуператор 0.92 + промохлаждение",
+    "PR": 5.63,
+    "eff_el": 0.4407,
+    "W_air": 25.64,
+    "EGT_C": 193.7,
+    "T_rec_in_C": 630.8,
+    "added_lpbf": 16,
+    "V_added_m3_lpbf": 11.58,
+    "mass_hx_kg_lpbf": 20268,
+    "mass_hx_kg_foil": 5420,
+    "limits_ok": true,
+    "T41_for_G_cap_C": null,
+    "prm": {
+     "x_rh": 0.5,
+     "sc": 2.0,
+     "R_egr": 1.0
+    }
+   },
+   "fuel_heat": {
+    "key": "R00-ic-rh-ibc-none-fh",
+    "name": "подогрев топлива",
+    "PR": 12.32,
+    "eff_el": 0.3061,
+    "W_air": 25.66,
+    "EGT_C": 460.2,
+    "T_rec_in_C": null,
+    "added_lpbf": 2,
+    "V_added_m3_lpbf": 0.05,
+    "mass_hx_kg_lpbf": 85,
+    "mass_hx_kg_foil": 23,
+    "limits_ok": true,
+    "T41_for_G_cap_C": null,
+    "prm": {
+     "x_rh": 0.5,
+     "sc": 2.0,
+     "R_egr": 1.0
+    }
+   },
+   "pgc": [
+    {
+     "key": "R00-ic-rh-ibc-real-none",
+     "name": "горение с ростом давления (25 %)",
+     "PR": 12.94,
+     "eff_el": 0.3039,
+     "W_air": 25.68,
+     "EGT_C": 464.0,
+     "T_rec_in_C": null,
+     "added_lpbf": 3,
+     "V_added_m3_lpbf": 0.0,
+     "mass_hx_kg_lpbf": 0,
+     "mass_hx_kg_foil": 0,
+     "limits_ok": true,
+     "T41_for_G_cap_C": null,
+     "prm": {
+      "x_rh": 0.5,
+      "sc": 2.0,
+      "R_egr": 1.0
+     }
+    },
+    {
+     "key": "R00-ic-rh-ibc-ideal-none",
+     "name": "горение с ростом давления (предел)",
+     "PR": 11.86,
+     "eff_el": 0.3617,
+     "W_air": 20.94,
+     "EGT_C": 436.4,
+     "T_rec_in_C": null,
+     "added_lpbf": 3,
+     "V_added_m3_lpbf": 0.0,
+     "mass_hx_kg_lpbf": 0,
+     "mass_hx_kg_foil": 0,
+     "limits_ok": true,
+     "T41_for_G_cap_C": null,
+     "prm": {
+      "x_rh": 0.5,
+      "sc": 2.0,
+      "R_egr": 1.0
+     }
+    }
+   ]
+  },
+  "engine_funnel": {
+   "target": "routes/gtu/funnel/funnel_space.py (CAT, CONT, ARCH)",
+   "new_axes": [
+    {
+     "axis": "reheat",
+     "kind": "CAT",
+     "values": [
+      "нет",
+      "межтурбинная камера"
+     ],
+     "note": "повторный подогрев на одном валу: газ после первой ступени турбины снова до T41; поднимает удельную работу и температуру газа перед рекуператором — делает рекуператор выполнимым при мягком допуске",
+     "model": "cycles.evaluate(topo с rh=True, PR, prm=dict(x_rh=…))"
+    },
+    {
+     "axis": "x_rh",
+     "kind": "CONT",
+     "range": [
+      0.3,
+      0.7
+     ],
+     "note": "доля ln(p4/p5) до подогрева; оптимум — см. representative.recup_reheat.prm"
+    },
+    {
+     "axis": "fuel_preheat",
+     "kind": "CAT",
+     "values": [
+      "нет",
+      "до 400 °C выхлопом"
+     ],
+     "note": "дешёвый узел (+2 детали), прирост КПД — representative.fuel_heat против simple"
+    },
+    {
+     "axis": "T_rec_max_C",
+     "kind": "CAT",
+     "values": [
+      700,
+      800
+     ],
+     "note": "700 — LIM gtu_explore (нержавеющая сталь); 800 — печатный Inconel 625 (оценка, нужна ползучесть) — trec800"
+    },
+    {
+     "axis": "recup_core_tech",
+     "kind": "CAT",
+     "values": [
+      "foil",
+      "lpbf"
+     ],
+     "note": "масса сердцевины: фольга 0,1 мм против печатной стенки 0,35 мм — hx_wall_sensitivity; печать — для коллекторов и корпуса, сердцевина — фольга или печать тонкой стенкой"
+    }
+   ],
+   "changes": [
+    {
+     "axis": "eps_rec",
+     "now": "0,75–0,92",
+     "proposed": "0,80–0,92 только вместе с reheat или промохлаждением; без них при T41 1000 °C вариант вне допуска по расходу (T41_for_G_cap_C)"
+    },
+    {
+     "axis": "pgain",
+     "now": "RDC 0–0,10",
+     "proposed": "идеальный предел EAP посчитан (pgc_ideal_PG); при реализации 25 % и штрафе КПД турбины 2 п. п. выигрыш около нуля — весу архетипа RDC снизить",
+     "model": "cycles.pgc_gain"
+    }
+   ],
+   "models": [
+    "cycles.evaluate — цикл любой топологии на одном валу (Cantera)",
+    "cycles.size_hx — объём, масса, модули печати",
+    "cycles.exergy_account — разрушение эксергии по узлам двумя способами"
+   ],
+   "drop": [
+    "паровой риформинг: вода в пакете (Plug&Play — нет), выигрыш в основном от впрыска пара",
+    "риформинг рециркулятом выхлопа: кислород обеднённого выхлопа сжигает метан, теплотворность не растёт",
+    "IBC: колесо компрессора IBC не помещается на вал 14 950 об/мин (нужен отдельный вал), охладитель громоздкий",
+    "горение с ростом давления: TRL 3, реальный выигрыш около нуля"
+   ],
+   "pgc_ideal_PG": {
+    "R00-ic-rh-ibc-real-none": 1.231340581913963,
+    "R00-ic-rh-ibc-ideal-none": 1.2514122684954152
+   }
+  },
+  "combustor_funnel": {
+   "target": "routes/gtu/combustor (targets.json)",
+   "conditions": {
+    "рекуператор + подогрев": [
+     {
+      "node": "Камера сгорания",
+      "T_in_C": 669.4846580619604,
+      "p_in_bar": 8.12356930005407,
+      "O2_in_vol": 0.20949999999999994,
+      "O2_out_vol": 0.17679089602718895,
+      "T_out_C": 999.99999999987,
+      "fuel_air_mass": 0.008322393195120365,
+      "fuel_T_C": 15.0,
+      "fuel_H2_vol": 0.0,
+      "fuel_CH4_vol": 1.0
+     },
+     {
+      "node": "Камера подогрева",
+      "T_in_C": 824.6256520832573,
+      "p_in_bar": 3.890915297800137,
+      "O2_in_vol": 0.17679089602718895,
+      "O2_out_vol": 0.1591052821288188,
+      "T_out_C": 999.9999999999992,
+      "fuel_air_mass": 0.004566889423814589,
+      "fuel_T_C": 15.0,
+      "fuel_H2_vol": 0.0,
+      "fuel_CH4_vol": 1.0
+     }
+    ],
+    "простой": [
+     {
+      "node": "Камера сгорания",
+      "T_in_C": 393.73950374616595,
+      "p_in_bar": 12.711307347752115,
+      "O2_in_vol": 0.20949999999999994,
+      "O2_out_vol": 0.15161081965895354,
+      "T_out_C": 999.9999999975747,
+      "fuel_air_mass": 0.01490149963061057,
+      "fuel_T_C": 15.0,
+      "fuel_H2_vol": 0.0,
+      "fuel_CH4_vol": 1.0
+     }
+    ],
+    "рекуператор + промохлаждение": [
+     {
+      "node": "Камера сгорания",
+      "T_in_C": 593.1537689863992,
+      "p_in_bar": 5.453680101158321,
+      "O2_in_vol": 0.20949999999999994,
+      "O2_out_vol": 0.1696075522778333,
+      "T_out_C": 999.999999999599,
+      "fuel_air_mass": 0.010183704669080603,
+      "fuel_T_C": 15.0,
+      "fuel_H2_vol": 0.0,
+      "fuel_CH4_vol": 1.0
+     }
+    ]
+   },
+   "new_axes": [
+    {
+     "axis": "T3_combustor_inlet_C",
+     "values": [
+      390.0,
+      590.0,
+      670.0
+     ],
+     "note": "рекуперированный цикл — горячий воздух на входе в камеру: проскок пламени, NOx"
+    },
+    {
+     "axis": "reheat_combustor",
+     "values": [
+      {
+       "node": "Камера подогрева",
+       "T_in_C": 824.6256520832573,
+       "p_in_bar": 3.890915297800137,
+       "O2_in_vol": 0.17679089602718895,
+       "O2_out_vol": 0.1591052821288188,
+       "T_out_C": 999.9999999999992,
+       "fuel_air_mass": 0.004566889423814589,
+       "fuel_T_C": 15.0,
+       "fuel_H2_vol": 0.0,
+       "fuel_CH4_vol": 1.0
+      }
+     ],
+     "note": "межтурбинная камера в обеднённом кислородом газе (вход — после ступени турбины)"
+    },
+    {
+     "axis": "fuel_T_C",
+     "values": [
+      15,
+      400
+     ],
+     "note": "подогрев топлива выхлопом; выше 400 °C — разложение метана на стенках"
+    }
+   ],
+   "models": [
+    "cycles.burn — полное сгорание любой смеси CH4/H2/CO/H2O/CO2",
+    "cycles.pgc_gain — предел горения с ростом давления",
+    "cycles.carbon_activity — сажеобразование в подогретом или риформированном топливе"
+   ]
+  },
+  "aws": {
+   "jobs": "routes/gtu/organic/cycles/aws_jobs_cycles.json",
+   "note": "мелкая сетка (CYCLES_FINE): 864 топологии, π через 0,5; проверено командой plan без AWS; выполнимо после попадания файлов в ветку claude/lucid-allen-yvps5d"
+  }
+ },
+ "thermal": {
+  "source": [
+   "routes/gtu/organic/thermal/vascular_results.json",
+   "routes/gtu/organic/thermal/tpms_results.json",
+   "routes/gtu/organic/thermal/topo_results.json"
+  ],
+  "date": "2026-11-14",
+  "status": "оценка уровня облика: 1D-сеть + 2D-стенка; переносы TPMS — предел Стокса (воксели 32³) с поправкой LBM; оптимизация топологии — 2D, малое Re; всё — к проверке трёхмерным расчётом (jobs_thermal.json)",
+  "engine_funnel": {
+   "target": "routes/gtu/funnel/funnel_space.py (CAT, CONT), parts_model.py, make_model.py",
+   "new_axes": [
+    {
+     "axis": "cool",
+     "kind": "CAT",
+     "add_value": "P (печатный сопловой аппарат с каналами у стенки)",
+     "note": "x_ngv по T41 — таблица vascular.x_ngv_pct_by_T41 (предел поверхности — оценка); лучшая сеть: при умеренной нагрузке — одно-два ветвления, при высокой — прямые каналы. Изготовимость (organic/print_review): каналы 0,6 мм × 48 мм (L/D 80) под обшивкой 0,6 мм — ниже надёжного выноса порошка (≥ 1 мм, по выдержке поиска), нужна проливка каждого канала; таблица посчитана для гладких каналов — шероховатость печати съедает запас перепада (print_review_results.json → roughness_ngv): при 1050 °C прямым каналам нужно 181 кПа из 470 гладкими и 300–431 кПа при ε 30–60 мкм (держат); при 1100 °C — 285 из 456 кПа гладкими, а при ε 30–60 мкм предел 950 °C держится только на границе или не держится. Строки 1100 и 1150 °C годны лишь для доведённых каналов (ε ≤ 15 мкм: абразивная проливка, оценка). В точке KV-3 (T41 1000 °C, класс U) охлаждение не нужно: значение P окупается только вместе с подъёмом T41",
+     "model": "vascular.min_flow_for_limit(ngv_case(T41), сеть) → x_ngv = 2·N·ṁ/G"
+    },
+    {
+     "axis": "ngv_network",
+     "kind": "CAT",
+     "values": [
+      "прямые",
+      "8 деревьев K=1",
+      "4 дерева K=2"
+     ],
+     "note": "глубокие деревья (K ≥ 3) и растущее дерево на равном объёме предел не держат — в перебор не включать"
+    },
+    {
+     "axis": "recup_core",
+     "kind": "CAT",
+     "values": [
+      "пластины LPBF (cycles)",
+      "фольга (cycles)",
+      "гироид LPBF, переменная ячейка",
+      "Schwarz-D LPBF, переменная ячейка"
+     ],
+     "note": "масса и объём сердцевины — tpms.designs; в ламинарном режиме (предел Стокса) гироид не легче плоских каналов при той же стенке; выигрыш TPMS — только с инерцией (Re ≥ 100), это задача AWS thermal-tpms-lbm-*. Изготовимость (organic/print_review): печатные сердцевины тяжелее фольги (cycles_plate_lpbf и cycles_foil в tpms.designs), стенка 0,35 / 0,25 мм ниже наименьшего элемента 0,38 мм (по выдержке поиска), плотность тонкой стенки и вынос порошка из каналов Dh 1,5 мм длиной 0,1–0,26 м не подтверждены — базовое значение оси: фольга"
+    },
+    {
+     "axis": "manifold",
+     "kind": "CAT",
+     "values": [
+      "гребёнка/спицы из труб",
+      "печатный (оптимизация топологии)"
+     ],
+     "note": "печатный коллектор — 1 деталь вместо N труб + коллектора + 2N соединений; равномерность раздачи и потери — topo (2D, малое Re: показатель, не число для KV-3). Разброс topo — при одинаковом противодавлении выходов без дросселей; где выходы дросселируются (форсунки, сопла), выигрыш — только в числе деталей и соединений"
+    }
+   ],
+   "models": {
+    "vascular": {
+     "x_ngv_pct_by_T41": {
+      "1000.0": {
+       "straight": 0.8,
+       "tree_r8": 0.8,
+       "tree_r4": 0.725,
+       "tree_r4_u": 0.746
+      },
+      "1050.0": {
+       "straight": 1.202,
+       "tree_r8": 1.2,
+       "tree_r4": 1.557,
+       "tree_r4_u": 1.612
+      },
+      "1100.0": {
+       "straight": 1.618,
+       "tree_r8": 1.615
+      },
+      "1150.0": {
+       "straight": 2.05,
+       "tree_r8": 2.047
+      }
+     },
+     "best_network_by_T41": {
+      "1000.0": {
+       "net": "tree_r4",
+       "x_ngv_pct": 0.725
+      },
+      "1050.0": {
+       "net": "tree_r8",
+       "x_ngv_pct": 1.2
+      },
+      "1100.0": {
+       "net": "tree_r8",
+       "x_ngv_pct": 1.615
+      },
+      "1150.0": {
+       "net": "tree_r8",
+       "x_ngv_pct": 2.047
+      }
+     },
+     "T_lim_surface_C": 950.0,
+     "N_vanes_estimate": 53,
+     "liner_panel": {
+      "straight": {
+       "coolant_kg_s_m2": null,
+       "T_max_full_dp_C": 952.9,
+       "spread_full_dp_K": 153.2
+      },
+      "tree_r8": {
+       "coolant_kg_s_m2": null,
+       "T_max_full_dp_C": 967.7,
+       "spread_full_dp_K": 176.3
+      },
+      "tree_r4": {
+       "coolant_kg_s_m2": null,
+       "T_max_full_dp_C": 1081.8,
+       "spread_full_dp_K": 265.2
+      },
+      "tree_r2": {
+       "coolant_kg_s_m2": null,
+       "T_max_full_dp_C": 1354.7,
+       "spread_full_dp_K": 573.6
+      },
+      "tree_r1": {
+       "coolant_kg_s_m2": null,
+       "T_max_full_dp_C": 1547.8,
+       "spread_full_dp_K": 890.3
+      },
+      "tree_r4_u": {
+       "coolant_kg_s_m2": null,
+       "T_max_full_dp_C": 1091.2,
+       "spread_full_dp_K": 261.6
+      },
+      "cco": {
+       "coolant_kg_s_m2": null,
+       "T_max_full_dp_C": 1165.2,
+       "spread_full_dp_K": 603.5
+      }
+     },
+     "liner_T_lim_C": 900.0
+    },
+    "tpms": {
+     "designs": {
+      "R80-ic-RH-ibc-none-none": {
+       "plate_NuT_as_cycles": {
+        "mass_core_kg": 2351,
+        "mass_with_headers_kg": 3762,
+        "V_core_m3": 1.075,
+        "A_front_m2": 6.44,
+        "L_m": 0.167,
+        "modules_BLT_S1500": 1,
+        "feasible": true
+       },
+       "plate_NuH1": {
+        "mass_core_kg": 2154,
+        "mass_with_headers_kg": 3446,
+        "V_core_m3": 0.984,
+        "A_front_m2": 10.68,
+        "L_m": 0.092,
+        "modules_BLT_S1500": 1,
+        "feasible": true
+       },
+       "gyroid_graded": {
+        "mass_core_kg": 2710,
+        "mass_with_headers_kg": 4336,
+        "V_core_m3": 0.975,
+        "A_front_m2": 11.5,
+        "L_m": 0.085,
+        "modules_BLT_S1500": 1,
+        "feasible": true
+       },
+       "diamond_graded": {
+        "mass_core_kg": 2671,
+        "mass_with_headers_kg": 4274,
+        "V_core_m3": 0.974,
+        "A_front_m2": 13.75,
+        "L_m": 0.071,
+        "modules_BLT_S1500": 1,
+        "feasible": true
+       },
+       "plate_NuH1_Dh15": {
+        "mass_core_kg": 1617,
+        "mass_with_headers_kg": 2588,
+        "V_core_m3": 0.602,
+        "A_front_m2": 5.81,
+        "L_m": 0.104,
+        "modules_BLT_S1500": 1,
+        "feasible": true
+       },
+       "cycles_plate_lpbf": {
+        "V_core_m3": 1.097,
+        "mass_kg": 3840.8,
+        "L_m": 0.21947,
+        "A_front_m2": 4.9987,
+        "modules": 2
+       },
+       "cycles_foil": {
+        "V_core_m3": 0.51696,
+        "mass_kg": 1026.6
+       }
+      },
+      "R85-ic-RH-ibc-none-none": {
+       "plate_NuT_as_cycles": {
+        "mass_core_kg": 3204,
+        "mass_with_headers_kg": 5126,
+        "V_core_m3": 1.464,
+        "A_front_m2": 15.85,
+        "L_m": 0.092,
+        "modules_BLT_S1500": 2,
+        "feasible": true
+       },
+       "plate_NuH1": {
+        "mass_core_kg": 2934,
+        "mass_with_headers_kg": 4695,
+        "V_core_m3": 1.341,
+        "A_front_m2": 10.08,
+        "L_m": 0.133,
+        "modules_BLT_S1500": 2,
+        "feasible": true
+       },
+       "gyroid_graded": {
+        "mass_core_kg": 3701,
+        "mass_with_headers_kg": 5921,
+        "V_core_m3": 1.335,
+        "A_front_m2": 24.79,
+        "L_m": 0.054,
+        "modules_BLT_S1500": 2,
+        "feasible": true
+       },
+       "diamond_graded": {
+        "mass_core_kg": 3626,
+        "mass_with_headers_kg": 5801,
+        "V_core_m3": 1.318,
+        "A_front_m2": 13.32,
+        "L_m": 0.099,
+        "modules_BLT_S1500": 2,
+        "feasible": true
+       },
+       "plate_NuH1_Dh15": {
+        "mass_core_kg": 2203,
+        "mass_with_headers_kg": 3526,
+        "V_core_m3": 0.821,
+        "A_front_m2": 8.83,
+        "L_m": 0.093,
+        "modules_BLT_S1500": 1,
+        "feasible": true
+       },
+       "cycles_plate_lpbf": {
+        "V_core_m3": 1.5109,
+        "mass_kg": 5289.7,
+        "L_m": 0.26,
+        "A_front_m2": 5.8111,
+        "modules": 2
+       },
+       "cycles_foil": {
+        "V_core_m3": 0.71198,
+        "mass_kg": 1413.9
+       }
+      },
+      "R90-ic-RH-ibc-none-none": {
+       "plate_NuT_as_cycles": {
+        "mass_core_kg": 4730,
+        "mass_with_headers_kg": 7568,
+        "V_core_m3": 2.162,
+        "A_front_m2": 8.46,
+        "L_m": 0.256,
+        "modules_BLT_S1500": 3,
+        "feasible": true
+       },
+       "plate_NuH1": {
+        "mass_core_kg": 4332,
+        "mass_with_headers_kg": 6932,
+        "V_core_m3": 1.98,
+        "A_front_m2": 7.61,
+        "L_m": 0.26,
+        "modules_BLT_S1500": 2,
+        "feasible": true
+       },
+       "gyroid_graded": {
+        "mass_core_kg": 5524,
+        "mass_with_headers_kg": 8838,
+        "V_core_m3": 2.013,
+        "A_front_m2": 14.38,
+        "L_m": 0.14,
+        "modules_BLT_S1500": 2,
+        "feasible": true
+       },
+       "diamond_graded": {
+        "mass_core_kg": 5286,
+        "mass_with_headers_kg": 8458,
+        "V_core_m3": 1.899,
+        "A_front_m2": 18.11,
+        "L_m": 0.105,
+        "modules_BLT_S1500": 2,
+        "feasible": true
+       },
+       "gyroid_uniform": {
+        "mass_core_kg": 5524,
+        "mass_with_headers_kg": 8838,
+        "V_core_m3": 2.013,
+        "A_front_m2": 14.38,
+        "L_m": 0.14,
+        "modules_BLT_S1500": 2,
+        "feasible": true
+       },
+       "diamond_uniform": {
+        "mass_core_kg": 5286,
+        "mass_with_headers_kg": 8458,
+        "V_core_m3": 1.899,
+        "A_front_m2": 18.11,
+        "L_m": 0.105,
+        "modules_BLT_S1500": 2,
+        "feasible": true
+       },
+       "gyroid_graded_tw025": {
+        "mass_core_kg": 3677,
+        "mass_with_headers_kg": 5883,
+        "V_core_m3": 1.71,
+        "A_front_m2": 12.39,
+        "L_m": 0.138,
+        "modules_BLT_S1500": 2,
+        "feasible": true
+       },
+       "plate_NuH1_Dh15": {
+        "mass_core_kg": 3253,
+        "mass_with_headers_kg": 5205,
+        "V_core_m3": 1.211,
+        "A_front_m2": 10.79,
+        "L_m": 0.112,
+        "modules_BLT_S1500": 2,
+        "feasible": true
+       },
+       "cycles_plate_lpbf": {
+        "V_core_m3": 2.2777,
+        "mass_kg": 7974.2,
+        "L_m": 0.32221,
+        "A_front_m2": 7.0688,
+        "modules": 3
+       },
+       "cycles_foil": {
+        "V_core_m3": 1.0733,
+        "mass_kg": 2131.4
+       }
+      }
+     },
+     "transport_stokes": {
+      "gyroid": [
+       {
+        "level": -0.4,
+        "eps": 0.629,
+        "fRe": 55.15,
+        "Nu_H1": 7.352
+       },
+       {
+        "level": -0.2,
+        "eps": 0.564,
+        "fRe": 53.05,
+        "Nu_H1": 6.711
+       },
+       {
+        "level": 0.0,
+        "eps": 0.5,
+        "fRe": 51.93,
+        "Nu_H1": 6.194
+       },
+       {
+        "level": 0.2,
+        "eps": 0.436,
+        "fRe": 51.06,
+        "Nu_H1": 5.763
+       },
+       {
+        "level": 0.4,
+        "eps": 0.371,
+        "fRe": 51.29,
+        "Nu_H1": 5.362
+       },
+       {
+        "level": 0.6,
+        "eps": 0.305,
+        "fRe": 51.33,
+        "Nu_H1": 4.998
+       }
+      ],
+      "diamond": [
+       {
+        "level": -0.4,
+        "eps": 0.664,
+        "fRe": 59.75,
+        "Nu_H1": 7.922
+       },
+       {
+        "level": -0.2,
+        "eps": 0.582,
+        "fRe": 57.07,
+        "Nu_H1": 6.969
+       },
+       {
+        "level": 0.0,
+        "eps": 0.5,
+        "fRe": 56.41,
+        "Nu_H1": 6.295
+       },
+       {
+        "level": 0.2,
+        "eps": 0.418,
+        "fRe": 56.62,
+        "Nu_H1": 5.774
+       },
+       {
+        "level": 0.4,
+        "eps": 0.336,
+        "fRe": 60.55,
+        "Nu_H1": 5.338
+       },
+       {
+        "level": 0.6,
+        "eps": 0.253,
+        "fRe": 66.33,
+        "Nu_H1": 5.007
+       }
+      ]
+     },
+     "crosscheck": {
+      "topo": "gyroid",
+      "level": 0.0,
+      "n": 32,
+      "k_mac_over_a2": 0.002032208996560263,
+      "k_lbm_over_a2": 0.002186552153799221,
+      "k_diff_pct": 7.594846666863542,
+      "Nu_mac": 6.186165082532801,
+      "Nu_lbm": 6.4183640527195625,
+      "Nu_diff_pct": 3.753520429682622,
+      "lbm_steps": 3000,
+      "lbm_converged": true,
+      "Pe_lbm": 0.0023359163849633663
+     },
+     "inertia": null
+    },
+    "manifold": {
+     "comb6": {
+      "n_out": 6,
+      "nonuniformity_max_min_at_equal_back_pressure": {
+       "comb": 0.6100018134617513,
+       "bp": 2.396202886561421,
+       "uniform": 0.10282277807229012,
+       "warm": 0.03854726234594441
+      },
+      "balanced_dissipation_ratio_vs_conventional": {
+       "bp_plus_orifices": 0.528,
+       "warm_start_uniform": 0.651,
+       "cold_start_uniform": 1.806
+      },
+      "note": "Φ_balanced — рассеяние при равных расходах + идеальные дроссели до общего давления выходов; 2D, Стокс, безразмерно — показатель, не число для KV-3"
+     },
+     "fan8": {
+      "n_out": 8,
+      "nonuniformity_max_min_at_equal_back_pressure": {
+       "comb": 1.4792108784798668,
+       "bp": 0.2599305384959283,
+       "uniform": 0.17642713047226377,
+       "warm": 0.046083450331607434
+      },
+      "balanced_dissipation_ratio_vs_conventional": {
+       "bp_plus_orifices": 0.357,
+       "warm_start_uniform": 0.352,
+       "cold_start_uniform": 0.991
+      },
+      "note": "Φ_balanced — рассеяние при равных расходах + идеальные дроссели до общего давления выходов; 2D, Стокс, безразмерно — показатель, не число для KV-3"
+     }
+    }
+   }
+  },
+  "combustor_funnel": {
+   "target": "routes/gtu/combustor (targets.json, comb_space.py)",
+   "new_axes": [
+    {
+     "axis": "liner_cooling",
+     "kind": "CAT",
+     "values": [
+      "плёночное (как есть)",
+      "печатные каналы у стенки"
+     ],
+     "note": "при перепаде 3 % p3 предел 900 °C не держит ни одна сеть (vascular.liner_panel: coolant_kg_s_m2 = null, лучшие — прямые каналы, T_max при полном перепаде в T_max_full_dp_C) — значение «печатные каналы» допустимо только вместе с плёнкой или покрытием (оценка; излучение пламени — ε = 0,20)"
+    },
+    {
+     "axis": "fuel_manifold",
+     "kind": "CAT",
+     "values": [
+      "трубы",
+      "печатный с равномерной раздачей"
+     ],
+     "note": "разброс расходов по форсункам брать из structure/manifold_results.json (с перепадом форсунки 4 % p3: кольцо 1,8 %, дерево 0 %; от допусков печати p95 2,3 % и 0,32 %; блок structure этого файла). topo.nonuniformity (61 % у гребёнки) — при одинаковом противодавлении без форсунок: к топливному коллектору KV-3 не применять — перепад форсунки (~55 кПа) в ~30 раз больше перепада каналов (~2 кПа) и сам выравнивает раздачу"
+    }
+   ]
+  },
+  "aws": {
+   "jobs": "routes/gtu/organic/thermal/jobs_thermal.json",
+   "note": "5 задач, проверено командой plan без AWS; прогноз пакета — поле estimate (верхняя граница); трёхмерные CFD/CHT — блок planned_3d (кода сборки кейсов нет)"
+  }
+ },
+ "structure": {
+  "source": "routes/gtu/organic/structure/structure_results.json",
+  "date": "2026-11-14",
+  "status": "оценка уровня облика: профили и поля температур frame3, допускаемые materials.json (по выдержкам поиска); проверенные числа — только после доводки гладкой формы в CalculiX (disk.py 160×24)",
+  "key_finding": "«живая» топология в осесимметричной постановке даёт направление (полый носок колеса, сформованная задняя поверхность, уступ ступицы турбины), но на гладкой геометрии в CalculiX воксельные проекты не проходят (пики у вершин полостей и уступов); проверенный выигрыш даёт доводка гладкого профиля в CalculiX: колесо ступени 2 −14,0 % массы и −22,8 % момента инерции, диск турбины ступени 1 −5,3 % массы при не худших запасах; решётка в роторе не окупается",
+  "funnel_engine": {
+   "new_axes": [
+    {
+     "axis": "rotor_profile",
+     "values": [
+      "литой/кованый профиль frame3",
+      "гладкий профиль, доведённый в CalculiX"
+     ],
+     "effect": {
+      "comp_wheel_mass": -0.1396,
+      "comp_wheel_J": -0.2277,
+      "turb_disk1_mass": -0.0526,
+      "turb_disk1_J": -0.0561
+     },
+     "basis": "structure_results.json → compressor_wheel_stage2.profile_eq, turbine_disk_stage1.profile_eq; запасы не хуже исходных",
+     "trl_note": "оценка: та же технология изготовления (поковка/литьё + обработка), меняется только профиль"
+    },
+    {
+     "axis": "turb_disk_at_material_limit",
+     "values": [
+      "запас как у литого",
+      "предел: 25 000 ч, σв/σ при 120 % ≥ 1"
+     ],
+     "effect": {
+      "turb_disk1_mass": -0.212,
+      "turb_disk1_J": -0.2278
+     },
+     "caveat": "на сетке 160×24 местный ресурс 18 929 ч < 25 000 ч — нужна доводка; брать как верхнюю оценку выигрыша"
+    }
+   ],
+   "model_updates": [
+    {
+     "model": "масса и момент инерции ротора (funnel_space: m_cw, m_tw)",
+     "change": "множители колёс компрессора 0,86 (масса) и 0,77 (J) для варианта «гладкий профиль»; диска турбины 0,95 и 0,94",
+     "why": "пуск пакета: момент инерции ротора — к моменту и времени разгона стартёра пакета (Plug&Play)"
+    },
+    {
+     "model": "make_model: печатный ротор с решёткой",
+     "change": "не добавлять ось «решётка в роторе»: при нагрузке деформацией (вращение, нагрев) S/E гироида ≈ 0,9, решётка несёт то же напряжение, что сплошной металл; колесо B 101,9 кг при загрузке 0,94 против 0,80 у кованого",
+     "basis": "structure_results.json → compressor_wheel_stage2.designs.comp2_B_mass_eq, lattice.law"
+    },
+    {
+     "model": "parts_model: оболочка «печать» + hot_integral",
+     "change": "подтверждено: −111 деталей и −696 единиц крепежа против REF_BOM; плюс встроенные каналы: топливный коллектор −15 деталей и −28 соединений",
+     "basis": "shell_results.json → parts; manifold_results.json",
+     "caveat": "собираемость (print_review → shell_assembly): ротор из 2 колёс и 3 ступеней турбины запирают 6 статорных элементов (передний корпус подшипника, обратный канал, внутренний корпус камеры с СА 1, СА 2, СА 3, задний корпус подшипника) — «одна деталь» не собирается; при сборке ротора по месту нужны передняя крышка и кольца СА 2 и СА 3: −108 деталей и −638…−694 крепежа (а не −111 / −696), картридж ротора целиком не вынимается. Цельная горячая часть (жаровая труба + СА + корпус) требует податливой связи: несовместность температурных деформаций 0,75 % (~3,4 мм по радиусу) — в счёте и расчётах её нет",
+     "caveat_source": "routes/gtu/organic/print_review/print_review_results.json"
+    },
+    {
+     "model": "make_model.printers_for: оболочка одной деталью",
+     "change": "KV-1…KV-3: D = 1,9·D2 (0,73 / 1,15 / 1,34 м), L 0,59 / 0,93 / 1,08 м — входят в BLT-S1500, Farsoon FS1521M-U, EP-M2050 и при kD 2,1 (камеры — по выдержкам поиска, funnel/make_model.PRINTERS)",
+     "basis": "shell_results.json → printer_fit",
+     "caveat": "ГИП оболочки KV-2/KV-3 (Ø1,03–1,48 м) — только в камерах Ø1,6 м (Швеция) и Ø2,05 м (Япония), по выдержке поиска; КТ стенки 40 мм по касательной — 0,46 м металла: ускоритель 9 МэВ, не трубка 450 кВ; BLT-S1500 по высоте источники расходятся (1200 или 1500 мм) — принята меньшая",
+     "caveat_source": "routes/gtu/organic/print_review/print_review_results.json"
+    },
+    {
+     "model": "рама опоры подшипника (жёсткость — критические частоты ротора)",
+     "change": "рама оптимизацией топологии жёстче 8 прямых стоек той же массы в 1.62 раза по худшему направлению (2D, демонстрационная сетка)",
+     "basis": "shell_results.json → frame",
+     "caveat": "выигрыш — жёсткость при той же массе (или масса при той же жёсткости), не число деталей и не КПД; ветвящиеся стойки пересекают проточную часть под углом — потери давления не считались"
+    }
+   ]
+  },
+  "funnel_combustor": {
+   "new_axes": [
+    {
+     "axis": "fuel_manifold",
+     "values": [
+      "кольцо + 14 трубок",
+      "дерево каналов в стенке оболочки (закон Мюррея)"
+     ],
+     "effect": {
+      "spread_pct_ring": 1.7669249155727935,
+      "spread_pct_tree": 0.0,
+      "spread_p95_pct_ring_tol2": 2.3153937561460776,
+      "spread_p95_pct_tree_tol2": 0.3247733651357067
+     },
+     "use": "неравномерность расхода по форсункам = неравномерность коэффициента избытка топлива по секторам -> NOx, CO",
+     "basis": "manifold_results.json (оценка: Δp форсунки 4 % p3, шероховатость 15 мкм, σ диаметра 2 %)",
+     "caveat": "ствол Ø42 мм и ветви Ø32 мм не помещаются в стенку оболочки 40 мм — нужен прилив; горизонтальные каналы > 8 мм — каплевидный профиль; шероховатость 15 мкм принята «после обработки», а внутренний канал не обрабатывается; выигрыш в равномерности мал (1,8 % → 0 %) — основной выигрыш −15 деталей и −28 соединений",
+     "caveat_source": "routes/gtu/organic/print_review/print_review_results.json"
+    }
+   ],
+   "notes": [
+    "показатель Мюррея для турбулентного газа из оптимума — 2,41 (а не 3 ламинарного): каналы к листьям толще кубического закона"
+   ]
+  },
+  "aws": {
+   "jobs": "routes/gtu/organic/structure/jobs_structure.json",
+   "forecast_usd_upper": 40.31,
+   "what": "3D диск турбины (1/8, 68 лопаток), 3D рама оболочки, осесимметрия на мелкой сетке, гироид 80³"
+  }
+ }
+}

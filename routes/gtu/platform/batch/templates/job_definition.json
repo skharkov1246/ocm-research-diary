@@ -1,0 +1,43 @@
+{
+  "jobDefinitionName": "${JD_NAME}",
+  "type": "container",
+  "platformCapabilities": ["EC2"],
+  "parameters": {"job_uri": "${JOB_URI}"},
+  "containerProperties": {
+    "image": "${IMAGE_URI}",
+    "command": ["--job", "Ref::job_uri"],
+    "jobRoleArn": "${JOB_ROLE_ARN}",
+    "resourceRequirements": [
+      {"type": "VCPU", "value": "${VCPU_STR}"},
+      {"type": "MEMORY", "value": "${MEMORY_MIB_STR}"}
+    ],
+    "environment": [
+      {"name": "GTU_RUN_ID", "value": "${RUN_ID}"},
+      {"name": "AWS_DEFAULT_REGION", "value": "${REGION}"}
+    ],
+    "linuxParameters": {
+      "initProcessEnabled": true,
+      "sharedMemorySize": "${SHARED_MEMORY_MIB}"
+    },
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-region": "${REGION}",
+        "awslogs-stream-prefix": "${LOG_STREAM_PREFIX}"
+      }
+    }
+  },
+  "retryStrategy": {
+    "attempts": "${RETRY_ATTEMPTS}",
+    "evaluateOnExit": [
+      {"onStatusReason": "Host EC2*", "action": "RETRY"},
+      {"onReason": "*", "action": "EXIT"}
+    ]
+  },
+  "timeout": {"attemptDurationSeconds": "${ATTEMPT_DURATION_S}"},
+  "propagateTags": true,
+  "tags": {
+    "Project": "${PROJECT_TAG}",
+    "RunId": "${RUN_ID}"
+  }
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Прогоны расчётной платформы ГТУ на спотовых машинах AWS (us-east-1).
+"""Прогоны расчётной платформы ГТУ на спотовых машинах AWS (us-east-1 и соседние регионы), версия 3.
 
 Запускается ИЗ СЕССИИ, где действуют ключи ограниченного IAM-пользователя (окружение
 Coldun). Машины работают под ролью экземпляра: ключей на машине и в user-data нет.
@@ -18,8 +18,37 @@ Coldun). Машины работают под ролью экземпляра: �
   3) внешний сборщик: в finally гасит машины с тегами Project=<ALPHA_O_TAG> и
      RunId=<run_id> — только этого прогона, соседние прогоны с тем же Project не трогает.
 Бюджет: перед каждым запуском «израсходовано + в работе (верхняя граница) + новая задача»
-против потолка. Цена — describe_spot_price_history; MaxPrice спота ставится равной оценке,
-поэтому почасовая цена машины сверху ограничена числом, вошедшим в прогноз.
+против потолка. Цена — describe_spot_price_history; MaxPrice спота ставится равной оценке
+по максимуму цены за окно по всем зонам, поэтому почасовая цена машины сверху ограничена
+числом, вошедшим в прогноз.
+
+Версия 2 (после первого живого прогона 14.11.2026):
+  А) самая дешёвая зона: зоны типа машины — по возрастанию последней цены спота, подсеть по
+     умолчанию зоны (describe_subnets, default-for-az); при InsufficientInstanceCapacity /
+     SpotMaxPriceTooLow / Unsupported — следующая зона, затем запасной тип; бюджет — по максимуму;
+  Б) образ по умолчанию al2023; поле "python": "3.12" — venv на этой версии через uv;
+  В) поле "container" (образ Docker) и "container_setup" — команда задачи внутри контейнера,
+     выгрузка, метка и гашение — снаружи;
+  Г) очередь под квоту (--max-vcpu, 384): запуск по мере освобождения машин, бюджет — перед
+     каждым запуском; повтор после прерывания спота — в свой префикс попытки (без задвоения);
+  Д) на машине переменная NPROC (число ядер).
+Правки после трёх проверок v2: машина с неподтверждённым гашением останавливает очередь (--max-vcpu);
+сетевой сбой гашения не уходит из finally; машина за ошибкой 5xx ищется по ClientToken; сверка гасит машину,
+живую после срока; DryRun-успех гасится; user-data всех попыток — до первого запуска; статусы capacity
+(с повтором), no_price, halted; метка 143 при гашении изнутри (Client.…) — не прерывание; окружение OpenFOAM
+(/openfoam/bash.rc) в контейнере.
+
+Версия 3 — соседние мощности (решение владельца 15.11.2026). Без новых флагов — точно как версия 2: те же
+вызовы AWS, тот же журнал. Новые флаги:
+  Е) --regions us-east-1,us-east-2,us-west-2: на регион — свои клиенты EC2/SSM, образ из SSM своего региона,
+     подсеть по умолчанию самой дешёвой зоны, группа безопасности по умолчанию и своя квота
+     (--vcpu-quota-per-region, иначе service-quotas, иначе запасное значение); профиль роли (IAM глобален)
+     и бакет (в --region, us-east-1) — общие; регион очередной задачи — с наименьшей ценой спота среди
+     регионов со свободной квотой (соседний — с запасом цены --region-price-margin); бюджет и MaxPrice — по
+     максимуму цены по всем разрешённым регионам; межрегиональная передача результатов — в смете;
+  Ж) --on-demand-fallback: спот недоступен во всех регионах (нет ёмкости, цены, прав или квоты спота) —
+     машина по требованию по цене из справочника aws_prices_ref.json, при своей квоте по требованию;
+  З) status, reap, collect и сверка — по всем регионам, где у прогона были машины; журнал пишет регион и рынок.
 """
 from __future__ import annotations
 
@@ -46,31 +75,73 @@ DEFAULT_TYPE = "c7a.16xlarge"
 DEFAULT_FALLBACK = ("c7i.16xlarge",)
 DEFAULT_REPO = "https://github.com/skharkov1246/ocm-research-diary"
 DEFAULT_TAG = "sandbox-agent"          # как в calc/aws_setup/setup.sh
+DEFAULT_IMAGE = "al2023"               # ubuntu2404: параметр SSM Canonical агенту не разрешён (прогон 14.11.2026)
 PRODUCT = "Linux/UNIX"
 USERDATA_LIMIT = 16384                 # байт до base64 (ограничение EC2)
 LIVE_STATES = ["pending", "running", "stopping", "stopped"]
+SPOT_REASON = "Server.SpotInstanceTermination"   # код причины гашения при прерывании (по архиву EC2, не сверен)
+# Прерывание спота — причина Server.Spot… (Termination или Shutdown). Причина Client.… — машину погасили
+# изнутри или мы сами (сторож shutdown -P, poweroff после итога, наш terminate): это не прерывание,
+# даже если ловушка TERM успела выгрузить метку с кодом 143.
+SPOT_REASON_PREFIX = "Server.Spot"
+OWN_REASON_PREFIX = "Client."
 
 # vCPU известных типов (квота спота считается в vCPU). Другие типы — поле "vcpu" в задаче.
 VCPU = {f"c7{f}.{s}": n for f in "ai"
         for s, n in (("4xlarge", 16), ("8xlarge", 32), ("16xlarge", 64))}
 
 IMAGES = {
-    # Пакеты платформы (calculix-ccx, gmsh, openfoam) — в apt, поэтому по умолчанию Ubuntu.
+    # Версия 3: вне us-east-1 ssm:GetParameter ключу агента не разрешён (us-east-2, us-west-2, eu-north-1 —
+    # AccessDenied, проверка 15.11.2026) — запасной путь DescribeImages: владелец amazon, имя al2023-ami-2023*-x86_64,
+    # самый свежий по CreationDate. Только в режиме версии 3 ("fallback": "v3"): без новых флагов — как версия 2.
+    "al2023": {"ssm": "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64",
+               "root": "/dev/xvda", "pkg": "dnf", "owner": "amazon", "name": "al2023-ami-2023*-x86_64",
+               "fallback": "v3"},
+    # Параметр SSM Canonical в живом прогоне 14.11.2026 — AccessDenied (дополнение политики не применено).
+    # Запасной путь — DescribeImages по владельцу Canonical (099720109477); вживую не проверен: есть ли
+    # у ключа агента ec2:DescribeImages — неизвестно. Не вышло — задача получает статус image_unavailable.
     "ubuntu2404": {"ssm": "/aws/service/canonical/ubuntu/server/24.04/stable/current/"
                           "amd64/hvm/ebs-gp3/ami-id",
-                   "root": "/dev/sda1", "pkg": "apt"},
-    "al2023": {"ssm": "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64",
-               "root": "/dev/xvda", "pkg": "dnf"},
+                   "root": "/dev/sda1", "pkg": "apt", "owner": "099720109477",
+                   "name": "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"},
 }
 
 CAPACITY_ERRORS = {"InsufficientInstanceCapacity", "SpotMaxPriceTooLow", "Unsupported"}
 QUOTA_ERRORS = {"MaxSpotInstanceCountExceeded", "VcpuLimitExceeded", "InstanceLimitExceeded"}
+# Версия 3: отказ в правах в регионе (политика ключа агента закреплена за us-east-1 условием
+# aws:RequestedRegion; регион не включён в аккаунте) — регион исключается до конца прогона для этого рынка.
+DENY_ERRORS = {"UnauthorizedOperation", "AccessDenied", "AccessDeniedException", "AuthFailure", "OptInRequired",
+               "UnrecognizedClientException", "InvalidClientTokenId"}
+
+# --------------------------------------------------------------------------- версия 3: регионы
+REGION_RE = re.compile(r"^[a-z]{2}(?:-[a-z]+)+-\d$")
+MARKETS = ("spot", "on-demand")
+# Коды квот EC2 в vCPU: L-1216C47A — Running On-Demand Standard (A, C, D, H, I, M, R, T, Z) instances (сверено по
+# примеру awscli 1.46.3 examples/service-quotas/get-service-quota.rst); L-34B43A08 — All Standard (A, C, D, H, I,
+# M, R, T, Z) Spot Instance Requests (по выдержкам поиска, не сверено).
+QUOTA_CODES = {"spot": "L-34B43A08", "on-demand": "L-1216C47A"}
+# Квота соседнего региона, если её не задали флагом и service-quotas не ответил: 0 — регион не используется.
+# Квоты регионов различаются на порядки (15.11.2026: спот us-east-2 и eu-north-1 — 5 vCPU, us-west-2 — 384):
+# запуск сверх неизвестной квоты не пробуется (--vcpu-quota-fallback меняет это значение).
+QUOTA_FALLBACK = 0
+PRICE_REF = HERE / "aws_prices_ref.json"   # справочник: цены по требованию и межрегиональная передача, с датой
+VCPU_REF = 64                          # vCPU типовой машины пакета (c7a/c7i.16xlarge): --max-parallel по сумме квот
 
 NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 BRANCH_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]{0,199}$")
 REPO_RE = re.compile(r"^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 PKG_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+\-\[\],:=<>!~]{0,127}$")
 RUN_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,47}$")
+AZ_RE = re.compile(r"^[a-z]{2}(?:-[a-z]+)+-\d[a-z]$")
+PY_RE = re.compile(r"^3\.\d{1,2}(?:\.\d{1,2})?$")
+REQ_RE = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9._/-]{0,199}$")
+IMAGE_REF_RE = re.compile(
+    r"^(?:[a-z0-9][a-z0-9.-]*(?::\d{1,5})?/)?[a-z0-9]+(?:[._-][a-z0-9]+)*(?:/[a-z0-9]+(?:[._-][a-z0-9]+)*)*"
+    r"(?::[A-Za-z0-9_][A-Za-z0-9_.-]{0,127})?(?:@sha256:[0-9a-f]{64})?$")
+HEREDOC_MARKS = ("GTU_CMD_EOF", "GTU_SETUP_EOF", "GTU_ENTRY_EOF", "GTU_PY_EOF")
+# apt-get / apt install|update в команде задачи без контейнера на образе al2023 (dnf) — почти наверняка
+# задача написана под прежний образ Ubuntu: предупреждение в plan и run (не отказ — совместимость).
+APT_IN_CMD_RE = re.compile(r"(?:^|[\s;&|(])(?:sudo\s+)?apt(?:-get)?\s+(?:-\S+\s+)*(?:install|update)\b", re.M)
 KEY_ID_RE = re.compile(r"(?<![A-Z0-9])(AKIA|ASIA)[A-Z0-9]{16}(?![A-Z0-9])")
 ARN_ACCOUNT_RE = re.compile(r"(arn:aws[a-z-]*:[a-z0-9-]*:[a-z0-9-]*:)\d{12}(?=:)")   # номер аккаунта в ARN
 SECRET_WORDS = ("aws_secret_access_key", "aws_session_token", "aws_access_key_id")
@@ -79,6 +150,10 @@ SECRET_ENV = ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN")
 
 class RunnerError(Exception):
     """Ошибка конфигурации или отказ (без вывода секретов)."""
+
+
+class ImageUnavailable(RunnerError):
+    """Образ машины не найден или не разрешён ключу агента."""
 
 
 # --------------------------------------------------------------------------- секреты
@@ -130,16 +205,24 @@ class Job:
     instance_type: str = DEFAULT_TYPE
     fallback_types: list = field(default_factory=lambda: list(DEFAULT_FALLBACK))
     max_min: int = 60
-    image: str = "ubuntu2404"
+    image: str = ""                 # "" — al2023; у старых задач с полем apt — ubuntu2404 (как было)
     disk_gb: int = 50
     apt: list = field(default_factory=list)
     dnf: list = field(default_factory=list)
     pip: list = field(default_factory=list)
     vcpu: int = 0
+    python: str = ""                # "3.12" — venv на этой версии через uv; "" — системный python3
+    requirements: str = ""          # файл зависимостей в репозитории, ставится после клонирования
+    container: str = ""             # образ Docker: команда задачи идёт внутри контейнера
+    container_setup: list = field(default_factory=list)   # команды внутри контейнера до команды задачи
 
     @property
     def types(self) -> list:
         return [self.instance_type] + [t for t in self.fallback_types if t != self.instance_type]
+
+    @property
+    def mode(self) -> str:
+        return "container" if self.container else ("python" if self.python else "system")
 
 
 JOB_KEYS = {f for f in Job.__dataclass_fields__}
@@ -190,9 +273,15 @@ def validate_job(job: Job, max_job_min: int = 720) -> None:
     assert_no_secret(job.command, f"команда задачи {job.name}")
     if not isinstance(job.fallback_types, list):
         raise RunnerError(f"{job.name}: fallback_types — список типов")
-    for lst in (job.apt, job.dnf, job.pip):
+    for lst in (job.apt, job.dnf, job.pip, job.container_setup):
         if not isinstance(lst, list):
-            raise RunnerError(f"{job.name}: apt, dnf, pip — списки")
+            raise RunnerError(f"{job.name}: apt, dnf, pip, container_setup — списки")
+    for k in ("python", "requirements", "container"):
+        if not isinstance(getattr(job, k), str):
+            raise RunnerError(f"{job.name}: {k} — строка (версию Python — в кавычках: \"3.12\")")
+    if job.image in ("", None):
+        # Старые задачи с apt рассчитаны на Ubuntu (прежний образ по умолчанию) — для них образ прежний.
+        job.image = "ubuntu2404" if job.apt else DEFAULT_IMAGE
     if isinstance(job.max_min, bool) or not isinstance(job.max_min, int) or not 20 <= job.max_min <= max_job_min:
         raise RunnerError(f"{job.name}: max_min должен быть целым в [20, {max_job_min}]")
     if job.image not in IMAGES:
@@ -205,6 +294,28 @@ def validate_job(job: Job, max_job_min: int = 720) -> None:
     for p in [*job.apt, *job.dnf, *job.pip]:
         if not isinstance(p, str) or not PKG_RE.match(p):
             raise RunnerError(f"{job.name}: недопустимое имя пакета {p!r}")
+    if job.python and not PY_RE.match(job.python):
+        raise RunnerError(f"{job.name}: python — версия вида \"3.12\" или \"3.12.7\"")
+    if job.requirements and (not REQ_RE.match(job.requirements) or ".." in job.requirements.split("/")
+                             or "//" in job.requirements):
+        raise RunnerError(f"{job.name}: requirements — относительный путь файла в репозитории")
+    for c in job.container_setup:
+        if not isinstance(c, str) or not c.strip():
+            raise RunnerError(f"{job.name}: container_setup — список непустых команд")
+        if any(line.strip() in HEREDOC_MARKS for line in c.splitlines()):
+            raise RunnerError(f"{job.name}: container_setup содержит служебную строку")
+        assert_no_secret(c, f"container_setup задачи {job.name}")
+    if job.container:
+        if len(job.container) > 255 or not IMAGE_REF_RE.match(job.container):
+            raise RunnerError(f"{job.name}: container — имя образа вида ubuntu:24.04 или org/image:tag")
+        if job.image != "al2023":
+            raise RunnerError(f"{job.name}: container идёт на образе машины al2023 (docker из dnf)")
+        extra = [k for k in ("apt", "pip", "python", "requirements") if getattr(job, k)]
+        if extra:
+            raise RunnerError(f"{job.name}: с container поля {extra} не применяются — "
+                              f"ставьте пакеты командами container_setup внутри контейнера")
+    elif job.container_setup:
+        raise RunnerError(f"{job.name}: container_setup без container")
     for t in job.types:
         if not isinstance(t, str) or not re.match(r"^[a-z0-9]+\.[a-z0-9]+$", t):
             raise RunnerError(f"{job.name}: недопустимый тип машины {t!r}")
@@ -215,6 +326,15 @@ def validate_job(job: Job, max_job_min: int = 720) -> None:
         raise RunnerError(f"{job.name}: нет числа vCPU для {missing} — задайте поле vcpu")
     # Для типов из таблицы число vCPU берётся из неё: заниженное поле vcpu не обходит квоту.
     job.vcpu = max([job.vcpu] + [VCPU[t] for t in job.types if t in VCPU])
+
+
+def job_warnings(job: Job) -> list:
+    """Предупреждения по задаче (не отказ): то, что почти наверняка не сработает на машине."""
+    out = []
+    if not job.container and IMAGES[job.image]["pkg"] == "dnf" and APT_IN_CMD_RE.search(job.command):
+        out.append(f"{job.name}: команда вызывает apt-get, а образ машины {job.image} (dnf, apt-get нет) — "
+                   f"задайте \"container\": \"ubuntu:24.04\" и перенесите установку в container_setup")
+    return out
 
 
 # --------------------------------------------------------------------------- user-data
@@ -231,19 +351,33 @@ for path, rel in pairs:
 sys.exit(1 if bad else 0)
 '''
 
+# Сборка в два прохода: сначала блоки режима (@@@ИМЯ@@@, текст раннера), затем значения (@@ИМЯ@@)
+# одним проходом — текст команды и container_setup повторно не сканируется.
 USERDATA_TEMPLATE = r'''#!/bin/bash
 shutdown -P +@@MAX_MIN@@
-# gtu runner: run=@@RUN_ID@@ job=@@JOB@@ attempt=@@ATTEMPT@@; the watchdog above is the first command
+# gtu runner v2: run=@@RUN_ID@@ job=@@JOB@@ attempt=@@ATTEMPT@@ mode=@@MODE@@; the watchdog above is the first command
 exec >@@LOG@@ 2>&1
 set -u
-export DEBIAN_FRONTEND=noninteractive AWS_DEFAULT_REGION=@@REGION@@
-T0=$(date +%s); DEADLINE=$((T0 + @@BUDGET_S@@)); WD_END=$((T0 + @@MAX_MIN@@ * 60))
-G=@@ROOT@@; OUT=$G/out; PHASE=setup
+export HOME="${HOME:-/root}" DEBIAN_FRONTEND=noninteractive AWS_DEFAULT_REGION=@@REGION@@
+T0=$(date +%s); DEADLINE=$((T0 + @@BUDGET_S@@)); WD_END=$((T0 + @@MAX_MIN@@ * 60)); TP=$T0; T_CMD=0
+G=@@ROOT@@; OUT=$G/out; PHASE=setup; AZ_M=""; IT_M=""
 mkdir -p "$OUT"
-export GTU_OUT="$OUT" GTU_RUN_ID=@@RUN_ID_Q@@ GTU_JOB=@@JOB_Q@@ GTU_ATTEMPT=@@ATTEMPT@@
+NPROC=$(nproc)
+export GTU_OUT="$OUT" GTU_RUN_ID=@@RUN_ID_Q@@ GTU_JOB=@@JOB_Q@@ GTU_ATTEMPT=@@ATTEMPT@@ NPROC
+export GTU_AZ=@@AZ_Q@@ GTU_AZ_CHEAPEST=@@AZ_CHEAP_Q@@ GTU_ITYPE=@@ITYPE_Q@@
 S3_BUCKET=@@BUCKET_Q@@; S3_KEY=@@KEY_Q@@
 cat >"$G/upload.py" <<'GTU_PY_EOF'
 @@UPLOAD_PY@@GTU_PY_EOF
+phase() {  # log how long the previous phase took (machine log), then switch to $1
+  local n; n=$(date +%s)
+  echo "[gtu-time] $PHASE $((n - TP))s total=$((n - T0))s"
+  TP=$n; PHASE=$1
+}
+imds() {  # IMDSv2 metadata path -> stdout, empty if unavailable
+  local t
+  t=$(curl -sf -m 2 -X PUT -H 'X-aws-ec2-metadata-token-ttl-seconds: 300' http://169.254.169.254/latest/api/token) || return 0
+  curl -sf -m 2 -H "X-aws-ec2-metadata-token: $t" "http://169.254.169.254/latest/meta-data/$1" || true
+}
 up() {  # $1 - path, $2 - time limit in seconds
   if [ -x "$G/venv/bin/python" ] && "$G/venv/bin/python" -c 'import boto3' 2>/dev/null; then
     timeout "$2s" "$G/venv/bin/python" "$G/upload.py" "$S3_BUCKET" "$S3_KEY" "$1"
@@ -254,49 +388,132 @@ up() {  # $1 - path, $2 - time limit in seconds
 }
 finish() {
   RC=$?; set +e; trap - EXIT
+@@@STOP@@@
+  echo "[gtu-time] $PHASE $(( $(date +%s) - TP ))s total=$(( $(date +%s) - T0 ))s"
   echo "finish phase=$PHASE rc=$RC"
+  [ -n "$AZ_M" ] || AZ_M=$(imds placement/availability-zone | tr -cd 'a-z0-9-')
   cp @@LOG@@ "$OUT/_job.log"
   # results must finish before the watchdog: keep 120 s for the marker and poweroff
   LEFT=$((WD_END - $(date +%s) - 120)); [ "$LEFT" -gt 1800 ] && LEFT=1800; [ "$LEFT" -lt 30 ] && LEFT=30
   up "$OUT" "$LEFT"
-  printf '{"run_id":"%s","job":"%s","attempt":%s,"phase":"%s","exit_code":%d,"t_start":%d,"t_end":%d,"nproc":%d}\n' \
-    "$GTU_RUN_ID" "$GTU_JOB" "$GTU_ATTEMPT" "$PHASE" "$RC" "$T0" "$(date +%s)" "$(nproc)" >"$G/_DONE.json"
+  printf '{"run_id":"%s","job":"%s","attempt":%s,"phase":"%s","exit_code":%d,"t_start":%d,"t_cmd":%d,"t_end":%d,"nproc":%d,"az":"%s","az_planned":"%s","itype":"%s"}\n' \
+    "$GTU_RUN_ID" "$GTU_JOB" "$GTU_ATTEMPT" "$PHASE" "$RC" "$T0" "$T_CMD" "$(date +%s)" "$NPROC" "$AZ_M" "$GTU_AZ" "$IT_M" >"$G/_DONE.json"
   up "$G/_DONE.json" 60
   poweroff
 }
 trap finish EXIT
 trap 'exit 143' TERM HUP INT
-PHASE=base
-@@BASE@@
-PHASE=venv
-python3 -m venv "$G/venv" || exit 12
-timeout 20m "$G/venv/bin/pip" install -q --upgrade pip boto3 || exit 13
-PHASE=packages
-@@PACKAGES@@
-PHASE=clone
+phase base
+@@@BASE@@@
+AZ_M=$(imds placement/availability-zone | tr -cd 'a-z0-9-'); IT_M=$(imds instance-type | tr -cd 'a-z0-9.')
+export GTU_AZ_MACHINE="$AZ_M"
+echo "[gtu] machine az=$AZ_M planned=$GTU_AZ cheapest=$GTU_AZ_CHEAPEST type=$IT_M nproc=$NPROC"
+phase venv
+@@@VENV@@@
+phase packages
+@@@PACKAGES@@@
+@@@DOCKER@@@
+phase clone
 timeout 10m git clone -q --depth 1 -b @@BRANCH_Q@@ @@REPO_Q@@ "$G/repo" || exit 14
 cd "$G/repo" || exit 15
-cat >"$G/cmd.sh" <<'GTU_CMD_EOF'
+echo "[gtu] commit $(git rev-parse HEAD 2>/dev/null)"
+@@@REQUIREMENTS@@@
+@@@PREP@@@
+cat >@@@CMD_FILE@@@ <<'GTU_CMD_EOF'
 @@COMMAND@@
 GTU_CMD_EOF
-export PATH="$G/venv/bin:$PATH" OMP_NUM_THREADS="$(nproc)"
+export PATH="$G/venv/bin:$PATH" OMP_NUM_THREADS="$NPROC"
 REMAIN=$((DEADLINE - $(date +%s)))
 [ "$REMAIN" -gt 120 ] || { PHASE=no_time; exit 124; }
-PHASE=command
-timeout -k 60 "${REMAIN}s" bash "$G/cmd.sh" >"$OUT/_stdout.log" 2>&1
-RC=$?
-PHASE=done
+phase command
+T_CMD=$(date +%s)
+@@@RUN@@@
+phase done
 exit $RC
 '''
+
+VENV_SYSTEM = r'''python3 -m venv "$G/venv" || exit 12
+timeout 20m "$G/venv/bin/pip" install -q --upgrade pip boto3 || exit 13'''
+
+# uv: из PATH, иначе pip в отдельный venv системного python3, иначе архив выпуска GitHub.
+VENV_UV = r'''UV=$(command -v uv 2>/dev/null || true)
+if [ -z "$UV" ] && python3 -m venv "$G/uvboot" && timeout 10m "$G/uvboot/bin/pip" install -q uv; then
+  UV="$G/uvboot/bin/uv"
+fi
+if [ ! -x "$UV" ]; then
+  echo "[gtu] uv from PyPI failed - trying the GitHub release"
+  mkdir -p "$G/uvrel"
+  timeout 5m curl -fsSL "https://github.com/astral-sh/uv/releases/latest/download/uv-$(uname -m)-unknown-linux-gnu.tar.gz" | tar -xz -C "$G/uvrel" --strip-components=1
+  UV="$G/uvrel/uv"
+fi
+[ -x "$UV" ] || exit 18
+export UV_PYTHON_INSTALL_DIR="$G/python" UV_PYTHON_BIN_DIR="$G/python/bin" UV_CACHE_DIR="$G/uv-cache" UV_NO_PROGRESS=1
+echo "[gtu] $("$UV" --version 2>&1)"
+timeout 15m "$UV" python install @@PY@@ || exit 19
+timeout 10m "$UV" venv --seed -q --python @@PY@@ "$G/venv" || exit 12
+timeout 20m "$UV" pip install -q --python "$G/venv/bin/python" boto3 || exit 13
+echo "[gtu] venv $("$G/venv/bin/python" -V 2>&1)"'''
+
+DOCKER_BLOCK = r'''phase docker
+timeout 5m systemctl start docker || exit 21
+for _ in $(seq 90); do docker info >/dev/null 2>&1 && break; sleep 2; done
+docker info >/dev/null 2>&1 || exit 21
+phase pull
+timeout 30m docker pull -q @@IMG_Q@@ || exit 22
+echo "[gtu] image digests: $(docker image inspect --format '{{json .RepoDigests}}' @@IMG_Q@@ 2>/dev/null)"'''
+
+PREP_CONTAINER = r'''mkdir -p "$G/ctr" "$G/meta"
+cat >"$G/ctr/setup.sh" <<'GTU_SETUP_EOF'
+@@SETUP@@
+GTU_SETUP_EOF
+cat >"$G/ctr/entry.sh" <<'GTU_ENTRY_EOF'
+#!/bin/bash
+set -u
+# images opencfd/openfoam-*: their entrypoint (replaced by bash here) sources the OpenFOAM environment
+for _rc in /openfoam/bash.rc; do [ -f "$_rc" ] && { set +u; . "$_rc" >/dev/null 2>&1; set -u; }; done
+T=$(date +%s)
+if ! bash -e @@CR@@/ctr/setup.sh >"$GTU_OUT/_container_setup.log" 2>&1; then
+  echo "[gtu] container_setup failed - see _container_setup.log"; exit 20
+fi
+echo $(( $(date +%s) - T )) >@@CR@@/meta/setup_s
+touch @@CR@@/meta/setup_ok
+exec bash @@CR@@/ctr/cmd.sh
+GTU_ENTRY_EOF
+chmod +x "$G/ctr/entry.sh"'''
+
+RUN_HOST = r'''timeout -k 60 "${REMAIN}s" bash "$G/cmd.sh" >"$OUT/_stdout.log" 2>&1
+RC=$?'''
+
+# Контейнер: все ядра (--cpus), /dev/shm — половина памяти (MPI), клон и $GTU_OUT примонтированы,
+# пользователь root (container_setup ставит пакеты), OpenMPI под root разрешён переменными.
+# IMDS из контейнера недоступен (hop limit 1): ключей роли у команды нет, зона — из GTU_AZ_MACHINE.
+# Без --init: есть ли docker-init в пакете docker al2023 — не проверено; контейнер снимает docker kill в finish.
+RUN_CONTAINER = r'''read -r _ MEM_KB _ </proc/meminfo
+timeout -k 60 "${REMAIN}s" docker run --rm --name gtu-job --user 0:0 --entrypoint /bin/bash \
+  --cpus "$NPROC" --shm-size "$((MEM_KB / 2))k" -w @@CR@@/repo \
+  -v "$G/repo:@@CR@@/repo" -v "$OUT:@@CR@@/out" -v "$G/ctr:@@CR@@/ctr:ro" -v "$G/meta:@@CR@@/meta" \
+  -e GTU_OUT=@@CR@@/out -e GTU_RUN_ID -e GTU_JOB -e GTU_ATTEMPT -e GTU_AZ -e GTU_AZ_CHEAPEST -e GTU_AZ_MACHINE \
+  -e GTU_ITYPE -e NPROC -e OMP_NUM_THREADS="$NPROC" -e DEBIAN_FRONTEND=noninteractive \
+  -e OMPI_ALLOW_RUN_AS_ROOT=1 -e OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
+  @@IMG_Q@@ @@CR@@/ctr/entry.sh >"$OUT/_stdout.log" 2>&1
+RC=$?
+[ -f "$G/meta/setup_s" ] && echo "[gtu-time] container_setup $(cat "$G/meta/setup_s")s (inside the command time)"
+if [ ! -f "$G/meta/setup_ok" ]; then PHASE=container; [ "$RC" -eq 0 ] && RC=20; exit "$RC"; fi'''
+
+STOP_CONTAINER = "  timeout 30 docker kill gtu-job >/dev/null 2>&1"
+
+
+def _fill(text: str, vals: dict, pattern: str) -> str:
+    return re.sub(pattern, lambda m: vals[m.group(1)], text)
 
 
 def build_userdata(job: Job, *, run_id: str, attempt: int, repo: str, branch: str,
                    bucket: str, key_prefix: str, region: str = REGION,
-                   upload_reserve_min: int = 8,
-                   _root: str = "/opt/gtu", _log: str = "/var/log/gtu-job.log") -> str:
+                   upload_reserve_min: int = 8, az: str = "", az_cheapest: str = "", itype: str = "",
+                   _root: str = "/opt/gtu", _log: str = "/var/log/gtu-job.log", _ctr_root: str = "/gtu") -> str:
     """Скрипт первой загрузки машины. Первая команда — сторож `shutdown -P +max_min`.
 
-    `_root` и `_log` — только для локального теста скрипта на подменённых командах.
+    `_root`, `_log`, `_ctr_root` — только для локального теста скрипта на подменённых командах.
     """
     q = shlex.quote
     if not REPO_RE.match(repo):
@@ -305,7 +522,12 @@ def build_userdata(job: Job, *, run_id: str, attempt: int, repo: str, branch: st
         raise RunnerError(f"недопустимое имя ветки {branch!r}")
     if not RUN_ID_RE.match(run_id):
         raise RunnerError(f"недопустимый run_id {run_id!r}")
+    for z in (az, az_cheapest):
+        if z and not AZ_RE.match(z):
+            raise RunnerError(f"недопустимая зона {z!r}")
     img = IMAGES[job.image]
+    uv = bool(job.python)
+    pip_cmd = '"$UV" pip install -q --python "$G/venv/bin/python"' if uv else '"$G/venv/bin/pip" install -q'
     # Сначала база (git, venv, boto3) — чтобы при сбое пакетов задачи журнал всё равно выгрузился.
     if img["pkg"] == "apt":
         apt = "timeout {m}m apt-get -o DPkg::Lock::Timeout=600 -q"
@@ -314,24 +536,39 @@ def build_userdata(job: Job, *, run_id: str, attempt: int, repo: str, branch: st
         sys_pk = (f"{apt.format(m=40)} install -y {' '.join(q(p) for p in job.apt)} || exit 16"
                   if job.apt else "")
     else:
-        base = "timeout 20m dnf -q install -y git python3-pip || exit 11"
+        base = f"timeout 20m dnf -q install -y git python3-pip{' docker' if job.container else ''} || exit 11"
         sys_pk = (f"timeout 40m dnf -q install -y {' '.join(q(p) for p in job.dnf)} || exit 16"
                   if job.dnf else "")
-    pip_pk = (f'timeout 40m "$G/venv/bin/pip" install -q {" ".join(q(p) for p in job.pip)} || exit 17'
-              if job.pip else "")
-    packages = "\n".join(x for x in (sys_pk, pip_pk) if x) or ":"
+    pip_pk = (f'timeout 40m {pip_cmd} {" ".join(q(p) for p in job.pip)} || exit 17' if job.pip else "")
+    req = ""
+    if job.requirements:
+        r = q(job.requirements)
+        req = (f'phase requirements\n[ -f {r} ] || {{ echo "[gtu] requirements file not found: "{r}; exit 23; }}\n'
+               f"timeout 40m {pip_cmd} -r {r} || exit 23")
+    blocks = {
+        "BASE": base,
+        "VENV": VENV_UV if uv else VENV_SYSTEM,
+        "PACKAGES": "\n".join(x for x in (sys_pk, pip_pk) if x) or ":",
+        "DOCKER": DOCKER_BLOCK if job.container else "",
+        "REQUIREMENTS": req,
+        "PREP": PREP_CONTAINER if job.container else "",
+        "CMD_FILE": '"$G/ctr/cmd.sh"' if job.container else '"$G/cmd.sh"',
+        "RUN": RUN_CONTAINER if job.container else RUN_HOST,
+        "STOP": STOP_CONTAINER if job.container else "",
+    }
     budget_s = job.max_min * 60 - upload_reserve_min * 60
     if budget_s < 600:
         raise RunnerError(f"{job.name}: max_min слишком мал для запаса на выгрузку")
     vals = {
         "MAX_MIN": str(job.max_min), "RUN_ID": run_id, "JOB": job.name, "ATTEMPT": str(int(attempt)),
-        "LOG": q(_log), "REGION": q(region), "BUDGET_S": str(budget_s), "ROOT": q(_root),
+        "MODE": job.mode, "LOG": q(_log), "REGION": q(region), "BUDGET_S": str(budget_s), "ROOT": q(_root),
         "RUN_ID_Q": q(run_id), "JOB_Q": q(job.name), "BUCKET_Q": q(bucket), "KEY_Q": q(key_prefix),
-        "UPLOAD_PY": UPLOAD_PY, "BASE": base, "PACKAGES": packages,
-        "BRANCH_Q": q(branch), "REPO_Q": q(repo), "COMMAND": job.command.rstrip("\n"),
+        "AZ_Q": q(az), "AZ_CHEAP_Q": q(az_cheapest), "ITYPE_Q": q(itype),
+        "UPLOAD_PY": UPLOAD_PY, "BRANCH_Q": q(branch), "REPO_Q": q(repo),
+        "PY": q(job.python), "IMG_Q": q(job.container), "CR": q(_ctr_root),
+        "COMMAND": job.command.rstrip("\n"), "SETUP": "\n".join(job.container_setup) or ":",
     }
-    # Один проход подстановки: текст команды повторно не сканируется.
-    ud = re.sub(r"@@([A-Z_]+)@@", lambda m: vals[m.group(1)], USERDATA_TEMPLATE)
+    ud = _fill(_fill(USERDATA_TEMPLATE, blocks, r"@@@([A-Z_]+)@@@"), vals, r"@@([A-Z_]+)@@")
     assert_no_secret(ud, "user-data")
     if len(ud.encode("utf-8")) > USERDATA_LIMIT:
         raise RunnerError(f"{job.name}: user-data {len(ud.encode())} байт > {USERDATA_LIMIT}")
@@ -367,13 +604,18 @@ class Ledger:
                 continue
         return out
 
-    def summary(self) -> dict:
+    def summary(self, now: float | None = None) -> dict:
         """Израсходовано (закрытые машины) и верхняя граница по открытым.
 
         Закрытая: (спот в её зоне на момент запуска + диск + IPv4) × max(60 с, конец − запуск) —
         оценка, не граница: цена спота за время работы может подняться (до MaxPrice).
         Открытая (нет записи end): (MaxPrice + диск + IPv4) × весь отпущенный срок — верхняя
         граница, потому что сторож и сборщик гасят машину не позже этого срока.
+        `now` (живой прогон после сверки): открытая машина старше отпущенного срока — значит, её не
+        погасили ни сторож, ни сборщик, ни сверка — считается по фактическому времени, а не по сроку.
+        Без `now` (status, plan, DryRun — сверки не было) — по сроку, как раньше.
+        Версия 3: машина по требованию пишет свою цену в spot_usd_h и max_usd_h (журнал читает и версия 2);
+        межрегиональная передача результатов (xfer_usd, разово) прибавляется и к закрытой, и к открытой.
         """
         recs = self.records()
         launches = {r["iid"]: r for r in recs if r.get("ev") == "launch"}
@@ -384,12 +626,36 @@ class Ledger:
             extra = L["ebs_usd_h"] + L.get("ip_usd_h", 0.0)
             if iid in ends:
                 dur = max(60.0, ends[iid]["t_end"] - L["t_launch"])
-                spent += (L["spot_usd_h"] + extra) * dur / 3600.0
+                spent += (L["spot_usd_h"] + extra) * dur / 3600.0 + L.get("xfer_usd", 0.0)
             else:
-                committed += (L["max_usd_h"] + extra) * L["allot_min"] / 60.0
+                hours = L["allot_min"] / 60.0
+                if now is not None:
+                    hours = max(hours, (now - L["t_launch"]) / 3600.0)
+                committed += (L["max_usd_h"] + extra) * hours + L.get("xfer_usd", 0.0)
                 open_.append(iid)
         return {"spent": spent, "committed": committed, "open": open_,
                 "closed": len(launches) - len(open_)}
+
+    def by_region(self) -> dict:
+        """Версия 3 (status): {(регион, рынок): {spent, committed, open, closed}} — по тем же формулам, что summary
+        без now; запись без полей региона и рынка — (None, None) (журнал версии 2). Пусто — полей нет нигде."""
+        recs = self.records()
+        launches = {r["iid"]: r for r in recs if r.get("ev") == "launch"}
+        if not any("region" in L or "market" in L for L in launches.values()):
+            return {}
+        ends = {r["iid"]: r for r in recs if r.get("ev") == "end"}
+        out: dict = {}
+        for iid, L in launches.items():
+            g = out.setdefault((L.get("region"), L.get("market")), {"spent": 0.0, "committed": 0.0, "open": 0, "closed": 0})
+            extra = L["ebs_usd_h"] + L.get("ip_usd_h", 0.0)
+            if iid in ends:
+                dur = max(60.0, ends[iid]["t_end"] - L["t_launch"])
+                g["spent"] += (L["spot_usd_h"] + extra) * dur / 3600.0 + L.get("xfer_usd", 0.0)
+                g["closed"] += 1
+            else:
+                g["committed"] += (L["max_usd_h"] + extra) * L["allot_min"] / 60.0 + L.get("xfer_usd", 0.0)
+                g["open"] += 1
+        return out
 
 
 # --------------------------------------------------------------------------- конфигурация
@@ -403,9 +669,12 @@ class Config:
     repo: str = DEFAULT_REPO
     branch: str = "main"
     region: str = REGION
-    ceiling: float = 300.0
+    ceiling: float = 2000.0          # решение владельца 14.11.2026: до 2000 долл. со стоп-краном
+    report_step: float = 500.0       # отчёт владельцу при пересечении каждых 500 долл.
     max_parallel: int = 6
-    vcpu_quota: int = 384
+    vcpu_quota: int = 384            # --max-vcpu: квота спота в vCPU (6 × c7a.16xlarge)
+    quota_wait_polls: int = 15       # квотная ошибка без своих машин в работе: ждать столько опросов
+    capacity_wait_polls: int = 15    # нет ёмкости спота ни в одной зоне ни на одном типе: столько повторов
     price_margin: float = 1.2
     price_window_h: float = 6.0
     ebs_usd_gb_month: float = 0.08
@@ -414,11 +683,35 @@ class Config:
     upload_reserve_min: int = 8
     poll_s: float = 60.0
     retries: int = 1
+    avoid_s: float = 1800.0          # зона после сбоя ёмкости или прерывания — в конец очереди на столько секунд
     spent_before: float = 0.0
     ledger_path: Path = HERE / "ledger.jsonl"
     out_dir: Path = HERE / "runs"
     dryrun: bool = False
     offline_price: float | None = None   # режим plan: цена спота задана вручную, AWS не вызывается
+    offline_zones: dict | None = None    # режим plan: цены по зонам (допущение) для порядка зон
+    # ---- версия 3 (без этих полей — точно версия 2)
+    regions: list = field(default_factory=list)          # разрешённые регионы машин; [] — только region
+    vcpu_quota_region: dict = field(default_factory=dict)      # квота спота по регионам из флага, vCPU
+    od_vcpu_quota_region: dict = field(default_factory=dict)   # квота по требованию по регионам из флага, vCPU
+    vcpu_quota_explicit: bool = False    # --max-vcpu задан явно: в версии 3 — флаг квоты спота региона region
+    od_vcpu_quota: int = 384             # запасная квота по требованию в region (проверка 15.11.2026: 384)
+    vcpu_quota_fallback: int = QUOTA_FALLBACK   # запасная квота соседнего региона (спот и по требованию)
+    on_demand_fallback: bool = False     # спот недоступен везде — машина по требованию
+    region_price_margin: float = 0.05    # соседний регион берётся, только если дешевле с этим запасом
+    xfer_gb: float = 10.0                # объём результатов задачи для сметы межрегиональной передачи, ГБ
+    price_ref: Path = PRICE_REF          # справочник цен по требованию и передачи
+    max_parallel_auto: bool = False      # --max-parallel не задан: в режиме версии 3 — по сумме квот
+    offline_no_spot: bool = False        # режим plan: спот недоступен (проверка пути по требованию)
+
+    @property
+    def region_list(self) -> list:
+        return list(self.regions) or [self.region]
+
+    @property
+    def multi(self) -> bool:
+        """Режим версии 3: регионы сверх region или запас по требованию."""
+        return self.region_list != [self.region] or self.on_demand_fallback
 
 
 def parse_s3_uri(uri: str) -> tuple:
@@ -426,6 +719,77 @@ def parse_s3_uri(uri: str) -> tuple:
     if not m or not m.group(2).strip("/"):
         raise RunnerError("ALPHA_O_S3 должен быть вида s3://<бакет>/<префикс> (префикс обязателен)")
     return m.group(1), m.group(2).strip("/")
+
+
+def parse_zone_prices(text: str) -> dict:
+    """'us-east-1a=0.955,us-east-1c=0.706' -> {зона: цена}."""
+    out = {}
+    for part in (text or "").split(","):
+        if not part.strip():
+            continue
+        az, _, p = part.partition("=")
+        az = az.strip()
+        try:
+            v = float(p)
+        except ValueError:
+            raise RunnerError(f"--assume-zone-prices: цена {p!r} не число") from None
+        if not AZ_RE.match(az) or not v > 0:
+            raise RunnerError(f"--assume-zone-prices: ожидается зона=цена, получено {part.strip()!r}")
+        out[az] = v
+    if not out:
+        raise RunnerError("--assume-zone-prices: пусто")
+    return out
+
+
+def parse_regions(text: str) -> list:
+    """'us-east-1,us-east-2' -> ['us-east-1', 'us-east-2'] (порядок сохраняется, повторы отброшены)."""
+    out = []
+    for part in (text or "").split(","):
+        r = part.strip()
+        if not r:
+            continue
+        if not REGION_RE.match(r):
+            raise RunnerError(f"--regions: недопустимый регион {r!r}")
+        if r not in out:
+            out.append(r)
+    if not out:
+        raise RunnerError("--regions: пусто")
+    return out
+
+
+def parse_region_ints(text: str, flag: str) -> dict:
+    """'us-east-1=384,us-east-2=256' -> {регион: vCPU}."""
+    out = {}
+    for part in (text or "").split(","):
+        if not part.strip():
+            continue
+        r, _, v = part.partition("=")
+        r = r.strip()
+        try:
+            n = int(v)
+        except ValueError:
+            raise RunnerError(f"{flag}: значение {v!r} не целое") from None
+        if not REGION_RE.match(r) or n < 0:
+            raise RunnerError(f"{flag}: ожидается регион=vCPU, получено {part.strip()!r}")
+        out[r] = n
+    if not out:
+        raise RunnerError(f"{flag}: пусто")
+    return out
+
+
+def load_price_ref(path) -> dict:
+    """Справочник цен (версия 3): по требованию {тип: {регион: долл./ч}}, передача {"откуда>куда" | default: долл./ГБ}."""
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+        od, xf = data["on_demand_usd_h"], data["xfer_usd_gb"]
+        od = {t: {r: float(p) for r, p in m.items()} for t, m in od.items()}
+        xf = {k: float(v) for k, v in xf.items()}
+    except (OSError, ValueError, KeyError, TypeError, AttributeError) as e:
+        raise RunnerError(f"справочник цен {Path(path).name} не прочитан: {type(e).__name__}") from None
+    if "default" not in xf or any(p <= 0 for m in od.values() for p in m.values()) or any(v < 0 for v in xf.values()):
+        raise RunnerError(f"справочник цен {Path(path).name}: нужны цены > 0 и xfer_usd_gb.default")
+    return {"on_demand_usd_h": od, "xfer_usd_gb": xf, "date": str(data.get("date", "?")),
+            "status": str(data.get("status", ""))}
 
 
 def new_run_id(clock=time.time) -> str:
@@ -442,6 +806,36 @@ class Active:
     az: str
     t_launch: float
     deadline: float
+    az_req: str = ""          # зона, в которую просили
+    az_rank: int = -1         # место зоны по цене (0 — самая дешёвая)
+    az_cheapest: str = ""     # самая дешёвая зона типа на момент запуска
+    spot_usd_h: float = 0.0   # цена спота в фактической зоне на момент запуска (по требованию — его цена)
+    t_mark: float = 0.0       # когда впервые увидели метку с кодом 143 при ещё живой машине
+    region: str = ""          # версия 3: регион машины ("" — region конфигурации)
+    market: str = "spot"      # версия 3: spot | on-demand
+
+
+@dataclass
+class _Try:
+    """Итоги попыток запуска одной задачи (по типам, регионам, рынкам) — для статуса и пояснения."""
+    refused: bool = False
+    no_price: list = field(default_factory=list)       # типы без цены спота ни в одном регионе
+    cap: list = field(default_factory=list)
+    skipped: list = field(default_factory=list)
+    quota: list = field(default_factory=list)          # версия 3: квота (ошибка, пауза региона, нет свободной)
+    denied: list = field(default_factory=list)         # версия 3: отказ в правах в регионе
+    failed: list = field(default_factory=list)         # версия 3: иная ошибка запуска в регионе
+    image_bad: list = field(default_factory=list)      # версия 3: образ недоступен в регионе
+    image_ok: bool = False
+    wait: list = field(default_factory=list)           # версия 3: регион ждёт проверки гашения первой машины
+    od_no_price: list = field(default_factory=list)    # версия 3: нет цены по требованию в справочнике
+    ami: dict = field(default_factory=dict)            # регион -> образ (или ImageUnavailable)
+
+    def spot_unavailable(self) -> bool:
+        """Спот не дал машину по причине, которую машина по требованию может обойти."""
+        if self.refused or self.wait or (self.image_bad and not self.image_ok):
+            return False                  # регион в ожидании проверки гашения — спот там будет через опрос
+        return bool(self.cap or self.quota or self.no_price or self.denied)
 
 
 @dataclass
@@ -453,13 +847,34 @@ class PriceInfo:
     def az_price(self, az: str) -> float:
         return self.latest.get(az, max(self.latest.values()) if self.latest else self.window_max)
 
+    def by_price(self) -> list:
+        """[(зона, цена)] по возрастанию цены; псевдозоны режима plan отброшены."""
+        return sorted(((z, p) for z, p in self.latest.items() if AZ_RE.match(z)), key=lambda x: (x[1], x[0]))
+
 
 # --------------------------------------------------------------------------- исполнитель
 class Runner:
     def __init__(self, cfg: Config, ec2=None, s3=None, ssm=None, sts=None,
-                 clock=time.time, sleep=time.sleep, out=print):
+                 clock=time.time, sleep=time.sleep, out=print, region_clients=None):
+        """`region_clients(регион) -> {"ec2", "ssm", "servicequotas"}` — клиенты регионов, кроме cfg.region
+        (для него — ec2/ssm из аргументов). Вызывается лениво: только когда регион действительно нужен."""
         self.cfg, self.ec2, self.s3, self.ssm, self.sts = cfg, ec2, s3, ssm, sts
         self.clock, self.sleep, self._out = clock, sleep, out
+        self.region_clients = region_clients
+        self.regions = cfg.region_list
+        self.v3 = cfg.multi
+        self._rc: dict = {}             # регион -> клиенты
+        self._quota: dict = {}          # (регион, рынок) -> (vCPU, источник)
+        self._qblock: dict = {}         # (регион, рынок) -> до какого времени пауза после квотной ошибки
+        self._denied: dict = {}         # (регион, рынок) -> код отказа в правах
+        self._iid_region: dict = {}     # машина -> регион
+        self._ledger_regions = None
+        self._ref = None                # справочник цен (версия 3), читается лениво
+        self._planned: dict = {}        # plan / DryRun версии 3: (регион, рынок) -> vCPU «запущенных» задач волны
+        self._placements: list = []     # plan / DryRun версии 3: (волна, задача, регион, рынок)
+        self._wave = 1
+        self.last_region = None         # регион и рынок последней спланированной / запущенной задачи
+        self.last_market = None
         self.redact = Redactor(cfg.bucket)
         self.ledger = Ledger(cfg.ledger_path, self.redact, clock)          # общий учёт
         side = cfg.dryrun or cfg.offline_price is not None
@@ -469,8 +884,24 @@ class Runner:
         self.results: dict = {}
         self.virtual = 0.0          # DRYRUN/plan: прогноз уже «запущенных» задач пакета
         self.last_params = None
-        self._prices: dict = {}
-        self._ami: dict = {}
+        self._prices: dict = {}     # (регион, тип) -> (время, PriceInfo)
+        self._ami: dict = {}        # (регион, образ) -> id | ImageUnavailable
+        self._subnets: dict = {}    # регион -> dict зона -> подсеть; False — отказ в правах (нет ключа — не читались)
+        self._avoid: dict = {}      # (тип, зона) -> до какого времени зона в конце очереди
+        self._why: dict = {}        # задача -> пояснение к статусу
+        self._quota_wait: dict = {}
+        self._cap_wait: dict = {}
+        self._budget_wait: dict = {}
+        # Гашение не подтверждено: машина, возможно, жива и занимает квоту — новых машин прогон не запускает.
+        self._unconfirmed: dict = {}
+        # Версия 3, соседний регион: права наблюдения (DescribeInstances) и гашения (TerminateInstances) у ключа агента
+        # не проверены (шаблон calc/aws_setup/user_policy.json закрепляет их условием aws:RequestedRegion за одним
+        # регионом). Без них сборщик и гашение после итога в регионе не работают — остаются сторож и shutdown.
+        self._observe: dict = {}        # регион -> True (DescribeInstances DryRun прошёл: права есть)
+        self._term_ok: set = set()      # регионы, где TerminateInstances DryRun на машине прогона прошёл
+        self._term_bad: dict = {}       # регион -> код отказа TerminateInstances
+        self._reconciled = False    # сверка журнала прошла: бюджет считает открытые машины по факту, если дольше срока
+        self._closed_n = 0          # счётчик закрытых машин: бюджет пересчитывается, когда он меняется
         self._seq = 0
         # ClientToken уникален в пределах процесса: повторный запуск с тем же --run-id не получит
         # чужой (старый) экземпляр или IdempotentParameterMismatch по совпавшему токену.
@@ -484,25 +915,289 @@ class Runner:
     def offline(self) -> bool:
         return self.cfg.offline_price is not None
 
-    def key_prefix(self, job_name: str, run_id: str | None = None) -> str:
-        return f"{self.cfg.prefix}/gtu/{run_id or self.cfg.run_id}/{job_name}"
+    def key_prefix(self, job_name: str, run_id: str | None = None, attempt: int = 1) -> str:
+        """Префикс результатов попытки: первая — <run>/<job>, повтор N — <run>/_attemptN/<job>.
+
+        Имя задачи не начинается с «_», поэтому префикс повтора не совпадёт ни с одной задачей,
+        а файлы прерванной попытки не смешаются с файлами следующей.
+        """
+        base = f"{self.cfg.prefix}/gtu/{run_id or self.cfg.run_id}"
+        return f"{base}/{job_name}" if attempt <= 1 else f"{base}/_attempt{int(attempt)}/{job_name}"
+
+    # ---- регионы (версия 3)
+    def client(self, region: str | None, kind: str):
+        """Клиент EC2 / SSM / Service Quotas региона. Для cfg.region — переданные в конструктор (как v2)."""
+        region = region or self.cfg.region
+        if region == self.cfg.region and kind in ("ec2", "ssm") and getattr(self, kind) is not None:
+            return getattr(self, kind)
+        if region not in self._rc:
+            if self.region_clients is None:
+                raise RunnerError(f"нет клиентов AWS для региона {region}")
+            self._rc[region] = self.region_clients(region)
+        return self._rc[region].get(kind)
+
+    def _rf(self, region: str | None, market: str | None = None) -> dict:
+        """Поля журнала версии 3 (регион, рынок); в режиме версии 2 — пусто: журнал как прежде."""
+        if not self.v3:
+            return {}
+        out = {"region": region or self.cfg.region}
+        if market:
+            out["market"] = market
+        return out
+
+    def _where(self, region: str | None) -> str:
+        return f" @{region or self.cfg.region}" if self.v3 else ""
+
+    def _region_of(self, iid: str) -> str:
+        for d in (self.active, self._unconfirmed):
+            a = d.get(iid)
+            if a is not None and a.region:
+                return a.region
+        if iid in self._iid_region:
+            return self._iid_region[iid]
+        if self._ledger_regions is None:
+            self._ledger_regions = {r["iid"]: r["region"] for r in self.ledger.records()
+                                    if r.get("ev") == "launch" and r.get("region") and r.get("iid")}
+        return self._ledger_regions.get(iid, self.cfg.region)
+
+    def _by_region(self, iids) -> dict:
+        """{регион: [id в исходном порядке]}; в режиме версии 2 — один регион."""
+        out: dict = {}
+        for iid in iids:
+            out.setdefault(self._region_of(iid), []).append(iid)
+        return out
+
+    @property
+    def ref(self) -> dict:
+        if self._ref is None:
+            self._ref = load_price_ref(self.cfg.price_ref)
+        return self._ref
+
+    def od_prices(self, itype: str) -> dict:
+        """Цены по требованию типа по разрешённым регионам из справочника: {регион: долл./ч}."""
+        m = self.ref["on_demand_usd_h"].get(itype, {})
+        return {r: m[r] for r in self.regions if r in m}
+
+    def xfer_usd(self, job: Job, region: str | None) -> float:
+        """Смета передачи результатов из региона машины в бакет (region): объём — min(диск, --xfer-gb)."""
+        region = region or self.cfg.region
+        if not self.v3 or region == self.cfg.region:
+            return 0.0
+        xf = self.ref["xfer_usd_gb"]
+        rate = xf.get(f"{region}>{self.cfg.region}", xf["default"])
+        return min(float(job.disk_gb), self.cfg.xfer_gb) * rate
+
+    def quota(self, region: str | None, market: str = "spot") -> int:
+        region = region or self.cfg.region
+        if not self.v3:
+            return self.cfg.vcpu_quota
+        if (region, market) not in self._quota:
+            self._quota[(region, market)] = self._read_quota(region, market)
+        return self._quota[(region, market)][0]
+
+    def _read_quota(self, region: str, market: str) -> tuple:
+        """(vCPU, источник) — только чтение, без изменений квот.
+
+        Фактическая квота региона — service-quotas get-service-quota (L-34B43A08 спот, L-1216C47A по требованию).
+        Флаг (--vcpu-quota-per-region / --od-vcpu-quota-per-region; для region спота — и явный --max-vcpu)
+        только ограничивает сверху: сверх фактической квоты раннер не запускает, даже если флаг больше
+        (заявка на 1536 ещё на рассмотрении). Service-quotas не ответил — флаг, иначе запасное значение:
+        для region — --max-vcpu (384) и od_vcpu_quota (384), для соседнего — --vcpu-quota-fallback (0: не используется).
+        """
+        cfg = self.cfg
+        explicit = cfg.vcpu_quota_region if market == "spot" else cfg.od_vcpu_quota_region
+        flag = explicit.get(region)
+        if flag is None and market == "spot" and region == cfg.region and cfg.vcpu_quota_explicit:
+            flag = cfg.vcpu_quota
+        if region == cfg.region:
+            fb = cfg.vcpu_quota if market == "spot" else cfg.od_vcpu_quota
+        else:
+            fb = cfg.vcpu_quota_fallback
+        code = QUOTA_CODES[market]
+        if self.offline:
+            if flag is not None:
+                return int(flag), "флаг (plan: service-quotas не вызывается)"
+            return fb, "запасное (plan: service-quotas не вызывается)"
+        actual, why = None, ""
+        try:
+            sq = self.client(region, "servicequotas")
+            if sq is None:
+                why = "нет клиента service-quotas"
+            else:
+                actual = int(float(sq.get_service_quota(ServiceCode="ec2", QuotaCode=code)["Quota"]["Value"]))
+        except Exception as e:      # нет прав, сеть, неизвестный ответ — флаг или запасное значение
+            resp = getattr(e, "response", None)
+            why = "service-quotas: " + str((resp.get("Error", {}).get("Code") if isinstance(resp, dict) else None)
+                                           or type(e).__name__)
+        if actual is not None:
+            if flag is not None and int(flag) < actual:
+                return int(flag), f"флаг (service-quotas {code}: {actual})"
+            note = f"; флаг {int(flag)} выше фактической — взята фактическая" if flag is not None and int(flag) > actual else ""
+            return actual, f"service-quotas {code}{note}"
+        if flag is not None:
+            return int(flag), f"флаг ({why})"
+        return fb, f"запасное ({why})"
+
+    def markets(self) -> list:
+        return ["spot", "on-demand"] if self.cfg.on_demand_fallback else ["spot"]
+
+    def load_quotas(self) -> None:
+        """Версия 3: справочник цен и квоты по регионам — в начале прогона и plan, с источником;
+        --max-parallel (не задан) — по сумме квот / 64 vCPU."""
+        if not self.v3:
+            return
+        ref = self.ref                       # битый справочник — отказ до первого запуска, а не посреди пакета
+        self.say(f"[справочник] {Path(self.cfg.price_ref).name} от {ref['date']}"
+                 + (f" ({ref['status']})" if ref["status"] else ""))
+        rows = []
+        for r in self.regions:
+            for m in self.markets():
+                self.quota(r, m)
+                v, src = self._quota[(r, m)]
+                rows.append([r, m, v, src])
+                tail = " — регион не используется (задайте --vcpu-quota-per-region)" if v <= 0 else ""
+                self.say(f"[квоты] {r} {'спот' if m == 'spot' else 'по требованию'}: {v} vCPU ({src}){tail}")
+        self.journal.append("quotas", run_id=self.cfg.run_id, quotas=rows)
+        if self.cfg.max_parallel_auto:
+            n = max(self.cfg.max_parallel, self.total_quota() // VCPU_REF)
+            if n != self.cfg.max_parallel:
+                self.say(f"[очередь] --max-parallel не задан: {n} машин (сумма квот по регионам / {VCPU_REF} vCPU)")
+            self.cfg.max_parallel = n
+
+    def total_quota(self) -> int:
+        if not self.v3:
+            return self.cfg.vcpu_quota
+        return sum(self.quota(r, m) for r in self.regions for m in self.markets())
+
+    @property
+    def _sideline(self) -> bool:
+        """plan или DryRun: машины не запускаются (в версии 3 квоты считаются по «волнам» пакета)."""
+        return self.offline or self.cfg.dryrun
+
+    def _used(self, region: str, market: str = "spot") -> int:
+        used = sum(a.job.vcpu for a in self.active.values()
+                   if (a.region or self.cfg.region) == region and a.market == market)
+        return used + self._planned.get((region, market), 0)
+
+    def _fits(self, job: Job) -> bool:
+        """Есть ли регион (и рынок), где задача помещается в квоту вместе с машинами прогона."""
+        if not self.v3:
+            return sum(a.job.vcpu for a in self.active.values()) + job.vcpu <= self.cfg.vcpu_quota
+        return any((r, m) not in self._denied and self._used(r, m) + job.vcpu <= self.quota(r, m)
+                   for r in self.regions for m in self.markets())
+
+    def _room(self, job: Job) -> bool:
+        """_fits; в plan / DryRun версии 3 квоты всех регионов «заняты» задачами пакета — следующая волна."""
+        if self._fits(job):
+            return True
+        if self.v3 and self._sideline and any(self._planned.values()):
+            self._wave += 1
+            self._planned.clear()
+            self.say(f"[план] квоты регионов заняты пакетом — волна {self._wave} (после освобождения машин)")
+            return self._fits(job)
+        return False
+
+    def _plan_use(self, job: Job, region: str, market: str) -> None:
+        if self.v3 and self._sideline:
+            self._planned[(region, market)] = self._planned.get((region, market), 0) + job.vcpu
+            self._placements.append((self._wave, job.name, region, market))
+
+    def _blocked(self, region: str, market: str) -> str:
+        """Почему регион сейчас не годится для рынка: отказ в правах / пауза после квотной ошибки / ''."""
+        if (region, market) in self._denied:
+            return f"нет прав ({self._denied[(region, market)]})"
+        if self._qblock.get((region, market), 0.0) > self.clock():
+            return "квота (пауза после ошибки)"
+        if self._term_unverified_busy(region):
+            return "ждём проверки гашения первой машины региона"
+        return ""
+
+    def _term_unverified_busy(self, region: str) -> bool:
+        """Соседний регион, где гашение ещё не проверено DryRun на машине прогона, а машина там уже есть: вторую не
+        запускаем (если TerminateInstances там запрещён — без сборщика окажется одна машина, а не очередь)."""
+        return (self.v3 and not self._sideline and region != self.cfg.region and region not in self._term_ok
+                and any((a.region or self.cfg.region) == region for a in self.active.values()))
+
+    def _observe_ok(self, region: str, tr: _Try) -> bool:
+        """Версия 3, соседний регион (боевой прогон и DryRun): DescribeInstances DryRun до первой машины региона.
+        Отказ в правах — регион исключён для обоих рынков: без наблюдения опрос уронил бы прогон, а сборщик не нашёл
+        бы машин по тегам. Иная ошибка (сеть) — регион пропущен в этот раз, проверка повторится."""
+        if not self.v3 or self.offline or region == self.cfg.region:
+            return True
+        if region in self._observe:
+            return True
+        from botocore.exceptions import ClientError
+        try:
+            self.client(region, "ec2").describe_instances(DryRun=True)
+            code = "DryRunOperation"            # DryRun проигнорирован — чтение прошло, права есть
+        except ClientError as e:
+            code = e.response.get("Error", {}).get("Code", "?")
+        except Exception as e:                  # сеть, нет клиента региона — проверка не прошла
+            code = type(e).__name__
+        if code == "DryRunOperation":
+            self._observe[region] = True
+            self.journal.append("region_check", run_id=self.cfg.run_id, region=region, op="DescribeInstances", ok=True)
+            return True
+        self.journal.append("region_check", run_id=self.cfg.run_id, region=region, op="DescribeInstances", ok=False,
+                            code=code)
+        if code in DENY_ERRORS:
+            for m in MARKETS:
+                self._deny(region, m, f"{code} (DescribeInstances)")
+            tr.denied.append(f"{region}: {code} (DescribeInstances)")
+        else:
+            tr.failed.append(f"{region}: DescribeInstances {code}")
+            self.say(f"[регион] {region}: проверка DescribeInstances — {code}, регион пропущен в этот раз")
+        return False
+
+    def _verify_terminate(self, region: str, iid: str) -> None:
+        """Версия 3, соседний регион: TerminateInstances DryRun на первой машине прогона (до неё проверить нельзя —
+        право завязано на тег машины). Отказ — регион исключён для новых машин; эта машина гаснет сторожем
+        (shutdown -P) или сама после итога (poweroff = terminate). NotFound и сеть — повтор на следующем опросе."""
+        from botocore.exceptions import ClientError
+        try:
+            self.client(region, "ec2").terminate_instances(InstanceIds=[iid], DryRun=True)
+            code = "DryRunOperation"            # DryRun проигнорирован — гашение прошло, права есть
+        except ClientError as e:
+            code = e.response.get("Error", {}).get("Code", "?")
+        except Exception as e:                  # сеть, нет клиента региона — проверка не прошла
+            code = type(e).__name__
+        if code == "DryRunOperation":
+            self._term_ok.add(region)
+            self.journal.append("region_check", run_id=self.cfg.run_id, region=region, op="TerminateInstances",
+                                ok=True, iid=iid)
+            self.say(f"[регион] {region}: гашение машин прогона разрешено (TerminateInstances DryRun на {iid})")
+        elif code in DENY_ERRORS:
+            self._term_bad[region] = code
+            self.journal.append("region_check", run_id=self.cfg.run_id, region=region, op="TerminateInstances",
+                                ok=False, code=code, iid=iid)
+            for m in MARKETS:
+                self._deny(region, m, f"{code} (TerminateInstances)")
+            self.say(f"[гашение][ОШИБКА] {region}: TerminateInstances запрещён ({code}) — сборщик здесь не гасит; "
+                     f"{iid} погаснет сторожем или сама после итога; новых машин в регионе не будет")
 
     # ---- цены и бюджет
-    def price(self, itype: str) -> PriceInfo:
+    def price(self, itype: str, region: str | None = None) -> PriceInfo:
+        region = region or self.cfg.region
         now = self.clock()
-        hit = self._prices.get(itype)
+        hit = self._prices.get((region, itype))
         if hit and now - hit[0] < 300:
             return hit[1]
         if self.offline:
             p = float(self.cfg.offline_price)
-            info = PriceInfo(itype, {"assumed": p}, p)
+            zp = dict(self.cfg.offline_zones or {})
+            if self.v3:                      # зоны своего региона (имя зоны = регион + буква)
+                zp = {z: v for z, v in zp.items() if z[:-1] == region}
+            info = PriceInfo(itype, zp or {"assumed": p}, max([p] + list(zp.values())))
+            if self.cfg.offline_no_spot:     # plan: спот недоступен — проверка пути по требованию
+                info = PriceInfo(itype, {}, 0.0)
         else:
             end = dt.datetime.fromtimestamp(now, tz=dt.timezone.utc)
             start = end - dt.timedelta(hours=self.cfg.price_window_h)
             kw = dict(InstanceTypes=[itype], ProductDescriptions=[PRODUCT], StartTime=start, EndTime=end)
             latest, ts, wmax = {}, {}, 0.0
+            ec2 = self.client(region, "ec2")
             while True:
-                r = self.ec2.describe_spot_price_history(**kw)
+                r = ec2.describe_spot_price_history(**kw)
                 for e in r.get("SpotPriceHistory", []):
                     if e.get("InstanceType") != itype:
                         continue
@@ -515,8 +1210,16 @@ class Runner:
                     break
                 kw["NextToken"] = tok
             info = PriceInfo(itype, latest, wmax)
-        self._prices[itype] = (now, info)
+        self._prices[(region, itype)] = (now, info)
         return info
+
+    @staticmethod
+    def combine(itype: str, infos: dict) -> PriceInfo:
+        """Цены нескольких регионов в одну: зоны всех регионов, максимум окна — по всем (для бюджета и MaxPrice)."""
+        latest = {}
+        for info in infos.values():
+            latest.update(info.latest)
+        return PriceInfo(itype, latest, max([i.window_max for i in infos.values()] or [0.0]))
 
     def max_price(self, info: PriceInfo) -> float:
         return math.ceil(info.window_max * self.cfg.price_margin * 10000) / 10000.0
@@ -527,45 +1230,187 @@ class Runner:
     def allot_min(self, job: Job) -> int:
         return job.max_min + self.cfg.grace_min
 
-    def budget_check(self, job: Job, itype: str, info: PriceInfo) -> tuple:
-        """(разрешено?, MaxPrice, цифры). Пишет запись budget в журнал."""
-        s = self.ledger.summary()
-        maxp = self.max_price(info)
-        new = (maxp + self.ebs_usd_h(job) + self.cfg.ipv4_usd_h) * self.allot_min(job) / 60.0
+    def budget_check(self, job: Job, itype: str, info: PriceInfo | None, *, market: str = "spot",
+                     od_rate: float = 0.0, xfer: float = 0.0, regions: list | None = None) -> tuple:
+        """(разрешено?, MaxPrice или цена по требованию, цифры). Пишет запись budget в журнал.
+
+        Версия 3: спот — MaxPrice по максимуму цены за окно по всем разрешённым регионам (info — общий);
+        по требованию — od_rate (максимум цены справочника по регионам-кандидатам); xfer — смета передачи
+        результатов в бакет из соседнего региона (разово, по худшему из регионов-кандидатам).
+        """
+        s = self.ledger.summary(now=self.clock() if self._reconciled else None)
+        spot = market == "spot"
+        maxp = self.max_price(info) if spot else round(float(od_rate), 4)
+        new = (maxp + self.ebs_usd_h(job) + self.cfg.ipv4_usd_h) * self.allot_min(job) / 60.0 + xfer
         spent = s["spent"] + self.cfg.spent_before
         total = spent + s["committed"] + self.virtual + new
-        ok = info.window_max > 0 and total <= self.cfg.ceiling + 1e-9
+        ok = (info.window_max > 0 if spot else maxp > 0) and total <= self.cfg.ceiling + 1e-9
         nums = {"spent": round(spent, 4), "committed": round(s["committed"], 4),
                 "virtual": round(self.virtual, 4), "new": round(new, 4), "total": round(total, 4),
                 "ceiling": self.cfg.ceiling}
+        extra = {}
+        if self.v3:
+            extra = {"market": market, "regions": list(regions or self.regions), "xfer_usd": round(xfer, 4)}
         self.journal.append("budget", run_id=self.cfg.run_id, job=job.name, itype=itype,
-                            spot_usd_h=round(max(info.latest.values()) if info.latest else 0.0, 4),
-                            max_usd_h=maxp, ok=ok, **nums)
+                            spot_usd_h=round(max(info.latest.values()) if spot and info.latest else
+                                             (0.0 if spot else maxp), 4),
+                            max_usd_h=maxp, ok=ok, **nums, **extra)
         verdict = "можно" if ok else "ОТКАЗ: превышение потолка"
-        self.say(f"[бюджет] {job.name} на {itype}: израсходовано {spent:.2f} + в работе "
-                 f"{s['committed']:.2f} + пакет {self.virtual:.2f} + новая {new:.2f} = {total:.2f} "
-                 f"из {self.cfg.ceiling:.2f} долл. (MaxPrice {maxp:.4f}/ч) — {verdict}")
+        step = self.cfg.report_step
+        before = total - new
+        if ok and step > 0 and int(total // step) > int(before // step):
+            порог = int(total // step) * step
+            self.journal.append("budget_report", run_id=self.cfg.run_id, job=job.name, threshold=порог,
+                                total=round(total, 4), ceiling=self.cfg.ceiling)
+            self.say(f"[бюджет] ОТЧЁТ ВЛАДЕЛЬЦУ: с этой задачей расходы пересекают {порог:.0f} долл. "
+                     f"(всего {total:.2f} из {self.cfg.ceiling:.0f})")
+        mk = " (по требованию)" if not spot else ""
+        price_txt = (f"MaxPrice {maxp:.4f}/ч" if spot else
+                     f"по требованию — верхняя граница {maxp:.4f}/ч: справочник × запас {self.cfg.price_margin:g}")
+        xf = f" (в т. ч. передача {xfer:.2f})" if xfer else ""
+        self.say(f"[бюджет] {job.name} на {itype}{mk}: израсходовано {spent:.2f} + в работе "
+                 f"{s['committed']:.2f} + пакет {self.virtual:.2f} + новая {new:.2f}{xf} = {total:.2f} "
+                 f"из {self.cfg.ceiling:.2f} долл. ({price_txt}) — {verdict}")
         return ok, maxp, nums
 
-    # ---- параметры запуска
-    def ami(self, image: str) -> str:
-        if self.offline:
-            return f"<ssm:{IMAGES[image]['ssm']}>"
-        if image not in self._ami:
-            self._ami[image] = self.ssm.get_parameter(Name=IMAGES[image]["ssm"])["Parameter"]["Value"]
-        return self._ami[image]
+    # ---- зоны и подсети
+    def _avoided(self, itype: str, az: str) -> bool:
+        return self._avoid.get((itype, az), 0.0) > self.clock()
 
-    def build_params(self, job: Job, itype: str, ami: str, maxp: float, attempt: int) -> dict:
+    @staticmethod
+    def _akey(itype: str, market: str = "spot") -> str:
+        """Ключ «зона после сбоя»: ёмкость спота и по требованию — разные (сбой спота не закрывает зону для другого)."""
+        return itype if market == "spot" else f"{itype}/od"
+
+    def zone_order(self, itype: str, info: PriceInfo) -> list:
+        """Порядок попыток: по цене, зоны со свежим сбоем ёмкости или прерыванием — в конце."""
+        zs = info.by_price()
+        return [z for z in zs if not self._avoided(itype, z[0])] + [z for z in zs if self._avoided(itype, z[0])]
+
+    def _say_zones(self, job: Job, itype: str, order: list, by_price: list, maxp: float,
+                   region: str | None = None, market: str = "spot", akey: str | None = None,
+                   od_price: float = 0.0) -> None:
+        akey = akey or itype
+        where = self._where(region)
+        if market != "spot":
+            txt = " → ".join(order_z for order_z, _ in order) if order else "зону выберет EC2"
+            self.say(f"[зоны] {job.name} {itype}{where} по требованию: {txt}; цена справочника {od_price:.4f} "
+                     f"долл./ч (от {self.ref['date']}), в бюджете — верхняя граница {maxp:.4f}")
+            return
+        if not order:
+            hint = " (в plan — --assume-zone-prices)" if self.offline else ""
+            self.say(f"[зоны] {job.name} {itype}{where}: цены по зонам неизвестны{hint} — зону выберет EC2")
+            return
+        txt = " → ".join(f"{z} {p:.4f}" + (" (после сбоя)" if self._avoided(akey, z) else "") for z, p in order)
+        tag = " (допущение plan)" if self.offline else ""
+        scope = "по всем регионам" if self.v3 and len(self.regions) > 1 else "за окно"
+        self.say(f"[зоны] {job.name} {itype}{where}: {txt}{tag}; ожидается {order[0][0]} по {order[0][1]:.4f} долл./ч, "
+                 f"самая дешёвая {by_price[0][0]}; MaxPrice {maxp:.4f} и бюджет — по максимуму цены {scope}")
+
+    def subnets(self, region: str | None = None):
+        """Подсети по умолчанию по зонам региона (describe_subnets, default-for-az=true); False — нет прав."""
+        region = region or self.cfg.region
+        if region in self._subnets:
+            return self._subnets[region]
+        from botocore.exceptions import ClientError
+        where = f" {region}:" if self.v3 else ""
+        try:
+            out, kw = {}, {"Filters": [{"Name": "default-for-az", "Values": ["true"]}]}
+            ec2 = self.client(region, "ec2")
+            while True:
+                r = ec2.describe_subnets(**kw)
+                for s in r.get("Subnets", []):
+                    if s.get("State", "available") == "available" and s.get("AvailabilityZone"):
+                        out[s["AvailabilityZone"]] = {"id": s["SubnetId"],
+                                                      "public": bool(s.get("MapPublicIpOnLaunch", False))}
+                if not r.get("NextToken"):
+                    break
+                kw["NextToken"] = r["NextToken"]
+            self._subnets[region] = out
+            self.say(f"[подсети]{where} по умолчанию в зонах: {', '.join(sorted(out)) or 'нет'}")
+        except ClientError as e:
+            code = e.response.get("Error", {}).get("Code", "?")
+            self._subnets[region] = False
+            self.journal.append("subnets", run_id=self.cfg.run_id, ok=False, code=code, **self._rf(region))
+            self.say(f"[подсети]{where} describe_subnets: {code} — зона задаётся Placement.AvailabilityZone "
+                     f"(подсеть по умолчанию этой зоны выберет EC2)")
+        return self._subnets[region]
+
+    def placement(self, az: str | None, region: str | None = None) -> tuple:
+        """('subnet', подсеть) | ('az', None) | ('none', None) | ('skip', None)."""
+        if not az:
+            return "none", None
+        if self.offline:
+            return "subnet", {"id": f"<подсеть по умолчанию {az}>", "public": True}
+        sn = self.subnets(region)
+        if not sn:                       # нет прав или нет подсетей по умолчанию — зона через Placement
+            return "az", None
+        if az in sn:
+            return "subnet", sn[az]
+        return "skip", None
+
+    # ---- параметры запуска
+    def ami(self, image: str, region: str | None = None) -> str:
+        """Образ из SSM своего региона (id образа в каждом регионе свой)."""
+        region = region or self.cfg.region
+        if self.offline:
+            img = IMAGES[image]
+            if self.v3 and region != self.cfg.region:
+                alt = f"; отказ — DescribeImages {img['owner']} {img['name']}" if img.get("owner") else ""
+                return f"<ssm:{img['ssm']}@{region}{alt}>"
+            return f"<ssm:{img['ssm']}>"
+        key = (region, image)
+        hit = self._ami.get(key)
+        if isinstance(hit, ImageUnavailable):
+            raise hit
+        if hit:
+            return hit
+        from botocore.exceptions import BotoCoreError, ClientError
+        img = IMAGES[image]
+        where = f" {region}" if self.v3 else ""
+        try:
+            self._ami[key] = self.client(region, "ssm").get_parameter(Name=img["ssm"])["Parameter"]["Value"]
+            return self._ami[key]
+        except ClientError as e:
+            code = e.response.get("Error", {}).get("Code", "?")
+        except BotoCoreError as e:
+            if not self.v3:
+                raise
+            code = type(e).__name__
+        err = None
+        if img.get("owner") and (self.v3 or img.get("fallback") != "v3"):
+            self.say(f"[образ]{where} {image}: ssm:GetParameter {code} — ищу образ владельца {img['owner']} (DescribeImages)")
+            try:
+                r = self.client(region, "ec2").describe_images(Owners=[img["owner"]], Filters=[
+                    {"Name": "name", "Values": [img["name"]]}, {"Name": "state", "Values": ["available"]},
+                    {"Name": "architecture", "Values": ["x86_64"]}])
+                found = sorted(r.get("Images", []), key=lambda i: i.get("CreationDate", ""))
+                if found:
+                    self._ami[key] = found[-1]["ImageId"]
+                    self.say(f"[образ]{where} {image}: {found[-1].get('Name', '')}")
+                    return self._ami[key]
+                err = f"ssm:GetParameter {code}, DescribeImages — образов нет"
+            except ClientError as e2:
+                err = f"ssm:GetParameter {code}, ec2:DescribeImages {e2.response.get('Error', {}).get('Code', '?')}"
+        self._ami[key] = ImageUnavailable(
+            f"образ {image}{' в ' + region if self.v3 else ''} недоступен ({err or 'ssm:GetParameter ' + code}) — "
+            f"используйте image al2023 или container ubuntu:24.04 (пакеты apt — командами container_setup)")
+        raise self._ami[key]
+
+    def build_params(self, job: Job, itype: str, ami: str, maxp: float, attempt: int, *,
+                     az: str | None = None, subnet: dict | None = None, az_cheapest: str = "",
+                     market: str = "spot") -> dict:
         cfg = self.cfg
         ud = build_userdata(job, run_id=cfg.run_id, attempt=attempt, repo=cfg.repo, branch=cfg.branch,
-                            bucket=cfg.bucket, key_prefix=self.key_prefix(job.name), region=cfg.region,
-                            upload_reserve_min=cfg.upload_reserve_min)
+                            bucket=cfg.bucket, key_prefix=self.key_prefix(job.name, attempt=attempt),
+                            region=cfg.region, upload_reserve_min=cfg.upload_reserve_min,
+                            az=az or "", az_cheapest=az_cheapest, itype=itype)
         tags = [{"Key": "Project", "Value": cfg.tag}, {"Key": "RunId", "Value": cfg.run_id},
                 {"Key": "Job", "Value": job.name}, {"Key": "Name", "Value": f"gtu-{job.name}"}]
         self._seq += 1
         token = "gtu-" + hashlib.sha256(
-            f"{cfg.run_id}|{job.name}|{attempt}|{itype}|{self._seq}|{self._nonce}".encode()).hexdigest()[:40]
-        return dict(
+            f"{cfg.run_id}|{job.name}|{attempt}|{itype}|{az}|{self._seq}|{self._nonce}".encode()).hexdigest()[:40]
+        params = dict(
             ImageId=ami, InstanceType=itype, MinCount=1, MaxCount=1,
             IamInstanceProfile={"Name": cfg.instance_profile},
             InstanceInitiatedShutdownBehavior="terminate",
@@ -583,89 +1428,466 @@ class Runner:
             UserData=ud,
             ClientToken=token,
         )
+        if market == "on-demand":
+            # По требованию: без InstanceMarketOptions. Гашение — то же: InstanceInitiatedShutdownBehavior=terminate,
+            # сторож shutdown -P и сборщик по тегам Project+RunId (тег Market — для глаз в консоли).
+            del params["InstanceMarketOptions"]
+            for spec in params["TagSpecifications"]:
+                spec["Tags"] = tags + [{"Key": "Market", "Value": "on-demand"}]
+        if subnet:
+            if subnet["public"]:          # подсеть по умолчанию выдаёт публичный IPv4 сама — как раньше
+                params["SubnetId"] = subnet["id"]
+            else:                         # иначе публичный IPv4 явно: машине нужен интернет (git, pip, S3)
+                params["NetworkInterfaces"] = [{"DeviceIndex": 0, "SubnetId": subnet["id"],
+                                                "AssociatePublicIpAddress": True, "DeleteOnTermination": True}]
+        elif az:
+            params["Placement"] = {"AvailabilityZone": az}
+        return params
 
     # ---- запуск одной задачи
     def launch(self, job: Job, attempt: int = 1) -> tuple:
-        """('launched', Active) | ('refused'|'defer'|'failed'|'dryrun_ok'|'dryrun_denied'|'planned', None)."""
-        from botocore.exceptions import ClientError
-        refused = False
+        """('launched', Active) | ('refused'|'defer'|'capacity'|'no_price'|'failed'|'image_unavailable'|
+        'dryrun_ok'|'dryrun_denied'|'planned', None).
+
+        'capacity' — ни одна зона ни одного типа не приняла (нет ёмкости спота): очередь повторит позже;
+        'no_price' — ни у одного типа нет истории цены: без цены нет ни MaxPrice, ни бюджета.
+        Причина отказа — в self._why[имя задачи] (уходит в поле detail итога).
+        Версия 3 (--regions / --on-demand-fallback) — _launch_v3; без новых флагов — путь версии 2 ниже.
+        """
+        if self.v3:
+            return self._launch_v3(job, attempt)
+        refused, ami = False, None
+        tr = _Try()
+        self._why.pop(job.name, None)             # пояснение прошлой попытки к этой не относится
         for itype in job.types:
             info = self.price(itype)
             if info.window_max <= 0:
+                tr.no_price.append(itype)
+                self.journal.append("launch_error", run_id=self.cfg.run_id, job=job.name, itype=itype,
+                                    attempt=attempt, code="NoSpotPrice")
                 self.say(f"[цена] нет истории цены спота для {itype} — тип пропущен")
                 continue
             ok, maxp, nums = self.budget_check(job, itype, info)
             if not ok:
                 refused = True
                 continue
-            params = self.build_params(job, itype, self.ami(job.image), maxp, attempt)
+            if ami is None:                       # образ — после бюджета: отказ по бюджету не зовёт SSM
+                try:
+                    ami = self.ami(job.image)
+                except ImageUnavailable as e:
+                    self._why[job.name] = str(e)
+                    self.journal.append("launch_error", run_id=self.cfg.run_id, job=job.name, attempt=attempt,
+                                        code="ImageUnavailable", detail=str(e))
+                    self.say(f"[запуск] {job.name}: {e}")
+                    return "image_unavailable", None
+            sig = self._zones_try(job, attempt, itype, self.cfg.region, "spot", info, maxp, nums, ami, tr)
+            if sig is None:
+                continue                          # ни одна зона не приняла — следующий тип
+            kind = sig[0]
+            if kind in ("launched", "planned", "dryrun_ok", "dryrun_denied"):
+                return sig
+            if kind == "quota":
+                return "defer", None
+            if kind == "region_denied":
+                return "dryrun_denied", None
+            self._why[job.name] = sig[1]          # failed: иная ошибка, машины по ClientToken нет
+            return "failed", None
+        if refused:
+            return "refused", None
+        if len(tr.no_price) == len(job.types):
+            self._why[job.name] = (f"нет истории цены спота за {self.cfg.price_window_h:g} ч для "
+                                   f"{', '.join(tr.no_price)} — без цены машина не запускается "
+                                   f"(MaxPrice и бюджет не посчитать)")
+            return "no_price", None
+        why = []
+        if tr.cap:
+            why.append("нет ёмкости спота: " + ", ".join(tr.cap))
+        if tr.skipped:
+            why.append("нет подсети по умолчанию: " + ", ".join(tr.skipped))
+        if tr.no_price:
+            why.append("нет цены: " + ", ".join(tr.no_price))
+        if why:
+            self._why[job.name] = "; ".join(why)
+        return ("capacity" if tr.cap else "failed"), None
+
+    def _zones_try(self, job: Job, attempt: int, itype: str, region: str, market: str, info: PriceInfo | None,
+                   maxp: float, nums: dict, ami: str, tr: _Try, od_price: float = 0.0):
+        """Зоны одного региона по порядку: запуск (DryRun / plan) в первой принявшей.
+
+        Возвращает ('launched', Active) | ('planned'|'dryrun_ok'|'dryrun_denied', None) — итог;
+        ('quota', код) | ('deny', код) | ('region_denied', код) | ('failed', пояснение) — сигнал: версия 2
+        превращает его в итог задачи, версия 3 — в переход к следующему региону; None — ни одна зона не приняла
+        (ёмкость или нет подсети — в tr), следующий тип или регион.
+        """
+        from botocore.exceptions import ClientError
+        spot = market == "spot"
+        rf = self._rf(region, market)
+        akey = self._akey(itype, market)
+        where = self._where(region)
+        if spot:
+            by_price = info.by_price()
+            order = [z for z in by_price if not self._avoided(akey, z[0])] + \
+                    [z for z in by_price if self._avoided(akey, z[0])]
+        else:
+            order = self._od_zones(itype, region, od_price)
+            by_price = sorted(order)
+        rank = {z: i for i, (z, _) in enumerate(by_price)}
+        cheapest = by_price[0][0] if by_price else ""
+        self._say_zones(job, itype, order, by_price, maxp, region=region, market=market, akey=akey, od_price=od_price)
+        for az, _p in (order or [(None, None)]):
+            how, subnet = self.placement(az, region)
+            if how == "skip":
+                tr.skipped.append(f"{itype}@{az}")
+                self.journal.append("zone_skip", run_id=self.cfg.run_id, job=job.name, itype=itype, az=az,
+                                    attempt=attempt, reason="no_default_subnet", **rf)
+                self.say(f"[зоны] {job.name}: в {az} нет подсети по умолчанию — зона пропущена")
+                continue
+            params = self.build_params(job, itype, ami, maxp, attempt, az=az, subnet=subnet,
+                                       az_cheapest=cheapest, market=market)
             self.last_params = params
             if self.offline:
                 self.virtual += nums["new"]
                 return "planned", None
+            ec2 = self.client(region, "ec2")
             if self.cfg.dryrun:
                 try:
-                    self.ec2.run_instances(DryRun=True, **params)
-                    self.say(f"[dryrun] {job.name}: неожиданный успех без DryRunOperation")
-                    return "dryrun_denied", None
+                    rr = ec2.run_instances(DryRun=True, **params)
                 except ClientError as e:
                     code = e.response.get("Error", {}).get("Code", "?")
                     if code == "DryRunOperation":
                         self.virtual += nums["new"]
-                        self.say(f"[dryrun] {job.name} на {itype}: запуск разрешён (DryRunOperation)")
-                        self.journal.append("dryrun", run_id=self.cfg.run_id, job=job.name, itype=itype, ok=True)
+                        self.say(f"[dryrun] {job.name} на {itype}{where} в {az or 'зоне EC2'}: запуск разрешён (DryRunOperation)")
+                        self.journal.append("dryrun", run_id=self.cfg.run_id, job=job.name, itype=itype,
+                                            az=az or "", ok=True, **rf)
                         return "dryrun_ok", None
-                    self.say(f"[dryrun] {job.name} на {itype}: отказ {code}")
+                    self.say(f"[dryrun] {job.name} на {itype}{where} в {az or 'зоне EC2'}: отказ {code}")
                     self.journal.append("dryrun", run_id=self.cfg.run_id, job=job.name, itype=itype,
-                                        ok=False, code=code)
+                                        az=az or "", ok=False, code=code, **rf)
                     if code in CAPACITY_ERRORS:
+                        tr.cap.append(f"{itype}@{az or 'EC2'}:{code}")
                         continue
-                    return "dryrun_denied", None
+                    if not self.v3:
+                        return "dryrun_denied", None
+                    return ("quota" if code in QUOTA_ERRORS else "region_denied"), code
+                # DryRun проигнорирован и машина создана: в режиме DryRun сборщика в finally нет — гасим здесь
+                ids = [i.get("InstanceId") for i in (rr or {}).get("Instances", [])]
+                for i in ids:
+                    self._iid_region[i] = region
+                self.say(f"[dryrun] {job.name}: неожиданный успех без DryRunOperation — гашу созданное {ids}")
+                self.journal.append("dryrun", run_id=self.cfg.run_id, job=job.name, itype=itype,
+                                    az=az or "", ok=False, code="UnexpectedSuccess", **rf)
+                self._terminate(ids, "DryRun проигнорирован")
+                return "dryrun_denied", None
             try:
-                r = self.ec2.run_instances(**params)
+                r = ec2.run_instances(**params)
             except ClientError as e:
                 code = e.response.get("Error", {}).get("Code", "?")
                 self.journal.append("launch_error", run_id=self.cfg.run_id, job=job.name, itype=itype,
-                                    attempt=attempt, code=code)
-                self.say(f"[запуск] {job.name} на {itype}: {code}")
+                                    az=az or "", attempt=attempt, code=code, **rf)
+                self.say(f"[запуск] {job.name} на {itype}{where} в {az or 'зоне EC2'}: {code}")
                 if code in CAPACITY_ERRORS:
-                    continue
+                    tr.cap.append(f"{itype}@{az or 'EC2'}:{code}")
+                    if az:
+                        self._avoid[(akey, az)] = self.clock() + self.cfg.avoid_s
+                    continue                            # следующая зона, затем следующий тип
                 if code in QUOTA_ERRORS:
-                    return "defer", None
-                return "failed", None
+                    return "quota", code
+                if self.v3 and code in DENY_ERRORS:     # отказ в правах машину не создаёт — следующий регион
+                    return "deny", code
+                # Иная ошибка (InternalError / Unavailable после повторов botocore): EC2 мог машину
+                # всё же создать — ищем по ClientToken, чтобы она сразу вошла в учёт, квоту и бюджет.
+                r = self._find_by_token(params["ClientToken"], region)
+                if r is None:
+                    return "failed", f"RunInstances: {code}"
+                self.say(f"[запуск] {job.name}: несмотря на {code} машина создана — беру в учёт")
             inst = r["Instances"][0]
             iid = inst["InstanceId"]
-            az = inst.get("Placement", {}).get("AvailabilityZone", "")
+            az_act = inst.get("Placement", {}).get("AvailabilityZone", "") or (az or "")
+            price_h = info.az_price(az_act) if spot else od_price
             now = self.clock()
-            act = Active(job, attempt, iid, itype, az, now, now + self.allot_min(job) * 60)
+            act = Active(job, attempt, iid, itype, az_act, now, now + self.allot_min(job) * 60,
+                         az_req=az or "", az_rank=rank.get(az_act, -1), az_cheapest=cheapest, spot_usd_h=price_h,
+                         region=region if self.v3 else "", market=market)
+            self._iid_region[iid] = region
+            v3f = {}
+            if self.v3:
+                v3f = {**rf, "xfer_usd": round(self.xfer_usd(job, region), 4)}
             self.ledger.append("launch", run_id=self.cfg.run_id, job=job.name, attempt=attempt, iid=iid,
-                               itype=itype, az=az, spot_usd_h=round(info.az_price(az), 4), max_usd_h=maxp,
+                               itype=itype, az=az_act, az_req=az or "", az_rank=act.az_rank,
+                               az_cheapest=cheapest, zones=[[z, round(p, 4)] for z, p in by_price],
+                               # как задана зона (id подсети не пишем: журнал коммитится в открытый репозиторий)
+                               net=("subnet" if subnet["public"] else "eni") if subnet else ("placement" if az else "auto"),
+                               image=job.image, mode=job.mode,
+                               spot_usd_h=round(price_h, 4), max_usd_h=maxp,
                                ebs_usd_h=round(self.ebs_usd_h(job), 5), ip_usd_h=self.cfg.ipv4_usd_h,
-                               t_launch=round(now, 1), allot_min=self.allot_min(job))
-            self.say(f"[запуск] {job.name} (попытка {attempt}): {iid} {itype} {az}, "
-                     f"сторож {job.max_min} мин, сборщик через {self.allot_min(job)} мин")
+                               t_launch=round(now, 1), allot_min=self.allot_min(job), **v3f)
+            place = "самая дешёвая" if az_act and az_act == cheapest else f"место по цене {act.az_rank + 1}"
+            if not spot:
+                place = "по требованию"
+            self.say(f"[запуск] {job.name} (попытка {attempt}): {iid} {itype}{where} {az_act} ({place}, "
+                     f"{price_h:.4f} долл./ч), сторож {job.max_min} мин, сборщик через {self.allot_min(job)} мин")
+            if self.v3 and region != self.cfg.region and region not in self._term_ok and region not in self._term_bad:
+                self._verify_terminate(region, iid)
             return "launched", act
-        return ("refused" if refused else "failed"), None
+        if order:
+            nxt = "следующий регион или тип" if self.v3 else "следующий тип"
+            self.say(f"[зоны] {job.name}: на {itype}{where} ни одна зона не приняла — {nxt}")
+        return None
+
+    def _od_zones(self, itype: str, region: str, od_price: float) -> list:
+        """Зоны для машины по требованию: цена во всех зонах одна; зоны — где тип есть по истории цены спота
+        (или все с подсетью по умолчанию), зоны после сбоя ёмкости по требованию — в конце."""
+        zs = []
+        hit = self._prices.get((region, itype))
+        if hit:
+            zs = [z for z, _ in hit[1].by_price()]
+        if not zs and self.offline:
+            zs = [z for z in (self.cfg.offline_zones or {}) if z[:-1] == region]
+        if not zs and not self.offline:
+            sn = self.subnets(region)
+            zs = sorted(sn) if sn else []
+        zs = sorted(zs)
+        akey = self._akey(itype, "on-demand")
+        zs = [z for z in zs if not self._avoided(akey, z)] + [z for z in zs if self._avoided(akey, z)]
+        return [(z, od_price) for z in zs]
+
+    def _best(self, itype: str, info: PriceInfo) -> tuple:
+        """(все зоны после сбоя?, лучшая цена) региона: наименьшая последняя цена среди зон без свежего сбоя."""
+        zs = info.by_price()
+        if not zs:
+            return False, info.window_max
+        fresh = [p for z, p in zs if not self._avoided(itype, z)]
+        return (not fresh), min(fresh or [p for _, p in zs])
+
+    def _pick(self, job: Job, itype: str, market: str, prices: dict, tr: _Try) -> list:
+        """Регионы-кандидаты по возрастанию цены: свободная квота, нет отказа в правах и паузы после квотной
+        ошибки. Соседний регион берётся раньше region, только если дешевле с запасом --region-price-margin."""
+        rows, notes = [], []
+        mname = "спот" if market == "spot" else "по требованию"
+        for r in self.regions:
+            if r not in prices:
+                continue
+            why = self._blocked(r, market)
+            if why:
+                (tr.denied if why.startswith("нет прав") else tr.wait if why.startswith("ждём")
+                 else tr.quota).append(f"{r} {mname}: {why}")
+                notes.append(f"{r} — {why}")
+                continue
+            q, used = self.quota(r, market), self._used(r, market)
+            if used + job.vcpu > q:
+                tr.quota.append(f"{r} {mname}: занято {used} из {q} vCPU")
+                notes.append(f"{r} — квота {used}/{q} vCPU")
+                continue
+            stale, best = prices[r] if isinstance(prices[r], tuple) else (False, prices[r])
+            eff = best if r == self.cfg.region else best * (1.0 + self.cfg.region_price_margin)
+            rows.append((stale, eff, r != self.cfg.region, r, best))
+        rows.sort()
+        if rows or notes:
+            txt = " → ".join(f"{r} {best:.4f}" + (f" (с запасом {eff:.4f})" if eff != best else "")
+                             + (" (зоны после сбоя)" if stale else "") for stale, eff, _h, r, best in rows)
+            self.say(f"[регион] {job.name} {itype} {mname}: {txt or 'нет кандидатов'}"
+                     + (f"; не годятся: {', '.join(notes)}" if notes else ""))
+        return [r for *_x, r, _b in rows]
+
+    def _deny(self, region: str, market: str, code: str) -> None:
+        if (region, market) not in self._denied:
+            self._denied[(region, market)] = code
+            self.journal.append("region_denied", run_id=self.cfg.run_id, region=region, market=market, code=code)
+            self.say(f"[регион] {region} ({'спот' if market == 'spot' else 'по требованию'}): отказ в правах {code} — "
+                     f"регион исключён до конца прогона")
+
+    def _region_try(self, job: Job, attempt: int, itype: str, region: str, market: str, info, maxp: float,
+                    nums: dict, tr: _Try, od_price: float = 0.0):
+        """Версия 3: образ своего региона и зоны региона; сигналы _zones_try — в tr и переход дальше."""
+        if not self._observe_ok(region, tr):
+            return None
+        try:
+            ami = self.ami(job.image, region)
+        except ImageUnavailable as e:
+            tr.image_bad.append(str(e))
+            self.journal.append("launch_error", run_id=self.cfg.run_id, job=job.name, attempt=attempt,
+                                code="ImageUnavailable", detail=str(e), **self._rf(region, market))
+            self.say(f"[запуск] {job.name}: {e} — следующий регион")
+            return None
+        tr.image_ok = True
+        sig = self._zones_try(job, attempt, itype, region, market, info, maxp, nums, ami, tr, od_price=od_price)
+        if sig is None:
+            return None
+        kind = sig[0]
+        if kind in ("launched", "planned", "dryrun_ok", "dryrun_denied"):
+            self.last_region, self.last_market = region, market
+            if kind in ("planned", "dryrun_ok"):
+                self._plan_use(job, region, market)
+            return sig
+        if kind == "quota":
+            # Квоту региона держат и чужие машины аккаунта: регион — на паузу (до следующих опросов), дальше — соседний.
+            self._qblock[(region, market)] = self.clock() + min(self.cfg.avoid_s, 5 * self.cfg.poll_s)
+            tr.quota.append(f"{region} {'спот' if market == 'spot' else 'по требованию'}: {sig[1]}")
+        elif kind in ("deny", "region_denied"):
+            self._deny(region, market, sig[1])
+            tr.denied.append(f"{region} {'спот' if market == 'spot' else 'по требованию'}: {sig[1]}")
+        else:
+            # Неклассифицированный отказ RunInstances (InternalError / Unavailable после повторов botocore), поиск по
+            # ClientToken машину не нашёл: EC2 мог её всё же создать, а описание запаздывает. Следующий регион или тип
+            # запустил бы вторую машину той же задачи — вне журнала и бюджета и в тот же префикс S3. Поэтому — как в
+            # версии 2: задача снимается со статусом failed; возможную машину гасят сборщик по тегам (finally) и сторож.
+            self._why[job.name] = (f"{itype}@{region}: {sig[1]} — машина могла быть создана; другие регионы и типы "
+                                   f"не пробуются (как в версии 2), её найдёт сборщик по тегам")
+            return "failed", None
+        return None
+
+    def _launch_v3(self, job: Job, attempt: int) -> tuple:
+        """Версия 3: спот во всех разрешённых регионах (регион — по цене среди регионов со свободной квотой);
+        не вышло ни в одном (ёмкость, цена, права, квота) — при --on-demand-fallback машина по требованию.
+        plan / DryRun: квоты всех регионов «заняты» задачами пакета — следующая волна и ещё одна попытка."""
+        self._room(job)
+        res = self._launch_v3_once(job, attempt)
+        if res[0] == "defer" and self._sideline and any(self._planned.values()):
+            self._wave += 1
+            self._planned.clear()
+            self.say(f"[план] квоты регионов заняты пакетом — волна {self._wave} (после освобождения машин)")
+            res = self._launch_v3_once(job, attempt)
+        return res
+
+    def _launch_v3_once(self, job: Job, attempt: int) -> tuple:
+        from botocore.exceptions import BotoCoreError, ClientError
+        tr = _Try()
+        self._why.pop(job.name, None)
+        self.last_region = self.last_market = None
+        for itype in job.types:
+            infos, answered = {}, 0
+            for r in self.regions:
+                if (r, "spot") in self._denied:
+                    tr.denied.append(f"{r} спот: {self._denied[(r, 'spot')]}")
+                    continue
+                if not self._observe_ok(r, tr):
+                    continue
+                try:
+                    info = self.price(itype, r)
+                except (ClientError, BotoCoreError) as e:
+                    code = e.response.get("Error", {}).get("Code", "?") if isinstance(e, ClientError) else type(e).__name__
+                    if code in DENY_ERRORS:
+                        self._deny(r, "spot", code)
+                        tr.denied.append(f"{r} спот: {code}")
+                    else:
+                        tr.failed.append(f"{itype}@{r}: цена спота {code}")
+                    continue
+                answered += 1
+                if info.window_max > 0:
+                    infos[r] = info
+            if not infos:
+                if not answered:                  # ни один регион не ответил (права, сеть) — причина уже в tr
+                    continue
+                tr.no_price.append(itype)
+                self.journal.append("launch_error", run_id=self.cfg.run_id, job=job.name, itype=itype,
+                                    attempt=attempt, code="NoSpotPrice", regions=list(self.regions))
+                hint = " (допущение plan --assume-no-spot)" if self.cfg.offline_no_spot else ""
+                self.say(f"[цена] нет истории цены спота для {itype} ни в одном регионе{hint} — тип пропущен")
+                continue
+            cands = self._pick(job, itype, "spot", {r: self._best(itype, i) for r, i in infos.items()}, tr)
+            if not cands:
+                continue
+            allinfo = self.combine(itype, infos)       # MaxPrice и бюджет — по максимуму по всем регионам с ценой
+            xfer = max(self.xfer_usd(job, r) for r in cands)
+            ok, maxp, nums = self.budget_check(job, itype, allinfo, market="spot", xfer=xfer, regions=sorted(infos))
+            if not ok:
+                tr.refused = True
+                continue
+            for r in cands:
+                sig = self._region_try(job, attempt, itype, r, "spot", infos[r], maxp, nums, tr)
+                if sig is not None:
+                    return sig
+        if self.cfg.on_demand_fallback and tr.spot_unavailable():
+            self.say(f"[по требованию] {job.name}: спот недоступен во всех регионах — запасной путь по требованию")
+            for itype in job.types:
+                prices = self.od_prices(itype)
+                if not prices:
+                    tr.od_no_price.append(itype)
+                    self.say(f"[по требованию] {itype}: цены в справочнике нет ни для одного региона — тип пропущен")
+                    continue
+                cands = self._pick(job, itype, "on-demand", prices, tr)
+                if not cands:
+                    continue
+                # Верхняя граница: максимум цены справочника по разрешённым регионам × --price-margin
+                # (справочник может устареть, а MaxPrice у машины по требованию нет).
+                rate = math.ceil(max(prices.values()) * self.cfg.price_margin * 10000) / 10000.0
+                xfer = max(self.xfer_usd(job, r) for r in cands)
+                ok, maxp, nums = self.budget_check(job, itype, None, market="on-demand", od_rate=rate, xfer=xfer,
+                                                   regions=sorted(prices))
+                if not ok:
+                    tr.refused = True
+                    continue
+                for r in cands:
+                    sig = self._region_try(job, attempt, itype, r, "on-demand", None, maxp, nums, tr,
+                                           od_price=prices[r])
+                    if sig is not None:
+                        return sig
+        return self._v3_verdict(job, tr)
+
+    def _v3_verdict(self, job: Job, tr: _Try) -> tuple:
+        why = []
+        for label, lst in (("нет ёмкости", tr.cap), ("нет подсети по умолчанию", tr.skipped),
+                           ("нет цены спота", tr.no_price), ("квота", tr.quota), ("нет прав", tr.denied),
+                           ("ошибка", tr.failed), ("образ", tr.image_bad), ("ждём", tr.wait),
+                           ("нет цены по требованию в справочнике", tr.od_no_price)):
+            if lst:
+                why.append(f"{label}: " + ", ".join(dict.fromkeys(lst)))
+        if why:
+            self._why[job.name] = "; ".join(why)
+        if tr.refused:
+            return "refused", None
+        if tr.image_bad and not tr.image_ok:
+            self._why[job.name] = "; ".join(dict.fromkeys(tr.image_bad))
+            return "image_unavailable", None
+        if (tr.quota or tr.wait) and (self.active or not tr.cap):
+            return "defer", None
+        if tr.cap:
+            return "capacity", None
+        if len(tr.no_price) == len(job.types) and not tr.denied and not tr.failed:
+            od = (f"; нет цены по требованию в справочнике: {', '.join(tr.od_no_price)}" if tr.od_no_price else "")
+            self._why[job.name] = (f"нет истории цены спота за {self.cfg.price_window_h:g} ч для "
+                                   f"{', '.join(tr.no_price)} ни в одном из регионов {', '.join(self.regions)} — "
+                                   f"без цены машина не запускается (MaxPrice и бюджет не посчитать){od}")
+            return "no_price", None
+        if tr.denied and self.cfg.dryrun:
+            return "dryrun_denied", None
+        return "failed", None
+
+    def _find_by_token(self, token: str, region: str | None = None):
+        """Машина, созданная запуском с этим ClientToken (не terminated), в виде ответа run_instances; иначе None."""
+        from botocore.exceptions import BotoCoreError, ClientError
+        try:
+            rr = self.client(region, "ec2").describe_instances(Filters=[{"Name": "client-token", "Values": [token]}])
+        except (ClientError, BotoCoreError):
+            return None
+        found = [i for res in rr.get("Reservations", []) for i in res.get("Instances", [])
+                 if i.get("State", {}).get("Name") != "terminated"]
+        return {"Instances": found[:1]} if found else None
 
     # ---- наблюдение
     def describe(self, iids: list) -> dict:
-        out, kw = {}, {"Filters": [{"Name": "instance-id", "Values": list(iids)}]}
-        while True:
-            r = self.ec2.describe_instances(**kw)
-            for res in r.get("Reservations", []):
-                for i in res.get("Instances", []):
-                    out[i["InstanceId"]] = {"state": i["State"]["Name"],
-                                            "reason": i.get("StateReason", {}).get("Code", ""),
-                                            "az": i.get("Placement", {}).get("AvailabilityZone", "")}
-            if not r.get("NextToken"):
-                return out
-            kw["NextToken"] = r["NextToken"]
+        """Состояние машин; версия 3 — по регионам машин (регион — из прогона или журнала)."""
+        out = {}
+        for region, ids in self._by_region(iids).items():
+            ec2 = self.client(region, "ec2")
+            kw = {"Filters": [{"Name": "instance-id", "Values": list(ids)}]}
+            while True:
+                r = ec2.describe_instances(**kw)
+                for res in r.get("Reservations", []):
+                    for i in res.get("Instances", []):
+                        out[i["InstanceId"]] = {"state": i["State"]["Name"],
+                                                "reason": i.get("StateReason", {}).get("Code", ""),
+                                                "az": i.get("Placement", {}).get("AvailabilityZone", "")}
+                if not r.get("NextToken"):
+                    break
+                kw["NextToken"] = r["NextToken"]
+        return out
 
-    def marker(self, job_name: str, run_id: str | None = None) -> dict | None:
+    def marker(self, job_name: str, run_id: str | None = None, attempt: int = 1) -> dict | None:
         from botocore.exceptions import ClientError
         try:
             body = self.s3.get_object(Bucket=self.cfg.bucket,
-                                      Key=self.key_prefix(job_name, run_id) + "/_DONE.json")["Body"].read()
+                                      Key=self.key_prefix(job_name, run_id, attempt) + "/_DONE.json")["Body"].read()
         except ClientError as e:
             code = e.response.get("Error", {}).get("Code", "")
             if code not in ("NoSuchKey", "404"):
@@ -676,10 +1898,11 @@ class Runner:
         except json.JSONDecodeError:
             return {"phase": "unparseable", "exit_code": -1}
 
-    def collect(self, job_name: str, run_id: str | None = None, dest: Path | None = None) -> list:
-        """Скачать всё из <префикс>/gtu/<run_id>/<job>/ в dest (по умолчанию runs/<run_id>/<job>)."""
+    def collect(self, job_name: str, run_id: str | None = None, dest: Path | None = None,
+                attempt: int = 1) -> list:
+        """Скачать всё из префикса попытки (key_prefix) в dest (по умолчанию runs/<run_id>/<job>)."""
         run_id = run_id or self.cfg.run_id
-        pfx = self.key_prefix(job_name, run_id) + "/"
+        pfx = self.key_prefix(job_name, run_id, attempt) + "/"
         dest = Path(dest or self.cfg.out_dir / run_id / job_name)
         got, kw = [], {"Bucket": self.cfg.bucket, "Prefix": pfx}
         while True:
@@ -700,7 +1923,7 @@ class Runner:
             if not r.get("IsTruncated"):
                 break
             kw["ContinuationToken"] = r["NextContinuationToken"]
-        self.say(f"[сбор] {job_name}: {len(got)} файл(ов) -> {dest}")
+        self.say(f"[сбор] {job_name} (попытка {attempt}): {len(got)} файл(ов) -> {dest}")
         return got
 
     # ---- гашение
@@ -710,82 +1933,146 @@ class Runner:
         TerminateInstances отвергает весь пакет, если хоть один id не годится (например,
         InvalidInstanceID.NotFound у только что запущенной машины). Поэтому при отказе
         пакета — повтор по одной, чтобы один плохой id не оставил живыми остальные.
+        Сетевой сбой (EndpointConnectionError, ReadTimeoutError — BotoCoreError) обрабатывается так же:
+        иначе исключение ушло бы из finally мимо повтора по одной и команды ручного гашения.
         """
-        from botocore.exceptions import ClientError
+        from botocore.exceptions import BotoCoreError, ClientError
+
+        def _code(e):
+            return e.response.get("Error", {}).get("Code", "?") if isinstance(e, ClientError) else type(e).__name__
         iids = sorted(set(i for i in iids if i))
         if not iids:
             return set()
-        self.say(f"[гашение] {iids} ({why})")
-        try:
-            self.ec2.terminate_instances(InstanceIds=iids)
-            return set(iids)
-        except ClientError as e:
-            code = e.response.get("Error", {}).get("Code", "?")
-            if len(iids) > 1:
-                self.say(f"[гашение] пакет отвергнут ({code}) — гашу по одной")
-            else:
-                self._manual(iids, code)
-                return set()
         ok = set()
-        for iid in iids:
+        for region, ids in self._by_region(iids).items():     # версия 3: каждый регион — своим клиентом
+            where = f" {region}" if self.v3 or region != self.cfg.region else ""
+            self.say(f"[гашение]{where} {ids} ({why})")
             try:
-                self.ec2.terminate_instances(InstanceIds=[iid])
-                ok.add(iid)
-            except ClientError as e:
-                self._manual([iid], e.response.get("Error", {}).get("Code", "?"))
+                ec2 = self.client(region, "ec2")
+            except Exception as e:                            # нет клиента региона — хотя бы команда вручную
+                self._manual(ids, str(e) if isinstance(e, RunnerError) else type(e).__name__, region)
+                continue
+            try:
+                ec2.terminate_instances(InstanceIds=ids)
+                ok |= set(ids)
+                continue
+            except (ClientError, BotoCoreError) as e:
+                code = _code(e)
+                if len(ids) > 1:
+                    self.say(f"[гашение] пакет отвергнут ({code}) — гашу по одной")
+                else:
+                    self._manual(ids, code, region)
+                    continue
+            for iid in ids:
+                try:
+                    ec2.terminate_instances(InstanceIds=[iid])
+                    ok.add(iid)
+                except (ClientError, BotoCoreError) as e:
+                    self._manual([iid], _code(e), region)
         return ok
 
-    def _manual(self, iids: list, code: str) -> None:
+    def _manual(self, iids: list, code: str, region: str | None = None) -> None:
         self.say(f"[гашение][ОШИБКА] {code} — погасите вручную: "
-                 f"aws ec2 terminate-instances --region {self.cfg.region} --instance-ids {' '.join(iids)}")
+                 f"aws ec2 terminate-instances --region {region or self.cfg.region} --instance-ids {' '.join(iids)}")
 
     def _close(self, a: Active, outcome: str, state: str = "", reason: str = "") -> None:
         self.active.pop(a.iid, None)
+        self._closed_n += 1
         self.ledger.append("end", run_id=self.cfg.run_id, job=a.job.name, iid=a.iid,
-                           t_end=round(self.clock(), 1), outcome=outcome, state=state, reason=reason)
+                           t_end=round(self.clock(), 1), outcome=outcome, state=state, reason=reason,
+                           **self._rf(a.region or self.cfg.region, a.market))
 
     def _drop(self, a: Active) -> None:
         """Гашение не подтверждено: снять с наблюдения, но запись в журнале оставить открытой.
 
         Открытая запись входит в бюджет верхней границей; закроет её сверка (reconcile)
         в начале следующего прогона или после `reap`, когда AWS покажет terminated.
+        Машина, возможно, жива и занимает квоту: она остаётся в self._unconfirmed — очередь
+        новых машин не запускает (иначе живых vCPU станет больше --max-vcpu), сборщик в finally
+        гасит её вместе с остальными.
         """
         self.active.pop(a.iid, None)
-        self.say(f"[журнал] {a.iid} ({a.job.name}): гашение не подтверждено — запись остаётся открытой")
+        self._unconfirmed[a.iid] = a
+        self.say(f"[журнал] {a.iid} ({a.job.name}): гашение не подтверждено — запись остаётся открытой, "
+                 f"новые машины прогона не запускаются")
 
-    def find_own(self, run_id: str | None = None) -> list:
-        """Машины с тегами Project=<tag> и RunId=<run_id> в живых состояниях (с проверкой тегов на месте)."""
+    def _retry_unconfirmed(self) -> None:
+        """Ещё раз погасить машины с неподтверждённым гашением; принятые — закрыть в журнале."""
+        ids = sorted(self._unconfirmed)
+        done = self._terminate(ids, "повтор: гашение прежде не подтверждено")
+        for iid in ids:
+            if iid in done:
+                self._close(self._unconfirmed.pop(iid), "reaped", reason="повторное гашение")
+
+    def reap_regions(self, run_id: str | None = None, known=()) -> list:
+        """Регионы, где у прогона могли быть машины: разрешённые этим запуском, регионы известных id и всё,
+        что журнал знает о прогоне (запуски, проверки бюджета версии 3). Без версии 3 и записей — только region."""
         run_id = run_id or self.cfg.run_id
-        kw = {"Filters": [{"Name": "tag:Project", "Values": [self.cfg.tag]},
-                          {"Name": "tag:RunId", "Values": [run_id]},
-                          {"Name": "instance-state-name", "Values": LIVE_STATES}]}
-        own = []
-        while True:
-            r = self.ec2.describe_instances(**kw)
-            for res in r.get("Reservations", []):
-                for i in res.get("Instances", []):
-                    tags = {t["Key"]: t["Value"] for t in i.get("Tags", [])}
-                    if tags.get("Project") == self.cfg.tag and tags.get("RunId") == run_id:
-                        own.append(i["InstanceId"])
-                    else:
-                        self.say(f"[сборщик] {i['InstanceId']} — не из прогона {run_id}, не трогаю")
-            if not r.get("NextToken"):
-                return own
-            kw["NextToken"] = r["NextToken"]
+        out = list(self.regions)
+        for iid in known:
+            out.append(self._region_of(iid))
+        for rec in self.ledger.records():
+            if rec.get("run_id") != run_id:
+                continue
+            if rec.get("ev") == "launch" and rec.get("region"):
+                out.append(rec["region"])
+            elif rec.get("ev") == "budget" and isinstance(rec.get("regions"), list):
+                out.extend(r for r in rec["regions"] if isinstance(r, str) and REGION_RE.match(r))
+        return list(dict.fromkeys(out))
+
+    def find_own(self, run_id: str | None = None, regions: list | None = None) -> list:
+        """Машины с тегами Project=<tag> и RunId=<run_id> в живых состояниях (с проверкой тегов на месте).
+
+        Версия 3: по всем регионам `regions`; сбой поиска в одном регионе не мешает другим (исключение — только
+        если не удалось ни в одном)."""
+        run_id = run_id or self.cfg.run_id
+        regions = regions or [self.cfg.region]
+        own, errs = [], []
+        for region in regions:
+            kw = {"Filters": [{"Name": "tag:Project", "Values": [self.cfg.tag]},
+                              {"Name": "tag:RunId", "Values": [run_id]},
+                              {"Name": "instance-state-name", "Values": LIVE_STATES}]}
+            try:
+                ec2 = self.client(region, "ec2")
+                while True:
+                    r = ec2.describe_instances(**kw)
+                    for res in r.get("Reservations", []):
+                        for i in res.get("Instances", []):
+                            tags = {t["Key"]: t["Value"] for t in i.get("Tags", [])}
+                            if tags.get("Project") == self.cfg.tag and tags.get("RunId") == run_id:
+                                own.append(i["InstanceId"])
+                                self._iid_region[i["InstanceId"]] = region
+                            else:
+                                self.say(f"[сборщик] {i['InstanceId']} — не из прогона {run_id}, не трогаю")
+                    if not r.get("NextToken"):
+                        break
+                    kw["NextToken"] = r["NextToken"]
+            except Exception as e:
+                if len(regions) == 1:
+                    raise
+                errs.append(e)
+                self.say(f"[сборщик] {region}: поиск по тегам не удался ({type(e).__name__}) — машины региона "
+                         f"по тегам не найдены; известные id гасятся")
+        if errs and len(errs) == len(regions):
+            raise errs[0]
+        return own
 
     def reap(self, why: str, run_id: str | None = None, known: list = (), list_only: bool = False) -> list:
-        """Внешний сборщик: погасить машины этого прогона (по тегам) и известные нам id."""
+        """Внешний сборщик: погасить машины этого прогона (по тегам) и известные нам id — во всех регионах,
+        где у прогона могли быть машины (reap_regions)."""
+        regions = self.reap_regions(run_id, known)
         try:
-            own = self.find_own(run_id)
+            own = self.find_own(run_id, regions)
         except Exception as e:     # не мешаем погасить хотя бы известные id
             self.say(f"[сборщик] поиск по тегам не удался: {type(e).__name__}")
             own = []
         targets = sorted(set(own) | set(known))
+        where = f" (регионы: {', '.join(regions)})" if len(regions) > 1 else ""
         if not targets:
-            self.say(f"[сборщик] живых машин прогона {run_id or self.cfg.run_id} нет")
+            self.say(f"[сборщик] живых машин прогона {run_id or self.cfg.run_id} нет{where}")
             return []
         if list_only:
-            self.say(f"[сборщик] найдены (не гашу): {targets}")
+            self.say(f"[сборщик] найдены (не гашу): {targets}{where}")
             return targets
         done = self._terminate(targets, why)
         for iid in targets:
@@ -794,10 +2081,19 @@ class Runner:
                     self._close(self.active[iid], "reaped", reason=why)
                 else:
                     self._drop(self.active[iid])
+            elif iid in self._unconfirmed and iid in done:
+                self._close(self._unconfirmed.pop(iid), "reaped", reason=why)
         return targets
 
     def reconcile(self) -> None:
-        """Закрыть в журнале машины прошлых прогонов, которые уже погашены (после падения сессии)."""
+        """Сверка журнала с AWS по открытым записям (после падения сессии и т. п.).
+
+        Погашена — закрыть верхней границей срока. Жива, но срок (max_min + запас) истёк — сторож и
+        сборщик не сработали (user-data не стартовал, сессия упала): журнал доказывает, что машина наша, —
+        гасим и закрываем по фактическому времени. Жива в пределах срока — «в работе».
+        Версия 3: каждая машина ищется в своём регионе (поле region записи launch; нет поля — region).
+        """
+        self._reconciled = True
         open_ = self.ledger.summary()["open"]
         if not open_:
             return
@@ -806,35 +2102,78 @@ class Runner:
         now = self.clock()
         for iid in open_:
             st = info.get(iid, {}).get("state", "not-found")
+            L = launches[iid]
+            rm = {k: L[k] for k in ("region", "market") if k in L}
             if st in ("shutting-down", "terminated", "not-found"):
-                L = launches[iid]
                 t_end = min(now, L["t_launch"] + L["allot_min"] * 60)   # верхняя граница
                 self.ledger.append("end", run_id=L["run_id"], job=L["job"], iid=iid, t_end=round(t_end, 1),
-                                   outcome="reconciled", state=st, reason="закрыто сверкой")
+                                   outcome="reconciled", state=st, reason="закрыто сверкой", **rm)
+            elif now > L["t_launch"] + L["allot_min"] * 60:
+                if iid in self._terminate([iid], f"сверка: {st} после срока {L['allot_min']} мин"):
+                    self.ledger.append("end", run_id=L["run_id"], job=L["job"], iid=iid, t_end=round(now, 1),
+                                       outcome="reaped_overdue", state=st, reason="жива после срока", **rm)
+                else:
+                    self.say(f"[сверка] {iid} ({L.get('job', '?')}) жива после срока и не погашена — в бюджете "
+                             f"прогона считается по фактическому времени ({(now - L['t_launch']) / 3600:.1f} ч)")
             else:
-                self.say(f"[сверка] {iid} ({launches[iid].get('job', '?')}) ещё {st} — учитывается как «в работе»")
+                self.say(f"[сверка] {iid} ({L.get('job', '?')}) ещё {st} — учитывается как «в работе»")
 
     # ---- основной цикл
+    def check_userdata(self, jobs: list) -> None:
+        """Собрать user-data всех задач и всех попыток до первого запуска.
+
+        Повтор пишет в префикс _attemptN — user-data длиннее; RunnerError (предел 16 КБ и т. п.)
+        посреди пакета остановил бы прогон, и сборщик в finally погасил бы работающие машины.
+        Зона и тип — самой длинной записи (длина зон региона одинакова; версия 3 — самый длинный из регионов).
+        """
+        cfg = self.cfg
+        az = f"{max(self.regions, key=len)}a"
+        for j in jobs:
+            for att in range(1, cfg.retries + 2):
+                build_userdata(j, run_id=cfg.run_id, attempt=att, repo=cfg.repo, branch=cfg.branch,
+                               bucket=cfg.bucket, key_prefix=self.key_prefix(j.name, attempt=att),
+                               region=cfg.region, upload_reserve_min=cfg.upload_reserve_min,
+                               az=az, az_cheapest=az, itype=max(j.types, key=len))
+
     def run(self, jobs: list) -> dict:
         cfg = self.cfg
         mode = "plan" if self.offline else ("dryrun" if cfg.dryrun else "run")
+        self.check_userdata(jobs)              # до первого запуска, а не посреди пакета
+        self.load_quotas()                     # версия 3: справочник и квоты регионов до первого запуска
+        extra = {}
+        if self.v3:
+            extra = {"regions": list(self.regions), "on_demand_fallback": cfg.on_demand_fallback,
+                     "quotas": {f"{r}/{m}": self.quota(r, m) for r in self.regions for m in self.markets()}}
         self.journal.append("run_start", run_id=cfg.run_id, mode=mode, branch=cfg.branch,
-                            jobs=[j.name for j in jobs], ceiling=cfg.ceiling, max_parallel=cfg.max_parallel)
+                            jobs=[j.name for j in jobs], ceiling=cfg.ceiling, max_parallel=cfg.max_parallel,
+                            max_vcpu=cfg.vcpu_quota, **extra)
+        need = sum(j.vcpu for j in jobs)
+        quota = self.total_quota()
+        qtxt = (f"квота={cfg.vcpu_quota} vCPU" if not self.v3 else
+                f"квоты={quota} vCPU по регионам {','.join(self.regions)}"
+                + (" (спот + по требованию)" if cfg.on_demand_fallback else ""))
         self.say(f"[прогон] {cfg.run_id} режим={mode} задач={len(jobs)} ветка={cfg.branch} "
-                 f"параллельно≤{cfg.max_parallel} квота={cfg.vcpu_quota} vCPU потолок={cfg.ceiling} долл.")
+                 f"параллельно≤{cfg.max_parallel} {qtxt} потолок={cfg.ceiling} долл."
+                 + (f" — очередь: {need} vCPU пакета > квоты, запуск по мере освобождения" if need > quota else ""))
+        for j in jobs:
+            for w in job_warnings(j):
+                self.say(f"[внимание] {w}")
         pending = deque((j, 1) for j in jobs)
         try:
             if mode == "run":
                 self.reconcile()
             while pending or self.active:
-                self._launch_some(pending, sideline=(mode != "run"))
+                waiting = self._launch_some(pending, sideline=(mode != "run"))
                 if not self.active:
-                    continue          # _launch_some всегда снимает задачу, если нечего ждать
+                    if waiting:                  # квотная ошибка без своих машин в работе — пауза и повтор
+                        self.sleep(cfg.poll_s)
+                    continue          # без ожидания _launch_some всегда снимает задачу
                 self.sleep(cfg.poll_s)
                 self._poll(pending)
         finally:
             if mode == "run":
-                self.reap("finally: конец прогона / ошибка / прерывание", known=list(self.active))
+                self.reap("finally: конец прогона / ошибка / прерывание",
+                          known=list(self.active) + list(self._unconfirmed))
             self.journal.append("run_end", run_id=cfg.run_id, mode=mode, results=self.results)
             summ = cfg.out_dir / cfg.run_id / ("summary.json" if mode == "run" else f"summary.{mode}.json")
             summ.parent.mkdir(parents=True, exist_ok=True)
@@ -843,64 +2182,165 @@ class Runner:
                             encoding="utf-8")
         return self.results
 
-    def _launch_some(self, pending: deque, sideline: bool = False) -> None:
+    def _launch_some(self, pending: deque, sideline: bool = False) -> bool:
+        """Запустить, что помещается в квоту, бюджет и --max-parallel.
+
+        Возвращает True, если головная задача ждёт квоты при пустом списке своих машин (тогда
+        цикл делает паузу poll_s); иначе False. Задача, упёршаяся в квоту или бюджет при своих
+        машинах в работе, остаётся в очереди: квота освободится, а бюджет пересчитается, когда
+        закроется машина (верхняя граница «в работе» сменится фактическим расходом).
+        Нет ёмкости спота ни в одной зоне ни на одном типе — повтор через poll_s, не больше
+        capacity_wait_polls раз (ёмкость обычно возвращается). Есть машина с неподтверждённым
+        гашением — ещё одна попытка погасить, не вышло — очередь снимается со статусом halted.
+        """
         cfg = self.cfg
+        if self._unconfirmed and pending:
+            self._retry_unconfirmed()
+            if self._unconfirmed:
+                why = (f"гашение {sorted(self._unconfirmed)} не подтверждено — машина, возможно, жива; "
+                       f"новые машины прогона не запускаются")
+                for job, attempt in pending:
+                    self.results[job.name] = {"status": "halted", "attempts": attempt, "detail": why}
+                self.say(f"[очередь] СТОП: {why}; снято задач: {len(pending)}")
+                pending.clear()
+                return False
         while pending:
             if len(self.active) >= cfg.max_parallel:
-                return
+                return False
             job, attempt = pending[0]
-            used = sum(a.job.vcpu for a in self.active.values())
-            if used + job.vcpu > cfg.vcpu_quota:
-                if self.active:
-                    return
-                self.results[job.name] = {"status": "quota", "attempts": attempt,
-                                          "detail": f"{job.vcpu} vCPU > квоты {cfg.vcpu_quota}"}
-                pending.popleft()
-                continue
+            if self.v3:
+                if not self._room(job):
+                    if self.active:
+                        return False
+                    self.results[job.name] = {"status": "quota", "attempts": attempt,
+                                              "detail": f"{job.vcpu} vCPU > свободной квоты во всех регионах: " + ", ".join(
+                                                  f"{r} {m} {self.quota(r, m)}" + (" (нет прав)" if (r, m) in self._denied else "")
+                                                  for r in self.regions for m in self.markets())}
+                    pending.popleft()
+                    continue
+            else:
+                used = sum(a.job.vcpu for a in self.active.values())
+                if used + job.vcpu > cfg.vcpu_quota:
+                    if self.active:
+                        return False
+                    self.results[job.name] = {"status": "quota", "attempts": attempt,
+                                              "detail": f"{job.vcpu} vCPU > квоты {cfg.vcpu_quota}"}
+                    pending.popleft()
+                    continue
+            if self.active and self._budget_wait.get(job.name) == self._closed_n:
+                return False                             # с прошлого отказа бюджет не менялся
             status, act = self.launch(job, attempt)
             if status == "launched":
                 self.active[act.iid] = act
+                self._budget_wait.pop(job.name, None)
+                self._quota_wait.pop(job.name, None)
+                self._cap_wait.pop(job.name, None)
                 pending.popleft()
                 continue
-            if status == "defer" and self.active:
-                return                                  # ждём освобождения квоты
+            if status == "defer":
+                if self.active:
+                    return False                         # ждём освобождения квоты
+                if not sideline:
+                    n = self._quota_wait[job.name] = self._quota_wait.get(job.name, 0) + 1
+                    if n <= cfg.quota_wait_polls:
+                        self.say(f"[очередь] {job.name}: квота занята (своих машин нет) — повтор через "
+                                 f"{cfg.poll_s:.0f} с ({n}/{cfg.quota_wait_polls})")
+                        return True
+            if status == "capacity" and not sideline:
+                n = self._cap_wait[job.name] = self._cap_wait.get(job.name, 0) + 1
+                if n <= cfg.capacity_wait_polls:
+                    self.say(f"[очередь] {job.name}: нет ёмкости спота ни в одной зоне ни на одном типе — "
+                             f"повтор через {cfg.poll_s:.0f} с ({n}/{cfg.capacity_wait_polls})")
+                    return not self.active               # без своих машин — пауза poll_s в цикле run
+            if status == "refused" and not sideline and self.active:
+                self._budget_wait[job.name] = self._closed_n
+                self.say(f"[очередь] {job.name}: бюджет не пропускает — жду окончания машины прогона")
+                return False
             pending.popleft()
-            self.results[job.name] = {"status": "quota" if status == "defer" else status, "attempts": attempt}
+            res = {"status": "quota" if status == "defer" else status, "attempts": attempt}
+            if job.name in self._why:
+                res["detail"] = self._why[job.name]
+            self.results[job.name] = res
+        return False
+
+    def _res(self, a: Active) -> dict:
+        d = {"attempts": a.attempt, "itype": a.itype, "iid": a.iid, "az": a.az, "az_rank": a.az_rank,
+             "az_cheapest": a.az_cheapest, "spot_usd_h": round(a.spot_usd_h, 4),
+             "cheapest_zone": bool(a.az_cheapest) and a.az == a.az_cheapest}
+        if self.v3:
+            d.update(region=a.region or self.cfg.region, market=a.market)
+        return d
 
     def _poll(self, pending: deque) -> None:
         info = self.describe(list(self.active))
         now = self.clock()
         for iid in list(self.active):
             a = self.active[iid]
+            if (self.v3 and a.region and a.region != self.cfg.region and a.region not in self._term_ok
+                    and a.region not in self._term_bad):
+                self._verify_terminate(a.region, iid)
             st = info.get(iid, {})
             state, reason = st.get("state", "pending?"), st.get("reason", "")
-            done = self.marker(a.job.name)
-            res = {"attempts": a.attempt, "itype": a.itype, "iid": iid}
-            if done is not None:
-                files = self.collect(a.job.name)
+            if st.get("az") and not a.az:
+                a.az = st["az"]
+            done = self.marker(a.job.name, attempt=a.attempt)
+            if done is not None and done.get("attempt") not in (None, a.attempt):
+                self.say(f"[итог] {a.job.name}: метка попытки {done.get('attempt')} — не этой ({a.attempt}), не принимаю")
+                done = None
+            gone = state in ("shutting-down", "terminated")
+            # Метка 143 (TERM) при ещё живой машине: причины гашения EC2 пока не показал — ждём до трёх
+            # опросов, иначе прерванную часть сочли бы окончательным сбоем и не повторили.
+            if (done is not None and done.get("exit_code") == 143 and not gone and now <= a.deadline
+                    and (not a.t_mark or now - a.t_mark < 3 * self.cfg.poll_s)):
+                a.t_mark = a.t_mark or now
+                self.say(f"[ждём] {a.job.name}: метка с кодом 143 (TERM), машина ещё {state} — жду причину гашения")
+                continue
+            ok = done is not None and done.get("phase") == "done" and done.get("exit_code") == 0
+            # Прерывание спота: машина гаснет не по нашей команде; ловушка TERM могла успеть выгрузить
+            # метку с кодом 143 — такая метка не итог, а повод повторить часть в префикс новой попытки.
+            # Причина Client.… (сторож shutdown -P, poweroff, наш terminate) — не прерывание: повтор
+            # зависшей задачи только удвоил бы расход.
+            spot = reason.startswith(SPOT_REASON_PREFIX)
+            own = reason.startswith(OWN_REASON_PREFIX)
+            interrupted = gone and not ok and (spot or (not own and (done or {}).get("exit_code") == 143))
+            retry = a.attempt <= self.cfg.retries and (interrupted or (gone and done is None))
+            res = self._res(a)
+            if done is not None and not retry:
+                files = self.collect(a.job.name, attempt=a.attempt)
                 if iid in self._terminate([iid], "задача завершена"):
                     self._close(a, "done", state)
                 else:
                     self._drop(a)
-                ok = done.get("phase") == "done" and done.get("exit_code") == 0
                 res.update(status="ok" if ok else "failed", phase=done.get("phase"),
-                           exit_code=done.get("exit_code"), files=len(files))
+                           exit_code=done.get("exit_code"), files=len(files), az_machine=done.get("az", ""))
+                if interrupted:
+                    res["interrupted"] = True
                 self.results[a.job.name] = res
-                self.say(f"[итог] {a.job.name}: {res['status']} (фаза {res['phase']}, код {res['exit_code']})")
-            elif state in ("shutting-down", "terminated"):
-                files = self.collect(a.job.name)
-                self._close(a, "lost", state, reason)
-                if a.attempt <= self.cfg.retries:
+                where = "самая дешёвая" if res["cheapest_zone"] else f"место по цене {a.az_rank + 1}"
+                if a.market != "spot":
+                    where = "по требованию"
+                self.say(f"[итог] {a.job.name}: {res['status']} (фаза {res['phase']}, код {res['exit_code']}), "
+                         f"зона {a.az}{self._where(a.region)} ({where}, {a.spot_usd_h:.4f} долл./ч)")
+            elif gone:
+                if retry:
+                    lost_dir = self.cfg.out_dir / self.cfg.run_id / "_lost" / f"a{a.attempt}" / a.job.name
+                    self.collect(a.job.name, attempt=a.attempt, dest=lost_dir)
+                    self._close(a, "lost", state, reason)
+                    if a.az:
+                        self._avoid[(self._akey(a.itype, a.market), a.az)] = now + self.cfg.avoid_s
                     pending.appendleft((a.job, a.attempt + 1))
-                    self.say(f"[итог] {a.job.name}: машина {state} без метки завершения ({reason}) — повтор")
+                    self.say(f"[итог] {a.job.name}: машина {state} без итога ({reason or 'метка ' + str((done or {}).get('exit_code'))}) "
+                             f"— повтор в префикс попытки {a.attempt + 1}, зона {a.az} — в конце очереди")
                 else:
+                    files = self.collect(a.job.name, attempt=a.attempt)
+                    self._close(a, "lost", state, reason)
                     res.update(status="lost", reason=reason, files=len(files))
                     self.results[a.job.name] = res
                     self.say(f"[итог] {a.job.name}: машина {state} без метки завершения ({reason})")
             elif now > a.deadline:
-                gone = iid in self._terminate([iid], "срок сборщика истёк")
-                files = self.collect(a.job.name)
-                if gone:
+                gone_ = iid in self._terminate([iid], "срок сборщика истёк")
+                files = self.collect(a.job.name, attempt=a.attempt)
+                if gone_:
                     self._close(a, "deadline", state)
                 else:
                     self._drop(a)
@@ -917,6 +2357,15 @@ def _clients(region: str):
     c = BCfg(region_name=region, retries={"max_attempts": 8, "mode": "adaptive"})
     return (boto3.client("ec2", config=c), boto3.client("s3", config=c),
             boto3.client("ssm", config=c), boto3.client("sts", config=c))
+
+
+def _region_clients(region: str) -> dict:
+    """Версия 3: клиенты региона машин (EC2, SSM, Service Quotas — только чтение квот). Бакет — один, в --region."""
+    import boto3
+    from botocore.config import Config as BCfg
+    c = BCfg(region_name=region, retries={"max_attempts": 8, "mode": "adaptive"})
+    return {"ec2": boto3.client("ec2", config=c), "ssm": boto3.client("ssm", config=c),
+            "servicequotas": boto3.client("service-quotas", config=c)}
 
 
 def _check_branch(repo: str, branch: str) -> None:
@@ -949,12 +2398,28 @@ def _config_from_args(a, need_env: bool) -> Config:
     cfg = Config(bucket=bucket, prefix=prefix, instance_profile=profile, run_id=run_id,
                  tag=os.environ.get("ALPHA_O_TAG", DEFAULT_TAG), region=a.region, ceiling=a.ceiling,
                  ledger_path=Path(a.ledger))
-    for name in ("repo", "branch", "max_parallel", "vcpu_quota", "price_margin", "price_window_h",
-                 "ebs_usd_gb_month", "ipv4_usd_h", "grace_min", "poll_s", "retries", "spent_before"):
+    for name in ("repo", "branch", "max_parallel", "vcpu_quota", "quota_wait_polls", "capacity_wait_polls", "price_margin",
+                 "price_window_h", "ebs_usd_gb_month", "ipv4_usd_h", "grace_min", "poll_s", "retries",
+                 "spent_before"):
         if getattr(a, name, None) is not None:
             setattr(cfg, name, getattr(a, name))
     if getattr(a, "out", None):
         cfg.out_dir = Path(a.out)
+    # ---- версия 3: без этих флагов конфигурация — точно версия 2
+    if getattr(a, "regions", None):
+        cfg.regions = parse_regions(a.regions)
+    if getattr(a, "vcpu_quota_per_region", None):
+        cfg.vcpu_quota_region = parse_region_ints(a.vcpu_quota_per_region, "--vcpu-quota-per-region")
+    if getattr(a, "od_vcpu_quota_per_region", None):
+        cfg.od_vcpu_quota_region = parse_region_ints(a.od_vcpu_quota_per_region, "--od-vcpu-quota-per-region")
+    for name in ("vcpu_quota_fallback", "region_price_margin", "xfer_gb"):
+        if getattr(a, name, None) is not None:
+            setattr(cfg, name, getattr(a, name))
+    if getattr(a, "price_ref", None):
+        cfg.price_ref = Path(a.price_ref)
+    cfg.on_demand_fallback = bool(getattr(a, "on_demand_fallback", False))
+    cfg.vcpu_quota_explicit = bool(getattr(a, "vcpu_quota_set", False))
+    cfg.max_parallel_auto = hasattr(a, "max_parallel") and not getattr(a, "max_parallel_set", False)
     validate_config(cfg)
     return cfg
 
@@ -963,7 +2428,7 @@ def validate_config(cfg: Config) -> None:
     """Пороги, на которых держится бюджетный предохранитель и верхняя граница «в работе»."""
     bad = []
     if cfg.max_parallel < 1 or cfg.vcpu_quota < 1:
-        bad.append("max_parallel, vcpu_quota ≥ 1")
+        bad.append("max_parallel, vcpu_quota (--max-vcpu) ≥ 1")
     if not cfg.ceiling > 0:
         bad.append("ceiling > 0")
     if not cfg.price_margin >= 1.0 or not cfg.price_window_h > 0:
@@ -972,19 +2437,32 @@ def validate_config(cfg: Config) -> None:
         bad.append("spent_before, ebs_usd_gb_month, ipv4_usd_h ≥ 0 (иначе потолок обходится)")
     if cfg.grace_min < 5:
         bad.append("grace_min ≥ 5 (запас на загрузку машины до старта сторожа)")
-    if not cfg.poll_s >= 5 or cfg.retries < 0:
-        bad.append("poll_s ≥ 5, retries ≥ 0")
+    if not cfg.poll_s >= 5 or cfg.retries < 0 or cfg.quota_wait_polls < 0 or cfg.capacity_wait_polls < 0:
+        bad.append("poll_s ≥ 5, retries ≥ 0, quota_wait_polls ≥ 0, capacity_wait_polls ≥ 0")
+    if not (cfg.region_price_margin >= 0 and cfg.xfer_gb >= 0 and cfg.vcpu_quota_fallback >= 0
+            and cfg.od_vcpu_quota >= 0):
+        bad.append("region_price_margin, xfer_gb, vcpu_quota_fallback, od_vcpu_quota ≥ 0 (иначе смета занижена)")
+    if not REGION_RE.match(cfg.region) or any(not REGION_RE.match(r) for r in cfg.regions):
+        bad.append("регионы вида us-east-1")
     if bad:
         raise RunnerError("; ".join(bad))
 
 
-def main(argv=None) -> int:
-    p = argparse.ArgumentParser(description="Прогоны ГТУ-платформы на спотовых машинах AWS (us-east-1).")
+class _Mark(argparse.Action):
+    """Сохранить значение и отметить, что флаг задан явно (<dest>_set): умолчание не отличить от явного 384."""
+
+    def __call__(self, parser, ns, values, option_string=None):
+        setattr(ns, self.dest, values)
+        setattr(ns, self.dest + "_set", True)
+
+
+def build_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(description="Прогоны ГТУ-платформы на спотовых машинах AWS (us-east-1 и соседние регионы).")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     def common(sp):
         sp.add_argument("--ledger", default=str(HERE / "ledger.jsonl"), help="журнал расходов (JSONL)")
-        sp.add_argument("--ceiling", type=float, default=300.0, help="потолок расходов, долл. (300)")
+        sp.add_argument("--ceiling", type=float, default=2000.0, help="потолок расходов, долл. (2000, решение владельца 14.11.2026)")
         sp.add_argument("--region", default=REGION)
 
     def knobs(sp):
@@ -992,8 +2470,14 @@ def main(argv=None) -> int:
         sp.add_argument("--branch", default=os.environ.get("GTU_BRANCH", "main"))
         sp.add_argument("--repo", default=DEFAULT_REPO)
         sp.add_argument("--run-id")
-        sp.add_argument("--max-parallel", type=int, default=6, help="машин одновременно (6)")
-        sp.add_argument("--vcpu-quota", type=int, default=384, help="квота спота, vCPU (384)")
+        sp.add_argument("--max-parallel", type=int, default=6, action=_Mark,
+                        help="машин одновременно (6; с --regions / --on-demand-fallback не задан — сумма квот / 64)")
+        sp.add_argument("--max-vcpu", "--vcpu-quota", dest="vcpu_quota", type=int, default=384, action=_Mark,
+                        help="квота спота, vCPU (384): сверх неё задачи ждут в очереди")
+        sp.add_argument("--quota-wait-polls", type=int, default=15,
+                        help="квотная ошибка AWS без своих машин в работе: опросов ожидания (15)")
+        sp.add_argument("--capacity-wait-polls", type=int, default=15,
+                        help="нет ёмкости спота ни в одной зоне ни на одном типе: повторов через --poll-s (15)")
         sp.add_argument("--price-margin", type=float, default=1.2, help="MaxPrice = макс. цена за окно × запас")
         sp.add_argument("--price-window-h", type=float, default=6.0)
         sp.add_argument("--ebs-usd-gb-month", type=float, default=0.08)
@@ -1004,6 +2488,21 @@ def main(argv=None) -> int:
         sp.add_argument("--spent-before", type=float, default=0.0, help="расход вне журнала, долл.")
         sp.add_argument("--max-job-min", type=int, default=720)
         sp.add_argument("--out", help="куда скачивать результаты (runs/)")
+        g = sp.add_argument_group("версия 3 — соседние мощности (без этих флагов — как версия 2)")
+        g.add_argument("--regions", help="регионы машин через запятую: us-east-1,us-east-2,us-west-2 "
+                                         "(по умолчанию только --region); бакет — один, в --region")
+        g.add_argument("--vcpu-quota-per-region", help="квота спота по регионам, vCPU: us-east-1=384,us-west-2=384 "
+                                                      "(ограничивает сверху фактическую из service-quotas)")
+        g.add_argument("--od-vcpu-quota-per-region", help="квота по требованию по регионам, vCPU: us-east-1=384,us-west-2=300")
+        g.add_argument("--vcpu-quota-fallback", type=int,
+                       help=f"квота соседнего региона, если нет ни флага, ни service-quotas ({QUOTA_FALLBACK} — не использовать)")
+        g.add_argument("--on-demand-fallback", action="store_true",
+                       help="спот недоступен во всех регионах (ёмкость, цена, права, квота) — машина по требованию "
+                            "по цене справочника, при своей квоте по требованию")
+        g.add_argument("--region-price-margin", type=float,
+                       help="соседний регион раньше --region, только если дешевле с этим запасом (0.05)")
+        g.add_argument("--xfer-gb", type=float, help="объём результатов задачи для сметы межрегиональной передачи, ГБ (10)")
+        g.add_argument("--price-ref", help=f"справочник цен по требованию и передачи ({PRICE_REF.name})")
         common(sp)
 
     sp = sub.add_parser("run", help="по умолчанию проверка прав (DryRun); --live — живой запуск")
@@ -1011,22 +2510,32 @@ def main(argv=None) -> int:
     sp.add_argument("--dryrun", action="store_true", help="DryRun=True: проверка прав без запуска (и так по умолчанию)")
     sp.add_argument("--live", action="store_true", help="живой запуск спотовых машин (расходы!)")
     sp.add_argument("--skip-branch-check", action="store_true")
-    sp = sub.add_parser("plan", help="без AWS: user-data, параметры run_instances, бюджет")
+    sp = sub.add_parser("plan", help="без AWS: user-data, параметры run_instances, порядок зон, бюджет")
     knobs(sp)
     sp.add_argument("--assume-price", type=float, required=True, help="цена спота, долл./ч (допущение)")
+    sp.add_argument("--assume-zone-prices", help="цены по зонам (допущение): us-east-1a=0.955,us-east-1c=0.706 "
+                                                 "(с --regions — зоны всех регионов: us-east-2b=0.601,…)")
+    sp.add_argument("--assume-no-spot", action="store_true",
+                    help="допущение: спот недоступен во всех регионах (показать путь --on-demand-fallback)")
     sp.add_argument("--show-userdata", action="store_true")
     sp = sub.add_parser("status", help="журнал: израсходовано, в работе, остаток")
     common(sp)
-    sp = sub.add_parser("reap", help="погасить машины прогона по тегам")
+    sp = sub.add_parser("reap", help="погасить машины прогона по тегам (во всех регионах прогона по журналу)")
     sp.add_argument("--run-id", required=True)
     sp.add_argument("--list-only", action="store_true")
+    sp.add_argument("--regions", help="искать ещё и в этих регионах (к регионам прогона из журнала)")
     common(sp)
     sp = sub.add_parser("collect", help="скачать результаты задачи")
     sp.add_argument("--run-id", required=True)
     sp.add_argument("--job", required=True)
+    sp.add_argument("--attempt", type=int, default=1, help="номер попытки (повтор после прерывания — 2)")
     sp.add_argument("--out")
     common(sp)
-    a = p.parse_args(argv)
+    return p
+
+
+def main(argv=None) -> int:
+    a = build_parser().parse_args(argv)
 
     def _sig(signum, _frame):
         raise KeyboardInterrupt(f"сигнал {signum}")
@@ -1041,15 +2550,41 @@ def main(argv=None) -> int:
             print(f"журнал: {a.ledger}\nзакрыто машин: {s['closed']}, израсходовано ≈ {s['spent']:.2f} долл.\n"
                   f"открыто: {len(s['open'])} {s['open']}, верхняя граница по ним {s['committed']:.2f} долл.\n"
                   f"итого {total:.2f} из {a.ceiling:.2f}, остаток {a.ceiling - total:.2f} долл.")
+            groups = led.by_region()          # версия 3: только если в журнале есть записи с регионом и рынком
+            for (reg, mk), g in sorted(groups.items(), key=lambda kv: (str(kv[0][0]), str(kv[0][1]))):
+                print(f"  {reg or a.region + ' (журнал v2)'} {'по требованию' if mk == 'on-demand' else 'спот'}: "
+                      f"закрыто {g['closed']}, ≈ {g['spent']:.2f} долл.; открыто {g['open']}, "
+                      f"верхняя граница {g['committed']:.2f} долл.")
             return 0
         if a.cmd == "plan":
+            if not a.assume_price > 0:
+                raise RunnerError("--assume-price: цена спота должна быть > 0 (иначе ни одна задача не планируется)")
             cfg = _config_from_args(a, need_env=False)
             cfg.offline_price = a.assume_price
+            if a.assume_zone_prices:
+                cfg.offline_zones = parse_zone_prices(a.assume_zone_prices)
+            cfg.offline_no_spot = bool(a.assume_no_spot)
+            if cfg.offline_no_spot and not cfg.on_demand_fallback:
+                raise RunnerError("--assume-no-spot имеет смысл только с --on-demand-fallback")
             jobs = load_jobs(a.jobs, a.max_job_min)
             r = Runner(cfg)
+            r.check_userdata(jobs)            # все попытки: повтор пишет в более длинный префикс
+            r.load_quotas()                   # версия 3: справочник и квоты (plan: флаги или запасные значения)
             for job in jobs:
+                extra = {"python": f"Python {job.python} (uv)", "system": "системный python3",
+                         "container": f"контейнер {job.container}, команд container_setup: {len(job.container_setup)}"}
+                r.say(f"[задача] {job.name}: образ {job.image}, {extra[job.mode]}, {job.vcpu} vCPU, "
+                      f"сторож {job.max_min} мин")
+                for w in job_warnings(job):
+                    r.say(f"[внимание] {w}")
                 st, _ = r.launch(job)
                 r.results[job.name] = {"status": st}
+                if job.name in r._why:
+                    r.results[job.name]["detail"] = r._why[job.name]
+                if r.v3 and st == "planned":
+                    r.results[job.name].update(region=r.last_region, market=r.last_market)
+                    r.say(f"[регион] {job.name}: {r.last_region}, "
+                          f"{'спот' if r.last_market == 'spot' else 'по требованию'} (волна {r._wave})")
                 if r.last_params and st == "planned":
                     shown = dict(r.last_params)
                     ud = shown.pop("UserData")
@@ -1058,7 +2593,26 @@ def main(argv=None) -> int:
                     if a.show_userdata:
                         r.say(ud)
                 r.last_params = None
-            r.say(f"[план] прогноз пакета {r.virtual:.2f} долл. (цена спота — допущение {a.assume_price}/ч)")
+            need = sum(j.vcpu for j in jobs)
+            quota = r.total_quota()
+            if need > quota:
+                r.say(f"[очередь] пакет {need} vCPU > квоты {quota}: одновременно не больше "
+                      f"{quota} vCPU и {cfg.max_parallel} машин, остальные ждут освобождения")
+            if r.v3 and r._placements:
+                waves: dict = {}
+                for w, _name, reg, mk in r._placements:
+                    key = f"{reg} {'спот' if mk == 'spot' else 'по требованию'}"
+                    waves.setdefault(w, {}).setdefault(key, 0)
+                    waves[w][key] += 1
+                for w, d in sorted(waves.items()):
+                    r.say(f"[план] волна {w}: " + ", ".join(f"{k} ×{n}" for k, n in d.items()))
+            tail = (" (цена спота — допущение {}/ч; бюджет и MaxPrice — по максимуму по регионам)".format(a.assume_price)
+                    if r.v3 else f" (цена спота — допущение {a.assume_price}/ч)")
+            r.say(f"[план] прогноз пакета {r.virtual:.2f} долл.{tail}")
+            bad = {k: v for k, v in r.results.items() if v["status"] != "planned"}
+            if bad:
+                r.say(f"[план] НЕ спланированы: {bad}")
+                return 1
             return 0
         if a.cmd == "run":
             # по умолчанию — проверка прав без запуска (DryRun=True); живой запуск только с --live или GTU_LIVE=1
@@ -1074,7 +2628,7 @@ def main(argv=None) -> int:
             ec2, s3, ssm, sts = _clients(cfg.region)
             arn = sts.get_caller_identity()["Arn"]
             print("вызов от имени:", re.sub(r"::\d{12}:", "::<аккаунт>:", arn))
-            r = Runner(cfg, ec2, s3, ssm, sts)
+            r = Runner(cfg, ec2, s3, ssm, sts, region_clients=_region_clients)
             if dry:   # чтение префикса результатов — проверка s3:ListBucket
                 from botocore.exceptions import ClientError
                 try:
@@ -1088,14 +2642,15 @@ def main(argv=None) -> int:
             return 1 if bad else 0
         cfg = _config_from_args(a, need_env=True)
         ec2, s3, ssm, sts = _clients(cfg.region)
-        r = Runner(cfg, ec2, s3, ssm, sts)
+        # клиенты соседних регионов создаются лениво: только если журнал прогона или --regions их называют
+        r = Runner(cfg, ec2, s3, ssm, sts, region_clients=_region_clients)
         if a.cmd == "reap":
             r.reap("ручной сборщик", run_id=a.run_id, list_only=a.list_only)
             if not a.list_only:
                 r.reconcile()     # закрыть в журнале погашенные машины (верхней границей срока)
             return 0
         if a.cmd == "collect":
-            r.collect(a.job, run_id=a.run_id, dest=Path(a.out) if a.out else None)
+            r.collect(a.job, run_id=a.run_id, dest=Path(a.out) if a.out else None, attempt=a.attempt)
             return 0
     except RunnerError as e:
         print("ОТКАЗ:", e, file=sys.stderr)

@@ -1,0 +1,955 @@
+{
+ "about": "Линии частоты колёс в SU2 (char_points.py run на AWS, runner.py): база smoke075, точки — рестарт от базы с рампой давления на выходе. Сетки узла geom — тетраэдры без пристенных призм; покрышка и стенки за колесом — по settings (slip — без трения). Числа — проверка постановки и сходимости по сетке, не паспортная характеристика; «converged» — π и η меняются < 0,1 % за 500 итераций, «usable» — без NaN, прямое течение, дисбаланс расхода ≤ 5 %.",
+ "run_id": null,
+ "created_utc": "2026-11-15T01:23:24Z",
+ "jobs": [
+  {
+   "job": "su2-kv3-core130-smoke",
+   "file": "../out/core130/char_summary.json",
+   "label": "core130",
+   "level": "coarse",
+   "verdict": "ok",
+   "itype": "c7a.16xlarge",
+   "az": "us-east-1c",
+   "t_total_s": 89.5,
+   "budget": {
+    "time_s": 2405.1,
+    "uptime_at_start_s": 414.9,
+    "job_max_min": 60,
+    "reserve_s": 300.0,
+    "base_max_frac": 0.3
+   }
+  },
+  {
+   "job": "su2-kv3-core130-smoke",
+   "file": "../out/kv3_stage1/char_summary.json",
+   "label": "kv3_stage1",
+   "level": "coarse",
+   "verdict": "ok",
+   "itype": "c7a.16xlarge",
+   "az": "us-east-1c",
+   "t_total_s": 156.2,
+   "budget": {
+    "time_s": 2573.4,
+    "uptime_at_start_s": 246.6,
+    "job_max_min": 60,
+    "reserve_s": 300.0,
+    "base_max_frac": 0.3
+   }
+  }
+ ],
+ "lines": {
+  "core130/coarse": {
+   "label": "core130",
+   "case": "core130",
+   "level": "coarse",
+   "mesh_nodes": 139006,
+   "mesh_cells": 616206,
+   "mesh_nodes_by_job": {
+    "su2-kv3-core130-smoke": 139006
+   },
+   "double_sided": false,
+   "estimate": {
+    "p_out_estimate": 311427.257614276,
+    "double_sided": false,
+    "m_for_estimate": 9.95,
+    "r_out": 0.28275,
+    "p_out_estimate_run_case": 311427.257614276,
+    "note": "оценка run_case.estimate_p_out"
+   },
+   "d1_reference": {
+    "m": 9.95,
+    "m_side": 9.95,
+    "PR": 4.25,
+    "rpm": 22197.0,
+    "D2": 0.435,
+    "U2": 505.57100795506165,
+    "b2": 0.02341520477246604,
+    "T01": 288.15,
+    "p01": 101325.0,
+    "eta_comp_stage": 0.8585973705037672
+   },
+   "settings": {
+    "shroud": "slip",
+    "vaneless": "slip",
+    "turb": "SST",
+    "output_files": "RESTART, SURFACE_PARAVIEW",
+    "extra": [
+     "MARKER_PLOTTING= (blade, hub)"
+    ],
+    "mpi_args": "--use-hwthread-cpus"
+   },
+   "plans": {
+    "base": "smoke075",
+    "point": [
+     {
+      "name": "c1_point",
+      "frac": 1.0,
+      "pfrac": 1.0,
+      "ramp": 0,
+      "pramp": 100,
+      "iter": 200,
+      "muscl": true
+     }
+    ],
+    "iter_scale_base": 1.0,
+    "iter_scale_point": 1.0
+   },
+   "assigned": [
+    0.7,
+    0.9,
+    1.0,
+    1.1
+   ],
+   "points": [
+    {
+     "pfrac": 0.7,
+     "p_out_Pa": 217999.08032999322,
+     "statuses": [
+      "finished"
+     ],
+     "status": "finished",
+     "dir": "p0.700",
+     "stage": "c1_point",
+     "history_rows": 200,
+     "seconds": 42.6,
+     "sec_per_iter": 0.213,
+     "rms_rho": {
+      "first": -4.791636146,
+      "max": -4.71327208,
+      "last": -5.048768661,
+      "slope_per_100_last_half": -0.05126921960876086
+     },
+     "performance": {
+      "m_in_passage": 0.6477843902,
+      "m_out_passage": -0.6676975708,
+      "mass_imbalance": 0.03074044527972021,
+      "mass_sign_ok": true,
+      "m_wheel": 5.8300595118,
+      "PR_tt": 2.9517127394041403,
+      "TR_tt": 1.6441107516093945,
+      "eta_tt_isentropic": 0.562647107802403,
+      "m_wheel_corrected": 5.834600084616143,
+      "PRTT_su2": 2.950986111,
+      "TotTotEff_su2": 59.99034159,
+      "PRTS_su2": 2.151005815,
+      "TotStaticEff_su2": 37.95092724,
+      "MassFlowIn_turbo": 0.6477843902,
+      "MassFlowOut_turbo": 0.6676978855,
+      "EulerianWork_su2": 186578.3285,
+      "window_iters": 50,
+      "window_rel_change": {
+       "m_in": 0.005319758166658051,
+       "pt_out": 0.0005878330036223101,
+       "tt_out": 0.0009371369886130217
+      },
+      "m_wheel_total": 5.8300595118,
+      "m_wheel_corrected_total": 5.834600084616143
+     },
+     "mass_sign_ok": true,
+     "periodic": {
+      "periodic_matched_points": 6270,
+      "periodic_max_distance": 1.70109e-16,
+      "bad_match": 0
+     },
+     "nan": false,
+     "su2_error": null,
+     "window": {
+      "window_iters": 500,
+      "rows": 200,
+      "rel_change": {
+       "m_in": null,
+       "PR_tt": null,
+       "tt_out": null,
+       "eta_tt": null
+      },
+      "converged_pi_eta": false
+     },
+     "usable": true,
+     "converged": false,
+     "returncode": 0,
+     "files": [
+      "run_summary.json",
+      "history_c1_point.csv",
+      "su2_c1_point.log",
+      "case_c1_point.cfg",
+      "surface.vtu",
+      "restart_c1_point.dat"
+     ],
+     "job": "su2-kv3-core130-smoke",
+     "mesh_nodes": 139006
+    },
+    {
+     "pfrac": 0.9,
+     "p_out_Pa": 280284.5318528484,
+     "statuses": [
+      "finished"
+     ],
+     "status": "finished",
+     "dir": "p0.900",
+     "stage": "c1_point",
+     "history_rows": 200,
+     "seconds": 43.7,
+     "sec_per_iter": 0.21850000000000003,
+     "rms_rho": {
+      "first": -4.791636146,
+      "max": -4.731125706,
+      "last": -5.559611918,
+      "slope_per_100_last_half": -0.30851399088688863
+     },
+     "performance": {
+      "m_in_passage": 0.6168941741,
+      "m_out_passage": -0.5141867185,
+      "mass_imbalance": 0.16649120693973507,
+      "mass_sign_ok": true,
+      "m_wheel": 5.552047566900001,
+      "PR_tt": 3.8280482210849667,
+      "TR_tt": 1.744020469385847,
+      "eta_tt_isentropic": 0.6282832586309525,
+      "m_wheel_corrected": 5.552318125891217,
+      "PRTT_su2": 3.827689937,
+      "TotTotEff_su2": 66.10202495,
+      "PRTS_su2": 2.76075946,
+      "TotStaticEff_su2": 45.21600385,
+      "MassFlowIn_turbo": 0.6168941741,
+      "MassFlowOut_turbo": 0.5141869781,
+      "EulerianWork_su2": 215533.2013,
+      "window_iters": 50,
+      "window_rel_change": {
+       "m_in": 0.008959395844617014,
+       "pt_out": 0.0014936805439177056,
+       "tt_out": 0.000608437397075061
+      },
+      "m_wheel_total": 5.552047566900001,
+      "m_wheel_corrected_total": 5.552318125891217
+     },
+     "mass_sign_ok": true,
+     "periodic": {
+      "periodic_matched_points": 6270,
+      "periodic_max_distance": 1.70109e-16,
+      "bad_match": 0
+     },
+     "nan": false,
+     "su2_error": null,
+     "window": {
+      "window_iters": 500,
+      "rows": 200,
+      "rel_change": {
+       "m_in": null,
+       "PR_tt": null,
+       "tt_out": null,
+       "eta_tt": null
+      },
+      "converged_pi_eta": false
+     },
+     "usable": false,
+     "converged": false,
+     "returncode": 0,
+     "files": [
+      "run_summary.json",
+      "history_c1_point.csv",
+      "su2_c1_point.log",
+      "case_c1_point.cfg",
+      "surface.vtu",
+      "restart_c1_point.dat"
+     ],
+     "job": "su2-kv3-core130-smoke",
+     "mesh_nodes": 139006
+    },
+    {
+     "pfrac": 1.0,
+     "p_out_Pa": 311427.257614276,
+     "statuses": [
+      "finished"
+     ],
+     "status": "finished",
+     "dir": "p1.000",
+     "stage": "c1_point",
+     "history_rows": 200,
+     "seconds": 41.2,
+     "sec_per_iter": 0.20600000000000002,
+     "rms_rho": {
+      "first": -4.791636146,
+      "max": -4.727279169,
+      "last": -5.422116473,
+      "slope_per_100_last_half": -0.21631182888448844
+     },
+     "performance": {
+      "m_in_passage": 0.592715801,
+      "m_out_passage": -0.4326006045,
+      "mass_imbalance": 0.27013822852345387,
+      "mass_sign_ok": true,
+      "m_wheel": 5.334442209,
+      "PR_tt": 4.28227757741239,
+      "TR_tt": 1.7877450481328998,
+      "eta_tt_isentropic": 0.6540566080190957,
+      "m_wheel_corrected": 5.3318389388963645,
+      "PRTT_su2": 4.281828803,
+      "TotTotEff_su2": 68.5198479,
+      "PRTS_su2": 3.063536065,
+      "TotStaticEff_su2": 47.82345217,
+      "MassFlowIn_turbo": 0.592715801,
+      "MassFlowOut_turbo": 0.4326010242,
+      "EulerianWork_su2": 228235.9593,
+      "window_iters": 50,
+      "window_rel_change": {
+       "m_in": 0.019733581558423748,
+       "pt_out": 0.0014004951376676887,
+       "tt_out": 0.0006377789009012444
+      },
+      "m_wheel_total": 5.334442209,
+      "m_wheel_corrected_total": 5.3318389388963645
+     },
+     "mass_sign_ok": true,
+     "periodic": {
+      "periodic_matched_points": 6270,
+      "periodic_max_distance": 1.70109e-16,
+      "bad_match": 0
+     },
+     "nan": false,
+     "su2_error": null,
+     "window": {
+      "window_iters": 500,
+      "rows": 200,
+      "rel_change": {
+       "m_in": null,
+       "PR_tt": null,
+       "tt_out": null,
+       "eta_tt": null
+      },
+      "converged_pi_eta": false
+     },
+     "usable": false,
+     "converged": false,
+     "returncode": 0,
+     "files": [
+      "run_summary.json",
+      "history_c1_point.csv",
+      "su2_c1_point.log",
+      "case_c1_point.cfg",
+      "surface.vtu",
+      "restart_c1_point.dat"
+     ],
+     "job": "su2-kv3-core130-smoke",
+     "mesh_nodes": 139006
+    },
+    {
+     "pfrac": 1.1,
+     "p_out_Pa": 342569.9833757036,
+     "statuses": [
+      "finished"
+     ],
+     "status": "finished",
+     "dir": "p1.100",
+     "stage": "c1_point",
+     "history_rows": 200,
+     "seconds": 47.8,
+     "sec_per_iter": 0.239,
+     "rms_rho": {
+      "first": -4.791636146,
+      "max": -4.719856806,
+      "last": -5.390670167,
+      "slope_per_100_last_half": -0.4225560257041703
+     },
+     "performance": {
+      "m_in_passage": 0.1683800061,
+      "m_out_passage": -0.1740820483,
+      "mass_imbalance": 0.03386412871735832,
+      "mass_sign_ok": true,
+      "m_wheel": 1.5154200549,
+      "PR_tt": 4.783534702334397,
+      "TR_tt": 1.8320741622663208,
+      "eta_tt_isentropic": 0.6777256534306474,
+      "m_wheel_corrected": 1.5152408868870042,
+      "PRTT_su2": 4.784948058,
+      "TotTotEff_su2": 70.84368216,
+      "PRTS_su2": 3.356730394,
+      "TotStaticEff_su2": 49.64320043,
+      "MassFlowIn_turbo": 0.1683800061,
+      "MassFlowOut_turbo": 0.1740825367,
+      "EulerianWork_su2": 241052.5553,
+      "window_iters": 50,
+      "window_rel_change": {
+       "m_in": 0.6575884035438339,
+       "pt_out": 0.005062203829395172,
+       "tt_out": 0.0021791784100908484
+      },
+      "m_wheel_total": 1.5154200549,
+      "m_wheel_corrected_total": 1.5152408868870042
+     },
+     "mass_sign_ok": true,
+     "periodic": {
+      "periodic_matched_points": 6270,
+      "periodic_max_distance": 1.70109e-16,
+      "bad_match": 0
+     },
+     "nan": false,
+     "su2_error": null,
+     "window": {
+      "window_iters": 500,
+      "rows": 200,
+      "rel_change": {
+       "m_in": null,
+       "PR_tt": null,
+       "tt_out": null,
+       "eta_tt": null
+      },
+      "converged_pi_eta": false
+     },
+     "usable": true,
+     "converged": false,
+     "returncode": 0,
+     "files": [
+      "run_summary.json",
+      "history_c1_point.csv",
+      "su2_c1_point.log",
+      "case_c1_point.cfg",
+      "surface.vtu",
+      "restart_c1_point.dat"
+     ],
+     "job": "su2-kv3-core130-smoke",
+     "mesh_nodes": 139006
+    }
+   ],
+   "bases": [
+    {
+     "job": "su2-kv3-core130-smoke",
+     "restart_ok": true,
+     "statuses": [
+      "finished",
+      "finished",
+      "finished"
+     ],
+     "su2_version": "SU2 v8.6.0 \"Harrier\", The Open-Source CFD Code",
+     "record": {
+      "pfrac": 0.75,
+      "p_out_Pa": 233570.44321070702,
+      "statuses": [
+       "finished",
+       "finished",
+       "finished"
+      ],
+      "status": "finished",
+      "dir": "base",
+      "stage": "s3_point_p075",
+      "history_rows": 150,
+      "seconds": 12.0,
+      "sec_per_iter": 0.08,
+      "rms_rho": {
+       "first": -4.609087756,
+       "max": -4.609087756,
+       "last": -4.804962204,
+       "slope_per_100_last_half": -0.7466152392830726
+      },
+      "performance": {
+       "m_in_passage": 0.69498605,
+       "m_out_passage": -0.6980600432,
+       "mass_imbalance": 0.004423100578781421,
+       "mass_sign_ok": true,
+       "m_wheel": 6.25487445,
+       "PR_tt": 3.218819610385385,
+       "TR_tt": 1.6006389763892797,
+       "eta_tt_isentropic": 0.6602119231917482,
+       "m_wheel_corrected": 6.25895215722286,
+       "PRTT_su2": 3.218178452,
+       "TotTotEff_su2": 69.05837752,
+       "PRTS_su2": 2.303773556,
+       "TotStaticEff_su2": 44.79648245,
+       "MassFlowIn_turbo": 0.69498605,
+       "MassFlowOut_turbo": 0.6980603868,
+       "EulerianWork_su2": 173993.0377,
+       "window_iters": 50,
+       "window_rel_change": {
+        "m_in": 0.008735477352387217,
+        "pt_out": 0.009968037599478691,
+        "tt_out": 0.028691559017383836
+       },
+       "m_wheel_total": 6.25487445,
+       "m_wheel_corrected_total": 6.25895215722286
+      },
+      "mass_sign_ok": true,
+      "periodic": {
+       "periodic_matched_points": 6270,
+       "periodic_max_distance": 1.70109e-16,
+       "bad_match": 0
+      },
+      "nan": false,
+      "su2_error": null,
+      "window": {
+       "window_iters": 500,
+       "rows": 150,
+       "rel_change": {
+        "m_in": null,
+        "PR_tt": null,
+        "tt_out": null,
+        "eta_tt": null
+       },
+       "converged_pi_eta": false
+      },
+      "usable": true,
+      "converged": false
+     }
+    }
+   ],
+   "missing": [],
+   "usable": 2,
+   "converged": 0
+  },
+  "kv3_stage1/coarse": {
+   "label": "kv3_stage1",
+   "case": "custom",
+   "level": "coarse",
+   "mesh_nodes": 258395,
+   "mesh_cells": 1199961,
+   "mesh_nodes_by_job": {
+    "su2-kv3-core130-smoke": 258395
+   },
+   "double_sided": true,
+   "estimate": {
+    "p_out_estimate": 338198.73873178364,
+    "double_sided": true,
+    "m_for_estimate": 12.775,
+    "r_out": 0.45147375000000006,
+    "p_out_estimate_run_case": 306594.9663595105,
+    "note": "двустороннее колесо: оценка по расходу стороны d1.m_side (run_case.py берёт d1.m — расход колеса)"
+   },
+   "d1_reference": {
+    "m": 25.55,
+    "m_side": 12.775,
+    "PR": 4.49,
+    "rpm": 14950.0,
+    "D2": 0.694575,
+    "U2": 543.6995362439768,
+    "b2": 0.0203443,
+    "T01": 288.15,
+    "p01": 101325.0,
+    "eta_comp_stage": 0.8561167244028014
+   },
+   "settings": {
+    "shroud": "slip",
+    "vaneless": "slip",
+    "turb": "SST",
+    "output_files": "RESTART, SURFACE_PARAVIEW",
+    "extra": [
+     "MARKER_PLOTTING= (blade, hub)"
+    ],
+    "mpi_args": "--use-hwthread-cpus"
+   },
+   "plans": {
+    "base": "smoke075",
+    "point": [
+     {
+      "name": "c1_point",
+      "frac": 1.0,
+      "pfrac": 1.0,
+      "ramp": 0,
+      "pramp": 100,
+      "iter": 200,
+      "muscl": true
+     }
+    ],
+    "iter_scale_base": 1.0,
+    "iter_scale_point": 1.0
+   },
+   "assigned": [
+    0.7,
+    0.9,
+    1.0,
+    1.1
+   ],
+   "points": [
+    {
+     "pfrac": 0.7,
+     "p_out_Pa": 236739.11711224852,
+     "statuses": [
+      "finished"
+     ],
+     "status": "finished",
+     "dir": "p0.700",
+     "stage": "c1_point",
+     "history_rows": 200,
+     "seconds": 80.3,
+     "sec_per_iter": 0.40149999999999997,
+     "rms_rho": {
+      "first": -4.62588781,
+      "max": -4.583819269,
+      "last": -5.165434719,
+      "slope_per_100_last_half": -0.18417566788298823
+     },
+     "performance": {
+      "m_in_passage": 0.8466942011,
+      "m_out_passage": -0.9071155048,
+      "mass_imbalance": 0.07136142378381996,
+      "mass_sign_ok": true,
+      "m_wheel": 7.6202478099,
+      "PR_tt": 3.160415745083475,
+      "TR_tt": 1.54177275971986,
+      "eta_tt_isentropic": 0.718496250773783,
+      "m_wheel_corrected": 7.620539238693632,
+      "PRTT_su2": 3.159374697,
+      "TotTotEff_su2": 74.11444986,
+      "PRTS_su2": 2.32867078,
+      "TotStaticEff_su2": 50.37423227,
+      "MassFlowIn_turbo": 0.8466942011,
+      "MassFlowOut_turbo": 0.907115476,
+      "EulerianWork_su2": 156998.9732,
+      "window_iters": 50,
+      "window_rel_change": {
+       "m_in": 0.0008427457033164745,
+       "pt_out": 0.0014211955615238843,
+       "tt_out": 0.0017953172069919596
+      },
+      "m_wheel_total": 15.2404956198,
+      "m_wheel_corrected_total": 15.241078477387264
+     },
+     "mass_sign_ok": true,
+     "periodic": {
+      "periodic_matched_points": 14176,
+      "periodic_max_distance": 2.37144e-16,
+      "bad_match": 0
+     },
+     "nan": false,
+     "su2_error": null,
+     "window": {
+      "window_iters": 500,
+      "rows": 200,
+      "rel_change": {
+       "m_in": null,
+       "PR_tt": null,
+       "tt_out": null,
+       "eta_tt": null
+      },
+      "converged_pi_eta": false
+     },
+     "usable": false,
+     "converged": false,
+     "returncode": 0,
+     "files": [
+      "run_summary.json",
+      "history_c1_point.csv",
+      "su2_c1_point.log",
+      "case_c1_point.cfg",
+      "surface.vtu",
+      "restart_c1_point.dat"
+     ],
+     "job": "su2-kv3-core130-smoke",
+     "mesh_nodes": 258395
+    },
+    {
+     "pfrac": 0.9,
+     "p_out_Pa": 304378.86485860526,
+     "statuses": [
+      "finished"
+     ],
+     "status": "finished",
+     "dir": "p0.900",
+     "stage": "c1_point",
+     "history_rows": 200,
+     "seconds": 79.5,
+     "sec_per_iter": 0.3975,
+     "rms_rho": {
+      "first": -4.62588781,
+      "max": -4.60387585,
+      "last": -5.245466229,
+      "slope_per_100_last_half": -0.22563700691389124
+     },
+     "performance": {
+      "m_in_passage": 0.8462885828,
+      "m_out_passage": -0.6854237485,
+      "mass_imbalance": 0.19008271831786785,
+      "mass_sign_ok": true,
+      "m_wheel": 7.6165972451999995,
+      "PR_tt": 4.134640604186366,
+      "TR_tt": 1.621758102535715,
+      "eta_tt_isentropic": 0.8043591252090334,
+      "m_wheel_corrected": 7.6167670815250315,
+      "PRTT_su2": 4.134919995,
+      "TotTotEff_su2": 82.1011538,
+      "PRTS_su2": 2.999082229,
+      "TotStaticEff_su2": 59.24259475,
+      "MassFlowIn_turbo": 0.8462885828,
+      "MassFlowOut_turbo": 0.6854237851,
+      "EulerianWork_su2": 180139.4258,
+      "window_iters": 50,
+      "window_rel_change": {
+       "m_in": 0.001318411145650219,
+       "pt_out": 0.001337075235004617,
+       "tt_out": 0.0019936842884199246
+      },
+      "m_wheel_total": 15.233194490399999,
+      "m_wheel_corrected_total": 15.233534163050063
+     },
+     "mass_sign_ok": true,
+     "periodic": {
+      "periodic_matched_points": 14176,
+      "periodic_max_distance": 2.37144e-16,
+      "bad_match": 0
+     },
+     "nan": false,
+     "su2_error": null,
+     "window": {
+      "window_iters": 500,
+      "rows": 200,
+      "rel_change": {
+       "m_in": null,
+       "PR_tt": null,
+       "tt_out": null,
+       "eta_tt": null
+      },
+      "converged_pi_eta": false
+     },
+     "usable": false,
+     "converged": false,
+     "returncode": 0,
+     "files": [
+      "run_summary.json",
+      "history_c1_point.csv",
+      "su2_c1_point.log",
+      "case_c1_point.cfg",
+      "surface.vtu",
+      "restart_c1_point.dat"
+     ],
+     "job": "su2-kv3-core130-smoke",
+     "mesh_nodes": 258395
+    },
+    {
+     "pfrac": 1.0,
+     "p_out_Pa": 338198.73873178364,
+     "statuses": [
+      "finished"
+     ],
+     "status": "finished",
+     "dir": "p1.000",
+     "stage": "c1_point",
+     "history_rows": 200,
+     "seconds": 81.2,
+     "sec_per_iter": 0.406,
+     "rms_rho": {
+      "first": -4.62588781,
+      "max": -4.601027489,
+      "last": -5.361632211,
+      "slope_per_100_last_half": -0.31578843064446466
+     },
+     "performance": {
+      "m_in_passage": 0.8469880054,
+      "m_out_passage": -0.5518859792,
+      "mass_imbalance": 0.3484134655019519,
+      "mass_sign_ok": true,
+      "m_wheel": 7.6228920486,
+      "PR_tt": 4.675487939327259,
+      "TR_tt": 1.6519198822087087,
+      "eta_tt_isentropic": 0.8494031305158165,
+      "m_wheel_corrected": 7.6233840557995745,
+      "PRTT_su2": 4.67641612,
+      "TotTotEff_su2": 86.2885287,
+      "PRTS_su2": 3.332333511,
+      "TotStaticEff_su2": 62.91582915,
+      "MassFlowIn_turbo": 0.8469880054,
+      "MassFlowOut_turbo": 0.5518860653,
+      "EulerianWork_su2": 188868.1406,
+      "window_iters": 50,
+      "window_rel_change": {
+       "m_in": 0.000503398864307009,
+       "pt_out": 0.0004511749932316029,
+       "tt_out": 0.0016099495748277775
+      },
+      "m_wheel_total": 15.2457840972,
+      "m_wheel_corrected_total": 15.246768111599149
+     },
+     "mass_sign_ok": true,
+     "periodic": {
+      "periodic_matched_points": 14176,
+      "periodic_max_distance": 2.37144e-16,
+      "bad_match": 0
+     },
+     "nan": false,
+     "su2_error": null,
+     "window": {
+      "window_iters": 500,
+      "rows": 200,
+      "rel_change": {
+       "m_in": null,
+       "PR_tt": null,
+       "tt_out": null,
+       "eta_tt": null
+      },
+      "converged_pi_eta": false
+     },
+     "usable": false,
+     "converged": false,
+     "returncode": 0,
+     "files": [
+      "run_summary.json",
+      "history_c1_point.csv",
+      "su2_c1_point.log",
+      "case_c1_point.cfg",
+      "surface.vtu",
+      "restart_c1_point.dat"
+     ],
+     "job": "su2-kv3-core130-smoke",
+     "mesh_nodes": 258395
+    },
+    {
+     "pfrac": 1.1,
+     "p_out_Pa": 372018.612604962,
+     "statuses": [
+      "finished"
+     ],
+     "status": "finished",
+     "dir": "p1.100",
+     "stage": "c1_point",
+     "history_rows": 200,
+     "seconds": 84.2,
+     "sec_per_iter": 0.42100000000000004,
+     "rms_rho": {
+      "first": -4.62588781,
+      "max": -4.595543141,
+      "last": -5.370684552,
+      "slope_per_100_last_half": -0.2882476852769277
+     },
+     "performance": {
+      "m_in_passage": 0.8006408495,
+      "m_out_passage": -0.7948700078,
+      "mass_imbalance": 0.007207778248641664,
+      "mass_sign_ok": true,
+      "m_wheel": 7.2057676455,
+      "PR_tt": 5.185964154241094,
+      "TR_tt": 1.7098528034546046,
+      "eta_tt_isentropic": 0.8458530756203751,
+      "m_wheel_corrected": 7.204798745923696,
+      "PRTT_su2": 5.186127265,
+      "TotTotEff_su2": 85.99326162,
+      "PRTS_su2": 3.662425262,
+      "TotStaticEff_su2": 63.21333756,
+      "MassFlowIn_turbo": 0.8006408495,
+      "MassFlowOut_turbo": 0.7948700424,
+      "EulerianWork_su2": 205657.5293,
+      "window_iters": 50,
+      "window_rel_change": {
+       "m_in": 0.04457073808098273,
+       "pt_out": 0.011169451506004457,
+       "tt_out": 0.014844872193348823
+      },
+      "m_wheel_total": 14.411535291,
+      "m_wheel_corrected_total": 14.409597491847393
+     },
+     "mass_sign_ok": true,
+     "periodic": {
+      "periodic_matched_points": 14176,
+      "periodic_max_distance": 2.37144e-16,
+      "bad_match": 0
+     },
+     "nan": false,
+     "su2_error": null,
+     "window": {
+      "window_iters": 500,
+      "rows": 200,
+      "rel_change": {
+       "m_in": null,
+       "PR_tt": null,
+       "tt_out": null,
+       "eta_tt": null
+      },
+      "converged_pi_eta": false
+     },
+     "usable": true,
+     "converged": false,
+     "returncode": 0,
+     "files": [
+      "run_summary.json",
+      "history_c1_point.csv",
+      "su2_c1_point.log",
+      "case_c1_point.cfg",
+      "surface.vtu",
+      "restart_c1_point.dat"
+     ],
+     "job": "su2-kv3-core130-smoke",
+     "mesh_nodes": 258395
+    }
+   ],
+   "bases": [
+    {
+     "job": "su2-kv3-core130-smoke",
+     "restart_ok": true,
+     "statuses": [
+      "finished",
+      "finished",
+      "finished"
+     ],
+     "su2_version": "SU2 v8.6.0 \"Harrier\", The Open-Source CFD Code",
+     "record": {
+      "pfrac": 0.75,
+      "p_out_Pa": 253649.05404883774,
+      "statuses": [
+       "finished",
+       "finished",
+       "finished"
+      ],
+      "status": "finished",
+      "dir": "base",
+      "stage": "s3_point_p075",
+      "history_rows": 150,
+      "seconds": 22.6,
+      "sec_per_iter": 0.15066666666666667,
+      "rms_rho": {
+       "first": -4.697484992,
+       "max": -4.57198731,
+       "last": -4.626483394,
+       "slope_per_100_last_half": -0.0413635100568993
+      },
+      "performance": {
+       "m_in_passage": 0.926747143,
+       "m_out_passage": -1.079670532,
+       "mass_imbalance": 0.1650109095615522,
+       "mass_sign_ok": true,
+       "m_wheel": 8.340724287,
+       "PR_tt": 3.6136325315030304,
+       "TR_tt": 1.3946867264530256,
+       "eta_tt_isentropic": 1.123640453509467,
+       "m_wheel_corrected": 8.338136658417504,
+       "PRTT_su2": 3.612960045,
+       "TotTotEff_su2": 111.0397086,
+       "PRTS_su2": 2.505109892,
+       "TotStaticEff_su2": 75.95604371,
+       "MassFlowIn_turbo": 0.926747143,
+       "MassFlowOut_turbo": 1.079670553,
+       "EulerianWork_su2": 114367.8831,
+       "window_iters": 50,
+       "window_rel_change": {
+        "m_in": 0.033526572954323104,
+        "pt_out": 0.04863176600080527,
+        "tt_out": 0.0316540309988098
+       },
+       "m_wheel_total": 16.681448574,
+       "m_wheel_corrected_total": 16.676273316835008
+      },
+      "mass_sign_ok": true,
+      "periodic": {
+       "periodic_matched_points": 14176,
+       "periodic_max_distance": 2.37144e-16,
+       "bad_match": 0
+      },
+      "nan": false,
+      "su2_error": null,
+      "window": {
+       "window_iters": 500,
+       "rows": 150,
+       "rel_change": {
+        "m_in": null,
+        "PR_tt": null,
+        "tt_out": null,
+        "eta_tt": null
+       },
+       "converged_pi_eta": false
+      },
+      "usable": false,
+      "converged": false
+     }
+    }
+   ],
+   "missing": [],
+   "usable": 1,
+   "converged": 0
+  }
+ }
+}

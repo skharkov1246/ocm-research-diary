@@ -1,0 +1,18 @@
+# Контекст сборки — корень репозитория; в образ идёт только код трека routes/gtu.
+# Файл <Dockerfile>.dockerignore рядом с Dockerfile BuildKit читает вместо .dockerignore корня.
+*
+!routes/gtu/
+!routes/gtu/platform/docker/requirements.txt
+# рабочие папки прогонов, сетки и кэши — не код
+routes/gtu/**/runs/
+routes/gtu/**/out/
+routes/gtu/**/TURBOMACHINERY/
+**/__pycache__/
+**/.pytest_cache/
+**/*.su2
+**/*.frd
+**/*.vtu
+**/*.dat
+**/*.png
+**/*.step
+**/*.pdf

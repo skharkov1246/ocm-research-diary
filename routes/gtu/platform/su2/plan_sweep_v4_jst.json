@@ -1,0 +1,52 @@
+{
+ "id": "v4_jst",
+ "axis": "численная схема",
+ "title": "Центральная схема JST без переключения порядка, малый CFL с медленным ростом, LU_SGS",
+ "mechanism": "JST (второй порядок с искусственной вязкостью, JST_SENSOR_COEFF (0,5; 0,02) шаблона) с первой итерации — переключения порядка нет (MUSCL с JST SU2 v8.6.0 не запускает); CFL 1 -> до 8 (множитель роста 1,05, сброса 0,5), предобусловливатель LU_SGS — как в образцах турбомашин SU2 (Aachen — JST, APU — LU_SGS); частота за 600, давление до 0,60 за 1100 (порция 1200), затем до 0,75 за 500.",
+ "hypothesis": "Разгон Roe первого порядка с CFL до 20 и резким включением MUSCL слишком агрессивен для тетраэдров без призм при U2 ~ 500–540 м/с; другая схема и осторожный CFL дойдут.",
+ "differs_from_smoke": "схема JST вместо Roe, без MUSCL, CFL 1–8, LU_SGS, длинные рампы, гейты",
+ "transforms": [
+  "hist"
+ ],
+ "set": {
+  "OUTPUT_FILES": "RESTART",
+  "WRT_FREQ": "100",
+  "FLOW_SCHEME": "JST",
+  "LIN_PREC": "LU_SGS",
+  "CFL_ADAPT_PARAM": "0.5, 1.05, 0.5, 8.0, 0.1"
+ },
+ "steps": [
+  {
+   "name": "a_spin_light",
+   "frac": 1.0,
+   "load": 0.6,
+   "iter": 1200,
+   "ramp": 600,
+   "pramp": 1100,
+   "muscl": false,
+   "gate": "intermediate",
+   "hold": {
+    "iter": 300,
+    "max": 3
+   },
+   "cfl": 1.0
+  },
+  {
+   "name": "b_base",
+   "frac": 1.0,
+   "load": 0.75,
+   "iter": 700,
+   "ramp": 0,
+   "pramp": 500,
+   "muscl": false,
+   "gate": "final",
+   "hold": {
+    "iter": 300,
+    "max": 40,
+    "cfl": 4.0
+   },
+   "cfl": 2.0
+  }
+ ],
+ "_comment": "Стратегия разгона базовой точки для sweep_ramp.py run (перебор jobs_aws_su2_kv3_sweep.json). Сгенерировано make_jobs_su2_kv3_sweep.py; правки — в нём. load — доля оценки давления на выходе при номинальной частоте (char_points.p_out_estimate); при частоте w < 1 давление — по линии дросселя p_нач + w^2 (load x оценка − p_нач); load null — давление прежнее. set — поля шаблона run_case.py (--set), transforms — правки производного шаблона (sweep_ramp.py rc)."
+}

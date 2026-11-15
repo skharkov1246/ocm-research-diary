@@ -1,0 +1,2 @@
+Выборка v2, прогон 20261115T010625Z-8893: CSV в S3 — <префикс ALPHA_O_S3>/gtu/funnel/l0v2_full_20261115T010625Z-8893/ — funnel_l0_KV-1_n50000.csv.gz 15.82 МБ sha256 c0c7ceb7af6832306c7a2e382d31dcf7f71aa64cbd8d448d62a2fcb1a3d04724; funnel_l0_KV-3_n200000.csv.gz 70.99 МБ sha256 d7d5593803573a15586ac163a6e97c9576bed034d451675b1890e2bdb46db2f3; funnel_l0_KV-6_n50000.csv.gz 18.98 МБ sha256 69b228386767d373dc748a8796957a510867f3d184c42b541385d35ddf859691
+Прежний прогон v1 20261114T232200Z-7ce3: <префикс ALPHA_O_S3>/gtu/funnel/l0_full_20261114T232200Z-7ce3/ (3 csv.gz).

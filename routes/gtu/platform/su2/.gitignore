@@ -1,0 +1,3 @@
+# папки прогонов SU2: restart, vtu, журналы — десятки МБ; итог прогона — su2_results.json (run_case.py --record)
+runs/
+__pycache__/

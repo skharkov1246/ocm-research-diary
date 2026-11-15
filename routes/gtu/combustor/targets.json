@@ -1,0 +1,1036 @@
+{
+ "schema": "kv.combustor.targets/1",
+ "title": "Измеримые цели камеры сгорания двигателя-заменителя KV (первым — KV-3)",
+ "date": "2026-11-14",
+ "status": "предложение целей; утверждение — владелец. Внешние факты — с пометкой «открыт» / «по выдаче поиска», наши числа — «оценка» или ключ в targets_basis_results.json",
+ "method": "сопоставление с открытыми данными серийных камер (STATE_OF_ART.md) + расчёт 0D (targets_basis.py)",
+ "software": "python 3.13.18, cantera 3.2.0, numpy 2.5.3, scipy 1.18.1; механизмы gri30.yaml (53/325), nDodecane_Reitz.yaml (100/553)",
+ "inputs": [
+  {
+   "file": "routes/gtu/combustor/targets_basis_results.json",
+   "field": "см. basis_calc[].key"
+  },
+  {
+   "file": "routes/gtu/combustor/STATE_OF_ART.md",
+   "field": "разделы 1–5"
+  },
+  {
+   "file": "routes/gtu/fleet/gtu_fleet_*.json",
+   "field": "combustor, nox, fuel"
+  }
+ ],
+ "applies_to": {
+  "frame": "KV-3",
+  "design_point": "Taurus 60 GS, мягкий допуск: π 13,5, T41 1000 °C, 25,55 кг/с",
+  "file": "routes/gtu/frame3/frame3_point_results.json",
+  "other_frames": "KV-1 … KV-7: те же нормы в ppm и долях; PF пересчитать по T41 и T3 типоразмера"
+ },
+ "conventions": {
+  "emissions": "ppmvd при 15 % O2, NOx = NO + NO2 (как NO2), C15 = C·(20,9−15)/(20,9−O2,сух)",
+  "mg_per_ppm": 2.05253,
+  "load": "доля мощности на валу при постоянной частоте",
+  "key_syntax": "путь в targets_basis_results.json: a.b[поле=значение].c"
+ },
+ "targets": [
+  {
+   "id": "nox_gas",
+   "kind": "hard",
+   "metric": "NOx, ppmvd при 15 % O2, природный газ",
+   "target": {
+    "max": 9.0,
+    "load_pct": [
+     50,
+     100
+    ]
+   },
+   "stretch": {
+    "max": 5.0,
+    "load_pct": [
+     50,
+     100
+    ]
+   },
+   "also": {
+    "max": 15.0,
+    "load_pct": [
+     30,
+     50
+    ],
+    "note": "нижняя часть диапазона — до 15 ppm (оценка)"
+   },
+   "best_in_class": [
+    {
+     "fact": "Solar Turbines, страница SoLoNOx: «9ppm NOx, 15ppm CO, and 15 ppm UHC emissions warranty for natural gas fuel»",
+     "source": "https://www.solarturbines.com/en_US/solutions/carbon-reduction/soLoNOx-technology-redirect.html",
+     "status": "по выдаче поиска"
+    },
+    {
+     "fact": "Kawasaki, 2011: гарантия NOx M7A-03 — 9,9 ppm (15 % O2)",
+     "source": "https://global.kawasaki.com/en/corp/newsroom/news/detail/20110927_1.html",
+     "status": "по выдаче поиска"
+    },
+    {
+     "fact": "Siemens Energy, Enhanced DLE Upgrade: SGT-400 13 МВт — NOx ≤ 9 ppmvd; экономия топлива на частичной нагрузке до 30 % при наличии перепускных клапанов",
+     "source": "https://assets.siemens-energy.com/dam/203b52b2-3f57-4cbc-ab57-b0580088391b/Enhanced-DLE-Upgrade-v3-pdf_Original%20file.pdf",
+     "status": "по выдаче поиска"
+    },
+    {
+     "fact": "Baker Hughes NovaLT16 Overview: < 15 ppm NOx при 15 % O2 на 50–100 %, 9 ppm по заказу; до 30 % H2 в DLN",
+     "source": "https://dam.bakerhughes.com/m/543e00e8456feb1f/original/NovaLT16-Overview.pdf",
+     "status": "по выдаче поиска"
+    },
+    {
+     "fact": "Паспорт Mercury 50: 8 форсунок, NOx 5 ppm (минимальная возможность двигателя)",
+     "source": "routes/gtu/fleet/gtu_fleet_mercury50.json",
+     "status": "открыт"
+    },
+    {
+     "fact": "Xonon на Kawasaki M1A-13X: NOx < 2,5 ppm, CO < 6 ppm за 3000 ч",
+     "source": "https://eponline.com/articles/2001/12/01/knocking-out-nox.aspx",
+     "status": "по выдаче поиска",
+     "source_alt": [
+      "https://webarchive.library.unt.edu/eot2008/20090119083903/http:/www.netl.doe.gov/publications/proceedings/99/99ats/2-14.pdf",
+      "https://www.power-eng.com/environmental-emissions/xonon-equipped-kawasaki-cogeneration-system-installed-at-plains-exploration-production-co-site/"
+     ],
+     "source_note": "адрес — из выдачи поиска; к какому именно документу относится выдержка, не проверено"
+    }
+   ],
+   "basis_calc": [
+    {
+     "key": "hydrogen[H2_vol=0].NOx_ppm15_10ms",
+     "value": 3.09049,
+     "unit": "ppm",
+     "what": "идеальное смешение, T_ad зоны пламени 1800 K, 10 мс горячей зоны"
+    },
+    {
+     "key": "crn_grid[phi=0.55].hot[tau_ms=10].NOx_ppm15",
+     "value": 5.78228,
+     "unit": "ppm",
+     "what": "phi 0,55 (T_ad 1852 K), 10 мс"
+    },
+    {
+     "key": "crn_grid[phi=0.55].hot[tau_ms=20].NOx_ppm15",
+     "value": 8.57189,
+     "unit": "ppm",
+     "what": "phi 0,55, 20 мс"
+    },
+    {
+     "key": "unmixedness[S=0.05].by_tau[tau_ms=10].NOx_ppm15",
+     "value": 7.0002,
+     "unit": "ppm",
+     "what": "неравномерность смешения S = 0,05 при phi 0,55, 10 мс"
+    },
+    {
+     "key": "unmixedness[S=0.1].by_tau[tau_ms=10].NOx_ppm15",
+     "value": 12.4023,
+     "unit": "ppm",
+     "what": "S = 0,10 при phi 0,55, 10 мс"
+    },
+    {
+     "key": "crn_grid[phi=0.6].hot[tau_ms=10].NOx_ppm15",
+     "value": 16.5235,
+     "unit": "ppm",
+     "what": "phi 0,60 (T_ad 1936 K), 10 мс"
+    }
+   ],
+   "rationale": "9 ppm — лучшая серийная гарантия класса у трёх поставщиков; цель «не хуже лучших» при одном клапане. Расчёт 0D: при идеальном смешении и T_ad 1800–1850 K NOx 3–6 ppm за 10 мс, то есть запас под неравномерность и погрешность модели (множитель около 1,5) есть, если S ≤ 0,05 и T_ad ≤ 1850 K; при S = 0,10 или T_ad 1936 K цель не выполняется. Вытянутая цель 5 ppm — уровень Mercury 50.",
+   "derived": [
+    {
+     "id": "unmixedness",
+     "metric": "S = sigma(phi)/phi на выходе смесителя",
+     "target": {
+      "max": 0.05
+     },
+     "status": "оценка",
+     "why": "NOx при S 0,05 → 0,10 растёт с 7,0 до 12,4 ppm (10 мс), появляется 3,8 % погасших струек"
+    },
+    {
+     "id": "flame_zone_Tad",
+     "metric": "адиабатическая температура зоны пламени на 100 %, K",
+     "target": {
+      "min": 1750,
+      "max": 1850
+     },
+     "status": "оценка",
+     "why": "ниже 1750 K — близко к срыву (1680 K при 0,5 мс), выше 1850 K — NOx за 9 ppm при малой неравномерности"
+    }
+   ],
+   "verify": {
+    "levels": [
+     "L0 сеть реакторов (targets_basis.py)",
+     "L1 RANS reactingFoam + сеть реакторов по полю",
+     "L2 LES смесителя (S, проскок)",
+     "L3 стенд при p3"
+    ],
+    "method": "приведение C15 = C·(20,9−15)/(20,9−O2) сухого газа, средние с весом расхода на выходе"
+   },
+   "status": "цель (предложение); числа обоснования — оценка 0D"
+  },
+  {
+   "id": "co_gas",
+   "kind": "hard",
+   "metric": "CO, ppmvd при 15 % O2, природный газ",
+   "target": {
+    "max": 15.0,
+    "load_pct": [
+     50,
+     100
+    ]
+   },
+   "also": {
+    "max": 50.0,
+    "load_pct": [
+     30,
+     50
+    ]
+   },
+   "best_in_class": [
+    {
+     "fact": "Solar Turbines, страница SoLoNOx: «9ppm NOx, 15ppm CO, and 15 ppm UHC emissions warranty for natural gas fuel»",
+     "source": "https://www.solarturbines.com/en_US/solutions/carbon-reduction/soLoNOx-technology-redirect.html",
+     "status": "по выдаче поиска"
+    },
+    {
+     "fact": "Xonon на Kawasaki M1A-13X: NOx < 2,5 ppm, CO < 6 ppm за 3000 ч",
+     "source": "https://eponline.com/articles/2001/12/01/knocking-out-nox.aspx",
+     "status": "по выдаче поиска",
+     "source_alt": [
+      "https://webarchive.library.unt.edu/eot2008/20090119083903/http:/www.netl.doe.gov/publications/proceedings/99/99ats/2-14.pdf",
+      "https://www.power-eng.com/environmental-emissions/xonon-equipped-kawasaki-cogeneration-system-installed-at-plains-exploration-production-co-site/"
+     ],
+     "source_note": "адрес — из выдачи поиска; к какому именно документу относится выдержка, не проверено"
+    },
+    {
+     "fact": "Испытание Mars T14000 SoLoNOx: CO 2209 ppmc на 35 % нагрузки",
+     "source": "https://collections.lib.utah.edu/details?id=8748",
+     "status": "по выдаче поиска"
+    }
+   ],
+   "basis_calc": [
+    {
+     "key": "crn_grid[phi=0.5].hot[tau_ms=3].CO_ppm15",
+     "value": 4.28386,
+     "unit": "ppm",
+     "what": "phi 0,50 (T_ad 1764 K), 3 мс"
+    },
+    {
+     "key": "crn_grid[phi=0.55].hot[tau_ms=3].CO_ppm15",
+     "value": 11.2333,
+     "unit": "ppm",
+     "what": "phi 0,55 (T_ad 1852 K), 3 мс — CO уже у равновесия"
+    },
+    {
+     "key": "crn_grid[phi=0.55].eq.CO_ppm15",
+     "value": 10.3999,
+     "unit": "ppm",
+     "what": "равновесный CO при phi 0,55"
+    },
+    {
+     "key": "unmixedness[S=0.1].by_tau[tau_ms=10].unlit_weight",
+     "value": 0.0380145,
+     "unit": "доля",
+     "what": "доля погасших бедных струек при S = 0,10"
+    }
+   ],
+   "rationale": "15 ppm — гарантия Solar на газе. По расчёту CO в горячей зоне упирается в равновесие уже через 3 мс (4–11 ppm при 1764–1852 K); реальный риск CO — частичная нагрузка и бедные струйки (при S = 0,10 около 4 % смеси не горит в своём объёме) и закалка стенкой и воздухом разбавления, которых в 0D нет.",
+   "verify": {
+    "levels": [
+     "L1 RANS с охлаждением стенки",
+     "L3 стенд"
+    ],
+    "method": "как nox_gas"
+   },
+   "status": "цель (предложение)"
+  },
+  {
+   "id": "load_range",
+   "kind": "hard",
+   "metric": "диапазон нагрузки (доля мощности на валу), где выполнены nox_gas и co_gas; устойчивое горение",
+   "target": {
+    "low_emission_gas_pct": [
+     30,
+     100
+    ],
+    "low_emission_diesel_pct": [
+     50,
+     100
+    ],
+    "stable_pct": [
+     0,
+     100
+    ]
+   },
+   "best_in_class": [
+    {
+     "fact": "Caterpillar/Solar, оценка формальдегида SoLoNOx: газ 50–100 % (Titan 250 — 40–100 %), жидкое 65–100 %",
+     "source": "https://mienviro.michigan.gov/ncore/downloadfile/619518159227452474",
+     "status": "по выдаче поиска",
+     "source_alt": [
+      "https://dec.alaska.gov/Applications/Air/airtoolsweb/Home/ViewAttachment/17157994/GLlbpQjeIWuJdONN_f7DAg2"
+     ],
+     "source_note": "адрес — из выдачи поиска; к какому именно документу относится выдержка, не проверено"
+    },
+    {
+     "fact": "Siemens (DirectIndustry): SGT-400 выполняет нормы выбросов вплоть до 30 % нагрузки, двухтопливная",
+     "source": "https://www.directindustry.com/prod/siemens-power-genereration/product-23116-2448234.html",
+     "status": "по выдаче поиска",
+     "source_alt": [
+      "https://www.directindustry.com/prod/siemens-power-genereration/product-23116-2019620.html"
+     ],
+     "source_note": "адрес — из выдачи поиска; к какому именно документу относится выдержка, не проверено"
+    },
+    {
+     "fact": "Siemens Energy, Enhanced DLE Upgrade: SGT-400 13 МВт — NOx ≤ 9 ppmvd; экономия топлива на частичной нагрузке до 30 % при наличии перепускных клапанов",
+     "source": "https://assets.siemens-energy.com/dam/203b52b2-3f57-4cbc-ab57-b0580088391b/Enhanced-DLE-Upgrade-v3-pdf_Original%20file.pdf",
+     "status": "по выдаче поиска"
+    },
+    {
+     "fact": "Baker Hughes NovaLT16 Overview: < 15 ppm NOx при 15 % O2 на 50–100 %, 9 ppm по заказу; до 30 % H2 в DLN",
+     "source": "https://dam.bakerhughes.com/m/543e00e8456feb1f/original/NovaLT16-Overview.pdf",
+     "status": "по выдаче поиска"
+    }
+   ],
+   "basis_calc": [
+    {
+     "key": "part_load_fixed_split[T41_C=950].load_frac",
+     "value": 0.882647,
+     "unit": "",
+     "what": "доля нагрузки при T41 950 °C (оценка вне расчётного режима)"
+    },
+    {
+     "key": "part_load_fixed_split[T41_C=950].T_ad_pz_K",
+     "value": 1716.59,
+     "unit": "K",
+     "what": "T_ad зоны пламени при неизменной доле воздуха, T41 950 °C"
+    },
+    {
+     "key": "part_load_fixed_split[T41_C=900].load_frac",
+     "value": 0.767722,
+     "unit": "",
+     "what": "доля нагрузки при T41 900 °C"
+    },
+    {
+     "key": "part_load_fixed_split[T41_C=900].T_ad_pz_K",
+     "value": 1632.03,
+     "unit": "K",
+     "what": "T_ad при неизменной доле воздуха, T41 900 °C — ниже срыва"
+    },
+    {
+     "key": "psr_lbo[tau_ms=0.5].T_ad_at_lbo_K",
+     "value": 1679.5,
+     "unit": "K",
+     "what": "T_ad срыва реактора идеального смешения при 0,5 мс"
+    },
+    {
+     "key": "part_load_fixed_split[T41_C=700].load_frac",
+     "value": 0.333689,
+     "unit": "",
+     "what": "доля нагрузки при T41 700 °C"
+    },
+    {
+     "key": "part_load_fixed_split[T41_C=700].premix_share_needed_for_1800K",
+     "value": 0.239421,
+     "unit": "",
+     "what": "доля воздуха в зону пламени, нужная для 1800 K при T41 700 °C"
+    },
+    {
+     "key": "flame_temperature.premix_share_at_1800K",
+     "value": 0.48071,
+     "unit": "",
+     "what": "та же доля на 100 %"
+    }
+   ],
+   "rationale": "Лучшие серийные: 50–100 % (Solar, NovaLT16), 30 % у SGT-400 только с перепуском воздуха; на жидком у Solar 65–100 %. Цель «круче всех» — 30–100 % на газе без перепуска и без ступенчатых клапанов. Расчёт показывает, почему это трудно: при неизменном делении воздуха и одном клапане зона пламени держит температуру выше срыва только до T41 ≈ 950 °C (около 88 % нагрузки); на 77 % она уже ниже срыва. Чтобы держать 1800 K до 33 % нагрузки, доля воздуха через зону пламени должна пассивно уменьшаться с 0,48 до 0,24 — вдвое. Это главное требование к схеме подачи (пассивное деление).",
+   "verify": {
+    "levels": [
+     "L0 сеть реакторов по нагрузке",
+     "L1 RANS на 30/50/100 %",
+     "L3 стенд"
+    ],
+    "method": "нагрузка — доля мощности на валу по gtu_cycle при постоянной частоте (оценка вне расчётного режима)"
+   },
+   "status": "цель (предложение); расчёт неполной нагрузки — оценка"
+  },
+  {
+   "id": "fuel_valves",
+   "kind": "hard",
+   "metric": "число регулирующих клапанов на одно топливо; исполнительных механизмов в камере",
+   "target": {
+    "control_valves_per_fuel": 1,
+    "actuators_in_combustor": 0,
+    "bleed_valves": 0
+   },
+   "best_in_class": [
+    {
+     "fact": "Паспорт Taurus 60: 12 форсунок SoLoNOx, факельный воспламенитель; перепускной клапан на корпусе камеры регулирует воздух горения",
+     "source": "routes/gtu/fleet/gtu_fleet_taurus60.json",
+     "status": "открыт"
+    },
+    {
+     "fact": "Паспорт SGT-400: NOx < 10 ppmvd (DLE, газ); 6 противоточных жаровых труб с запальником в каждой; H2 до 30 % DLE",
+     "source": "routes/gtu/fleet/gtu_fleet_sgt400.json",
+     "status": "открыт"
+    }
+   ],
+   "basis_calc": [
+    {
+     "key": "part_load_fixed_split[T41_C=700].premix_share_needed_for_1800K",
+     "value": 0.239421,
+     "unit": "",
+     "what": "что должно делать пассивное деление на 33 % нагрузки"
+    }
+   ],
+   "rationale": "Требование владельца (Plug&Play в пакет со штатной топливной системой). У SoLoNOx — пилот и основной контур плюс перепускной клапан воздуха; у SGT-400 — пилот и основная горелка в каждой из 6 труб. Деление топлива или воздуха по нагрузке должно быть заложено геометрией (пассивно) — см. load_range.",
+   "verify": {
+    "levels": [
+     "L1 RANS гидравлики каналов на 30/50/100 %"
+    ],
+    "method": "распределение расхода по каналам из расчёта"
+   },
+   "status": "требование владельца"
+  },
+  {
+   "id": "diesel_dry",
+   "kind": "hard",
+   "metric": "NOx и CO на дизеле без воды, ppmvd при 15 % O2",
+   "target": {
+    "NOx_max": 42.0,
+    "CO_max": 50.0,
+    "load_pct": [
+     50,
+     100
+    ],
+    "water": 0
+   },
+   "stretch": {
+    "NOx_max": 25.0
+   },
+   "best_in_class": [
+    {
+     "fact": "GE Vernova, Water Injection for NOx Reduction: 25 ppm газ, 42 ppm жидкое",
+     "source": "https://www.gevernova.com/gas-power/services/gas-turbines/upgrades/water-injection-for-nox-reduction",
+     "status": "по выдаче поиска"
+    },
+    {
+     "fact": "Siemens SGT-600 DLE 3-го поколения: жидкое < 58 ppm на полной нагрузке без воды, CO < 40 ppm до 75 %",
+     "source": "https://www.sciencegate.app/document/10.1115/gt2017-63089",
+     "status": "по выдаче поиска"
+    },
+    {
+     "fact": "Klein, Austrem, Mowill, GT2002-30107: OP16, дизель — NOx < 25 ppm на 50–90 %, < 30 ppm на полной; CO, UHC < 10 ppm",
+     "source": "https://next.sciencegate.app/document/10.1115/gt2002-30107",
+     "status": "по выдаче поиска"
+    },
+    {
+     "fact": "Capstone C65 (перепечатка паспорта): жидкие топлива < 35 ppmvd NOx при 15 % O2",
+     "source": "https://pdf.directindustry.com/pdf/capstone-turbine/c65-c65-ichp-liquid-fuels-product-literature/22062-58097.html",
+     "status": "по выдаче поиска"
+    },
+    {
+     "fact": "Solar, GT2021-58986: Titan 250 — двухтопливная DLE и LDI-система для жидкого топлива на базе газовой DLE",
+     "source": "https://asme-turboexpo.secure-platform.com/a/solicitations/137/sessiongallery/6190/application/58986",
+     "status": "по выдаче поиска"
+    },
+    {
+     "fact": "40 CFR 60 подраздел KKKK, таблица 1: новые генераторные ГТУ на газе ≤ 50 MMBtu/ч — 42 ppm при 15 % O2",
+     "source": "https://www.ecfr.gov/current/title-40/chapter-I/subchapter-C/part-60/subpart-KKKK",
+     "status": "по выдаче поиска"
+    }
+   ],
+   "basis_calc": [
+    {
+     "key": "diesel.rows[phi=0.5].ign_delay_ms",
+     "value": 15.7064,
+     "unit": "мс",
+     "what": "задержка самовоспламенения н-додекана при T3, p3, phi 0,5 (механизм Reitz)"
+    },
+    {
+     "key": "diesel.rows[phi=1].ign_delay_ms",
+     "value": 8.80971,
+     "unit": "мс",
+     "what": "то же при phi 1,0 (богатые карманы)"
+    },
+    {
+     "key": "diesel.rows[phi=1].T_ad_K",
+     "value": 2556.61,
+     "unit": "K",
+     "what": "стехиометрическая T_ad н-додекана при T3, p3"
+    },
+    {
+     "key": "diesel.T_ad_stoich_CH4_K",
+     "value": 2460.24,
+     "unit": "K",
+     "what": "стехиометрическая T_ad метана"
+    }
+   ],
+   "rationale": "42 ppm — уровень водяного впрыска на жидком (GE) и норма KKKK для газа малых ГТУ; сухая камера SGT-600 даёт < 58 ppm, опытная LPP-камера OP16 — 25–30 ppm на стенде. Цель — водяной уровень без воды, вытянутая — уровень OP16. Расчёт: стехиометрическое пламя дизеля горячее метанового (2557 против 2460 K), поэтому диффузионное горение дизеля даёт много NOx; предварительное испарение и смешение при 410 °C и 13,7 бар ограничено самовоспламенением за 9–16 мс (механизм Reitz, н-додекан; реальный дизель и другие механизмы могут дать в разы меньше) — смеситель должен быть на порядок короче. Предпочтение — бедный прямой впрыск (LDI), как Titan 250.",
+   "verify": {
+    "levels": [
+     "L1 sprayFoam / распыл + испарение",
+     "L3 стенд"
+    ],
+    "method": "NOx дизеля — только механизм с азотной химией (в Reitz её нет)"
+   },
+   "status": "цель (предложение)"
+  },
+  {
+   "id": "fuel_changeover",
+   "kind": "hard",
+   "metric": "смена газ ↔ дизель на ходу",
+   "target": {
+    "both_directions": true,
+    "load_pct": [
+     30,
+     100
+    ],
+    "stop": false,
+    "water": false,
+    "power_dip_max_pct": 5.0
+   },
+   "best_in_class": [
+    {
+     "fact": "Паспорт SGT-100: «automatic changeover from primary to secondary fuel at any load»; H2 до 30 % DLE",
+     "source": "routes/gtu/fleet/gtu_fleet_sgt100.json",
+     "status": "открыт"
+    },
+    {
+     "fact": "Caterpillar/Solar, оценка формальдегида SoLoNOx: газ 50–100 % (Titan 250 — 40–100 %), жидкое 65–100 %",
+     "source": "https://mienviro.michigan.gov/ncore/downloadfile/619518159227452474",
+     "status": "по выдаче поиска",
+     "source_alt": [
+      "https://dec.alaska.gov/Applications/Air/airtoolsweb/Home/ViewAttachment/17157994/GLlbpQjeIWuJdONN_f7DAg2"
+     ],
+     "source_note": "адрес — из выдачи поиска; к какому именно документу относится выдержка, не проверено"
+    }
+   ],
+   "basis_calc": [],
+   "rationale": "SGT-100 — автоматическая смена топлива при любой нагрузке (паспорт); у Kawasaki жидкое — резерв. Цель: смена в обе стороны во всём диапазоне малых выбросов газа, без воды и останова; провал мощности ≤ 5 % — оценка, уточнить у заказчика.",
+   "verify": {
+    "levels": [
+     "L2 нестационарный расчёт перехода",
+     "L3 стенд"
+    ],
+    "method": "—"
+   },
+   "status": "цель (предложение); провал мощности — оценка"
+  },
+  {
+   "id": "hydrogen",
+   "kind": "objective",
+   "metric": "доля водорода в газе (объёмн.) при выполнении nox_gas и co_gas",
+   "target": {
+    "H2_vol_min": 0.3,
+    "hardware_change": false
+   },
+   "stretch": {
+    "H2_vol": 1.0,
+    "NOx_max": 25.0,
+    "hardware_change": "сменный картридж с тем же стыком"
+   },
+   "best_in_class": [
+    {
+     "fact": "Паспорт SGT-100: «automatic changeover from primary to secondary fuel at any load»; H2 до 30 % DLE",
+     "source": "routes/gtu/fleet/gtu_fleet_sgt100.json",
+     "status": "открыт"
+    },
+    {
+     "fact": "Паспорт SGT-400: NOx < 10 ppmvd (DLE, газ); 6 противоточных жаровых труб с запальником в каждой; H2 до 30 % DLE",
+     "source": "routes/gtu/fleet/gtu_fleet_sgt400.json",
+     "status": "открыт"
+    },
+    {
+     "fact": "Baker Hughes NovaLT16 Overview: < 15 ppm NOx при 15 % O2 на 50–100 %, 9 ppm по заказу; до 30 % H2 в DLN",
+     "source": "https://dam.bakerhughes.com/m/543e00e8456feb1f/original/NovaLT16-Overview.pdf",
+     "status": "по выдаче поиска"
+    },
+    {
+     "fact": "Turbomachinery: SoLoNOx до 20 % H2, цель 100 % к 2030 г.",
+     "source": "https://www.turbomachinerymag.com/view/vendor-spotlight-solar-turbines",
+     "status": "по выдаче поиска"
+    },
+    {
+     "fact": "Solar, GRTgaz Deutschland, OGE: Titan 130 SoLoNOx — смеси до 25 % H2, более 200 ч",
+     "source": "https://www.powermag.com/successful-test-of-hydrogen-in-gas-turbine-driving-a-natural-gas-compressor-in-germany/",
+     "status": "по выдаче поиска"
+    },
+    {
+     "fact": "KHI / FH Aachen / B&B-AGEMA: M1A-17, 100 % H2, микросмешение, 72 ppmv при 1800 кВт (15 % O2), 1040 ч",
+     "source": "https://opus.bibliothek.fh-aachen.de/opus4/solrsearch/index/search/searchtype/authorsearch/author/Tomoyuki+Ogino",
+     "status": "по выдаче поиска"
+    },
+    {
+     "fact": "TKI / OPRA FlameSheet: 100 % H2 — NOx < 25 ppm на номинальной температуре; цель < 9 ppm не достигнута",
+     "source": "https://projecten.topsectorenergie.nl/storage/app/uploads/public/61f/7a3/45a/61f7a345ac28b478860182.pdf",
+     "status": "по выдаче поиска"
+    }
+   ],
+   "basis_calc": [
+    {
+     "key": "hydrogen[H2_vol=0].S_L_m_s",
+     "value": 0.13271,
+     "unit": "м/с",
+     "what": "S_L метана при T_ad 1800 K, T3, p3"
+    },
+    {
+     "key": "hydrogen[H2_vol=0.3].S_L_m_s",
+     "value": 0.149513,
+     "unit": "м/с",
+     "what": "S_L при 30 % H2"
+    },
+    {
+     "key": "hydrogen[H2_vol=1].S_L_m_s",
+     "value": 0.323431,
+     "unit": "м/с",
+     "what": "S_L водорода"
+    },
+    {
+     "key": "hydrogen[H2_vol=0.3].NOx_ppm15_10ms",
+     "value": 3.43809,
+     "unit": "ppm",
+     "what": "NOx при 30 % H2, T_ad 1800 K, 10 мс"
+    },
+    {
+     "key": "hydrogen[H2_vol=1].NOx_ppm15_10ms",
+     "value": 5.86905,
+     "unit": "ppm",
+     "what": "NOx при 100 % H2, T_ad 1800 K, 10 мс"
+    }
+   ],
+   "rationale": "30 % — уровень серийных DLE (SGT-100/400, NovaLT); Solar — 20 % серийно, 25 % испытано. При той же T_ad ламинарная скорость при 30 % H2 выше на 13 %, при 100 % — в 2,4 раза; турбулентная скорость водорода растёт сильнее (не учтено) — главный риск проскок. Самовоспламенения смеси при T3 за 1 с нет ни для одной доли H2. 100 % H2 — сменным картриджем микросмешения (у Kawasaki 72 ppm на двигателе, у FlameSheet < 25 ppm на стенде).",
+   "verify": {
+    "levels": [
+     "L0 S_L и задержка",
+     "L2 LES проскока",
+     "L3 стенд"
+    ],
+    "method": "запас по проскоку — корреляции раздела 5 STATE_OF_ART"
+   },
+   "status": "цель (предложение)"
+  },
+  {
+   "id": "pressure_loss",
+   "kind": "objective",
+   "metric": "полные потери давления камеры (от выхода диффузора до входа в сопловой аппарат), доля p3",
+   "target": {
+    "max": 0.04
+   },
+   "stretch": {
+    "max": 0.03
+   },
+   "best_in_class": [
+    {
+     "fact": "Лекции по Lefebvre: потери давления камеры — фундаментальные около 0,2 %, смешение 3–4 %, всего 4–5 %",
+     "source": "https://conference.isabe.org/content/scnotes/bobby/gtc9.pdf",
+     "status": "по выдаче поиска",
+     "source_alt": [
+      "https://www.scribd.com/document/353061582/CIT04-0316-pdf"
+     ],
+     "source_note": "адрес — из выдачи поиска; к какому именно документу относится выдержка, не проверено"
+    }
+   ],
+   "basis_calc": [
+    {
+     "key": "dp_sensitivity.dP_kW_per_pct",
+     "value": -49.4292,
+     "unit": "кВт",
+     "what": "мощность на валу KV-3 на 1 п. п. потерь"
+    },
+    {
+     "key": "dp_sensitivity.d_eff_pt_per_pct",
+     "value": -0.270443,
+     "unit": "п. п.",
+     "what": "КПД на валу на 1 п. п. потерь"
+    },
+    {
+     "key": "dp_sensitivity.rows[dp_comb=0.03].dP_kW_vs_4pct",
+     "value": 49.1053,
+     "unit": "кВт",
+     "what": "выигрыш при 3 % против 4 %"
+    }
+   ],
+   "rationale": "4 % — значение модели цикла трека (gtu_cycle dp_comb = 0,04) и середина обычных 4–5 %. Каждый процент потерь стоит KV-3 около 49 кВт на валу и 0,27 п. п. КПД. Струйные схемы (FLOX, микросмешение) требуют перепада на струях — потери надо считать, а не принимать.",
+   "verify": {
+    "levels": [
+     "L1 RANS холодный и горячий"
+    ],
+    "method": "разность полных давлений, средних по расходу"
+   },
+   "status": "цель (предложение)"
+  },
+  {
+   "id": "exit_uniformity",
+   "kind": "hard",
+   "metric": "неравномерность температуры на выходе: PF = (Tmax − T41)/(T41 − T3); радиальный профиль",
+   "target": {
+    "PF_max": 0.084,
+    "RTDF_max": 0.05
+   },
+   "best_in_class": [
+    {
+     "fact": "Конференционная статья по проектированию камер: показатель качества поля температуры обычно 0,05–0,30",
+     "source": "https://conference.isabe.org/content/scnotes/bobby/gtc9.pdf",
+     "status": "по выдаче поиска",
+     "source_alt": [
+      "https://www.scribd.com/document/353061582/CIT04-0316-pdf"
+     ],
+     "source_note": "адрес — из выдачи поиска; к какому именно документу относится выдержка, не проверено"
+    }
+   ],
+   "basis_calc": [
+    {
+     "key": "exit_uniformity.pattern_factor_max",
+     "value": 0.084799,
+     "unit": "",
+     "what": "предел PF, чтобы местный максимум не превысил 1050 °C при T41 1000 °C"
+    }
+   ],
+   "rationale": "KV-3 — неохлаждаемая осевая турбина, предел газа 1050 °C (gtu_explore LIM['T_ax_max']) при T41 1000 °C: местный максимум не выше +50 K, отсюда PF ≤ 0,084 (0,0848 с округлением вниз) — в нижней части обычных 0,05–0,30. RTDF 0,05 — оценка.",
+   "verify": {
+    "levels": [
+     "L1 RANS с разбавлением",
+     "L3 стенд (гребёнка термопар)"
+    ],
+    "method": "поле T на плоскости выхода"
+   },
+   "status": "цель; PF — расчёт из принятых величин трека, RTDF — оценка"
+  },
+  {
+   "id": "wall_life",
+   "kind": "hard",
+   "metric": "ресурс картриджа до замены; температура металла стенки",
+   "target": {
+    "life_h_min": 30000,
+    "T_metal_max_K": 1173
+   },
+   "best_in_class": [
+    {
+     "fact": "TWI FAQ: типовые интервалы — осмотр камеры 8000 EOH, горячий тракт 24 000, капитальный 48 000–50 000 (не модельные)",
+     "source": "https://www.twi-global.com/technical-knowledge/faqs/faq-what-are-the-factors-influencing-maintenance-intervals-for-gas-turbines",
+     "status": "по выдаче поиска"
+    },
+    {
+     "fact": "Siemens (презентация 2013): интервалы осмотров SGT-600 продлены с 20 000 до 30 000 EOH",
+     "source": "https://dtsheet.com/doc/1509571/download-presentation--pdf-",
+     "status": "по выдаче поиска",
+     "source_alt": [],
+     "source_note": "адрес — из выдачи поиска; к какому именно документу относится выдержка, не проверено"
+    },
+    {
+     "fact": "Solar Centaur 50S, керамические жаровые трубы: SiC/SiC с покрытием 13 937 ч; оксидная — более 25 000 ч",
+     "source": "https://www.osti.gov/biblio/991117",
+     "status": "по выдаче поиска",
+     "source_alt": [
+      "https://impact.ornl.gov/en/publications/microstructural-and-mechanical-characterization-of-a-hybrid-oxide/"
+     ],
+     "source_note": "адрес — из выдачи поиска; к какому именно документу относится выдержка, не проверено"
+    },
+    {
+     "fact": "NASA: допустимая температура металла голой жаровой трубы HX 1260 K при толщине около 2 мм",
+     "source": "https://ntrs.nasa.gov/api/citations/19830025622/downloads/19830025622.pdf",
+     "status": "по выдаче поиска",
+     "source_alt": [
+      "https://ntrs.nasa.gov/api/citations/19840024434/downloads/19840024434.pdf"
+     ],
+     "source_note": "адрес — из выдачи поиска; к какому именно документу относится выдержка, не проверено"
+    },
+    {
+     "fact": "Cal Poly (проект при поддержке Solar, 2021): печатный наконечник форсунки Taurus 60 — цель ресурса ≥ 60 000 ч",
+     "source": "https://core.ac.uk/download/483721164.pdf",
+     "status": "по выдаче поиска",
+     "source_alt": [
+      "https://www.osti.gov/servlets/purl/2483903"
+     ],
+     "source_note": "адрес — из выдачи поиска; к какому именно документу относится выдержка, не проверено"
+    }
+   ],
+   "basis_calc": [],
+   "rationale": "Типовой осмотр камеры — 8000 EOH, интервалы осмотров SGT-600 — 30 000 EOH; керамические трубы Solar — 13 937 и более 25 000 ч. Цель 30 000 ч — замена картриджа не чаще осмотров горячего тракта (оценка). Температура металла ≤ 1173 K (900 °C) — запас 87 K к допустимой 1260 K голой HX по NASA (оценка); прочность и ползучесть печатного сплава после HIP — расчёт CalculiX (навык calculix-rotor) и испытания.",
+   "verify": {
+    "levels": [
+     "L2 сопряжённый теплообмен chtMultiRegionFoam",
+     "CalculiX ползучесть и МЦУ",
+     "L3 стенд"
+    ],
+    "method": "—"
+   },
+   "status": "цель (предложение); числа — оценка"
+  },
+  {
+   "id": "parts_count",
+   "kind": "objective",
+   "metric": "число отдельно изготовленных деталей модуля камеры (картриджа); сварных швов после печати; посадок с центровкой",
+   "target": {
+    "parts_max": 5,
+    "welds_after_print": 0,
+    "alignment_fits": 0,
+    "fuel_connections_per_fuel": 1
+   },
+   "best_in_class": [
+    {
+     "fact": "Паспорт Taurus 60: 12 форсунок SoLoNOx, факельный воспламенитель; перепускной клапан на корпусе камеры регулирует воздух горения",
+     "source": "routes/gtu/fleet/gtu_fleet_taurus60.json",
+     "status": "открыт"
+    },
+    {
+     "fact": "Паспорт SGT-400: NOx < 10 ppmvd (DLE, газ); 6 противоточных жаровых труб с запальником в каждой; H2 до 30 % DLE",
+     "source": "routes/gtu/fleet/gtu_fleet_sgt400.json",
+     "status": "открыт"
+    },
+    {
+     "fact": "GE: наконечник форсунки LEAP — около 20 деталей → 1, −25 % массы, ресурс ×5",
+     "source": "https://www.ge.com/news/reports/epiphany-disruption-ge-additive-chief-explains-3d-printing-will-upend-manufacturing",
+     "status": "по выдаче поиска"
+    },
+    {
+     "fact": "Siemens Energy: печатная горелка — 13 деталей / 18 швов → 1, 26 → 3 недели, более 8000 ч на ТЭС Philippsthal",
+     "source": "https://siemens-energy.com/us/en/home/stories/better-turbines-thanks-to-3d-printing.html",
+     "status": "по выдаче поиска"
+    }
+   ],
+   "basis_calc": [],
+   "baseline": {
+    "taurus60_solonox_units_min": 17,
+    "sgt400_units_min": 18,
+    "status": "оценка",
+    "how": "узлы по открытым данным без деталей внутри форсунок: 12 форсунок + жаровая труба + воспламенитель + перепускной клапан + ≥ 2 коллектора; SGT-400 — 6 × (горелка + труба + запальник)"
+   },
+   "rationale": "Состав цели: 1 печатный моноблок (жаровая труба, смесители, топливные каналы, охлаждение), 1 корпус-фланец, 1 блок топливных разъёмов (оба топлива), 1 воспламенитель, 1 датчик. Прецеденты печати: 20 → 1 (LEAP), 13 деталей и 18 швов → 1 (горелка SGT-700).",
+   "verify": {
+    "levels": [
+     "конструкторская спецификация",
+     "проверка печатаемости (свесы ≤ 55°, удаление порошка)"
+    ],
+    "method": "подсчёт по спецификации"
+   },
+   "status": "цель владельца (минимум деталей), число — предложение"
+  },
+  {
+   "id": "cartridge_swap",
+   "kind": "objective",
+   "metric": "замена картриджа камеры на месте",
+   "target": {
+    "time_h_max": 2.0,
+    "people": 2,
+    "special_tools": 0,
+    "alignment": false,
+    "keyed_connections": true,
+    "self_diagnosis": [
+     "наличие пламени",
+     "пульсации давления",
+     "температура стенки"
+    ]
+   },
+   "best_in_class": [],
+   "basis_calc": [],
+   "rationale": "Требование владельца «хоть уборщиком». Открытых данных о времени замены камеры у Solar и Siemens не найдено (пробел); цель 2 ч — оценка. Соединения — только с ключом формы (собрать неправильно нельзя).",
+   "verify": {
+    "levels": [
+     "макет и хронометраж"
+    ],
+    "method": "—"
+   },
+   "status": "цель владельца; число — оценка"
+  },
+  {
+   "id": "combustion_dynamics",
+   "kind": "hard",
+   "metric": "амплитуда пульсаций давления в камере, доля p3 (размах)",
+   "target": {
+    "max": 0.01
+   },
+   "best_in_class": [
+    {
+     "fact": "Обзор динамики бедного горения (Huang, Yang, PECS 2009): амплитуды до порядка 10 % давления; > 5 % среднего давления считают неустойчивостью (другая работа)",
+     "source": "https://www.yang.gatech.edu/publications/Journal/PECS%20(Huang,%202009).pdf",
+     "status": "по выдаче поиска",
+     "source_alt": [
+      "https://torroja.dmt.upm.es/congresos/asme_2011/data/pdfs/trk-4/GT2011-46115.pdf"
+     ],
+     "source_note": "адрес — из выдачи поиска; к какому именно документу относится выдержка, не проверено"
+    }
+   ],
+   "basis_calc": [],
+   "rationale": "Бедное горение склонно к автоколебаниям: амплитуды до порядка 10 % давления, > 5 % считают неустойчивостью. Цель 1 % — пятикратный запас к этому порогу (оценка; приёмочные пределы изготовителей закрыты).",
+   "verify": {
+    "levels": [
+     "L2 LES / акустическая сеть",
+     "L3 стенд"
+    ],
+    "method": "эталон PRECCINSTA"
+   },
+   "status": "цель (предложение); число — оценка"
+  },
+  {
+   "id": "fuel_supply_compatibility",
+   "kind": "hard",
+   "metric": "перепад давления топлива на форсунках при штатном давлении топливного газа пакета",
+   "target": {
+    "value": null,
+    "note": "не задано: давление топливного газа пакетов Solar и Siemens не опубликовано"
+   },
+   "best_in_class": [
+    {
+     "fact": "Паспорта Solar и Siemens: давление топливного газа на входе пакета не опубликовано",
+     "source": "routes/gtu/fleet/gtu_fleet_sgt400.json",
+     "status": "открыт"
+    }
+   ],
+   "basis_calc": [],
+   "rationale": "Plug&Play требует уложиться в штатное давление топлива; число — после запроса заказчику (навык gtu-dropin).",
+   "verify": {
+    "levels": [
+     "запрос заказчику"
+    ],
+    "method": "—"
+   },
+   "status": "пробел"
+  }
+ ],
+ "guides": [
+  {
+   "id": "hot_zone_residence",
+   "metric": "время пребывания в горячей зоне до разбавления, мс",
+   "value": [
+    10,
+    20
+   ],
+   "status": "оценка",
+   "basis_calc": [
+    {
+     "key": "hot_zone_volume.rows[tau_ms=10].V_hot_L",
+     "value": 48.1911,
+     "unit": "л",
+     "what": "объём горячей зоны KV-3 при 10 мс"
+    },
+    {
+     "key": "hot_zone_volume.rows[tau_ms=20].V_hot_L",
+     "value": 96.3822,
+     "unit": "л",
+     "what": "то же при 20 мс"
+    },
+    {
+     "key": "crn_grid[phi=0.55].hot[tau_ms=30].NOx_ppm15",
+     "value": 11.3588,
+     "unit": "ppm",
+     "what": "NOx при 30 мс (phi 0,55) — длинная зона вредна"
+    }
+   ],
+   "why": "CO доходит до равновесия за 3 мс, NOx растёт почти линейно со временем; 10–20 мс — запас на частичную нагрузку и закалку"
+  },
+  {
+   "id": "design_point",
+   "metric": "вход камеры KV-3",
+   "value": null,
+   "status": "расчёт 0D (повтор frame3)",
+   "basis_calc": [
+    {
+     "key": "inlet.p3_kPa",
+     "value": 1367.89,
+     "unit": "кПа",
+     "what": "давление за компрессором"
+    },
+    {
+     "key": "inlet.T3_C",
+     "value": 410.371,
+     "unit": "°C",
+     "what": "температура за компрессором"
+    },
+    {
+     "key": "inlet.W_air_comb_kg_s",
+     "value": 25.1668,
+     "unit": "кг/с",
+     "what": "воздух в камеру"
+    },
+    {
+     "key": "inlet.W_fuel_kg_s",
+     "value": 0.365323,
+     "unit": "кг/с",
+     "what": "метан"
+    },
+    {
+     "key": "inlet.phi_overall",
+     "value": 0.250207,
+     "unit": "",
+     "what": "общий коэффициент phi"
+    },
+    {
+     "key": "inlet.heat_input_MW",
+     "value": 18.2771,
+     "unit": "МВт",
+     "what": "тепловая мощность по LHV"
+    }
+   ],
+   "why": "граничные условия всех уровней воронки камеры"
+  }
+ ],
+ "funnel_interface": {
+  "note": "Поля, которые воронка камеры отдаёт воронке двигателя (routes/gtu/funnel/), и пороги отбора. hard — отсев, objective — ранжирование.",
+  "outputs_to_engine_funnel": [
+   "dp_comb (доля p3)",
+   "V_hot_L и габарит модуля (длина, наружный диаметр, м)",
+   "масса модуля, кг",
+   "parts (число деталей модуля)",
+   "NOx_ppm15 и CO_ppm15 на 100 / 50 / 30 %",
+   "PF и RTDF",
+   "T_metal_max_K",
+   "fuel_valves",
+   "H2_vol_max",
+   "diesel_NOx_ppm15",
+   "cartridge_swap_h (оценка)"
+  ],
+  "hard": [
+   "nox_gas",
+   "co_gas",
+   "load_range",
+   "fuel_valves",
+   "diesel_dry",
+   "fuel_changeover",
+   "exit_uniformity",
+   "wall_life",
+   "combustion_dynamics"
+  ],
+  "objectives": [
+   {
+    "id": "parts_count",
+    "sense": "min"
+   },
+   {
+    "id": "pressure_loss",
+    "sense": "min"
+   },
+   {
+    "id": "nox_gas",
+    "sense": "min"
+   },
+   {
+    "id": "hydrogen",
+    "sense": "max"
+   },
+   {
+    "id": "cartridge_swap",
+    "sense": "min"
+   }
+  ],
+  "cycle_coupling": {
+   "field": "dp_comb",
+   "file": "routes/gtu/gtu_cycle.py → cycle(dp_comb=…)",
+   "sensitivity_key": "dp_sensitivity.dP_kW_per_pct"
+  },
+  "engine_funnel_fields": {
+   "file": "routes/gtu/funnel/funnel_space.py (сверено 14.11.2026 по тексту файла)",
+   "dp_comb": "pfac = 1 − 0,04 (кольцевая) или 1 − 0,05 (выносная, кластер) — принятая величина; заменить итогом камеры",
+   "D_comb_L_comb": "D_comb = 1,1·Dc, L_comb = 0,6·D_comb (кольцевая) — оценка; заменить габаритом картриджа",
+   "m_comb": "масса жаровой трубы по толщине 2 мм и плотности 8220 кг/м3 — оценка; заменить массой картриджа",
+   "n_inj": "round(π·0,8·D_comb/0,12), не меньше 6 — оценка; заменить числом смесителей выбранной схемы"
+  }
+ },
+ "gaps": [
+  "Гарантии NOx на жидком топливе для SoLoNOx, SGT-100, SGT-400 в открытых источниках не найдены",
+  "Время замены камеры у Solar и Siemens не опубликовано — цель cartridge_swap без эталона",
+  "Давление топливного газа на входе пакетов не опубликовано — fuel_supply_compatibility не задано",
+  "Доля пилотного топлива SoLoNOx и SGT-400 не найдена",
+  "Приёмочные пределы пульсаций давления изготовителей закрыты — combustion_dynamics по литературе",
+  "Тексты норм (ГОСТ 29328-92, KKKK таблица 1 целиком, MCPD приложение II) из среды не открывались",
+  "Все внешние числа этого файла, кроме паспортов fleet/, — по выдаче поиска: перед публикацией сверить с первоисточником"
+ ]
+}

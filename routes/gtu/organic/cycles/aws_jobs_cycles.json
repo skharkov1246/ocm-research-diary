@@ -1,0 +1,17 @@
+{
+  "defaults": {
+    "instance_type": "c7a.16xlarge",
+    "fallback_types": ["c7i.16xlarge"],
+    "image": "ubuntu2404",
+    "disk_gb": 50,
+    "max_min": 60
+  },
+  "jobs": [
+    {
+      "name": "organic-cycles-fine",
+      "command": "cd routes/gtu/organic/cycles\nCYCLES_FINE=1 CYCLES_WORKERS=$(nproc) CYCLES_OUT=\"$GTU_OUT\" python cycles.py > \"$GTU_OUT/cycles_fine.log\" 2>&1\ngit rev-parse HEAD > \"$GTU_OUT/commit.txt\"",
+      "pip": ["cantera", "scipy", "numpy", "matplotlib"],
+      "max_min": 60
+    }
+  ]
+}

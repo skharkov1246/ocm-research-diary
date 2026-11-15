@@ -1,0 +1,237 @@
+{
+ "_comment": "«Живая геометрия» (routes/gtu/organic): перебор циклов на полной сетке кода (CYCLES_FINE) и базовой (сверка повторяемости) + эксергия, одна машина. Оптимизация топологии (structure, thermal) - код пишется, точек входа нет: шаблоны в pending_jobs (раннер их не видит). Заменяет cycles/aws_jobs_cycles.json (ubuntu2404 - по README раннера вживую упрётся в образ: SSM Canonical ключу не разрешён; пакеты не закреплены; $(nproc) вместо $NPROC). Раннер берёт только defaults и jobs. Код - ветка claude/lucid-allen-yvps5d.",
+ "defaults": {
+  "instance_type": "c7a.16xlarge",
+  "fallback_types": [
+   "c7i.16xlarge"
+  ],
+  "image": "al2023",
+  "disk_gb": 30,
+  "python": "3.12",
+  "pip": [
+   "cantera==3.2.0",
+   "numpy==2.5.3",
+   "scipy==1.18.1",
+   "matplotlib==3.11.2"
+  ]
+ },
+ "jobs": [
+  {
+   "name": "organic-cycles",
+   "command": "set -e\nmkdir -p \"$GTU_OUT/exergy\" \"$GTU_OUT/base\"\n( cd routes/gtu/organic/exergy && python -u exergy.py > \"$GTU_OUT/exergy/exergy.log\" 2>&1 && rc=0 || rc=$?; echo \"$rc\" > \"$GTU_OUT/exergy/exit_code.txt\" ) &\nEXJ=$!\ncd routes/gtu/organic/cycles\nCYCLES_WORKERS=$((NPROC - 1)) CYCLES_OUT=\"$GTU_OUT/base\" python -u cycles.py > \"$GTU_OUT/base/cycles_base.log\" 2>&1\nCYCLES_FINE=1 CYCLES_WORKERS=$((NPROC - 1)) CYCLES_OUT=\"$GTU_OUT\" python -u cycles.py > \"$GTU_OUT/cycles_fine.log\" 2>&1\nwait \"$EXJ\" || true\nif [ \"$(cat \"$GTU_OUT/exergy/exit_code.txt\")\" = 0 ]; then cp ../exergy/exergy_results.json ../exergy/*.svg \"$GTU_OUT/exergy/\"; fi\nls -l \"$GTU_OUT\" \"$GTU_OUT/base\" \"$GTU_OUT/exergy\" > \"$GTU_OUT/_files_list.txt\"",
+   "max_min": 40
+  }
+ ],
+ "collect": {
+  "where": "сессия с ключами после run (иначе collect --run-id <run_id> --job organic-cycles); тот же коммит, что в _job.log; слияния частей нет - одна задача",
+  "commands": [
+   "mkdir -p routes/gtu/organic/cycles/aws_fine",
+   "gzip -9 -c routes/gtu/platform/aws/runs/<run_id>/organic-cycles/cycles_results.json > routes/gtu/organic/cycles/aws_fine/cycles_results_fine.json.gz",
+   "gzip -9 -c routes/gtu/platform/aws/runs/<run_id>/organic-cycles/cycles.csv > routes/gtu/organic/cycles/aws_fine/cycles_fine.csv.gz",
+   "cp routes/gtu/platform/aws/runs/<run_id>/organic-cycles/feed_cycles.json routes/gtu/organic/cycles/aws_fine/feed_cycles_fine.json",
+   "cp routes/gtu/platform/aws/runs/<run_id>/organic-cycles/cycles_pareto.png routes/gtu/organic/cycles/aws_fine/cycles_pareto_fine.png",
+   "cp routes/gtu/platform/aws/runs/<run_id>/organic-cycles/cycles_exergy.png routes/gtu/organic/cycles/aws_fine/cycles_exergy_fine.png",
+   "cp routes/gtu/platform/aws/runs/<run_id>/organic-cycles/cycles_fine.log routes/gtu/platform/aws/runs/<run_id>/organic-cycles/base/cycles_base.log routes/gtu/organic/cycles/aws_fine/",
+   "python3 -c \"import json,sys; A,B=(json.load(open(p)) for p in sys.argv[1:3]); k=lambda d: [r['key'] for r in d['pareto_lpbf']]; e=lambda d: [r['eff_el'] for r in d['pareto_lpbf']]; ok=A['n_topologies']==B['n_topologies'] and k(A)==k(B) and all(abs(x-y)<=5e-4 for x,y in zip(e(A),e(B))); print('base == repo (топологий, ключи фронта Парето lpbf, КПД до 0,05 п. п.):', ok, A['n_topologies'], len(k(A)), B['n_topologies'], len(k(B))); sys.exit(0 if ok else 4)\" routes/gtu/platform/aws/runs/<run_id>/organic-cycles/base/cycles_results.json routes/gtu/organic/cycles/cycles_results.json",
+   "cat routes/gtu/platform/aws/runs/<run_id>/organic-cycles/exergy/exit_code.txt && python3 -c \"import json,sys; A,B=(json.load(open(p))['variants'] for p in sys.argv[1:3]); d=[(v,k,A[v][k],B[v][k]) for v in ('base','recup','hot_printed') for k in ('eff_shaft','ex_eff_el')]; ok=all(abs(a-b)<=5e-4 for _,_,a,b in d); print('exergy == repo (КПД и эксергетический КПД трёх исполнений):', ok, d); sys.exit(0 if ok else 4)\" routes/gtu/platform/aws/runs/<run_id>/organic-cycles/exergy/exergy_results.json routes/gtu/organic/exergy/exergy_results.json",
+   "du -ch routes/gtu/organic/cycles/aws_fine/* | tail -n 1"
+  ],
+  "expect": "base == repo: True (код 0) - машина повторила базовый перебор ветки (то же число топологий, те же ключи фронта Парето, КПД до 0,05 п. п.); код 4 - разбор (или cycles_results.json в ветке устарел относительно cycles.py); exergy: exit_code 0 и «exergy == repo: True»; итог в ветке ~1 МБ",
+  "to_branch": "routes/gtu/organic/cycles/aws_fine/: cycles_results_fine.json.gz, cycles_fine.csv.gz, feed_cycles_fine.json, два PNG, журналы; ledger.jsonl",
+  "stays_in_s3": "несжатые cycles_results.json (FINE и base), exergy/ (сверка) - s3://<бакет>/<префикс>/gtu/<run_id>/organic-cycles/"
+ },
+ "estimate": {
+  "what": "один c7a.16xlarge: (1) cycles.py на базовой сетке (576 топологий) - сверка повторяемости с cycles_results.json ветки; (2) cycles.py CYCLES_FINE=1 - полная сетка кода: 864 топологии (степень регенерации 0/0,70...0,94 - 9 значений, IC, RH, IBC, горение с ростом давления 3, химическая рекуперация 4 - подогрев топлива, паровой риформинг, риформинг рециркулятом), π 3...21 через 0,5 (37), x_rh 5, S/C 5, R_egr 5, plow 13; (3) exergy.py параллельно на одном ядре - повтор на Python 3.12",
+  "topologies": {
+   "base": 576,
+   "fine": 864
+  },
+  "s_cpu_per_topology": {
+   "base": 2.42,
+   "fine": 5.17,
+   "base_max": 13.31,
+   "fine_max": 28.07
+  },
+  "cpu_s_total": {
+   "base": 1394,
+   "fine": 4467
+  },
+  "workers": "NPROC - 1 = 63 (одно ядро - exergy.py)",
+  "cycles_min": {
+   "expected": 4.24,
+   "planning": 8.48,
+   "rule": "ЦП-сумма / 63 + самая долгая топология (хвост пула) + 1 мин на последовательную часть, на каждый из двух прогонов"
+  },
+  "exergy_min": {
+   "expected": 5.0,
+   "planning": 10.0
+  },
+  "safety": 2.0,
+  "setup_min": 2.0,
+  "upload_min": 1.0,
+  "machine_min": {
+   "expected": 8.0,
+   "planning": 13.0
+  },
+  "machine_hours": {
+   "expected": 0.1333,
+   "planning": 0.2167
+  },
+  "max_min": 40,
+  "max_min_why": "команда до старт + max_min - 8 = 32 мин против 13.0 по плану",
+  "usd": {
+   "machine_hours_x_0_75": 0.1625,
+   "disk_ipv4": 0.0018,
+   "s3_month": 0.00069,
+   "transfer_to_session": 0.0027,
+   "total_planning": 0.1677,
+   "total_expected_spot_0_706": 0.0994
+  },
+  "price": {
+   "planning": 0.75,
+   "expected": 0.7064,
+   "basis": "как в jobs_aws_comb_l0.json: задача владельца 0,71-0,75; ledger smoke2 0,7064 (us-east-1c)"
+  },
+  "measurements": {
+   "cpu_per_topology": [
+    {
+     "value_s": 5.17,
+     "max_s": 28.07,
+     "how": "time.process_time вокруг cycles.optimize_topo в пуле 4 процессов; 24 топологии, случайная выборка random.Random(20261114).sample из 864 (CYCLES_FINE=1)"
+    },
+    {
+     "value_s": 2.42,
+     "max_s": 13.31,
+     "how": "то же без CYCLES_FINE: 24 из 576; отношение FINE/база 2,14"
+    }
+   ],
+   "crosscheck": "второй способ: базовый прогон cycles.py потока organic - runtime_s 505 с на 4 процессах (cycles_results.json, 23:24) = 2020 ядро-с против 576 x 2,42 = 1394 ЦП-с: стена выше на 45 % (чужая нагрузка и последовательная часть) - согласуется",
+   "mini": "CYCLES_QUICK=1 CYCLES_FINE=1, 12 топологий, 4 процесса: перебор 31 с, всё 34 с (код f92879b); без FINE - 17 и 19 с; в миниатюре задачи (код 39f054d, параллельно с exergy.py): база 46 с, FINE 60 с",
+   "exergy": "exergy.py целиком в миниатюре задачи: «готово за 312,3 с» на одном ядре при средней нагрузке контейнера 10-14 на 4 ядрах (докстрока: около 5 мин); КПД и эксергетический КПД трёх исполнений совпали с exergy_results.json ветки (Python 3.12 против 3.13 потока)",
+   "where": "контейнер сессии, 4 общих ядра, python 3.12.16 (uv), cantera 3.2.0, numpy 2.5.3, scipy 1.18.1",
+   "output_size": "базовый cycles_results.json потока 3,72 МБ (gzip -9 0,43 МБ), cycles.csv 0,83 МБ (gzip 0,10 МБ); FINE - примерно x1,5 по числу топологий: ~5,6 МБ, gzip ~0,7 МБ (оценка)",
+   "setup": "как в jobs_aws_comb_l0.json: ledger.jsonl, 62,5 с от запуска до конца машины smoke-py"
+  },
+  "assumptions": {
+   "c7a_core": "ядро c7a не медленнее ядра контейнера сессии; запас 2",
+   "disk_ipv4": "ставки раннера - допущения кода",
+   "s3": "0,03 ГБ результатов; 0,023 долл./ГБ-мес и 0,09 долл./ГБ - допущения"
+  }
+ },
+ "pending": {
+  "status": "оптимизация топологии (structure, thermal) - код пишется потоком organic прямо сейчас: в 23:45 UTC 14.11.2026 появились неотслеживаемые routes/gtu/organic/structure/topo_axi.py (осесимметричная оптимизация топологии диска/колеса, свой КЭ на numpy/scipy, MMA, материалы из platform/fea) и routes/gtu/organic/thermal/voxflow.py (воксельный Стокс + теплообмен в периодической ячейке TPMS: f·Re, Nu_H1); точки входа (CLI), тестов и результатов нет - в миниатюре запускать нечего. Задачи ниже - шаблоны, раннер их не видит (не в jobs); перенести в jobs после CLI, зелёных тестов и миниатюры",
+  "conventions": "одна задача = одна машина, пул на $NPROC процессов (или OMP_NUM_THREADS для SuperLU/BLAS), варианты по индексу i % частей == часть, всё в $GTU_OUT, итог задачи - сводка JSON; поля и сетки - в S3, в ветку - сводки до 5 МБ; python 3.12 + закреплённые cantera/numpy/scipy (+ matplotlib)",
+  "hx_cell_cfd_note": "voxflow - прямой SuperLU по седловой системе: на 3D-ячейке память растёт быстрее n^3 (заполнение); перед задачей замерить пик памяти на 32^3 и 48^3 и экстраполировать к 96-128^3 (c7a.16xlarge - 128 ГиБ; если не влезает - r7a.16xlarge 512 ГиБ: тип в fallback и VCPU раннера, бюджет пересчитать)"
+ },
+ "pending_jobs": [
+  {
+   "name": "organic-structure-pNN",
+   "command": "python routes/gtu/organic/structure/<точка входа>.py --cases <N> --part \"$NN\" --parts <S> --workers \"$NPROC\" --out \"$GTU_OUT\"",
+   "max_min": 60,
+   "why": "мелкая сетка оптимизации топологии диска/колеса: варианты (цель масса/момент инерции, сплошной/решётка, радиус фильтра, температурный случай) по частям; шаблон"
+  },
+  {
+   "name": "organic-thermal-cell",
+   "command": "python routes/gtu/organic/thermal/<точка входа>.py --cell gyroid,schwarzD --n 32,48,64,96 --re 300,500,800 --workers \"$NPROC\" --out \"$GTU_OUT\"",
+   "max_min": 120,
+   "why": "f·Re и Nu_H1 ячеек TPMS на сгущающихся сетках - замена констант плоского канала в cycles.py (24 и 8,235); шаблон"
+  }
+ ],
+ "mini_check": {
+  "how": "копия ветки git archive HEAD в scratch; та же команда задачи с CYCLES_QUICK=1 перед обоими прогонами cycles.py (12 топологий; FINE-сетки параметров - настоящие); exergy.py - полностью; `bash cmd.sh` из корня копии с GTU_OUT, NPROC = 4, python 3.12 из venv uv; затем команды collect с путями scratch (сверка base == repo в миниатюре даёт код 4: 12 топологий против 576 - ожидаемо)",
+  "commit": "39f054d20eaadca6eadd5454d0cdfe4e75d8f5e4",
+  "python": "3.12.16 3.2.0 2.5.3 1.18.1",
+  "jobs": [
+   {
+    "job": "organic-cycles",
+    "exit_code": 0,
+    "wall_s": 313.9,
+    "files": 10
+   }
+  ],
+  "collect": [
+   {
+    "cmd": "mkdir -p /tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/offload/comb-organic/mini/org_collect",
+    "exit_code": 0,
+    "wall_s": 0.0,
+    "tail": []
+   },
+   {
+    "cmd": "gzip -9 -c /tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/offload/comb-organic/mini/jobs_org/organic-cycles/cycles_results.json > /tmp",
+    "exit_code": 0,
+    "wall_s": 0.0,
+    "tail": []
+   },
+   {
+    "cmd": "gzip -9 -c /tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/offload/comb-organic/mini/jobs_org/organic-cycles/cycles.csv > /tmp/claude-0",
+    "exit_code": 0,
+    "wall_s": 0.0,
+    "tail": []
+   },
+   {
+    "cmd": "cp /tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/offload/comb-organic/mini/jobs_org/organic-cycles/feed_cycles.json /tmp/claude-0/-ho",
+    "exit_code": 0,
+    "wall_s": 0.0,
+    "tail": []
+   },
+   {
+    "cmd": "cp /tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/offload/comb-organic/mini/jobs_org/organic-cycles/cycles_pareto.png /tmp/claude-0/-h",
+    "exit_code": 0,
+    "wall_s": 0.0,
+    "tail": []
+   },
+   {
+    "cmd": "cp /tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/offload/comb-organic/mini/jobs_org/organic-cycles/cycles_exergy.png /tmp/claude-0/-h",
+    "exit_code": 0,
+    "wall_s": 0.0,
+    "tail": []
+   },
+   {
+    "cmd": "cp /tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/offload/comb-organic/mini/jobs_org/organic-cycles/cycles_fine.log /tmp/claude-0/-hom",
+    "exit_code": 0,
+    "wall_s": 0.0,
+    "tail": []
+   },
+   {
+    "cmd": "python3 -c \"import json,sys; A,B=(json.load(open(p)) for p in sys.argv[1:3]); k=lambda d: [r['key'] for r in d['pareto_lpbf']]; e=lambda d: [r['eff_el'] for r i",
+    "exit_code": 4,
+    "wall_s": 0.1,
+    "tail": [
+     "base == repo (топологий, ключи фронта Парето lpbf, КПД до 0,05 п. п.): False 12 7 576 42"
+    ]
+   },
+   {
+    "cmd": "cat /tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/offload/comb-organic/mini/jobs_org/organic-cycles/exergy/exit_code.txt && python3 -",
+    "exit_code": 0,
+    "wall_s": 0.0,
+    "tail": [
+     "0",
+     "exergy == repo (КПД и эксергетический КПД трёх исполнений): True [('base', 'eff_shaft', 0.31629, 0.31629), ('base', 'ex_eff_el', 0.289161, 0.289161), ('recup', 'eff_shaft', 0.391597, 0.391597), ('recup', 'ex_eff_el', 0.359025, 0.359025), ('hot_printed', 'eff_shaft', 0.330571, 0.330571), ('hot_printed', 'ex_eff_el', 0.302218, 0.302218)]"
+    ]
+   },
+   {
+    "cmd": "du -ch /tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/offload/comb-organic/mini/org_collect/* | tail -n 1",
+    "exit_code": 0,
+    "wall_s": 0.0,
+    "tail": [
+     "196K\ttotal"
+    ]
+   }
+  ],
+  "exergy_log_tail": [
+   "готово за 312.3 с -> /tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/offload/comb-organic/repo/routes/gtu/organic/exergy/exergy_results.json"
+  ],
+  "date": "2026-11-14"
+ },
+ "plan_check": {
+  "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/organic/jobs_aws_organic.json --assume-price 0.75 --assume-zone-prices us-east-1a=0.9554,us-east-1b=0.7478,us-east-1c=0.7064,us-east-1d=0.8576,us-east-1f=1.1804",
+  "exit_code": 0,
+  "forecast_usd": 1.19,
+  "lines": [
+   "[задача] organic-cycles: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 40 мин",
+   "[бюджет] organic-cycles на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 0.00 + новая 1.19 = 1.35 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[зоны] organic-cycles c7a.16xlarge: us-east-1c 0.7064 → us-east-1b 0.7478 → us-east-1d 0.8576 → us-east-1a 0.9554 → us-east-1f 1.1804 (допущение plan); ожидается us-east-1c по 0.7064 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.4165 и бюджет — по максимуму цены за окно",
+   "[план] прогноз пакета 1.19 долл. (цена спота — допущение 0.75/ч)"
+  ]
+ }
+}

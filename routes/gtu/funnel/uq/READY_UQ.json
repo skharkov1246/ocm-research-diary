@@ -1,0 +1,66 @@
+{
+ "title": "Устойчивый отбор и фронты Парето ниш: готовность к AWS",
+ "date": "2026-11-15",
+ "measured": {
+  "dp_eval": 0.02453,
+  "nsga_eval": 0.00824,
+  "nsga_eval_rob": 0.01068,
+  "check": 28.835,
+  "od_eval": 29.98646,
+  "seed_niche": 1.065,
+  "basis": "локальные миниатюры на 4 общих ядрах (uq_probe_results.json, pareto_probe_results.json, pareto_probe_rob_results.json) и проба уровня 1 (нерасчётные режимы - funnel_l1_results.json, процессорное время пробы (настенное × 0.99))"
+ },
+ "assume": {
+  "od_frac_l1": 0.1,
+  "p_dp_od_l1": 0.4,
+  "od_frac_debug": 0.2,
+  "cands_nom_per_niche": 8,
+  "cands_rob_per_niche": 6,
+  "od_frac_pareto": 0.3,
+  "p_dp_od_pareto": 0.75,
+  "basis": "оценка: доли вариантов, доходящих до нерасчётных режимов, и P(расчётная точка) у них - по миниатюре (у оптимумов уровня 1 P около 0,03-0,08, порог 0,2 проходят немногие); проверенных допустимых членов фронта на нишу - по миниатюре 2 из 2 (на AWS проверяется до 24); фактические числа даст jobs_uq_debug.json и первая волна"
+ },
+ "files": {
+  "jobs_uq_debug.json": {
+   "machines": 1,
+   "core_hours": 15.76,
+   "expected_usd": 0.268,
+   "upper_bound_usd": 1.31,
+   "plan_exit": 0
+  },
+  "jobs_uq.json": {
+   "machines": 3,
+   "core_hours": 219.46,
+   "expected_usd": 2.826,
+   "upper_bound_usd": 11.65,
+   "plan_exit": 0
+  },
+  "jobs_pareto.json": {
+   "machines": 24,
+   "core_hours": 2874.45,
+   "expected_usd": 35.788,
+   "upper_bound_usd": 142.89,
+   "plan_exit": 0
+  },
+  "jobs_uq_pareto.json": {
+   "machines": 43,
+   "core_hours": 3931.62,
+   "expected_usd": 49.717,
+   "upper_bound_usd": 201.62,
+   "plan_exit": 0
+  }
+ },
+ "order": [
+  "1. jobs_uq_debug.json (после l1_debug) -> merge_uq -> время на выборку при 64 процессах; при расхождении с миниатюрой больше чем вдвое - перегенерировать make_jobs_uq.py",
+  "2. jobs_uq.json (после l1_full) -> merge_uq: хрупкость оптимумов уровня 1 и запасы по правилам (rules_margins)",
+  "3. jobs_pareto.json -> merge_pareto по каждой группе (merge.*) -> pareto_cands*.json.gz в ветку",
+  "4. jobs_uq_pareto.json -> merge_uq по каждой точке: uq_robust50_*.json - 50 устойчивых разных"
+ ],
+ "total_expected_usd": 88.6,
+ "total_upper_bound_usd": 357.47,
+ "ceiling_usd": 2000.0,
+ "spent_note": "израсходовано около 3 долл. (задание 15.11.2026; точное - runner.py status по ledger.jsonl)",
+ "within_ceiling": true,
+ "ready_for_aws": true,
+ "how_to_regenerate": "python3 routes/gtu/funnel/uq/make_jobs_uq.py --plan-out <папка>"
+}

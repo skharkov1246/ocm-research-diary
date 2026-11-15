@@ -1,0 +1,344 @@
+{
+ "title": "Фронты Парето ниш (NSGA-II) - KV-3, 2 ниш",
+ "software": "python 3.13.18, numpy 2.5.3, scipy 1.18.1, cantera 3.2.0",
+ "date": "2026-11-15",
+ "method": "Многокритериальный поиск внутри каждой ниши (NSGA-II) - фронт Парето ниши (на AWS). Всё - оценка.",
+ "kv": "KV-3",
+ "NN": 2,
+ "input": {
+  "file": "funnel_l0_select_KV-3_n2000.json",
+  "sha256": "fb5bac9c653edd25556930ac39da128cc418710912cacd8ff2798bb29c4d8df7",
+  "kv": "KV-3",
+  "n": 2000,
+  "seed": 20261114,
+  "l0_code_sha": "5f99d76a48e9e6db",
+  "fingerprint": "f5fad5c6f4eb42e5",
+  "niches": 218,
+  "niche_filter": [
+   "литой монолит|2р|2Ц|О|K|нет|сварка:литьё",
+   "кластер|2р|2Ц|О|P|нет|сварка:печать"
+  ]
+ },
+ "l1": {
+  "seed_cands": {
+   "kind": "L1-csv",
+   "kv": "KV-3",
+   "file": "probe_cands.json",
+   "sha256": "0efb1139014aa46c9d01d717d8b63b32a7b24157a0634708fdabdfee24633ea0",
+   "source": "funnel_l1.csv",
+   "code_match": true,
+   "n": 12,
+   "rebuilt": 0,
+   "rebuild_lost": 0
+  }
+ },
+ "code_sha": "54006f6599d6a672",
+ "l1_code_sha": "3d8acb616add4e6c",
+ "params": {
+  "pop": 40,
+  "gens": 15,
+  "check": 2,
+  "robust": 0,
+  "p_target": null
+ },
+ "genes": [
+  "cores",
+  "n_ax",
+  "inlet",
+  "comb",
+  "bear",
+  "mat_cw",
+  "mat_tw",
+  "m_hot",
+  "mat_hot",
+  "m_comb",
+  "m_case",
+  "hot_integral",
+  "recup_integral",
+  "conn",
+  "cartridge",
+  "split_bl",
+  "t41",
+  "pi",
+  "split",
+  "mu1",
+  "mu2",
+  "phi1",
+  "lt",
+  "kcm",
+  "zc",
+  "zt",
+  "zn",
+  "phit",
+  "kUpt",
+  "phipt",
+  "eps_rec",
+  "kD_case",
+  "nt",
+  "npt"
+ ],
+ "objectives": [
+  "1 − s_parts/10",
+  "1 − s_plugplay/10",
+  "1 − s_service/10",
+  "(45 − η_el)/30",
+  "ln V_env / ln 60"
+ ],
+ "merge_checks": {
+  "files": 2,
+  "shards_expected": 2,
+  "missing": [],
+  "duplicate_same": [],
+  "duplicate_conflict": [],
+  "meta_mismatch": [],
+  "index_errors": [],
+  "unreadable": [],
+  "indices_ok": true,
+  "n_rows": 2
+ },
+ "timing": {
+  "cpu_s": 128.1,
+  "evals": 1280,
+  "robust_evals": 0,
+  "calls": [
+   {
+    "shards": [
+     0
+    ],
+    "niches": 1,
+    "elapsed_s": 73.47,
+    "evals": 640,
+    "robust_evals": 0,
+    "checked": 2,
+    "cpu_s": 57.41,
+    "host_cpus": 4,
+    "started": "2026-11-15T10:47:38.329127+00:00",
+    "shard": 0
+   },
+   {
+    "shards": [
+     1
+    ],
+    "niches": 1,
+    "elapsed_s": 88.23,
+    "evals": 640,
+    "robust_evals": 0,
+    "checked": 2,
+    "cpu_s": 70.65,
+    "host_cpus": 4,
+    "started": "2026-11-15T10:48:53.028343+00:00",
+    "shard": 1
+   }
+  ],
+  "merge_s": 0.0
+ },
+ "summary": {
+  "niches": 2,
+  "with_feasible_front": 2,
+  "front_size": {
+   "n": 2,
+   "mean": 28.0,
+   "p50": 28.0,
+   "max": 30.0
+  },
+  "hv": {
+   "n": 2,
+   "mean": 0.072,
+   "p50": 0.072,
+   "max": 0.0821
+  },
+  "hv_gain_second_half": {
+   "n": 2,
+   "mean": 0.0027,
+   "p50": 0.0027,
+   "max": 0.0028
+  },
+  "hv_gain_gt_001": 0,
+  "checked": 4,
+  "checked_feasible": 4,
+  "evals": 1280,
+  "robust_evals": 0,
+  "l1_compare": {
+   "niches": 2,
+   "l1_feasible": 2,
+   "dominated": 1,
+   "gain": {
+    "n": 2,
+    "mean": -0.0274,
+    "p50": -0.0274,
+    "max": 0.0393
+   },
+   "gain_positive": 1
+  },
+  "by_arch": {
+   "кластер": {
+    "niches": 1,
+    "with_front": 1,
+    "checked_feasible": 2,
+    "hv_max": 0.0821,
+    "best_score_w": 6.69865
+   },
+   "литой монолит": {
+    "niches": 1,
+    "with_front": 1,
+    "checked_feasible": 2,
+    "hv_max": 0.0619,
+    "best_score_w": 6.43018
+   }
+  },
+  "note": "гиперобъём - Монте-Карло 20 000 точек в нормированных целях (0 - лучшее, 1 - точка отсчёта); рост со второй половины поколений - мера сходимости"
+ },
+ "global_front": {
+  "n": 4,
+  "of": 4,
+  "by_arch": {
+   "литой монолит": 2,
+   "кластер": 2
+  },
+  "members": [
+   {
+    "niche": "литой монолит|2р|2Ц|О|K|нет|сварка:литьё",
+    "arch": "литой монолит",
+    "key": "0:2",
+    "G": [
+     0.3891,
+     0.3357,
+     0.366,
+     0.5939722192621486,
+     0.468852979039169
+    ],
+    "score_w": 6.17475,
+    "score_f": 5.14563,
+    "eta_el": 27.181,
+    "V_env": 6.8185
+   },
+   {
+    "niche": "литой монолит|2р|2Ц|О|K|нет|сварка:литьё",
+    "arch": "литой монолит",
+    "key": "0:17",
+    "G": [
+     0.3922,
+     0.3327,
+     0.36360000000000003,
+     0.5868510729854647,
+     0.476427819238163
+    ],
+    "score_w": 6.18202,
+    "score_f": 5.15169,
+    "eta_el": 27.394,
+    "V_env": 7.0333
+   },
+   {
+    "niche": "кластер|2р|2Ц|О|P|нет|сварка:печать",
+    "arch": "кластер",
+    "key": "1:15",
+    "G": [
+     0.3196,
+     0.36060000000000003,
+     0.30820000000000003,
+     0.5536914166434269,
+     0.5526788385439363
+    ],
+    "score_w": 6.29576,
+    "score_f": 4.54694,
+    "eta_el": 28.389,
+    "V_env": 9.6105
+   },
+   {
+    "niche": "кластер|2р|2Ц|О|P|нет|сварка:печать",
+    "arch": "кластер",
+    "key": "1:17",
+    "G": [
+     0.32619999999999993,
+     0.35919999999999996,
+     0.5596,
+     0.5497774801726704,
+     0.5561012323038742
+    ],
+    "score_w": 5.77616,
+    "score_f": 4.17167,
+    "eta_el": 28.507,
+    "V_env": 9.7461
+   }
+  ]
+ },
+ "niches": [
+  {
+   "k": 0,
+   "niche": "литой монолит|2р|2Ц|О|K|нет|сварка:литьё",
+   "arch": "литой монолит",
+   "ref_idx": 1858,
+   "n_l1_seeds": 1,
+   "n_l0_seeds": 7,
+   "evals": 640,
+   "feasible_evals": 120,
+   "robust_evals": 0,
+   "hv": 0.06185,
+   "half": {
+    "gen": 7,
+    "hv": 0.05925,
+    "front": 1
+   },
+   "front_size": 26,
+   "checked_feasible": 2,
+   "best_score_w": 6.43018,
+   "best_score_f": 5.35848,
+   "l1_compare": {
+    "l1_feasible": 1,
+    "dominated_by_checked_front": 1,
+    "best_l1_score": 6.1427,
+    "best_front_score_checked": 6.18202,
+    "gain": 0.03932
+   },
+   "t_cpu_s": 57.41,
+   "t_cpu": {
+    "seed": 1.66,
+    "nsga": 5.22,
+    "check": 50.52,
+    "per_eval": 0.00815,
+    "per_check": 25.26
+   }
+  },
+  {
+   "k": 1,
+   "niche": "кластер|2р|2Ц|О|P|нет|сварка:печать",
+   "arch": "кластер",
+   "ref_idx": 1164,
+   "n_l1_seeds": 1,
+   "n_l0_seeds": 1,
+   "evals": 640,
+   "feasible_evals": 263,
+   "robust_evals": 0,
+   "hv": 0.0821,
+   "half": {
+    "gen": 7,
+    "hv": 0.0793,
+    "front": 2
+   },
+   "front_size": 30,
+   "checked_feasible": 2,
+   "best_score_w": 6.69865,
+   "best_score_f": 4.83791,
+   "l1_compare": {
+    "l1_feasible": 1,
+    "dominated_by_checked_front": 0,
+    "best_l1_score": 6.3898,
+    "best_front_score_checked": 6.29576,
+    "gain": -0.09404
+   },
+   "t_cpu_s": 70.65,
+   "t_cpu": {
+    "seed": 0.47,
+    "nsga": 5.33,
+    "check": 64.82,
+    "per_eval": 0.00833,
+    "per_check": 32.41
+   }
+  }
+ ],
+ "files": {
+  "candidates": "pareto_cands_probe.json.gz",
+  "csv": "pareto_probe.csv",
+  "n_candidates": 4
+ }
+}

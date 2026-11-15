@@ -1,0 +1,26 @@
+{
+  "defaults": {
+    "instance_type": "c7a.16xlarge",
+    "fallback_types": ["c7i.16xlarge"],
+    "image": "al2023",
+    "disk_gb": 30,
+    "max_min": 25
+  },
+  "jobs": [
+    {
+      "name": "smoke-py",
+      "python": "3.12",
+      "pip": ["cantera", "numpy", "scipy"],
+      "command": "git rev-parse HEAD > \"$GTU_OUT/commit.txt\"\necho \"$NPROC\" > \"$GTU_OUT/nproc.txt\"\npython routes/gtu/platform/aws/smoke2.py py"
+    },
+    {
+      "name": "smoke-ccx",
+      "container": "ubuntu:24.04",
+      "container_setup": [
+        "apt-get update -q",
+        "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-numpy python3-scipy"
+      ],
+      "command": "echo \"$NPROC\" > \"$GTU_OUT/nproc.txt\"\npython3 routes/gtu/platform/aws/smoke2.py ccx"
+    }
+  ]
+}

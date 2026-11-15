@@ -1,0 +1,2 @@
+[{"name": "s2_ramp100_p075", "frac": 1.0, "pfrac": 0.75, "ramp": 80, "pramp": 160, "iter": 200, "muscl": false},
+ {"name": "s3_point_p075", "frac": 1.0, "pfrac": 0.75, "ramp": 0, "iter": 150, "muscl": true}]

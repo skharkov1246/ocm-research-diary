@@ -1,0 +1,1352 @@
+{
+ "title": "Воронка, уровень 0 -> уровень 1: отбор KV-6",
+ "method": "воронка, уровень 0: концепции по индексу из последовательности Соболя (funnel_space, зерно SEED); быстрый цикл на таблицах gtu_explore (Cantera GRI-Mech 3.0, метан, ISO) с КПД ступеней comp_stage, поправками за зазор и удельную быстроходность (подбор по frame3) и КПД турбин по нагрузке и U/C0; геометрия derive, габарит и масса (оценка); правила допустимости funnel_space.check; баллы parts/service/plugplay/make, s_eta, s_size; взвешенная оценка по весам владельца 14.11.2026. Всё - оценка (README узла).",
+ "software": "python 3.12.16, numpy 2.5.3, scipy 1.18.1, cantera 3.2.0",
+ "date": "2026-11-14",
+ "kv": "KV-6",
+ "n": 2000,
+ "seed": 20261114,
+ "fingerprint": "f5fad5c6f4eb42e5",
+ "code_sha": "5f99d76a48e9e6db",
+ "weights": {
+  "parts": 0.35,
+  "plugplay": 0.25,
+  "service": 0.2,
+  "effmake": 0.2
+ },
+ "params": {
+  "k": 3,
+  "top": 40,
+  "pareto": true,
+  "k_near": 1,
+  "near_max": 0.25,
+  "target": 150
+ },
+ "how_to_rebuild": "funnel_space.concept(idx, n, kv, seed) с закреплёнными версиями (fingerprint должен совпасть)",
+ "summary": {
+  "n_selected": 82,
+  "n_feasible": 49,
+  "n_near": 33,
+  "K_per_niche": 4,
+  "K_max_in_niche": 4,
+  "target": 150,
+  "target_exceeded": false,
+  "feasible_niches": 24,
+  "feasible_niches_covered": 24,
+  "lost_feasible_niches": [],
+  "near_candidates": 33,
+  "archetypes": {
+   "RDC": 49,
+   "безмасляный": 26,
+   "гибрид": 4,
+   "печатный рекуператор": 2,
+   "традиционная": 1
+  },
+  "reasons": {
+   "ниша": 49,
+   "общий топ": 40,
+   "ниша без допустимых": 33,
+   "фронт Парето": 28
+  }
+ },
+ "selected": [
+  {
+   "idx": 1547,
+   "niche": "безмасляный|1р|2Ц|О|P|нет|сборный:печать/печать",
+   "arch": "безмасляный",
+   "niche_rank": 1,
+   "niche_size": 1,
+   "rank": 1,
+   "score": 6.8584,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 28.013,
+   "reasons": [
+    "ниша: место 1 из 1",
+    "общий топ: место 1",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 1592,
+   "niche": "безмасляный|2р|ОЦ|О|P|нет|сборный:литьё/печать",
+   "arch": "безмасляный",
+   "niche_rank": 1,
+   "niche_size": 2,
+   "rank": 2,
+   "score": 6.714,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 30.231,
+   "reasons": [
+    "ниша: место 1 из 2",
+    "общий топ: место 2",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 1967,
+   "niche": "RDC|1р|2Ц|О|P|нет|сборный:печать/печать",
+   "arch": "RDC",
+   "niche_rank": 1,
+   "niche_size": 1,
+   "rank": 3,
+   "score": 6.5269,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 27.982,
+   "reasons": [
+    "ниша: место 1 из 1",
+    "общий топ: место 3",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 1652,
+   "niche": "безмасляный|2р|2Ц|О|P|нет|сборный:поковка/печать",
+   "arch": "безмасляный",
+   "niche_rank": 1,
+   "niche_size": 1,
+   "rank": 4,
+   "score": 6.4284,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 29.932,
+   "reasons": [
+    "ниша: место 1 из 1",
+    "общий топ: место 4",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 1895,
+   "niche": "RDC|1р|2Ц|О|P|нет|сварка:печать",
+   "arch": "RDC",
+   "niche_rank": 1,
+   "niche_size": 2,
+   "rank": 5,
+   "score": 6.3661,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 28.13,
+   "reasons": [
+    "ниша: место 1 из 2",
+    "общий топ: место 5",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 1744,
+   "niche": "RDC|2р|2Ц|О|K|нет|сборный:печать/печать",
+   "arch": "RDC",
+   "niche_rank": 1,
+   "niche_size": 2,
+   "rank": 6,
+   "score": 6.3229,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 30.535,
+   "reasons": [
+    "ниша: место 1 из 2",
+    "общий топ: место 6"
+   ]
+  },
+  {
+   "idx": 679,
+   "niche": "RDC|1р|2Ц|О|P|нет|сварка:печать",
+   "arch": "RDC",
+   "niche_rank": 2,
+   "niche_size": 2,
+   "rank": 7,
+   "score": 6.2398,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 28.097,
+   "reasons": [
+    "ниша: место 2 из 2",
+    "общий топ: место 7",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 367,
+   "niche": "RDC|1р|2Ц|О|P|нет|сборный:поковка/печать",
+   "arch": "RDC",
+   "niche_rank": 1,
+   "niche_size": 2,
+   "rank": 8,
+   "score": 6.2395,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 28.341,
+   "reasons": [
+    "ниша: место 1 из 2",
+    "общий топ: место 8",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 111,
+   "niche": "RDC|1р|2Ц|О|K|нет|сборный:печать/печать",
+   "arch": "RDC",
+   "niche_rank": 1,
+   "niche_size": 4,
+   "rank": 9,
+   "score": 6.2301,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 28.776,
+   "reasons": [
+    "ниша: место 1 из 4",
+    "общий топ: место 9"
+   ]
+  },
+  {
+   "idx": 272,
+   "niche": "RDC|2р|2Ц|О|P|нет|сборный:печать/печать",
+   "arch": "RDC",
+   "niche_rank": 1,
+   "niche_size": 1,
+   "rank": 10,
+   "score": 6.1883,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 30.794,
+   "reasons": [
+    "ниша: место 1 из 1",
+    "общий топ: место 10"
+   ]
+  },
+  {
+   "idx": 760,
+   "niche": "RDC|2р|2Ц|О|K|нет|сборный:печать/печать",
+   "arch": "RDC",
+   "niche_rank": 2,
+   "niche_size": 2,
+   "rank": 11,
+   "score": 6.1343,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 30.588,
+   "reasons": [
+    "ниша: место 2 из 2",
+    "общий топ: место 11",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 999,
+   "niche": "RDC|1р|2Ц|О|N|нет|сборный:печать/литьё",
+   "arch": "RDC",
+   "niche_rank": 1,
+   "niche_size": 3,
+   "rank": 12,
+   "score": 6.13,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 29.643,
+   "reasons": [
+    "ниша: место 1 из 3",
+    "общий топ: место 12",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 903,
+   "niche": "RDC|1р|2Ц|О|K|нет|сборный:печать/печать",
+   "arch": "RDC",
+   "niche_rank": 2,
+   "niche_size": 4,
+   "rank": 13,
+   "score": 6.0715,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 27.987,
+   "reasons": [
+    "ниша: место 2 из 4",
+    "общий топ: место 13",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 1095,
+   "niche": "RDC|1р|2Ц|О|K|нет|сборный:печать/печать",
+   "arch": "RDC",
+   "niche_rank": 3,
+   "niche_size": 4,
+   "rank": 14,
+   "score": 6.0259,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 28.184,
+   "reasons": [
+    "ниша: место 3 из 4",
+    "общий топ: место 14",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 327,
+   "niche": "RDC|1р|2Ц|О|P|нет|сборный:поковка/литьё",
+   "arch": "RDC",
+   "niche_rank": 1,
+   "niche_size": 1,
+   "rank": 15,
+   "score": 6.024,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 29.291,
+   "reasons": [
+    "ниша: место 1 из 1",
+    "общий топ: место 15",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 1767,
+   "niche": "RDC|1р|2Ц|О|P|нет|сборный:поковка/печать",
+   "arch": "RDC",
+   "niche_rank": 2,
+   "niche_size": 2,
+   "rank": 16,
+   "score": 6.0216,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 28.786,
+   "reasons": [
+    "ниша: место 2 из 2",
+    "общий топ: место 16"
+   ]
+  },
+  {
+   "idx": 920,
+   "niche": "RDC|2р|2Ц|О|N|нет|сборный:поковка/литьё",
+   "arch": "RDC",
+   "niche_rank": 1,
+   "niche_size": 2,
+   "rank": 17,
+   "score": 5.875,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 31.808,
+   "reasons": [
+    "ниша: место 1 из 2",
+    "общий топ: место 17",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 71,
+   "niche": "RDC|1р|2Ц|О|K|нет|сборный:печать/литьё",
+   "arch": "RDC",
+   "niche_rank": 1,
+   "niche_size": 3,
+   "rank": 18,
+   "score": 5.8375,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 27.954,
+   "reasons": [
+    "ниша: место 1 из 3",
+    "общий топ: место 18",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 135,
+   "niche": "RDC|1р|2Ц|О|N|нет|сборный:поковка/литьё",
+   "arch": "RDC",
+   "niche_rank": 1,
+   "niche_size": 3,
+   "rank": 19,
+   "score": 5.7924,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 29.121,
+   "reasons": [
+    "ниша: место 1 из 3",
+    "общий топ: место 19"
+   ]
+  },
+  {
+   "idx": 1800,
+   "niche": "безмасляный|2р|ОЦ|О|P|нет|сборный:литьё/печать",
+   "arch": "безмасляный",
+   "niche_rank": 2,
+   "niche_size": 2,
+   "rank": 20,
+   "score": 5.7456,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 30.045,
+   "reasons": [
+    "ниша: место 2 из 2",
+    "общий топ: место 20"
+   ]
+  },
+  {
+   "idx": 519,
+   "niche": "RDC|1р|2Ц|О|N|нет|сборный:поковка/литьё",
+   "arch": "RDC",
+   "niche_rank": 2,
+   "niche_size": 3,
+   "rank": 21,
+   "score": 5.7245,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 29.578,
+   "reasons": [
+    "ниша: место 2 из 3",
+    "общий топ: место 21"
+   ]
+  },
+  {
+   "idx": 1063,
+   "niche": "RDC|1р|2Ц|О|N|нет|сборный:печать/литьё",
+   "arch": "RDC",
+   "niche_rank": 2,
+   "niche_size": 3,
+   "rank": 22,
+   "score": 5.7217,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 28.278,
+   "reasons": [
+    "ниша: место 2 из 3",
+    "общий топ: место 22",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 1351,
+   "niche": "RDC|1р|2Ц|О|K|нет|сборный:поковка/печать",
+   "arch": "RDC",
+   "niche_rank": 1,
+   "niche_size": 1,
+   "rank": 23,
+   "score": 5.6995,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 28.299,
+   "reasons": [
+    "ниша: место 1 из 1",
+    "общий топ: место 23"
+   ]
+  },
+  {
+   "idx": 1319,
+   "niche": "RDC|1р|2Ц|О|N|нет|сборный:поковка/литьё",
+   "arch": "RDC",
+   "niche_rank": 3,
+   "niche_size": 3,
+   "rank": 24,
+   "score": 5.6776,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 29.261,
+   "reasons": [
+    "ниша: место 3 из 3",
+    "общий топ: место 24"
+   ]
+  },
+  {
+   "idx": 1511,
+   "niche": "RDC|1р|2Ц|О|K|нет|сборный:печать/литьё",
+   "arch": "RDC",
+   "niche_rank": 2,
+   "niche_size": 3,
+   "rank": 25,
+   "score": 5.5802,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 28.12,
+   "reasons": [
+    "ниша: место 2 из 3",
+    "общий топ: место 25",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 1575,
+   "niche": "RDC|1р|2Ц|О|K|нет|сборный:печать/печать",
+   "arch": "RDC",
+   "niche_rank": 4,
+   "niche_size": 4,
+   "rank": 26,
+   "score": 5.4591,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 28.582,
+   "reasons": [
+    "ниша: место 4 из 4",
+    "общий топ: место 26"
+   ]
+  },
+  {
+   "idx": 664,
+   "niche": "RDC|2р|2Ц|О|N|нет|сборный:печать/литьё",
+   "arch": "RDC",
+   "niche_rank": 1,
+   "niche_size": 4,
+   "rank": 27,
+   "score": 5.3991,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 31.147,
+   "reasons": [
+    "ниша: место 1 из 4",
+    "общий топ: место 27"
+   ]
+  },
+  {
+   "idx": 1368,
+   "niche": "RDC|2р|2Ц|О|N|нет|сборный:печать/литьё",
+   "arch": "RDC",
+   "niche_rank": 2,
+   "niche_size": 4,
+   "rank": 28,
+   "score": 5.3871,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 31.689,
+   "reasons": [
+    "ниша: место 2 из 4",
+    "общий топ: место 28",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 80,
+   "niche": "RDC|2р|2Ц|О|N|нет|сборный:литьё/литьё",
+   "arch": "RDC",
+   "niche_rank": 1,
+   "niche_size": 1,
+   "rank": 29,
+   "score": 5.3175,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 32.146,
+   "reasons": [
+    "ниша: место 1 из 1",
+    "общий топ: место 29",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 1012,
+   "niche": "безмасляный|2р|ОЦ|О|K|печатный|сборный:печать/литьё",
+   "arch": "безмасляный",
+   "niche_rank": 1,
+   "niche_size": 1,
+   "rank": 30,
+   "score": 5.2812,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 36.14,
+   "reasons": [
+    "ниша: место 1 из 1",
+    "общий топ: место 30",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 248,
+   "niche": "RDC|2р|2Ц|О|N|нет|сборный:печать/литьё",
+   "arch": "RDC",
+   "niche_rank": 3,
+   "niche_size": 4,
+   "rank": 31,
+   "score": 5.2604,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 31.073,
+   "reasons": [
+    "ниша: место 3 из 4",
+    "общий топ: место 31",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 632,
+   "niche": "RDC|2р|2Ц|О|K|нет|сборный:печать/литьё",
+   "arch": "RDC",
+   "niche_rank": 1,
+   "niche_size": 4,
+   "rank": 32,
+   "score": 5.2159,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 30.733,
+   "reasons": [
+    "ниша: место 1 из 4",
+    "общий топ: место 32"
+   ]
+  },
+  {
+   "idx": 1775,
+   "niche": "RDC|1р|2Ц|О|N|нет|сборный:печать/литьё",
+   "arch": "RDC",
+   "niche_rank": 3,
+   "niche_size": 3,
+   "rank": 33,
+   "score": 5.2055,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 29.177,
+   "reasons": [
+    "ниша: место 3 из 3",
+    "общий топ: место 33"
+   ]
+  },
+  {
+   "idx": 1199,
+   "niche": "RDC|1р|2Ц|О|K|нет|сборный:поковка/литьё",
+   "arch": "RDC",
+   "niche_rank": 1,
+   "niche_size": 2,
+   "rank": 34,
+   "score": 5.192,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 27.996,
+   "reasons": [
+    "ниша: место 1 из 2",
+    "общий топ: место 34"
+   ]
+  },
+  {
+   "idx": 312,
+   "niche": "RDC|2р|2Ц|О|K|нет|сборный:печать/литьё",
+   "arch": "RDC",
+   "niche_rank": 2,
+   "niche_size": 4,
+   "rank": 35,
+   "score": 5.1043,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 30.046,
+   "reasons": [
+    "ниша: место 2 из 4",
+    "общий топ: место 35"
+   ]
+  },
+  {
+   "idx": 1416,
+   "niche": "безмасляный|2р|2Ц|О|K|нет|сборный:поковка/литьё",
+   "arch": "безмасляный",
+   "niche_rank": 1,
+   "niche_size": 3,
+   "rank": 36,
+   "score": 5.0779,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 30.747,
+   "reasons": [
+    "ниша: место 1 из 3",
+    "общий топ: место 36",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 1816,
+   "niche": "RDC|2р|2Ц|О|K|нет|сборный:поковка/литьё",
+   "arch": "RDC",
+   "niche_rank": 1,
+   "niche_size": 3,
+   "rank": 37,
+   "score": 5.0395,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 31.008,
+   "reasons": [
+    "ниша: место 1 из 3",
+    "общий топ: место 37"
+   ]
+  },
+  {
+   "idx": 1784,
+   "niche": "RDC|2р|2Ц|О|K|нет|сборный:печать/литьё",
+   "arch": "RDC",
+   "niche_rank": 3,
+   "niche_size": 4,
+   "rank": 38,
+   "score": 5.035,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 30.678,
+   "reasons": [
+    "ниша: место 3 из 4",
+    "общий топ: место 38",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 400,
+   "niche": "RDC|2р|2Ц|О|P|нет|сборный:печать/литьё",
+   "arch": "RDC",
+   "niche_rank": 1,
+   "niche_size": 1,
+   "rank": 39,
+   "score": 5.0308,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 32.176,
+   "reasons": [
+    "ниша: место 1 из 1",
+    "общий топ: место 39",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 1936,
+   "niche": "RDC|2р|2Ц|О|N|нет|сборный:печать/литьё",
+   "arch": "RDC",
+   "niche_rank": 4,
+   "niche_size": 4,
+   "rank": 40,
+   "score": 4.9835,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 30.878,
+   "reasons": [
+    "ниша: место 4 из 4",
+    "общий топ: место 40"
+   ]
+  },
+  {
+   "idx": 504,
+   "niche": "RDC|2р|2Ц|О|K|нет|сборный:поковка/литьё",
+   "arch": "RDC",
+   "niche_rank": 2,
+   "niche_size": 3,
+   "rank": 41,
+   "score": 4.9748,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 31.833,
+   "reasons": [
+    "ниша: место 2 из 3"
+   ]
+  },
+  {
+   "idx": 1616,
+   "niche": "RDC|2р|2Ц|О|K|нет|сборный:печать/литьё",
+   "arch": "RDC",
+   "niche_rank": 4,
+   "niche_size": 4,
+   "rank": 42,
+   "score": 4.9265,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 30.844,
+   "reasons": [
+    "ниша: место 4 из 4",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 1264,
+   "niche": "RDC|2р|2Ц|О|K|нет|сборный:поковка/литьё",
+   "arch": "RDC",
+   "niche_rank": 3,
+   "niche_size": 3,
+   "rank": 43,
+   "score": 4.9213,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 31.969,
+   "reasons": [
+    "ниша: место 3 из 3",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 271,
+   "niche": "RDC|1р|2Ц|О|K|нет|сборный:поковка/литьё",
+   "arch": "RDC",
+   "niche_rank": 2,
+   "niche_size": 2,
+   "rank": 44,
+   "score": 4.9111,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 29.227,
+   "reasons": [
+    "ниша: место 2 из 2",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 943,
+   "niche": "RDC|1р|2Ц|О|K|нет|сборный:печать/литьё",
+   "arch": "RDC",
+   "niche_rank": 3,
+   "niche_size": 3,
+   "rank": 45,
+   "score": 4.8604,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 28.394,
+   "reasons": [
+    "ниша: место 3 из 3",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 264,
+   "niche": "безмасляный|2р|2Ц|О|K|нет|сборный:поковка/литьё",
+   "arch": "безмасляный",
+   "niche_rank": 2,
+   "niche_size": 3,
+   "rank": 46,
+   "score": 4.7827,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 29.959,
+   "reasons": [
+    "ниша: место 2 из 3",
+    "фронт Парето"
+   ]
+  },
+  {
+   "idx": 568,
+   "niche": "безмасляный|2р|ОЦ|О|K|печатный|сборный:литьё/литьё",
+   "arch": "безмасляный",
+   "niche_rank": 1,
+   "niche_size": 1,
+   "rank": 47,
+   "score": 4.7245,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 36.198,
+   "reasons": [
+    "ниша: место 1 из 1"
+   ]
+  },
+  {
+   "idx": 680,
+   "niche": "безмасляный|2р|2Ц|О|K|нет|сборный:поковка/литьё",
+   "arch": "безмасляный",
+   "niche_rank": 3,
+   "niche_size": 3,
+   "rank": 48,
+   "score": 4.6768,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 30.052,
+   "reasons": [
+    "ниша: место 3 из 3"
+   ]
+  },
+  {
+   "idx": 1680,
+   "niche": "RDC|2р|2Ц|О|N|нет|сборный:поковка/литьё",
+   "arch": "RDC",
+   "niche_rank": 2,
+   "niche_size": 2,
+   "rank": 49,
+   "score": 4.6248,
+   "feasible": true,
+   "violation": 0.0,
+   "eta_el": 31.688,
+   "reasons": [
+    "ниша: место 2 из 2"
+   ]
+  },
+  {
+   "idx": 872,
+   "niche": "безмасляный|2р|ОЦ|О|K|печатный|сборный:поковка/литьё",
+   "arch": "безмасляный",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.5595,
+   "feasible": false,
+   "violation": 0.0011,
+   "eta_el": 34.443,
+   "reasons": [
+    "ниша без допустимых: превышение 0.001 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 375,
+   "niche": "безмасляный|1р|ОЦ|О|K|печатный|сборный:печать/литьё",
+   "arch": "безмасляный",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.8884,
+   "feasible": false,
+   "violation": 0.0015,
+   "eta_el": 34.092,
+   "reasons": [
+    "ниша без допустимых: превышение 0.002 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 469,
+   "niche": "печатный рекуператор|1р|2Ц|О|P|печатный|сборный:печать/печать",
+   "arch": "печатный рекуператор",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 6.3332,
+   "feasible": false,
+   "violation": 0.0019,
+   "eta_el": 35.101,
+   "reasons": [
+    "ниша без допустимых: превышение 0.002 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 1864,
+   "niche": "безмасляный|2р|2Ц|О|P|нет|сборный:печать/печать",
+   "arch": "безмасляный",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 6.4997,
+   "feasible": false,
+   "violation": 0.0032,
+   "eta_el": 29.821,
+   "reasons": [
+    "ниша без допустимых: превышение 0.003 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 783,
+   "niche": "RDC|2р|2Ц|О|P|нет|сборный:литьё/печать",
+   "arch": "RDC",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 6.7013,
+   "feasible": false,
+   "violation": 0.0043,
+   "eta_el": 30.893,
+   "reasons": [
+    "ниша без допустимых: превышение 0.004 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 1944,
+   "niche": "RDC|2р|2Ц|О|K|нет|сборный:поковка/печать",
+   "arch": "RDC",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.2818,
+   "feasible": false,
+   "violation": 0.0091,
+   "eta_el": 30.611,
+   "reasons": [
+    "ниша без допустимых: превышение 0.009 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 879,
+   "niche": "RDC|2р|2Ц|О|K|нет|сборный:литьё/литьё",
+   "arch": "RDC",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.934,
+   "feasible": false,
+   "violation": 0.0164,
+   "eta_el": 30.225,
+   "reasons": [
+    "ниша без допустимых: превышение 0.016 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 197,
+   "niche": "печатный рекуператор|1р|2Ц|О|P|печатный|сборный:поковка/печать",
+   "arch": "печатный рекуператор",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 6.3893,
+   "feasible": false,
+   "violation": 0.0222,
+   "eta_el": 35.177,
+   "reasons": [
+    "ниша без допустимых: превышение 0.022 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 47,
+   "niche": "RDC|1р|2Ц|О|K|нет|сварка:печать",
+   "arch": "RDC",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.5053,
+   "feasible": false,
+   "violation": 0.025,
+   "eta_el": 27.377,
+   "reasons": [
+    "ниша без допустимых: превышение 0.025 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 498,
+   "niche": "гибрид|1р|ОЦ|О|P|нет|сборный:поковка/литьё",
+   "arch": "гибрид",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.1963,
+   "feasible": false,
+   "violation": 0.029,
+   "eta_el": 27.731,
+   "reasons": [
+    "ниша без допустимых: превышение 0.029 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 1879,
+   "niche": "безмасляный|1р|ОЦ|О|K|печатный|сборный:поковка/литьё",
+   "arch": "безмасляный",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 5.0679,
+   "feasible": false,
+   "violation": 0.0316,
+   "eta_el": 36.61,
+   "reasons": [
+    "ниша без допустимых: превышение 0.032 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 1867,
+   "niche": "безмасляный|1р|ОЦ|О|N|нет|сборный:печать/литьё",
+   "arch": "безмасляный",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 3.7845,
+   "feasible": false,
+   "violation": 0.0327,
+   "eta_el": 28.697,
+   "reasons": [
+    "ниша без допустимых: превышение 0.033 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 756,
+   "niche": "безмасляный|2р|ОЦ|О|P|печатный|сборный:поковка/печать",
+   "arch": "безмасляный",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.2211,
+   "feasible": false,
+   "violation": 0.0372,
+   "eta_el": 34.001,
+   "reasons": [
+    "ниша без допустимых: превышение 0.037 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 823,
+   "niche": "безмасляный|1р|ОЦ|О|N|нет|сборный:поковка/литьё",
+   "arch": "безмасляный",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 3.9412,
+   "feasible": false,
+   "violation": 0.0393,
+   "eta_el": 27.921,
+   "reasons": [
+    "ниша без допустимых: превышение 0.039 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 1277,
+   "niche": "гибрид|1р|ОЦ|О|N|нет|сборный:поковка/литьё",
+   "arch": "гибрид",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.0065,
+   "feasible": false,
+   "violation": 0.0394,
+   "eta_el": 27.922,
+   "reasons": [
+    "ниша без допустимых: превышение 0.039 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 431,
+   "niche": "RDC|2р|2Ц|О|K|нет|сборный:литьё/печать",
+   "arch": "RDC",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 5.0619,
+   "feasible": false,
+   "violation": 0.04,
+   "eta_el": 30.39,
+   "reasons": [
+    "ниша без допустимых: превышение 0.040 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 119,
+   "niche": "безмасляный|1р|2Ц|О|K|печатный|сборный:поковка/литьё",
+   "arch": "безмасляный",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 3.1688,
+   "feasible": false,
+   "violation": 0.0474,
+   "eta_el": 33.695,
+   "reasons": [
+    "ниша без допустимых: превышение 0.047 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 1783,
+   "niche": "безмасляный|1р|2Ц|О|P|нет|сборный:поковка/печать",
+   "arch": "безмасляный",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.6886,
+   "feasible": false,
+   "violation": 0.0475,
+   "eta_el": 27.123,
+   "reasons": [
+    "ниша без допустимых: превышение 0.048 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 1927,
+   "niche": "RDC|1р|2Ц|О|P|нет|сборный:печать/литьё",
+   "arch": "RDC",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.0029,
+   "feasible": false,
+   "violation": 0.0496,
+   "eta_el": 28.967,
+   "reasons": [
+    "ниша без допустимых: превышение 0.050 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 1128,
+   "niche": "безмасляный|1р|2Ц|О|K|печатный|сборный:печать/литьё",
+   "arch": "безмасляный",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.8735,
+   "feasible": false,
+   "violation": 0.0518,
+   "eta_el": 34.788,
+   "reasons": [
+    "ниша без допустимых: превышение 0.052 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 1176,
+   "niche": "RDC|2р|2Ц|О|P|нет|сборный:литьё/литьё",
+   "arch": "RDC",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 5.7088,
+   "feasible": false,
+   "violation": 0.0519,
+   "eta_el": 31.13,
+   "reasons": [
+    "ниша без допустимых: превышение 0.052 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 1303,
+   "niche": "безмасляный|1р|ОЦ|О|K|нет|сборный:печать/литьё",
+   "arch": "безмасляный",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 3.747,
+   "feasible": false,
+   "violation": 0.0561,
+   "eta_el": 27.304,
+   "reasons": [
+    "ниша без допустимых: превышение 0.056 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 1207,
+   "niche": "безмасляный|1р|2Ц|О|P|печатный|сборный:печать/печать",
+   "arch": "безмасляный",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.6465,
+   "feasible": false,
+   "violation": 0.0591,
+   "eta_el": 33.695,
+   "reasons": [
+    "ниша без допустимых: превышение 0.059 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 1463,
+   "niche": "безмасляный|1р|2Ц|О|P|печатный|сборный:поковка/печать",
+   "arch": "безмасляный",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.199,
+   "feasible": false,
+   "violation": 0.0688,
+   "eta_el": 34.81,
+   "reasons": [
+    "ниша без допустимых: превышение 0.069 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 1922,
+   "niche": "гибрид|1р|2Ц|О|N|нет|сборный:поковка/литьё",
+   "arch": "гибрид",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.2895,
+   "feasible": false,
+   "violation": 0.0754,
+   "eta_el": 27.322,
+   "reasons": [
+    "ниша без допустимых: превышение 0.075 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 1965,
+   "niche": "гибрид|1р|2Ц|О|P|нет|сборный:поковка/литьё",
+   "arch": "гибрид",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.5213,
+   "feasible": false,
+   "violation": 0.0836,
+   "eta_el": 27.229,
+   "reasons": [
+    "ниша без допустимых: превышение 0.084 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 331,
+   "niche": "безмасляный|1р|2Ц|О|P|нет|сборный:печать/литьё",
+   "arch": "безмасляный",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 3.7654,
+   "feasible": false,
+   "violation": 0.0849,
+   "eta_el": 27.313,
+   "reasons": [
+    "ниша без допустимых: превышение 0.085 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 1047,
+   "niche": "безмасляный|1р|2Ц|О|P|нет|сборный:поковка/литьё",
+   "arch": "безмасляный",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 3.7401,
+   "feasible": false,
+   "violation": 0.0872,
+   "eta_el": 27.317,
+   "reasons": [
+    "ниша без допустимых: превышение 0.087 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 1064,
+   "niche": "безмасляный|2р|2Ц|О|P|нет|сборный:литьё/печать",
+   "arch": "безмасляный",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 6.7988,
+   "feasible": false,
+   "violation": 0.0917,
+   "eta_el": 27.881,
+   "reasons": [
+    "ниша без допустимых: превышение 0.092 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 144,
+   "niche": "RDC|2р|2Ц|О|P|нет|сборный:поковка/литьё",
+   "arch": "RDC",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.4911,
+   "feasible": false,
+   "violation": 0.1085,
+   "eta_el": 30.989,
+   "reasons": [
+    "ниша без допустимых: превышение 0.108 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 88,
+   "niche": "RDC|2р|2Ц|Р|P|нет|сборный:поковка/печать",
+   "arch": "RDC",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 4.3037,
+   "feasible": false,
+   "violation": 0.1139,
+   "eta_el": 28.259,
+   "reasons": [
+    "ниша без допустимых: превышение 0.114 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 1769,
+   "niche": "традиционная|1р|2Ц|О|U|нет|сборный:поковка/литьё",
+   "arch": "традиционная",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 3.6618,
+   "feasible": false,
+   "violation": 0.1322,
+   "eta_el": 27.59,
+   "reasons": [
+    "ниша без допустимых: превышение 0.132 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  },
+  {
+   "idx": 1163,
+   "niche": "безмасляный|1р|2Ц|О|K|нет|сборный:печать/литьё",
+   "arch": "безмасляный",
+   "niche_rank": null,
+   "niche_size": null,
+   "rank": null,
+   "score": 3.6934,
+   "feasible": false,
+   "violation": 0.1392,
+   "eta_el": 26.147,
+   "reasons": [
+    "ниша без допустимых: превышение 0.139 (уровень 1 оптимизирует непрерывные оси)"
+   ]
+  }
+ ]
+}

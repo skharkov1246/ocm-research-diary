@@ -1,0 +1,94 @@
+{
+ "title": "воронка двигателя-заменителя: прогоны AWS",
+ "date": "2026-11-14",
+ "ledger": "routes/gtu/platform/aws/ledger.jsonl",
+ "rule": "в ветку - слитые results-JSON, top50 и части уровня 1 (JSON .gz до 5 МБ); CSV больше 5 МБ, сетки, рестарты SU2 - в S3 (<префикс ALPHA_O_S3>/gtu/<run_id>/<задача>/) и runs/<run_id>/ (в .gitignore); после каждого боевого прогона - закоммитить ledger.jsonl и дописать run_id сюда (make_jobs_l23.py, словарь FUNNEL_RUNS)",
+ "done": [
+  {
+   "run_id": "20261114T231900Z-b7cc",
+   "level": "L0",
+   "what": "отладка, выборка v1 (заменена)",
+   "results": "снято (выборка v1 заменена v2)",
+   "usd": 0.037,
+   "machine_min": 3.1,
+   "jobs": [
+    "l0-debug-m0",
+    "l0-debug-m1"
+   ]
+  },
+  {
+   "run_id": "20261114T232200Z-7ce3",
+   "level": "L0",
+   "what": "полный, выборка v1 (заменена)",
+   "results": "S3: <префикс ALPHA_O_S3>/gtu/funnel/l0_full_20261114T232200Z-7ce3/",
+   "usd": 0.078,
+   "machine_min": 6.5,
+   "jobs": [
+    "l0-full-m0",
+    "l0-full-m1",
+    "l0-full-m2"
+   ]
+  },
+  {
+   "run_id": "20261115T010201Z-1a6e",
+   "level": "L0",
+   "what": "отладка, выборка v2, N = 2000 × 3 точки",
+   "results": "routes/gtu/funnel/l0_aws_debug/",
+   "usd": 0.049,
+   "machine_min": 4.1,
+   "jobs": [
+    "l0-debug-m0",
+    "l0-debug-m1"
+   ]
+  },
+  {
+   "run_id": "20261115T010625Z-8893",
+   "level": "L0",
+   "what": "полный, выборка v2: KV-3 200 000, KV-1 и KV-6 по 50 000",
+   "results": "routes/gtu/funnel/l0_aws_full/ (JSON); CSV - S3 <префикс ALPHA_O_S3>/gtu/funnel/l0v2_full_20261115T010625Z-8893/",
+   "usd": 0.241,
+   "machine_min": 20.4,
+   "jobs": [
+    "l0-full-m0",
+    "l0-full-m1",
+    "l0-full-m2",
+    "l0-full-m3",
+    "l0-full-m4",
+    "l0-full-m5"
+   ]
+  }
+ ],
+ "todo": [
+  {
+   "level": "L1",
+   "file": "routes/gtu/funnel/jobs_l1_debug.json",
+   "results_dir": "routes/gtu/funnel/aws/l1_debug/",
+   "s3": "<префикс ALPHA_O_S3>/gtu/<run_id>/l1-debug-m*/"
+  },
+  {
+   "level": "L1",
+   "file": "routes/gtu/funnel/jobs_l1.json",
+   "results_dir": "routes/gtu/funnel/aws/l1_full/",
+   "s3": "<префикс ALPHA_O_S3>/gtu/<run_id>/l1-full-m*/, l1-starts2x/"
+  },
+  {
+   "level": "L1",
+   "file": "routes/gtu/funnel/jobs_l1_fea.json",
+   "results_dir": "routes/gtu/funnel/aws/l1_fea/",
+   "s3": "<префикс ALPHA_O_S3>/gtu/<run_id>/l1-fea300/"
+  },
+  {
+   "level": "L2",
+   "file": "routes/gtu/funnel/jobs_l2.json",
+   "results_dir": "routes/gtu/funnel/aws/l2/ (su2 - aws/l2/su2/)",
+   "s3": "<префикс ALPHA_O_S3>/gtu/<run_id>/l2-*/"
+  },
+  {
+   "level": "L3",
+   "file": "routes/gtu/funnel/jobs_l3.json",
+   "results_dir": "routes/gtu/funnel/aws/l3/",
+   "s3": "<префикс ALPHA_O_S3>/gtu/<run_id>/l3-*/"
+  }
+ ],
+ "how_to_regenerate": "python3 routes/gtu/funnel/make_jobs_l23.py"
+}

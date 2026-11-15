@@ -1,0 +1,301 @@
+{
+ "_comment": "Семейство «лопатки и колёса» (routes/gtu/evo/blades, README): стадия 1 — острова MAP-Elites по частям, элиты части → CalculiX. Островов на компонент 1536 (24 частей × 64), оценок на остров 20000, всего оценок 92 160 000. Срок задачи 58 мин (расчёт ≈ 33 мин + установка + CalculiX). Сгенерировано make_jobs_evo_blades.py; правки — в нём. После сбора: evo_blades.py merge-parts (контроль полноты).",
+ "defaults": {
+  "instance_type": "c7a.16xlarge",
+  "fallback_types": [
+   "c7i.16xlarge"
+  ],
+  "image": "al2023",
+  "disk_gb": 30
+ },
+ "jobs": [
+  {
+   "name": "blades-p000",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 0 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  },
+  {
+   "name": "blades-p001",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 1 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  },
+  {
+   "name": "blades-p002",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 2 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  },
+  {
+   "name": "blades-p003",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 3 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  },
+  {
+   "name": "blades-p004",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 4 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  },
+  {
+   "name": "blades-p005",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 5 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  },
+  {
+   "name": "blades-p006",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 6 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  },
+  {
+   "name": "blades-p007",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 7 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  },
+  {
+   "name": "blades-p008",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 8 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  },
+  {
+   "name": "blades-p009",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 9 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  },
+  {
+   "name": "blades-p010",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 10 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  },
+  {
+   "name": "blades-p011",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 11 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  },
+  {
+   "name": "blades-p012",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 12 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  },
+  {
+   "name": "blades-p013",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 13 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  },
+  {
+   "name": "blades-p014",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 14 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  },
+  {
+   "name": "blades-p015",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 15 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  },
+  {
+   "name": "blades-p016",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 16 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  },
+  {
+   "name": "blades-p017",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 17 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  },
+  {
+   "name": "blades-p018",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 18 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  },
+  {
+   "name": "blades-p019",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 19 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  },
+  {
+   "name": "blades-p020",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 20 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  },
+  {
+   "name": "blades-p021",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 21 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  },
+  {
+   "name": "blades-p022",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 22 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  },
+  {
+   "name": "blades-p023",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-venv python3-pip",
+    "python3 -m venv /opt/evo",
+    "/opt/evo/bin/pip install -q numpy==2.5.3 scipy==1.18.1 cantera==3.2.0"
+   ],
+   "command": "export EVO_OUT=/tmp/evo_blades\n/opt/evo/bin/python -u routes/gtu/evo/blades/evo_blades.py part --part 23 --n-parts 24 --n-islands 1536 --comps comp1,comp2,turb --evals 20000 --k 8 --workers \"$NPROC\" --ccx --scale aws --out \"$GTU_OUT\"",
+   "max_min": 58
+  }
+ ]
+}

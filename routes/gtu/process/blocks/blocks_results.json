@@ -1,0 +1,2374 @@
+{
+ "title": "Библиотека блоков процесса «от топлива до вала»: варианты, быстрые модели, совместимость, единый вызов evaluate",
+ "method": "блоки (подготовка топлива, компрессор, камера, турбины, теплообменники, вал и стык пакета) поверх моделей трека без их правки: КПД узлов, геометрия, правила, детали, Plug&Play, изготовимость - воронка (funnel_space, funnel_l0, make_model, parts/service/plugplay_model); сквозная 0D-цепочка на таблицах gtu_explore (как funnel_space._core) с промохлаждением, рекуператором, подогревом, ростом давления, подогревом топлива, IBC; химическая рекуперация - приращение cycles.evaluate (Cantera); теплообменники - cycles.size_hx и cycles.parts; камера - итог уровня 0 воронки камеры и targets.json; сверка - gtu_cycle.cycle / recup, frame3, cycles_results.json",
+ "software": "python 3.13.18, numpy 2.5.3, scipy 1.18.1, cantera 3.2.0",
+ "date": "2026-11-15",
+ "status": "оценка уровня облика; КПД узлов, потери, пределы, детали и TRL - принятые величины трека и оценки; массы не калиброваны",
+ "code_sha": "7783f67bfffd44d6",
+ "inputs": [
+  {
+   "file": "routes/gtu/gtu_family_results.json",
+   "sha256_16": "ad356f199b045427"
+  },
+  {
+   "file": "routes/gtu/frame3/frame3_point_results.json",
+   "sha256_16": "0440ba7e4a7a290b"
+  },
+  {
+   "file": "routes/gtu/organic/cycles/cycles_results.json",
+   "sha256_16": "7b6d13e1f01f1df2"
+  },
+  {
+   "file": "routes/gtu/combustor/targets.json",
+   "sha256_16": "a100b32855bec2c2"
+  },
+  {
+   "file": "routes/gtu/combustor/l0_aws/comb_l0_KV-3_n262144_results.json",
+   "sha256_16": "51da47b76b1970f2"
+  },
+  {
+   "file": "routes/gtu/fleet/gtu_fleet_taurus60.json",
+   "sha256_16": "bac47532c0190931"
+  },
+  {
+   "file": "routes/gtu/gtu_cycle.py",
+   "sha256_16": "44b9b08059ef3a0c"
+  },
+  {
+   "file": "routes/gtu/gtu_explore.py",
+   "sha256_16": "98493d2c281c06b3"
+  },
+  {
+   "file": "routes/gtu/funnel/funnel_space.py",
+   "sha256_16": "ebd4d1dc754a5ac8"
+  },
+  {
+   "file": "routes/gtu/funnel/funnel_l0.py",
+   "sha256_16": "c31e0a5aee867e9a"
+  },
+  {
+   "file": "routes/gtu/funnel/make_model.py",
+   "sha256_16": "7f79577ef621d924"
+  },
+  {
+   "file": "routes/gtu/funnel/parts_model.py",
+   "sha256_16": "2ba68f4ba4ddac68"
+  },
+  {
+   "file": "routes/gtu/funnel/plugplay_model.py",
+   "sha256_16": "3dce8419693866db"
+  },
+  {
+   "file": "routes/gtu/funnel/service_model.py",
+   "sha256_16": "fb836131038cf860"
+  },
+  {
+   "file": "routes/gtu/organic/cycles/cycles.py",
+   "sha256_16": "5e887aeb401e4155"
+  },
+  {
+   "file": "routes/gtu/combustor/comb_space.py",
+   "sha256_16": "a96b98ef5d011a03"
+  }
+ ],
+ "assumptions": [
+  "свойства газа - таблицы gtu_explore (Cantera GRI-Mech 3.0, метан, ISO), смесь воздуха и стехиометрических продуктов",
+  "КПД ступеней компрессора и турбин - модели воронки для базового ядра концепции; добавочные блоки (промохлаждение, подогрев, IBC) нагрузку ступеней и их КПД не пересчитывают",
+  "охлаждение: доли make_model.COOL_AIR; повторная ступень (подогрев) - тем же классом",
+  "рекуператор: потери 2,5 % / 3,5 % (gtu_cycle.recup), эффективность по наименьшей теплоёмкости; газ на входе <= 700 °C",
+  "камера: потери - лучший по рейтингу вариант пары «схема × тип камеры» уровня 0 камеры (ни один вариант уровня 0 не выполняет все цели выбросов); track - 4 % (кольцевая) / 5 % (выносная)",
+  "горение с ростом давления: 25 % идеального выигрыша (эквивалентное давление при постоянном объёме), турбина -2 п. п.",
+  "химическая рекуперация: приращение перебора циклов при тех же π, T41, ε, промохлаждении, подогреве (суперпозиция)",
+  "быстроходный вал: частота по φ первой центробежной ступени, отношение частот 0,70-1,60 (сменная пара в корпусе редуктора)",
+  "добавочные узлы теплообмена в счёт деталей - по 1 эффективной детали на позицию cycles.parts",
+  "массы модулей - формулы воронки; это вход модели массы, не итог"
+ ],
+ "checks": {
+  "kv3_frame3": {
+   "evaluate": {
+    "eff_shaft": 31.128,
+    "w_kJkg": 220.778,
+    "G_air": 26.8233,
+    "EGT_C": 457.84
+   },
+   "funnel": {
+    "eff_shaft": 31.128,
+    "w_kJkg": 220.778,
+    "G_air": 26.8233,
+    "EGT_C": 457.84
+   },
+   "frame3": {
+    "eff_shaft": 31.629,
+    "w_kJkg": 226.257,
+    "EGT_C": 458.175,
+    "P_shaft_kW": 5780.87,
+    "G": 25.55,
+    "source": "frame3/frame3_point_results.json cycle.frame3"
+   },
+   "eta_given": {
+    "eff_shaft": 31.557,
+    "w_kJkg": 225.299,
+    "EGT_C": 457.9
+   },
+   "gtu_cycle": {
+    "eff_shaft": 31.629,
+    "w_kJkg": 226.257,
+    "EGT_C": 458.18,
+    "call": "gtu_cycle.cycle(13.5, 1000, eta_pc, eta_t, eta_t, x_ngv=0, x_rot=0, x_leak=0.015, dp_comb=0.04, dp_duct=0)"
+   },
+   "d_eff_vs_funnel_pp": 0.0004,
+   "d_eff_vs_frame3_pp": -0.501,
+   "d_w_vs_frame3_pct": -2.422,
+   "d_EGT_vs_frame3_K": -0.34,
+   "d_eff_given_vs_gtu_cycle_pp": -0.072,
+   "d_w_given_vs_gtu_cycle_pct": -0.423,
+   "calibration_pp": 2.0
+  },
+  "cycles_5": [
+   {
+    "key": "R00-ic-rh-ibc-none-none",
+    "name": "перебор циклов: простой (R00-ic-rh-ibc-none-none, opt)",
+    "PR": 12.545,
+    "cycles": {
+     "eff_shaft": 31.402,
+     "eff_el": 30.065,
+     "W_air": 25.681,
+     "W_exh": 25.673,
+     "EGT_C": 471.03,
+     "T_rec_in_C": null,
+     "w_kJkg": 230.6
+    },
+    "blocks": {
+     "eff_shaft": 31.366,
+     "eff_el": 30.031,
+     "W_air": 25.756,
+     "W_exh": 25.7452,
+     "EGT_C": 470.59,
+     "T_rec_in_C": null,
+     "w_kJkg": 229.927
+    },
+    "d_eff_pp": -0.036,
+    "d_W_air_pct": 0.292,
+    "d_EGT_K": -0.44
+   },
+   {
+    "key": "R90-ic-rh-ibc-none-none",
+    "name": "перебор циклов: рекуператор 0.90 (R90-ic-rh-ibc-none-none, opt)",
+    "PR": 3.6667,
+    "cycles": {
+     "eff_shaft": 41.529,
+     "eff_el": 39.76,
+     "W_air": 34.187,
+     "W_exh": 33.959,
+     "EGT_C": 244.81,
+     "T_rec_in_C": 715.17,
+     "w_kJkg": 173.22
+    },
+    "blocks": {
+     "eff_shaft": 41.514,
+     "eff_el": 39.747,
+     "W_air": 34.2028,
+     "W_exh": 33.9735,
+     "EGT_C": 244.87,
+     "T_rec_in_C": 715.05,
+     "w_kJkg": 173.144
+    },
+    "d_eff_pp": -0.015,
+    "d_W_air_pct": 0.046,
+    "d_EGT_K": 0.06
+   },
+   {
+    "key": "R90-ic-RH-ibc-none-none",
+    "name": "перебор циклов: рекуператор 0.90 + подогрев (R90-ic-RH-ibc-none-none, opt)",
+    "PR": 8.2229,
+    "cycles": {
+     "eff_shaft": 41.273,
+     "eff_el": 39.515,
+     "W_air": 22.203,
+     "W_exh": 22.157,
+     "EGT_C": 362.87,
+     "T_rec_in_C": 699.9,
+     "w_kJkg": 266.72
+    },
+    "blocks": {
+     "eff_shaft": 41.215,
+     "eff_el": 39.46,
+     "W_air": 22.2383,
+     "W_exh": 22.1905,
+     "EGT_C": 363.21,
+     "T_rec_in_C": 699.75,
+     "w_kJkg": 266.297
+    },
+    "d_eff_pp": -0.058,
+    "d_W_air_pct": 0.159,
+    "d_EGT_K": 0.34
+   },
+   {
+    "key": "R90-IC-rh-ibc-none-none",
+    "name": "перебор циклов: рекуператор 0.90 + промохлаждение (R90-IC-rh-ibc-none-none, opt)",
+    "PR": 5.5907,
+    "cycles": {
+     "eff_shaft": 45.072,
+     "eff_el": 43.153,
+     "W_air": 25.691,
+     "W_exh": 25.568,
+     "EGT_C": 203.58,
+     "T_rec_in_C": 632.44,
+     "w_kJkg": 230.51
+    },
+    "blocks": {
+     "eff_shaft": 45.078,
+     "eff_el": 43.159,
+     "W_air": 25.6869,
+     "W_exh": 25.5629,
+     "EGT_C": 203.53,
+     "T_rec_in_C": 632.23,
+     "w_kJkg": 230.545
+    },
+    "d_eff_pp": 0.006,
+    "d_W_air_pct": -0.016,
+    "d_EGT_K": -0.05
+   },
+   {
+    "key": "R00-ic-rh-ibc-none-fh",
+    "name": "перебор циклов: подогрев топлива (R00-ic-rh-ibc-none-fh, opt)",
+    "PR": 12.32,
+    "cycles": {
+     "eff_shaft": 31.968,
+     "eff_el": 30.607,
+     "W_air": 25.665,
+     "W_exh": 25.65,
+     "EGT_C": 460.19,
+     "T_rec_in_C": null,
+     "w_kJkg": 230.75
+    },
+    "blocks": {
+     "eff_shaft": 31.93,
+     "eff_el": 30.57,
+     "W_air": 25.7369,
+     "W_exh": 25.7197,
+     "EGT_C": 459.77,
+     "T_rec_in_C": null,
+     "w_kJkg": 230.098
+    },
+    "d_eff_pp": -0.038,
+    "d_W_air_pct": 0.28,
+    "d_EGT_K": -0.42
+   }
+  ],
+  "cycles_extra": [
+   {
+    "key": "R00-ic-rh-IBC-none-none",
+    "name": "перебор циклов: IBC (R00-ic-rh-IBC-none-none, opt)",
+    "PR": 13.547,
+    "cycles": {
+     "eff_shaft": 34.182,
+     "eff_el": 32.727,
+     "W_air": 24.25,
+     "W_exh": 24.233,
+     "EGT_C": 160.66,
+     "T_rec_in_C": null,
+     "w_kJkg": 244.21
+    },
+    "blocks": {
+     "eff_shaft": 34.131,
+     "eff_el": 32.678,
+     "W_air": 24.3335,
+     "W_exh": 24.3135,
+     "EGT_C": 160.65,
+     "T_rec_in_C": null,
+     "w_kJkg": 243.368
+    },
+    "d_eff_pp": -0.051,
+    "d_W_air_pct": 0.344,
+    "d_EGT_K": -0.01
+   },
+   {
+    "key": "R00-ic-rh-ibc-real-none",
+    "name": "перебор циклов: горение с ростом давления (25 %) (R00-ic-rh-ibc-real-none, opt)",
+    "PR": 12.943,
+    "cycles": {
+     "eff_shaft": 31.747,
+     "eff_el": 30.395,
+     "W_air": 25.682,
+     "W_exh": 25.67,
+     "EGT_C": 463.98,
+     "T_rec_in_C": null,
+     "w_kJkg": 230.59
+    },
+    "blocks": {
+     "eff_shaft": 31.705,
+     "eff_el": 30.355,
+     "W_air": 25.7638,
+     "W_exh": 25.7488,
+     "EGT_C": 463.54,
+     "T_rec_in_C": null,
+     "w_kJkg": 229.857
+    },
+    "d_eff_pp": -0.042,
+    "d_W_air_pct": 0.319,
+    "d_EGT_K": -0.44
+   },
+   {
+    "key": "R00-ic-rh-ibc-none-steam",
+    "name": "перебор циклов: паровой риформинг (R00-ic-rh-ibc-none-steam, opt)",
+    "PR": 15.663,
+    "cycles": {
+     "eff_shaft": 36.939,
+     "eff_el": 35.366,
+     "W_air": 22.292,
+     "W_exh": 23.357,
+     "EGT_C": 291.94,
+     "T_rec_in_C": null,
+     "w_kJkg": 265.66
+    },
+    "blocks": {
+     "eff_shaft": 36.877,
+     "eff_el": 35.307,
+     "W_air": 22.3884,
+     "W_exh": 23.4563,
+     "EGT_C": 291.44,
+     "T_rec_in_C": null,
+     "w_kJkg": 264.512
+    },
+    "d_eff_pp": -0.062,
+    "d_W_air_pct": 0.432,
+    "d_EGT_K": -0.5
+   }
+  ],
+  "gtu_cycle_recup": {
+   "PR": 6.5,
+   "T41": 1000.0,
+   "eps": 0.85,
+   "gtu_cycle": {
+    "eff": 39.311,
+    "w": 216.823,
+    "T3r_C": 551.26,
+    "EGT_C": 602.76
+   },
+   "blocks": {
+    "eff": 39.269,
+    "w": 216.538,
+    "T3r_C": 551.18,
+    "T_rec_in_C": 602.61
+   },
+   "d_eff_pp": -0.042,
+   "d_w_pct": -0.132,
+   "d_T3r_K": -0.08,
+   "note": "gtu_cycle.recup: EGT_C - температура газа за турбиной (на входе рекуператора); T3r - воздух за рекуператором"
+  },
+  "tolerances": {
+   "same_model": "до округления (0,005 п. п.)",
+   "other_property_impl_pp": 0.15,
+   "flow_pct": 0.6,
+   "temp_K": 2.0,
+   "frame3_calibration_pp": 2.0
+  }
+ },
+ "mass_reference": {
+  "engine_kg_fleet": 3290,
+  "record": "fleet/gtu_fleet_taurus60.json (MD - единственная масса двигателя в паспортах)",
+  "funnel_estimate_frame3_kg": 1463,
+  "ratio": 2.249,
+  "note": "формула массы воронки (funnel_l0.envelope) на опорной точке KV-3 даёт меньше паспортной массы двигателя Taurus 60 в указанное число раз: модель массы должна калиброваться по машинам, а не брать эту оценку"
+ },
+ "catalog": {
+  "blocks": {
+   "fuel": {
+    "title": "1. Подготовка топлива",
+    "options": {
+     "нет": {
+      "name": "топливный газ пакета как есть",
+      "trl": 9,
+      "trl_basis": "традиция",
+      "water": false,
+      "note": "точка трека: метан, 15 °C (gtu_cycle, gtu_explore)"
+     },
+     "подогрев": {
+      "name": "подогрев топливного газа выхлопом до 400 °C",
+      "trl": 8,
+      "trl_basis": "подогрев топливного газа — обычная практика (оценка)",
+      "water": false,
+      "note": "cycles: +0,55 п. п. у простого KV-3 за 2 детали (README organic/cycles, оценка)"
+     },
+     "паровой риформинг": {
+      "name": "паровой риформинг метана теплом выхлопа (химическая рекуперация, нужна вода)",
+      "trl": 4,
+      "trl_basis": "химически рекуперированная ГТУ — расчётные работы (Kesser, Hoffman, Baughn 1994; Pashchenko 2022 — по выдержке поиска); серийных малых ГТУ нет — оценка 4",
+      "water": true,
+      "note": "cycles: выигрыш простого KV-3 почти целиком от впрыска пара, а не от химии; химия заметна при газе 730 °C (рекуператор + подогрев) - оценка"
+     },
+     "сухой риформинг": {
+      "name": "сухой риформинг на рециркуляте выхлопа (без воды)",
+      "trl": 3,
+      "trl_basis": "риформинг газом рециркуляции на ГТУ — нет известных образцов (оценка 3)",
+      "water": false,
+      "note": "cycles: кислорода в выхлопе в 3-4 раза больше, чем CO2 и H2O, - он сжигает метан, теплотворность падает, сажа термодинамически выгодна (активность углерода 7-10) - оценка"
+     }
+    },
+    "params": {
+     "T_fh_max_C": 400.0,
+     "dT_app_K": 40.0,
+     "dp_fh_gas": 0.002,
+     "sc": [
+      1.5,
+      2.0,
+      3.0
+     ],
+     "R_egr": [
+      0.5,
+      1.0,
+      2.0,
+      4.0
+     ],
+     "source": "organic/cycles A"
+    },
+    "model": "подогрев - в цепочке; риформинг - приращение cycles.evaluate (Cantera) к цепочке концепции"
+   },
+   "compressor": {
+    "title": "2. Компрессор",
+    "options": {
+     "1Ц": "одно центробежное колесо (до π 7 - прецедент OPRA OP16, выше - трансзвуковое)",
+     "2Ц": "два центробежных колеса (точка KV-3 frame3)",
+     "Д": "одно диагональное колесо",
+     "ОЦ": "осевые ступени (1-3) + центробежное колесо"
+    },
+    "pi_range": {
+     "1Ц": [
+      3.0,
+      8.0
+     ],
+     "Д": [
+      2.5,
+      6.0
+     ],
+     "2Ц": [
+      6.0,
+      20.0
+     ],
+     "('ОЦ', 1)": [
+      4.0,
+      14.0
+     ],
+     "('ОЦ', 2)": [
+      5.0,
+      18.0
+     ],
+     "('ОЦ', 3)": [
+      6.0,
+      22.0
+     ]
+    },
+    "materials": {
+     "Ti64": {
+      "U_forge": 620.0,
+      "U_cast_print": 558.0
+     },
+     "Al": {
+      "U_forge": 520.0,
+      "U_cast_print": 468.0
+     },
+     "Ni": {
+      "U_forge": 480.0,
+      "U_cast_print": 480.0
+     }
+    },
+    "intercooler": {
+     "eps": 0.8,
+     "dp": 0.02,
+     "Cr": 1.5,
+     "dp_fan": 500.0,
+     "eta_fan": 0.65,
+     "eta_motor": 0.95,
+     "trl": 6,
+     "trl_basis": "промохладитель воздух-воздух на стационарной ГТУ: близкие образцы — WR-21 (промохлаждение водой, отказы охладителя — по выдержке поиска); воздух-воздух малой ГТУ — оценка 6",
+     "source": "organic/cycles A"
+    },
+    "model": "КПД ступеней - funnel_space.eta_comp + funnel_l0.corrections (зазор, быстроходность по геометрии derive)"
+   },
+   "combustor": {
+    "title": "3. Камера сгорания",
+    "options": {
+     "LPP": {
+      "name": "бедная предварительно перемешанная с пассивным пилотом (один клапан)",
+      "trl": 9,
+      "trl_basis": "comb_space.TRL_SCHEME[LPP] (STATE_OF_ART.md, оценка)",
+      "premix": true,
+      "pressure_gain": false,
+      "dp_best_annular": 0.0484938,
+      "dp_min_scheme": 0.0270317,
+      "parts_best_annular": 4,
+      "NOx_100_best_annular": 316.795,
+      "CO_100_best_annular": 11.922,
+      "l0_variants": 37449,
+      "l0_feasible": 12948,
+      "l0_hard_ok": 0
+     },
+     "FLOX": {
+      "name": "FLOX / MILD: струйная стабилизация с рециркуляцией продуктов",
+      "trl": 5,
+      "trl_basis": "comb_space.TRL_SCHEME[FLOX] (STATE_OF_ART.md, оценка)",
+      "premix": true,
+      "pressure_gain": false,
+      "dp_best_annular": 0.0692154,
+      "dp_min_scheme": 0.0321538,
+      "parts_best_annular": 5,
+      "NOx_100_best_annular": 207.549,
+      "CO_100_best_annular": 4.39842,
+      "l0_variants": 37448,
+      "l0_feasible": 11304,
+      "l0_hard_ok": 0
+     },
+     "TVC": {
+      "name": "захваченный вихрь (полость с вихрем - пассивный пилот)",
+      "trl": 5,
+      "trl_basis": "comb_space.TRL_SCHEME[TVC] (STATE_OF_ART.md, оценка)",
+      "premix": true,
+      "pressure_gain": false,
+      "dp_best_annular": 0.0676065,
+      "dp_min_scheme": 0.0266735,
+      "parts_best_annular": 5,
+      "NOx_100_best_annular": 72.6212,
+      "CO_100_best_annular": 4.14727,
+      "l0_variants": 37449,
+      "l0_feasible": 18635,
+      "l0_hard_ok": 0
+     },
+     "CAT": {
+      "name": "каталитическая (штраф готовности)",
+      "trl": 6,
+      "trl_basis": "comb_space.TRL_SCHEME[CAT] (STATE_OF_ART.md, оценка)",
+      "premix": false,
+      "pressure_gain": false,
+      "dp_best_annular": 0.0461195,
+      "dp_min_scheme": 0.0263886,
+      "parts_best_annular": 14,
+      "NOx_100_best_annular": 1.66361,
+      "CO_100_best_annular": 1.78457,
+      "l0_variants": 37450,
+      "l0_feasible": 14525,
+      "l0_hard_ok": 0
+     },
+     "RDC": {
+      "name": "вращающаяся детонация, рост давления (штраф готовности)",
+      "trl": 3,
+      "trl_basis": "make_model.TRL[rdc]: вращающаяся детонация: «still experimental»; ракетные RDE - TRL 4 из 9; NETL 2025 - проекты интеграции в ГТУ (netl.doe.gov, FY25 Advanced Turbines Peer Review)",
+      "premix": false,
+      "pressure_gain": true,
+      "dp_best_annular": 0.138321,
+      "dp_min_scheme": 0.0422471,
+      "parts_best_annular": 5,
+      "NOx_100_best_annular": 13.9552,
+      "CO_100_best_annular": 2.76383,
+      "l0_variants": 37449,
+      "l0_feasible": 12558,
+      "l0_hard_ok": 0
+     },
+     "ВР": {
+      "name": "волновой ротор, рост давления (штраф готовности)",
+      "trl": 3,
+      "trl_basis": "make_model.TRL[волновой_ротор]: стендовые испытания четырёхпортового волнового ротора NASA Glenn; испытание на двигателе - «необходимый шаг» (ntrs.nasa.gov/citations/19960038355)",
+      "premix": false,
+      "pressure_gain": true,
+      "dp_best_annular": null,
+      "dp_min_scheme": null,
+      "parts_best_annular": null,
+      "NOx_100_best_annular": null,
+      "CO_100_best_annular": null,
+      "l0_variants": null,
+      "l0_feasible": null,
+      "l0_hard_ok": null
+     }
+    },
+    "targets": {
+     "nox": 9.0,
+     "co": 15.0,
+     "tad_min": 1750,
+     "tad_max": 1850,
+     "valves": 1,
+     "dp_obj": 0.04
+    },
+    "dp_track": {
+     "кольцевая": 0.04,
+     "выносная": 0.05
+    },
+    "T3_premix_max_C": 650.0,
+    "T3_cat_min_K": 723.0,
+    "pgc": {
+     "f_real": 0.25,
+     "deta_t": 0.02,
+     "dp_inlet": 0.04,
+     "model": "cycles.pgc_gain"
+    },
+    "owner_decision": "один клапан на каждое топливо без приводов; частичную нагрузку держит пассивный элемент (README трека, решения 15.11.2026)",
+    "source": "combustor/l0_aws (262 144 варианта KV-3), combustor/targets.json, comb_space.TRL_SCHEME"
+   },
+   "turbine": {
+    "title": "4. Турбины",
+    "cooling": {
+     "U": {
+      "name": "без охлаждения (литые неохлаждаемые лопатки; точка KV-3)",
+      "x_ngv": 0.0,
+      "x_rotor": 0.0,
+      "t41_ngv": 1000.0,
+      "basis": "неохлаждаемый сопловой аппарат: класс U gtu_family (T41 <= 1000 C)"
+     },
+     "N": {
+      "name": "охлаждаемый сопловой аппарат, рабочие лопатки без охлаждения",
+      "x_ngv": 0.03,
+      "x_rotor": 0.0,
+      "t41_ngv": 1200.0,
+      "basis": "охлаждаемый сопловой аппарат: класс K gtu_family (1200 C)"
+     },
+     "K": {
+      "name": "охлаждаемые сопловой аппарат и рабочие лопатки (монокристалл - до 1200 °C)",
+      "x_ngv": 0.055,
+      "x_rotor": 0.055,
+      "t41_ngv": 1200.0,
+      "basis": "класс K gtu_family"
+     },
+     "P": {
+      "name": "печатные каналы охлаждения у стенки (сопловой аппарат; колесо - если напечатано)",
+      "x_ngv": 0.025,
+      "x_rotor": 0.03,
+      "t41_ngv": 1250.0,
+      "basis": "оценка: печатные каналы охлаждения (не проверено)"
+     },
+     "C": {
+      "name": "керамика (Si3N4 колесо, CMC статор) без охлаждения",
+      "x_ngv": 0.0,
+      "x_rotor": 0.0,
+      "t41_ngv": 1350.0,
+      "basis": "оценка: цель CGT302 - 1350 C (по выдержке поиска)"
+     }
+    },
+    "materials": {
+     "blades": {
+      "литьё": [
+       "K418",
+       "CM247LC",
+       "SC"
+      ],
+      "печать": [
+       "IN718",
+       "Haynes282",
+       "CM247LC"
+      ],
+      "керамика": [
+       "Si3N4"
+      ]
+     },
+     "hot": {
+      "литьё": [
+       "K438"
+      ],
+      "печать": [
+       "HastX",
+       "IN625",
+       "Haynes282"
+      ],
+      "керамика": [
+       "CMC"
+      ]
+     }
+    },
+    "nt_auto": {
+     "psi_axial": 1.6,
+     "nu_radial": 0.6
+    },
+    "model": "КПД - funnel_space.quick_perf (eta_axial по ψ, U/C0 радиальной); пределы - make_model"
+   },
+   "hx": {
+    "title": "5. Теплообменники",
+    "recup": {
+     "eps_range": [
+      0.7,
+      0.92
+     ],
+     "dp_air": 0.025,
+     "dp_gas": 0.035,
+     "T_rec_max_C": 700.0,
+     "techs": {
+      "фольга": "первичная поверхность из гофрированной фольги (как Mercury 50), сварка/пайка",
+      "печать": "печатная сердцевина TPMS (гироид), LPBF, Inconel 625"
+     },
+     "trl_foil": 9,
+     "trl_print": 4
+    },
+    "reheat": {
+     "dp": 0.03,
+     "x_rh": [
+      0.35,
+      0.5,
+      0.65
+     ],
+     "trl": 5,
+     "trl_basis": "последовательное сгорание доказано на больших ГТУ (GT24/26 — по памяти); межтурбинная камера малой ГТУ — оценка 5"
+    },
+    "ibc": {
+     "eta_t": 0.86,
+     "eta_c": 0.82,
+     "eps": 0.85,
+     "dp": 0.02,
+     "plow": [
+      0.25,
+      0.3,
+      0.35,
+      0.4,
+      0.5,
+      0.6,
+      0.7
+     ],
+     "Cr": 1.5,
+     "dp_fan": 500.0,
+     "eta_fan": 0.65,
+     "eta_motor": 0.95,
+     "trl": 4,
+     "trl_basis": "обращённый цикл Брайтона — лабораторные и расчётные работы (Bianchi, De Pascale 2011 — по выдержке поиска)"
+    },
+    "model": "цепочка + размеры cycles.size_hx (ламинарные каналы) + детали cycles.parts"
+   },
+   "shaft": {
+    "title": "6. Вал и стык пакета",
+    "options": {
+     "прямой": "одновальный, вал двигателя = вход редуктора (генераторный) или приводной машины пакета",
+     "свободная СТ": "газогенератор на своей частоте + свободная силовая турбина на частоте пакета",
+     "быстроходный": "одновальный на своей частоте; выход через существующий корпус редуктора пакета со сменной зубчатой парой (только генераторные пакеты)"
+    },
+    "hs_ratio": [
+     0.7,
+     1.6
+    ],
+    "hs_trl": 7,
+    "soft_tolerance": {
+     "alpha": 0.2,
+     "dT": 100.0
+    },
+    "note": "мягкий допуск пакета: воздух и выхлоп до +20 %, выхлоп до +100 °C"
+   }
+  },
+  "compatibility": [
+   {
+    "id": "ic_stages",
+    "a": "компрессор 1Ц / Д",
+    "b": "промохлаждение",
+    "hard": true,
+    "why": "одна ступень сжатия: охладителю негде стоять"
+   },
+   {
+    "id": "reheat_radial",
+    "a": "подогрев на одном валу",
+    "b": "радиальная турбина",
+    "hard": true,
+    "why": "межтурбинной камере нет места между радиальными колёсами (оценка); на одном валу нужна осевая турбина не меньше 2 ступеней"
+   },
+   {
+    "id": "cool_C",
+    "a": "класс охлаждения C",
+    "b": "осевая турбина / не Si3N4",
+    "hard": true,
+    "why": "керамическое колесо - только радиальное (make_model.CERAMIC)"
+   },
+   {
+    "id": "cool_P_print",
+    "a": "класс охлаждения P",
+    "b": "литая горячая часть",
+    "hard": true,
+    "why": "печатные каналы - в печатном сопловом аппарате"
+   },
+   {
+    "id": "sc_axial",
+    "a": "монокристалл SC",
+    "b": "радиальная турбина",
+    "hard": true,
+    "why": "монокристаллические лопатки - осевая турбина"
+   },
+   {
+    "id": "ni_wheel_join",
+    "a": "колесо компрессора Ni",
+    "b": "сборный ротор",
+    "hard": true,
+    "why": "никелевое колесо - заодно или сваркой с турбиной"
+   },
+   {
+    "id": "hs_generator_only",
+    "a": "быстроходный вал через редуктор",
+    "b": "приводной (механический) пакет",
+    "hard": true,
+    "why": "только генераторные пакеты: у привода частота машины меняется с режимом"
+   },
+   {
+    "id": "single_shaft_md",
+    "a": "одновальный прямой привод",
+    "b": "приводной (механический) пакет",
+    "hard": true,
+    "why": "приводу нужна свободная силовая турбина"
+   },
+   {
+    "id": "cluster_free_pt",
+    "a": "кластер ядер",
+    "b": "одновальный / двусторонний вход",
+    "hard": true,
+    "why": "ядра работают на общую силовую турбину, вход односторонний"
+   },
+   {
+    "id": "comb_cat_preburner",
+    "a": "каталитическая камера",
+    "b": "воздух на входе холоднее 723 K (без рекуператора)",
+    "hard": true,
+    "why": "нужна предгорелка со своим клапаном - против решения владельца «один клапан на топливо»"
+   },
+   {
+    "id": "comb_T4_flame",
+    "a": "камера предварительного смешения (LPP, TVC, FLOX)",
+    "b": "газ за камерой горячее 1850 K",
+    "hard": true,
+    "why": "адиабатическая температура зоны пламени выше 1850 K - NOx больше 9 ppm (targets.json)"
+   },
+   {
+    "id": "recup_T",
+    "a": "рекуператор",
+    "b": "газ на входе выше 700 °C",
+    "hard": true,
+    "why": "LIM T_rec_max (gtu_explore); печатный IN625 800 °C - нужна проверка ползучести"
+   },
+   {
+    "id": "pnp_water",
+    "a": "паровой риформинг",
+    "b": "Plug&Play",
+    "hard": false,
+    "why": "нужна вода (водоподготовка, насос, бак) - в пакете её нет; Plug&Play «нет»"
+   },
+   {
+    "id": "egr_o2",
+    "a": "сухой риформинг на рециркуляте",
+    "b": "выхлоп ГТУ",
+    "hard": false,
+    "why": "кислорода в выхлопе в 3-4 раза больше, чем CO2 и H2O: метан сгорает, теплотворность падает, сажа выгодна (перебор циклов)"
+   },
+   {
+    "id": "pgc_recup",
+    "a": "горение с ростом давления (RDC, ВР)",
+    "b": "рекуператор",
+    "hard": false,
+    "why": "горячий воздух на входе снижает выигрыш давления и повышает риск самовоспламенения (оценка); шаблоны воронки RDC и ВР - без рекуператора"
+   },
+   {
+    "id": "pgc_cool_U",
+    "a": "горение с ростом давления (RDC, ВР)",
+    "b": "класс охлаждения U",
+    "hard": false,
+    "why": "нестационарный горячий поток перед сопловым аппаратом (оценка); шаблон воронки RDC - классы N, K, P"
+   },
+   {
+    "id": "ibc_after_recup",
+    "a": "IBC",
+    "b": "рекуператор ε >= 0,85",
+    "hard": false,
+    "why": "за рекуператором газ холодный - IBC почти не даёт работы"
+   },
+   {
+    "id": "fuel_valves_reheat",
+    "a": "повторный подогрев",
+    "b": "один клапан на топливо",
+    "hard": false,
+    "why": "вторая камера: топливо делится пассивно (дроссель) или вторым клапаном - против цели fuel_valves; не проверено"
+   },
+   {
+    "id": "aux_pnp",
+    "a": "промохлаждение, IBC, вынесенный рекуператор",
+    "b": "Plug&Play",
+    "hard": false,
+    "why": "модули с вентиляторами вне двигателя: рама, укрытие, вентиляция - «частично» или «нет» по объёму (перебор циклов)"
+   },
+   {
+    "id": "shell_fit",
+    "a": "оболочка",
+    "b": "габарит камеры LPBF",
+    "hard": true,
+    "why": "холодная и горячая части целиком - в камере принтера (funnel_space.shell_fit)"
+   }
+  ],
+  "defaults": {
+   "kv": "KV-3",
+   "name": null,
+   "fuel": {
+    "prep": "нет",
+    "T_max": null,
+    "sc": 2.0,
+    "R_egr": 1.0
+   },
+   "compressor": {
+    "arch": "2Ц",
+    "n_ax": 0,
+    "inlet": "одно",
+    "mat": "Ti64",
+    "make": "поковка",
+    "pi": null,
+    "split": null,
+    "mu": null,
+    "kcm": 0.28,
+    "zc": 11,
+    "intercool": "нет",
+    "ic_after": null
+   },
+   "combustor": {
+    "scheme": "LPP",
+    "chamber": "кольцевая",
+    "dp_source": "comb_l0",
+    "pgc_real": null,
+    "dp": null
+   },
+   "turbine": {
+    "type": "О",
+    "nt": "auto",
+    "cool": "U",
+    "mat": "SC",
+    "make": "литьё",
+    "hot_make": "литьё",
+    "hot_mat": "K438",
+    "t41": 1000.0,
+    "lt": null,
+    "phit": 0.5,
+    "npt": "auto",
+    "kUpt": 1.0,
+    "phipt": 0.5,
+    "zt": null,
+    "zn": null
+   },
+   "hx": {
+    "recup": 0.0,
+    "recup_make": "фольга",
+    "recup_integral": 0,
+    "reheat": false,
+    "x_rh": 0.5,
+    "t_rh": null,
+    "ibc": false
+   },
+   "shaft": {
+    "drive": "прямой",
+    "phi1": null,
+    "n_out": null
+   },
+   "build": {
+    "rotor_join": "сборный",
+    "bear": "масло",
+    "case": "картридж",
+    "conn": "болты",
+    "cores": 1,
+    "comb_make": "обработка",
+    "case_make": "литьё",
+    "split_bl": 0,
+    "kD_case": 1.9
+   },
+   "eta": {
+    "source": "воронка"
+   },
+   "options": {
+    "rec_model": "enthalpy",
+    "T_rec_max": null
+   }
+  }
+ },
+ "examples": [
+  {
+   "name": "KV-3 frame3: одновальный 2Ц, осевая 3 ст., класс U",
+   "kv": "KV-3",
+   "feasible": false,
+   "reject": [
+    "pkg_Wexh",
+    "soft_G"
+   ],
+   "warnings": [
+    "nox_gas"
+   ],
+   "eff_shaft": 31.128,
+   "eff_el": 29.802,
+   "w_kJkg": 220.778,
+   "G_air": 26.8233,
+   "W_exh": 26.7993,
+   "EGT_C": 457.84,
+   "T41_C": 1000.0,
+   "PR": 13.5,
+   "T_rec_in_C": null,
+   "water_t_h": 0.0,
+   "nt": 3,
+   "npt": 0,
+   "dG_pct": 25.28,
+   "dWexh_pct": 23.1,
+   "dEGT": -52.2,
+   "P_at_G_cap_kW": 5672.2,
+   "parts_engine": 281,
+   "assemblies": 10,
+   "aux_added": 0,
+   "n_eff_total": 568.3,
+   "s_parts": 5.18,
+   "trl_min": 9,
+   "k_trl": 1.0,
+   "trl_limiting": [
+    "лопатки_SC",
+    "традиция",
+    "камера: LPP"
+   ],
+   "plugplay": 0.0,
+   "pnp_cycles": "нет",
+   "pp_blocked": [
+    "вход",
+    "выхлоп"
+   ],
+   "n_rpm": 14950,
+   "D_env": 1.8425,
+   "envelope": {
+    "L": 1.511,
+    "W": 1.842,
+    "H": 1.842,
+    "V": 5.128
+   },
+   "hx_core_mass_kg": 0,
+   "mass_funnel_estimate_kg": 1463,
+   "funnel_score": 3.7736,
+   "comb_dp": 0.04,
+   "runtime_s": 0.0016
+  },
+  {
+   "name": "простой 2Ц π 13,5, LPP",
+   "kv": "KV-3",
+   "feasible": false,
+   "reject": [
+    "pkg_Wexh",
+    "soft_G"
+   ],
+   "warnings": [
+    "nox_gas"
+   ],
+   "eff_shaft": 30.738,
+   "eff_el": 29.429,
+   "w_kJkg": 217.493,
+   "G_air": 27.2285,
+   "W_exh": 27.2032,
+   "EGT_C": 459.31,
+   "T41_C": 1000.0,
+   "PR": 13.5,
+   "T_rec_in_C": null,
+   "water_t_h": 0.0,
+   "nt": 3,
+   "npt": 0,
+   "dG_pct": 27.18,
+   "dWexh_pct": 24.96,
+   "dEGT": -50.7,
+   "P_at_G_cap_kW": 5587.8,
+   "parts_engine": 285,
+   "assemblies": 10,
+   "aux_added": 0,
+   "n_eff_total": 577.9,
+   "s_parts": 5.138,
+   "trl_min": 9,
+   "k_trl": 1.0,
+   "trl_limiting": [
+    "лопатки_SC",
+    "традиция",
+    "камера: LPP"
+   ],
+   "plugplay": 0.0,
+   "pnp_cycles": "нет",
+   "pp_blocked": [
+    "вход",
+    "выхлоп"
+   ],
+   "n_rpm": 14950,
+   "D_env": 1.9655,
+   "envelope": {
+    "L": 1.573,
+    "W": 1.966,
+    "H": 1.966,
+    "V": 6.078
+   },
+   "hx_core_mass_kg": 0,
+   "mass_funnel_estimate_kg": 1581,
+   "funnel_score": 3.8999,
+   "comb_dp": 0.0485,
+   "runtime_s": 0.0016
+  },
+  {
+   "name": "+ подогрев топлива",
+   "kv": "KV-3",
+   "feasible": false,
+   "reject": [
+    "pkg_Wexh",
+    "soft_G"
+   ],
+   "warnings": [
+    "nox_gas"
+   ],
+   "eff_shaft": 31.344,
+   "eff_el": 30.009,
+   "w_kJkg": 216.659,
+   "G_air": 27.3333,
+   "W_exh": 27.299,
+   "EGT_C": 445.84,
+   "T41_C": 1000.0,
+   "PR": 13.5,
+   "T_rec_in_C": null,
+   "water_t_h": 0.0,
+   "nt": 3,
+   "npt": 0,
+   "dG_pct": 27.67,
+   "dWexh_pct": 25.4,
+   "dEGT": -64.2,
+   "P_at_G_cap_kW": 5566.4,
+   "parts_engine": 285,
+   "assemblies": 10,
+   "aux_added": 2,
+   "n_eff_total": 579.9,
+   "s_parts": 5.13,
+   "trl_min": 8,
+   "k_trl": 0.9444,
+   "trl_limiting": [
+    "топливо: подогрев"
+   ],
+   "plugplay": 0.0,
+   "pnp_cycles": "нет",
+   "pp_blocked": [
+    "вход",
+    "выхлоп"
+   ],
+   "n_rpm": 14950,
+   "D_env": 1.9655,
+   "envelope": {
+    "L": 1.573,
+    "W": 1.966,
+    "H": 1.966,
+    "V": 6.078
+   },
+   "hx_core_mass_kg": 93.9,
+   "mass_funnel_estimate_kg": 1581,
+   "funnel_score": 3.708,
+   "comb_dp": 0.0485,
+   "runtime_s": 0.0018
+  },
+  {
+   "name": "+ паровой риформинг (S/C 2)",
+   "kv": "KV-3",
+   "feasible": true,
+   "reject": [],
+   "warnings": [
+    "pnp_water",
+    "nox_gas"
+   ],
+   "eff_shaft": 34.292,
+   "eff_el": 32.832,
+   "w_kJkg": 247.923,
+   "G_air": 23.8865,
+   "W_exh": 24.6587,
+   "EGT_C": 352.9,
+   "T41_C": 1000.0,
+   "PR": 13.5,
+   "T_rec_in_C": null,
+   "water_t_h": 2.829,
+   "nt": 3,
+   "npt": 0,
+   "dG_pct": 11.57,
+   "dWexh_pct": 13.27,
+   "dEGT": -157.1,
+   "P_at_G_cap_kW": 6369.6,
+   "parts_engine": 285,
+   "assemblies": 10,
+   "aux_added": 6,
+   "n_eff_total": 583.9,
+   "s_parts": 5.113,
+   "trl_min": 4,
+   "k_trl": 0.7222,
+   "trl_limiting": [
+    "топливо: паровой риформинг"
+   ],
+   "plugplay": 7.254,
+   "pnp_cycles": "нет",
+   "pp_blocked": [],
+   "n_rpm": 14950,
+   "D_env": 1.9655,
+   "envelope": {
+    "L": 1.573,
+    "W": 1.966,
+    "H": 1.966,
+    "V": 6.078
+   },
+   "hx_core_mass_kg": 0,
+   "mass_funnel_estimate_kg": 1568,
+   "funnel_score": 4.2432,
+   "comb_dp": 0.0485,
+   "runtime_s": 0.0089
+  },
+  {
+   "name": "+ сухой риформинг (R 1)",
+   "kv": "KV-3",
+   "feasible": false,
+   "reject": [
+    "pkg_Wexh",
+    "soft_G"
+   ],
+   "warnings": [
+    "egr_o2",
+    "nox_gas"
+   ],
+   "eff_shaft": 29.887,
+   "eff_el": 28.614,
+   "w_kJkg": 218.42,
+   "G_air": 27.1129,
+   "W_exh": 27.1002,
+   "EGT_C": 462.98,
+   "T41_C": 1000.0,
+   "PR": 13.5,
+   "T_rec_in_C": null,
+   "water_t_h": 0.0,
+   "nt": 3,
+   "npt": 0,
+   "dG_pct": 26.64,
+   "dWexh_pct": 24.48,
+   "dEGT": -47.0,
+   "P_at_G_cap_kW": 5611.6,
+   "parts_engine": 285,
+   "assemblies": 10,
+   "aux_added": 10,
+   "n_eff_total": 587.9,
+   "s_parts": 5.096,
+   "trl_min": 3,
+   "k_trl": 0.6667,
+   "trl_limiting": [
+    "топливо: сухой риформинг"
+   ],
+   "plugplay": 0.0,
+   "pnp_cycles": "нет",
+   "pp_blocked": [
+    "вход",
+    "выхлоп"
+   ],
+   "n_rpm": 14950,
+   "D_env": 1.9655,
+   "envelope": {
+    "L": 1.573,
+    "W": 1.966,
+    "H": 1.966,
+    "V": 6.078
+   },
+   "hx_core_mass_kg": 0,
+   "mass_funnel_estimate_kg": 1580,
+   "funnel_score": 2.5629,
+   "comb_dp": 0.0485,
+   "runtime_s": 0.0076
+  },
+  {
+   "name": "промохлаждение + рекуператор 0,90",
+   "kv": "KV-3",
+   "feasible": false,
+   "reject": [
+    "phi1",
+    "turb_ansq"
+   ],
+   "warnings": [
+    "nox_gas"
+   ],
+   "eff_shaft": 45.741,
+   "eff_el": 43.793,
+   "w_kJkg": 239.314,
+   "G_air": 24.7458,
+   "W_exh": 24.6321,
+   "EGT_C": 204.31,
+   "T41_C": 1000.0,
+   "PR": 6.0,
+   "T_rec_in_C": 621.11,
+   "water_t_h": 0.0,
+   "nt": 2,
+   "npt": 0,
+   "dG_pct": 15.58,
+   "dWexh_pct": 13.15,
+   "dEGT": -305.7,
+   "P_at_G_cap_kW": 6148.4,
+   "parts_engine": 217,
+   "assemblies": 11,
+   "aux_added": 13,
+   "n_eff_total": 439.7,
+   "s_parts": 5.814,
+   "trl_min": 6,
+   "k_trl": 0.8333,
+   "trl_limiting": [
+    "промохлаждение воздух-воздух"
+   ],
+   "plugplay": 7.22,
+   "pnp_cycles": "частично",
+   "pp_blocked": [],
+   "n_rpm": 14950,
+   "D_env": 1.5515,
+   "envelope": {
+    "L": 1.131,
+    "W": 4.78,
+    "H": 1.552,
+    "V": 8.391
+   },
+   "hx_core_mass_kg": 4572.6,
+   "mass_funnel_estimate_kg": 4301,
+   "funnel_score": 5.1999,
+   "comb_dp": 0.0485,
+   "runtime_s": 0.0033
+  },
+  {
+   "name": "рекуператор 0,90 (фольга) + подогрев, π 8,2",
+   "kv": "KV-3",
+   "feasible": false,
+   "reject": [
+    "recup_T",
+    "turb_ansq"
+   ],
+   "warnings": [
+    "comb_T3_premix",
+    "fuel_valves_reheat",
+    "nox_gas"
+   ],
+   "eff_shaft": 41.599,
+   "eff_el": 39.828,
+   "w_kJkg": 265.665,
+   "G_air": 22.2912,
+   "W_exh": 22.24,
+   "EGT_C": 357.27,
+   "T41_C": 1000.0,
+   "PR": 8.2,
+   "T_rec_in_C": 704.14,
+   "water_t_h": 0.0,
+   "nt": 2,
+   "npt": 0,
+   "dG_pct": 4.12,
+   "dWexh_pct": 2.16,
+   "dEGT": -152.7,
+   "P_at_G_cap_kW": 6825.5,
+   "parts_engine": 220,
+   "assemblies": 11,
+   "aux_added": 10,
+   "n_eff_total": 445.3,
+   "s_parts": 5.784,
+   "trl_min": 5,
+   "k_trl": 0.7778,
+   "trl_limiting": [
+    "повторный подогрев (межтурбинная камера)"
+   ],
+   "plugplay": 6.995,
+   "pnp_cycles": "частично",
+   "pp_blocked": [],
+   "n_rpm": 14950,
+   "D_env": 1.6968,
+   "envelope": {
+    "L": 1.259,
+    "W": 4.05,
+    "H": 1.697,
+    "V": 8.652
+   },
+   "hx_core_mass_kg": 2147.6,
+   "mass_funnel_estimate_kg": 3680,
+   "funnel_score": 4.7757,
+   "comb_dp": 0.0485,
+   "runtime_s": 0.0034
+  },
+  {
+   "name": "рекуператор 0,90 (печать) + подогрев, π 8,2",
+   "kv": "KV-3",
+   "feasible": false,
+   "reject": [
+    "recup_T",
+    "turb_ansq"
+   ],
+   "warnings": [
+    "comb_T3_premix",
+    "fuel_valves_reheat",
+    "nox_gas"
+   ],
+   "eff_shaft": 41.599,
+   "eff_el": 39.828,
+   "w_kJkg": 265.665,
+   "G_air": 22.2912,
+   "W_exh": 22.24,
+   "EGT_C": 357.27,
+   "T41_C": 1000.0,
+   "PR": 8.2,
+   "T_rec_in_C": 704.14,
+   "water_t_h": 0.0,
+   "nt": 2,
+   "npt": 0,
+   "dG_pct": 4.12,
+   "dWexh_pct": 2.16,
+   "dEGT": -152.7,
+   "P_at_G_cap_kW": 6825.5,
+   "parts_engine": 222,
+   "assemblies": 11,
+   "aux_added": 12,
+   "n_eff_total": 449.3,
+   "s_parts": 5.762,
+   "trl_min": 4,
+   "k_trl": 0.7222,
+   "trl_limiting": [
+    "печать_рекуператор"
+   ],
+   "plugplay": 6.995,
+   "pnp_cycles": "частично",
+   "pp_blocked": [],
+   "n_rpm": 14950,
+   "D_env": 1.6968,
+   "envelope": {
+    "L": 1.259,
+    "W": 6.184,
+    "H": 1.697,
+    "V": 13.212
+   },
+   "hx_core_mass_kg": 8034.7,
+   "mass_funnel_estimate_kg": 11039,
+   "funnel_score": 4.1574,
+   "comb_dp": 0.0485,
+   "runtime_s": 0.0034
+  },
+  {
+   "name": "рекуператор 0,90 + подогрев, π 13,5 (как есть)",
+   "kv": "KV-3",
+   "feasible": true,
+   "reject": [],
+   "warnings": [
+    "fuel_valves_reheat",
+    "nox_gas"
+   ],
+   "eff_shaft": 36.468,
+   "eff_el": 34.915,
+   "w_kJkg": 275.353,
+   "G_air": 21.5069,
+   "W_exh": 21.5073,
+   "EGT_C": 448.1,
+   "T41_C": 1000.0,
+   "PR": 13.5,
+   "T_rec_in_C": 635.57,
+   "water_t_h": 0.0,
+   "nt": 3,
+   "npt": 0,
+   "dG_pct": 0.45,
+   "dWexh_pct": -1.21,
+   "dEGT": -61.9,
+   "P_at_G_cap_kW": 7074.4,
+   "parts_engine": 292,
+   "assemblies": 11,
+   "aux_added": 10,
+   "n_eff_total": 604.7,
+   "s_parts": 5.025,
+   "trl_min": 5,
+   "k_trl": 0.7778,
+   "trl_limiting": [
+    "повторный подогрев (межтурбинная камера)"
+   ],
+   "plugplay": 6.787,
+   "pnp_cycles": "частично",
+   "pp_blocked": [],
+   "n_rpm": 14950,
+   "D_env": 1.9615,
+   "envelope": {
+    "L": 1.569,
+    "W": 4.26,
+    "H": 1.962,
+    "V": 13.111
+   },
+   "hx_core_mass_kg": 1982.8,
+   "mass_funnel_estimate_kg": 4039,
+   "funnel_score": 4.3878,
+   "comb_dp": 0.0485,
+   "runtime_s": 0.0028
+  },
+  {
+   "name": "обращённый Брайтон (IBC)",
+   "kv": "KV-3",
+   "feasible": true,
+   "reject": [],
+   "warnings": [
+    "nox_gas"
+   ],
+   "eff_shaft": 33.361,
+   "eff_el": 31.94,
+   "w_kJkg": 236.049,
+   "G_air": 25.088,
+   "W_exh": 25.0647,
+   "EGT_C": 160.99,
+   "T41_C": 1000.0,
+   "PR": 13.5,
+   "T_rec_in_C": null,
+   "water_t_h": 0.0,
+   "nt": 3,
+   "npt": 0,
+   "dG_pct": 17.18,
+   "dWexh_pct": 15.13,
+   "dEGT": -349.0,
+   "P_at_G_cap_kW": 6064.6,
+   "parts_engine": 285,
+   "assemblies": 10,
+   "aux_added": 9,
+   "n_eff_total": 586.9,
+   "s_parts": 5.1,
+   "trl_min": 4,
+   "k_trl": 0.7222,
+   "trl_limiting": [
+    "обращённый цикл Брайтона"
+   ],
+   "plugplay": 6.6,
+   "pnp_cycles": "частично",
+   "pp_blocked": [],
+   "n_rpm": 14950,
+   "D_env": 1.9655,
+   "envelope": {
+    "L": 1.573,
+    "W": 1.966,
+    "H": 1.966,
+    "V": 6.078
+   },
+   "hx_core_mass_kg": 7000.6,
+   "mass_funnel_estimate_kg": 1573,
+   "funnel_score": 4.0897,
+   "comb_dp": 0.0485,
+   "runtime_s": 0.0022
+  },
+  {
+   "name": "FLOX + рекуператор 0,88",
+   "kv": "KV-3",
+   "feasible": false,
+   "reject": [
+    "pkg_Wexh",
+    "phi1",
+    "turb_ansq",
+    "soft_G"
+   ],
+   "warnings": [
+    "nox_gas"
+   ],
+   "eff_shaft": 38.615,
+   "eff_el": 36.971,
+   "w_kJkg": 219.472,
+   "G_air": 26.9829,
+   "W_exh": 26.8832,
+   "EGT_C": 337.25,
+   "T41_C": 1000.0,
+   "PR": 8.0,
+   "T_rec_in_C": 568.93,
+   "water_t_h": 0.0,
+   "nt": 2,
+   "npt": 0,
+   "dG_pct": 26.03,
+   "dWexh_pct": 23.49,
+   "dEGT": -172.7,
+   "P_at_G_cap_kW": 5638.7,
+   "parts_engine": 218,
+   "assemblies": 11,
+   "aux_added": 6,
+   "n_eff_total": 439.3,
+   "s_parts": 5.817,
+   "trl_min": 5,
+   "k_trl": 0.7778,
+   "trl_limiting": [
+    "камера: FLOX"
+   ],
+   "plugplay": 0.0,
+   "pnp_cycles": "нет",
+   "pp_blocked": [
+    "вход",
+    "выхлоп"
+   ],
+   "n_rpm": 14950,
+   "D_env": 1.6849,
+   "envelope": {
+    "L": 1.249,
+    "W": 4.106,
+    "H": 1.685,
+    "V": 8.638
+   },
+   "hx_core_mass_kg": 2367.3,
+   "mass_funnel_estimate_kg": 3945,
+   "funnel_score": 3.4167,
+   "comb_dp": 0.0692,
+   "runtime_s": 0.0023
+  },
+  {
+   "name": "TVC (полость - пассивный пилот)",
+   "kv": "KV-3",
+   "feasible": false,
+   "reject": [
+    "pkg_Wexh",
+    "turb_ansq",
+    "soft_G"
+   ],
+   "warnings": [
+    "nox_gas"
+   ],
+   "eff_shaft": 30.203,
+   "eff_el": 28.917,
+   "w_kJkg": 213.709,
+   "G_air": 27.7105,
+   "W_exh": 27.6848,
+   "EGT_C": 462.73,
+   "T41_C": 1000.0,
+   "PR": 13.5,
+   "T_rec_in_C": null,
+   "water_t_h": 0.0,
+   "nt": 3,
+   "npt": 0,
+   "dG_pct": 29.43,
+   "dWexh_pct": 27.17,
+   "dEGT": -47.3,
+   "P_at_G_cap_kW": 5490.6,
+   "parts_engine": 285,
+   "assemblies": 10,
+   "aux_added": 0,
+   "n_eff_total": 577.9,
+   "s_parts": 5.138,
+   "trl_min": 5,
+   "k_trl": 0.7778,
+   "trl_limiting": [
+    "камера: TVC"
+   ],
+   "plugplay": 0.0,
+   "pnp_cycles": "нет",
+   "pp_blocked": [
+    "вход",
+    "выхлоп"
+   ],
+   "n_rpm": 14950,
+   "D_env": 1.9655,
+   "envelope": {
+    "L": 1.573,
+    "W": 1.966,
+    "H": 1.966,
+    "V": 6.078
+   },
+   "hx_core_mass_kg": 0,
+   "mass_funnel_estimate_kg": 1583,
+   "funnel_score": 3.0133,
+   "comb_dp": 0.0676,
+   "runtime_s": 0.0012
+  },
+  {
+   "name": "каталитическая + рекуператор 0,85",
+   "kv": "KV-3",
+   "feasible": false,
+   "reject": [
+    "pkg_Wexh",
+    "phi1",
+    "turb_ansq",
+    "soft_G"
+   ],
+   "warnings": [],
+   "eff_shaft": 38.628,
+   "eff_el": 36.983,
+   "w_kJkg": 224.919,
+   "G_air": 26.3294,
+   "W_exh": 26.2394,
+   "EGT_C": 344.72,
+   "T41_C": 1000.0,
+   "PR": 8.0,
+   "T_rec_in_C": 564.53,
+   "water_t_h": 0.0,
+   "nt": 2,
+   "npt": 0,
+   "dG_pct": 22.98,
+   "dWexh_pct": 20.53,
+   "dEGT": -165.3,
+   "P_at_G_cap_kW": 5778.6,
+   "parts_engine": 218,
+   "assemblies": 11,
+   "aux_added": 6,
+   "n_eff_total": 439.3,
+   "s_parts": 5.817,
+   "trl_min": 6,
+   "k_trl": 0.8333,
+   "trl_limiting": [
+    "камера: CAT"
+   ],
+   "plugplay": 0.0,
+   "pnp_cycles": "нет",
+   "pp_blocked": [
+    "вход",
+    "выхлоп"
+   ],
+   "n_rpm": 14950,
+   "D_env": 1.6849,
+   "envelope": {
+    "L": 1.249,
+    "W": 3.932,
+    "H": 1.685,
+    "V": 8.274
+   },
+   "hx_core_mass_kg": 1832.8,
+   "mass_funnel_estimate_kg": 3274,
+   "funnel_score": 3.6968,
+   "comb_dp": 0.0461,
+   "runtime_s": 0.002
+  },
+  {
+   "name": "детонационная (RDC), класс N",
+   "kv": "KV-3",
+   "feasible": true,
+   "reject": [],
+   "warnings": [
+    "nox_gas"
+   ],
+   "eff_shaft": 31.443,
+   "eff_el": 30.104,
+   "w_kJkg": 241.749,
+   "G_air": 24.4965,
+   "W_exh": 24.5036,
+   "EGT_C": 490.01,
+   "T41_C": 1050,
+   "PR": 13.5,
+   "T_rec_in_C": null,
+   "water_t_h": 0.0,
+   "nt": 3,
+   "npt": 0,
+   "dG_pct": 14.42,
+   "dWexh_pct": 12.56,
+   "dEGT": -20.0,
+   "P_at_G_cap_kW": 6211.0,
+   "parts_engine": 247,
+   "assemblies": 10,
+   "aux_added": 3,
+   "n_eff_total": 545.9,
+   "s_parts": 5.281,
+   "trl_min": 3,
+   "k_trl": 0.6667,
+   "trl_limiting": [
+    "rdc",
+    "камера: RDC"
+   ],
+   "plugplay": 6.368,
+   "pnp_cycles": "частично",
+   "pp_blocked": [],
+   "n_rpm": 14950,
+   "D_env": 1.9788,
+   "envelope": {
+    "L": 1.584,
+    "W": 1.979,
+    "H": 1.979,
+    "V": 6.203
+   },
+   "hx_core_mass_kg": 0,
+   "mass_funnel_estimate_kg": 1597,
+   "funnel_score": 3.5644,
+   "comb_dp": 0.04,
+   "runtime_s": 0.0024
+  },
+  {
+   "name": "волновой ротор, класс N",
+   "kv": "KV-3",
+   "feasible": true,
+   "reject": [],
+   "warnings": [],
+   "eff_shaft": 31.443,
+   "eff_el": 30.104,
+   "w_kJkg": 241.749,
+   "G_air": 24.4965,
+   "W_exh": 24.5036,
+   "EGT_C": 490.01,
+   "T41_C": 1050,
+   "PR": 13.5,
+   "T_rec_in_C": null,
+   "water_t_h": 0.0,
+   "nt": 3,
+   "npt": 0,
+   "dG_pct": 14.42,
+   "dWexh_pct": 12.56,
+   "dEGT": -20.0,
+   "P_at_G_cap_kW": 6211.0,
+   "parts_engine": 250,
+   "assemblies": 11,
+   "aux_added": 3,
+   "n_eff_total": 552.9,
+   "s_parts": 5.249,
+   "trl_min": 3,
+   "k_trl": 0.6667,
+   "trl_limiting": [
+    "волновой_ротор",
+    "камера: ВР"
+   ],
+   "plugplay": 6.768,
+   "pnp_cycles": "частично",
+   "pp_blocked": [],
+   "n_rpm": 14950,
+   "D_env": 1.9788,
+   "envelope": {
+    "L": 2.051,
+    "W": 1.979,
+    "H": 1.979,
+    "V": 8.031
+   },
+   "hx_core_mass_kg": 0,
+   "mass_funnel_estimate_kg": 2180,
+   "funnel_score": 3.6816,
+   "comb_dp": 0.04,
+   "runtime_s": 0.0025
+  },
+  {
+   "name": "быстроходный через редуктор пакета",
+   "kv": "KV-3",
+   "feasible": false,
+   "reject": [
+    "pkg_Wexh",
+    "turb_ansq",
+    "soft_G"
+   ],
+   "warnings": [
+    "nox_gas"
+   ],
+   "eff_shaft": 30.799,
+   "eff_el": 29.487,
+   "w_kJkg": 218.122,
+   "G_air": 27.1499,
+   "W_exh": 27.125,
+   "EGT_C": 459.32,
+   "T41_C": 1000.0,
+   "PR": 13.5,
+   "T_rec_in_C": null,
+   "water_t_h": 0.0,
+   "nt": 3,
+   "npt": 0,
+   "dG_pct": 26.81,
+   "dWexh_pct": 24.6,
+   "dEGT": -50.7,
+   "P_at_G_cap_kW": 5604.0,
+   "parts_engine": 285,
+   "assemblies": 10,
+   "aux_added": 0,
+   "n_eff_total": 576.5,
+   "s_parts": 5.144,
+   "trl_min": 7,
+   "k_trl": 0.8889,
+   "trl_limiting": [
+    "сменная зубчатая пара в корпусе редуктора пакета"
+   ],
+   "plugplay": 0.0,
+   "pnp_cycles": "нет",
+   "pp_blocked": [
+    "вход",
+    "выхлоп"
+   ],
+   "n_rpm": 15110,
+   "D_env": 1.9485,
+   "envelope": {
+    "L": 1.555,
+    "W": 1.949,
+    "H": 1.949,
+    "V": 5.906
+   },
+   "hx_core_mass_kg": 0,
+   "mass_funnel_estimate_kg": 1531,
+   "funnel_score": 3.4784,
+   "comb_dp": 0.0485,
+   "runtime_s": 0.0073
+  },
+  {
+   "name": "свободная СТ",
+   "kv": "KV-3",
+   "feasible": false,
+   "reject": [
+    "pkg_Wexh",
+    "phi2",
+    "pt_ansq",
+    "size:колесо компрессора 2",
+    "soft_G"
+   ],
+   "warnings": [
+    "nox_gas"
+   ],
+   "eff_shaft": 30.386,
+   "eff_el": 29.092,
+   "w_kJkg": 214.619,
+   "G_air": 27.5931,
+   "W_exh": 27.5668,
+   "EGT_C": 460.8,
+   "T41_C": 1000.0,
+   "PR": 13.5,
+   "T_rec_in_C": null,
+   "water_t_h": 0.0,
+   "nt": 2,
+   "npt": 2,
+   "dG_pct": 28.88,
+   "dWexh_pct": 26.63,
+   "dEGT": -49.2,
+   "P_at_G_cap_kW": 5514.0,
+   "parts_engine": 374,
+   "assemblies": 15,
+   "aux_added": 0,
+   "n_eff_total": 751.8,
+   "s_parts": 4.483,
+   "trl_min": 9,
+   "k_trl": 1.0,
+   "trl_limiting": [
+    "лопатки_SC",
+    "традиция",
+    "камера: LPP"
+   ],
+   "plugplay": 0.0,
+   "pnp_cycles": "нет",
+   "pp_blocked": [
+    "вход",
+    "выхлоп"
+   ],
+   "n_rpm": 12033,
+   "D_env": 2.3373,
+   "envelope": {
+    "L": 2.35,
+    "W": 2.337,
+    "H": 2.337,
+    "V": 12.838
+   },
+   "hx_core_mass_kg": 0,
+   "mass_funnel_estimate_kg": 2796,
+   "funnel_score": 3.4194,
+   "comb_dp": 0.0485,
+   "runtime_s": 0.0014
+  },
+  {
+   "name": "свободная СТ + межтурбинная камера, класс K",
+   "kv": "KV-3",
+   "feasible": false,
+   "reject": [
+    "phi2",
+    "pt_htr",
+    "pt_ansq",
+    "soft_EGT"
+   ],
+   "warnings": [
+    "fuel_valves_reheat",
+    "nox_gas"
+   ],
+   "eff_shaft": 22.185,
+   "eff_el": 21.241,
+   "w_kJkg": 249.134,
+   "G_air": 23.7704,
+   "W_exh": 23.9447,
+   "EGT_C": 769.57,
+   "T41_C": 1150,
+   "PR": 13.5,
+   "T_rec_in_C": null,
+   "water_t_h": 0.0,
+   "nt": 2,
+   "npt": 2,
+   "dG_pct": 11.02,
+   "dWexh_pct": 9.99,
+   "dEGT": 259.6,
+   "P_at_G_cap_kW": 6400.7,
+   "parts_engine": 410,
+   "assemblies": 15,
+   "aux_added": 4,
+   "n_eff_total": 947.0,
+   "s_parts": 3.921,
+   "trl_min": 5,
+   "k_trl": 0.7778,
+   "trl_limiting": [
+    "повторный подогрев (межтурбинная камера)"
+   ],
+   "plugplay": 0.0,
+   "pnp_cycles": "нет",
+   "pp_blocked": [
+    "выхлоп"
+   ],
+   "n_rpm": 12964,
+   "D_env": 2.2053,
+   "envelope": {
+    "L": 2.235,
+    "W": 2.205,
+    "H": 2.205,
+    "V": 10.872
+   },
+   "hx_core_mass_kg": 0,
+   "mass_funnel_estimate_kg": 2303,
+   "funnel_score": 2.4675,
+   "comb_dp": 0.0485,
+   "runtime_s": 0.0016
+  },
+  {
+   "name": "класс K, T41 1150, π 16",
+   "kv": "KV-3",
+   "feasible": false,
+   "reject": [
+    "U_comp2",
+    "phi2"
+   ],
+   "warnings": [
+    "nox_gas"
+   ],
+   "eff_shaft": 29.958,
+   "eff_el": 28.682,
+   "w_kJkg": 244.483,
+   "G_air": 24.2225,
+   "W_exh": 24.2523,
+   "EGT_C": 526.71,
+   "T41_C": 1150,
+   "PR": 16.0,
+   "T_rec_in_C": null,
+   "water_t_h": 0.0,
+   "nt": 3,
+   "npt": 0,
+   "dG_pct": 13.14,
+   "dWexh_pct": 11.4,
+   "dEGT": 16.7,
+   "P_at_G_cap_kW": 6281.3,
+   "parts_engine": 342,
+   "assemblies": 10,
+   "aux_added": 0,
+   "n_eff_total": 869.1,
+   "s_parts": 4.127,
+   "trl_min": 9,
+   "k_trl": 1.0,
+   "trl_limiting": [
+    "лопатки_SC",
+    "традиция",
+    "камера: LPP"
+   ],
+   "plugplay": 7.343,
+   "pnp_cycles": "да",
+   "pp_blocked": [],
+   "n_rpm": 14950,
+   "D_env": 2.0633,
+   "envelope": {
+    "L": 1.654,
+    "W": 2.063,
+    "H": 2.063,
+    "V": 7.042
+   },
+   "hx_core_mass_kg": 0,
+   "mass_funnel_estimate_kg": 1753,
+   "funnel_score": 5.306,
+   "comb_dp": 0.0485,
+   "runtime_s": 0.0016
+  },
+  {
+   "name": "печатный класс P, оболочка",
+   "kv": "KV-3",
+   "feasible": false,
+   "reject": [
+    "phi2"
+   ],
+   "warnings": [
+    "nox_gas"
+   ],
+   "eff_shaft": 31.361,
+   "eff_el": 30.025,
+   "w_kJkg": 277.979,
+   "G_air": 21.3038,
+   "W_exh": 21.3598,
+   "EGT_C": 556.94,
+   "T41_C": 1150,
+   "PR": 13.5,
+   "T_rec_in_C": null,
+   "water_t_h": 0.0,
+   "nt": 3,
+   "npt": 0,
+   "dG_pct": -0.5,
+   "dWexh_pct": -1.88,
+   "dEGT": 46.9,
+   "P_at_G_cap_kW": 7141.8,
+   "parts_engine": 46,
+   "assemblies": 10,
+   "aux_added": 0,
+   "n_eff_total": 95.2,
+   "s_parts": 8.652,
+   "trl_min": 4,
+   "k_trl": 0.7222,
+   "trl_limiting": [
+    "печать_колесо_турбины",
+    "печать_оболочка"
+   ],
+   "plugplay": 8.118,
+   "pnp_cycles": "да",
+   "pp_blocked": [],
+   "n_rpm": 14950,
+   "D_env": 1.9735,
+   "envelope": {
+    "L": 1.577,
+    "W": 1.973,
+    "H": 1.973,
+    "V": 6.141
+   },
+   "hx_core_mass_kg": 0,
+   "mass_funnel_estimate_kg": 1336,
+   "funnel_score": 4.8956,
+   "comb_dp": 0.0485,
+   "runtime_s": 0.0016
+  },
+  {
+   "name": "керамика C, быстроходный",
+   "kv": "KV-3",
+   "feasible": false,
+   "reject": [
+    "turb_ns",
+    "soft_EGT"
+   ],
+   "warnings": [
+    "nox_gas"
+   ],
+   "eff_shaft": 20.386,
+   "eff_el": 19.517,
+   "w_kJkg": 253.575,
+   "G_air": 23.354,
+   "W_exh": 23.5815,
+   "EGT_C": 860.7,
+   "T41_C": 1250,
+   "PR": 6.0,
+   "T_rec_in_C": null,
+   "water_t_h": 0.0,
+   "nt": 2,
+   "npt": 0,
+   "dG_pct": 9.08,
+   "dWexh_pct": 8.32,
+   "dEGT": 350.7,
+   "P_at_G_cap_kW": 6514.9,
+   "parts_engine": 92,
+   "assemblies": 10,
+   "aux_added": 0,
+   "n_eff_total": 136.5,
+   "s_parts": 8.173,
+   "trl_min": 5,
+   "k_trl": 0.7778,
+   "trl_limiting": [
+    "керамика_ротор"
+   ],
+   "plugplay": 0.0,
+   "pnp_cycles": "нет",
+   "pp_blocked": [
+    "выхлоп"
+   ],
+   "n_rpm": 23920,
+   "D_env": 1.3943,
+   "envelope": {
+    "L": 0.925,
+    "W": 1.394,
+    "H": 1.394,
+    "V": 1.798
+   },
+   "hx_core_mass_kg": 0,
+   "mass_funnel_estimate_kg": 246,
+   "funnel_score": 3.9287,
+   "comb_dp": 0.0485,
+   "runtime_s": 0.0079
+  },
+  {
+   "name": "ОЦ (1 осевая + центробежная), класс K",
+   "kv": "KV-3",
+   "feasible": false,
+   "reject": [
+    "U_comp2",
+    "turb_ansq",
+    "size:колесо компрессора 2"
+   ],
+   "warnings": [
+    "nox_gas"
+   ],
+   "eff_shaft": 27.219,
+   "eff_el": 26.06,
+   "w_kJkg": 234.231,
+   "G_air": 25.2827,
+   "W_exh": 25.3362,
+   "EGT_C": 573.67,
+   "T41_C": 1150,
+   "PR": 12.0,
+   "T_rec_in_C": null,
+   "water_t_h": 0.0,
+   "nt": 3,
+   "npt": 0,
+   "dG_pct": 18.09,
+   "dWexh_pct": 16.38,
+   "dEGT": 63.7,
+   "P_at_G_cap_kW": 6017.9,
+   "parts_engine": 346,
+   "assemblies": 10,
+   "aux_added": 0,
+   "n_eff_total": 880.3,
+   "s_parts": 4.096,
+   "trl_min": 9,
+   "k_trl": 1.0,
+   "trl_limiting": [
+    "лопатки_SC",
+    "традиция",
+    "камера: LPP"
+   ],
+   "plugplay": 7.495,
+   "pnp_cycles": "да",
+   "pp_blocked": [],
+   "n_rpm": 14950,
+   "D_env": 2.2616,
+   "envelope": {
+    "L": 1.649,
+    "W": 2.262,
+    "H": 2.262,
+    "V": 8.434
+   },
+   "hx_core_mass_kg": 0,
+   "mass_funnel_estimate_kg": 1945,
+   "funnel_score": 5.1779,
+   "comb_dp": 0.0485,
+   "runtime_s": 0.0016
+  },
+  {
+   "name": "кластер 2 ядра + СТ",
+   "kv": "KV-3",
+   "feasible": false,
+   "reject": [
+    "phi2",
+    "pt_ansq"
+   ],
+   "warnings": [
+    "nox_gas"
+   ],
+   "eff_shaft": 30.392,
+   "eff_el": 29.098,
+   "w_kJkg": 232.761,
+   "G_air": 25.4424,
+   "W_exh": 25.1939,
+   "EGT_C": 496.33,
+   "T41_C": 1050,
+   "PR": 13.5,
+   "T_rec_in_C": null,
+   "water_t_h": 0.0,
+   "nt": 2,
+   "npt": 2,
+   "dG_pct": 18.83,
+   "dWexh_pct": 15.73,
+   "dEGT": -13.7,
+   "P_at_G_cap_kW": 5980.1,
+   "parts_engine": 570,
+   "assemblies": 23,
+   "aux_added": 0,
+   "n_eff_total": 1126.3,
+   "s_parts": 3.516,
+   "trl_min": 5,
+   "k_trl": 0.7778,
+   "trl_limiting": [
+    "кластер_ядер"
+   ],
+   "plugplay": 5.434,
+   "pnp_cycles": "да",
+   "pp_blocked": [],
+   "n_rpm": 17722,
+   "D_env": 2.4406,
+   "envelope": {
+    "L": 1.748,
+    "W": 2.441,
+    "H": 2.441,
+    "V": 10.414
+   },
+   "hx_core_mass_kg": 0,
+   "mass_funnel_estimate_kg": 1867,
+   "funnel_score": 3.4568,
+   "comb_dp": 0.0485,
+   "runtime_s": 0.0015
+  },
+  {
+   "name": "KV-1: 1Ц радиальная, быстроходный",
+   "kv": "KV-1",
+   "feasible": true,
+   "reject": [],
+   "warnings": [
+    "nox_gas"
+   ],
+   "eff_shaft": 20.886,
+   "eff_el": 19.997,
+   "w_kJkg": 169.985,
+   "G_air": 7.436,
+   "W_exh": 7.4448,
+   "EGT_C": 594.65,
+   "T41_C": 950,
+   "PR": 6.0,
+   "T_rec_in_C": null,
+   "water_t_h": 0.0,
+   "nt": 2,
+   "npt": 0,
+   "dG_pct": 15.64,
+   "dWexh_pct": 13.83,
+   "dEGT": 89.6,
+   "P_at_G_cap_kW": 1311.6,
+   "parts_engine": 78,
+   "assemblies": 10,
+   "aux_added": 0,
+   "n_eff_total": 123.7,
+   "s_parts": 8.316,
+   "trl_min": 7,
+   "k_trl": 0.8889,
+   "trl_limiting": [
+    "сменная зубчатая пара в корпусе редуктора пакета"
+   ],
+   "plugplay": 6.749,
+   "pnp_cycles": "да",
+   "pp_blocked": [],
+   "n_rpm": 22540,
+   "D_env": 1.4668,
+   "envelope": {
+    "L": 1.014,
+    "W": 1.467,
+    "H": 1.467,
+    "V": 2.181
+   },
+   "hx_core_mass_kg": 0,
+   "mass_funnel_estimate_kg": 429,
+   "funnel_score": 6.0971,
+   "comb_dp": 0.0485,
+   "runtime_s": 0.0088
+  },
+  {
+   "name": "KV-6: ОЦ (2 осевые + центробежная), свободная СТ, класс K",
+   "kv": "KV-6",
+   "feasible": false,
+   "reject": [
+    "htr_ax1",
+    "htr_ax2",
+    "U_comp3",
+    "turb_htr",
+    "turb_ansq",
+    "pt_htr",
+    "pt_ansq"
+   ],
+   "warnings": [
+    "nox_gas"
+   ],
+   "eff_shaft": 33.682,
+   "eff_el": 32.248,
+   "w_kJkg": 303.522,
+   "G_air": 56.8822,
+   "W_exh": 57.0484,
+   "EGT_C": 546.25,
+   "T41_C": 1200,
+   "PR": 16.0,
+   "T_rec_in_C": null,
+   "water_t_h": 0.0,
+   "nt": 2,
+   "npt": 2,
+   "dG_pct": 2.84,
+   "dWexh_pct": 1.42,
+   "dEGT": 56.3,
+   "P_at_G_cap_kW": 20145.4,
+   "parts_engine": 401,
+   "assemblies": 15,
+   "aux_added": 0,
+   "n_eff_total": 924.8,
+   "s_parts": 3.978,
+   "trl_min": 9,
+   "k_trl": 1.0,
+   "trl_limiting": [
+    "лопатки_SC",
+    "традиция",
+    "камера: LPP"
+   ],
+   "plugplay": 7.006,
+   "pnp_cycles": "да",
+   "pp_blocked": [],
+   "n_rpm": 20628,
+   "D_env": 1.7843,
+   "envelope": {
+    "L": 1.834,
+    "W": 1.784,
+    "H": 1.784,
+    "V": 5.839
+   },
+   "hx_core_mass_kg": 0,
+   "mass_funnel_estimate_kg": 1285,
+   "funnel_score": 5.3388,
+   "comb_dp": 0.0485,
+   "runtime_s": 0.0026
+  }
+ ],
+ "runtime_s": 6.0
+}

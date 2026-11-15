@@ -1,0 +1,1660 @@
+{
+ "title": "Скептик изготовимости печатью и пользы: генеративные формы organic/structure и organic/thermal",
+ "method": "Что считается (всё — из файлов узлов, внешние правила печати — с источником и статусом):\n  1. STL узлов: доля поверхности с нависанием круче 45° к плите (лучшая из 6 ориентаций по осям), число отдельных\n     оболочек и замкнутых внутренних полостей (порошок из них не выходит без отверстий).\n  2. Наименьшие стенки, отверстия, каналы и отношение длины к диаметру — из results-JSON и констант узлов — против\n     правил печати и выноса порошка.\n  3. Чувствительность «сосудов» сопловой лопатки (thermal/vascular.py) к шероховатости печатного канала: тот же\n     решатель, трение Churchill с ε/D, теплоотдача Gnielinski × (f/f_гл)^n (Norris), предел 950 °C.\n  4. Время печати сердцевин рекуператора (thermal/tpms_results.json) по скорости камер funnel/make_model.PRINTERS.\n  5. Собираемость оболочки «одной деталью» (structure/shell_results.json → parts): ротор из 2 колёс и 3 ступеней\n     турбины — какой статор запирает какое колесо (frame3), сколько частей корпуса нужно на самом деле; поправка\n     счёта деталей по funnel/parts_model.py.\n  6. Цельная горячая часть (жаровая труба + сопловой аппарат + корпус): несовместность температурных деформаций.\n  7. Посадка в камеры ГИП и проход лучей КТ через стенки оболочки.\n  8. Польза для владельца по каждой форме (детали, масса, КПД) и решение: оставить / с условиями / отсеять.\npython3 print_review.py                # ~4–20 мин (п. 3 — 42 решения vascular), пишет print_review_results.json рядом\npython3 print_review.py --reuse-rough  # без п. 3: строки шероховатости берутся из прошлого прогона",
+ "software": {
+  "python": "3.13.18",
+  "numpy": "2.5.3"
+ },
+ "date": "2026-11-14",
+ "run_utc": "2026-11-15T01:38:07Z",
+ "status": "оценка уровня облика; внешние правила печати, ГИП, КТ, усталость — по выдержкам поиска (RULES)",
+ "inputs": [
+  {
+   "file": "routes/gtu/organic/structure/stl/*.stl, routes/gtu/organic/thermal/*.stl",
+   "use": "STL"
+  },
+  {
+   "file": "routes/gtu/organic/thermal/vascular_results.json",
+   "field": "assumptions.ngv, liner; inputs"
+  },
+  {
+   "file": "routes/gtu/organic/thermal/vascular.py",
+   "field": "решатель сети и стенки (без правок)"
+  },
+  {
+   "file": "routes/gtu/organic/thermal/tpms_results.json",
+   "field": "recuperator.print_rules, cases.*.designs"
+  },
+  {
+   "file": "routes/gtu/organic/structure/lattice_results.json",
+   "field": "sheet_thickness_mm"
+  },
+  {
+   "file": "routes/gtu/organic/structure/manifold_results.json",
+   "field": "tree.D_m, assumptions"
+  },
+  {
+   "file": "routes/gtu/organic/structure/shell_results.json",
+   "field": "geometry, parts, printer_fit"
+  },
+  {
+   "file": "routes/gtu/frame3/frame3_point_results.json",
+   "field": "stage1/2.D2_m, D1_tip_m; turbine.options.3"
+  },
+  {
+   "file": "routes/gtu/funnel/parts_model.py",
+   "field": "count, REF_BOM, BOLT_PITCH"
+  },
+  {
+   "file": "routes/gtu/funnel/make_model.py",
+   "field": "PRINTERS (rate)"
+  },
+  {
+   "file": "routes/gtu/platform/fea/materials.json",
+   "field": "in713c.alpha_mean_1e6, E_GPa, nu"
+  }
+ ],
+ "rules": {
+  "overhang_deg": {
+   "value": 45.0,
+   "text": "самонесущее нависание — не круче 45° к плите (у 316L и бронз — 55°)",
+   "src": "https://www.protolabs.com/resources/design-tips/how-to-3d-print-metal-parts/",
+   "status": "по выдержке поиска"
+  },
+  "hole_horizontal_max_mm": {
+   "value": 8.0,
+   "text": "горизонтальное круглое отверстие до 8 мм строится без поддержек; больше — каплевидный или ромбовидный профиль",
+   "src": "https://www.makerverse.com/resources/the-laser-powder-bed-fusion-l-pbf-design-guide/; Protolabs DMLS design guide",
+   "status": "по выдержке поиска"
+  },
+  "min_feature_in718_mm": {
+   "value": 0.381,
+   "text": "наименьший элемент IN718 при обычном разрешении 0,015 in",
+   "src": "https://www.protolabs.com/media/bn1dvyuy/pl_3dp_dmls_design_guide_en.pdf",
+   "status": "по выдержке поиска"
+  },
+  "depowder_ideal_min_mm": {
+   "value": 1.0,
+   "text": "канал от 1 мм — удаление порошка надёжно; меньше — зависит от формы и порошка (провайдер очищал 0,4 мм)",
+   "src": "https://3dadept.com/designing-for-depowdering-optimizing-3d-printed-parts-from-the-start/",
+   "status": "по выдержке поиска"
+  },
+  "depowder_long_mm": {
+   "value": [
+    3.0,
+    5.0,
+    50.0
+   ],
+   "text": "канал ≥ 3 мм, при длине больше 50 мм — ≥ 5 мм (правило поставщиков, один первоисточник на нескольких сайтах)",
+   "src": "https://www.assemblymag.com/articles/97510-design-for-additive-manufacturing-part-3",
+   "status": "по выдержке поиска"
+  },
+  "escape_holes": {
+   "value": 2,
+   "text": "не меньше двух отверстий выноса порошка на полость",
+   "src": "3dadept.com (та же статья)",
+   "status": "по выдержке поиска"
+  },
+  "roughness_channels": {
+   "text": "печатные каналы DMLS: трение растёт сильнее теплоотдачи, особенно в мини-каналах малого Dh; средняя шероховатость Ra плохо предсказывает потери — нужны Rq и асимметрия профиля",
+   "src": "Stimpson, Snyder, Thole, Mongillo, J. Turbomach. 2016 (doi:10.1115/1.4032167); Wildgoose et al., J. Turbomach. 2024",
+   "status": "по выдержке поиска (аннотации)"
+  },
+  "fatigue_ti64_lpbf": {
+   "text": "усталость LPBF Ti-6Al-4V: поверхность после печати снижает предел выносливости ~45 %; обработка поднимает его примерно втрое, ГИП — ещё на 10–20 %; база 10⁷ — 200–500 МПа в зависимости от дефектов",
+   "src": "Kahlin et al. (обзор); Ednie et al. JMRT 2024; ASM IMAT 2026 abstract 65732",
+   "status": "по выдержке поиска"
+  },
+  "hip_largest": {
+   "value_m": [
+    2.05,
+    1.6,
+    0.88
+   ],
+   "text": "наибольшая камера ГИП в мире — Ø2,05 × 4,2 м (Metal Technology Co., Япония); Ø1,6 × 3,5 м (MTC Powder Solutions, Швеция); серийная QIH 200 URC — Ø0,88 × 2,15 м",
+   "src": "https://quintustechnologies.com/products/material-densification/hot-isostatic-presses/large-hip-systems/; https://www.prweb.com/releases/addition-of-super-sized-quintus-hot-isostatic-press-marks-major-expansion-for-mtc-powder-solutions-842093421.html",
+   "status": "по выдержке поиска"
+  },
+  "ct_penetration": {
+   "text": "при 450 кВ и ниже просвечивание крупных плотных деталей затруднено (нужен ускоритель 9 МэВ); никель при 200 кВ — порядка 2,1 см",
+   "src": "https://4nsi.com/scanning-service/high-energy-x-ray/; https://npl.co.uk/products-services/dimensional/mpp-xct",
+   "status": "по выдержке поиска"
+  },
+  "printer_boxes": {
+   "text": "BLT-S1500: 1500×1500×1200 мм (DirectIndustry: Z 1200) или ×1500 (TCT, реселлер) — источники расходятся, принята меньшая; Farsoon FS1521M-U: 1530×1530×1650 мм (Metal AM, 2025); EP-M2050: 2050×2050×1100 мм (funnel/make_model.PRINTERS)",
+   "src": "https://www.tctmagazine.com/blt-guide/; https://www.metal-am.com/farsoon-fs1521m-u-now-supports-up-to-32-lasers/",
+   "status": "по выдержке поиска"
+  }
+ },
+ "stl": {
+  "structure/stl/comp2_profile_eq.stl": {
+   "normals_inverted": false,
+   "triangles": 10620,
+   "bbox": [
+    0.703,
+    0.702,
+    0.281
+   ],
+   "area": 0.88,
+   "overhang_frac_by_build_dir": {
+    "+x": 0.0227,
+    "-x": 0.0227,
+    "+y": 0.0231,
+    "-y": 0.0231,
+    "+z": 0.4414,
+    "-z": 0.4242
+   },
+   "best_build_dir": "+x",
+   "overhang_frac_best": 0.0227,
+   "shells": 1,
+   "bodies": 1,
+   "enclosed_voids": 0,
+   "kind": "solid",
+   "what": "колесо 2, гладкая задняя поверхность (проверено ccx)"
+  },
+  "structure/stl/comp2_A_mass_eq.stl": {
+   "normals_inverted": false,
+   "triangles": 40000,
+   "bbox": [
+    0.703,
+    0.702,
+    0.281
+   ],
+   "area": 2.01,
+   "overhang_frac_by_build_dir": {
+    "+x": 0.0263,
+    "-x": 0.0253,
+    "+y": 0.0262,
+    "-y": 0.0265,
+    "+z": 0.4318,
+    "-z": 0.4287
+   },
+   "best_build_dir": "-x",
+   "overhang_frac_best": 0.0253,
+   "shells": 10,
+   "bodies": 1,
+   "enclosed_voids": 9,
+   "kind": "solid",
+   "what": "колесо 2, воксельный проект A с полостями (в ccx не проходит)"
+  },
+  "structure/stl/comp2_B_mass_eq_gyroid_sector40.stl": {
+   "normals_inverted": false,
+   "triangles": 49609,
+   "bbox": [
+    0.35,
+    0.24,
+    0.282
+   ],
+   "area": 0.35,
+   "overhang_frac_by_build_dir": {
+    "+x": 0.0682,
+    "-x": 0.082,
+    "+y": 0.1482,
+    "-y": 0.1492,
+    "+z": 0.2458,
+    "-z": 0.2459
+   },
+   "best_build_dir": "+x",
+   "overhang_frac_best": 0.0682,
+   "shells": 95,
+   "bodies": 1,
+   "enclosed_voids": 1,
+   "kind": "solid",
+   "what": "колесо 2, сектор 40° с гироидом (не проходит)"
+  },
+  "structure/stl/turb1_profile_eq.stl": {
+   "normals_inverted": false,
+   "triangles": 3240,
+   "bbox": [
+    0.438,
+    0.438,
+    0.072
+   ],
+   "area": 0.35,
+   "overhang_frac_by_build_dir": {
+    "+x": 0.033,
+    "-x": 0.033,
+    "+y": 0.033,
+    "-y": 0.033,
+    "+z": 0.4325,
+    "-z": 0.4325
+   },
+   "best_build_dir": "-x",
+   "overhang_frac_best": 0.033,
+   "shells": 1,
+   "bodies": 1,
+   "enclosed_voids": 0,
+   "kind": "solid",
+   "what": "диск турбины 1, гладкий профиль eq (проверено)"
+  },
+  "structure/stl/turb1_profile_lim.stl": {
+   "normals_inverted": false,
+   "triangles": 6120,
+   "bbox": [
+    0.438,
+    0.438,
+    0.072
+   ],
+   "area": 0.36,
+   "overhang_frac_by_build_dir": {
+    "+x": 0.0326,
+    "-x": 0.0326,
+    "+y": 0.0326,
+    "-y": 0.0326,
+    "+z": 0.4333,
+    "-z": 0.4333
+   },
+   "best_build_dir": "-x",
+   "overhang_frac_best": 0.0326,
+   "shells": 1,
+   "bodies": 1,
+   "enclosed_voids": 0,
+   "kind": "solid",
+   "what": "диск турбины 1, «предел» (нужна доводка)"
+  },
+  "structure/stl/turb1_profile_baseline_frame3.stl": {
+   "normals_inverted": false,
+   "triangles": 3240,
+   "bbox": [
+    0.438,
+    0.438,
+    0.072
+   ],
+   "area": 0.35,
+   "overhang_frac_by_build_dir": {
+    "+x": 0.0329,
+    "-x": 0.0329,
+    "+y": 0.0329,
+    "-y": 0.0329,
+    "+z": 0.4326,
+    "-z": 0.4326
+   },
+   "best_build_dir": "-x",
+   "overhang_frac_best": 0.0329,
+   "shells": 1,
+   "bodies": 1,
+   "enclosed_voids": 0,
+   "kind": "solid",
+   "what": "диск турбины 1, исходный литой профиль"
+  },
+  "structure/stl/shell_frame_kv3.stl": {
+   "normals_inverted": false,
+   "triangles": 4460,
+   "bbox": [
+    1.335,
+    1.335,
+    0.1
+   ],
+   "area": 3.6,
+   "overhang_frac_by_build_dir": {
+    "+x": 0.1928,
+    "-x": 0.1912,
+    "+y": 0.132,
+    "-y": 0.1313,
+    "+z": 0.0,
+    "-z": 0.0
+   },
+   "best_build_dir": "+z",
+   "overhang_frac_best": 0.0,
+   "shells": 1,
+   "bodies": 1,
+   "enclosed_voids": 0,
+   "kind": "solid",
+   "what": "рама опоры подшипника (оптимизация топологии, 2D, выдавлено)"
+  },
+  "thermal/tpms_gyroid_optimum_block.stl": {
+   "normals_inverted": false,
+   "triangles": 96000,
+   "bbox": [
+    13.367,
+    13.366,
+    26.688
+   ],
+   "area": 9148.4,
+   "overhang_frac_by_build_dir": {
+    "+x": 0.1218,
+    "-x": 0.1228,
+    "+y": 0.1221,
+    "-y": 0.1217,
+    "+z": 0.115,
+    "-z": 0.1167
+   },
+   "best_build_dir": "+z",
+   "overhang_frac_best": 0.115,
+   "shells": 3,
+   "bodies": 3,
+   "enclosed_voids": 0,
+   "kind": "solid",
+   "what": "лист гироида рекуператора (упрощённая копия)"
+  },
+  "thermal/tpms_gyroid_graded_illustration.stl": {
+   "normals_inverted": false,
+   "triangles": 39980,
+   "bbox": [
+    39.965,
+    10.063,
+    10.066
+   ],
+   "area": 5526.01,
+   "overhang_frac_by_build_dir": {
+    "+x": 0.1168,
+    "-x": 0.1152,
+    "+y": 0.127,
+    "-y": 0.1237,
+    "+z": 0.1214,
+    "-z": 0.1213
+   },
+   "best_build_dir": "-x",
+   "overhang_frac_best": 0.1152,
+   "shells": 2,
+   "bodies": 2,
+   "enclosed_voids": 0,
+   "kind": "solid",
+   "what": "иллюстрация переменной ячейки (не оптимум)"
+  },
+  "thermal/topo_comb6.stl": {
+   "normals_inverted": true,
+   "triangles": 15180,
+   "bbox": [
+    100.0,
+    132.576,
+    4.0
+   ],
+   "area": 10593.03,
+   "overhang_frac_by_build_dir": {
+    "+x": 0.0364,
+    "-x": 0.0313,
+    "+y": 0.0361,
+    "-y": 0.034,
+    "+z": 0.429,
+    "-z": 0.4289
+   },
+   "best_build_dir": "-x",
+   "overhang_frac_best": 0.0313,
+   "shells": 1,
+   "bodies": 1,
+   "enclosed_voids": 0,
+   "kind": "fluid",
+   "what": "коллектор 1→6 (2D, выдавлено, каналы телом)"
+  },
+  "thermal/topo_fan8.stl": {
+   "normals_inverted": true,
+   "triangles": 9140,
+   "bbox": [
+    150.0,
+    99.375,
+    4.0
+   ],
+   "area": 11463.71,
+   "overhang_frac_by_build_dir": {
+    "+x": 0.0653,
+    "-x": 0.0651,
+    "+y": 0.0399,
+    "-y": 0.0383,
+    "+z": 0.3957,
+    "-z": 0.3956
+   },
+   "best_build_dir": "-y",
+   "overhang_frac_best": 0.0383,
+   "shells": 1,
+   "bodies": 1,
+   "enclosed_voids": 0,
+   "kind": "fluid",
+   "what": "коллектор 1→8 (2D, выдавлено, каналы телом)"
+  },
+  "thermal/vascular_ngv_straight.stl": {
+   "normals_inverted": false,
+   "triangles": 640,
+   "bbox": [
+    48.0,
+    27.036,
+    0.571
+   ],
+   "area": 1432.41,
+   "overhang_frac_by_build_dir": {
+    "+x": 0.003,
+    "-x": 0.003,
+    "+y": 0.1988,
+    "-y": 0.1988,
+    "+z": 0.2982,
+    "-z": 0.2982
+   },
+   "best_build_dir": "+x",
+   "overhang_frac_best": 0.003,
+   "shells": 16,
+   "bodies": 16,
+   "enclosed_voids": 0,
+   "kind": "fluid",
+   "what": "каналы лопатки СА: прямые"
+  },
+  "thermal/vascular_ngv_tree_r8.stl": {
+   "normals_inverted": false,
+   "triangles": 640,
+   "bbox": [
+    48.011,
+    27.036,
+    0.571
+   ],
+   "area": 1432.53,
+   "overhang_frac_by_build_dir": {
+    "+x": 0.003,
+    "-x": 0.003,
+    "+y": 0.1988,
+    "-y": 0.1988,
+    "+z": 0.2982,
+    "-z": 0.2982
+   },
+   "best_build_dir": "-x",
+   "overhang_frac_best": 0.003,
+   "shells": 8,
+   "bodies": 8,
+   "enclosed_voids": 0,
+   "kind": "fluid",
+   "what": "каналы лопатки СА: 8 деревьев"
+  },
+  "thermal/vascular_ngv_tree_r4.stl": {
+   "normals_inverted": false,
+   "triangles": 960,
+   "bbox": [
+    48.041,
+    27.069,
+    0.759
+   ],
+   "area": 1243.13,
+   "overhang_frac_by_build_dir": {
+    "+x": 0.0068,
+    "-x": 0.0068,
+    "+y": 0.1973,
+    "-y": 0.1973,
+    "+z": 0.2959,
+    "-z": 0.2959
+   },
+   "best_build_dir": "-x",
+   "overhang_frac_best": 0.0068,
+   "shells": 4,
+   "bodies": 4,
+   "enclosed_voids": 0,
+   "kind": "fluid",
+   "what": "каналы лопатки СА: 4 дерева"
+  },
+  "thermal/vascular_ngv_cco.stl": {
+   "normals_inverted": false,
+   "triangles": 8466,
+   "bbox": [
+    48.336,
+    27.43,
+    1.719
+   ],
+   "area": 1054.28,
+   "overhang_frac_by_build_dir": {
+    "+x": 0.1007,
+    "-x": 0.1007,
+    "+y": 0.1444,
+    "-y": 0.1444,
+    "+z": 0.2415,
+    "-z": 0.2415
+   },
+   "best_build_dir": "+x",
+   "overhang_frac_best": 0.1007,
+   "shells": 4,
+   "bodies": 4,
+   "enclosed_voids": 0,
+   "kind": "fluid",
+   "what": "каналы лопатки СА: растущее дерево"
+  }
+ },
+ "features": {
+  "ngv_vascular": {
+   "nets": {
+    "straight": {
+     "d_min_mm": 0.6,
+     "d_max_mm": 0.6,
+     "path_len_mm": 48.0,
+     "L_over_dmin": 80.0
+    },
+    "tree_r8": {
+     "d_min_mm": 0.6,
+     "d_max_mm": 0.6,
+     "path_len_mm": 48.0,
+     "L_over_dmin": 80.0
+    },
+    "tree_r4": {
+     "d_min_mm": 0.633,
+     "d_max_mm": 0.798,
+     "path_len_mm": 48.0,
+     "L_over_dmin": 75.8
+    },
+    "tree_r1": {
+     "d_min_mm": 0.688,
+     "d_max_mm": 1.376,
+     "path_len_mm": 48.0,
+     "L_over_dmin": 69.8
+    }
+   },
+   "skin_mm": 0.6,
+   "wall_mm": 1.0,
+   "T_surface_lim_C": 950.0,
+   "verdict": "прямые каналы 0,6 мм × 48 мм (L/D 80) и обшивка 0,6 мм: ниже надёжного выноса порошка (1.0 мм) и далеко от правила «≥ 5 мм при длине > 50 мм»; печатаемо только мелким порошком с проверкой проливкой каждого канала (оценка); деревья K ≥ 1 сужают окончания (см. d_min) — ещё хуже"
+  },
+  "liner_vascular": {
+   "d_straight_mm": 1.0,
+   "skin_mm": 0.5
+  },
+  "recuperator": {
+   "wall_mm": [
+    0.35,
+    0.25
+   ],
+   "Dh_min_mm": 1.5,
+   "flow_len_m": {
+    "plate_NuT_as_cycles": 0.256,
+    "plate_NuH1": 0.26,
+    "gyroid_graded": 0.14,
+    "diamond_graded": 0.105,
+    "gyroid_uniform": 0.14,
+    "diamond_uniform": 0.105,
+    "gyroid_graded_tw025": 0.138,
+    "plate_NuH1_Dh15": 0.112
+   },
+   "verdict": "стенка 0,35 мм ниже наименьшего элемента IN718 0.381 мм по выдержке, 0,25 мм — тем более; плотность тонкой стенки (сквозные поры → перетечка воздуха 8 бар в газ 1 бар) не проверена; Dh 1,5 мм при длине пути 0,1–0,26 м — в 30–70 раз длиннее правила выноса порошка (оценка по правилу поставщиков)"
+  },
+  "rotor_gyroid": {
+   "sheet_mm": {
+    "L4mm": {
+     "0.10": 0.129,
+     "0.15": 0.194,
+     "0.20": 0.259,
+     "0.30": 0.388
+    },
+    "L6mm": {
+     "0.10": 0.194,
+     "0.15": 0.291,
+     "0.20": 0.388,
+     "0.30": 0.582
+    },
+    "L8mm": {
+     "0.10": 0.259,
+     "0.15": 0.388,
+     "0.20": 0.517,
+     "0.30": 0.776
+    }
+   },
+   "verdict": "лист 0,39–0,52 мм внутри обшивки 2 мм ротора: замкнутая полость, вынос порошка только через отверстия в самом нагруженном месте — форма снята узлом"
+  },
+  "fuel_manifold_tree": {
+   "D_mm": [
+    42.1,
+    31.6,
+    14.1
+   ],
+   "wall_band_mm": 40.0,
+   "eps_rough_um": 15.0,
+   "verdict": "ствол Ø42 мм и ветви Ø32 мм не помещаются в стенку 40 мм рамы оболочки — нужен прилив (≥ 48 мм, оценка); горизонтальные каналы > 8 мм — каплевидный профиль; принятые 15 мкм — «после обработки», а внутренний канал не обрабатывается (узел сам пишет 20–50 мкм)"
+  },
+  "shell_channels": {
+   "radial_mm": [
+    12.0,
+    22.0,
+    14.0,
+    14.0
+   ],
+   "axial_mm": [
+    24.0,
+    24.0,
+    20.0,
+    20.0,
+    16.0,
+    16.0
+   ],
+   "verdict": "радиальные каналы 12–22 мм в стойках лежат горизонтально при печати осью вверх — каплевидный профиль; осевые 16–24 мм вертикальны — без поддержек; масляные каналы печати — промывка до класса чистоты масла и контроль частиц обязательны (оценка)"
+  }
+ },
+ "recup_print_time": {
+  "rows": {
+   "R80-ic-RH-ibc-none-none": {
+    "plate_NuT_as_cycles": {
+     "metal_m3": 0.279,
+     "machine_h_BLT_S1500": 310,
+     "machine_h_EP_M2050": 224
+    },
+    "plate_NuH1": {
+     "metal_m3": 0.255,
+     "machine_h_BLT_S1500": 284,
+     "machine_h_EP_M2050": 205
+    },
+    "gyroid_graded": {
+     "metal_m3": 0.321,
+     "machine_h_BLT_S1500": 357,
+     "machine_h_EP_M2050": 258
+    },
+    "diamond_graded": {
+     "metal_m3": 0.316,
+     "machine_h_BLT_S1500": 352,
+     "machine_h_EP_M2050": 254
+    },
+    "plate_NuH1_Dh15": {
+     "metal_m3": 0.192,
+     "machine_h_BLT_S1500": 213,
+     "machine_h_EP_M2050": 154
+    },
+    "cycles_foil_mass_kg": 1026.6
+   },
+   "R85-ic-RH-ibc-none-none": {
+    "plate_NuT_as_cycles": {
+     "metal_m3": 0.38,
+     "machine_h_BLT_S1500": 422,
+     "machine_h_EP_M2050": 305
+    },
+    "plate_NuH1": {
+     "metal_m3": 0.348,
+     "machine_h_BLT_S1500": 386,
+     "machine_h_EP_M2050": 279
+    },
+    "gyroid_graded": {
+     "metal_m3": 0.438,
+     "machine_h_BLT_S1500": 487,
+     "machine_h_EP_M2050": 352
+    },
+    "diamond_graded": {
+     "metal_m3": 0.43,
+     "machine_h_BLT_S1500": 477,
+     "machine_h_EP_M2050": 345
+    },
+    "plate_NuH1_Dh15": {
+     "metal_m3": 0.261,
+     "machine_h_BLT_S1500": 290,
+     "machine_h_EP_M2050": 210
+    },
+    "cycles_foil_mass_kg": 1413.9
+   },
+   "R90-ic-RH-ibc-none-none": {
+    "plate_NuT_as_cycles": {
+     "metal_m3": 0.56,
+     "machine_h_BLT_S1500": 623,
+     "machine_h_EP_M2050": 450
+    },
+    "plate_NuH1": {
+     "metal_m3": 0.513,
+     "machine_h_BLT_S1500": 570,
+     "machine_h_EP_M2050": 412
+    },
+    "gyroid_graded": {
+     "metal_m3": 0.654,
+     "machine_h_BLT_S1500": 727,
+     "machine_h_EP_M2050": 525
+    },
+    "diamond_graded": {
+     "metal_m3": 0.626,
+     "machine_h_BLT_S1500": 696,
+     "machine_h_EP_M2050": 503
+    },
+    "gyroid_uniform": {
+     "metal_m3": 0.654,
+     "machine_h_BLT_S1500": 727,
+     "machine_h_EP_M2050": 525
+    },
+    "diamond_uniform": {
+     "metal_m3": 0.626,
+     "machine_h_BLT_S1500": 696,
+     "machine_h_EP_M2050": 503
+    },
+    "gyroid_graded_tw025": {
+     "metal_m3": 0.436,
+     "machine_h_BLT_S1500": 484,
+     "machine_h_EP_M2050": 350
+    },
+    "plate_NuH1_Dh15": {
+     "metal_m3": 0.385,
+     "machine_h_BLT_S1500": 428,
+     "machine_h_EP_M2050": 309
+    },
+    "cycles_foil_mass_kg": 2131.4
+   }
+  },
+  "rates_cm3_h": {
+   "BLT-S1500": 900.0,
+   "Eplus3D EP-M2050": 1246.1538461538462
+  },
+  "rate_basis": {
+   "BLT-S1500": "по выдержке поиска (презентация BLT)",
+   "Eplus3D EP-M2050": "оценка: 34,6 см3/ч на лазер по BLT-S1500"
+  },
+  "note": "машинное время = объём металла сердцевины / объёмная скорость камеры (без коллекторов, поддержек, охлаждения камеры и ГИП); у тонких стенок скорость ниже паспортной (контур) — числа снизу (оценка)"
+ },
+ "shell_assembly": {
+  "rotor": [
+   {
+    "element": "колесо 1 (двусторонний вход)",
+    "D_m": 0.695
+   },
+   {
+    "element": "колесо 2",
+    "D_m": 0.703
+   },
+   {
+    "element": "колесо турбины 1",
+    "D_m": 0.574
+   },
+   {
+    "element": "колесо турбины 2",
+    "D_m": 0.608
+   },
+   {
+    "element": "колесо турбины 3",
+    "D_m": 0.697
+   }
+  ],
+  "stator": [
+   {
+    "stator": "вход + передний корпус подшипника",
+    "bore_m": 0.26,
+    "D_left_m": null,
+    "D_right_m": 0.695,
+    "traps": true
+   },
+   {
+    "stator": "обратный канал к глазу колеса 2",
+    "bore_m": 0.291,
+    "D_left_m": 0.695,
+    "D_right_m": 0.703,
+    "traps": true
+   },
+   {
+    "stator": "внутренний корпус камеры + СА 1",
+    "bore_m": 0.508,
+    "D_left_m": 0.703,
+    "D_right_m": 0.574,
+    "traps": true
+   },
+   {
+    "stator": "СА 2",
+    "bore_m": 0.492,
+    "D_left_m": 0.574,
+    "D_right_m": 0.608,
+    "traps": true
+   },
+   {
+    "stator": "СА 3",
+    "bore_m": 0.447,
+    "D_left_m": 0.608,
+    "D_right_m": 0.697,
+    "traps": true
+   },
+   {
+    "stator": "задний корпус подшипника + выхлоп",
+    "bore_m": 0.26,
+    "D_left_m": 0.697,
+    "D_right_m": null,
+    "traps": true
+   }
+  ],
+  "stator_pieces_needed": 6,
+  "stator_pieces_in_shell_count": 3,
+  "parts": {
+   "reference": 319,
+   "shell_claimed": 208,
+   "shell_assemblable": 211,
+   "removed_claimed": 111,
+   "removed_assemblable": 108
+  },
+  "fasteners": {
+   "reference": 978,
+   "shell_claimed": 282,
+   "shell_assemblable": [
+    284,
+    340
+   ],
+   "removed_assemblable": [
+    638,
+    694
+   ]
+  },
+  "assumption": "ротор собирается в корпусе по месту (колесо 1 — спереди, колесо 2 и турбина — сзади, стяжка через обратный канал); добавочные части: передняя крышка с корпусом подшипника, кольца СА 2 и СА 3 (цельные печатные кольца, вставляются между колёсами); новый наружный стык — один (передняя крышка): хомут (2) или болты по правилу parts_model (π·D/0,1 м); D отверстий — frame3 и shell_results.geometry (оценка уровня облика)",
+  "consequence": "картридж ротора целиком не вынимается; балансировка ротора в сборе — до разборки и сборка по меткам; замена колеса турбины 1 — через выхлоп, колёса 3, 2 и кольца СА 3, 2"
+ },
+ "hot_integral": {
+  "T_liner_C": 900.0,
+  "T_case_C": 410.4,
+  "eps_mismatch_pct": 0.754,
+  "dr_free_mm_at_r": {
+   "r_m": 0.45,
+   "dr_mm": 3.39
+  },
+  "sigma_elastic_biaxial_full_constraint_MPa": 1911,
+  "material_proxy": "IN-713C (materials.json, α и E по выдержкам поиска) вместо Hastelloy X / Haynes 282 — их свойств в репозитории нет; порядок величины тот же (оценка)",
+  "verdict": "жёстко сросшиеся жаровая труба и корпус должны разойтись на ~3 мм по радиусу: упругое напряжение при полном стеснении в разы выше предела текучести любых жаропрочных сплавов при 900 °C — пластическое деформирование каждый пуск, малоцикловая усталость; нужна податливая связь (печатные пружинные подвески/сильфонный участок) — в счёте деталей и расчётах её нет"
+ },
+ "hip_ct": {
+  "hip": [
+   {
+    "frame": "KV-1",
+    "kD": "kD1.7",
+    "D_m": 0.653,
+    "L_m": 0.591,
+    "hip_vessels_fit": [
+     2.05,
+     1.6,
+     0.88
+    ]
+   },
+   {
+    "frame": "KV-1",
+    "kD": "kD1.9",
+    "D_m": 0.73,
+    "L_m": 0.591,
+    "hip_vessels_fit": [
+     2.05,
+     1.6,
+     0.88
+    ]
+   },
+   {
+    "frame": "KV-1",
+    "kD": "kD2.1",
+    "D_m": 0.806,
+    "L_m": 0.591,
+    "hip_vessels_fit": [
+     2.05,
+     1.6,
+     0.88
+    ]
+   },
+   {
+    "frame": "KV-2",
+    "kD": "kD1.7",
+    "D_m": 1.03,
+    "L_m": 0.933,
+    "hip_vessels_fit": [
+     2.05,
+     1.6
+    ]
+   },
+   {
+    "frame": "KV-2",
+    "kD": "kD1.9",
+    "D_m": 1.151,
+    "L_m": 0.933,
+    "hip_vessels_fit": [
+     2.05,
+     1.6
+    ]
+   },
+   {
+    "frame": "KV-2",
+    "kD": "kD2.1",
+    "D_m": 1.273,
+    "L_m": 0.933,
+    "hip_vessels_fit": [
+     2.05,
+     1.6
+    ]
+   },
+   {
+    "frame": "KV-3",
+    "kD": "kD1.7",
+    "D_m": 1.194,
+    "L_m": 1.082,
+    "hip_vessels_fit": [
+     2.05,
+     1.6
+    ]
+   },
+   {
+    "frame": "KV-3",
+    "kD": "kD1.9",
+    "D_m": 1.335,
+    "L_m": 1.082,
+    "hip_vessels_fit": [
+     2.05,
+     1.6
+    ]
+   },
+   {
+    "frame": "KV-3",
+    "kD": "kD2.1",
+    "D_m": 1.475,
+    "L_m": 1.082,
+    "hip_vessels_fit": [
+     2.05,
+     1.6
+    ]
+   }
+  ],
+  "hip_margin_m": 0.05,
+  "ct": {
+   "shell_R_m": 0.667,
+   "wall_m": 0.04,
+   "tangential_chord_through_wall_m": 0.455,
+   "verdict": "луч по касательной проходит ~0,46 м металла стенки оболочки (Ti-6Al-4V или никелевый сплав): трубкой 450 кВ не просвечивается, нужен ускоритель 9 МэВ с грубым вокселем; каналы 0,6–1 мм лопаток СА в кольце Ø0,54 м КТ всего кольца не разрешит — контроль проливкой каждого канала, свидетели-купоны в той же печати, КТ купонов (оценка)"
+  }
+ },
+ "roughness_ngv": {
+  "rows": [
+   {
+    "T41_C": 1050.0,
+    "net": "straight",
+    "ks_um": 0.0,
+    "nu_augmentation": "smooth",
+    "feasible": true,
+    "dp_available_kPa": 469.9,
+    "x_ngv_pct": 1.2016,
+    "dp_kPa": 181.3,
+    "Re_max": 10122,
+    "f_ratio_max": 1.0,
+    "T_spread_K": 220.4,
+    "Mach_max": 0.312,
+    "at_backflow_floor": false,
+    "seconds": 10.1
+   },
+   {
+    "T41_C": 1050.0,
+    "net": "straight",
+    "ks_um": 15.0,
+    "nu_augmentation": "norris",
+    "feasible": true,
+    "dp_available_kPa": 469.9,
+    "x_ngv_pct": 1.1152,
+    "dp_kPa": 252.0,
+    "Re_max": 9190,
+    "f_ratio_max": 1.82,
+    "T_spread_K": 256.3,
+    "Mach_max": 0.29,
+    "at_backflow_floor": false,
+    "seconds": 12.0
+   },
+   {
+    "T41_C": 1050.0,
+    "net": "straight",
+    "ks_um": 15.0,
+    "nu_augmentation": "none",
+    "feasible": true,
+    "dp_available_kPa": 469.9,
+    "x_ngv_pct": 1.2015,
+    "dp_kPa": 277.4,
+    "Re_max": 10105,
+    "f_ratio_max": 1.856,
+    "T_spread_K": 220.1,
+    "Mach_max": 0.298,
+    "at_backflow_floor": false,
+    "seconds": 15.2
+   },
+   {
+    "T41_C": 1050.0,
+    "net": "straight",
+    "ks_um": 30.0,
+    "nu_augmentation": "norris",
+    "feasible": true,
+    "dp_available_kPa": 469.9,
+    "x_ngv_pct": 1.0947,
+    "dp_kPa": 300.2,
+    "Re_max": 8954,
+    "f_ratio_max": 2.358,
+    "T_spread_K": 272.2,
+    "Mach_max": 0.282,
+    "at_backflow_floor": false,
+    "seconds": 12.5
+   },
+   {
+    "T41_C": 1050.0,
+    "net": "straight",
+    "ks_um": 30.0,
+    "nu_augmentation": "none",
+    "feasible": true,
+    "dp_available_kPa": 469.9,
+    "x_ngv_pct": 1.2015,
+    "dp_kPa": 337.1,
+    "Re_max": 10103,
+    "f_ratio_max": 2.425,
+    "T_spread_K": 220.1,
+    "Mach_max": 0.289,
+    "at_backflow_floor": false,
+    "seconds": 13.5
+   },
+   {
+    "T41_C": 1050.0,
+    "net": "straight",
+    "ks_um": 60.0,
+    "nu_augmentation": "norris",
+    "feasible": true,
+    "dp_available_kPa": 469.9,
+    "x_ngv_pct": 1.0787,
+    "dp_kPa": 380.3,
+    "Re_max": 8751,
+    "f_ratio_max": 3.262,
+    "T_spread_K": 291.9,
+    "Mach_max": 0.272,
+    "at_backflow_floor": false,
+    "seconds": 13.1
+   },
+   {
+    "T41_C": 1050.0,
+    "net": "straight",
+    "ks_um": 60.0,
+    "nu_augmentation": "none",
+    "feasible": true,
+    "dp_available_kPa": 469.9,
+    "x_ngv_pct": 1.2014,
+    "dp_kPa": 431.4,
+    "Re_max": 10101,
+    "f_ratio_max": 3.382,
+    "T_spread_K": 220.0,
+    "Mach_max": 0.277,
+    "at_backflow_floor": false,
+    "seconds": 16.7
+   },
+   {
+    "T41_C": 1050.0,
+    "net": "tree_r8",
+    "ks_um": 0.0,
+    "nu_augmentation": "smooth",
+    "feasible": true,
+    "dp_available_kPa": 469.9,
+    "x_ngv_pct": 1.2003,
+    "dp_kPa": 180.4,
+    "Re_max": 10130,
+    "f_ratio_max": 1.0,
+    "T_spread_K": 231.7,
+    "Mach_max": 0.311,
+    "at_backflow_floor": false,
+    "seconds": 3.4
+   },
+   {
+    "T41_C": 1050.0,
+    "net": "tree_r8",
+    "ks_um": 15.0,
+    "nu_augmentation": "norris",
+    "feasible": true,
+    "dp_available_kPa": 469.9,
+    "x_ngv_pct": 1.1075,
+    "dp_kPa": 248.1,
+    "Re_max": 9146,
+    "f_ratio_max": 1.818,
+    "T_spread_K": 266.2,
+    "Mach_max": 0.288,
+    "at_backflow_floor": false,
+    "seconds": 3.4
+   },
+   {
+    "T41_C": 1050.0,
+    "net": "tree_r8",
+    "ks_um": 15.0,
+    "nu_augmentation": "none",
+    "feasible": true,
+    "dp_available_kPa": 469.9,
+    "x_ngv_pct": 1.2001,
+    "dp_kPa": 276.0,
+    "Re_max": 10114,
+    "f_ratio_max": 1.857,
+    "T_spread_K": 231.4,
+    "Mach_max": 0.297,
+    "at_backflow_floor": false,
+    "seconds": 3.5
+   },
+   {
+    "T41_C": 1050.0,
+    "net": "tree_r8",
+    "ks_um": 30.0,
+    "nu_augmentation": "norris",
+    "feasible": true,
+    "dp_available_kPa": 469.9,
+    "x_ngv_pct": 1.0846,
+    "dp_kPa": 294.5,
+    "Re_max": 8888,
+    "f_ratio_max": 2.354,
+    "T_spread_K": 281.6,
+    "Mach_max": 0.279,
+    "at_backflow_floor": false,
+    "seconds": 3.2
+   },
+   {
+    "T41_C": 1050.0,
+    "net": "tree_r8",
+    "ks_um": 30.0,
+    "nu_augmentation": "none",
+    "feasible": true,
+    "dp_available_kPa": 469.9,
+    "x_ngv_pct": 1.2001,
+    "dp_kPa": 335.4,
+    "Re_max": 10112,
+    "f_ratio_max": 2.426,
+    "T_spread_K": 231.4,
+    "Mach_max": 0.288,
+    "at_backflow_floor": false,
+    "seconds": 3.4
+   },
+   {
+    "T41_C": 1050.0,
+    "net": "tree_r8",
+    "ks_um": 60.0,
+    "nu_augmentation": "norris",
+    "feasible": true,
+    "dp_available_kPa": 469.9,
+    "x_ngv_pct": 1.0659,
+    "dp_kPa": 371.5,
+    "Re_max": 8663,
+    "f_ratio_max": 3.254,
+    "T_spread_K": 300.4,
+    "Mach_max": 0.268,
+    "at_backflow_floor": false,
+    "seconds": 3.5
+   },
+   {
+    "T41_C": 1050.0,
+    "net": "tree_r8",
+    "ks_um": 60.0,
+    "nu_augmentation": "none",
+    "feasible": true,
+    "dp_available_kPa": 469.9,
+    "x_ngv_pct": 1.2,
+    "dp_kPa": 429.3,
+    "Re_max": 10110,
+    "f_ratio_max": 3.383,
+    "T_spread_K": 231.4,
+    "Mach_max": 0.276,
+    "at_backflow_floor": false,
+    "seconds": 3.3
+   },
+   {
+    "T41_C": 1050.0,
+    "net": "tree_r4",
+    "ks_um": 0.0,
+    "nu_augmentation": "smooth",
+    "feasible": true,
+    "dp_available_kPa": 469.9,
+    "x_ngv_pct": 1.5571,
+    "dp_kPa": 222.6,
+    "Re_max": 21384,
+    "f_ratio_max": 1.0,
+    "T_spread_K": 232.3,
+    "Mach_max": 0.39,
+    "at_backflow_floor": false,
+    "seconds": 3.8
+   },
+   {
+    "T41_C": 1050.0,
+    "net": "tree_r4",
+    "ks_um": 15.0,
+    "nu_augmentation": "norris",
+    "feasible": true,
+    "dp_available_kPa": 469.9,
+    "x_ngv_pct": 1.0144,
+    "dp_kPa": 173.2,
+    "Re_max": 13594,
+    "f_ratio_max": 1.794,
+    "T_spread_K": 236.7,
+    "Mach_max": 0.271,
+    "at_backflow_floor": false,
+    "seconds": 4.4
+   },
+   {
+    "T41_C": 1050.0,
+    "net": "tree_r4",
+    "ks_um": 15.0,
+    "nu_augmentation": "none",
+    "feasible": true,
+    "dp_available_kPa": 469.9,
+    "x_ngv_pct": 1.5571,
+    "dp_kPa": 342.7,
+    "Re_max": 21356,
+    "f_ratio_max": 1.967,
+    "T_spread_K": 232.2,
+    "Mach_max": 0.368,
+    "at_backflow_floor": false,
+    "seconds": 3.5
+   },
+   {
+    "T41_C": 1050.0,
+    "net": "tree_r4",
+    "ks_um": 30.0,
+    "nu_augmentation": "norris",
+    "feasible": true,
+    "dp_available_kPa": 469.9,
+    "x_ngv_pct": 0.9894,
+    "dp_kPa": 203.0,
+    "Re_max": 13186,
+    "f_ratio_max": 2.291,
+    "T_spread_K": 254.7,
+    "Mach_max": 0.263,
+    "at_backflow_floor": false,
+    "seconds": 3.7
+   },
+   {
+    "T41_C": 1050.0,
+    "net": "tree_r4",
+    "ks_um": 30.0,
+    "nu_augmentation": "none",
+    "feasible": true,
+    "dp_available_kPa": 469.9,
+    "x_ngv_pct": 1.5571,
+    "dp_kPa": 412.3,
+    "Re_max": 21352,
+    "f_ratio_max": 2.552,
+    "T_spread_K": 232.1,
+    "Mach_max": 0.356,
+    "at_backflow_floor": false,
+    "seconds": 3.3
+   },
+   {
+    "T41_C": 1050.0,
+    "net": "tree_r4",
+    "ks_um": 60.0,
+    "nu_augmentation": "norris",
+    "feasible": true,
+    "dp_available_kPa": 469.9,
+    "x_ngv_pct": 0.968,
+    "dp_kPa": 252.8,
+    "Re_max": 12821,
+    "f_ratio_max": 3.099,
+    "T_spread_K": 277.3,
+    "Mach_max": 0.254,
+    "at_backflow_floor": false,
+    "seconds": 3.5
+   },
+   {
+    "T41_C": 1050.0,
+    "net": "tree_r4",
+    "ks_um": 60.0,
+    "nu_augmentation": "none",
+    "feasible": false,
+    "dp_available_kPa": 469.9,
+    "T_max_full_dp_C": 953.7,
+    "seconds": 0.2
+   },
+   {
+    "T41_C": 1100.0,
+    "net": "straight",
+    "ks_um": 0.0,
+    "nu_augmentation": "smooth",
+    "feasible": true,
+    "dp_available_kPa": 456.1,
+    "x_ngv_pct": 1.6176,
+    "dp_kPa": 285.3,
+    "Re_max": 13765,
+    "f_ratio_max": 1.0,
+    "T_spread_K": 234.9,
+    "Mach_max": 0.387,
+    "at_backflow_floor": false,
+    "seconds": 9.8
+   },
+   {
+    "T41_C": 1100.0,
+    "net": "straight",
+    "ks_um": 15.0,
+    "nu_augmentation": "norris",
+    "feasible": true,
+    "dp_available_kPa": 456.1,
+    "x_ngv_pct": 1.4523,
+    "dp_kPa": 384.4,
+    "Re_max": 12080,
+    "f_ratio_max": 1.927,
+    "T_spread_K": 273.0,
+    "Mach_max": 0.345,
+    "at_backflow_floor": false,
+    "seconds": 16.6
+   },
+   {
+    "T41_C": 1100.0,
+    "net": "straight",
+    "ks_um": 15.0,
+    "nu_augmentation": "none",
+    "feasible": true,
+    "dp_available_kPa": 456.1,
+    "x_ngv_pct": 1.6172,
+    "dp_kPa": 444.2,
+    "Re_max": 13742,
+    "f_ratio_max": 1.981,
+    "T_spread_K": 234.5,
+    "Mach_max": 0.36,
+    "at_backflow_floor": false,
+    "seconds": 13.1
+   },
+   {
+    "T41_C": 1100.0,
+    "net": "straight",
+    "ks_um": 30.0,
+    "nu_augmentation": "norris",
+    "feasible": true,
+    "dp_available_kPa": 456.1,
+    "x_ngv_pct": 1.4124,
+    "dp_kPa": 449.2,
+    "Re_max": 11661,
+    "f_ratio_max": 2.508,
+    "T_spread_K": 288.5,
+    "Mach_max": 0.33,
+    "at_backflow_floor": false,
+    "seconds": 16.4
+   },
+   {
+    "T41_C": 1100.0,
+    "net": "straight",
+    "ks_um": 30.0,
+    "nu_augmentation": "none",
+    "feasible": false,
+    "dp_available_kPa": 456.1,
+    "T_max_full_dp_C": 964.7,
+    "seconds": 2.1
+   },
+   {
+    "T41_C": 1100.0,
+    "net": "straight",
+    "ks_um": 60.0,
+    "nu_augmentation": "norris",
+    "feasible": false,
+    "dp_available_kPa": 456.1,
+    "T_max_full_dp_C": 971.4,
+    "seconds": 1.1
+   },
+   {
+    "T41_C": 1100.0,
+    "net": "straight",
+    "ks_um": 60.0,
+    "nu_augmentation": "none",
+    "feasible": false,
+    "dp_available_kPa": 456.1,
+    "T_max_full_dp_C": 985.5,
+    "seconds": 1.1
+   },
+   {
+    "T41_C": 1100.0,
+    "net": "tree_r8",
+    "ks_um": 0.0,
+    "nu_augmentation": "smooth",
+    "feasible": true,
+    "dp_available_kPa": 456.1,
+    "x_ngv_pct": 1.6152,
+    "dp_kPa": 283.6,
+    "Re_max": 13768,
+    "f_ratio_max": 1.0,
+    "T_spread_K": 246.5,
+    "Mach_max": 0.385,
+    "at_backflow_floor": false,
+    "seconds": 3.4
+   },
+   {
+    "T41_C": 1100.0,
+    "net": "tree_r8",
+    "ks_um": 15.0,
+    "nu_augmentation": "norris",
+    "feasible": true,
+    "dp_available_kPa": 456.1,
+    "x_ngv_pct": 1.4414,
+    "dp_kPa": 378.3,
+    "Re_max": 12009,
+    "f_ratio_max": 1.925,
+    "T_spread_K": 282.8,
+    "Mach_max": 0.342,
+    "at_backflow_floor": false,
+    "seconds": 3.4
+   },
+   {
+    "T41_C": 1100.0,
+    "net": "tree_r8",
+    "ks_um": 15.0,
+    "nu_augmentation": "none",
+    "feasible": true,
+    "dp_available_kPa": 456.1,
+    "x_ngv_pct": 1.6148,
+    "dp_kPa": 441.8,
+    "Re_max": 13746,
+    "f_ratio_max": 1.981,
+    "T_spread_K": 246.1,
+    "Mach_max": 0.358,
+    "at_backflow_floor": false,
+    "seconds": 3.2
+   },
+   {
+    "T41_C": 1100.0,
+    "net": "tree_r8",
+    "ks_um": 30.0,
+    "nu_augmentation": "norris",
+    "feasible": true,
+    "dp_available_kPa": 456.1,
+    "x_ngv_pct": 1.3985,
+    "dp_kPa": 440.4,
+    "Re_max": 11565,
+    "f_ratio_max": 2.503,
+    "T_spread_K": 297.4,
+    "Mach_max": 0.327,
+    "at_backflow_floor": false,
+    "seconds": 3.0
+   },
+   {
+    "T41_C": 1100.0,
+    "net": "tree_r8",
+    "ks_um": 30.0,
+    "nu_augmentation": "none",
+    "feasible": false,
+    "dp_available_kPa": 456.1,
+    "T_max_full_dp_C": 964.2,
+    "seconds": 0.2
+   },
+   {
+    "T41_C": 1100.0,
+    "net": "tree_r8",
+    "ks_um": 60.0,
+    "nu_augmentation": "norris",
+    "feasible": false,
+    "dp_available_kPa": 456.1,
+    "T_max_full_dp_C": 968.9,
+    "seconds": 0.2
+   },
+   {
+    "T41_C": 1100.0,
+    "net": "tree_r8",
+    "ks_um": 60.0,
+    "nu_augmentation": "none",
+    "feasible": false,
+    "dp_available_kPa": 456.1,
+    "T_max_full_dp_C": 985.1,
+    "seconds": 0.2
+   },
+   {
+    "T41_C": 1100.0,
+    "net": "tree_r4",
+    "ks_um": 0.0,
+    "nu_augmentation": "smooth",
+    "feasible": false,
+    "dp_available_kPa": 456.1,
+    "T_max_full_dp_C": 961.4,
+    "seconds": 0.2
+   },
+   {
+    "T41_C": 1100.0,
+    "net": "tree_r4",
+    "ks_um": 15.0,
+    "nu_augmentation": "norris",
+    "feasible": true,
+    "dp_available_kPa": 456.1,
+    "x_ngv_pct": 1.7727,
+    "dp_kPa": 429.1,
+    "Re_max": 24136,
+    "f_ratio_max": 2.017,
+    "T_spread_K": 285.4,
+    "Mach_max": 0.402,
+    "at_backflow_floor": false,
+    "seconds": 2.9
+   },
+   {
+    "T41_C": 1100.0,
+    "net": "tree_r4",
+    "ks_um": 15.0,
+    "nu_augmentation": "none",
+    "feasible": false,
+    "dp_available_kPa": 456.1,
+    "T_max_full_dp_C": 979.4,
+    "seconds": 0.2
+   },
+   {
+    "T41_C": 1100.0,
+    "net": "tree_r4",
+    "ks_um": 30.0,
+    "nu_augmentation": "norris",
+    "feasible": true,
+    "dp_available_kPa": 456.1,
+    "x_ngv_pct": 1.4958,
+    "dp_kPa": 398.2,
+    "Re_max": 20177,
+    "f_ratio_max": 2.52,
+    "T_spread_K": 286.3,
+    "Mach_max": 0.35,
+    "at_backflow_floor": false,
+    "seconds": 3.3
+   },
+   {
+    "T41_C": 1100.0,
+    "net": "tree_r4",
+    "ks_um": 30.0,
+    "nu_augmentation": "none",
+    "feasible": false,
+    "dp_available_kPa": 456.1,
+    "T_max_full_dp_C": 986.7,
+    "seconds": 0.2
+   },
+   {
+    "T41_C": 1100.0,
+    "net": "tree_r4",
+    "ks_um": 60.0,
+    "nu_augmentation": "norris",
+    "feasible": true,
+    "dp_available_kPa": 456.1,
+    "x_ngv_pct": 1.2476,
+    "dp_kPa": 381.7,
+    "Re_max": 16631,
+    "f_ratio_max": 3.298,
+    "T_spread_K": 290.0,
+    "Mach_max": 0.3,
+    "at_backflow_floor": false,
+    "seconds": 4.1
+   },
+   {
+    "T41_C": 1100.0,
+    "net": "tree_r4",
+    "ks_um": 60.0,
+    "nu_augmentation": "none",
+    "feasible": false,
+    "dp_available_kPa": 456.1,
+    "T_max_full_dp_C": 995.9,
+    "seconds": 0.2
+   }
+  ],
+  "N_vanes": 53,
+  "G_kg_s": 25.55,
+  "method": "thermal/vascular.py без изменений, подменены: трение Churchill с ε/D по диаметру сегмента; теплоотдача — две границы: norris — Nu_Gnielinski,гл·min(f/f_гл, 4)^(0,68·Pr^0,215) (Norris 1971, по памяти — оценка, оптимистично для печатных каналов), none — без приращения (осторожно); наименьший расход при пределе поверхности 950 °C (min_flow_for_limit)",
+  "note": "ε — эквивалентная песочная шероховатость; 15 мкм ~ обработанный/полированный канал, 30–60 мкм — печать без обработки малых каналов (оценка; у Stimpson 2016 приращение трения в мини-каналах больше, чем по ε/D — по выдержке)",
+  "reused_from_previous_run": true
+ },
+ "benefit": [
+  {
+   "form": "колесо 2 — гладкая задняя поверхность (structure, profile_eq)",
+   "parts": 0,
+   "mass": "−14,0 %",
+   "J": "−22,8 %",
+   "efficiency": "косвенно (пуск)",
+   "make": "поковка + точение, печать не нужна",
+   "decision": "оставить",
+   "basis": "structure_results.json → compressor_wheel_stage2.profile_eq"
+  },
+  {
+   "form": "диск турбины 1 — гладкий профиль eq",
+   "parts": 0,
+   "mass": "−5,3 %",
+   "efficiency": 0,
+   "make": "литьё + точение",
+   "decision": "оставить",
+   "basis": "structure_results.json → turbine_disk_stage1.profile_eq"
+  },
+  {
+   "form": "диск турбины 1 — «до предела»",
+   "parts": 0,
+   "mass": "−21 % (верхняя оценка)",
+   "efficiency": 0,
+   "make": "литьё + точение",
+   "decision": "оставить как верхнюю оценку: ресурс 18 929 ч < 25 000 ч на сетке 160×24"
+  },
+  {
+   "form": "воксельные проекты A колеса и диска (полости, тороиды)",
+   "parts": 0,
+   "mass": "−14…−36 % только в вокселях",
+   "efficiency": 0,
+   "make": "замкнутых полостей в STL колеса: 9; вынос порошка — отверстиями в нагруженном полотне; в CalculiX загрузка 1,28–1,45",
+   "decision": "отсеять: красота без пользы"
+  },
+  {
+   "form": "ротор с гироидом (вариант B)",
+   "parts": 0,
+   "mass": "−0,7 % диск; колесо не проходит",
+   "efficiency": 0,
+   "make": "замкнутая полость под обшивкой 2 мм, лист 0,39–0,52 мм",
+   "decision": "отсеять: красота без пользы"
+  },
+  {
+   "form": "корпус-оболочка «одной деталью» + горячая часть",
+   "parts": "−108 (заявлено −111)",
+   "fasteners": "−638…−694",
+   "mass": "не считалась",
+   "efficiency": "не считался",
+   "make": "6 частей статора вместо 3; податливая связь жаровой трубы; ГИП только в камерах Ø1,6 / 2,05 м; КТ — ускоритель",
+   "decision": "оставить с условиями"
+  },
+  {
+   "form": "рама опоры подшипника (оптимизация топологии)",
+   "parts": 0,
+   "stiffness": "×1.62 при той же массе",
+   "efficiency": "потери стоек не считались",
+   "make": "призма, печать осью вверх без нависаний (STL: 0 %)",
+   "decision": "оставить как второстепенное (жёсткость)"
+  },
+  {
+   "form": "топливный коллектор-дерево по Мюррею в стенке",
+   "parts": "−15 деталей, −28 соединений",
+   "uniformity": "1.8 % → 0 %",
+   "efficiency": 0,
+   "make": "ствол Ø42 мм не помещается в стенку 40 мм — прилив; каплевидные каналы",
+   "decision": "оставить с условиями"
+  },
+  {
+   "form": "сопловой аппарат: прямые каналы / 8 деревьев у стенки (класс P)",
+   "parts": "кольцо вместо сегментов",
+   "coolant": "1.2016307938441024 % против 3 % класса N при 1050 °C",
+   "efficiency": "только при T41 > 1000 °C",
+   "make": "каналы 0,6 × 48 мм под обшивкой 0,6 мм; при 1100 °C нужна доводка каналов (roughness_ngv)",
+   "decision": "оставить с условиями"
+  },
+  {
+   "form": "сопловой аппарат: 4 дерева (K = 2)",
+   "coolant": "0.7246096913115029 против 0.7999145801955941 % только при 1000 °C, где KV-3 не охлаждается (класс U); при 1050 °C хуже прямых",
+   "efficiency": 0,
+   "decision": "отсеять: красота без пользы"
+  },
+  {
+   "form": "сопловой аппарат: деревья K ≥ 3 и растущее дерево (CCO)",
+   "efficiency": "предел не держат",
+   "decision": "отсеять: красота без пользы"
+  },
+  {
+   "form": "жаровая труба: каналы у стенки без плёнки",
+   "efficiency": "предел 900 °C не держит ни одна сеть",
+   "decision": "отсеять как самостоятельное решение; только с плёнкой или покрытием"
+  },
+  {
+   "form": "рекуператор: гироид / Schwarz-D",
+   "mass": "ε 0,90: 5.52 / 5.29 т против пластин Dh 1,5 мм 3.25 т и фольги 2.13 т",
+   "make": "стенка 0,35 / 0,25 мм ниже 0,38 мм; вынос порошка из Dh 1,5 мм длиной 0,1–0,26 м не подтверждён",
+   "decision": "отсеять: красота без пользы (пока нет расчёта с инерцией, Re ≥ 100 — задача AWS)"
+  },
+  {
+   "form": "переменная ячейка TPMS (иллюстрация)",
+   "mass": "оптимизатор выбрал постоянную ячейку",
+   "decision": "отсеять: красота без пользы"
+  },
+  {
+   "form": "коллектор оптимизацией топологии 2D (comb6, fan8)",
+   "parts": "1 деталь вместо N труб",
+   "uniformity": "61 % → 3,9 % только без дросселей на выходах",
+   "efficiency": "для топлива — нет (форсунки выравнивают)",
+   "make": "2D-выдавливание, нормали STL внутрь",
+   "decision": "отсеять для топлива (там дерево Мюррея); оставить как метод для раздачи без дросселей (воздух охлаждения) — после 3D"
+  }
+ ],
+ "runtime_s": 1.6
+}

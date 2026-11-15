@@ -1,0 +1,1815 @@
+{
+ "title": "Камера KV-3, уровень 0 v2: чувствительность пробы N = 300 к закону затухания при малом J",
+ "method": "та же выборка (зерно 20261115, N = 300), BETA_LOWJ = 0 (затухание как v1), 1 (номинал), 2; comb_l0_v2.py --beta, merge_l0_v2.py, сборка - beta_sens_v2.py",
+ "status": "оценка: закон затухания при малом J не сверен, проверка - уровень 1 (RANS)",
+ "code_hash": {
+  "0": "ce00c977bea5cca0",
+  "1": "ce00c977bea5cca0",
+  "2": "ce00c977bea5cca0"
+ },
+ "data_hash": {
+  "0": "39396a12e5ed0369",
+  "1": "39396a12e5ed0369",
+  "2": "39396a12e5ed0369"
+ },
+ "bc_key": {
+  "0": "825fed627e97b080",
+  "1": "825fed627e97b080",
+  "2": "825fed627e97b080"
+ },
+ "complete": {
+  "0": true,
+  "1": true,
+  "2": true
+ },
+ "beta": {
+  "0": 0.0,
+  "1": 1.0,
+  "2": 2.0
+ },
+ "counts": {
+  "0": {
+   "n": 300,
+   "rows": 300,
+   "status": {
+    "ok": 111,
+    "отсев": 189
+   },
+   "reject_codes": {
+    "ГАБАРИТ": 1,
+    "ОБРАТНЫЙ_ТОК": 38,
+    "ОХЛАЖДЕНИЕ": 23,
+    "ЭЛЕМЕНТОВ_НА_ТРУБУ": 10,
+    "ТОПЛИВО": 48,
+    "ПОГАСАНИЕ_100": 30,
+    "ЭЛЕМЕНТ": 28,
+    "ДИЗЕЛЬ_ФОРСУНКИ": 16,
+    "ВОЗДУХ": 32,
+    "САМОВОСПЛАМЕНЕНИЕ": 6,
+    "ПРОСКОК": 7,
+    "ЭЛЕМЕНТЫ_КОНТУРОВ": 3
+   },
+   "feasible": 111,
+   "stable_30_100": 35,
+   "lowem_30_100_1valve": 0,
+   "lowem_strict_all_zones": 0,
+   "load_range_base": 0,
+   "stable_0_100": 18,
+   "stable_30_100_in_domain": 24,
+   "lowem_in_domain": 0,
+   "in_domain": 66,
+   "cross_ignition_upper": {
+    "note": "каналы: группа B поджигается горячим газом группы A - верхняя оценка (отбор - без неё)",
+    "evaluated": 21,
+    "stable_30_100": 1,
+    "lowem": 0
+   },
+   "hard_ok": 0,
+   "binding_term_among_feasible": {
+    "eta": 49,
+    "NOx": 33,
+    "CO": 25,
+    "lbo": 4
+   }
+  },
+  "1": {
+   "n": 300,
+   "rows": 300,
+   "status": {
+    "ok": 108,
+    "отсев": 192
+   },
+   "reject_codes": {
+    "ГАБАРИТ": 1,
+    "ОБРАТНЫЙ_ТОК": 38,
+    "ОХЛАЖДЕНИЕ": 23,
+    "ЭЛЕМЕНТОВ_НА_ТРУБУ": 10,
+    "ТОПЛИВО": 48,
+    "ПОГАСАНИЕ_100": 29,
+    "ЭЛЕМЕНТ": 28,
+    "ДИЗЕЛЬ_ФОРСУНКИ": 16,
+    "ВОЗДУХ": 32,
+    "САМОВОСПЛАМЕНЕНИЕ": 6,
+    "ПРОСКОК": 11,
+    "ЭЛЕМЕНТЫ_КОНТУРОВ": 3
+   },
+   "feasible": 108,
+   "stable_30_100": 35,
+   "lowem_30_100_1valve": 0,
+   "lowem_strict_all_zones": 0,
+   "load_range_base": 0,
+   "stable_0_100": 18,
+   "stable_30_100_in_domain": 24,
+   "lowem_in_domain": 0,
+   "in_domain": 64,
+   "cross_ignition_upper": {
+    "note": "каналы: группа B поджигается горячим газом группы A - верхняя оценка (отбор - без неё)",
+    "evaluated": 21,
+    "stable_30_100": 1,
+    "lowem": 0
+   },
+   "hard_ok": 0,
+   "binding_term_among_feasible": {
+    "eta": 46,
+    "NOx": 33,
+    "CO": 25,
+    "lbo": 4
+   }
+  },
+  "2": {
+   "n": 300,
+   "rows": 300,
+   "status": {
+    "ok": 108,
+    "отсев": 192
+   },
+   "reject_codes": {
+    "ГАБАРИТ": 1,
+    "ОБРАТНЫЙ_ТОК": 38,
+    "ОХЛАЖДЕНИЕ": 23,
+    "ЭЛЕМЕНТОВ_НА_ТРУБУ": 10,
+    "ТОПЛИВО": 48,
+    "ПОГАСАНИЕ_100": 29,
+    "ЭЛЕМЕНТ": 28,
+    "ДИЗЕЛЬ_ФОРСУНКИ": 16,
+    "ВОЗДУХ": 32,
+    "САМОВОСПЛАМЕНЕНИЕ": 6,
+    "ПРОСКОК": 12,
+    "ЭЛЕМЕНТЫ_КОНТУРОВ": 3
+   },
+   "feasible": 108,
+   "stable_30_100": 36,
+   "lowem_30_100_1valve": 0,
+   "lowem_strict_all_zones": 0,
+   "load_range_base": 0,
+   "stable_0_100": 19,
+   "stable_30_100_in_domain": 23,
+   "lowem_in_domain": 0,
+   "in_domain": 58,
+   "cross_ignition_upper": {
+    "note": "каналы: группа B поджигается горячим газом группы A - верхняя оценка (отбор - без неё)",
+    "evaluated": 21,
+    "stable_30_100": 1,
+    "lowem": 0
+   },
+   "hard_ok": 0,
+   "binding_term_among_feasible": {
+    "eta": 43,
+    "NOx": 34,
+    "CO": 26,
+    "lbo": 5
+   }
+  }
+ },
+ "by_cell": {
+  "TVC|струи": {
+   "0": {
+    "total": 16,
+    "ok": 5,
+    "stable_30_100": 1,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 21.2614,
+    "a_eff_30_min": 0.995249,
+    "share_anchor_30_over_100_max": 1.0
+   },
+   "1": {
+    "total": 16,
+    "ok": 5,
+    "stable_30_100": 1,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 21.2614,
+    "a_eff_30_min": 0.976295,
+    "share_anchor_30_over_100_max": 1.0
+   },
+   "2": {
+    "total": 16,
+    "ok": 5,
+    "stable_30_100": 1,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 21.2614,
+    "a_eff_30_min": 0.903905,
+    "share_anchor_30_over_100_max": 1.0
+   }
+  },
+  "RQL|нет": {
+   "0": {
+    "total": 59,
+    "ok": 35,
+    "stable_30_100": 34,
+    "stable_in_domain": 24,
+    "stable_0_100": 18,
+    "lowem": 0,
+    "new_value_min": 12.6488,
+    "a_eff_30_min": null,
+    "share_anchor_30_over_100_max": null
+   },
+   "1": {
+    "total": 59,
+    "ok": 35,
+    "stable_30_100": 34,
+    "stable_in_domain": 24,
+    "stable_0_100": 18,
+    "lowem": 0,
+    "new_value_min": 12.6488,
+    "a_eff_30_min": null,
+    "share_anchor_30_over_100_max": null
+   },
+   "2": {
+    "total": 59,
+    "ok": 35,
+    "stable_30_100": 34,
+    "stable_in_domain": 23,
+    "stable_0_100": 18,
+    "lowem": 0,
+    "new_value_min": 12.6488,
+    "a_eff_30_min": null,
+    "share_anchor_30_over_100_max": null
+   }
+  },
+  "FLOX|рециркуляция": {
+   "0": {
+    "total": 7,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 70.0266,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   },
+   "1": {
+    "total": 7,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 69.187,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   },
+   "2": {
+    "total": 7,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 50.3744,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   }
+  },
+  "TVC|гидравлика": {
+   "0": {
+    "total": 15,
+    "ok": 4,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 266.333,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.26025
+   },
+   "1": {
+    "total": 15,
+    "ok": 4,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 266.333,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.26025
+   },
+   "2": {
+    "total": 15,
+    "ok": 4,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 266.333,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.26025
+   }
+  },
+  "TVC|гидравлика+струи": {
+   "0": {
+    "total": 16,
+    "ok": 4,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 56.686,
+    "a_eff_30_min": 0.740001,
+    "share_anchor_30_over_100_max": 1.25134
+   },
+   "1": {
+    "total": 16,
+    "ok": 3,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 56.686,
+    "a_eff_30_min": 0.962813,
+    "share_anchor_30_over_100_max": 1.25134
+   },
+   "2": {
+    "total": 16,
+    "ok": 4,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 56.686,
+    "a_eff_30_min": 0.103399,
+    "share_anchor_30_over_100_max": 1.26715
+   }
+  },
+  "FLOX|каналы+струи": {
+   "0": {
+    "total": 8,
+    "ok": 3,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 99.9245,
+    "a_eff_30_min": 0.993151,
+    "share_anchor_30_over_100_max": 1.32566
+   },
+   "1": {
+    "total": 8,
+    "ok": 3,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 98.8597,
+    "a_eff_30_min": 0.871208,
+    "share_anchor_30_over_100_max": 1.32566
+   },
+   "2": {
+    "total": 8,
+    "ok": 3,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 82.6013,
+    "a_eff_30_min": 0.62794,
+    "share_anchor_30_over_100_max": 1.32566
+   }
+  },
+  "FLOX|гидравлика": {
+   "0": {
+    "total": 8,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 88.2338,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.20453
+   },
+   "1": {
+    "total": 8,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 88.2338,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.20453
+   },
+   "2": {
+    "total": 8,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 88.2338,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.20453
+   }
+  },
+  "TVC|нет": {
+   "0": {
+    "total": 14,
+    "ok": 7,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 85.5372,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.0
+   },
+   "1": {
+    "total": 14,
+    "ok": 5,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 88.8211,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.0
+   },
+   "2": {
+    "total": 14,
+    "ok": 5,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 56.9374,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.0
+   }
+  },
+  "FLOX|струи": {
+   "0": {
+    "total": 7,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 94.5224,
+    "a_eff_30_min": 0.944963,
+    "share_anchor_30_over_100_max": null
+   },
+   "1": {
+    "total": 7,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 94.5224,
+    "a_eff_30_min": 0.833051,
+    "share_anchor_30_over_100_max": null
+   },
+   "2": {
+    "total": 7,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 94.5224,
+    "a_eff_30_min": 0.69708,
+    "share_anchor_30_over_100_max": null
+   }
+  },
+  "FLOX|гидравлика+струи+рециркуляция": {
+   "0": {
+    "total": 8,
+    "ok": 3,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 93.2993,
+    "a_eff_30_min": 0.956896,
+    "share_anchor_30_over_100_max": 1.26896
+   },
+   "1": {
+    "total": 8,
+    "ok": 3,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 93.2993,
+    "a_eff_30_min": 0.730307,
+    "share_anchor_30_over_100_max": 1.26896
+   },
+   "2": {
+    "total": 8,
+    "ok": 3,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 78.7365,
+    "a_eff_30_min": 0.476584,
+    "share_anchor_30_over_100_max": 1.26896
+   }
+  },
+  "FLOX|каналы+рециркуляция": {
+   "0": {
+    "total": 7,
+    "ok": 3,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 41.3674,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.2265
+   },
+   "1": {
+    "total": 7,
+    "ok": 3,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 41.3674,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.2265
+   },
+   "2": {
+    "total": 7,
+    "ok": 3,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 41.3674,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.2265
+   }
+  },
+  "MM|каналы+рециркуляция": {
+   "0": {
+    "total": 4,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 76.3003,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.15791
+   },
+   "1": {
+    "total": 4,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 76.3003,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.15791
+   },
+   "2": {
+    "total": 4,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 76.3003,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.15791
+   }
+  },
+  "MM|гидравлика+струи": {
+   "0": {
+    "total": 7,
+    "ok": 4,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 56.7946,
+    "a_eff_30_min": 0.922382,
+    "share_anchor_30_over_100_max": 1.24556
+   },
+   "1": {
+    "total": 7,
+    "ok": 4,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 56.7946,
+    "a_eff_30_min": 0.847277,
+    "share_anchor_30_over_100_max": 1.24556
+   },
+   "2": {
+    "total": 7,
+    "ok": 4,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 48.1528,
+    "a_eff_30_min": 0.781384,
+    "share_anchor_30_over_100_max": 1.24556
+   }
+  },
+  "MM|каналы+струи": {
+   "0": {
+    "total": 4,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 67.6816,
+    "a_eff_30_min": 0.912675,
+    "share_anchor_30_over_100_max": 1.17032
+   },
+   "1": {
+    "total": 4,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 67.6816,
+    "a_eff_30_min": 0.770652,
+    "share_anchor_30_over_100_max": 1.17032
+   },
+   "2": {
+    "total": 4,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 67.6816,
+    "a_eff_30_min": 0.651218,
+    "share_anchor_30_over_100_max": 1.17032
+   }
+  },
+  "LPP|каналы+рециркуляция": {
+   "0": {
+    "total": 7,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 86.6816,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.14614
+   },
+   "1": {
+    "total": 7,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 67.286,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.14614
+   },
+   "2": {
+    "total": 7,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 94.5161,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.14614
+   }
+  },
+  "LPP|нет": {
+   "0": {
+    "total": 3,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 100.0,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   },
+   "1": {
+    "total": 3,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 98.1497,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   },
+   "2": {
+    "total": 3,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 67.0653,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   }
+  },
+  "MM|нет": {
+   "0": {
+    "total": 8,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 97.6175,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   },
+   "1": {
+    "total": 8,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 97.6175,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   },
+   "2": {
+    "total": 8,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 97.6175,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   }
+  },
+  "LPP|гидравлика+струи+рециркуляция": {
+   "0": {
+    "total": 4,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 97.8908,
+    "a_eff_30_min": 0.969353,
+    "share_anchor_30_over_100_max": 1.05524
+   },
+   "1": {
+    "total": 4,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 96.5571,
+    "a_eff_30_min": 0.894183,
+    "share_anchor_30_over_100_max": 1.05524
+   },
+   "2": {
+    "total": 4,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 83.0401,
+    "a_eff_30_min": 0.799923,
+    "share_anchor_30_over_100_max": 1.05524
+   }
+  },
+  "LPP|рециркуляция": {
+   "0": {
+    "total": 7,
+    "ok": 3,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 87.7918,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   },
+   "1": {
+    "total": 7,
+    "ok": 3,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 61.7099,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   },
+   "2": {
+    "total": 7,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 97.5066,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   }
+  },
+  "MM|рециркуляция": {
+   "0": {
+    "total": 4,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 75.3748,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   },
+   "1": {
+    "total": 4,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 75.3748,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   },
+   "2": {
+    "total": 4,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 75.3748,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   }
+  },
+  "LPP|струи": {
+   "0": {
+    "total": 5,
+    "ok": 3,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 99.9977,
+    "a_eff_30_min": 0.955108,
+    "share_anchor_30_over_100_max": null
+   },
+   "1": {
+    "total": 5,
+    "ok": 3,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 66.9058,
+    "a_eff_30_min": 0.40544,
+    "share_anchor_30_over_100_max": null
+   },
+   "2": {
+    "total": 5,
+    "ok": 3,
+    "stable_30_100": 1,
+    "stable_in_domain": 0,
+    "stable_0_100": 1,
+    "lowem": 0,
+    "new_value_min": 39.2592,
+    "a_eff_30_min": 0.233403,
+    "share_anchor_30_over_100_max": null
+   }
+  },
+  "LPP|каналы+струи+рециркуляция": {
+   "0": {
+    "total": 5,
+    "ok": 0,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": null,
+    "a_eff_30_min": null,
+    "share_anchor_30_over_100_max": null
+   },
+   "1": {
+    "total": 5,
+    "ok": 0,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": null,
+    "a_eff_30_min": null,
+    "share_anchor_30_over_100_max": null
+   },
+   "2": {
+    "total": 5,
+    "ok": 0,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": null,
+    "a_eff_30_min": null,
+    "share_anchor_30_over_100_max": null
+   }
+  },
+  "MM|каналы+струи+рециркуляция": {
+   "0": {
+    "total": 6,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 59.6432,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.26003
+   },
+   "1": {
+    "total": 6,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 59.6432,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.26003
+   },
+   "2": {
+    "total": 6,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 59.6432,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.26003
+   }
+  },
+  "LPP|гидравлика": {
+   "0": {
+    "total": 7,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 173.598,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.21586
+   },
+   "1": {
+    "total": 7,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 173.604,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.21586
+   },
+   "2": {
+    "total": 7,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 164.352,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.21586
+   }
+  },
+  "MM|струи+рециркуляция": {
+   "0": {
+    "total": 6,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 117.713,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   },
+   "1": {
+    "total": 6,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 117.713,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   },
+   "2": {
+    "total": 6,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 117.713,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   }
+  },
+  "LPP|гидравлика+рециркуляция": {
+   "0": {
+    "total": 6,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 90.1201,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.11526
+   },
+   "1": {
+    "total": 6,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 90.1201,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.11526
+   },
+   "2": {
+    "total": 6,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 90.1201,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.11526
+   }
+  },
+  "MM|гидравлика+рециркуляция": {
+   "0": {
+    "total": 7,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 86.2214,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.30568
+   },
+   "1": {
+    "total": 7,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 86.2214,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.30568
+   },
+   "2": {
+    "total": 7,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 86.2214,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.30568
+   }
+  },
+  "LPP|каналы+струи": {
+   "0": {
+    "total": 4,
+    "ok": 0,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": null,
+    "a_eff_30_min": null,
+    "share_anchor_30_over_100_max": null
+   },
+   "1": {
+    "total": 4,
+    "ok": 0,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": null,
+    "a_eff_30_min": null,
+    "share_anchor_30_over_100_max": null
+   },
+   "2": {
+    "total": 4,
+    "ok": 0,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": null,
+    "a_eff_30_min": null,
+    "share_anchor_30_over_100_max": null
+   }
+  },
+  "FLOX|каналы+струи+рециркуляция": {
+   "0": {
+    "total": 3,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 365.51,
+    "a_eff_30_min": 0.936518,
+    "share_anchor_30_over_100_max": 1.42386
+   },
+   "1": {
+    "total": 3,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 365.51,
+    "a_eff_30_min": 0.858513,
+    "share_anchor_30_over_100_max": 1.42386
+   },
+   "2": {
+    "total": 3,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 365.51,
+    "a_eff_30_min": 0.770754,
+    "share_anchor_30_over_100_max": 1.42386
+   }
+  },
+  "MM|каналы": {
+   "0": {
+    "total": 8,
+    "ok": 4,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 62.5247,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.29159
+   },
+   "1": {
+    "total": 8,
+    "ok": 4,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 59.2753,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.29159
+   },
+   "2": {
+    "total": 8,
+    "ok": 4,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 58.5922,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.29159
+   }
+  },
+  "LPP|гидравлика+струи": {
+   "0": {
+    "total": 5,
+    "ok": 0,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": null,
+    "a_eff_30_min": null,
+    "share_anchor_30_over_100_max": null
+   },
+   "1": {
+    "total": 5,
+    "ok": 0,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": null,
+    "a_eff_30_min": null,
+    "share_anchor_30_over_100_max": null
+   },
+   "2": {
+    "total": 5,
+    "ok": 0,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": null,
+    "a_eff_30_min": null,
+    "share_anchor_30_over_100_max": null
+   }
+  },
+  "MM|струи": {
+   "0": {
+    "total": 4,
+    "ok": 0,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": null,
+    "a_eff_30_min": null,
+    "share_anchor_30_over_100_max": null
+   },
+   "1": {
+    "total": 4,
+    "ok": 0,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": null,
+    "a_eff_30_min": null,
+    "share_anchor_30_over_100_max": null
+   },
+   "2": {
+    "total": 4,
+    "ok": 0,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": null,
+    "a_eff_30_min": null,
+    "share_anchor_30_over_100_max": null
+   }
+  },
+  "LPP|каналы": {
+   "0": {
+    "total": 3,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 100.0,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.10644
+   },
+   "1": {
+    "total": 3,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 100.0,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.10644
+   },
+   "2": {
+    "total": 3,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 99.0638,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.10644
+   }
+  },
+  "LPP|струи+рециркуляция": {
+   "0": {
+    "total": 5,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 104.385,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   },
+   "1": {
+    "total": 5,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 104.385,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   },
+   "2": {
+    "total": 5,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 104.385,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   }
+  },
+  "FLOX|каналы": {
+   "0": {
+    "total": 3,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 94.2607,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.2217
+   },
+   "1": {
+    "total": 3,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 94.2607,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.2217
+   },
+   "2": {
+    "total": 3,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 94.2607,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.2217
+   }
+  },
+  "FLOX|струи+рециркуляция": {
+   "0": {
+    "total": 4,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 91.9223,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   },
+   "1": {
+    "total": 4,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 91.9223,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   },
+   "2": {
+    "total": 4,
+    "ok": 2,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 91.9223,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   }
+  },
+  "FLOX|гидравлика+струи": {
+   "0": {
+    "total": 1,
+    "ok": 0,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": null,
+    "a_eff_30_min": null,
+    "share_anchor_30_over_100_max": null
+   },
+   "1": {
+    "total": 1,
+    "ok": 0,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": null,
+    "a_eff_30_min": null,
+    "share_anchor_30_over_100_max": null
+   },
+   "2": {
+    "total": 1,
+    "ok": 0,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": null,
+    "a_eff_30_min": null,
+    "share_anchor_30_over_100_max": null
+   }
+  },
+  "MM|гидравлика": {
+   "0": {
+    "total": 2,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 62.9568,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.13775
+   },
+   "1": {
+    "total": 2,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 62.9568,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.13775
+   },
+   "2": {
+    "total": 2,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 62.9568,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.13775
+   }
+  },
+  "FLOX|нет": {
+   "0": {
+    "total": 2,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 100.0,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   },
+   "1": {
+    "total": 2,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 100.0,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   },
+   "2": {
+    "total": 2,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 100.0,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": null
+   }
+  },
+  "FLOX|гидравлика+рециркуляция": {
+   "0": {
+    "total": 1,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 98.4261,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.06052
+   },
+   "1": {
+    "total": 1,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 98.4261,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.06052
+   },
+   "2": {
+    "total": 1,
+    "ok": 1,
+    "stable_30_100": 0,
+    "stable_in_domain": 0,
+    "stable_0_100": 0,
+    "lowem": 0,
+    "new_value_min": 98.4261,
+    "a_eff_30_min": 1.0,
+    "share_anchor_30_over_100_max": 1.06052
+   }
+  }
+ },
+ "nearest": {
+  "0": [
+   {
+    "idx": 267,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 12.6488,
+    "binding": "NOx_100",
+    "in_domain": true
+   },
+   {
+    "idx": 91,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 13.5206,
+    "binding": "NOx_30",
+    "in_domain": true
+   },
+   {
+    "idx": 59,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 14.2232,
+    "binding": "NOx_100",
+    "in_domain": true
+   },
+   {
+    "idx": 116,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 14.309,
+    "binding": "NOx_30",
+    "in_domain": false
+   },
+   {
+    "idx": 251,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 17.2372,
+    "binding": "NOx_30",
+    "in_domain": true
+   },
+   {
+    "idx": 292,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 17.9359,
+    "binding": "NOx_100",
+    "in_domain": true
+   },
+   {
+    "idx": 212,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 19.6041,
+    "binding": "NOx_100",
+    "in_domain": true
+   },
+   {
+    "idx": 268,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 20.4821,
+    "binding": "NOx_30",
+    "in_domain": false
+   },
+   {
+    "idx": 187,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 20.7809,
+    "binding": "NOx_50",
+    "in_domain": false
+   },
+   {
+    "idx": 60,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 21.0696,
+    "binding": "NOx_30",
+    "in_domain": false
+   }
+  ],
+  "1": [
+   {
+    "idx": 267,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 12.6488,
+    "binding": "NOx_100",
+    "in_domain": true
+   },
+   {
+    "idx": 91,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 13.5206,
+    "binding": "NOx_30",
+    "in_domain": true
+   },
+   {
+    "idx": 59,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 14.2232,
+    "binding": "NOx_100",
+    "in_domain": true
+   },
+   {
+    "idx": 116,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 14.309,
+    "binding": "NOx_30",
+    "in_domain": false
+   },
+   {
+    "idx": 251,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 17.2372,
+    "binding": "NOx_30",
+    "in_domain": true
+   },
+   {
+    "idx": 292,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 17.9359,
+    "binding": "NOx_100",
+    "in_domain": true
+   },
+   {
+    "idx": 212,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 19.6041,
+    "binding": "NOx_100",
+    "in_domain": true
+   },
+   {
+    "idx": 268,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 20.4821,
+    "binding": "NOx_30",
+    "in_domain": false
+   },
+   {
+    "idx": 187,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 20.7809,
+    "binding": "NOx_50",
+    "in_domain": false
+   },
+   {
+    "idx": 60,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 21.0696,
+    "binding": "NOx_30",
+    "in_domain": false
+   }
+  ],
+  "2": [
+   {
+    "idx": 267,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 12.6488,
+    "binding": "NOx_100",
+    "in_domain": true
+   },
+   {
+    "idx": 91,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 13.5206,
+    "binding": "NOx_30",
+    "in_domain": true
+   },
+   {
+    "idx": 59,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 14.2232,
+    "binding": "NOx_100",
+    "in_domain": false
+   },
+   {
+    "idx": 116,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 14.309,
+    "binding": "NOx_30",
+    "in_domain": false
+   },
+   {
+    "idx": 251,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 17.2372,
+    "binding": "NOx_30",
+    "in_domain": true
+   },
+   {
+    "idx": 292,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 17.9359,
+    "binding": "NOx_100",
+    "in_domain": true
+   },
+   {
+    "idx": 212,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 19.6041,
+    "binding": "NOx_100",
+    "in_domain": true
+   },
+   {
+    "idx": 268,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 20.4821,
+    "binding": "NOx_30",
+    "in_domain": false
+   },
+   {
+    "idx": 187,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 20.7809,
+    "binding": "NOx_50",
+    "in_domain": false
+   },
+   {
+    "idx": 60,
+    "scheme": "RQL",
+    "passive": "нет",
+    "new_value": 21.0696,
+    "binding": "NOx_30",
+    "in_domain": false
+   }
+  ]
+ },
+ "same_code": true
+}

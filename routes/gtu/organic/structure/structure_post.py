@@ -1,0 +1,606 @@
+#!/usr/bin/env python3
+"""Постобработка узла organic/structure: проверка проектов в CalculiX на гладком контуре, геометрия (STL), рендеры,
+рисунки и сводный results-JSON.
+
+Проверка в CalculiX (ccx_check.py): сечение — многоугольники контура x̄ = 0,5 с точной огибающей (тракт, обод),
+сетка Gmsh CAX6 шага h_ccx, нагрузки и допускаемые — те же, что в оптимизации (disk_topo.setup); исходный профиль
+frame3 считается той же цепочкой (сравнение «один к одному»). Решётка — по группам ρ* (шаг 0,01).
+
+Запуск: python3 structure_post.py [--ccx] [--geom] [--figs] [--summary]   (без ключей — всё)
+"""
+import argparse
+import json
+import math
+import os
+import sys
+import time
+from multiprocessing import Pool
+
+import numpy as np
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import disk_topo as DT  # noqa: E402
+import organic_geom as OG  # noqa: E402
+import lattice as LT  # noqa: E402
+
+OUTDIR = OG.OUTDIR
+CCX_RES = os.path.join(HERE, "ccx_check_results.json")
+H_CCX = {"turb1": 1.0e-3, "comp2": 1.5e-3}
+
+
+def part_loads(part):
+    """нагрузки и допускаемые для ccx_check — из той же постановки, что оптимизация"""
+    d = DT.frame3()
+    P = d["parts"][part]
+    if part == "turb1":
+        g = P["geometry"]
+        Tv = P["variants"]["cooled_750"]["T_C"]
+        T_of_r = lambda r: np.interp(r, Tv["r"], Tv["T"])  # noqa: E731
+        p = P["variants"]["cooled_750"]["cases"]["100"]["rim_p_MPa"] * 1e6
+        rim = dict(r=g["r_live_rim_m"], zlo=-g["w_rim_m"] / 2, zhi=g["w_rim_m"] / 2, p_Pa=p)
+        return dict(mat="in713c", T_of_r=T_of_r, rim=rim, blade=None, fixz=(0.0, 0.0))
+    s = P["variants"]["solid"]
+    pr = s["profile"]
+    r = np.asarray(pr["r"]); t = np.asarray(pr["t"]); zc = np.asarray(pr["zc"]); hb = np.asarray(pr["hb"])
+    ztop = zc + t / 2
+    Tv = s["T_C"]
+    T_of_r = lambda rr: np.interp(rr, Tv["r"], Tv["T"])  # noqa: E731
+    phi = P["blade_fill"]
+
+    def f_r(rr, rpm):
+        w2 = (2 * math.pi * rpm / 60) ** 2
+        return phi * 4430.0 * w2 * np.interp(rr, r, hb) * 2 * math.pi * rr ** 2
+
+    def on_hub(a, c):
+        za, zc_ = np.interp(a[0], r, ztop), np.interp(c[0], r, ztop)
+        return abs(a[1] - za) < 2e-5 and abs(c[1] - zc_) < 2e-5 and max(a[0], c[0]) > r[0] + 1e-9
+    return dict(mat="ti64", T_of_r=T_of_r, rim=None, f_r=f_r, on_hub=on_hub, fixz=(0.0, float((zc - t / 2).min())))
+
+
+def allow_fn(part, k_am, lc):
+    import topo_axi as TA
+    mat = TA.DK.load_material("in713c" if part == "turb1" else "ti64")
+    mt = TA.mat_tables(mat)
+    if part == "turb1":
+        if lc == 0:
+            return lambda T, rho: np.minimum(mt["slm"](T, DT.CREEP_H), mt["uts"](T)) * 1e6
+        return lambda T, rho: mt["uts"](T) * 1e6
+    if lc == 0:
+        return lambda T, rho: k_am * mt["ys"](T) * 1e6 / 1.5
+    return lambda T, rho: k_am * mt["ys"](T) * 1e6
+
+
+def ccx_job(job):
+    import ccx_check as CC
+    name, part, polys, k_am, rho_field_npz = job["name"], job["part"], job["polys"], job["k_am"], job.get("rho_npz")
+    L = part_loads(part)
+    lat = None; rho_field = None
+    if rho_field_npz:
+        D = OG.load(rho_field_npz)
+        lat = LT.default_law()
+        F = np.nan_to_num(D["F"], nan=1.0)
+        nr, nz = F.shape
+        dr, dz = D["r1"] / nr, (D["z1"] - D["z0"]) / nz
+        G = D["G"]
+        rmin = lat["rho_min"]
+
+        def rho_field(rr, zz):
+            i = np.clip((rr / dr).astype(int), 0, nr - 1); j = np.clip(((zz - D["z0"]) / dz).astype(int), 0, nz - 1)
+            x = F[i, j]
+            return np.where(G[i, j] == 2, rmin + (1 - rmin) * x, 1.0)
+    out = dict(name=name, part=part, cases=[])
+    for lc, rpm in enumerate((DT.RPM0, 1.2 * DT.RPM0)):
+        blade = None
+        if L.get("f_r"):
+            blade = dict(f=lambda rr, rpm=rpm: L["f_r"](rr, rpm), select=L["on_hub"])
+        rim = None
+        if L.get("rim"):
+            rim = dict(L["rim"]); rim["p_Pa"] = rim["p_Pa"] * (rpm / DT.RPM0) ** 2
+        res = CC.check(f"{name}_lc{lc + 1}", polys, L["mat"], L["T_of_r"], rpm, rim=rim, blade=blade, lattice=lat,
+                       rho_field=rho_field, h=H_CCX[part], fix_z_point=L["fixz"], allow=allow_fn(part, k_am, lc),
+                       workdir=os.path.join(OUTDIR, "ccx", f"{name}_lc{lc + 1}"))
+        out["cases"].append(res)
+    return out
+
+
+def polys_of(name):
+    D = OG.load(name)
+    gs = OG.section_polygons(D, smooth_tol=0.3e-3)
+    return [r.tolist() for g in gs for r in OG.poly_rings(g)] if len(gs) == 1 else None, gs, D
+
+
+def run_ccx(names, workers=4, out_path=None, with_baseline=True):
+    with open(DT.RESULTS, encoding="utf-8") as f:
+        R = json.load(f)
+    runs = {r["name"]: r for r in R["runs"]}
+    jobs = []
+    for part in (("turb1", "comp2") if with_baseline else ()):
+        model, design, cases, prm, meta, inb = DT.setup(part, "A", 1e-3 if part == "turb1" else 1.5e-3)
+        base = np.asarray(meta["base_poly"])
+        jobs.append(dict(name=f"{part}_baseline", part=part, polys=[base.tolist()], k_am=1.0))
+    for nm in names:
+        r = runs[nm]
+        if r["variant"] == "A":
+            pl, gs, D = polys_of(nm)
+            if pl is None:
+                print("несвязное сечение:", nm, len(gs)); continue
+            jobs.append(dict(name=nm, part=r["part"], polys=pl, k_am=r["meta"]["k_am"]))
+        else:
+            D = OG.load(nm)
+            jobs.append(dict(name=nm, part=r["part"], polys=[np.asarray(D["env"]).tolist()], k_am=r["meta"]["k_am"],
+                             rho_npz=nm))
+    with Pool(workers) as p:
+        res = p.map(ccx_job, jobs, chunksize=1)
+    out = dict(title="Проверка проектов в CalculiX на гладком контуре (CAX6, Gmsh)", date="2026-11-14",
+               method="ccx_check.py: контур x̄ = 0,5 ∩ огибающая -> Gmsh CAX6 -> ccx 2.21; CENTRIF, *TEMPERATURE T(r), *CLOAD "
+                      "(полная сила по окружности — соглашение проверено cload_convention: Ламе, 0,015 %); допускаемые — как в "
+                      "оптимизации; решётка — группы ρ* с E·E*/E и ρ·ρ*, загрузка решётки против её прочности S(ρ*)",
+               software=dict(ccx=res[0]["cases"][0]["ccx"] if res else None, python=sys.version.split()[0]),
+               h_ccx_m=H_CCX, results=res)
+    with open(out_path or CCX_RES, "w", encoding="utf-8") as f:
+        json.dump(out, f, ensure_ascii=False, indent=1, default=float)
+    return out
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--ccx", action="store_true")
+    ap.add_argument("--names", default="")
+    ap.add_argument("--workers", type=int, default=4)
+    a = ap.parse_args()
+    if a.ccx:
+        names = [n for n in a.names.split(",") if n]
+        run_ccx(names, a.workers)
+
+
+if __name__ == "__main__":
+    main()
+
+
+# =========================================================================== доводка порога
+LEVELS = (0.5, 0.45, 0.4, 0.35, 0.3, 0.25, 0.2, 0.15, 0.1, 0.05)
+
+
+def pick_threshold(name, part, variant, h, u_target):
+    """наибольший уровень x̄, при котором двоичный проект (x̄ ≥ уровня -> металл) выполняет ограничения (воксельный КЭ)"""
+    model, design, cases, prm, meta, inb = DT.setup(part, variant, h)
+    d = np.load(os.path.join(OUTDIR, f"disk_{name}.npz"))
+    assert np.array_equal(d["ei"], model.ei) and np.array_equal(d["ej"], model.ej), "сетка прогона не совпадает"
+    xb = d["xb"]
+    scan = []
+    best = None
+    for lv in LEVELS:
+        xe = np.where(xb >= lv, 1.0, 0.0); xe[model.group == 0] = 1.0
+        sol = model.solve(xe, prm, cases, need_sens=False)
+        eE, em, *_ = model.interp(xe, prm)
+        u = [float(np.max(np.where(xe > 0.5, c["u"], 0.0))) for c in sol["cases"]]
+        ok = all(u[k] <= u_target[k] * 1.01 for k in range(len(u)))
+        scan.append(dict(level=lv, mass_kg=model.mass(em), J_kgm2=model.inertia(em), u=u, ok=ok))
+        if ok and best is None:
+            best = scan[-1]
+    return dict(scan=scan, chosen=best)
+
+
+# =========================================================================== диск турбины: профиль -> disk.py (CalculiX)
+def turb_profile(name, n_pts=48, sigma_s=0.0):
+    """профиль t(r), zc(r) из двоичного проекта: толщина металла по столбцу и его средняя линия; сглаживание по 3 столбцам
+    и (sigma_s > 0) гауссом по радиусу (м) — доводка формы: снимает концентрацию на уступе ступицы"""
+    D = OG.load(name)
+    F = np.nan_to_num(D["F"], nan=0.0)
+    nr, nz = F.shape
+    dr, dz = D["r1"] / nr, (D["z1"] - D["z0"]) / nz
+    zc = D["z0"] + (np.arange(nz) + 0.5) * dz
+    S = F >= 0.5
+    t = S.sum(axis=1) * dz
+    zm = np.array([zc[S[i]].mean() if S[i].any() else 0.0 for i in range(nr)])
+    k = np.ones(3) / 3
+    t_s = np.convolve(np.r_[t[0], t, t[-1]], k, mode="valid"); zm_s = np.convolve(np.r_[zm[0], zm, zm[-1]], k, mode="valid")
+    rc = (np.arange(nr) + 0.5) * dr
+    if sigma_s > 0:
+        from scipy.ndimage import gaussian_filter1d
+        keep = rc < D["r1"] - 6e-3                          # слой под пазами и обод не сглаживаются
+        t_s = np.where(keep, gaussian_filter1d(t_s, sigma_s / dr, mode="nearest"), t_s)
+    r = np.r_[0.0, np.linspace(rc[0], rc[-1], n_pts - 2), D["r1"]]
+    tt = np.interp(r, rc, t_s); zz = np.interp(r, rc, zm_s)
+    return dict(r=r.tolist(), t=tt.tolist(), zc=zz.tolist())
+
+
+def disk_case(name, prof, rpm, k_thick=1.0, mesh=(120, 16), t_cap=None, r_fix=None):
+    """случай disk.py: профиль с утолщением k (кроме слоя под пазами r ≥ r_fix), поле cooled_750, давление лопаток ∝ ω²"""
+    sys.path.insert(0, DT.TA.FEA)
+    import disk as DK
+    d = DT.frame3(); P = d["parts"]["turb1"]
+    Tv = P["variants"]["cooled_750"]["T_C"]
+    p_rim = P["variants"]["cooled_750"]["cases"]["100"]["rim_p_MPa"]
+    r = np.asarray(prof["r"]); t = np.asarray(prof["t"]).copy()
+    if k_thick != 1.0:
+        m = r < (r_fix if r_fix is not None else r[-1])
+        t[m] = t[m] * k_thick
+        if t_cap:
+            t = np.minimum(t, t_cap)
+    case = dict(name=name, material="in713c", rpm=rpm, profile=dict(r=r.tolist(), t=t.tolist(), zc=prof.get("zc", [0.0] * len(r))),
+                profile_interp="pchip", T_C=Tv, rim=dict(p_MPa=p_rim * (rpm / DT.RPM0) ** 2), mesh=dict(nr=mesh[0], nz=mesh[1]))
+    wd = os.path.join(OUTDIR, "diskpy", f"{name}_{int(rpm)}")
+    res = DK.run_case(case, workdir=wd, keep=True)
+    # местный σв(T)/σ_экв по узлам .frd этого прогона (как frame3_fea: uts_local)
+    frd = DK.parse_frd(os.path.join(wd, "disk.frd"))
+    mat = DK.load_material("in713c"); ua = np.asarray(mat["uts_MPa"], float)
+    S, TN = frd["STRESS"], frd.get("NDTEMP", {})
+    rat = []
+    for n, sv in S.items():
+        vm = DK.von_mises(*sv[:6]) / 1e6
+        if vm > 1.0:
+            rat.append(float(np.interp(TN[n][0], ua[:, 0], ua[:, 1])) / vm)
+    res["uts_local"] = dict(ratio=min(rat))
+    rho = 7916.0
+    rr = np.linspace(r[0], r[-1], 4001); tt = np.interp(rr, r, t)
+    mass = float(np.trapezoid(rho * tt * 2 * math.pi * rr, rr)); J = float(np.trapezoid(rho * tt * 2 * math.pi * rr ** 3, rr))
+    return dict(rpm=rpm, k=k_thick, mass_kg=mass, J_kgm2=J, vm_max_MPa=res["vm_max_node_MPa"], vm_max_at=res["vm_max_at"],
+                uts_ratio=(res.get("uts_local") or {}).get("ratio"), creep_local_min_h=res["creep"]["local_min_h"],
+                creep_local_s1_min_h=res["creep"]["local_s1_min_h"], creep_at=res["creep"]["local_at"],
+                burst_margin=res["burst"]["margin"], gate=res["quality"]["passed"], flags=res["flags"],
+                profile=dict(r=r.tolist(), t=t.tolist()))
+
+
+def size_turb(name, prof, crit, mesh=(120, 16)):
+    """наименьшее k ≥ 1 (бисекция), при котором: местный ресурс LC1 ≥ crit['life_h'] и σв/σ при 120 % ≥ crit['uts_ratio']"""
+    d = DT.frame3(); g = d["parts"]["turb1"]["geometry"]
+    r_fix = g["r_live_rim_m"] - 4e-3; t_cap = d["parts"]["turb1"]["profile_info"]["t_max_m"]
+
+    def ok(k):
+        a = disk_case(name, prof, DT.RPM0, k, mesh, t_cap, r_fix); b = disk_case(name, prof, 1.2 * DT.RPM0, k, mesh, t_cap, r_fix)
+        good = a["creep_local_min_h"] >= crit["life_h"] and (b["uts_ratio"] or 0) >= crit["uts_ratio"]
+        return good, a, b
+    log = []
+    g1, a, b = ok(1.0); log.append(dict(k=1.0, ok=g1, life=a["creep_local_min_h"], uts120=b["uts_ratio"], mass=a["mass_kg"]))
+    if g1:
+        return dict(k=1.0, c100=a, c120=b, log=log)
+    lo, hi = 1.0, 1.6
+    g2, a2, b2 = ok(hi); log.append(dict(k=hi, ok=g2, life=a2["creep_local_min_h"], uts120=b2["uts_ratio"], mass=a2["mass_kg"]))
+    if not g2:
+        return dict(k=None, c100=a2, c120=b2, log=log, note="при k = 1,6 критерии не выполнены")
+    best = (hi, a2, b2)
+    for _ in range(7):
+        mid = 0.5 * (lo + hi)
+        gm, am, bm = ok(mid)
+        log.append(dict(k=mid, ok=gm, life=am["creep_local_min_h"], uts120=bm["uts_ratio"], mass=am["mass_kg"]))
+        if gm:
+            hi, best = mid, (mid, am, bm)
+        else:
+            lo = mid
+    return dict(k=best[0], c100=best[1], c120=best[2], log=log)
+
+
+def size_turb_job(job):
+    prof = turb_profile(job["name"], sigma_s=job.get("sigma_s", 8e-3))
+    out = size_turb(job["name"] + job.get("tag", ""), prof, job["crit"])
+    out.update(name=job["name"], crit=job["crit"], sigma_s=job.get("sigma_s", 8e-3), profile_k1=prof)
+    return out
+
+
+def run_turb_sizing(workers=3):
+    d = DT.frame3(); pr = d["parts"]["turb1"]["profile"]
+    base = dict(r=pr["r"], t=pr["t"], zc=[0.0] * len(pr["r"]))
+    b100 = disk_case("turb1_baseline", base, DT.RPM0); b120 = disk_case("turb1_baseline", base, 1.2 * DT.RPM0)
+    crit_eq = dict(life_h=b100["creep_local_min_h"], uts_ratio=b120["uts_ratio"], name="eq: не хуже литого профиля")
+    crit_lim = dict(life_h=DT.CREEP_H, uts_ratio=1.0, name="lim: ресурс ≥ 25 000 ч, σв/σ при 120 % ≥ 1")
+    jobs = [dict(name="turb1_A_mass_eq", crit=crit_eq), dict(name="turb1_A_J_eq", crit=crit_eq),
+            dict(name="turb1_A_mass_lim", crit=crit_lim)]
+    with Pool(workers) as p:
+        res = p.map(size_turb_job, jobs, chunksize=1)
+    out = dict(title="Диск турбины ступени 1: профиль из оптимизации топологии -> доводка формы и толщины в CalculiX (disk.py)",
+               date="2026-11-14",
+               method="t(r) из двоичного проекта (толщина металла по столбцу), сглаживание гауссом σ_s по радиусу, утолщение k "
+                      "(кроме слоя под пазами) бисекцией до выполнения критериев; каждый шаг — два расчёта disk.py (CAX8, 120×16, "
+                      "pchip, cooled_750, давление лопаток ∝ ω²)",
+               software=dict(ccx=DT.TA.DK.ccx_version()), baseline=dict(c100=b100, c120=b120), crit=dict(eq=crit_eq, lim=crit_lim),
+               runs=res)
+    with open(os.path.join(HERE, "turb_sizing_results.json"), "w", encoding="utf-8") as f:
+        json.dump(out, f, ensure_ascii=False, indent=1, default=float)
+    return out
+
+
+def size_turb_blend_job(job):
+    """переход к ободу как у литого профиля: t = max(t_проекта, t_литого) при r ≥ r_s; r_s — наибольший, при котором
+    выполнены критерии (перебор по сетке r_s сверху вниз)"""
+    prof = turb_profile(job["name"], sigma_s=job.get("sigma_s", 8e-3))
+    d = DT.frame3(); pb = d["parts"]["turb1"]["profile"]
+    rb, tb = np.asarray(pb["r"]), np.asarray(pb["t"])
+    r = np.asarray(prof["r"]); t0 = np.asarray(prof["t"])
+    crit = job["crit"]
+    log = []
+    best = None
+    for r_s in job.get("r_s", (0.205, 0.195, 0.185, 0.175, 0.165, 0.155, 0.145, 0.135, 0.12, 0.10, 0.0)):
+        t = np.where(r >= r_s, np.maximum(t0, np.interp(r, rb, tb)), t0)
+        p = dict(r=r.tolist(), t=t.tolist(), zc=[0.0] * len(r))
+        a = disk_case(job["name"] + "_bl", p, DT.RPM0); b = disk_case(job["name"] + "_bl", p, 1.2 * DT.RPM0)
+        ok = a["creep_local_min_h"] >= crit["life_h"] and (b["uts_ratio"] or 0) >= crit["uts_ratio"]
+        log.append(dict(r_s=r_s, ok=ok, life=a["creep_local_min_h"], uts120=b["uts_ratio"], mass=a["mass_kg"], J=a["J_kgm2"],
+                        burst=a["burst_margin"]))
+        if ok:
+            best = dict(r_s=r_s, c100=a, c120=b, profile=p)
+            break
+    return dict(name=job["name"], crit=crit, sigma_s=job.get("sigma_s", 8e-3), log=log, best=best, profile_k1=prof)
+
+
+def run_turb_blend(workers=3):
+    with open(os.path.join(HERE, "turb_sizing_results.json"), encoding="utf-8") as f:
+        prev = json.load(f)
+    ce, cl = prev["crit"]["eq"], prev["crit"]["lim"]
+    jobs = [dict(name="turb1_A_mass_eq", crit=ce), dict(name="turb1_A_J_eq", crit=ce), dict(name="turb1_A_mass_lim", crit=cl)]
+    with Pool(workers) as p:
+        res = p.map(size_turb_blend_job, jobs, chunksize=1)
+    prev["thickening_runs"] = prev.pop("runs", prev.get("thickening_runs"))
+    prev["blend_runs"] = res
+    prev["method_blend"] = ("переход к ободу как у литого профиля: t(r) = max(t_проекта, t_литого) при r ≥ r_s, r_s — наибольший "
+                            "из сетки, при котором выполнены критерии; каждый шаг — два расчёта disk.py")
+    with open(os.path.join(HERE, "turb_sizing_results.json"), "w", encoding="utf-8") as f:
+        json.dump(prev, f, ensure_ascii=False, indent=1, default=float)
+    return prev
+
+
+# =========================================================================== слияние результатов прогонов
+def merge_disk_results(parts_files):
+    """итоговый disk_topo_results.json: исходные профили + последние прогоны каждого варианта (файлы по порядку,
+    поздний перекрывает ранний)"""
+    runs, base, head = {}, None, None
+    for p in parts_files:
+        if not os.path.exists(p):
+            continue
+        with open(p, encoding="utf-8") as f:
+            d = json.load(f)
+        head = head or d
+        base = d.get("baseline") or base
+        for r in d["runs"]:
+            runs[r["name"]] = r
+    out = dict(head)
+    out["baseline"] = base
+    out["runs"] = sorted(runs.values(), key=lambda r: r["name"])
+    out["merged_from"] = [os.path.basename(p) for p in parts_files if os.path.exists(p)]
+    with open(DT.RESULTS, "w", encoding="utf-8") as f:
+        json.dump(out, f, ensure_ascii=False, indent=1, default=float)
+    return out
+
+
+# =========================================================================== выпуск геометрии
+STL_DIR = os.path.join(HERE, "stl")
+
+
+def stl_pair(mesh, name, max_mb=4.0):
+    """полный STL — в scratchpad, уменьшенный (≤ max_mb) — в репозиторий"""
+    import trimesh
+    os.makedirs(os.path.join(OUTDIR, "stl"), exist_ok=True); os.makedirs(STL_DIR, exist_ok=True)
+    full = os.path.join(OUTDIR, "stl", f"{name}.stl")
+    mesh.export(full)
+    target = int(max_mb * 1e6 / 50)
+    small = mesh if len(mesh.faces) <= target else OG.decimate(mesh, target)
+    red = os.path.join(STL_DIR, f"{name}.stl")
+    small.export(red)
+    return dict(full=full, full_MB=round(os.path.getsize(full) / 1e6, 2), full_faces=int(len(mesh.faces)),
+                repo=os.path.relpath(red, os.path.join(HERE, "..", "..", "..", "..")), repo_MB=round(os.path.getsize(red) / 1e6, 2),
+                repo_faces=int(len(small.faces)), watertight_full=bool(mesh.is_watertight))
+
+
+def geom_revolved(name, geoms, render_png, sections=360):
+    import trimesh
+    parts = []
+    for g in geoms:
+        for k, ring in enumerate(OG.poly_rings(g)):
+            ring = np.vstack([ring, ring[:1]])
+            m = trimesh.creation.revolve(ring, angle=2 * math.pi, sections=sections)
+            if (m.volume < 0) == (k == 0):
+                m.invert()
+            parts.append(m)
+    mesh = trimesh.util.concatenate(parts); mesh.merge_vertices()
+    info = stl_pair(mesh, name)
+    OG.render_cutaway(geoms, render_png)
+    info["render"] = os.path.basename(render_png)
+    info["stats"] = OG.section_stats(geoms)
+    return info
+
+
+def profile_polygon(prof):
+    from shapely.geometry import Polygon
+    r = np.asarray(prof["r"]); t = np.asarray(prof["t"]); zc = np.asarray(prof.get("zc", [0.0] * len(r)))
+    from scipy.interpolate import PchipInterpolator
+    rr = np.linspace(r[0], r[-1], 300)
+    tt = PchipInterpolator(r, t)(rr); zz = np.interp(rr, r, zc)
+    poly = np.vstack([np.c_[rr, zz + tt / 2], np.c_[rr[::-1], (zz - tt / 2)[::-1]]])
+    return [Polygon(poly).buffer(0)]
+
+
+def geom_lattice(name, png, L_cell=8e-3, sector_deg=40.0, step=None):
+    """сектор полого печатного диска: обшивка + гироид переменной плотности (ρ* — из проекта B)"""
+    D = OG.load(name)
+    law = LT.default_law()
+    step = step or L_cell / 9
+    mesh = OG.lattice_sector(D, law, L_cell, sector_deg, step, t_skin=DT.T_SKIN)
+    info = stl_pair(mesh, f"{name}_gyroid_sector{int(sector_deg)}")
+    import pyvista as pv
+    pv.OFF_SCREEN = True
+    p = pv.Plotter(off_screen=True, window_size=(1400, 1000)); p.set_background("white")
+    p.add_mesh(pv.wrap(mesh), color="#b8b2a7", smooth_shading=True, specular=0.45, specular_power=25)
+    R = D["r1"]; zc = 0.5 * (D["z0"] + D["z1"])
+    p.camera_position = [(0.35 * R, -1.25 * R, 0.55 * R + zc), (0.6 * R, 0, zc), (0, 0, 1)]
+    p.screenshot(png); p.close()
+    info.update(render=os.path.basename(png), L_cell_m=L_cell, sector_deg=sector_deg, voxel_step_m=step,
+                sheet_thickness_note="толщина листа при ρ* и L — lattice_results.json → sheet_thickness_mm")
+    return info
+
+
+def geom_frame(png, b=0.10):
+    """рама оболочки: сечение (контур x̄ = 0,5) выдавлено на осевую длину b"""
+    import trimesh
+    from skimage import measure
+    from shapely.geometry import Polygon
+    d = np.load(os.path.join(OUTDIR, "shell_frame.npz"))
+    n = int(d["n"]); R = float(d["R"]); h = float(d["h"])
+    F = np.zeros((n + 2, n + 2)); F[d["ei"] + 1, d["ej"] + 1] = d["xe"]
+    cs = measure.find_contours(F, 0.5)
+    polys = [Polygon((c - 1 + 0.5) * h - R).buffer(0) for c in cs if len(c) > 3]
+    polys = [p for p in polys if p.area > 4 * h * h]
+    polys.sort(key=lambda p: -p.area)
+    solid = None
+    for p in polys:
+        depth = sum(1 for q in polys if q is not p and q.area > p.area and q.contains(p.representative_point()))
+        if depth % 2 == 0:
+            solid = p if solid is None else solid.union(p)
+        else:
+            solid = solid.difference(p)
+    solid = solid.simplify(0.5 * h, preserve_topology=True)
+    geoms = list(solid.geoms) if solid.geom_type == "MultiPolygon" else [solid]
+    meshes = [trimesh.creation.extrude_polygon(g, b) for g in geoms]
+    mesh = trimesh.util.concatenate(meshes)
+    info = stl_pair(mesh, "shell_frame_kv3")
+    import pyvista as pv
+    pv.OFF_SCREEN = True
+    p = pv.Plotter(off_screen=True, window_size=(1400, 1000)); p.set_background("white")
+    p.add_mesh(pv.wrap(mesh), color="#b8b2a7", smooth_shading=False, specular=0.25)
+    p.camera_position = [(1.5 * R, -2.6 * R, 2.9 * R), (0, 0, b / 2), (0, 0, 1)]
+    p.screenshot(png); p.close()
+    info["render"] = os.path.basename(png)
+    return info
+
+
+# =========================================================================== сводка и подача в воронки
+def _load(p):
+    p = p if os.path.isabs(p) else os.path.join(HERE, p)
+    if not os.path.exists(p):
+        return None
+    with open(p, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _ccx_index(*files):
+    idx = {}
+    for f in files:
+        d = _load(f)
+        if d:
+            for r in d["results"]:
+                idx[r["name"]] = r
+    return idx
+
+
+def _ccx_brief(r):
+    if not r:
+        return None
+    c1, c2 = r["cases"]
+    out = dict(mass_kg=c1["mass_kg"], J_kgm2=c1["J_kgm2"], u_LC1=c1.get("u_max"), u_LC2=c2.get("u_max"),
+               u_LC1_at=c1.get("u_max_at"), u_LC2_at=c2.get("u_max_at"), vm_max_100_MPa=c1["vm_max_ip_MPa"],
+               vm_max_120_MPa=c2["vm_max_ip_MPa"], burst_margin=c1["burst_margin"], elements=c1["elements"])
+    if "creep_life_min_h" in c1:
+        out["creep_life_min_h"] = c1["creep_life_min_h"]
+    return out
+
+
+def summary():
+    R = _load("disk_topo_results.json"); runs = {r["name"]: r for r in R["runs"]}
+    pe, pl = _load("profile_opt_eq.json"), _load("profile_opt_lim.json")
+    L = _load("lattice_results.json"); S = _load("shell_results.json"); M = _load("manifold_results.json")
+    T3 = _load("topo3d_demo_results.json"); TS = _load("turb_sizing_results.json")
+    cx = _ccx_index(os.path.join(OUTDIR, "ccx_A.json"), os.path.join(OUTDIR, "ccx_B.json"), CCX_RES)
+    geo = {k: _load(os.path.join(OUTDIR, f"geom_{k}.json")) for k in ("turb", "comp2A", "comp2B", "frame")}
+    base = R["baseline"]
+    fe, fl = pe["check_160x24"], pl["check_160x24"]
+    b_t = fe["base_c100"]; b_t120 = fe["base_c120"]
+
+    def rel(a, b):
+        return round(a / b - 1, 4)
+    turb = dict(
+        baseline_cast_frame3=dict(mass_kg=b_t["mass_kg"], J_kgm2=b_t["J_kgm2"], creep_life_local_h=b_t["creep_local_min_h"],
+                                  uts_ratio_120=b_t120["uts_ratio"], burst_margin=b_t["burst_margin"], source="disk.py 160×24"),
+        topo_voxel={k: dict(mass_kg=runs[k]["mass_kg"], J_kgm2=runs[k]["J_kgm2"], u_binary=[c["u_max"] for c in runs[k]["cases"]],
+                            u_target=runs[k]["u_target"], interp="ramp") for k in ("turb1_A_mass_eq", "turb1_A_J_eq", "turb1_A_mass_lim")},
+        profile_eq=dict(mass_kg=fe["c100"]["mass_kg"], J_kgm2=fe["c100"]["J_kgm2"], d_mass=rel(fe["c100"]["mass_kg"], b_t["mass_kg"]),
+                        d_J=rel(fe["c100"]["J_kgm2"], b_t["J_kgm2"]), creep_life_local_h=fe["c100"]["creep_local_min_h"],
+                        uts_ratio_120=fe["c120"]["uts_ratio"], burst_margin=fe["c100"]["burst_margin"], profile=fe["profile"],
+                        verdict="не хуже литого по всем трём критериям (disk.py 160×24)"),
+        profile_lim=dict(mass_kg=fl["c100"]["mass_kg"], J_kgm2=fl["c100"]["J_kgm2"], d_mass=rel(fl["c100"]["mass_kg"], b_t["mass_kg"]),
+                         d_J=rel(fl["c100"]["J_kgm2"], b_t["J_kgm2"]), creep_life_local_h_160x24=fl["c100"]["creep_local_min_h"],
+                         creep_life_local_h_80x12=pl["best"]["life"], uts_ratio_120=fl["c120"]["uts_ratio"],
+                         burst_margin=fl["c100"]["burst_margin"], profile=fl["profile"],
+                         verdict="предел 25 000 ч выполнен на сетке поиска 80×12, на 160×24 — 18 929 ч: требуется доводка (оценка)"),
+        lattice_B=dict(mass_kg=runs["turb1_B_mass_eq"]["mass_kg"], u=[c["u_max"] for c in runs["turb1_B_mass_eq"]["cases"]],
+                       rho_mean=runs["turb1_B_mass_eq"]["lattice"]["rho_mean"],
+                       verdict="решётка вытесняется сплошным металлом (ρ* ср. 0,99): выигрыша нет"),
+        ccx_voxel_designs={k: _ccx_brief(cx.get(k)) for k in ("turb1_baseline", "turb1_A_mass_eq", "turb1_A_mass_lim", "turb1_A_J_eq")},
+        thickening_and_blend_attempts="turb_sizing_results.json: утолщение и «переход как у литого» — не сошлись (см. README)")
+    bc = base["comp2"]
+    comp = dict(
+        baseline_forged_frame3=dict(mass_kg=bc["mass_kg"], J_kgm2=bc["J_kgm2"], u=[c["u_max"] for c in bc["cases"]],
+                                    note="тот же воксельный расчёт; масса лопаток — на поверхности ступицы"),
+        designs={k: dict(mass_kg=runs[k]["mass_kg"], J_kgm2=runs[k]["J_kgm2"], d_mass=rel(runs[k]["mass_kg"], bc["mass_kg"]),
+                         d_J=rel(runs[k]["J_kgm2"], bc["J_kgm2"]), u_binary=[c["u_max"] for c in runs[k]["cases"]],
+                         u_target=runs[k]["u_target"], constraint_ok=runs[k]["constraint_ok"], k_am=runs[k]["meta"]["k_am"],
+                         burst_margin=runs[k]["burst_margin"], interp=runs[k].get("interp"),
+                         lattice=runs[k].get("lattice"), ccx=_ccx_brief(cx.get(k)),
+                         geometry=(geo["comp2A"] or {}).get(k, {}).get("stats") if geo["comp2A"] else None)
+                 for k in ("comp2_A_mass_eq", "comp2_A_J_eq", "comp2_A_mass_lim", "comp2_B_mass_eq", "comp2_B_J_eq")},
+        ccx_baseline=_ccx_brief(cx.get("comp2_baseline")),
+        ccx_refine={r["name"]: _ccx_brief(r) for r in (_load(os.path.join(OUTDIR, "ccx_refine.json")) or {}).get("results", [])})
+    pc = _load("profile_opt_comp2.json")
+    if pc and pc.get("check_160x24"):
+        c = pc["check_160x24"]
+        comp["profile_eq"] = dict(mass_kg=c["c100"]["mass_kg"], J_kgm2=c["c100"]["J_kgm2"],
+                                  d_mass=rel(c["c100"]["mass_kg"], c["base_c100"]["mass_kg"]),
+                                  d_J=rel(c["c100"]["J_kgm2"], c["base_c100"]["J_kgm2"]),
+                                  yield_ratio_100=c["c100"]["yield_ratio"], yield_ratio_120=c["c120"]["yield_ratio"],
+                                  base_yield_ratio_100=c["base_c100"]["yield_ratio"], base_yield_ratio_120=c["base_c120"]["yield_ratio"],
+                                  burst_margin=c["c100"]["burst_margin"], base_burst_margin=c["base_c100"]["burst_margin"],
+                                  base_mass_kg=c["base_c100"]["mass_kg"], base_J_kgm2=c["base_c100"]["J_kgm2"],
+                                  n_eval=pc["n_eval"], cobyla=pc["cobyla"], profile=c["c100"]["profile"],
+                                  verdict="не хуже кованого по наибольшему σ/σ0,2 на 100 и 120 % (disk.py 160×24, k = 1)")
+    lat = dict(law=L["law"], fit_power=L["fit_power"], sheet_thickness_mm=L["sheet_thickness_mm"],
+               convergence=[dict(rho=c["rho"], N=c["N"], E100=c["E100"], S=c["S_worst_p995"]) for c in L["convergence"]],
+               zener=[(p["rho"], p["zener"]) for p in L["points"]])
+    shell = dict(frame=dict(stiffness_ratio_worst=S["stiffness_ratio_worst"], mass_kg=S["optimized"]["mass_kg"],
+                            vm_max_MPa_opt=S["optimized"]["vm_max_MPa"], vm_max_MPa_ref=S["reference_8_spokes"]["vm_max_MPa"],
+                            k_min_opt_N_m=min(S["optimized"]["k_bearing_N_per_m"]), k_min_ref_N_m=min(S["reference_8_spokes"]["k_bearing_N_per_m"]),
+                            pressure_compliance_ratio=S["optimized"]["C_rel"][-1] / S["reference_8_spokes"]["C_rel"][-1]),
+                 parts=S["parts"]["removed"], parts_reference=S["parts"]["reference"]["parts"],
+                 parts_shell=S["parts"]["shell_one_piece"]["parts"],
+                 fasteners_reference=S["parts"]["reference"]["fasteners"], fasteners_shell=S["parts"]["shell_one_piece"]["fasteners"],
+                 printer_fit=[dict(frame=r["frame"], D_m=r["fit"]["kD1.9"]["D_m"], L_m=r["fit"]["kD1.9"]["L_m"],
+                                   printers_kD19=r["fit"]["kD1.9"]["printers"], printers_kD21=r["fit"]["kD2.1"]["printers"])
+                              for r in S["printer_fit"]["rows"]],
+                 manifold=dict(ring_spread_pct=M["ring"]["spread_pct"], ring_mc_p95_pct=M["ring"]["mc_spread_pct_p95"],
+                               tree_spread_pct=M["tree"]["spread_pct"], tree_mc_p95_pct=M["tree"]["mc_spread_pct_p95"],
+                               murray_k=[M["tree"]["murray_k_01"], M["tree"]["murray_k_12"]], parts_removed=M["ring"]["parts"],
+                               joints_removed=M["ring"]["joints"] - M["tree"]["joints"]))
+    out = dict(title="KV-3: генеративная геометрия ротора и корпуса (organic/structure) — сводка", date="2026-11-14",
+               method="см. README узла: осесимметричная оптимизация топологии (свой КЭ, SIMP/RAMP, MMA, p-норма напряжений), "
+                      "доводка формы профиля в CalculiX (disk.py, COBYLA), проверка в ccx (Gmsh CAX6), гомогенизация гироида (3D-КЭ), "
+                      "2D-оптимизация рамы оболочки, сеть каналов по Мюррею, 3D-код для AWS",
+               software=dict(python=sys.version.split()[0], numpy=np.__version__, scipy=__import__("scipy").__version__,
+                             ccx=DT.TA.DK.ccx_version()),
+               status="оценка уровня облика: профили и поля температур frame3, допускаемые materials.json (по выдержкам поиска), "
+                      "k_AM, t_skin, размеры рамы и коллектора — приняты",
+               inputs=R["inputs"] + [dict(file="routes/gtu/funnel/make_model.py", field="PRINTERS"),
+                                     dict(file="routes/gtu/funnel/parts_model.py", field="count, REF_BOM"),
+                                     dict(file="routes/gtu/frame3/frame3_point_results.json", field="D2, Wf, p3")],
+               turbine_disk_stage1=turb, compressor_wheel_stage2=comp, lattice=lat, shell=shell,
+               topo3d_demo=T3, geometry=geo,
+               aws=dict(jobs="routes/gtu/organic/structure/jobs_structure.json", plan_exit=0, forecast_usd_at_1usd_h=40.31,
+                        note="runner.py plan --assume-price 1.0: 5 задач, верхняя граница по сторожам; AWS не вызывался"))
+    with open(os.path.join(HERE, "structure_results.json"), "w", encoding="utf-8") as f:
+        json.dump(out, f, ensure_ascii=False, indent=1, default=float)
+    return out
+
+
+def comp2_refine_variants(name="comp2_A_mass_eq", r_keep=0.10, fillet=4e-3):
+    """доводка колеса: полости полотна (центр дальше r_keep) заполняются, полость носка остаётся; вариант 2 — ещё
+    скругление вогнутых углов радиусом fillet (замыкание: расширение + сужение), в пределах огибающей"""
+    from shapely.geometry import Polygon
+    D = OG.load(name)
+    gs = OG.section_polygons(D, smooth_tol=0.3e-3)
+    env = Polygon(D["env"]).buffer(0)
+    g = gs[0]
+    keep = [i for i in g.interiors if Polygon(i).centroid.x < r_keep]
+    v1 = Polygon(g.exterior, keep).buffer(0)
+    v2 = v1.buffer(fillet, join_style="round").buffer(-fillet, join_style="round").intersection(env).buffer(0)
+    out = {}
+    for tag, p in (("fill", v1), ("fill_fillet", v2.simplify(0.5e-3, preserve_topology=True).buffer(0))):
+        p = max(p.geoms, key=lambda q: q.area) if p.geom_type == "MultiPolygon" else p
+        out[f"{name}_{tag}"] = p
+    return out

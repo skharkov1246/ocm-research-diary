@@ -1,0 +1,45 @@
+{
+ "method": "Подсчёт узлов, объёмных элементов и уникальных рёбер сетки SU2 (рёбра элементов: тетраэдр 6, призма 9, пирамида 8, гексаэдр 12). Число внедиагональных блоков матрицы SU2 = 2 × рёбра (без узлов-призраков разбиения и периодики).",
+ "software": "python3 3.13.18, numpy 2.5.3",
+ "date": "2026-11-14",
+ "inputs": [
+  "../geom/out/core130_coarse/passage_core130_coarse.su2",
+  "../geom/out/core130_medium/passage_core130_medium.su2",
+  "../geom/out/taurus60_coarse/passage_taurus60_coarse.su2"
+ ],
+ "meshes": [
+  {
+   "file": "../geom/out/core130_coarse/passage_core130_coarse.su2",
+   "sha256": "ab8dff7d7567a2c1bf4ca07287ed862f5757f030876ed57858494e009347551a",
+   "n_points": 139121,
+   "n_elements": 617089,
+   "element_types": {
+    "10": 617089
+   },
+   "n_edges": 834254,
+   "edges_per_point": 5.996607
+  },
+  {
+   "file": "../geom/out/core130_medium/passage_core130_medium.su2",
+   "sha256": "b646d94a550ddd0196e38bb9a33488220d8e3524c1dd2da109351df142088512",
+   "n_points": 584357,
+   "n_elements": 2875475,
+   "element_types": {
+    "10": 2875475
+   },
+   "n_edges": 3699988,
+   "edges_per_point": 6.331725
+  },
+  {
+   "file": "../geom/out/taurus60_coarse/passage_taurus60_coarse.su2",
+   "sha256": "73e8b271eb024210065abc8b3c193ee84ac3fe4a1903e4b0793574277544729d",
+   "n_points": 165236,
+   "n_elements": 756640,
+   "element_types": {
+    "10": 756640
+   },
+   "n_edges": 1007362,
+   "edges_per_point": 6.096504
+  }
+ ]
+}

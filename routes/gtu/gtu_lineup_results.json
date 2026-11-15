@@ -1,0 +1,393 @@
+{
+ "method": "Раскладка исполнений по типоразмерам газогенератора из gtu_family_results.json (сценарий «мягкий», охват 75 % расхода); номер KV-n — место типоразмера по мощности на валу верхнего исполнения (решение владельца 14.11.2026).",
+ "software": "python3",
+ "date": "2026-11-14",
+ "inputs": [
+  "gtu_family_results.json"
+ ],
+ "scenario": "мягкий",
+ "lineup": [
+  {
+   "G_frame_kg_s": 7.4,
+   "G_min_kg_s": 6.2,
+   "n": 2,
+   "P_shaft_MW_min": 1.19,
+   "P_shaft_MW_max": 1.26,
+   "members": [
+    {
+     "model": "Saturn 20",
+     "variant": "привод",
+     "P_kW": 1185.0,
+     "P_shaft_kW": 1185,
+     "arch": "2В-1Ц",
+     "cool": "U",
+     "G_kg_s": 6.2
+    },
+    {
+     "model": "Saturn 20",
+     "variant": "генератор",
+     "P_kW": 1210.0,
+     "P_shaft_kW": 1264,
+     "arch": "1В-2Ц",
+     "cool": "U",
+     "G_kg_s": 7.36
+    }
+   ],
+   "models": [
+    "Saturn 20"
+   ],
+   "name": "KV-1"
+  },
+  {
+   "G_frame_kg_s": 18.3,
+   "G_min_kg_s": 18.2,
+   "n": 2,
+   "P_shaft_MW_min": 3.5,
+   "P_shaft_MW_max": 4.18,
+   "members": [
+    {
+     "model": "Centaur 40",
+     "variant": "привод",
+     "P_kW": 3500.0,
+     "P_shaft_kW": 3500,
+     "arch": "2В-1Ц",
+     "cool": "U",
+     "G_kg_s": 18.3
+    },
+    {
+     "model": "SGT-A05 KB5S",
+     "variant": "генератор",
+     "P_kW": 4000.0,
+     "P_shaft_kW": 4178,
+     "arch": "1В-2Ц",
+     "cool": "U",
+     "G_kg_s": 18.16
+    }
+   ],
+   "models": [
+    "Centaur 40",
+    "SGT-A05 KB5S"
+   ],
+   "name": "KV-2"
+  },
+  {
+   "G_frame_kg_s": 25.6,
+   "G_min_kg_s": 21.4,
+   "n": 11,
+   "P_shaft_MW_min": 3.67,
+   "P_shaft_MW_max": 6.79,
+   "members": [
+    {
+     "model": "Centaur 40",
+     "variant": "генератор",
+     "P_kW": 3515.0,
+     "P_shaft_kW": 3671,
+     "arch": "1В-2Ц",
+     "cool": "U",
+     "G_kg_s": 21.38
+    },
+    {
+     "model": "Centaur 50",
+     "variant": "привод",
+     "P_kW": 4570.0,
+     "P_shaft_kW": 4570,
+     "arch": "2В-1Ц",
+     "cool": "U",
+     "G_kg_s": 21.5
+    },
+    {
+     "model": "Centaur 50",
+     "variant": "генератор",
+     "P_kW": 4600.0,
+     "P_shaft_kW": 4805,
+     "arch": "1В-2Ц",
+     "cool": "U",
+     "G_kg_s": 22.43
+    },
+    {
+     "model": "SGT-100 (5.1 MW)",
+     "variant": "генератор",
+     "P_kW": 5100.0,
+     "P_shaft_kW": 5327,
+     "arch": "1В-1Ц",
+     "cool": "U",
+     "G_kg_s": 22.77
+    },
+    {
+     "model": "SGT-100 (5.4 MW)",
+     "variant": "генератор",
+     "P_kW": 5400.0,
+     "P_shaft_kW": 5640,
+     "arch": "1В-1Ц",
+     "cool": "U",
+     "G_kg_s": 24.11
+    },
+    {
+     "model": "SGT-A05 KB7S",
+     "variant": "генератор",
+     "P_kW": 5400.0,
+     "P_shaft_kW": 5640,
+     "arch": "1В-2Ц",
+     "cool": "U",
+     "G_kg_s": 25.12
+    },
+    {
+     "model": "SGT-100 (5.7 MW)",
+     "variant": "привод",
+     "P_kW": 5700.0,
+     "P_shaft_kW": 5700,
+     "arch": "2В-1Ц",
+     "cool": "N",
+     "G_kg_s": 22.31
+    },
+    {
+     "model": "Taurus 60",
+     "variant": "привод",
+     "P_kW": 5740.0,
+     "P_shaft_kW": 5740,
+     "arch": "2В-1Ц",
+     "cool": "U",
+     "G_kg_s": 24.54
+    },
+    {
+     "model": "Taurus 60",
+     "variant": "генератор",
+     "P_kW": 5670.0,
+     "P_shaft_kW": 5922,
+     "arch": "1В-2Ц",
+     "cool": "U",
+     "G_kg_s": 25.55
+    },
+    {
+     "model": "SGT-A05 KB7HE",
+     "variant": "генератор",
+     "P_kW": 5800.0,
+     "P_shaft_kW": 6058,
+     "arch": "1В-2Ц",
+     "cool": "U",
+     "G_kg_s": 25.19
+    },
+    {
+     "model": "Taurus 65",
+     "variant": "генератор",
+     "P_kW": 6500.0,
+     "P_shaft_kW": 6789,
+     "arch": "2В-2Ц",
+     "cool": "K",
+     "G_kg_s": 25.16
+    }
+   ],
+   "models": [
+    "Centaur 40",
+    "Centaur 50",
+    "SGT-100",
+    "SGT-A05 KB7HE",
+    "SGT-A05 KB7S",
+    "Taurus 60",
+    "Taurus 65"
+   ],
+   "name": "KV-3"
+  },
+  {
+   "G_frame_kg_s": 34.6,
+   "G_min_kg_s": 31.7,
+   "n": 3,
+   "P_shaft_MW_min": 8.29,
+   "P_shaft_MW_max": 8.54,
+   "members": [
+    {
+     "model": "Taurus 70",
+     "variant": "привод",
+     "P_kW": 8290.0,
+     "P_shaft_kW": 8290,
+     "arch": "2В-2Ц",
+     "cool": "N",
+     "G_kg_s": 32.1
+    },
+    {
+     "model": "SGT-300 (8.4 MW)",
+     "variant": "привод",
+     "P_kW": 8400.0,
+     "P_shaft_kW": 8400,
+     "arch": "2В-2Ц",
+     "cool": "N",
+     "G_kg_s": 34.65
+    },
+    {
+     "model": "Taurus 70",
+     "variant": "генератор",
+     "P_kW": 8180.0,
+     "P_shaft_kW": 8544,
+     "arch": "1В-2Ц",
+     "cool": "K",
+     "G_kg_s": 31.67
+    }
+   ],
+   "models": [
+    "SGT-300",
+    "Taurus 70"
+   ],
+   "name": "KV-4"
+  },
+  {
+   "G_frame_kg_s": 47.1,
+   "G_min_kg_s": 35.5,
+   "n": 6,
+   "P_shaft_MW_min": 8.36,
+   "P_shaft_MW_max": 13.47,
+   "members": [
+    {
+     "model": "SGT-300",
+     "variant": "генератор",
+     "P_kW": 8000.0,
+     "P_shaft_kW": 8356,
+     "arch": "1В-2Ц",
+     "cool": "U",
+     "G_kg_s": 35.55
+    },
+    {
+     "model": "SGT-300 (9.1 MW)",
+     "variant": "привод",
+     "P_kW": 9100.0,
+     "P_shaft_kW": 9100,
+     "arch": "2В-2Ц",
+     "cool": "N",
+     "G_kg_s": 35.68
+    },
+    {
+     "model": "Mars 90",
+     "variant": "привод",
+     "P_kW": 9860.0,
+     "P_shaft_kW": 9860,
+     "arch": "2В-1Ц",
+     "cool": "U",
+     "G_kg_s": 46.4
+    },
+    {
+     "model": "Mars 90",
+     "variant": "генератор",
+     "P_kW": 9450.0,
+     "P_shaft_kW": 9870,
+     "arch": "1В-2Ц",
+     "cool": "U",
+     "G_kg_s": 47.06
+    },
+    {
+     "model": "SGT-400 (13 MW version)",
+     "variant": "привод",
+     "P_kW": 13400.0,
+     "P_shaft_kW": 13400,
+     "arch": "2В-2Ц",
+     "cool": "K",
+     "G_kg_s": 45.6
+    },
+    {
+     "model": "SGT-400 (13 MW version)",
+     "variant": "генератор",
+     "P_kW": 12900.0,
+     "P_shaft_kW": 13474,
+     "arch": "1В-2Ц",
+     "cool": "K",
+     "G_kg_s": 47.08
+    }
+   ],
+   "models": [
+    "Mars 90",
+    "SGT-300",
+    "SGT-400"
+   ],
+   "name": "KV-5"
+  },
+  {
+   "G_frame_kg_s": 66.2,
+   "G_min_kg_s": 50.1,
+   "n": 6,
+   "P_shaft_MW_min": 11.86,
+   "P_shaft_MW_max": 17.5,
+   "members": [
+    {
+     "model": "Mars 100",
+     "variant": "генератор",
+     "P_kW": 11350.0,
+     "P_shaft_kW": 11855,
+     "arch": "1В-2Ц",
+     "cool": "U",
+     "G_kg_s": 50.13
+    },
+    {
+     "model": "Mars 100",
+     "variant": "привод",
+     "P_kW": 11860.0,
+     "P_shaft_kW": 11860,
+     "arch": "2В-2Ц",
+     "cool": "U",
+     "G_kg_s": 50.15
+    },
+    {
+     "model": "SGT-400 (15 MW version)",
+     "variant": "привод",
+     "P_kW": 14900.0,
+     "P_shaft_kW": 14900,
+     "arch": "2В-2Ц",
+     "cool": "K",
+     "G_kg_s": 52.5
+    },
+    {
+     "model": "SGT-400 (15 MW version)",
+     "variant": "генератор",
+     "P_kW": 14300.0,
+     "P_shaft_kW": 14936,
+     "arch": "1В-2Ц",
+     "cool": "K",
+     "G_kg_s": 52.4
+    },
+    {
+     "model": "Titan 130",
+     "variant": "генератор",
+     "P_kW": 16530.0,
+     "P_shaft_kW": 17265,
+     "arch": "1В-2Ц",
+     "cool": "N",
+     "G_kg_s": 66.12
+    },
+    {
+     "model": "Titan 130",
+     "variant": "привод",
+     "P_kW": 17500.0,
+     "P_shaft_kW": 17500,
+     "arch": "2В-2Ц",
+     "cool": "N",
+     "G_kg_s": 66.21
+    }
+   ],
+   "models": [
+    "Mars 100",
+    "SGT-400",
+    "Titan 130"
+   ],
+   "name": "KV-6"
+  },
+  {
+   "G_frame_kg_s": 114.5,
+   "G_min_kg_s": 114.5,
+   "n": 1,
+   "P_shaft_MW_min": 19.95,
+   "P_shaft_MW_max": 19.95,
+   "members": [
+    {
+     "model": "SGT-500",
+     "variant": "генератор",
+     "P_kW": 19100.0,
+     "P_shaft_kW": 19949,
+     "arch": "2В-2Ц",
+     "cool": "U",
+     "G_kg_s": 114.55
+    }
+   ],
+   "models": [
+    "SGT-500"
+   ],
+   "name": "KV-7"
+  }
+ ]
+}

@@ -1,0 +1,20 @@
+{
+  "jobQueueName": "${JQ_NAME}",
+  "state": "ENABLED",
+  "priority": 1,
+  "computeEnvironmentOrder": [
+    {"order": 1, "computeEnvironment": "${CE_ARN}"}
+  ],
+  "jobStateTimeLimitActions": [
+    {
+      "reason": "GTU: job RUNNABLE too long (no Spot capacity or vCPU quota)",
+      "state": "RUNNABLE",
+      "maxTimeSeconds": "${RUNNABLE_TIMEOUT_S}",
+      "action": "CANCEL"
+    }
+  ],
+  "tags": {
+    "Project": "${PROJECT_TAG}",
+    "RunId": "${RUN_ID}"
+  }
+}

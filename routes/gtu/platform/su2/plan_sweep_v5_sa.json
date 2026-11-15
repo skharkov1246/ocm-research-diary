@@ -1,0 +1,65 @@
+{
+ "id": "v5_sa",
+ "axis": "модель турбулентности",
+ "title": "Модель Спаларта — Аллмараса вместо SST на том же пути, что v2",
+ "mechanism": "Путь и численная схема v2 (частота при лёгком выходе -> плавный второй порядок -> нагружение), но SA (одно уравнение, SA_OPTIONS= NONE) вместо SST. Вместо «сначала Эйлер или ламинарное решение, потом RANS», которое в SU2 v8.6.0 с этим шаблоном не делается (см. diagnosis.not_used).",
+ "hypothesis": "Срыв вызывает модель SST (уравнение для w) на тетраэдрах без пристенных призм при большой относительной скорости; SA (одно уравнение) мягче. В сводке пробы — только rms[Rho], какое уравнение сорвалось первым, не установлено.",
+ "differs_from_smoke": "SA вместо SST; остальное — как v2",
+ "transforms": [
+  "hist"
+ ],
+ "set": {
+  "OUTPUT_FILES": "RESTART",
+  "WRT_FREQ": "100",
+  "LIMITER": "VENKATAKRISHNAN_WANG",
+  "VENKAT": "0.05"
+ },
+ "turb": "SA",
+ "steps": [
+  {
+   "name": "a_spin_light",
+   "frac": 1.0,
+   "load": 0.6,
+   "iter": 1000,
+   "ramp": 450,
+   "pramp": 900,
+   "muscl": false,
+   "gate": "intermediate",
+   "hold": {
+    "iter": 300,
+    "max": 3
+   },
+   "cfl": 5.0
+  },
+  {
+   "name": "b_order2",
+   "frac": 1.0,
+   "load": 0.6,
+   "iter": 400,
+   "ramp": 0,
+   "pramp": 0,
+   "muscl": true,
+   "gate": "intermediate",
+   "hold": {
+    "iter": 300,
+    "max": 3
+   },
+   "muscl_ramp": 250
+  },
+  {
+   "name": "c_base",
+   "frac": 1.0,
+   "load": 0.75,
+   "iter": 600,
+   "ramp": 0,
+   "pramp": 400,
+   "muscl": true,
+   "gate": "final",
+   "hold": {
+    "iter": 300,
+    "max": 40
+   }
+  }
+ ],
+ "_comment": "Стратегия разгона базовой точки для sweep_ramp.py run (перебор jobs_aws_su2_kv3_sweep.json). Сгенерировано make_jobs_su2_kv3_sweep.py; правки — в нём. load — доля оценки давления на выходе при номинальной частоте (char_points.p_out_estimate); при частоте w < 1 давление — по линии дросселя p_нач + w^2 (load x оценка − p_нач); load null — давление прежнее. set — поля шаблона run_case.py (--set), transforms — правки производного шаблона (sweep_ramp.py rc)."
+}

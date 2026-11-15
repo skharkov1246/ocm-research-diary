@@ -1,0 +1,10 @@
+{
+  "defaults": {"instance_type": "c7a.16xlarge", "fallback_types": ["c7i.16xlarge"], "image": "ubuntu2404",
+               "disk_gb": 60, "max_min": 150},
+  "jobs": [
+    {"name": "su2-core130-medium",
+     "command": "bash routes/gtu/platform/su2/install_su2.sh \"$HOME/su2\" \"$HOME/SU2-src\" && export SU2_RUN=\"$HOME/su2/bin\" && python routes/gtu/platform/su2/run_case.py --case core130 --level medium --plan design --np \"$(nproc)\" --mpi-args \"\" --time-limit 6600 --su2-src \"$HOME/SU2-src\" --out \"$GTU_OUT/core130_medium\" --record && cp routes/gtu/platform/su2/su2_results.json \"$GTU_OUT/\"",
+     "apt": ["build-essential", "git", "pkg-config", "openmpi-bin", "libopenmpi-dev", "libglu1-mesa"],
+     "pip": ["numpy", "scipy", "gmsh", "cantera"]}
+  ]
+}

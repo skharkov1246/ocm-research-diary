@@ -1,0 +1,136 @@
+{
+ "title": "уровень 2: короткая локальная проба (отобранные пробой уровня 1; геометрия без сетки, disk.py)",
+ "date": "2026-11-14",
+ "status": "оценка",
+ "method": "колёса - impeller.py --case custom (STEP, без сетки - локальная проба); диски - disk.py (CalculiX, осесимметричная модель, сетка 80×12; диски осевых ступеней - равнопрочный профиль, обод при температуре лопатки - верхняя граница); SU2 - char_points.py (если задано). Всё - оценка",
+ "software": "python 3.13.18; impeller.py, disk.py (ccx), char_points.py узлов платформы",
+ "inputs": [
+  {
+   "file": "l2_cases_probe_KV-3.json",
+   "sha256": "8c651c29678be5d1687ce93e56cb667b1c21b89070450026fedea7e53c2ecb30",
+   "source": {
+    "file": "funnel_l1_top50.json",
+    "sha256": "c535007adbb09d7635c12f6815e1dca8f15dad1a5a689cd22a07a0ecd945caaf",
+    "code_sha_l1": "a9adfb18e64ff36c",
+    "M": 12
+   }
+  },
+  {
+   "part": "fea:s0",
+   "seconds": 58.0,
+   "nproc": 4
+  },
+  {
+   "part": "fea:s1",
+   "seconds": 77.6,
+   "nproc": 4
+  },
+  {
+   "part": "geom:s0",
+   "seconds": 58.0,
+   "nproc": 4
+  },
+  {
+   "part": "geom:s1",
+   "seconds": 77.6,
+   "nproc": 4
+  }
+ ],
+ "whats": [
+  "geom",
+  "fea"
+ ],
+ "shards": 2,
+ "completeness": {
+  "ok": true,
+  "problems": []
+ },
+ "pass_rule": {
+  "burst_120_min": 1.0,
+  "life_h_min": 25000.0,
+  "d_eta_su2_max": 0.02,
+  "d_pi_su2_rel_max": 0.05,
+  "mesh_ok": true
+ },
+ "n": 2,
+ "n_pass": 0,
+ "l3_select": [],
+ "l3_rule": "прошедшие по убыванию оценки уровня 1, не больше 2 на архетип, до 10 (не меньше 5 - иначе точка остановки)",
+ "rows": [
+  {
+   "key": "r01_j8",
+   "arch": "кластер",
+   "niche": "кластер|2р|2Ц|О|P|нет|сварка:печать",
+   "score_l1": 6.3898,
+   "eta_th_shaft_pct": 29.632,
+   "fails": [
+    "запас по разрушению при 120 % 0.87 < 1.0",
+    "ресурс по ползучести 1728 ч < 25000"
+   ],
+   "geom_ok": true,
+   "fea": {
+    "comp1": {
+     "burst_margin_120": 1.223,
+     "life_local_h": 3.902982853741106e+47,
+     "vm_max_MPa": 525.445
+    },
+    "comp2": {
+     "burst_margin_120": 1.245,
+     "life_local_h": 6.176431397319639e+28,
+     "vm_max_MPa": 502.701
+    },
+    "turb_disc": {
+     "burst_margin_120": 0.872,
+     "life_local_h": 1727.809,
+     "vm_max_MPa": 1192.601
+    },
+    "pt_disc": {
+     "burst_margin_120": 1.158,
+     "life_local_h": 2320558.435,
+     "vm_max_MPa": 835.107
+    }
+   },
+   "burst_120_min": 0.8721737819132279,
+   "life_h_min": 1727.8088863326216,
+   "pass": false
+  },
+  {
+   "key": "r02_j7",
+   "arch": "литой монолит",
+   "niche": "литой монолит|2р|2Ц|О|K|нет|сварка:литьё",
+   "score_l1": 6.1427,
+   "eta_th_shaft_pct": 28.366,
+   "fails": [
+    "запас по разрушению при 120 % 0.87 < 1.0",
+    "ресурс по ползучести 1064 ч < 25000"
+   ],
+   "geom_ok": true,
+   "fea": {
+    "comp1": {
+     "burst_margin_120": 1.222,
+     "life_local_h": 2.473753676649377e+44,
+     "vm_max_MPa": 536.408
+    },
+    "comp2": {
+     "burst_margin_120": 1.254,
+     "life_local_h": 6.768876564809329e+27,
+     "vm_max_MPa": 484.255
+    },
+    "turb_disc": {
+     "burst_margin_120": 0.871,
+     "life_local_h": 1064.069,
+     "vm_max_MPa": 1185.991
+    },
+    "pt_disc": {
+     "burst_margin_120": 1.158,
+     "life_local_h": 2250160.843,
+     "vm_max_MPa": 825.632
+    }
+   },
+   "burst_120_min": 0.871401597138538,
+   "life_h_min": 1064.0692502947204,
+   "pass": false
+  }
+ ],
+ "probe_note": "локальная проба на 4 ядрах: колёса - только STEP (--no-mesh), SU2 не считался; полный уровень 2 - задачи AWS jobs_l2.json по 50 разным слитого уровня 1"
+}

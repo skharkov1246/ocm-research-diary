@@ -1,0 +1,2292 @@
+{
+ "method": "disk.py (CalculiX ccx, осесимметричный диск, условный профиль в масштабе D)",
+ "date": "2026-11-14",
+ "input": "funnel_l1_fea_cases.json",
+ "n": 571,
+ "results": [
+  {
+   "key": "j70:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j70:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j502:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j502:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3081:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3081:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1710:comp4",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j869:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j869:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1536:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1536:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2529:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2529:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3165:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3165:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j431:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j431:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j71:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j71:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3509:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3509:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j928:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j928:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j928:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3698:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3698:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j79:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3846:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2630:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j461:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j461:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1662:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3861:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3861:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3177:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3177:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j708:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j320:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j320:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1006:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1006:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2549:comp4",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j47:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j47:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2517:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j877:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3180:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3180:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3180:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j485:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j485:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2334:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2334:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j661:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1590:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1590:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1092:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1092:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3869:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3869:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3854:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3854:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2770:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2770:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2770:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1063:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1063:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j885:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j885:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2593:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2593:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j269:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j269:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j212:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j212:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1228:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1228:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2461:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2461:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j487:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j487:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j487:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2810:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2810:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j455:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j455:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j949:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j949:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2142:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2142:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3192:comp4",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j447:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j447:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j838:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j838:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j358:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j358:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j646:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j646:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1050:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1050:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j326:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j326:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j622:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j622:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j598:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j598:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j910:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j910:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j958:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j958:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j790:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j790:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j526:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j526:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j406:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j406:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j766:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j766:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j262:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j262:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j718:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j718:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j478:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j478:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j574:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j574:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j60:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j60:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j550:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j550:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1029:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1029:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j982:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j982:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j862:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j862:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1222:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1222:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j934:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j934:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j469:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j469:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1151:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1151:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2433:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2433:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j670:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j670:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3485:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3485:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1169:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1169:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j238:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j238:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j50:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j463:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j174:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j174:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1113:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1113:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j285:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j285:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j277:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1216:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j206:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j206:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j261:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j261:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3700:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3700:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1680:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1680:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1680:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3618:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3618:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j685:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j334:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j334:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j669:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j669:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j477:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j477:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j861:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j861:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1070:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1070:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3722:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3722:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1077:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1077:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1776:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1776:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j471:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j471:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j471:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j142:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j142:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2509:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2509:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j991:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3870:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3870:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3523:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3523:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j109:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j109:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1981:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1981:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1981:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2051:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1650:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1650:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j31:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j31:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3495:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3495:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2513:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2513:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j107:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j107:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3168:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3168:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j749:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j749:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j749:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3525:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3222:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3222:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3871:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j615:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j615:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1656:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3717:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3717:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2773:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3503:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3503:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3718:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3529:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3529:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3529:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j727:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j727:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j335:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j335:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3775:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3775:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3877:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3877:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3877:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3705:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3705:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3070:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3070:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3132:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3132:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1668:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1668:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1668:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3900:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3900:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j302:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j302:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j367:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j367:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2453:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2453:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1027:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3162:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1566:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1566:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3863:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3863:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j270:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j270:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3929:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3929:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3859:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3859:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3873:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3873:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j372:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j372:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j38:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j38:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2469:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2469:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j624:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3120:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3120:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3710:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3710:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3872:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j684:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j684:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j28:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j28:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j524:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j524:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j692:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j692:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j852:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j852:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1132:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1132:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j18:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j349:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j349:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3852:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3709:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3709:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j364:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j364:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3175:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3175:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3876:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3876:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1004:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1004:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2117:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2117:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j204:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j204:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2176:comp4",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1282:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1282:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j844:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j844:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j532:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j532:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j887:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j887:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j887:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1012:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1012:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3889:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j549:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j549:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j86:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j86:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3121:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3121:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3121:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3719:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3864:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3864:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j439:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j439:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j27:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j27:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j165:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j165:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j165:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3880:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j37:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j37:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j57:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j57:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j540:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j540:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3527:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j7:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j7:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1644:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1644:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3159:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3159:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j360:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3505:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3505:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1944:comp4",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1944:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j95:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j95:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j131:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j131:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j565:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j565:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j565:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3135:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3135:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j48:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j48:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3746:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3746:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3563:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3563:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j612:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3541:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j444:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2206:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2206:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j365:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j365:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1037:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1037:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j196:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j196:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3127:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3127:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2505:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2505:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j104:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j104:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1596:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1596:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j132:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j916:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j700:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1633:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1633:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j122:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j122:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j114:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j67:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j67:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j932:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j375:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j375:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3624:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3521:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3521:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2406:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2406:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3283:comp4",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3283:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1023:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1023:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1023:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j77:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j77:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j17:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j17:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j228:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j228:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1980:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1980:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j260:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j260:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3780:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3780:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2473:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2473:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j765:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j765:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j765:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j78:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j78:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j78:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j113:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j113:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1055:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1055:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2036:comp4",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2036:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j96:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j96:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j96:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j268:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j268:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j268:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j748:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j748:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j748:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2721:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2721:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j836:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j836:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j676:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j676:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j580:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j580:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j580:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j564:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j564:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j564:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1062:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1062:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j860:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j860:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j244:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j244:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j420:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j420:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j420:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2212:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1083:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1147:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1147:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3716:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3716:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3379:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3379:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j900:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j900:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j900:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j965:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j965:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j965:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3934:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3934:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j548:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j548:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1200:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j428:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j428:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j428:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j588:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j588:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j105:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j105:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j105:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j404:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j404:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j404:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1407:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j724:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j724:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j724:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j908:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j908:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j908:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1294:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1294:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1294:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3295:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3295:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3399:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3399:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2071:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2071:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2071:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2249:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2249:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j292:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1971:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j740:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j740:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1041:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1041:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1041:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j884:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j884:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2893:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1124:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3966:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1076:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j387:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j763:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1689:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2213:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j1260:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3333:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3764:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3764:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3803:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3803:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j756:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3607:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3607:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2191:comp4",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2797:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j2797:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3813:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3956:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3647:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3647:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3918:comp1",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3918:comp2",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  },
+  {
+   "key": "j3918:turb",
+   "error": "ModuleNotFoundError: No module named 'scipy'"
+  }
+ ]
+}
