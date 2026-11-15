@@ -264,7 +264,7 @@ def baseline_genes(comp):
              t_hub_k=1.0, t_tip_k=1.0, ffd1=0.0, ffd2=0.0, ffd3=0.0, ffd4=0.0, route=0)
     if comp == "comp2":
         p.update({f"zb{i}": 0.0 for i in range(6)})
-        x = BG.encode(comp, dict(p, fish=0.0, fish_r0=0.4, fish_r1=0.8))
+        x = BG.encode(comp, dict(p, fish=0.0, fish_r0=0.4, fish_r1=0.8, boss=1.0))
         x = base_backface(x)
         return x
         p.update(fish=0.0, fish_r0=0.4, fish_r1=0.8)

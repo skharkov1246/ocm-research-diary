@@ -1,0 +1,41 @@
+{
+ "_comment": "CalculiX (disk.py) для лучших 300 вариантов уровня 1: вход - funnel_l1_fea_cases.json, который пишет merge_l1.py --fea-cases-out (положить в ветку до запуска). Контейнер ubuntu:24.04 с calculix-ccx и numpy; ccx - в один поток, случаи параллельно ($NPROC).",
+ "defaults": {
+  "instance_type": "c7a.16xlarge",
+  "fallback_types": [
+   "c7i.16xlarge"
+  ],
+  "image": "al2023",
+  "disk_gb": 30
+ },
+ "jobs": [
+  {
+   "name": "l1-v3-fea300",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-numpy"
+   ],
+   "command": "python3 routes/gtu/funnel/strength_l1.py --run-cases routes/gtu/funnel/aws/l1_v3/funnel_l1_fea_cases.json --workers \"$NPROC\" --out \"$GTU_OUT\"",
+   "max_min": 40
+  }
+ ],
+ "estimate": {
+  "cases": "до 300 вариантов × 1-3 колеса",
+  "s_per_case": "5-20 с (disk.py, сетка 40×6, один поток - оценка по примерам)",
+  "usd_expected": 0.37,
+  "usd_expected_basis": "оценка: машина около 30 мин (как make_jobs_l23.py, строка jobs_l1_fea.json сметы)",
+  "usd_upper_bound": 1.19
+ },
+ "plan_check": {
+  "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/funnel/jobs_l1_v3_fea.json --branch claude/lucid-allen-yvps5d --assume-price 0.748 --assume-zone-prices us-east-1a=0.955,us-east-1b=0.748,us-east-1c=0.706",
+  "exit_code": 0,
+  "lines": [
+   "[задача] l1-v3-fea300: образ al2023, контейнер ubuntu:24.04, команд container_setup: 2, 64 vCPU, сторож 40 мин",
+   "[бюджет] l1-v3-fea300 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 0.00 + новая 0.96 = 2.27 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] l1-v3-fea300 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[план] прогноз пакета 0.96 долл. (цена спота — допущение 0.748/ч)"
+  ],
+  "runner_note": "раннер v2 в ветке claude/lucid-allen-yvps5d (поля python, pip, NPROC, самая дешёвая зона); run - с --branch claude/lucid-allen-yvps5d (без него раннер клонирует main); при правке раннера повторить plan"
+ }
+}

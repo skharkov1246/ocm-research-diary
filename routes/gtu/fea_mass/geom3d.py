@@ -657,10 +657,10 @@ def axial_sector(spec, level="base", threads=1, keep_step=None):
             h_neck = A["neck_h_c"] * chord
             r_ft = max(R + 0.3 * (r_h - R), r_h - h_neck)
             a_neck = 0.5 * A["neck_w_pitch"] * pitch * R / r_ft
-            L_att = A["rim_w_bx"] * bx
+            L_att = float(prof_t[-1])          # ширина мёртвого обода = ширине живого обода (совпадающие грани без щелей)
             ov = 2e-3 * R
             ring = _box_wedge(occ, R - ov, r_ft, L_att, -0.5 * pitch, pitch)
-            neck = _box_wedge(occ, r_ft - ov, r_h + ov, L_att, -a_neck, 2 * a_neck)
+            neck = _box_wedge(occ, r_ft - ov, r_h + 0.5 * t_plat, L_att, -a_neck, 2 * a_neck)   # верх - в середине полки
             solids += [(3, ring), (3, neck)]
             # 3) полка
             plat = _platform(occ, r_h, t_plat, A["plat_len_bx"] * bx, (1 - A["plat_gap_pitch"]) * pitch, k_ch)

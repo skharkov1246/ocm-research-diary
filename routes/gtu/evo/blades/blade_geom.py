@@ -88,6 +88,7 @@ GENES_COMP = [
     Gene("route", 0, 1, "choice", note="0 — печать металлом, 1 — литьё"),
 ]
 GENES_COMP2_EXTRA = [Gene(f"zb{i}", 0.0, 1.0, note="задняя поверхность: узел PCHIP (0 — стенка 10 мм, 1 — 1,6 кованой)") for i in range(6)] + [
+    Gene("boss", 0.8, 2.0, note="глубина ступицы у оси / кованой frame3"),
     Gene("fish", 0.10, 0.60, "switch", 0.3, "«рыбья кость»: глубина карманов / толщина"),
     Gene("fish_r0", 0.25, 0.55, note="карманы: от r/r2"), Gene("fish_r1", 0.60, 0.92, note="карманы: до r/r2")]
 
@@ -474,6 +475,7 @@ def impeller_disk(ml, p, stage, hub, Z, theta, mt, rr, n=241):
         xb_k = xb_base.copy()
         xb_k[2:8] = xb_min[2:8] + zb * (xb_max[2:8] - xb_min[2:8])
         xb_k[-1] = Lz + t_rim
+        xb_k[0] = xb_k[1] = Lz + p.get("boss", 1.0) * base[0]
         xb = PchipInterpolator(r_knots, np.maximum(xb_k, xb_min))(r)
         xb = np.maximum(xb, xh + 0.010)
         h = xb - xh
