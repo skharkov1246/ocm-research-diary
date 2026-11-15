@@ -4,12 +4,12 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 508,
-    "total_bytes": 21253599,
-    "results_files": 207,
+    "datasets": 510,
+    "total_bytes": 21406738,
+    "results_files": 209,
     "results_with_script": 67,
     "results_referenced_in_site": 22,
-    "results_with_provenance_fields": 58,
+    "results_with_provenance_fields": 60,
     "by_track": {
       "ammonia": 91,
       "battery-cathode": 1,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 188,
+      "не определён": 190,
       "прочее": 25
     }
   },
@@ -7183,6 +7183,37 @@
       "last_commit": "493cb81"
     },
     {
+      "path": "routes/gtu/evo/blades/blades_mini_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 91159,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "aws",
+        "calibration",
+        "comps",
+        "config",
+        "date",
+        "inputs",
+        "method",
+        "render",
+        "seconds_mini",
+        "software",
+        "status",
+        "tech",
+        "title"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "b10b1b7"
+    },
+    {
       "path": "routes/gtu/evo/blades/disk1d_calibration.json",
       "track": "не определён",
       "kind": "данные",
@@ -10720,10 +10751,41 @@
       "last_commit": "4ba862b"
     },
     {
+      "path": "routes/gtu/process/blocks/blocks_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 61679,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "status",
+        "code_sha",
+        "inputs",
+        "assumptions",
+        "checks",
+        "mass_reference",
+        "catalog",
+        "examples",
+        "runtime_s"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "b10b1b7"
+    },
+    {
       "path": "routes/gtu/process/mass/mass_calibration.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 66599,
+      "bytes": 66621,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -10750,13 +10812,13 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "7258c68"
+      "last_commit": "b10b1b7"
     },
     {
       "path": "routes/gtu/process/mass/mass_db.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 25928,
+      "bytes": 26207,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -10775,7 +10837,7 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "a3f8da1"
+      "last_commit": "b10b1b7"
     },
     {
       "path": "routes/gtu/shaft/data/solar_available_power_taurus60.json",
