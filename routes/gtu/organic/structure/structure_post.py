@@ -110,12 +110,12 @@ def polys_of(name):
     return [r.tolist() for g in gs for r in OG.poly_rings(g)] if len(gs) == 1 else None, gs, D
 
 
-def run_ccx(names, workers=4):
+def run_ccx(names, workers=4, out_path=None, with_baseline=True):
     with open(DT.RESULTS, encoding="utf-8") as f:
         R = json.load(f)
     runs = {r["name"]: r for r in R["runs"]}
     jobs = []
-    for part in ("turb1", "comp2"):
+    for part in (("turb1", "comp2") if with_baseline else ()):
         model, design, cases, prm, meta, inb = DT.setup(part, "A", 1e-3 if part == "turb1" else 1.5e-3)
         base = np.asarray(meta["base_poly"])
         jobs.append(dict(name=f"{part}_baseline", part=part, polys=[base.tolist()], k_am=1.0))
@@ -138,7 +138,7 @@ def run_ccx(names, workers=4):
                       "оптимизации; решётка — группы ρ* с E·E*/E и ρ·ρ*, загрузка решётки против её прочности S(ρ*)",
                software=dict(ccx=res[0]["cases"][0]["ccx"] if res else None, python=sys.version.split()[0]),
                h_ccx_m=H_CCX, results=res)
-    with open(CCX_RES, "w", encoding="utf-8") as f:
+    with open(out_path or CCX_RES, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=1, default=float)
     return out
 
@@ -360,4 +360,135 @@ def merge_disk_results(parts_files):
     out["merged_from"] = [os.path.basename(p) for p in parts_files if os.path.exists(p)]
     with open(DT.RESULTS, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=1, default=float)
+    return out
+
+
+# =========================================================================== выпуск геометрии
+STL_DIR = os.path.join(HERE, "stl")
+
+
+def stl_pair(mesh, name, max_mb=4.0):
+    """полный STL — в scratchpad, уменьшенный (≤ max_mb) — в репозиторий"""
+    import trimesh
+    os.makedirs(os.path.join(OUTDIR, "stl"), exist_ok=True); os.makedirs(STL_DIR, exist_ok=True)
+    full = os.path.join(OUTDIR, "stl", f"{name}.stl")
+    mesh.export(full)
+    target = int(max_mb * 1e6 / 50)
+    small = mesh if len(mesh.faces) <= target else OG.decimate(mesh, target)
+    red = os.path.join(STL_DIR, f"{name}.stl")
+    small.export(red)
+    return dict(full=full, full_MB=round(os.path.getsize(full) / 1e6, 2), full_faces=int(len(mesh.faces)),
+                repo=os.path.relpath(red, os.path.join(HERE, "..", "..", "..", "..")), repo_MB=round(os.path.getsize(red) / 1e6, 2),
+                repo_faces=int(len(small.faces)), watertight_full=bool(mesh.is_watertight))
+
+
+def geom_revolved(name, geoms, render_png, sections=360):
+    import trimesh
+    parts = []
+    for g in geoms:
+        for k, ring in enumerate(OG.poly_rings(g)):
+            ring = np.vstack([ring, ring[:1]])
+            m = trimesh.creation.revolve(ring, angle=2 * math.pi, sections=sections)
+            if (m.volume < 0) == (k == 0):
+                m.invert()
+            parts.append(m)
+    mesh = trimesh.util.concatenate(parts); mesh.merge_vertices()
+    info = stl_pair(mesh, name)
+    OG.render_cutaway(geoms, render_png)
+    info["render"] = os.path.basename(render_png)
+    info["stats"] = OG.section_stats(geoms)
+    return info
+
+
+def profile_polygon(prof):
+    from shapely.geometry import Polygon
+    r = np.asarray(prof["r"]); t = np.asarray(prof["t"]); zc = np.asarray(prof.get("zc", [0.0] * len(r)))
+    from scipy.interpolate import PchipInterpolator
+    rr = np.linspace(r[0], r[-1], 300)
+    tt = PchipInterpolator(r, t)(rr); zz = np.interp(rr, r, zc)
+    poly = np.vstack([np.c_[rr, zz + tt / 2], np.c_[rr[::-1], (zz - tt / 2)[::-1]]])
+    return [Polygon(poly).buffer(0)]
+
+
+def geom_lattice(name, png, L_cell=8e-3, sector_deg=40.0, step=None):
+    """сектор полого печатного диска: обшивка + гироид переменной плотности (ρ* — из проекта B)"""
+    D = OG.load(name)
+    law = LT.default_law()
+    step = step or L_cell / 9
+    mesh = OG.lattice_sector(D, law, L_cell, sector_deg, step, t_skin=DT.T_SKIN)
+    info = stl_pair(mesh, f"{name}_gyroid_sector{int(sector_deg)}")
+    import pyvista as pv
+    pv.OFF_SCREEN = True
+    p = pv.Plotter(off_screen=True, window_size=(1400, 1000)); p.set_background("white")
+    p.add_mesh(pv.wrap(mesh), color="#b8b2a7", smooth_shading=True, specular=0.45, specular_power=25)
+    R = D["r1"]; zc = 0.5 * (D["z0"] + D["z1"])
+    p.camera_position = [(0.35 * R, -1.25 * R, 0.55 * R + zc), (0.6 * R, 0, zc), (0, 0, 1)]
+    p.screenshot(png); p.close()
+    info.update(render=os.path.basename(png), L_cell_m=L_cell, sector_deg=sector_deg, voxel_step_m=step,
+                sheet_thickness_note="толщина листа при ρ* и L — lattice_results.json → sheet_thickness_mm")
+    return info
+
+
+def geom_frame(png, b=0.10):
+    """рама оболочки: сечение (контур x̄ = 0,5) выдавлено на осевую длину b"""
+    import trimesh
+    from skimage import measure
+    from shapely.geometry import Polygon
+    d = np.load(os.path.join(OUTDIR, "shell_frame.npz"))
+    n = int(d["n"]); R = float(d["R"]); h = float(d["h"])
+    F = np.zeros((n + 2, n + 2)); F[d["ei"] + 1, d["ej"] + 1] = d["xe"]
+    cs = measure.find_contours(F, 0.5)
+    polys = [Polygon((c - 1 + 0.5) * h - R).buffer(0) for c in cs if len(c) > 3]
+    polys = [p for p in polys if p.area > 4 * h * h]
+    polys.sort(key=lambda p: -p.area)
+    solid = None
+    for p in polys:
+        depth = sum(1 for q in polys if q is not p and q.area > p.area and q.contains(p.representative_point()))
+        if depth % 2 == 0:
+            solid = p if solid is None else solid.union(p)
+        else:
+            solid = solid.difference(p)
+    solid = solid.simplify(0.5 * h, preserve_topology=True)
+    geoms = list(solid.geoms) if solid.geom_type == "MultiPolygon" else [solid]
+    meshes = [trimesh.creation.extrude_polygon(g, b) for g in geoms]
+    mesh = trimesh.util.concatenate(meshes)
+    info = stl_pair(mesh, "shell_frame_kv3")
+    import pyvista as pv
+    pv.OFF_SCREEN = True
+    p = pv.Plotter(off_screen=True, window_size=(1400, 1000)); p.set_background("white")
+    p.add_mesh(pv.wrap(mesh), color="#b8b2a7", smooth_shading=True, specular=0.4)
+    p.camera_position = [(0.9 * R, -1.6 * R, 1.9 * R), (0, 0, b / 2), (0, 0, 1)]
+    p.screenshot(png); p.close()
+    info["render"] = os.path.basename(png)
+    return info
+
+
+# =========================================================================== сводка и подача в воронки
+def _load(p):
+    p = p if os.path.isabs(p) else os.path.join(HERE, p)
+    if not os.path.exists(p):
+        return None
+    with open(p, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _ccx_index(*files):
+    idx = {}
+    for f in files:
+        d = _load(f)
+        if d:
+            for r in d["results"]:
+                idx[r["name"]] = r
+    return idx
+
+
+def _ccx_brief(r):
+    if not r:
+        return None
+    c1, c2 = r["cases"]
+    out = dict(mass_kg=c1["mass_kg"], J_kgm2=c1["J_kgm2"], u_LC1=c1.get("u_max"), u_LC2=c2.get("u_max"),
+               u_LC1_at=c1.get("u_max_at"), u_LC2_at=c2.get("u_max_at"), vm_max_100_MPa=c1["vm_max_ip_MPa"],
+               vm_max_120_MPa=c2["vm_max_ip_MPa"], burst_margin=c1["burst_margin"], elements=c1["elements"])
+    if "creep_life_min_h" in c1:
+        out["creep_life_min_h"] = c1["creep_life_min_h"]
     return out

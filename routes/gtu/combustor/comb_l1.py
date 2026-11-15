@@ -168,7 +168,7 @@ def run(inputs, n, shard, shards, out, workers, level="coarse", of="2512", iters
         for li in range(len(e["loads"])):
             tasks.append((e, "cell", li, level, work, of, it, timeout_min * 60, generate_only, None))
         if grid_every and i % grid_every == 0 and level == "coarse":
-            tasks.append((e, "cell", 0, "medium", work, of, it, timeout_min * 60, generate_only, None))
+            tasks.append((e, "cell", 0, "medium", work, of, it, 2 * timeout_min * 60, generate_only, None))
     rows = {i: dict(pos=i, idx=ents[i]["idx"], why=ents[i]["why"], cases={}) for i in idx}
     packs = os.path.join(out, f"cases_s{shard:03d}")
     os.makedirs(packs, exist_ok=True)

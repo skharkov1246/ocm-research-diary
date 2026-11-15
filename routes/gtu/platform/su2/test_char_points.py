@@ -228,6 +228,8 @@ def test_smoke_job_loads(tmp_path):
     (j,) = runner.load_jobs(p)
     assert j.mode == "container" and j.max_min == M.SMOKE_MAX_MIN
     assert j.command.count(f"--job-max-min {M.SMOKE_MAX_MIN}") == len(M.LINES)
+    # база этапа 0 — тот же план, что на этапах A и B (сжатая рампа x 0,1 разошлась на AWS 15.11.2026)
+    assert j.command.count("--base-iter-scale 1 ") == len(M.LINES)
     assert j.command.splitlines()[-1].endswith("--require-base-ok --expect " + ",".join(M.LINES))
     ud = runner.build_userdata(j, run_id="r-SYNTHETIC", attempt=1, repo=runner.DEFAULT_REPO, branch=M.BRANCH,
                                bucket="bucket-EXAMPLE", key_prefix="PREFIX/gtu/r/j")

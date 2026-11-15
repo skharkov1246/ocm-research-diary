@@ -1,0 +1,168 @@
+{
+ "_comment": "Уровень 2 воронки камеры KV-3 (README, «Уровень 2»). Раннер берёт только defaults и jobs; pending_jobs - не готовы к запуску (что дописать - поле ready). Перед запуском: l2_inputs_KV-3.json (merge_l1 -> select_l2) в ветке. Сгенерировано make_jobs_l123.py.",
+ "defaults": {
+  "instance_type": "c7a.16xlarge",
+  "fallback_types": [
+   "c7i.16xlarge"
+  ],
+  "image": "al2023",
+  "disk_gb": 80,
+  "max_min": 320,
+  "container": "opencfd/openfoam-default:2512",
+  "container_setup": [
+   "apt-get update -q",
+   "apt-get install -y -q --no-install-recommends python3 python3-numpy curl ca-certificates"
+  ]
+ },
+ "jobs": [
+  {
+   "name": "comb-l2-p00",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L2 --inputs routes/gtu/combustor/l2_inputs_KV-3.json --n 40 --shard 0 --shards 20 --out \"$GTU_OUT\" --np 8 --workers \"$NPROC\" --timeout-min 288"
+  },
+  {
+   "name": "comb-l2-p01",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L2 --inputs routes/gtu/combustor/l2_inputs_KV-3.json --n 40 --shard 1 --shards 20 --out \"$GTU_OUT\" --np 8 --workers \"$NPROC\" --timeout-min 288"
+  },
+  {
+   "name": "comb-l2-p02",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L2 --inputs routes/gtu/combustor/l2_inputs_KV-3.json --n 40 --shard 2 --shards 20 --out \"$GTU_OUT\" --np 8 --workers \"$NPROC\" --timeout-min 288"
+  },
+  {
+   "name": "comb-l2-p03",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L2 --inputs routes/gtu/combustor/l2_inputs_KV-3.json --n 40 --shard 3 --shards 20 --out \"$GTU_OUT\" --np 8 --workers \"$NPROC\" --timeout-min 288"
+  },
+  {
+   "name": "comb-l2-p04",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L2 --inputs routes/gtu/combustor/l2_inputs_KV-3.json --n 40 --shard 4 --shards 20 --out \"$GTU_OUT\" --np 8 --workers \"$NPROC\" --timeout-min 288"
+  },
+  {
+   "name": "comb-l2-p05",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L2 --inputs routes/gtu/combustor/l2_inputs_KV-3.json --n 40 --shard 5 --shards 20 --out \"$GTU_OUT\" --np 8 --workers \"$NPROC\" --timeout-min 288"
+  },
+  {
+   "name": "comb-l2-p06",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L2 --inputs routes/gtu/combustor/l2_inputs_KV-3.json --n 40 --shard 6 --shards 20 --out \"$GTU_OUT\" --np 8 --workers \"$NPROC\" --timeout-min 288"
+  },
+  {
+   "name": "comb-l2-p07",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L2 --inputs routes/gtu/combustor/l2_inputs_KV-3.json --n 40 --shard 7 --shards 20 --out \"$GTU_OUT\" --np 8 --workers \"$NPROC\" --timeout-min 288"
+  },
+  {
+   "name": "comb-l2-p08",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L2 --inputs routes/gtu/combustor/l2_inputs_KV-3.json --n 40 --shard 8 --shards 20 --out \"$GTU_OUT\" --np 8 --workers \"$NPROC\" --timeout-min 288"
+  },
+  {
+   "name": "comb-l2-p09",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L2 --inputs routes/gtu/combustor/l2_inputs_KV-3.json --n 40 --shard 9 --shards 20 --out \"$GTU_OUT\" --np 8 --workers \"$NPROC\" --timeout-min 288"
+  },
+  {
+   "name": "comb-l2-p10",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L2 --inputs routes/gtu/combustor/l2_inputs_KV-3.json --n 40 --shard 10 --shards 20 --out \"$GTU_OUT\" --np 8 --workers \"$NPROC\" --timeout-min 288"
+  },
+  {
+   "name": "comb-l2-p11",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L2 --inputs routes/gtu/combustor/l2_inputs_KV-3.json --n 40 --shard 11 --shards 20 --out \"$GTU_OUT\" --np 8 --workers \"$NPROC\" --timeout-min 288"
+  },
+  {
+   "name": "comb-l2-p12",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L2 --inputs routes/gtu/combustor/l2_inputs_KV-3.json --n 40 --shard 12 --shards 20 --out \"$GTU_OUT\" --np 8 --workers \"$NPROC\" --timeout-min 288"
+  },
+  {
+   "name": "comb-l2-p13",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L2 --inputs routes/gtu/combustor/l2_inputs_KV-3.json --n 40 --shard 13 --shards 20 --out \"$GTU_OUT\" --np 8 --workers \"$NPROC\" --timeout-min 288"
+  },
+  {
+   "name": "comb-l2-p14",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L2 --inputs routes/gtu/combustor/l2_inputs_KV-3.json --n 40 --shard 14 --shards 20 --out \"$GTU_OUT\" --np 8 --workers \"$NPROC\" --timeout-min 288"
+  },
+  {
+   "name": "comb-l2-p15",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L2 --inputs routes/gtu/combustor/l2_inputs_KV-3.json --n 40 --shard 15 --shards 20 --out \"$GTU_OUT\" --np 8 --workers \"$NPROC\" --timeout-min 288"
+  },
+  {
+   "name": "comb-l2-p16",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L2 --inputs routes/gtu/combustor/l2_inputs_KV-3.json --n 40 --shard 16 --shards 20 --out \"$GTU_OUT\" --np 8 --workers \"$NPROC\" --timeout-min 288"
+  },
+  {
+   "name": "comb-l2-p17",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L2 --inputs routes/gtu/combustor/l2_inputs_KV-3.json --n 40 --shard 17 --shards 20 --out \"$GTU_OUT\" --np 8 --workers \"$NPROC\" --timeout-min 288"
+  },
+  {
+   "name": "comb-l2-p18",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L2 --inputs routes/gtu/combustor/l2_inputs_KV-3.json --n 40 --shard 18 --shards 20 --out \"$GTU_OUT\" --np 8 --workers \"$NPROC\" --timeout-min 288"
+  },
+  {
+   "name": "comb-l2-p19",
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l23.py --level L2 --inputs routes/gtu/combustor/l2_inputs_KV-3.json --n 40 --shard 19 --shards 20 --out \"$GTU_OUT\" --np 8 --workers \"$NPROC\" --timeout-min 288"
+  }
+ ],
+ "pending_jobs": [
+  {
+   "name": "comb-l2-cht",
+   "what": "сектор трубы с теплообменом стенки, chtMultiRegionFoam, 40 вариантов",
+   "ready": "сетка и области - готово и проверено на apt-1912 (comb_cfd3d.build_liner3d_cht_case, Allmesh: газ 73 356 ячеек, стенка 6 504, входы разбавления и охлаждения); НЕ готово: словари областей (constant/gas, constant/solid, 0/gas, 0/solid, regionProperties), свойства печатного сплава k(T), cp(T)",
+   "core_hours": 253.85822993262244,
+   "basis": "40 × средняя сетка × 4000 итераций × 1,2·t_хим (оценка)"
+  },
+  {
+   "name": "comb-l2-spray",
+   "what": "распыл дизеля sprayFoam, элемент 3D, 100 и 50 %",
+   "ready": "НЕ готово: механизм н-додекана Reitz в формате OpenFOAM (yaml2ck -> chemkinToFoam с правками навыка), словари облака (comb_cfd3d.spray_dicts - шаблон)",
+   "core_hours": 573.708044635436,
+   "basis": "40 × 2 × средняя сетка × 3000 итераций × 3·t_хим (механизм 100 веществ, оценка)"
+  },
+  {
+   "name": "comb-l2-active",
+   "what": "активный дорасчёт: 3 порции по 12 точек (l2_active.py) -> L1 + L2",
+   "ready": "связка проверена (l2_active.py --check-plumbing); запуск - после L1",
+   "core_hours": 359.1900918839975,
+   "basis": "30 % счёта L2 (оценка)"
+  }
+ ],
+ "estimate": {
+  "level": "L2 (элемент 3D: 100/50/30 %, цепочки запаса по срыву и проскоку)",
+  "variants": 40,
+  "shards": 20,
+  "np_per_case": 8,
+  "parallel_eff": 0.8,
+  "mean_cells": 45413.333333333336,
+  "max_cells": 102500,
+  "cpu_s_per_variant": 107757.02756519927,
+  "compute_min": {
+   "expected": 86.93784878553573,
+   "planning": 294.3341364674718
+  },
+  "max_min": 320,
+  "core_hours": 1197.300306279992,
+  "machine_hours": {
+   "expected": 36.64594959517858,
+   "planning": 105.77804548915726
+  },
+  "outputs_gb": 0.8,
+  "usd": {
+   "spot_expected": 25.88669879403415,
+   "spot_planning": 27.484462196383934,
+   "disk": 0.3212795580947163,
+   "ipv4": 0.1832297479758929,
+   "s3_3months": 0.0552,
+   "transfer_to_session": 0.072,
+   "total_expected": 26.518408100104757,
+   "total_planning": 28.11617150245454
+  },
+  "usd_planning_hours": 80.91699351024607
+ },
+ "plan_check": {
+  "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/combustor/jobs_l2.json --assume-price 0.75 --assume-zone-prices us-east-1a=0.9554,us-east-1b=0.7478,us-east-1c=0.7064,us-east-1d=0.8576,us-east-1f=1.1804",
+  "exit_code": 0,
+  "forecast_usd": 157.33,
+  "spent_in_ledger": 0.91,
+  "lines": [
+   "[зоны] comb-l2-p17 c7a.16xlarge: us-east-1c 0.7064 → us-east-1b 0.7478 → us-east-1d 0.8576 → us-east-1a 0.9554 → us-east-1f 1.1804 (допущение plan); ожидается us-east-1c по 0.7064 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.4165 и бюджет — по максимуму цены за окно",
+   "[бюджет] comb-l2-p18 на c7a.16xlarge: израсходовано 0.91 + в работе 0.00 + пакет 141.60 + новая 7.87 = 150.37 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[зоны] comb-l2-p18 c7a.16xlarge: us-east-1c 0.7064 → us-east-1b 0.7478 → us-east-1d 0.8576 → us-east-1a 0.9554 → us-east-1f 1.1804 (допущение plan); ожидается us-east-1c по 0.7064 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.4165 и бюджет — по максимуму цены за окно",
+   "[бюджет] comb-l2-p19 на c7a.16xlarge: израсходовано 0.91 + в работе 0.00 + пакет 149.46 + новая 7.87 = 158.24 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[зоны] comb-l2-p19 c7a.16xlarge: us-east-1c 0.7064 → us-east-1b 0.7478 → us-east-1d 0.8576 → us-east-1a 0.9554 → us-east-1f 1.1804 (допущение plan); ожидается us-east-1c по 0.7064 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.4165 и бюджет — по максимуму цены за окно",
+   "[план] прогноз пакета 157.33 долл. (цена спота — допущение 0.75/ч)"
+  ]
+ }
+}

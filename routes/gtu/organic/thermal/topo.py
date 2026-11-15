@@ -768,9 +768,11 @@ def run_all(out_dir, nx=90, vol=0.30, cases=("comb6", "fan8")):
         evs.append(evb)
         plot(cs, [evs[3], evs[0], evs[1], evs[2]], out_dir / f"topo_{case}.png",
              f"Коллектор: 1 вход → {cs['n_out']} выходов, доля жидкости {vol:.2f} (2D, Стокс — Бринкман, безразмерно)")
-        # STL — форма с наименьшей ценой равной раздачи (Φ с дросселями) среди трёх оптимизированных
-        bi = int(np.argmin([evs[i]["Phi_balanced"] for i in range(3)]))
-        best_rho = (rB["rho"], rU["rho"], rW["rho"])[bi]
+        # STL — форма тёплого старта: равномерна без дросселей (у формы Б — П нужны шайбы на выходах)
+        bi = 2
+        best_rho = rW["rho"]
+        np.savez_compressed(out_dir / f"topo_{case}_rho.npz", bp=rB["rho"], uniform=rU["rho"], warm=rW["rho"],
+                            conventional=mb.astype(float), h=cs["h"])
         stl = contour_stl(out_dir / f"topo_{case}.stl", best_rho, cs["h"] * 100.0, thickness=4.0)
         stl["design"] = evs[bi]["label"]
         stl["path"] = str(Path(stl["path"]).relative_to(ROOT)) if str(stl["path"]).startswith(str(ROOT)) else stl["path"]

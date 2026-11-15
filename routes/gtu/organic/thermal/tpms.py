@@ -128,6 +128,8 @@ def recuperators(mac_rows, inertia, quick=False):
         case["designs"]["plate_NuT_as_cycles"] = strip(pl)
         pl2 = R.size_plate(du, PH, PC, 1.0e-3, PLATE["NuH1"])
         case["designs"]["plate_NuH1"] = strip(pl2)
+        pl3 = R.size_plate(du, PH, PC, 0.75e-3, PLATE["NuH1"])          # тот же Dh 1,5 мм, что у TPMS
+        case["designs"]["plate_NuH1_Dh15"] = strip(pl3)
         runs = [("gyroid", True, None, models), ("diamond", True, None, models)]
         if key == "R90-ic-RH-ibc-none-none":
             runs += [("gyroid", False, None, models), ("diamond", False, None, models),
@@ -158,30 +160,6 @@ def strip(r):
     return o
 
 
-def graded_block_stl(path, topo, a_prof, c_prof, t_w, size_mm, voxel_mm):
-    """образец листа TPMS с переменной ячейкой по длине: фаза φ(x) = 2π∫dx/a(x), поперечные координаты
-    масштабированы местной ячейкой; лист |F − c(x)| < t(x) (t — из таблицы для t_w/a)"""
-    from skimage import measure
-    Lx, Ly, Lz = size_mm
-    nx, ny, nz = (int(round(v / voxel_mm)) + 1 for v in size_mm)
-    x = np.linspace(0, Lx, nx)
-    a = a_prof(x / Lx)
-    phi = 2 * np.pi * np.concatenate([[0], np.cumsum(0.5 * (1 / a[1:] + 1 / a[:-1]) * np.diff(x))])
-    y = np.linspace(0, Ly, ny)
-    z = np.linspace(0, Lz, nz)
-    m = R.TPMSModel(topo, json.loads(Path(_MAC).read_text())["rows"])
-    c = c_prof(x / Lx)
-    t = m.t_level_vec(c, t_w / a)
-    PHI = phi[:, None, None]
-    Y = 2 * np.pi * y[None, :, None] / a[:, None, None]
-    Z = 2 * np.pi * z[None, None, :] / a[:, None, None]
-    F = field(topo, PHI, Y, Z)
-    D = np.abs(F - c[:, None, None]) - t[:, None, None]          # < 0 — металл
-    D = np.pad(D, 1, constant_values=1.0)                          # замкнуть тело по краям
-    v, f, _, _ = measure.marching_cubes(D, level=0.0, spacing=(voxel_mm,) * 3)
-    return write_stl(path, v, f, solid=f"{topo}_graded")
-
-
 _MAC = None
 
 
@@ -207,14 +185,15 @@ def plots(res, profiles, out_dir):
     rc = res["recuperator"]["cases"]
     fig, axs = plt.subplots(1, 3, figsize=(13, 4))
     keys = list(rc)
-    labels = {"plate_NuH1": "пластины", "gyroid_uniform": "гироид, ячейка пост.", "gyroid_graded": "гироид, переменная",
+    labels = {"plate_NuH1": "пластины, Dh 2 мм", "plate_NuH1_Dh15": "пластины, Dh 1,5 мм",
+              "gyroid_uniform": "гироид, ячейка пост.", "gyroid_graded": "гироид, переменная",
               "diamond_uniform": "Schwarz-D, пост.", "diamond_graded": "Schwarz-D, переменная",
               "gyroid_graded_tw025": "гироид, стенка 0,25", "gyroid_graded_inertia": "гироид + инерция (LBM)"}
     for ax, field_, yl in ((axs[0], "mass_core", "масса сердцевины, т"), (axs[1], "V", "объём сердцевины, м³"),
                            (axs[2], "A_fr", "фронт, м²")):
         names = [n for n in labels if n in rc.get("R90-ic-RH-ibc-none-none", {}).get("designs", {})]
         vals = [rc["R90-ic-RH-ibc-none-none"]["designs"][n][field_] / (1e3 if field_ == "mass_core" else 1) for n in names]
-        cols = ["0.55"] + ["#3b7dd8"] * (len(names) - 1)
+        cols = ["0.55" if n.startswith("plate") else "#3b7dd8" for n in names]
         ax.barh(range(len(names)), vals, color=cols)
         ax.set_yticks(range(len(names))); ax.set_yticklabels([labels[n] for n in names], fontsize=8)
         ax.invert_yaxis(); ax.set_xlabel(yl); ax.grid(axis="x", alpha=0.3)
@@ -269,8 +248,12 @@ def main():
     ap.add_argument("--big", default=None, help="папка для полноразмерного STL (scratchpad)")
     ap.add_argument("--quick", action="store_true")
     ap.add_argument("--no-crosscheck", action="store_true")
+    ap.add_argument("--geometry-only", default=None, help="готовый tpms_results.json: только STL и картинки")
     a = ap.parse_args()
     _MAC = a.mac
+    if a.geometry_only:
+        print(geometry_outputs(a.geometry_only, Path(a.out), a.big or a.out))
+        return
     out = Path(a.out)
     t0 = time.time()
     mac = json.loads(Path(a.mac).read_text())
@@ -297,35 +280,98 @@ def main():
     rec, profiles = recuperators(mac["rows"], inertia, quick=a.quick)
     res["recuperator"] = rec
     plots(res, profiles, out)
-    # образец переменной решётки по найденному профилю (гироид, ε = 0,90)
-    d = rec["cases"]["R90-ic-RH-ibc-none-none"]["designs"].get("gyroid_graded")
-    stl = {}
-    if d:
-        z = d["z"]
-        fa = R.pw(np.array(z[2:5]) * 1e3)
-        fc = R.pw(z[5:8])
-        from tpms_geom import decimate_stl
-        big_dir = Path(a.big) if a.big else out
-        full = big_dir / "tpms_graded_demo_full.stl"
-        st0 = graded_block_stl(full, "gyroid", fa, fc, R.PRINT["t_w"] * 1e3, (60.0, 20.0, 20.0), 0.12)
-        st = decimate_stl(full, out / "tpms_graded_demo.stl")
-        st["full"] = dict(path=str(full), triangles=st0["triangles"], bytes=st0["bytes"])
-        st["note"] = ("образец 60 × 20 × 20 мм: профиль a(x), c(x) оптимума ε = 0,90 сжат по длине в 60 мм; мм; "
-                      "воксель 0,12 мм (стенка 0,35 мм), в репозитории — упрощённая копия ≤ 5 МБ")
-        st["path"] = str(Path(st["path"]).relative_to(ROOT)) if str(st["path"]).startswith(str(ROOT)) else st["path"]
-        stl["demo"] = st
-        render_png(out / "tpms_graded_demo.stl", out / "tpms_graded_demo.png",
-                   "Гироид с переменной ячейкой (лист — металл, два лабиринта — газ и воздух), образец 60 мм")
-        if a.big:
-            big = Path(a.big) / "tpms_graded_module_section.stl"
-            L = d["L"] * 1e3
-            stb = graded_block_stl(big, "gyroid", fa, fc, R.PRINT["t_w"] * 1e3, (L, 20.0, 20.0), 0.2)
-            stb["note"] = f"сечение 20 × 20 мм на всю длину сердцевины {L:.0f} мм — в scratchpad (большой файл)"
-            stl["full_length_section"] = stb
-    res["stl"] = stl
     res["runtime_s"] = round(time.time() - t0, 1)
     (out / "tpms_results.json").write_text(json.dumps(res, ensure_ascii=False, indent=1, default=float))
+    geometry_outputs(out / "tpms_results.json", out, a.big or out)
     print("записано", res["runtime_s"])
+
+
+def sheet_block(topo, a_mm, c, tw_mm, cells, voxel_mm, a_prof=None):
+    """лист TPMS (металл) в блоке cells = (nx, ny, nz) ячеек; a_prof(s) — переменная ячейка по оси x (иллюстрация)"""
+    from skimage import measure
+    m = R.TPMSModel(topo, json.loads(Path(_MAC).read_text())["rows"])
+    Lx, Ly, Lz = (k * a_mm for k in cells)
+    nx, ny, nz = (int(round(v / voxel_mm)) + 1 for v in (Lx, Ly, Lz))
+    x = np.linspace(0, Lx, nx)
+    a = np.full(nx, a_mm) if a_prof is None else a_prof(x / Lx)
+    phi = 2 * np.pi * np.concatenate([[0], np.cumsum(0.5 * (1 / a[1:] + 1 / a[:-1]) * np.diff(x))])
+    y = np.linspace(0, Ly, ny); z = np.linspace(0, Lz, nz)
+    t = m.t_level_vec(np.full(nx, c), tw_mm / a)
+    F = field(topo, phi[:, None, None], 2 * np.pi * y[None, :, None] / a[:, None, None],
+              2 * np.pi * z[None, None, :] / a[:, None, None])
+    D = np.abs(F - c) - t[:, None, None]
+    D = np.pad(D, 1, constant_values=1.0)
+    v, f, _, _ = measure.marching_cubes(D, level=0.0, spacing=(voxel_mm,) * 3)
+    return v, f
+
+
+def render_cells(path, title, items):
+    """светотеневой вид листов TPMS (2 × 2 × 2 ячейки)"""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import LightSource
+    fig = plt.figure(figsize=(5.2 * len(items), 4.6))
+    ls = LightSource(azdeg=315, altdeg=35)
+    for k, (lab, v, f) in enumerate(items):
+        ax = fig.add_subplot(1, len(items), k + 1, projection="3d")
+        tri = v[f]
+        n = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
+        n /= np.maximum(np.linalg.norm(n, axis=1, keepdims=True), 1e-12)
+        shade = ls.shade_normals(n, fraction=1.0)
+        from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+        col = plt.cm.copper(0.25 + 0.7 * shade)
+        pc = Poly3DCollection(tri, facecolors=col, edgecolors="none", linewidths=0)
+        ax.add_collection3d(pc)
+        lo, hi = v.min(0), v.max(0)
+        ax.set_xlim(lo[0], hi[0]); ax.set_ylim(lo[1], hi[1]); ax.set_zlim(lo[2], hi[2])
+        ax.set_box_aspect(hi - lo)
+        ax.set_axis_off(); ax.view_init(elev=22, azim=-55)
+        ax.set_title(lab, fontsize=9)
+    fig.suptitle(title, fontsize=10)
+    fig.tight_layout()
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+
+
+def geometry_outputs(res_path, out, big):
+    """STL оптимума (ε = 0,90) и картинки: вызывается после main или отдельно (--geometry-only)"""
+    from tpms_geom import decimate_stl
+    res = json.loads(Path(res_path).read_text())
+    des = res["recuperator"]["cases"]["R90-ic-RH-ibc-none-none"]["designs"]
+    stl = {}
+    items = []
+    for topo in ("gyroid", "diamond"):
+        d = des.get(f"{topo}_graded") or des.get(f"{topo}_uniform")
+        a_mm = d["z"][2] * 1e3
+        c = d["z"][5] if len(d["z"]) == 8 else d["z"][3]
+        tw = R.PRINT["t_w"] * 1e3
+        v, f = sheet_block(topo, a_mm, c, tw, (2, 2, 2), a_mm / 44)
+        items.append((f"{TOPOS[topo]}: ячейка {a_mm:.1f} мм, стенка {tw:.2f} мм, c = {c:+.3f}", v, f))
+        if topo == "gyroid":
+            full = Path(big) / "tpms_gyroid_optimum_block_full.stl"
+            v2, f2 = sheet_block(topo, a_mm, c, tw, (4, 4, 8), 0.06)
+            st0 = write_stl(full, v2, f2, solid="gyroid_opt")
+            st = decimate_stl(full, Path(out) / "tpms_gyroid_optimum_block.stl")
+            st.update(full=dict(path=str(full), triangles=st0["triangles"], bytes=st0["bytes"]),
+                      note=f"лист гироида оптимума ε = 0,90 (стенка 0,35 мм): блок 4 × 4 × 8 ячеек = "
+                           f"{4 * a_mm:.1f} × {4 * a_mm:.1f} × {8 * a_mm:.1f} мм; воксель 0,06 мм; в репозитории — "
+                           f"упрощённая копия ≤ 5 МБ", path="tpms_gyroid_optimum_block.stl")
+            stl["optimum_block"] = st
+            # иллюстрация переменной ячейки (метод, не оптимум): ячейка 1:2 по длине
+            gp = Path(big) / "tpms_gyroid_graded_illustration_full.stl"
+            v3, f3 = sheet_block(topo, a_mm, c, tw, (12, 3, 3), 0.08, a_prof=R.pw([a_mm, 1.5 * a_mm, 2 * a_mm]))
+            st3 = write_stl(gp, v3, f3, solid="gyroid_graded")
+            st4 = decimate_stl(gp, Path(out) / "tpms_gyroid_graded_illustration.stl")
+            st4.update(full=dict(path=str(gp), triangles=st3["triangles"], bytes=st3["bytes"]),
+                       note="ИЛЛЮСТРАЦИЯ метода переменной ячейки (a от 1 до 2 оптимальных по длине), не оптимум: "
+                            "в ламинарном пределе оптимизатор выбрал постоянную ячейку", path="tpms_gyroid_graded_illustration.stl")
+            stl["graded_illustration"] = st4
+    render_cells(Path(out) / "tpms_cells.png", "Лист TPMS оптимума рекуператора KV-3 (ε = 0,90): металл между двумя "
+                 "лабиринтами — газ и воздух", items)
+    res["stl"] = stl
+    Path(res_path).write_text(json.dumps(res, ensure_ascii=False, indent=1, default=float))
+    return stl
 
 
 if __name__ == "__main__":

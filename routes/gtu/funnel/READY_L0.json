@@ -1,0 +1,120 @@
+{
+ "title": "Уровень 0 воронки двигателя-заменителя: готовность к AWS (выборка v2)",
+ "date": "2026-11-14",
+ "ready_for_aws": true,
+ "ready_basis": "pytest test_models.py + test_funnel_l0.py, короткие пробы KV-3/KV-1/KV-6 (см. probes), runner.py plan обоих файлов - код 0",
+ "branch": "claude/lucid-allen-yvps5d (PR #62) - код задач берётся из ветки: перед run изменения узла funnel должны быть в ней",
+ "order": [
+  "1. jobs_l0_debug.json (KV-3, KV-1, KV-6 по N = 2000; 2 машины): run -> слияние (команды merge.commands файла) -> проверить доли допустимых, ниши, архетипы и s_per_concept_core против проб",
+  "2. jobs_l0.json (KV-3 200 000, KV-1 и KV-6 по 50 000; 6 машин - одна волна под квоту 384 vCPU) -> слияние с --csv-dir вне ветки -> в ветку только funnel_l0_results_*.json и funnel_l0_select_*.json"
+ ],
+ "files": {
+  "debug": "routes/gtu/funnel/jobs_l0_debug.json",
+  "full": "routes/gtu/funnel/jobs_l0.json"
+ },
+ "plan_commands": {
+  "debug": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/funnel/jobs_l0_debug.json --assume-price 0.748 --assume-zone-prices us-east-1a=0.955,us-east-1b=0.748,us-east-1c=0.706",
+  "full": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/funnel/jobs_l0.json --assume-price 0.748 --assume-zone-prices us-east-1a=0.955,us-east-1b=0.748,us-east-1c=0.706"
+ },
+ "plan_exit_codes": {
+  "debug": 0,
+  "full": 0
+ },
+ "plan_note": "раннер v2 в рабочей копии (поля python, pip, NPROC, самая дешёвая зона); если v2 ещё не влит в ветку - перепроверить plan после влития",
+ "run_commands": {
+  "debug": {
+   "dryrun": "python3 routes/gtu/platform/aws/runner.py run routes/gtu/funnel/jobs_l0_debug.json",
+   "live": "python3 routes/gtu/platform/aws/runner.py run routes/gtu/funnel/jobs_l0_debug.json --live",
+   "note": "живой запуск (--live) - только сессия с ключами AWS; здесь AWS не вызывался"
+  },
+  "full": {
+   "dryrun": "python3 routes/gtu/platform/aws/runner.py run routes/gtu/funnel/jobs_l0.json",
+   "live": "python3 routes/gtu/platform/aws/runner.py run routes/gtu/funnel/jobs_l0.json --live",
+   "note": "живой запуск (--live) - только сессия с ключами AWS; здесь AWS не вызывался"
+  }
+ },
+ "merge_commands": {
+  "debug": [
+   "python3 routes/gtu/funnel/merge_l0.py --kv KV-3 --n 2000 --shards 10 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/l0_aws_debug --suffix _KV-3_n2000 --top 40 --target 150 --k-near 1 --near-max 0.25",
+   "python3 routes/gtu/funnel/merge_l0.py --kv KV-1 --n 2000 --shards 10 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/l0_aws_debug --suffix _KV-1_n2000 --top 40 --target 150 --k-near 1 --near-max 0.25",
+   "python3 routes/gtu/funnel/merge_l0.py --kv KV-6 --n 2000 --shards 10 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/l0_aws_debug --suffix _KV-6_n2000 --top 40 --target 150 --k-near 1 --near-max 0.25"
+  ],
+  "full": [
+   "python3 routes/gtu/funnel/merge_l0.py --kv KV-3 --n 200000 --shards 30 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/l0_aws_full --suffix _KV-3_n200000 --top 1000 --target 4000 --k-near 1 --near-max 0.25 --csv-gz --csv-dir routes/gtu/platform/aws/runs/<run_id>/merged",
+   "python3 routes/gtu/funnel/merge_l0.py --kv KV-1 --n 50000 --shards 30 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/l0_aws_full --suffix _KV-1_n50000 --top 1000 --target 4000 --k-near 1 --near-max 0.25 --csv-gz --csv-dir routes/gtu/platform/aws/runs/<run_id>/merged",
+   "python3 routes/gtu/funnel/merge_l0.py --kv KV-6 --n 50000 --shards 30 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/l0_aws_full --suffix _KV-6_n50000 --top 1000 --target 4000 --k-near 1 --near-max 0.25 --csv-gz --csv-dir routes/gtu/platform/aws/runs/<run_id>/merged"
+  ]
+ },
+ "merge_where": "сессия с ключами после run: результаты уже в routes/gtu/platform/aws/runs/<run_id>/<задача>/ (или collect --run-id <run_id> --job <задача> по каждой); Python с теми же версиями пакетов (pip install cantera==3.2.0 scipy==1.18.1 numpy==2.5.3) - иначе отпечаток выборки не совпадёт",
+ "csv_rule": "CSV крупнее 5 МБ (полный прогон) - в --csv-dir внутри runs/ (в .gitignore) и в S3; в ветку - только funnel_l0_results_*.json и funnel_l0_select_*.json",
+ "estimate": {
+  "debug": {
+   "concepts": 6000,
+   "machines": 2,
+   "shards": 10,
+   "machine_hours": 0.218,
+   "usd_expected": 0.165,
+   "usd_upper_bound": 1.91,
+   "max_min": 30,
+   "s_per_concept_core_measured": 0.23036,
+   "safety": 3.0
+  },
+  "full": {
+   "concepts": 300000,
+   "machines": 6,
+   "shards": 30,
+   "machine_hours": 1.5,
+   "usd_expected": 1.157,
+   "usd_upper_bound": 6.14,
+   "max_min": 33,
+   "s_per_concept_core_measured": 0.23036,
+   "safety": 3.0
+  }
+ },
+ "estimate_total_usd": {
+  "expected": 1.32,
+  "upper_bound": 8.05,
+  "cap_level0_usd": 300,
+  "cap_ok": true
+ },
+ "probes": {
+  "funnel_l0_results.json": {
+   "kv": "KV-3",
+   "n": 256,
+   "feasible_share": 0.56641,
+   "feasible": 145,
+   "feasible_niches": 73,
+   "archetypes_feasible": 10,
+   "code_sha": "5f99d76a48e9e6db"
+  },
+  "funnel_l0_results_probe_KV-1_n128.json": {
+   "kv": "KV-1",
+   "n": 128,
+   "feasible_share": 0.77344,
+   "feasible": 99,
+   "feasible_niches": 81,
+   "archetypes_feasible": 11,
+   "code_sha": "5f99d76a48e9e6db"
+  },
+  "funnel_l0_results_probe_KV-6_n128.json": {
+   "kv": "KV-6",
+   "n": 128,
+   "feasible_share": 0.02344,
+   "feasible": 3,
+   "feasible_niches": 3,
+   "archetypes_feasible": 1,
+   "code_sha": "5f99d76a48e9e6db"
+  }
+ },
+ "sampler": "v2: окна допустимости по номинальному циклу, ремонт незамыкающих комбинаций (funnel_space.SAMPLER)",
+ "known_limitations": [
+  "все числа уровня 0 - оценка (КПД узлов по формулам трека, без характеристик и нерасчётных режимов); погрешность модели трека ±2 п. п.",
+  "время на концепцию в пробах замерено на общем контейнере (4 ядра, нагрузка чужими задачами) с холодным кэшем замыканий; смета берёт его с запасом ×3 - фактическое время даст отладочный прогон",
+  "KV-6: последняя ступень на 11 220 об/мин при проверенном frame3 AN² 6,03e7 пропускает около 146 м³/с выхлопа (СТ, 380 м/с, ca/U 0,8) - допустимы только концепции с высокой удельной работой и холодным выхлопом (охлаждаемая турбина, высокая π); доля допустимых KV-6 в пробе мала, это физика модели, а не дефект выборки (README, раздел «Выборка v2»)",
+  "простой ротор (одно колесо + одна ступень турбины на валу пакета) не замыкает KV-3 и KV-6 - доказательство в closure_proof результатов и README",
+  "предел AN² = 6,03e7 - единственная проверенная прочностью точка (frame3 turb3, 536 °C); для более горячей последней ступени он не снижается - проверка на уровне 2",
+  "модель массы занижена против Taurus 60 MD (results: mass_reference); абсолютная масса входит в s_mass и подъём plugplay",
+  "раннер v2 - в рабочей копии; если к запуску он изменится, повторить plan"
+ ],
+ "how_to_regenerate": "python3 routes/gtu/funnel/make_jobs_l0.py (пишет jobs_l0_debug.json, jobs_l0.json, READY_L0.json; AWS не вызывает)"
+}

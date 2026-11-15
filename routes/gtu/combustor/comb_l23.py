@@ -32,7 +32,7 @@ SCHEMA = "kv.combustor.l23.shard/1"
 LBO_STEPS = [0.9, 0.8, 0.7, 0.6, 0.5]
 FB_STEPS = [0.3, 0.5, 0.7, 1.0]
 ITERS2 = dict(cold=800, hot=3500, write=500, restart=1500)
-LES = dict(flow_through=12, stats=8, max_co=0.5)
+LES = dict(flow_through=8, stats=6, max_co=0.5)
 LES_LENGTH_FRAC = 0.35     # LES - канал и зона пламени: 35 % длины ячейки (смета, README «Уровень 3»)
 
 
@@ -106,7 +106,7 @@ def _restart_fuel(case, scale=None, h2=None, desc=None):
 
 def _status_burn(a, T3):
     o = a.get("outlet", {})
-    return (o.get("eta_c") or 0) >= 0.9 and (a.get("T_max") or 0) >= T3 + 300.0
+    return (o.get("eta_c") or 0) >= 0.9 and (a.get("T_max") or 0) >= T3 + 300.0 and abs(a.get("mass_imbalance", 1)) < 0.05
 
 
 def to_les(case, desc, forcing=False):

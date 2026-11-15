@@ -110,22 +110,23 @@ def money(machine_hours, gb_out, disk_gb, months=3.0):
 
 def pkg_l1(T, MS, n=500, shards=25, grid_every=10):
     per = math.ceil(n / shards)
+    import comb_cfd as CF
     tc, th = T["cold_s_per_cell_iter"], T["hot_s_per_cell_iter"]
-    it = dict(cold=600, hot=3000)
+    it = dict(cold=CF.ITERS["cold"], hot=CF.ITERS["hot"])
     case_s = lambda cells: cells * (it["cold"] * tc + it["hot"] * th)
     mean_cell, max_cell = MS["cell"]["mean"], MS["cell"]["max"]
     mean_lin, max_lin = MS["liner"]["mean"], MS["liner"]["max"]
     n_med = math.ceil(per / grid_every)
     cpu = per * 3 * case_s(mean_cell) + per * case_s(mean_lin) + n_med * case_s(MS["cell_medium"]["mean"])
     second = 0.3 * per * 3 * mean_cell * 3000 * th           # второй проход 30 % несошедшихся ячеек (+3000 итераций)
-    crit = case_s(max_cell) + case_s(max_lin)                 # путь: ячейка 100 % -> труба
+    crit = max(case_s(max_cell) + case_s(max_lin), case_s(MS["cell_medium"]["max"]))   # ячейка -> труба; сетка medium
     comp_exp = max((cpu + second) / VCPU, crit) / 60.0
     comp_plan = 2.0 * max((cpu + second) / VCPU, crit + case_s(max_cell)) / 60.0
     mm = ceil5(SETUP_MIN + comp_plan + UPLOAD_MIN)
     jobs = [dict(name=f"comb-l1-p{k:02d}",
                  command=f"{ROOT_ENV}\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/"
                          f"l1_inputs_KV-3.json --n {n} --shard {k} --shards {shards} --out \"$GTU_OUT\" --workers \"$NPROC\" "
-                         f"--grid-every {grid_every} --timeout-min {int(0.4 * mm)}") for k in range(shards)]
+                         f"--grid-every {grid_every} --timeout-min {int(0.45 * mm)}") for k in range(shards)]
     mh = shards * (SETUP_MIN + comp_exp + UPLOAD_MIN) / 60.0
     mh_plan = shards * (SETUP_MIN + comp_plan + UPLOAD_MIN) / 60.0
     gb = shards * (per * 4 + n_med) * 0.6e-3                 # итоги кейса ~0,6 МБ (сжатые: логи, сетка, основные поля)
@@ -203,10 +204,10 @@ def pkg_l2(T, MS, n=40, shards=20, np_=8):
     return pk
 
 
-def pkg_l3(T, MS, n=5, np_=32):
+def pkg_l3(T, MS, n=5, np_=64):
     th = T["hot_s_per_cell_iter"]
     m, mx = MS["element3d_L3_les"]["mean"], MS["element3d_L3_les"]["max"]
-    steps = 90000                                              # 20 времён протекания зоны пламени при Co 0,5 (оценка)
+    steps = 70000                                              # 14 времён протекания зоны пламени при Co 0,5 (оценка)
     s_step = 1.5 * th                                          # PIMPLE 3 коррекции против 2 в RANS (оценка)
     eff = 0.75
     run_s = lambda c: c * steps * s_step / eff
@@ -225,8 +226,8 @@ def pkg_l3(T, MS, n=5, np_=32):
                s_per_cell_step=s_step, parallel_eff=eff, mean_cells=m, max_cells=mx, core_hours=core_h,
                max_min=mm, machine_hours=dict(expected=mh, planning=1.5 * mh), outputs_gb=gb, usd=money(mh, gb, 100),
                usd_planning_hours=money(1.5 * mh, gb, 100)["total_planning"],
-               note="задача - один кейс (вариант × вид) на 32 ядрах машины (половина ядер простаивает - LES на 64 "
-                    "ядрах при 0,3 млн ячеек упирается в обмен; оценка); сторож 720 мин - если LES не уложится, раннер "
+               note="задача - один кейс (вариант × вид) на всех 64 ядрах машины; кейс должен уложиться в сторож 720 мин "
+                    "(машина не читает S3 - продолжения с контрольной точки на другой машине нет); сторож 720 мин - если LES не уложится, раннер "
                     "получит код 124: продолжение с последней записи вторым пакетом (контрольные точки в $GTU_OUT)",
                session_side=["comb_acoustic.py: сеть элементов с F(ω) из LES (identify_ftf) - секунды",
                              "CalculiX: прочность и ползучесть картриджа (навык calculix-rotor) - минуты, AWS не нужен"])

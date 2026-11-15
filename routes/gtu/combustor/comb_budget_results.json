@@ -1,0 +1,397 @@
+{
+ "title": "Сводная смета воронки камеры KV-3 (уровни 1-3, каналы, калибровка) против общего потолка AWS",
+ "method": "машино-часы × цена спота c7a.16xlarge + диск + IPv4 + хранение S3 + передача; верхняя граница - прогноз runner.py plan (MaxPrice × (сторож + 10 мин)); другие пакеты - их поля estimate",
+ "software": "python 3.13.18; runner.py plan",
+ "date": "2026-11-14",
+ "status": "смета - оценка; ни один пакет уровней 1-3 не запускался",
+ "inputs": [
+  {
+   "file": "routes/gtu/combustor/comb_l1_smoke_results.json",
+   "field": "timing",
+   "used": {
+    "cold": 5.037593984962406e-05,
+    "hot": 6.316515465011407e-05
+   }
+  },
+  {
+   "file": "routes/gtu/platform/aws/ledger.jsonl",
+   "field": "израсходовано (строка plan)",
+   "used": 0.91
+  },
+  {
+   "file": "routes/gtu/platform/batch/aws_rates.toml",
+   "field": "s3, transfer, ebs, ipv4",
+   "used": {
+    "s3_gb_month": 0.023,
+    "transfer_gb": 0.09,
+    "ebs_gb_month": 0.08,
+    "ipv4_h": 0.005
+   }
+  },
+  {
+   "file": "routes/gtu/combustor/channels_plan_results.json",
+   "field": "channels, topology"
+  }
+ ],
+ "prices": {
+  "expected": 0.7064,
+  "planning": 0.75,
+  "zones": "us-east-1a=0.9554,us-east-1b=0.7478,us-east-1c=0.7064,us-east-1d=0.8576,us-east-1f=1.1804",
+  "basis": "0,7064 - us-east-1c (ledger 20261114T231610Z-9b64); 0,75 - верх диапазона задачи владельца; зоны - ledger того же прогона"
+ },
+ "mesh_stats": {
+  "cell": {
+   "values": [
+    4172,
+    4018,
+    4485,
+    2610,
+    4814,
+    5060,
+    2280,
+    4150,
+    3050,
+    3270,
+    3820,
+    4920
+   ],
+   "mean": 3887.4166666666665,
+   "max": 5060
+  },
+  "cell_medium": {
+   "values": [
+    10673,
+    10470,
+    11268,
+    6708,
+    12648,
+    13056,
+    5808,
+    10308,
+    7428,
+    8328,
+    9408,
+    12828
+   ],
+   "mean": 9910.916666666666,
+   "max": 13056
+  },
+  "liner": {
+   "values": [
+    5076,
+    4485,
+    4028,
+    2214,
+    1764,
+    1980,
+    3420,
+    1521,
+    4142,
+    2080,
+    1722,
+    3344
+   ],
+   "mean": 2981.3333333333335,
+   "max": 5076
+  },
+  "element3d_L2": {
+   "values": [
+    45300,
+    32130,
+    24640,
+    30690,
+    30520,
+    53160,
+    27060,
+    102500,
+    37050,
+    87750,
+    32580,
+    41580
+   ],
+   "mean": 45413.333333333336,
+   "max": 102500
+  },
+  "element3d_L3_les": {
+   "values": [
+    138600,
+    85800,
+    84744,
+    94260,
+    59444,
+    138432,
+    81000,
+    337428,
+    119814,
+    304434,
+    103428,
+    142736
+   ],
+   "mean": 140843.33333333334,
+   "max": 337428
+  },
+  "liner3d_cht": {
+   "values": [
+    100254,
+    122364,
+    80850,
+    110880,
+    78408,
+    54912,
+    79860,
+    30030,
+    110220,
+    50160,
+    25344,
+    60984
+   ],
+   "mean": 75355.5,
+   "max": 122364
+  },
+  "idx": [
+   217,
+   281,
+   251,
+   112,
+   196,
+   134,
+   233,
+   268,
+   131,
+   94,
+   108,
+   17
+  ]
+ },
+ "timing": {
+  "rows": [
+   {
+    "case": "lin233",
+    "phase": "cold",
+    "cells": 3420,
+    "iters": 140.0,
+    "cpu_s": 24.12,
+    "s_per_cell_iter": 5.037593984962406e-05,
+    "ended": true
+   },
+   {
+    "case": "lin233",
+    "phase": "hot",
+    "cells": 3420,
+    "iters": 140.0,
+    "cpu_s": 27.42,
+    "s_per_cell_iter": 5.726817042606517e-05,
+    "ended": true
+   },
+   {
+    "case": "run233_100",
+    "phase": "cold",
+    "cells": 2440,
+    "iters": 590.0,
+    "cpu_s": 63.46,
+    "s_per_cell_iter": 4.408168935815504e-05,
+    "ended": true
+   },
+   {
+    "case": "run233_100",
+    "phase": "hot",
+    "cells": 2440,
+    "iters": 3090.0,
+    "cpu_s": 476.24,
+    "s_per_cell_iter": 6.316515465011407e-05,
+    "ended": true
+   },
+   {
+    "case": "run233b_100",
+    "phase": "cold",
+    "cells": 2280,
+    "iters": 1161.0,
+    "cpu_s": 126.11,
+    "s_per_cell_iter": 4.764117442616015e-05,
+    "ended": false
+   }
+  ],
+  "cold_s_per_cell_iter": 5.037593984962406e-05,
+  "hot_s_per_cell_iter": 6.316515465011407e-05,
+  "cold_median": 4.764117442616015e-05,
+  "hot_median": 6.021666253808962e-05,
+  "rule": "в смету - наибольшее по кейсам обкатки (между 10-й и последней итерацией журнала)"
+ },
+ "combustor_rows": [
+  {
+   "item": "камера CALIB",
+   "file": "routes/gtu/combustor/jobs_calib.json",
+   "expected_usd": 0.5863782752532978,
+   "planning_usd": 0.6216656795505326,
+   "upper_runner_usd": 2.61,
+   "plan_exit_code": 0
+  },
+  {
+   "item": "камера L1",
+   "file": "routes/gtu/combustor/jobs_l1.json",
+   "expected_usd": 32.504847498814335,
+   "planning_usd": 82.37398825604292,
+   "upper_runner_usd": 160.54,
+   "plan_exit_code": 0
+  },
+  {
+   "item": "камера L2",
+   "file": "routes/gtu/combustor/jobs_l2.json",
+   "expected_usd": 26.518408100104757,
+   "planning_usd": 80.91699351024607,
+   "upper_runner_usd": 157.33,
+   "plan_exit_code": 0
+  },
+  {
+   "item": "камера L2 - comb-l2-cht (не готово к запуску)",
+   "expected_usd": 2.8019602128813204,
+   "planning_usd": 4.462351698034379,
+   "upper_runner_usd": null,
+   "basis": "40 × средняя сетка × 4000 итераций × 1,2·t_хим (оценка)"
+  },
+  {
+   "item": "камера L2 - comb-l2-spray (не готово к запуску)",
+   "expected_usd": 6.332302542663625,
+   "planning_usd": 10.084711722107272,
+   "upper_runner_usd": null,
+   "basis": "40 × 2 × средняя сетка × 3000 итераций × 3·t_хим (механизм 100 веществ, оценка)"
+  },
+  {
+   "item": "камера L2 - comb-l2-active (не готово к запуску)",
+   "expected_usd": 3.9645606391696226,
+   "planning_usd": 6.313888333898395,
+   "upper_runner_usd": null,
+   "basis": "30 % счёта L2 (оценка)"
+  },
+  {
+   "item": "камера L3",
+   "file": "routes/gtu/combustor/jobs_l3.json",
+   "expected_usd": 42.13627026640107,
+   "planning_usd": 66.83149408745935,
+   "upper_runner_usd": 108.63,
+   "plan_exit_code": 0
+  },
+  {
+   "item": "камера L3 - calib-preccinsta-les (не готово к запуску)",
+   "expected_usd": 34.8592697225317,
+   "planning_usd": 55.51624920420181,
+   "upper_runner_usd": null,
+   "basis": "1 млн ячеек × 45 000 шагов × 1,5·t_хим / 0,75 на режим (оценка)"
+  },
+  {
+   "item": "каналы/печать - diffuser (постановка, сетки не готовы)",
+   "expected_usd": 0.606775794557431,
+   "planning_usd": 0.9663402730423412,
+   "upper_runner_usd": null,
+   "basis": "SU2 1,1e-5 с/(узел·итер.·ядро) × (прямое + 1,5·сопр.)"
+  },
+  {
+   "item": "каналы/печать - transition (постановка, сетки не готовы)",
+   "expected_usd": 1.703460319119287,
+   "planning_usd": 2.712900423285954,
+   "upper_runner_usd": null,
+   "basis": "simpleFoam 1,23e-6 с/(ячейка·итер.·ядро) - замер; сопряжённое 1,5 прямого (оценка)"
+  },
+  {
+   "item": "каналы/печать - scroll (постановка, сетки не готовы)",
+   "expected_usd": 3.406920638238574,
+   "planning_usd": 5.425800846571908,
+   "upper_runner_usd": null,
+   "basis": "simpleFoam 1,23e-6 с/(ячейка·итер.·ядро) - замер; сопряжённое 1,5 прямого (оценка)"
+  },
+  {
+   "item": "каналы/печать - fuel_manifold (постановка, сетки не готовы)",
+   "expected_usd": 4.258650797798217,
+   "planning_usd": 6.782251058214884,
+   "upper_runner_usd": null,
+   "basis": "simpleFoam замер × (1 + 1,5) × 150 циклов (оценка)"
+  },
+  {
+   "item": "каналы/печать - cooling_lattice (постановка, сетки не готовы)",
+   "expected_usd": 5.298,
+   "planning_usd": 8.4375,
+   "upper_runner_usd": null,
+   "basis": "CHT ячейки 0,2 млн × 3000 итер. × 1,2·6,0e-5 с (реагирующий замер L1 как верхняя граница для нереагирующего) × 40 точек (оценка)"
+  },
+  {
+   "item": "каналы/печать - cartridge_bracket (постановка, сетки не готовы)",
+   "expected_usd": 0.22075,
+   "planning_usd": 0.3515625,
+   "upper_runner_usd": null,
+   "basis": "TopOpt на 1-2 млн элементов: десятки ядро-часов (оценка)"
+  }
+ ],
+ "other_packages": [
+  {
+   "name": "воронка двигателя L0, отладка (запущен 14.11.2026)",
+   "file": "routes/gtu/funnel/jobs_l0_debug.json",
+   "expected_usd": 0.152,
+   "upper_usd": 1.67,
+   "note": "расход уже в ledger.jsonl"
+  },
+  {
+   "name": "воронка двигателя L0, полный (запущен 14.11.2026)",
+   "file": "routes/gtu/funnel/jobs_l0.json",
+   "expected_usd": 0.263,
+   "upper_usd": 2.86,
+   "note": "расход уже в ledger.jsonl"
+  },
+  {
+   "name": "камера L0, N = 262 144 (jobs_aws_comb_l0.json)",
+   "file": "routes/gtu/combustor/jobs_aws_comb_l0.json",
+   "expected_usd": 0.697,
+   "upper_usd": 7.84,
+   "note": "альтернатива jobs_l0.json"
+  },
+  {
+   "name": "камера L0, N = 30 000 (jobs_l0.json)",
+   "file": "routes/gtu/combustor/jobs_l0.json",
+   "expected_usd": null,
+   "upper_usd": 23.09,
+   "note": "альтернатива jobs_aws_comb_l0.json; в сводную - большее из двух"
+  },
+  {
+   "name": "SU2 KV-3, пробный",
+   "file": "routes/gtu/platform/su2/jobs_aws_su2_kv3_smoke.json",
+   "expected_usd": 0.44,
+   "upper_usd": 1.67,
+   "note": ""
+  },
+  {
+   "name": "SU2 KV-3, medium",
+   "file": "routes/gtu/platform/su2/jobs_aws_su2_kv3.json",
+   "expected_usd": 14.22,
+   "upper_usd": 41.02,
+   "note": ""
+  },
+  {
+   "name": "SU2 KV-3, fine",
+   "file": "routes/gtu/platform/su2/jobs_aws_su2_kv3_fine.json",
+   "expected_usd": 32.38,
+   "upper_usd": 93.23,
+   "note": ""
+  }
+ ],
+ "totals": {
+  "spent_ledger": 0.91,
+  "combustor_expected": 165.19855480753324,
+  "combustor_planning": 331.7976975926558,
+  "combustor_upper": 530.1635560593569,
+  "other_expected": 48.15200000000001,
+  "other_upper": 163.54000000000002,
+  "all_upper": 694.6135560593568,
+  "ceiling": 2000.0,
+  "headroom_upper": 1305.3864439406432,
+  "share_upper": 0.3473067780296784,
+  "engine_funnel_L1plus": "сметы уровней 1+ воронки двигателя в репозитории нет; должна уложиться в headroom_upper"
+ },
+ "run_order": [
+  "0. Перед всем: runner.py plan каждого файла (сделано - plan_check), ветка запушена, ledger.jsonl закоммичен",
+  "1. jobs_calib.json (Sandia D): не прошёл критерии - стоп, разбор моделей; уровень 1 не запускается",
+  "2. jobs_l1.json: до запуска prepare_l1.py по слитым частям уровня 0 (l1_inputs_KV-3.json в ветке); после - merge_l1.py: полнота 500/500, флаги сверки Cantera < 10 % вариантов, сходимость > 70 % кейсов; иначе - стоп (второй проход несошедшихся, разбор)",
+  "3. отчёт раннера после каждых 500 долл. общего расхода - решение владельца о продолжении",
+  "4. jobs_l2.json: отбор select_l2 (40) + активный дорасчёт; проход L2 - запас по срыву ≥ 1,5 и H2 ≥ 0,3 по объёму без проскока при выполненных NOx/CO; меньше 3 вариантов прошли - стоп и пересмотр схем (уровень 0)",
+  "5. PRECCINSTA (pending) пройден - только тогда jobs_l3.json (3-5 вариантов)",
+  "6. L3: размах пульсаций ≤ 1 % p3 (targets.json) по LES и рост мод сети элементов ≤ 0 с F(ω) из LES; стенка ≤ 1173 K и ресурс 30 000 ч по CalculiX - кандидат в стенд"
+ ]
+}

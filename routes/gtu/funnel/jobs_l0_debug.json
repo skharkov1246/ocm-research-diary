@@ -17,46 +17,49 @@
  "jobs": [
   {
    "name": "l0-debug-m0",
-   "command": "python routes/gtu/funnel/funnel_l0.py --kv KV-3 --n 2000 --shards 10 --shard 0,2,4,6,8 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
-   "max_min": 25
+   "command": "python routes/gtu/funnel/funnel_l0.py --kv KV-3 --n 2000 --shards 10 --shard 0,2,4,6,8 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\npython routes/gtu/funnel/funnel_l0.py --kv KV-1 --n 2000 --shards 10 --shard 0,2,4,6,8 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\npython routes/gtu/funnel/funnel_l0.py --kv KV-6 --n 2000 --shards 10 --shard 0,2,4,6,8 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 30
   },
   {
    "name": "l0-debug-m1",
-   "command": "python routes/gtu/funnel/funnel_l0.py --kv KV-3 --n 2000 --shards 10 --shard 1,3,5,7,9 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
-   "max_min": 25
+   "command": "python routes/gtu/funnel/funnel_l0.py --kv KV-3 --n 2000 --shards 10 --shard 1,3,5,7,9 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\npython routes/gtu/funnel/funnel_l0.py --kv KV-1 --n 2000 --shards 10 --shard 1,3,5,7,9 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\npython routes/gtu/funnel/funnel_l0.py --kv KV-6 --n 2000 --shards 10 --shard 1,3,5,7,9 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"",
+   "max_min": 30
   }
  ],
  "merge": {
+  "csv_rule": "CSV крупнее 5 МБ (полный прогон) - в --csv-dir внутри runs/ (в .gitignore) и в S3; в ветку - только funnel_l0_results_*.json и funnel_l0_select_*.json",
   "where": "сессия с ключами после run: результаты уже в routes/gtu/platform/aws/runs/<run_id>/<задача>/ (или collect --run-id <run_id> --job <задача> по каждой); Python с теми же версиями пакетов (pip install cantera==3.2.0 scipy==1.18.1 numpy==2.5.3) - иначе отпечаток выборки не совпадёт",
   "commands": [
-   "python3 routes/gtu/funnel/merge_l0.py --kv KV-3 --n 2000 --shards 10 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/l0_aws_debug --suffix _KV-3_n2000 --top 40 --target 150 --k-near 1 --near-max 0.25"
+   "python3 routes/gtu/funnel/merge_l0.py --kv KV-3 --n 2000 --shards 10 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/l0_aws_debug --suffix _KV-3_n2000 --top 40 --target 150 --k-near 1 --near-max 0.25",
+   "python3 routes/gtu/funnel/merge_l0.py --kv KV-1 --n 2000 --shards 10 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/l0_aws_debug --suffix _KV-1_n2000 --top 40 --target 150 --k-near 1 --near-max 0.25",
+   "python3 routes/gtu/funnel/merge_l0.py --kv KV-6 --n 2000 --shards 10 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/l0_aws_debug --suffix _KV-6_n2000 --top 40 --target 150 --k-near 1 --near-max 0.25"
   ],
-  "profile_why": "отладочный прогон: путь части -> машины -> S3 -> слияние на настоящем раннере; отбор около 150",
+  "profile_why": "отладочный прогон выборки v2 на всех трёх точках: доли допустимых, ниши, архетипы и время на концепцию при 64 процессах (кэш замыканий тёплый) - до полного; отбор около 150 на точку",
   "checks": "слияние откажет (код 2), если потеряна или задвоена хоть одна часть или индекс, или у частей разные отпечатки выборки и кода"
  },
  "estimate": {
-  "concepts": 2000,
-  "s_per_concept_core_measured": 0.00523,
+  "concepts": 6000,
+  "s_per_concept_core_measured": 0.23036,
   "safety": 3.0,
-  "core_hours": 0.009,
+  "core_hours": 1.152,
   "machines": 2,
   "shards": 10,
   "vcpu_per_machine": 64,
-  "compute_min_per_machine": 0.0,
+  "compute_min_per_machine": 0.54,
   "setup_min": 5.0,
   "upload_min": 1.0,
-  "machine_min": 6.0,
-  "machine_hours": 0.2,
-  "parts_gb_gz": 0.0009,
+  "machine_min": 6.54,
+  "machine_hours": 0.218,
+  "parts_gb_gz": 0.0031,
   "usd": {
-   "spot_expected": 0.141,
-   "spot_alt": 0.15,
-   "disk_ipv4": 0.0017,
-   "s3_month": 0.0001,
-   "transfer": 0.0001,
-   "total_expected": 0.152
+   "spot_expected": 0.154,
+   "spot_alt": 0.163,
+   "disk_ipv4": 0.0018,
+   "s3_month": 0.0002,
+   "transfer": 0.0003,
+   "total_expected": 0.165
   },
-  "upper_bound_usd": 1.67,
+  "upper_bound_usd": 1.91,
   "upper_bound_rule": "раннер: (MaxPrice + диск + IPv4) × (max_min + 10) / 60 на машину",
   "price": {
    "expected": 0.706,
@@ -75,13 +78,13 @@
   "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/funnel/jobs_l0_debug.json --assume-price 0.748 --assume-zone-prices us-east-1a=0.955,us-east-1b=0.748,us-east-1c=0.706",
   "exit_code": 0,
   "lines": [
-   "[задача] l0-debug-m0: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 25 мин",
-   "[бюджет] l0-debug-m0 на c7a.16xlarge: израсходовано 0.02 + в работе 0.00 + пакет 0.00 + новая 0.67 = 0.69 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[задача] l0-debug-m0: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 30 мин",
+   "[бюджет] l0-debug-m0 на c7a.16xlarge: израсходовано 0.91 + в работе 0.00 + пакет 0.00 + новая 0.77 = 1.68 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
    "[зоны] l0-debug-m0 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
-   "[задача] l0-debug-m1: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 25 мин",
-   "[бюджет] l0-debug-m1 на c7a.16xlarge: израсходовано 0.02 + в работе 0.00 + пакет 0.67 + новая 0.67 = 1.36 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[задача] l0-debug-m1: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 30 мин",
+   "[бюджет] l0-debug-m1 на c7a.16xlarge: израсходовано 0.91 + в работе 0.00 + пакет 0.77 + новая 0.77 = 2.45 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
    "[зоны] l0-debug-m1 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
-   "[план] прогноз пакета 1.35 долл. (цена спота — допущение 0.748/ч)"
+   "[план] прогноз пакета 1.54 долл. (цена спота — допущение 0.748/ч)"
   ],
   "runner_note": "раннер v2 в рабочей копии (поля python, pip, NPROC, самая дешёвая зона); если v2 ещё не влит в ветку - перепроверить plan после влития"
  }

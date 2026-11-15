@@ -21,26 +21,26 @@
  "jobs": [
   {
    "name": "su2-kv3-stage1-medium-a",
-   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; free -g; df -h /tmp; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/frame3/frame3_geom.py --out \"$W/geom\" --levels medium --stages stage1 --gzip-levels --threads \"$NPROC\" --results \"$GTU_OUT/frame3_geom_results.json\" > \"$GTU_OUT/geom.log\" 2>&1\npython routes/gtu/platform/su2/char_points.py run --case custom --level medium --geom-out \"$W/geom/stage1_medium\" --label kv3_stage1 --pfracs 0.50,0.70,0.90,1.10 --base-pfrac 0.75 --np-per-point 16 --point-iter 6000 --point-pramp 300 --job-max-min 510 --su2-src /opt/SU2-src --work \"$W/runs\" --out \"$GTU_OUT\"",
-   "max_min": 510,
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; free -g; df -h /tmp; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/frame3/frame3_geom.py --out \"$W/geom\" --levels medium --stages stage1 --gzip-levels --threads \"$NPROC\" --results \"$GTU_OUT/frame3_geom_results.json\" > \"$GTU_OUT/geom.log\" 2>&1\npython routes/gtu/platform/su2/char_points.py run --case custom --level medium --geom-out \"$W/geom/stage1_medium\" --label kv3_stage1 --pfracs 0.50,0.70,0.90,1.10 --base-pfrac 0.75 --np-per-point 16 --point-iter 6000 --point-pramp 300 --job-max-min 540 --su2-src /opt/SU2-src --work \"$W/runs\" --out \"$GTU_OUT\"",
+   "max_min": 540,
    "disk_gb": 50
   },
   {
    "name": "su2-kv3-stage1-medium-b",
-   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; free -g; df -h /tmp; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/frame3/frame3_geom.py --out \"$W/geom\" --levels medium --stages stage1 --gzip-levels --threads \"$NPROC\" --results \"$GTU_OUT/frame3_geom_results.json\" > \"$GTU_OUT/geom.log\" 2>&1\npython routes/gtu/platform/su2/char_points.py run --case custom --level medium --geom-out \"$W/geom/stage1_medium\" --label kv3_stage1 --pfracs 0.60,0.80,1.00,1.20 --base-pfrac 0.75 --np-per-point 16 --point-iter 6000 --point-pramp 300 --job-max-min 510 --su2-src /opt/SU2-src --work \"$W/runs\" --out \"$GTU_OUT\"",
-   "max_min": 510,
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; free -g; df -h /tmp; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/frame3/frame3_geom.py --out \"$W/geom\" --levels medium --stages stage1 --gzip-levels --threads \"$NPROC\" --results \"$GTU_OUT/frame3_geom_results.json\" > \"$GTU_OUT/geom.log\" 2>&1\npython routes/gtu/platform/su2/char_points.py run --case custom --level medium --geom-out \"$W/geom/stage1_medium\" --label kv3_stage1 --pfracs 0.60,0.80,1.00,1.20 --base-pfrac 0.75 --np-per-point 16 --point-iter 6000 --point-pramp 300 --job-max-min 540 --su2-src /opt/SU2-src --work \"$W/runs\" --out \"$GTU_OUT\"",
+   "max_min": 540,
    "disk_gb": 50
   },
   {
    "name": "su2-core130-medium-a",
-   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; free -g; df -h /tmp; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/platform/geom/impeller.py --case core130 --level medium --no-step --out \"$W/geom/core130_medium\" --threads \"$NPROC\" > \"$GTU_OUT/geom.log\" 2>&1\npython routes/gtu/platform/su2/char_points.py run --case core130 --level medium --geom-out \"$W/geom/core130_medium\" --label core130 --pfracs 0.50,0.70,0.90,1.10 --base-pfrac 0.75 --np-per-point 16 --point-iter 6000 --point-pramp 300 --job-max-min 270 --su2-src /opt/SU2-src --work \"$W/runs\" --out \"$GTU_OUT\"",
-   "max_min": 270,
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; free -g; df -h /tmp; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/platform/geom/impeller.py --case core130 --level medium --no-step --out \"$W/geom/core130_medium\" --threads \"$NPROC\" > \"$GTU_OUT/geom.log\" 2>&1\npython routes/gtu/platform/su2/char_points.py run --case core130 --level medium --geom-out \"$W/geom/core130_medium\" --label core130 --pfracs 0.50,0.70,0.90,1.10 --base-pfrac 0.75 --np-per-point 16 --point-iter 6000 --point-pramp 300 --job-max-min 300 --su2-src /opt/SU2-src --work \"$W/runs\" --out \"$GTU_OUT\"",
+   "max_min": 300,
    "disk_gb": 50
   },
   {
    "name": "su2-core130-medium-b",
-   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; free -g; df -h /tmp; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/platform/geom/impeller.py --case core130 --level medium --no-step --out \"$W/geom/core130_medium\" --threads \"$NPROC\" > \"$GTU_OUT/geom.log\" 2>&1\npython routes/gtu/platform/su2/char_points.py run --case core130 --level medium --geom-out \"$W/geom/core130_medium\" --label core130 --pfracs 0.60,0.80,1.00,1.20 --base-pfrac 0.75 --np-per-point 16 --point-iter 6000 --point-pramp 300 --job-max-min 270 --su2-src /opt/SU2-src --work \"$W/runs\" --out \"$GTU_OUT\"",
-   "max_min": 270,
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; free -g; df -h /tmp; } > \"$GTU_OUT/env.txt\" 2>&1 || true\npython routes/gtu/platform/geom/impeller.py --case core130 --level medium --no-step --out \"$W/geom/core130_medium\" --threads \"$NPROC\" > \"$GTU_OUT/geom.log\" 2>&1\npython routes/gtu/platform/su2/char_points.py run --case core130 --level medium --geom-out \"$W/geom/core130_medium\" --label core130 --pfracs 0.60,0.80,1.00,1.20 --base-pfrac 0.75 --np-per-point 16 --point-iter 6000 --point-pramp 300 --job-max-min 300 --su2-src /opt/SU2-src --work \"$W/runs\" --out \"$GTU_OUT\"",
+   "max_min": 300,
    "disk_gb": 50
   }
  ],
@@ -81,7 +81,7 @@
    "total_expected": 14.22,
    "total_at_C_sizing": 19.24
   },
-  "upper_bound_usd": 38.16,
+  "upper_bound_usd": 41.02,
   "upper_bound_rule": "раннер: (MaxPrice 1,4206 + диск + IPv4) × (max_min + 10) / 60 на машину — если каждая задача дойдёт до сторожа",
   "jobs": [
    {
@@ -95,7 +95,7 @@
      1.1
     ],
     "np_per_point": 16,
-    "max_min": 510,
+    "max_min": 540,
     "disk_gb": 50,
     "nodes": 1137992,
     "s_per_iter_base": 0.782,
@@ -118,7 +118,7 @@
      1.2
     ],
     "np_per_point": 16,
-    "max_min": 510,
+    "max_min": 540,
     "disk_gb": 50,
     "nodes": 1137992,
     "s_per_iter_base": 0.782,
@@ -141,7 +141,7 @@
      1.1
     ],
     "np_per_point": 16,
-    "max_min": 270,
+    "max_min": 300,
     "disk_gb": 50,
     "nodes": 584357,
     "s_per_iter_base": 0.402,
@@ -164,7 +164,7 @@
      1.2
     ],
     "np_per_point": 16,
-    "max_min": 270,
+    "max_min": 300,
     "disk_gb": 50,
     "nodes": 584357,
     "s_per_iter_base": 0.402,
@@ -254,19 +254,19 @@
   "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/platform/su2/jobs_aws_su2_kv3.json --assume-price 0.748 --assume-zone-prices us-east-1a=0.955,us-east-1b=0.748,us-east-1c=0.706 --branch claude/lucid-allen-yvps5d",
   "exit_code": 0,
   "lines": [
-   "[задача] su2-kv3-stage1-medium-a: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 510 мин",
-   "[бюджет] su2-kv3-stage1-medium-a на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 0.00 + новая 10.02 = 10.19 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[задача] su2-kv3-stage1-medium-a: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 540 мин",
+   "[бюджет] su2-kv3-stage1-medium-a на c7a.16xlarge: израсходовано 0.91 + в работе 0.00 + пакет 0.00 + новая 10.60 = 11.51 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
    "[зоны] su2-kv3-stage1-medium-a c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
-   "[задача] su2-kv3-stage1-medium-b: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 510 мин",
-   "[бюджет] su2-kv3-stage1-medium-b на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 10.02 + новая 10.02 = 20.21 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[задача] su2-kv3-stage1-medium-b: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 540 мин",
+   "[бюджет] su2-kv3-stage1-medium-b на c7a.16xlarge: израсходовано 0.91 + в работе 0.00 + пакет 10.60 + новая 10.60 = 22.11 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
    "[зоны] su2-kv3-stage1-medium-b c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
-   "[задача] su2-core130-medium-a: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 270 мин",
-   "[бюджет] su2-core130-medium-a на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 20.05 + новая 5.40 = 25.61 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[задача] su2-core130-medium-a: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 300 мин",
+   "[бюджет] su2-core130-medium-a на c7a.16xlarge: израсходовано 0.91 + в работе 0.00 + пакет 21.20 + новая 5.98 = 28.08 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
    "[зоны] su2-core130-medium-a c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
-   "[задача] su2-core130-medium-b: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 270 мин",
-   "[бюджет] su2-core130-medium-b на c7a.16xlarge: израсходовано 0.17 + в работе 0.00 + пакет 25.44 + новая 5.40 = 31.01 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[задача] su2-core130-medium-b: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 300 мин",
+   "[бюджет] su2-core130-medium-b на c7a.16xlarge: израсходовано 0.91 + в работе 0.00 + пакет 27.18 + новая 5.98 = 34.06 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
    "[зоны] su2-core130-medium-b c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
-   "[план] прогноз пакета 30.84 долл. (цена спота — допущение 0.748/ч)"
+   "[план] прогноз пакета 33.15 долл. (цена спота — допущение 0.748/ч)"
   ],
   "userdata_sizes": [
    "\"UserData\": \"<7675 байт>\"",

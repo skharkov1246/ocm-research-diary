@@ -23,7 +23,7 @@ import comb_cfd as CF
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MESH3 = {"L2": dict(nr_ch=10, nt=12, nz_ch_max=30, nz_cell=110, nr_out_max=26, nr_l=30, nz_l=90, nt_l=16, nr_w=3),
-         "L3": dict(nr_ch=20, nt=28, nz_ch_max=60, nz_cell=220, nr_out_max=48, nr_l=50, nz_l=160, nt_l=28, nr_w=4)}
+         "L3": dict(nr_ch=16, nt=20, nz_ch_max=48, nz_cell=150, nr_out_max=34, nr_l=50, nz_l=160, nt_l=28, nr_w=4)}
 R_CORE = 0.02          # внутренний радиус сектора, доля наружного (ось не включается: тонкая труба симметрии)
 
 

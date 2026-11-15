@@ -226,3 +226,44 @@ def render_mesh(mesh, path, title=None, color="#b8b2a7", cam=None, size=(1400, 1
     p.screenshot(path)
     p.close()
     return path
+
+
+def section_caps(geoms, angles):
+    """плоские грани сечения (триангуляция многоугольника с дырами) в плоскостях θ из angles -> trimesh"""
+    import trimesh
+    out = []
+    for g in geoms:
+        v2, f = trimesh.creation.triangulate_polygon(g)
+        for k, th in enumerate(angles):
+            v3 = np.c_[v2[:, 0] * math.cos(th), v2[:, 0] * math.sin(th), v2[:, 1]]
+            m = trimesh.Trimesh(v3, f if k == 0 else f[:, ::-1], process=False)
+            out.append(m)
+    return trimesh.util.concatenate(out)
+
+
+def render_cutaway(geoms, png, angle=1.5 * math.pi, sections=180, cam=None, body="#b8b2a7", cut="#eb6834",
+                   size=(1400, 1000), extra=None):
+    """тело вращения на угол angle с гранями сечения (цвет cut) — видна внутренняя топология"""
+    import pyvista as pv
+    import trimesh
+    pv.OFF_SCREEN = True
+    parts = []
+    for g in geoms:
+        for k, ring in enumerate(poly_rings(g)):
+            ring = np.vstack([ring, ring[:1]])
+            m = trimesh.creation.revolve(ring, angle=angle, sections=int(sections * angle / (2 * math.pi)))
+            parts.append(m)
+    surf = trimesh.util.concatenate(parts)
+    caps = section_caps(geoms, (0.0, angle))
+    p = pv.Plotter(off_screen=True, window_size=size)
+    p.set_background("white")
+    p.add_mesh(pv.wrap(surf), color=body, smooth_shading=True, specular=0.45, specular_power=25)
+    p.add_mesh(pv.wrap(caps), color=cut, smooth_shading=False, specular=0.1)
+    if extra is not None:
+        p.add_mesh(pv.wrap(extra), color="#6f8fb0", smooth_shading=True, specular=0.3)
+    R = max(g.bounds[2] for g in geoms)
+    zc = np.mean([0.5 * (g.bounds[1] + g.bounds[3]) for g in geoms])
+    p.camera_position = cam or [(1.6 * R, -2.4 * R, 1.6 * R + zc), (0, 0, zc), (0, 0, 1)]
+    p.screenshot(png)
+    p.close()
+    return png

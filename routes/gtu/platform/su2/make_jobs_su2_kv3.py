@@ -3,8 +3,9 @@
 двусторонний вход, frame3) и core130 — на сетке medium, затем fine.
 
 Пишет рядом:
-  jobs_aws_su2_kv3_smoke.json — этап 0: одна машина, обе линии на coarse, единицы десятков итераций (~20 мин):
-                                проверка всей цепочки на AWS (сборка SU2, MPI 16 и 64 процесса, срок, выгрузка);
+  jobs_aws_su2_kv3_smoke.json — этап 0: одна машина, обе линии на coarse, база — полный план smoke075, точки по
+                                200 итераций (~35 мин): проверка всей цепочки на AWS (сборка SU2, MPI 16 и 64
+                                процесса, план базы этапов A и B, срок, выгрузка);
   jobs_aws_su2_kv3.json       — этап A: medium (4 машины c7a.16xlarge, по 4 точки на машину x 16 процессов MPI);
   jobs_aws_su2_kv3_fine.json  — этап B: fine (6 машин), запускать после разбора этапа A, точки — по его итогам.
 В каждом — блоки estimate (машино-часы x цена спота + диск, источник времени итерации), merge (что забрать и куда
@@ -333,8 +334,15 @@ def build_smoke() -> dict:
     job = {"name": "su2-kv3-core130-smoke", "command": smoke_command(), "max_min": SMOKE_MAX_MIN, "disk_gb": disk}
     return {
         "_comment": ("Этап 0 линий частоты SU2: проба всей цепочки на одной машине до этапов A и B (обе линии на coarse, "
-                     "итераций — десятки, числа не характеристика). Раннер берёт только defaults и jobs. Код — ветка "
+                     f"база — полный план smoke075, точки — по {SMOKE_POINT_ITER} итераций; числа не характеристика). "
+                     "Раннер берёт только defaults и jobs. Код — ветка "
                      f"{BRANCH}. Сгенерировано make_jobs_su2_kv3.py; правки — в нём."),
+        "previous_runs": [{"run_id": "20261115T003035Z-c8f9", "exit_code": 3,
+                           "what": "--base-iter-scale 0.1, точки по 40 итераций: container_setup, сборка SU2, сетки, "
+                                   "выгрузка и merge прошли (база стартовала на 248-й с после загрузки машины); база "
+                                   "обеих линий разошлась (NaN) на 9–10-й итерации стадии s2 (разгон 0,6 -> 1,0 за 8 "
+                                   "итераций), точки не считались",
+                           "files": "routes/gtu/platform/su2/aws_smoke_20261115T003035Z-c8f9/"}],
         "defaults": {"instance_type": "c7a.16xlarge", "fallback_types": ["c7i.16xlarge"], "image": "al2023",
                      "container": CONTAINER, "container_setup": CONTAINER_SETUP},
         "jobs": [job],
@@ -356,8 +364,10 @@ def build_smoke() -> dict:
         "estimate": {"machines": 1, "machine_min_expected": t_min,
                      "usd": {"total_expected": round(t_min / 60 * (PRICE_EXPECTED + IPV4_USD_H + disk * DISK_USD_GB_H), 2)},
                      "upper_bound_usd": round(upper, 2),
-                     "basis": "загрузка 3 + подготовка 12 + 2 сетки coarse по ~5 + 2 прогона по ~3 мин (оценки; сетка KV-3 "
-                              "coarse здесь — 131 с, core130 coarse — 40 с); цена — как этапы A и B"},
+                     "basis": f"загрузка 3 + подготовка 12 + 2 сетки coarse по ~5 + 2 линии по ~{SMOKE_LINE_MIN} мин "
+                              "(база 520 итераций на 64 процессах, точки на 16; оценки по C_expected; сетка KV-3 coarse "
+                              "здесь — 131 с, core130 coarse — 40 с; первый прогон: загрузка, подготовка и сетка KV-3 — "
+                              "~4 мин); цена — как этапы A и B"},
     }
 
 

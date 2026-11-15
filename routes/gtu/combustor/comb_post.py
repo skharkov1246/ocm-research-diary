@@ -288,6 +288,9 @@ def emissions(X, O2_ref=15.0):
     xh2o = X.get("H2O", 0.0)
     dry = 1.0 - xh2o
     o2d = 100.0 * X.get("O2", 0.0) / dry
+    if o2d > 20.0:                       # на выходе почти воздух: приведение к 15 % O2 не определено
+        return dict(O2_dry_pct=o2d, NOx_ppm15=None, NO_ppm15=None, NO2_ppm15=None, CO_ppm15=None, CH4_ppm15=None,
+                    corr15=None, note="O2 сухой > 20 %: на выходе почти воздух, приведение к 15 % O2 не определено")
     corr = (20.9 - O2_ref) / max(20.9 - o2d, 1e-6)
     ppm = lambda s: 1e6 * X.get(s, 0.0) / dry * corr
     return dict(O2_dry_pct=o2d, NOx_ppm15=ppm("NO") + ppm("NO2"), NO_ppm15=ppm("NO"), NO2_ppm15=ppm("NO2"),
@@ -340,7 +343,7 @@ def outlet_metrics(cs, T3, lhv, fuel_in_frac, time=None):
     X, mwm = x_from_Y(Ym)
     em = emissions(X)
     q_left = sum(Ym.get(s, 0.0) * lhv.get(s, 0.0) for s in ("CH4", "CO", "H2"))
-    eta = 1.0 - q_left / max(fuel_in_frac * lhv["CH4"], 1e-30)
+    eta = 1.0 - q_left / (fuel_in_frac * lhv["CH4"]) if fuel_in_frac > 1e-6 else None   # труба: топлива на входе нет
     # радиальный профиль: грани выхода - радиальные полосы клина
     r = np.hypot(cs.mesh.Cf[cs.mesh.patch("outlet")[0], 0], 0.0)
     order = np.argsort(r)
@@ -348,7 +351,7 @@ def outlet_metrics(cs, T3, lhv, fuel_in_frac, time=None):
     rtdf = (float(T.max()) - Tm) / max(Tm - T3, 1e-9)
     return dict(m=float(W), T=Tm, T_max_face=float(T.max()), RTDF=rtdf, Y_major={s: Ym[s] for s in
                 ("CH4", "O2", "CO2", "H2O", "CO", "H2", "NO", "NO2", "OH") if s in Ym},
-                eta_c=float(eta), MW=float(mwm), profile=prof, **em)
+                eta_c=None if eta is None else float(eta), MW=float(mwm), profile=prof, **em)
 
 
 def convergence(cs, T3, lhv, fuel_in_frac):
@@ -359,10 +362,13 @@ def convergence(cs, T3, lhv, fuel_in_frac):
     if "T" not in a or "T" not in b:
         return dict(ok=False, note="нет расхода через выход в одной из записей", times=[cs.prev, cs.time])
     rel = lambda x, y, floor: abs(x - y) / max(abs(y), floor)
+    if a.get("NOx_ppm15") is None or b.get("NOx_ppm15") is None:
+        return dict(ok=False, note="на выходе почти воздух (O2 сухой > 20 %)", times=[cs.prev, cs.time])
     d = dict(dT=rel(a["T"], b["T"], 1.0), dNOx=rel(a["NOx_ppm15"], b["NOx_ppm15"], 0.5),
              dCO=rel(a["CO_ppm15"], b["CO_ppm15"], 1.0), times=[cs.prev, cs.time])
     d["ok"] = bool(d["dT"] < 0.002 and d["dNOx"] < 0.05 and d["dCO"] < 0.10)
-    d["rule"] = "между двумя последними записями: T < 0,2 %, NOx < 5 % (не меньше 0,5 ppm), CO < 10 % (не меньше 1 ppm)"
+    d["rule"] = ("между двумя последними записями: T < 0,2 %, NOx < 5 % (не меньше 0,5 ppm), CO < 10 % (не меньше 1 ppm); "
+                 "и баланс массы вход/выход < 1 %")
     return d
 
 
@@ -465,6 +471,9 @@ def analyse(case, inputs):
     res["outlet_mixed_state"] = dict(T=mo["T"], Y={s: v for s, v in mo["Y"].items() if v > 1e-7},
                                      m=mo["m"], Uz=None)
     res["convergence"] = convergence(cs, inputs["T3"], inputs["lhv"], fin)
+    if abs(res["mass_imbalance"]) > 0.01:
+        res["convergence"]["ok"] = False
+        res["convergence"]["mass_note"] = f"баланс массы вход/выход {res['mass_imbalance']:.3f} > 1 %"
     res.update(cell_metrics(cs) if d["kind"] == "cell" else liner_metrics(cs))
     fatal = any(v["fatal"] for v in res["log"].values())
     res["status"] = "ошибка решателя" if fatal else ("сошлось" if res["convergence"].get("ok") else "не сошлось")
