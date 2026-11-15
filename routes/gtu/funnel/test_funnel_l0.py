@@ -354,8 +354,9 @@ def test_sampler_v2_windows_and_repair():
         for ax in FS.REPAIR_AXES:
             if ax in T and not (ax == "rotors" and c["cores"] > 1):
                 assert c[ax] in T[ax], (i, ax, c[ax])
+        mg = FS.MG0 if "без запасов" in c["repair"] else FS.MG     # окно без запасов - запись в repair
         if "T41/π" not in c["dflags"]:
-            m, _ = FS._margins(c, t, c["pi"], c["t41"])
+            m, _ = FS._margins(c, t, c["pi"], c["t41"], mg)
             assert m >= -0.02, (i, m)
         if "исходная не замыкает" in c["repair"]:
             assert FS.closure(c)["ok"]
@@ -365,3 +366,47 @@ def test_sampler_v2_windows_and_repair():
     FS._CLOSURE.clear(); FS._CANDS.clear(); FS._NOCLOSE.clear(); FS._DM.clear()
     b = [FS.concept(i, n, "KV-3") for i in reversed(range(6))][::-1]
     assert a == b
+
+
+def test_nominal_attainable_and_closure_kv6():
+    """v2.1 (kv6-диагностика): номинал окна не лучше достижимого - КПД СТ не выше ETA_NOM["pt"] и падает, когда AN² на частоте
+    пакета требует ca/U 0,8; нагрузка осевой турбины на валу пакета не ниже w/(nt·U_max²); замыкание - без запасов окон;
+    лучший вход - только из шаблона; кластер KV-6 с 2Ц не замыкает точку (общая СТ, AN²), с ОЦ и охлаждаемыми SC - замыкает"""
+    t6 = FS.target("KV-6")
+    base = dict(arch="безмасляный", kv="KV-6", rotors=2, cores=1, comp="2Ц", n_ax=0, inlet="одно", turb="О", cool="K", m_tw="литьё",
+                mat_tw="SC", recup="нет", comb="кольцевая", rotor_join="сборный", m_cw="поковка", mat_cw="Ti64", bear="магнит")
+    cc = dict(FS.best_case(base, "mid"), pi=14.0, t41=1200.0)
+    nm = FS._nominal(cc, t6)
+    assert nm["ok"] and nm["att"]["ep"] <= FS.ETA_NOM["pt"] + 1e-12
+    assert nm["att"]["ep"] < FS.ETA_NOM["pt"] - 0.005                 # KV-6: ca/U СТ у предела 0,8 - потеря выходной скорости
+    one = dict(cc, rotors=1, arch="гибрид", nt=2)
+    nm1 = FS._nominal(one, t6)
+    U = min(FS.MK.u_limit_turb("О", "SC", 1200.0)[0], FS.u_cap_size(one, FS.d_cap_turb(one)) * (1 - FS.M_GEO))
+    assert nm1["att"]["lt"] >= nm1["r"]["t"]["w"] / (FS._nt_max(one) * U ** 2) - 1e-9
+    assert FS.closure(base)["margins"] == list(FS.CLOSURE_MG) == [0.0, 0.0, 0.0]
+    assert FS.best_case(dict(base, arch="традиционная"))["inlet"] == "двух"
+    cl2 = dict(base, arch="кластер", cores=2, bear="масло")
+    r2 = FS.closure(cl2)
+    assert not r2["ok"] and r2["why"] == "AN2"
+    assert FS.closure(dict(cl2, cores=4))["best"]["m"] == r2["best"]["m"]   # потери кластера в модели не зависят от числа ядер
+    assert FS.closure(dict(cl2, comp="ОЦ", n_ax=3))["ok"]
+
+
+def test_closure_cache_key_turbine_alloy():
+    """ключ кэша замыкания различает сплав колеса турбины: номинал v2.1 (_attain) зависит от предела окружной скорости
+    радиальной турбины (dT_cap сплава), а у K418/CM247LC (литьё) и IN718/Haynes282/CM247LC (печать) с охлаждением K предел T41
+    один (1050 °C). Без сплава в ключе итог замыкания зависел от порядка счёта (KV-3: RDC, печать, Р, K, 2 вала, 2Ц)"""
+    import itertools
+    t = FS.target("KV-3")
+    base = dict(arch="RDC", kv="KV-3", rotors=2, cores=1, comp="2Ц", n_ax=0, inlet="одно", turb="Р", nt=1, npt=2, cool="K", recup="нет",
+                comb="RDC", bear="масло", m_tw="печать", rotor_join="сборный", m_cw="поковка", mat_cw="Ti64")
+    cs = [dict(base, mat_tw=m) for m in ("IN718", "Haynes282", "CM247LC")]
+    assert len({FS._sig(c) for c in cs}) == 3
+    clean = {}
+    for c in cs:
+        FS._CLOSURE.clear()
+        clean[c["mat_tw"]] = FS.closure(c)["ok"]
+    for perm in itertools.permutations(cs):
+        FS._CLOSURE.clear()
+        assert {c["mat_tw"]: FS.closure(c)["ok"] for c in perm} == clean, [c["mat_tw"] for c in perm]
+    FS._CLOSURE.clear()

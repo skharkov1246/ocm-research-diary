@@ -126,7 +126,14 @@ CONT = {   # непрерывные оси, выборка v2: доля 0..1 С�
     "pgain": "прирост полного давления в камере: RDC 0-0,10, волновой ротор 0-0,15 (оценка; модели обещают +3-5 % КПД у RDC - по выдержке поиска)",
     "kD_case": "диаметр корпуса / наибольший D2: окно [1,7; min(2,1; по габариту пакета)] (gtu_family - 1,9)",
 }
-SAMPLER = ("v2 (14.11.2026): дискретные оси - по шаблону архетипа; комбинация, номинальный цикл которой не замыкает точку ни при каких "
+SAMPLER = ("v3 (решения владельца 15.11.2026): правки KV-6 A, B1, B2, C и ключ кэша замыкания по сплаву колеса турбины; B2 - сдвиг к "
+           "лучшим осям сначала при исходном входе, лучший вход шаблона - только если окна нет; ось «корпус» (картридж / оболочка) не "
+           "разыгрывается - оба значения считаются для каждой концепции (funnel_l0.evaluate_l0, case_variants). "
+           "v2.1 (kv6-диагностика 15.11.2026): номинальный цикл окон и замыкания - при достижимой нагрузке турбины газогенератора "
+           "(предел окружной скорости, наибольшее число ступеней шаблона) и КПД СТ с потерей выходной скорости при ca/U, которого "
+           "требуют AN² и втулка на частоте пакета; замыкание - без запасов окон (пределы правил check), окно T41/π - с запасами, а если "
+           "его нет - без запасов; сдвиг к лучшим осям включает вход; в шаблон кластера добавлен ОЦ. "
+           "v2 (14.11.2026): дискретные оси - по шаблону архетипа; комбинация, номинальный цикл которой не замыкает точку ни при каких "
            "T41 и π (repair), заменяется ближайшей замыкающей по осям REPAIR_AXES с записью причины; непрерывные оси - внутри окон "
            "допустимости (CONT), зависимые величины выводятся. Первая версия (v1: все оси независимо во всём диапазоне) дала 1,2 % "
            "допустимых в KV-3 и 0 % в KV-6 (прогоны AWS 20261114T231900Z-b7cc и 20261114T232200Z-7ce3)")
@@ -135,6 +142,11 @@ GOOD_BASIS = ("хорошие диапазоны для выборки (оцен
               "теряет 1,2-3,2 п.); U/C0 радиальной турбины 0,62-0,78 вокруг оптимума 0,70 (gtu_explore.turb_radial); ψ осевой 0,9-2,0 "
               "(eta_axial 0,885 ниже 1,2 и 0,857 при 2,0; предел 2,5); быстроходность радиальной турбины 0,35-0,85 вокруг 0,60; правила check шире")
 M_W, M_T, M_GEO = 0.015, 8.0, 0.03    # запасы окон: удельная работа +1,5 %, температуры -8 K, геометрия 3 % (оценка)
+MG = (M_W, M_T, M_GEO)                  # запасы окон выборки
+MG0 = (0.0, 0.0, 0.0)                   # без запасов: те же пределы, что у правил check (soft_G, soft_EGT, recup_T, T_al, AN²)
+CLOSURE_MG = MG0                        # kv6-диагностика 15.11.2026: замыкание (существование точки у комбинации) - необходимое
+#   условие правил check, без запасов окон; с запасами оно отбрасывало узкие, но настоящие окна (KV-6 у предела AN²). Окна выборки
+#   строятся с запасами MG, а если окна с запасами нет - без запасов (запись в repair)
 ETA_NOM = dict(comp=-0.012, ax=-0.016, rad=-0.042, pt=0.86)  # номинальные КПД окон: поправки к формулам ступеней (зазор, ns, политропный
 #   эквивалент радиальной, выходная скорость) и КПД СТ; подобраны по медианам «итог - номинал» короткой пробы KV-3 N = 300 (осевая -0,011,
 #   радиальная -0,027 к первым значениям -0,005 и -0,015) - оценка; остаток покрывают запасы M_W, M_T
@@ -172,9 +184,11 @@ ARCH = {
         comp=["1Ц", "2Ц"], turb=["Р"], cool=["C"], rotor_join=["сборный"], m_cw=["поковка", "литьё"], mat_cw=["Ti64"],
         m_tw=["керамика"], mat_tw=["Si3N4"], m_hot=["керамика"], mat_hot=["CMC"], m_comb=["керамика", "печать"])),
     "кластер": dict(name="кластер малых ядер + общая силовая турбина", allowed=dict(
-        cores=[2, 4], rotors=[2], comp=["1Ц", "2Ц"], inlet=["одно"], turb=["Р", "О"], cool=["U", "N", "K", "P"], recup=["нет"],
+        cores=[2, 4], rotors=[2], comp=["1Ц", "2Ц", "ОЦ"], inlet=["одно"], turb=["Р", "О"], cool=["U", "N", "K", "P"], recup=["нет"],
         rotor_join=["заодно", "сварка", "сборный"], m_tw=["литьё", "печать"]),
-        note="v2: добавлена осевая турбина ядра; с одной радиальной (U/C0, T41 <= 1100 °C) кластер не замыкает KV-6 - closure_table"),
+        note="v2: добавлена осевая турбина ядра; с одной радиальной (U/C0, T41 <= 1100 °C) кластер не замыкает KV-6 - closure_table. "
+             "kv6-диагностика 15.11.2026: добавлен компрессор ОЦ - ядро KV-6 (30 или 15 кг/с) не «малое», а общая СТ на 11 220 об/мин "
+             "ограничивает AN² так же, как у одиночного двухвального: нужен КПД ядра класса ОЦ (с 2Ц - ни одной замыкающей комбинации)"),
     "простой ротор": dict(name="предельно простой ротор: одно трансзвуковое колесо + одна турбина", allowed=dict(
         rotors=[1], comp=["1Ц"], nt=[1], cool=["U", "N", "K", "P"], rotor_join=["заодно", "сварка", "сборный"])),
     "безмасляный": dict(name="безмасляный ротор на магнитных подшипниках", allowed=dict(
@@ -317,7 +331,8 @@ def _sig(c):
     dt = d_cap_turb(c)
     return (c["kv"], c["rotors"], c["cores"], c["comp"], c["n_ax"], c["turb"], c["cool"], c["recup"], c["comb"],
             round(MK.t41_limit(c["turb"], c["cool"], c["mat_tw"], c["m_tw"])[0], 3), MK.rotor_cooled(c["cool"], c["m_tw"]), ni,
-            c["mat_cw"] == "Al", ul, round(d_cap_comp(c), 4), _nt_max(c), None if dt is None else round(dt, 4), c["mat_tw"] == "Si3N4")
+            c["mat_cw"] == "Al", ul, round(d_cap_comp(c), 4), _nt_max(c), None if dt is None else round(dt, 4), c["mat_tw"] == "Si3N4",
+            c["mat_tw"])   # предел окружной скорости турбины (dT_cap сплава) - в номинале _attain и в turbine_exists
 
 
 def _nt_max(c):
@@ -377,8 +392,40 @@ def _eta_turb_nom(c):
     return eg, ETA_NOM["pt"]
 
 
+NOM_ATTAIN = True   # kv6-диагностика 15.11.2026: номинальный цикл окон и замыкания - при достижимой нагрузке турбины и КПД СТ
+
+
+def _attain(c, tgt, r, G):
+    """достижимые величины для номинального цикла (те же пределы, что _turb_trial, derive и check): нагрузка турбины
+    газогенератора при пределе окружной скорости (сплав, T41; вал пакета - ещё размер колеса) и наибольшем числе ступеней шаблона -
+    осевая ψ >= w/(nt·U_max²), радиальная U/C0 <= U_max/C0; КПД силовой турбины - eta_axial при наибольшем числе ступеней СТ минус
+    потеря с выходной скоростью при ca/U, которого требуют AN² и втулка последней ступени на частоте пакета при 380 м/с (не выше
+    ETA_NOM["pt"]). Возврат: (lt, КПД СТ, запас турбины: PSI_MAX/ψ_min - 1 или (U/C0)_max/0,5 - 1)"""
+    E = _E()
+    t = r["t"]
+    nt = _nt_max(c)
+    U_max = min(MK.u_limit_turb(c["turb"], c["mat_tw"], c["t41"])[0], u_cap_size(c, d_cap_turb(c)) * (1 - M_GEO))
+    if c["turb"] == "О":
+        psi_lo = t["w"] / (nt * U_max ** 2)
+        lt, m_t = max(c["lt"], psi_lo), PSI_MAX / psi_lo - 1.0
+    else:
+        nu_hi = U_max / math.sqrt(2 * max(_stage_dhs(t, nt), 1.0))
+        lt, m_t = min(c["lt"], nu_hi), nu_hi / NU_RANGE[0] - 1.0
+    ep = ETA_NOM["pt"]
+    if r["pt"]:
+        p = r["pt"]
+        Qp = p["m"] * G / (p["p_out"] / (E.Rg(p["b"]) * p["T_out"]))
+        n, U = tgt["n_pkg"], U_PT_MAX
+        Dp = 60 * U / (math.pi * n)
+        phi = min(GOOD["phit"][1], max(CX_T, n ** 2 * Qp / (AN2_MAX * U), Qp / (math.pi * Dp ** 2 * U * HTR_H)))
+        npt = max(ARCH[c["arch"]]["allowed"].get("npt", _DEF["npt"]))
+        ep = min(ep, E.eta_axial(p["w"] / (npt * U ** 2)) - leaving_loss(phi, U, p["w"] / ETA_NOM["pt"]))
+    return lt, ep, m_t
+
+
 def _nominal(c, tgt):
-    """номинальный цикл концепции (КПД ступеней по формулам + ETA_NOM): ступени компрессора, ядро, расход"""
+    """номинальный цикл концепции (КПД ступеней по формулам + ETA_NOM): ступени компрессора, ядро, расход. NOM_ATTAIN: КПД
+    турбин - при достижимой нагрузке и ca/U СТ (_attain, до двух поправок), att - эти величины и запас турбины"""
     pis, typ, mats, mus = stages_pi(c), stage_types(c), _stage_mats(c), stage_mus(c)
     comp = _comp([(p, max(0.60, eta_comp(t, p, m, k, c["inlet"], mu) + ETA_NOM["comp"]))
                   for k, (p, t, m, mu) in enumerate(zip(pis, typ, mats, mus))])
@@ -386,26 +433,43 @@ def _nominal(c, tgt):
     r = _core(c, comp, eg, ep)
     if "fail" in r:
         return dict(ok=False, fail=r["fail"], comp=comp)
-    return dict(ok=True, comp=comp, r=r, G=tgt["P_shaft_kW"] * 1e3 / r["wnet"])
+    G = tgt["P_shaft_kW"] * 1e3 / r["wnet"]
+    att = None
+    if NOM_ATTAIN:
+        for k in range(3):
+            lt, ep2, m_t = _attain(c, tgt, r, G)
+            eg2 = _eta_turb_nom(dict(c, lt=lt))[0]
+            att = dict(lt=lt, ep=ep2, m_turb=m_t)
+            if k == 2 or (abs(eg2 - eg) < 2e-4 and abs(ep2 - ep) < 2e-4):
+                break
+            eg, ep = eg2, ep2
+            r = _core(c, comp, eg, ep)
+            if "fail" in r:
+                return dict(ok=False, fail=r["fail"], comp=comp)
+            G = tgt["P_shaft_kW"] * 1e3 / r["wnet"]
+    return dict(ok=True, comp=comp, r=r, G=G, att=att)
 
 
-def _margins(c, tgt, pi, t41):
+def _margins(c, tgt, pi, t41, mg=MG):
     """запасы номинального цикла при (π, T41): min из w/w_need - 1 - M_W, (t0+100-M_T-EGT)/100, рекуператор (700-M_T-T5)/100,
-    алюминиевое колесо (200-M_T-T2_1)/100; < 0 - вне окна"""
+    алюминиевое колесо (200-M_T-T2_1)/100, AN² (6,03e7·(1-M_GEO) - AN²)/6,03e7; < 0 - вне окна. mg = (M_W, M_T, M_GEO)"""
+    mw, mt, mgeo = mg
     cc = dict(c, pi=pi, t41=t41)
     nm = _nominal(cc, tgt)
     if not nm["ok"]:
         return -1.0, dict(fail=nm["fail"], w=0.0, EGT=None, T5=None)
     r = nm["r"]
     w, egt, t5 = r["wnet"], r["Tstack"] - 273.15, r["T5"] - 273.15
-    m = {"w": w / w_need(tgt) - 1.0 - M_W, "EGT": (egt_max(tgt) - M_T - egt) / 100.0}
+    m = {"w": w / w_need(tgt) - 1.0 - mw, "EGT": (egt_max(tgt) - mt - egt) / 100.0}
     if c["recup"] == "печатный":
-        m["T5"] = (T_REC_MAX - M_T - t5) / 100.0
+        m["T5"] = (T_REC_MAX - mt - t5) / 100.0
     if c["mat_cw"] == "Al":
-        m["T_al"] = (MK.MAT["Al"]["T_max"] - M_T - (nm["comp"][0]["T2"] - 273.15)) / 100.0
+        m["T_al"] = (MK.MAT["Al"]["T_max"] - mt - (nm["comp"][0]["T2"] - 273.15)) / 100.0
     an2 = an2_min(cc, tgt, r, nm["G"])
     if an2 is not None:
-        m["AN2"] = (AN2_MAX * (1 - M_GEO) - an2) / AN2_MAX
+        m["AN2"] = (AN2_MAX * (1 - mgeo) - an2) / AN2_MAX
+    if nm.get("att"):
+        m["turb"] = nm["att"]["m_turb"]
     worst = min(m, key=m.get)
     return m[worst], dict(w=w / 1e3, EGT=egt, T5=t5, worst=worst, G=nm["G"])
 
@@ -450,15 +514,15 @@ def _run_edges(xs, ms):
     return lo, hi
 
 
-def _pi_window(c, tgt, t41):
+def _pi_window(c, tgt, t41, mg=MG):
     """окно π при T41: сетка по ln π в [lo, min(hi, pi_max_U)]; возврат (окно (a, b) или None, лучшая точка)"""
     lo, hi = pi_range(c)
     hi = min(hi, c["pi_max_U"])
     if hi <= lo * 1.001:
-        m, d = _margins(c, tgt, lo, t41)
+        m, d = _margins(c, tgt, lo, t41, mg)
         return ((lo, lo) if m >= 0 else None), dict(d, pi=lo, m=m)
     xs = [math.log(lo) + (math.log(hi) - math.log(lo)) * k / (N_PI_GRID - 1) for k in range(N_PI_GRID)]
-    res = [_margins(c, tgt, math.exp(x), t41) for x in xs]
+    res = [_margins(c, tgt, math.exp(x), t41, mg) for x in xs]
     ms = [m for m, _ in res]
     kb = max(range(len(ms)), key=lambda k: ms[k])
     best = dict(res[kb][1], pi=math.exp(xs[kb]), m=ms[kb])
@@ -466,16 +530,16 @@ def _pi_window(c, tgt, t41):
     return ((math.exp(e[0]), math.exp(e[1])) if e else None), best
 
 
-def _t41_pi_window(c, tgt, tl):
+def _t41_pi_window(c, tgt, tl, mg=MG):
     """окно T41: строки T41 от Tlim вниз (N_T41_GRID), в строке - окно π; края уточняются делением пополам (3 шага).
     Возврат: (Ta, Tb) или None, лучшая точка (наибольший запас)"""
     if tl <= T41_MIN:
-        w, best = _pi_window(c, tgt, tl)
+        w, best = _pi_window(c, tgt, tl, mg)
         return ((tl, tl) if w else None), dict(best, t41=tl)
     Ts = [tl - (tl - T41_MIN) * k / (N_T41_GRID - 1) for k in range(N_T41_GRID)]
     ok, best, seen = [], None, False
     for T in Ts:
-        w, b = _pi_window(c, tgt, T)
+        w, b = _pi_window(c, tgt, T, mg)
         b = dict(b, t41=T)
         if best is None or b["m"] > best["m"]:
             best = b
@@ -492,7 +556,7 @@ def _t41_pi_window(c, tgt, tl):
     def bis(a, b):                                    # a - вне окна, b - в окне
         for _ in range(3):
             mid = 0.5 * (a + b)
-            if _pi_window(c, tgt, mid)[0] is not None:
+            if _pi_window(c, tgt, mid, mg)[0] is not None:
                 b = mid
             else:
                 a = mid
@@ -508,7 +572,8 @@ _CLOSURE = {}
 def best_case(c, mode="mid"):
     """непрерывные оси, лучшие для замыкания точки: μ - середина или верх диапазона, ψ 1,2 или U/C0 0,70, наибольший прирост
     давления, ε 0,92, вход односторонний, деление - лучшее по пределу окружной скорости"""
-    cc = dict(c, inlet="одно")
+    inl = ARCH[c["arch"]]["allowed"].get("inlet", _DEF["inlet"])
+    cc = dict(c, inlet="одно" if "одно" in inl else inl[0])
     st = stage_types(cc)
     k = 0.5 if mode == "mid" else 1.0
     cc["mu1"] = MU_RANGE[st[0]][0] + k * (MU_RANGE[st[0]][1] - MU_RANGE[st[0]][0])
@@ -520,12 +585,18 @@ def best_case(c, mode="mid"):
     return cc
 
 
-def closure(c):
+def closure(c, mg=None):
     """замыкает ли дискретная комбинация точку KV: есть ли T41 <= Tlim и π в диапазоне, при которых номинальный цикл с лучшими
-    в диапазонах непрерывными осями (μ - середина, ψ - 1,2 или U/C0 - 0,70, прирост давления - наибольший, ε = 0,92, деление -
-    лучшее, вход односторонний) даёт w_need·(1+M_W) в мягком допуске по выхлопу (и 700 °C перед рекуператором). Строки T41 -
-    от предела вниз; если в строке не хватает удельной работы, ниже её тоже не хватит (выход). Кэш по сигнатуре _sig"""
-    key = _sig(c)
+    в диапазонах непрерывными осями (μ - середина, ψ - 1,2 или U/C0 - 0,70, но не лучше достижимых при пределе окружной скорости,
+    КПД СТ - с потерей выходной скорости при ca/U, которого требует AN²; прирост давления - наибольший, ε = 0,92, деление -
+    лучшее, вход - односторонний, если он есть в шаблоне) даёт w_need·(1+M_W) в мягком допуске по выхлопу (и 700 °C перед
+    рекуператором), AN² последней ступени и нагрузку турбины в пределах. Запасы mg: по умолчанию CLOSURE_MG (без запасов - пределы
+    правил check). Строки T41 - от предела вниз; если в строке не хватает удельной работы, ниже её тоже не хватит (выход). Кэш по
+    сигнатуре _sig, запасам и входу шаблона"""
+    mg = CLOSURE_MG if mg is None else mg
+    mw, mt, _ = mg
+    inl = ARCH[c["arch"]]["allowed"].get("inlet", _DEF["inlet"])
+    key = _sig(c) + (tuple(mg), "одно" in inl, NOM_ATTAIN)
     if key in _CLOSURE:
         return _CLOSURE[key]
     tgt = target(c["kv"])
@@ -535,7 +606,7 @@ def closure(c):
     for mode in ("mid", "hi"):                  # μ середина диапазона, затем верх (выше π при том же пределе окружной скорости)
         cc = best_case(c, mode)
         for T in Ts:
-            w, b = _pi_window(cc, tgt, T)
+            w, b = _pi_window(cc, tgt, T, mg)
             b = dict(b, t41=T, mu=mode)
             if best is None or b["m"] > best["m"]:
                 best = b
@@ -555,16 +626,17 @@ def closure(c):
                 break
         if ok:
             break
-    res = dict(ok=ok, mu=mu_ok, t41_lim=round(tl, 1), w_need=round(w_need(tgt) * (1 + M_W) / 1e3, 1),
+    res = dict(ok=ok, mu=mu_ok, t41_lim=round(tl, 1), w_need=round(w_need(tgt) * (1 + mw) / 1e3, 1), margins=list(mg),
                best=({k: (round(v, 3) if isinstance(v, float) else v) for k, v in best.items()} if best else None))
     if not ok:
         b = best or {}
         why = {"w": "мала удельная работа", "EGT": "горячий выхлоп", "T5": "газ перед рекуператором выше 700 °C",
-               "T_al": "алюминиевое колесо выше 200 °C", "turb": b.get("turb", ""),
+               "T_al": "алюминиевое колесо выше 200 °C",
+               "turb": b.get("turb") or "турбина газогенератора: ψ > 2,5 или U/C0 < 0,5 при пределе окружной скорости и наибольшем числе ступеней",
                "AN2": "AN² последней ступени выше проверенного 6,03e7 (большой объёмный расход выхлопа)"}.get(b.get("worst"), b.get("fail", "цикл не решается"))
         res["why"] = b.get("worst") or "perf"
-        res["reason"] = why if b.get("worst") == "turb" else (f"{why}: лучшая точка T41 {b.get('t41', tl):.0f} °C, π {b.get('pi', 0):.2f} - w {b.get('w', 0):.0f} кДж/кг "
-                         f"(нужно {res['w_need']:.0f}), выхлоп {b.get('EGT') or 0:.0f} °C (предел {egt_max(tgt) - M_T:.0f})"
+        res["reason"] = why if (b.get("worst") == "turb" and b.get("turb")) else (f"{why}: лучшая точка T41 {b.get('t41', tl):.0f} °C, π {b.get('pi', 0):.2f} - w {b.get('w', 0):.0f} кДж/кг "
+                         f"(нужно {res['w_need']:.0f}), выхлоп {b.get('EGT') or 0:.0f} °C (предел {egt_max(tgt) - mt:.0f})"
                          + (f", газ перед рекуператором {b.get('T5') or 0:.0f} °C" if c["recup"] == "печатный" else ""))
     _CLOSURE[key] = res
     return res
@@ -613,8 +685,16 @@ def _repair(u, arch, c0):
     T = ARCH[arch]["allowed"]
     nkey = (arch, tuple(c0[a] for a in NOCLOSE_KEYS), _pick(u["m_cw"], T.get("m_cw", _DEF["m_cw"])),
             _pick(u["n_ax"], T.get("n_ax", _DEF["n_ax"])))
-    if nkey in _NOCLOSE:          # чистый кэш: исход «нет замыкающей» - функция этих величин (материалы перебираются все)
-        return c0, _NOCLOSE[nkey]
+    if nkey not in _NOCLOSE:      # чистый кэш: исход «нет замыкающей» - функция этих величин (материалы перебираются все)
+        c2 = _repair_search(u, arch, c0)
+        if c2 is not None:
+            return c2, _repair_note(c0, c2, cl)
+        _NOCLOSE[nkey] = f"нет замыкающей комбинации в шаблоне архетипа (до {REPAIR_MAX_AXES} осей) - {cl['reason']}"
+    return c0, _NOCLOSE[nkey]
+
+
+def _repair_search(u, arch, c0):
+    """ближайшая замыкающая комбинация в шаблоне архетипа или None; порядок - _repair_cands"""
     for ch in _repair_cands(arch, c0):
         c = _discrete(u, arch, ch); c["kv"] = c0["kv"]
         if any(c[a] != v for a, v in ch.items()):
@@ -626,10 +706,8 @@ def _repair(u, arch, c0):
                 if (c2["mat_tw"], c2["mat_cw"]) != (mt, mc) or (not ch and (mt, mc) == (c0["mat_tw"], c0["mat_cw"])):
                     continue
                 if closure(c2)["ok"]:
-                    return c2, _repair_note(c0, c2, cl)
-    note = f"нет замыкающей комбинации в шаблоне архетипа (до {REPAIR_MAX_AXES} осей) - {cl['reason']}"
-    _NOCLOSE[nkey] = note
-    return c0, note
+                    return c2
+    return None
 
 
 _NOCLOSE = {}
@@ -744,29 +822,46 @@ def design(c, u, tgt):
     c["w_need"] = w_need(tgt) / 1e3
     # ---------------------------------------------------------------- T41 и π
     tl = MK.t41_limit(c["turb"], c["cool"], c["mat_tw"], c["m_tw"])[0]
+    mgu = MG                          # запасы, при которых найдено окно (MG; MG0 - окна с запасами нет)
     tw, best = _t41_pi_window(c, tgt, tl)
-    if tw is None:                    # окно пусто при выпавших μ, ψ (U/C0), прирост давления, ε - сдвиг к лучшим (best_case) на α
-        cl = closure(c)
-        if cl["ok"]:
+    cl = closure(c)
+    for mg in (MG, MG0):
+        if tw is not None:
+            break
+        if mg is MG0:                 # окна с запасами нет ни при выпавших, ни при лучших осях - окно без запасов
+            tw0, b0 = _t41_pi_window(c, tgt, tl, MG0)
+            if tw0:
+                tw, best, mgu = tw0, b0, MG0
+                break
+        if cl["ok"]:                  # окно пусто при выпавших μ, ψ (U/C0), прирост давления, ε - сдвиг к лучшим (best_case) на α
             bc = best_case(dict(c, inlet=c["inlet"]), cl["mu"])
-            for alpha in (0.5, 1.0):
-                trial = dict(c)
-                for k in ("mu1", "mu2", "lt", "pgain", "eps_rec"):
-                    trial[k] = c[k] + alpha * (bc[k] - c[k])
-                trial["pi_max_U"], trial["split"] = pi_max_by_speed(trial, best_split=True)
-                tw2, b2 = _t41_pi_window(trial, tgt, tl)
-                if tw2:
-                    c.update({k: trial[k] for k in ("mu1", "mu2", "lt", "pgain", "eps_rec", "pi_max_U", "split")})
-                    c["repair"] = (c["repair"] + "; " if c["repair"] else "") + f"μ, нагрузка турбины, прирост давления, ε сдвинуты к лучшим на {alpha:g}"
-                    tw, best = tw2, b2
+            # B2 (v3, доработка проверки): сначала сдвиг при исходном входе, и только если окна нет - при лучшем входе шаблона
+            # (замыкание считалось при лучшем входе best_case); вход меняется лишь тогда, когда без этого окна нет
+            for inl in [c["inlet"]] + ([bc["inlet"]] if bc["inlet"] != c["inlet"] else []):
+                for alpha in (0.5, 1.0):
+                    trial = dict(c, inlet=inl)
+                    for k in ("mu1", "mu2", "lt", "pgain", "eps_rec"):
+                        trial[k] = c[k] + alpha * (bc[k] - c[k])
+                    trial["pi_max_U"], trial["split"] = pi_max_by_speed(trial, best_split=True)
+                    tw2, b2 = _t41_pi_window(trial, tgt, tl, mg)
+                    if tw2:
+                        if trial["inlet"] != c["inlet"]:
+                            c["repair"] = (c["repair"] + "; " if c["repair"] else "") + f"inlet: {c['inlet']} -> {trial['inlet']} (окно T41/π)"
+                        c.update({k: trial[k] for k in ("mu1", "mu2", "lt", "pgain", "eps_rec", "pi_max_U", "split", "inlet")})
+                        c["repair"] = (c["repair"] + "; " if c["repair"] else "") + f"μ, нагрузка турбины, прирост давления, ε сдвинуты к лучшим на {alpha:g}"
+                        tw, best, mgu = tw2, b2, mg
+                        break
+                if tw is not None:
                     break
+    if tw and mgu is MG0:
+        c["repair"] = (c["repair"] + "; " if c["repair"] else "") + "окно T41/π только без запасов M_W, M_T, M_GEO"
     pw = None
     if tw:
         c["t41"] = _place(u["t41"], tw)
-        pw, _ = _pi_window(c, tgt, c["t41"])
+        pw, _ = _pi_window(c, tgt, c["t41"], mgu)
         if pw is None:                                    # край окна T41 уточнён с погрешностью - ближе к середине
             c["t41"] = 0.5 * (tw[0] + tw[1])
-            pw, _ = _pi_window(c, tgt, c["t41"])
+            pw, _ = _pi_window(c, tgt, c["t41"], mgu)
     if pw is None:
         fl.append("T41/π: окно пусто" + (f" ({best.get('worst', best.get('fail', ''))})" if best else ""))
         c["t41"] = best["t41"] if best else max(tl, T41_MIN)
@@ -896,14 +991,14 @@ def design(c, u, tgt):
         c["kUpt"], c["phipt"] = 0.0, 0.0
     # ---------------------------------------------------------------- сверка: номинальный цикл при окончательных осях - в окне
     if "T41/π" not in "|".join(fl):
-        m_fin, _ = _margins(c, tgt, c["pi"], c["t41"])
+        m_fin, _ = _margins(c, tgt, c["pi"], c["t41"], mgu)
         if m_fin < 0:                       # μ, деление, вход, нагрузка турбины сдвинули КПД: π (затем T41) - назад в окно
             moved = False
             for T in (c["t41"], 0.5 * (c["t41"] + c["t41_hi"]), c["t41_hi"]):
-                pw2, _ = _pi_window(dict(c, t41=T), tgt, T)
+                pw2, _ = _pi_window(dict(c, t41=T), tgt, T, mgu)
                 if pw2:
                     c["t41"], c["pi"] = T, min(pw2[1], max(pw2[0], c["pi"]))
-                    if _margins(c, tgt, c["pi"], c["t41"])[0] < 0:
+                    if _margins(c, tgt, c["pi"], c["t41"], mgu)[0] < 0:
                         c["pi"] = math.sqrt(pw2[0] * pw2[1])
                     c["pi_lo"], c["pi_hi"] = pw2
                     c["repair"] = (c["repair"] + "; " if c["repair"] else "") + "π, T41 сдвинуты в окно после выбора μ, деления и турбины"
