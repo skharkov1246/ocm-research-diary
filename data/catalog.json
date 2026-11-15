@@ -4,10 +4,10 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 506,
-    "total_bytes": 21161072,
+    "datasets": 508,
+    "total_bytes": 21244046,
     "results_files": 207,
-    "results_with_script": 66,
+    "results_with_script": 67,
     "results_referenced_in_site": 22,
     "results_with_provenance_fields": 58,
     "by_track": {
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 186,
+      "не определён": 188,
       "прочее": 25
     }
   },
@@ -10720,6 +10720,64 @@
       "last_commit": "4ba862b"
     },
     {
+      "path": "routes/gtu/process/mass/mass_calibration.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 57128,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "status",
+        "inputs",
+        "assumptions",
+        "criterion",
+        "database",
+        "calibration",
+        "checks",
+        "examples",
+        "how_to_use",
+        "not_done",
+        "runtime_s"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "9b2a0e8"
+    },
+    {
+      "path": "routes/gtu/process/mass/mass_db.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 25846,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "date",
+        "status",
+        "status_legend",
+        "hosts_blocked_in_session",
+        "engines",
+        "reference_only",
+        "packages",
+        "not_used"
+      ],
+      "provenance_fields": [
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "0eff180"
+    },
+    {
       "path": "routes/gtu/shaft/data/solar_available_power_taurus60.json",
       "track": "не определён",
       "kind": "данные",
@@ -10804,6 +10862,7 @@
       "kind": "результат расчёта",
       "bytes": 105159,
       "referenced_in_site": false,
+      "produced_by": "routes/shaft.py",
       "shape": "объект",
       "top_keys": [
         "method",
