@@ -251,7 +251,7 @@ def test_selection_on_real_sample_keeps_niches(parts, tmp):
 
 
 # =========================================================================== файлы задач AWS
-@pytest.mark.parametrize("fname", ["jobs_l0_debug.json", "jobs_l0.json"])
+@pytest.mark.parametrize("fname", ["jobs_l0_debug.json", "jobs_l0.json", "jobs_l0_v3.json", "jobs_l0_v3_kv1_n400000.json"])
 def test_jobs_files_cover_every_shard_once(fname):
     path = os.path.join(HERE, fname)
     if not os.path.exists(path):
@@ -277,6 +277,10 @@ def test_jobs_files_cover_every_shard_once(fname):
         S = max(k for a, b, k in seen if (a, b) == (kv, n)) + 1
         assert sorted(k for a, b, k in seen if (a, b) == (kv, n)) == list(range(S))
         assert any(f"--kv {kv} --n {n} --shards {S}" in c for c in doc["merge"]["commands"])
+    if "v3" in fname:                                                 # v3: код выхода - наихудший из шагов; plan - код 0; правило сходимости KV-1
+        assert all(j.command.splitlines()[-1] == "exit $rc" for j in jobs)
+        assert doc["plan_check"]["exit_code"] == 0 and "estimate" in doc and doc["merge"]["commands"]
+        assert doc["converge"] and "3 %" in doc["converge"]["rule"]
 
 
 # =========================================================================== исправления скептиков и выборка v2

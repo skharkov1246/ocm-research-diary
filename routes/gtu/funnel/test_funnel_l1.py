@@ -416,6 +416,13 @@ def test_jobs_files():
             assert "--workers \"$NPROC\"" in j["command"] and "$GTU_OUT" in j["command"]
     r = json.load(open(os.path.join(HERE, "READY_L1.json"), encoding="utf-8"))
     assert r["estimate"]["budget_ok"] and r["estimate"]["total_upper_bound"] < 1500
+    p = os.path.join(HERE, "jobs_l1_v3.json")                          # v3: по отбору уровня 0 v3, блоки merge (с пересчётом v2) и estimate
+    if os.path.exists(p):
+        d = json.load(open(p, encoding="utf-8"))
+        assert d["plan_check"]["exit_code"] == 0 and 20 <= d["estimate"]["shards"] <= 50 and "l0_aws_v3" in d["input"]["file"]
+        assert "--rescore" in d["merge"]["rescore_v2_l1_full"]["command"] and d["merge"]["final"]
+        for j in d["jobs"]:
+            assert "--workers \"$NPROC\"" in j["command"] and "$GTU_OUT" in j["command"]
 
 
 # =========================================================================== v3: пересчёт отбора без нового счёта

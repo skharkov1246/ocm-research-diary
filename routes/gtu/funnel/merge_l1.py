@@ -729,7 +729,8 @@ def compare_starts(recs, other_dirs):
 
 
 # =========================================================================== короткая локальная проба
-PROBE = dict(input=os.path.join(HERE, "l0_aws_debug", "funnel_l0_select_KV-3_n2000.json"), top=12, shards=4, starts=2, maxfev=150, workers=4)
+PROBE = dict(input=os.path.join(HERE, "l0_v3_probe", "funnel_l0_select_KV-3_n300.json"), top=12, shards=4, starts=2, maxfev=150, workers=4)
+# v3: вход пробы - отбор короткой пробы уровня 0 тем же кодом (отбор AWS v2 код уровня 0 v3 не принимает: другой code_sha)
 
 
 def probe(out_dir=HERE, **kw):
@@ -742,7 +743,7 @@ def probe(out_dir=HERE, **kw):
         paths, meta = L1.run_parts(P["input"], P["top"], list(range(P["shards"])), P["shards"], tmp, P["starts"], P["maxfev"], P["workers"], gz=True)
         t_par = time.time() - t0
         found = find_parts([tmp], meta["kv"], meta["M"], P["shards"])
-        extra = dict(status=(f"короткая локальная проба (4 общих ядра): {meta['kv']}, первые {meta['M']} вариантов отбора уровня 0 AWS N = 2000 "
+        extra = dict(status=(f"короткая локальная проба (4 общих ядра): {meta['kv']}, первые {meta['M']} вариантов отбора {os.path.basename(P['input'])} "
                              f"в порядке архетипов и ниш по кругу, {P['starts']} старта (дифференциальная эволюция, {L1.DE_GENS} поколений + "
                              f"доводка COBYLA {P['maxfev']} вычислений); отладочный (около 150) и полный "
                              "(3000-5000) прогоны - задачи AWS jobs_l1_debug.json и jobs_l1.json"),

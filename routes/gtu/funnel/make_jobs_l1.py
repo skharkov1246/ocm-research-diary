@@ -1,6 +1,8 @@
 """Файлы задач AWS уровня 1 воронки (формат раннера ../platform/aws/runner.py v2) со сметой и проверкой командой plan.
 
   python make_jobs_l1.py        # jobs_l1_debug.json, jobs_l1.json, jobs_l1_fea.json, READY_L1.json
+  python make_jobs_l1.py --v3   # v3 (решения владельца 15.11.2026): jobs_l1_v3.json и jobs_l1_v3_fea.json по отбору уровня 0 v3
+                                # (l0_aws_v3/funnel_l0_select_KV-3_n200000.json); v2-файлы не трогает
 
 Вход уровня 1 - отбор слитого уровня 0 (merge_l0): отладка - l0_aws_debug/funnel_l0_select_KV-3_n2000.json (выборка v2, уже в
 ветке, 307 вариантов), полный - l0_aws_full/funnel_l0_select_KV-3_n200000.json (выборка v2, прогон 20261115T010625Z-8893, в
@@ -39,6 +41,14 @@ PROFILES = {
                      "3983 записи); 4 старта (DE 25 поколений + доводка COBYLA 200); проверка сходимости - те же первые 640 вариантов с 8 "
                      "стартами (задача l1-starts2x)"),
 }
+
+PROFILES["v3"] = dict(file="jobs_l1_v3.json", input=f"{REL}/l0_aws_v3/funnel_l0_select_KV-3_n200000.json", M=4000, shards=40, machines=5,
+                      starts=4, maxfev=200, conv=dict(M=640, starts=8, shards=10), fea_dir="l1_v3_fea", v3=True,
+                      why="уровень 1 v3: отбор слитого уровня 0 v3 KV-3 N = 200 000 (jobs_l0_v3.json, merge_l0 --target 4000; ниша - с осью "
+                          "«корпус», вариант корпуса - из записи отбора); итоговая оценка × (0,5 + 0,5·TRL/9) и в цели оптимизации; 4 старта "
+                          "(DE 25 поколений + доводка COBYLA 200); проверка сходимости - первые 640 вариантов с 8 стартами (l1-starts2x)")
+RESCORE_V2 = (f"python3 {REL}/merge_l1.py --rescore --kv KV-3 --m 3983 --shards 40 --in routes/gtu/platform/aws/runs/<run_id_l1_full_v2> "
+              f"--out-dir {REL}/aws/l1_full_rescore_v3 --suffix _KV-3_m3983_rescore_v3 --fea-results {REL}/aws/l1_fea/funnel_l1_fea_results.json")
 
 
 def measured(results=os.path.join(HERE, "funnel_l1_results.json")):
@@ -125,10 +135,11 @@ def build(profile, branch="claude/lucid-allen-yvps5d"):
         P["conv_max_min"] = mm
     base = (f"python3 {REL}/merge_l1.py --kv KV-3 --m {P['M']} --shards {S} --in routes/gtu/platform/aws/runs/<run_id> "
             f"--out-dir {REL}/aws/l1_{profile} --suffix _KV-3_m{P['M']} --fea-top 0" + (" --compare-in routes/gtu/platform/aws/runs/<run_id>" if conv else ""))
+    fea_dir = P.get("fea_dir", "l1_fea")
     # отладка - без масштабирования на KV-1/KV-6: оно повторяет оптимизацию отобранных (до 50 × 2 точки × starts) в процессе слияния,
     # то есть на машине сессии, а не на AWS (решение владельца: локально - не больше 12 вариантов и 2 стартов)
     merge = dict(first=base + (f" --no-scale --fea-cases-out {REL}/aws/l1_{profile}/funnel_l1_fea_cases.json" if conv else " --no-scale"),
-                 final=(base + f" --fea-results {REL}/aws/l1_fea/funnel_l1_fea_results.json") if conv else None)
+                 final=(base + f" --fea-results {REL}/aws/{fea_dir}/funnel_l1_fea_results.json") if conv else None)
     return P, jobs, merge, tv, m
 
 
@@ -152,15 +163,15 @@ def estimate(P, jobs, tv, m):
                 upper_bound_rule="раннер: (MaxPrice + диск + IPv4) × (max_min + 10) / 60 на машину", price=PRICE)
 
 
-def fea_jobs():
+def fea_jobs(l1_dir="l1_full", name="l1-fea300"):
     return dict(_comment=("CalculiX (disk.py) для лучших 300 вариантов уровня 1: вход - funnel_l1_fea_cases.json, который пишет merge_l1.py "
                           "--fea-cases-out (положить в ветку до запуска). Контейнер ubuntu:24.04 с calculix-ccx и numpy; ccx - в один поток, "
                           "случаи параллельно ($NPROC)."),
                 defaults=dict(instance_type="c7a.16xlarge", fallback_types=["c7i.16xlarge"], image="al2023", disk_gb=30),
-                jobs=[dict(name="l1-fea300", container="ubuntu:24.04",
+                jobs=[dict(name=name, container="ubuntu:24.04",
                            container_setup=["apt-get update -q",
                                             "apt-get install -y -q --no-install-recommends calculix-ccx python3 python3-numpy"],
-                           command=f"python3 {REL}/strength_l1.py --run-cases {REL}/aws/l1_full/funnel_l1_fea_cases.json --workers \"$NPROC\" --out \"$GTU_OUT\"",
+                           command=f"python3 {REL}/strength_l1.py --run-cases {REL}/aws/{l1_dir}/funnel_l1_fea_cases.json --workers \"$NPROC\" --out \"$GTU_OUT\"",
                            max_min=40)],
                 estimate=dict(cases="до 300 вариантов × 1-3 колеса", s_per_case="5-20 с (disk.py, сетка 40×6, один поток - оценка по примерам)",
                               usd_expected=round(0.5 * PRICE["alt"], 2),
@@ -168,10 +179,63 @@ def fea_jobs():
                               usd_upper_bound=round((PRICE["upper"] + J0.IPV4_USD_H) * 50 / 60, 2)))
 
 
+def write_v3(plan_out):
+    """jobs_l1_v3.json (по отбору уровня 0 v3) и jobs_l1_v3_fea.json; блоки merge (с пересчётом прогона v2 без нового счёта) и estimate"""
+    P, jobs, merge, tv, m = build("v3")
+    est = estimate(P, jobs, tv, m)
+    pending = P.get("input_entries") is None
+    doc = dict(_comment=("Уровень 1 воронки, v3 (README узла funnel, раздел «v3: решения владельца 15.11.2026»). Раннер берёт только defaults "
+                         "и jobs; блоки input, merge, estimate, plan_check - для сессии с ключами. Код - ветка claude/lucid-allen-yvps5d. "
+                         "Сгенерировано make_jobs_l1.py --v3; правки - в нём."),
+               defaults=dict(instance_type="c7a.16xlarge", fallback_types=["c7i.16xlarge"], image="al2023", disk_gb=J0.EBS_GB,
+                             python="3.12", pip=PIP),
+               jobs=jobs,
+               input=dict(file=P["input"], entries=P.get("input_entries"), M=P["M"], M_requested=P.get("M_requested"), pending=pending,
+                          note=(("вход ещё не посчитан: отбор уровня 0 v3 даст jobs_l0_v3.json (merge_l0 --target 4000). После слияния - в "
+                                 "ветку и ПЕРЕГЕНЕРИРОВАТЬ этот файл (python3 routes/gtu/funnel/make_jobs_l1.py --v3): M частей = min(4000, "
+                                 "записей отбора) - иначе имена частей и команда слияния разойдутся; funnel_l1.py откажет, если отпечаток "
+                                 "выборки или кода уровня 0 не тот") if pending else
+                                "в ветке; отпечатки выборки и кода уровня 0 совпадают с текущими (funnel_l1.load_select)")),
+               merge=dict(command=merge["first"], final=merge["final"],
+                          where="сессия с ключами после run (раннер скачивает части в routes/gtu/platform/aws/runs/<run_id>/)",
+                          then=("первое слияние - без масштабирования, пишет funnel_l1_fea_cases.json -> в ветку -> jobs_l1_v3_fea.json "
+                                "(CalculiX лучших 300) -> итог в aws/l1_v3_fea/ -> окончательное слияние (final): отсев по CalculiX до отбора 50 "
+                                "и масштабирование 50 на KV-1/KV-6"),
+                          rescore_v2_l1_full=dict(command=RESCORE_V2,
+                                                  what=("пересчёт отбора 50 по уже посчитанным записям уровня 1 v2 (прогон на коде f5a4bfe, "
+                                                        "aws/l1_full/) с множителем TRL - без нового счёта и без AWS: оценка - funnel_l0.final_score "
+                                                        "по частным баллам записей; ось «корпус» в записях v2 нет (картридж/разъём по оси "
+                                                        "cartridge выборки v2); --m и --shards - как у слияния прогона v2")),
+                          profile_why=P["why"]),
+               estimate=est)
+    path = os.path.join(HERE, P["file"])
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(doc, fh, ensure_ascii=False, indent=1)
+    doc["plan_check"] = J0.plan_check(path, plan_out)
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(doc, fh, ensure_ascii=False, indent=1)
+    print(f"{P['file']}: {len(jobs)} машин, {P['M']} вариантов{' (вход ждёт уровня 0 v3)' if pending else ''}, {P['starts']} стартов × "
+          f"{P['maxfev']}, ожидаемо {est['usd']['total_expected']} долл., верхняя граница {est['upper_bound_usd']} долл.; plan: код "
+          f"{doc['plan_check']['exit_code']}")
+    fj = fea_jobs("l1_v3", "l1-v3-fea300")
+    pf = os.path.join(HERE, "jobs_l1_v3_fea.json")
+    with open(pf, "w", encoding="utf-8") as fh:
+        json.dump(fj, fh, ensure_ascii=False, indent=1)
+    fj["plan_check"] = J0.plan_check(pf, plan_out)
+    with open(pf, "w", encoding="utf-8") as fh:
+        json.dump(fj, fh, ensure_ascii=False, indent=1)
+    print(f"jobs_l1_v3_fea.json: plan код {fj['plan_check']['exit_code']}")
+    return doc, fj
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--plan-out", default=os.environ.get("TMPDIR", "/tmp"))
+    ap.add_argument("--v3", action="store_true", help="только jobs_l1_v3.json и jobs_l1_v3_fea.json")
     a = ap.parse_args(argv)
+    if a.v3:
+        doc, fj = write_v3(a.plan_out)
+        return 0 if doc["plan_check"]["exit_code"] == 0 and fj["plan_check"]["exit_code"] == 0 else 1
     docs = {}
     for prof in ("debug", "full"):
         P, jobs, merge, tv, m = build(prof)

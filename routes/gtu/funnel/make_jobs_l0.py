@@ -2,6 +2,9 @@
 
   python make_jobs_l0.py                      # jobs_l0_debug.json (KV-3, N=2000, 10 частей) и jobs_l0.json (полный)
   python make_jobs_l0.py --shards 40 --machines 4
+  python make_jobs_l0.py --v3                 # v3 (решения владельца 15.11.2026): jobs_l0_v3.json (KV-3 200 000, KV-1 200 000,
+                                              # KV-6 100 000) и следующий шаг KV-1 jobs_l0_v3_kv1_n400000.json; v2-файлы не трогает
+  python make_jobs_l0.py --v3-kv1 800000      # следующий шаг сходимости ниш KV-1 (удвоение N), если прирост ниш >= 3 %
 
 Части (--shards, вход прогона; 10 у отладки, 20-50 у полного) - единственное деление выборки, по индексу варианта
 (i % S == k). Части группируются в задачи-машины (--machines): машина считает свои части одним пулом процессов на все
@@ -31,6 +34,29 @@ PROFILES = {
                  why="полный уровень 0 (приоритет владельца 14.11.2026: KV-3 200 000, KV-1 и KV-6 по 50 000; отбор 3000-5000); "
                      "6 машин - одна волна под квоту 384 vCPU"),
 }
+# v3 (решения владельца 15.11.2026: множитель TRL, ось «корпус», правки KV-6 A, B1, B2, C): объём - KV-3 200 000, KV-1 - до
+# сходимости ниш (удвоение N, пока прирост допустимых ниш при удвоении >= 3 %; старт 200 000), KV-6 100 000
+V3_DIR = "l0_aws_v3"
+V3_PROBE = os.path.join(HERE, "l0_v3_probe", "funnel_v3_probe_compare.json")
+V3_CONV = 0.03                   # сходимость ниш KV-1: прирост допустимых ниш при удвоении N меньше 3 % (задача владельца)
+PROFILES.update({
+    "v3": dict(file="jobs_l0_v3.json", runs=[("KV-3", 200000), ("KV-1", 200000), ("KV-6", 100000)], shards=30, machines=6, max_min=None,
+               merge=dict(top=1000, target=4000, k_near=1, near_max=0.25), v3=True,
+               why="уровень 0 v3 (решения владельца 15.11.2026): итоговая оценка × (0,5 + 0,5·TRL/9); ось «корпус» - картридж и оболочка "
+                   "для каждой концепции, где оболочка входит в камеру LPBF; KV-6 - правки A, B1, B2 (сначала при исходном входе), C и ключ "
+                   "кэша; KV-3 200 000, KV-1 200 000 (первый шаг сходимости ниш), KV-6 100 000; 6 машин - одна волна под квоту 384 vCPU"),
+})
+
+
+def v3_kv1_profile(n):
+    """следующий шаг сходимости ниш KV-1 (v3): та же выборка объёма n (концепции 0..n/2-1 - те же, что в предыдущем шаге:
+    префикс последовательности Соболя), отдельный файл задач"""
+    return dict(file=f"jobs_l0_v3_kv1_n{n}.json", runs=[("KV-1", n)], shards=30, machines=6, max_min=None,
+                merge=dict(top=1000, target=4000, k_near=1, near_max=0.25), v3=True,
+                why=f"сходимость ниш KV-1 (v3): N = {n} - запускать, только если при N = {n // 2} прирост допустимых ниш при удвоении "
+                    f"(convergence: new_feasible_niches_vs_half / feasible_niches при N/2) не меньше {V3_CONV:.0%}")
+
+
 PRICE = dict(expected=0.706, alt=0.748, upper=1.4206,
              basis="ожидаемая: спот c7a.16xlarge us-east-1c 0,706 долл./ч, us-east-1b 0,748 (замер сессии с ключами 22:08 14.11.2026, "
                    "задача владельца); верхняя граница: MaxPrice раннера 1,4206 долл./ч (максимум по зонам × 1,2, ledger.jsonl "
@@ -51,31 +77,48 @@ def measured(results=os.path.join(HERE, "funnel_l0_results.json")):
     return t, b, d["probe"]["params"]
 
 
+def measured_v3(path=V3_PROBE):
+    """время на концепцию v3 (с, ядро) и байт на концепцию: наибольшее по пробам KV-3 N = 300, KV-1 N = 300, KV-6 N = 1000
+    (пул из 4 процессов на общем контейнере, холодный кэш замыканий - время завышено против AWS)"""
+    d = json.load(open(path, encoding="utf-8"))
+    pts = {kv: v for kv, v in d.items() if isinstance(v, dict) and "s_per_concept_core" in v}
+    t = max(v["s_per_concept_core"]["v3"] for v in pts.values())
+    b = max(v.get("part_bytes_per_concept", {}).get("v3") or 0 for v in pts.values()) or None
+    return t, b, {kv: v["s_per_concept_core"] for kv, v in pts.items()}
+
+
 def build(profile, shards=None, machines=None, branch="claude/lucid-allen-yvps5d"):
-    P = dict(PROFILES[profile])
+    P = dict(PROFILES[profile]) if isinstance(profile, str) else dict(profile)
     S = shards or P["shards"]
     M = machines or P["machines"]
-    lo, hi = (10, 50) if profile == "debug" else (20, 50)
+    name = profile if isinstance(profile, str) else P["file"].replace("jobs_l0_", "").replace(".json", "").replace("_", "-")
+    lo, hi = (10, 50) if name == "debug" else (20, 50)
     if not lo <= S <= hi:
-        raise ValueError(f"{profile}: частей {S}, нужно {lo}-{hi}")
+        raise ValueError(f"{name}: частей {S}, нужно {lo}-{hi}")
     if not 1 <= M <= min(6, S):
         raise ValueError(f"машин {M}: от 1 до min(6, частей)")
     jobs = []
     if P["max_min"] is None:                     # сторож: подготовка + счёт с запасом ×2 + 10 мин, не меньше 30
-        t, _, _ = measured()
+        t, _, _ = measured_v3() if P.get("v3") else measured()
         comp = sum(n for _, n in P["runs"]) * t * SAFETY / M / VCPU / 60
         P["max_min"] = max(30, int(math.ceil(SETUP_MIN + 2 * comp + 10)))
+    # v3: код выхода задачи - наихудший из шагов (раннер выполняет команду без -e; иначе упавший расчёт дал бы exit 0)
     for j in range(M):
         mine = [k for k in range(S) if k % M == j]
         lines = [f"python {REL}/funnel_l0.py --kv {kv} --n {n} --shards {S} --shard {','.join(map(str, mine))} "
-                 f"--workers \"$NPROC\" --gzip --out \"$GTU_OUT\"" for kv, n in P["runs"]]
+                 f"--workers \"$NPROC\" --gzip --out \"$GTU_OUT\"" + (" || rc=$?" if P.get("v3") else "") for kv, n in P["runs"]]
+        if P.get("v3"):
+            lines.insert(0, "rc=0")
         lines.append("ls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"")
-        jobs.append(dict(name=f"l0-{profile}-m{j}", command="\n".join(lines), max_min=P["max_min"]))
+        if P.get("v3"):
+            lines.append("exit $rc")
+        jobs.append(dict(name=f"l0-{name}-m{j}", command="\n".join(lines), max_min=P["max_min"]))
     merge = []
+    out_dir = V3_DIR if P.get("v3") else f"l0_aws_{name}"
     for kv, n in P["runs"]:
         m = P["merge"]
         merge.append(f"python3 {REL}/merge_l0.py --kv {kv} --n {n} --shards {S} --in routes/gtu/platform/aws/runs/<run_id> "
-                     f"--out-dir {REL}/l0_aws_{profile} --suffix _{kv}_n{n} --top {m['top']} --target {m['target']} "
+                     f"--out-dir {REL}/{out_dir} --suffix _{kv}_n{n} --top {m['top']} --target {m['target']} "
                      f"--k-near {m['k_near']} --near-max {m['near_max']}" +
                      (" --csv-gz --csv-dir routes/gtu/platform/aws/runs/<run_id>/merged" if n > 20000 else ""))
     return P, S, M, jobs, merge
@@ -121,12 +164,65 @@ def plan_check(path, outdir):
                             "(без него раннер клонирует main); при правке раннера повторить plan")
 
 
+def write_v3(plan_out, kv1_next=400000, only_kv1=None):
+    """файлы задач v3: jobs_l0_v3.json (основная волна) и шаг сходимости ниш KV-1 jobs_l0_v3_kv1_n<N>.json; блоки merge, estimate,
+    converge (правило остановки KV-1), plan_check"""
+    t, b, per = measured_v3()
+    out = []
+    profs = ([] if only_kv1 else [PROFILES["v3"]]) + [v3_kv1_profile(only_kv1 or kv1_next)]
+    for P0 in profs:
+        P, S, M, jobs, merge = build(P0)
+        est = estimate(P, S, M, jobs, t, b)
+        est["time_basis"] = ("наибольшее s_per_concept_core проб v3 (l0_v3_probe/funnel_v3_probe_compare.json: " +
+                             ", ".join(f"{kv} {v['v3']:.3f} (v2 {v['v2']:.3f})" for kv, v in per.items()) +
+                             f") × запас {SAFETY:g}; пробы - 4 общих ядра и холодный кэш замыканий, на AWS быстрее (v2: смета 1,16 долл., факт 0,24)")
+        n1 = next((n for kv, n in P["runs"] if kv == "KV-1"), None)
+        conv = dict(rule=(f"KV-1: после слияния при N = {n1} взять в funnel_l0_results_KV-1_n{n1}.json convergence.rows последнюю строку: "
+                          f"прирост = new_feasible_niches_vs_half / feasible_niches предыдущей строки (N/2); если прирост < {V3_CONV:.0%} - "
+                          "сошлось, KV-1 готов; иначе запустить следующий шаг (удвоение N) и слить с тем же правилом"),
+                    next_file=f"{REL}/jobs_l0_v3_kv1_n{2 * n1}.json",
+                    next_make=f"python3 {REL}/make_jobs_l0.py --v3-kv1 {2 * n1}",
+                    note="ниши - с осью «корпус» (feasible_niches) и без неё (feasible_niches_v2) - обе в convergence.rows; правило - по первым; "
+                         "выборка следующего шага включает предыдущую (префикс Соболя), считается целиком заново: шаг стоит долей доллара")
+        doc = dict(_comment=("Уровень 0 воронки, выборка v3 (README узла funnel, раздел «v3: решения владельца 15.11.2026»). Раннер берёт "
+                             "только defaults и jobs; блоки merge, converge, estimate, plan_check - для сессии с ключами. Код - ветка "
+                             f"{BRANCH}. Сгенерировано make_jobs_l0.py --v3; правки - в нём."),
+                   defaults=dict(instance_type="c7a.16xlarge", fallback_types=["c7i.16xlarge"], image="al2023", disk_gb=EBS_GB,
+                                 python="3.12", pip=PIP),
+                   jobs=jobs,
+                   merge=dict(csv_rule="CSV крупнее 5 МБ - в --csv-dir внутри runs/ (в .gitignore) и в S3; в ветку - только "
+                                       f"{REL}/{V3_DIR}/funnel_l0_results_*.json и funnel_l0_select_*.json",
+                              where="сессия с ключами после run: результаты в routes/gtu/platform/aws/runs/<run_id>/<задача>/; Python с теми же "
+                                    "версиями пакетов (pip install " + " ".join(PIP) + ")",
+                              commands=merge, profile_why=P["why"],
+                              checks="слияние откажет (код 2), если потеряна или задвоена часть, индекс или запись оси «корпус», или у частей "
+                                     "разные отпечатки выборки и кода",
+                              after="отбор KV-3 v3 (funnel_l0_select_KV-3_n200000.json) -> в ветку -> python3 routes/gtu/funnel/make_jobs_l1.py --v3 "
+                                    "(M = число записей отбора) -> jobs_l1_v3.json"),
+                   converge=conv if n1 else None, estimate=est)
+        path = os.path.join(HERE, P["file"])
+        with open(path, "w", encoding="utf-8") as fh:
+            json.dump(doc, fh, ensure_ascii=False, indent=1)
+        doc["plan_check"] = plan_check(path, plan_out)
+        with open(path, "w", encoding="utf-8") as fh:
+            json.dump(doc, fh, ensure_ascii=False, indent=1)
+        print(f"{P['file']}: {len(jobs)} машин, {S} частей, {est['concepts']} концепций, ожидаемо {est['usd']['total_expected']} долл., "
+              f"верхняя граница {est['upper_bound_usd']} долл.; plan: код {doc['plan_check']['exit_code']}")
+        out.append(doc)
+    return out
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--shards", type=int, default=None, help="частей полного прогона (20-50)")
     ap.add_argument("--machines", type=int, default=None, help="машин полного прогона (<= 6)")
     ap.add_argument("--plan-out", default=os.environ.get("TMPDIR", "/tmp"))
+    ap.add_argument("--v3", action="store_true", help="только файлы v3: jobs_l0_v3.json и jobs_l0_v3_kv1_n400000.json")
+    ap.add_argument("--v3-kv1", type=int, default=None, help="только следующий шаг сходимости ниш KV-1 v3 с этим N")
     a = ap.parse_args(argv)
+    if a.v3 or a.v3_kv1:
+        docs = write_v3(a.plan_out, only_kv1=a.v3_kv1)
+        return 0 if all(d["plan_check"]["exit_code"] == 0 for d in docs) else 1
     t, b, probe = measured()
     docs = {}
     for prof in ("debug", "full"):
