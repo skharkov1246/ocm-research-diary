@@ -5,7 +5,7 @@
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
     "datasets": 508,
-    "total_bytes": 21244046,
+    "total_bytes": 21249157,
     "results_files": 207,
     "results_with_script": 67,
     "results_referenced_in_site": 22,
@@ -7225,7 +7225,7 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "f9e4919"
+      "last_commit": "a3f8da1"
     },
     {
       "path": "routes/gtu/evo/core/.owner.json",
@@ -10723,7 +10723,7 @@
       "path": "routes/gtu/process/mass/mass_calibration.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 57128,
+      "bytes": 62157,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -10750,13 +10750,13 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "9b2a0e8"
+      "last_commit": "a3f8da1"
     },
     {
       "path": "routes/gtu/process/mass/mass_db.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 25846,
+      "bytes": 25928,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -10775,7 +10775,7 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "0eff180"
+      "last_commit": "a3f8da1"
     },
     {
       "path": "routes/gtu/shaft/data/solar_available_power_taurus60.json",
