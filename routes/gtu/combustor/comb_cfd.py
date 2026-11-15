@@ -40,7 +40,11 @@ MESH = {
     "coarse": dict(nr_ch=10, nz_ch_max=30, nz_cell=110, nr_out_max=30, nr_liner=36, nz_liner=90),
     "medium": dict(nr_ch=16, nz_ch_max=48, nz_cell=180, nr_out_max=48, nr_liner=56, nz_liner=140),
 }
-ITERS = dict(cold=600, hot=3000, write=500)   # без химии / с химией / шаг записи (по образцу SandiaD_LTS: 1500 + 3500)
+ITERS = dict(cold=1500, hot=5000, write=500)  # без химии / с химией / шаг записи (образец SandiaD_LTS: 1500 + 3500)
+RING = False   # кольцевая щель топлива (k_je >= 4) выключена: щель в десятки мкм дала локальный шаг LTS ~3e-8 с, и за 3600
+               # итераций поток не дошёл до выхода (обкатка 14.11.2026, comb_l1_smoke_results.json). Топливо - профиль смеси
+               # с неравномерностью уровня 0; разрешение струй - уровень 2 (элемент 3D)
+SLOT_MIN = 5e-4  # наименьшая ширина щелей разбавления, охлаждения, гашения, м (тот же расход - меньше скорость)
 
 
 def air_Y():
@@ -232,15 +236,15 @@ def cell_geometry(e, li):
         m_q = c["a_aux"] * W / c["n_el"]
         V_rich = next(z["V_L"] for z in d["zones"] if z["name"] == "богатая") * 1e-3 / n_can / n_el_can
         L_rich = V_rich / (math.pi * R_c ** 2)
-        w_q = m_q / (rho3 * u_j * 2 * math.pi * R_c)
-        g["quench"] = dict(m_air=m_q, z=l_ch + L_rich, w=w_q, u=u_j)
+        w_q = max(SLOT_MIN, m_q / (rho3 * u_j * 2 * math.pi * R_c))
+        g["quench"] = dict(m_air=m_q, z=l_ch + L_rich, w=w_q, u=m_q / (rho3 * w_q * 2 * math.pi * R_c))
         g["L_cell"] = max(g["L_cell"], L_rich + 3 * w_q + 2 * R_c)
     g.update(m_air_main=m_main, m_fuel_main=m_fuel_main, rho3=rho3, u_jet_air=u_j)
     r_in = g["pilot"]["r"] if g["pilot"] else 0.0
     g["r_in"] = r_in
     g["u_ch"] = m_main / (rho3 * math.pi * (r_ch ** 2 - r_in ** 2))
     # топливо: кольцевая щель (k_je >= 4) или радиальный профиль смеси (k_je < 4 - дискретные струи, L1 их не разрешает)
-    g["fuel_mode"] = "ring" if c["k_je"] >= 4 and s != "CAT" else "profile"
+    g["fuel_mode"] = "ring" if RING and c["k_je"] >= 4 and s != "CAT" else "profile"
     if g["fuel_mode"] == "ring":
         Tf, pf = 288.15, p3
         rho_f = pf * MW["CH4"] * 1e-3 / (R_U * Tf)
@@ -452,10 +456,10 @@ def build_liner_case(e, cell_out, out, level="coarse", of="2512", iters=None):
     t_film = A_film / (2 * math.pi * r_hi) / len(walls)
     # щели: разбавление - одна на стенку на 0,15·Ld; охлаждение - ряды через ~25 мм ниже по течению
     z_dil = 0.15 * Ld
-    w_dil = m_dil_can / len(walls) / (rho3 * u_j * 2 * math.pi * r_hi)
+    w_dil = max(SLOT_MIN, m_dil_can / len(walls) / (rho3 * u_j * 2 * math.pi * r_hi))
     n_rows = max(2, min(12, int(Ld / 0.025)))
     z_rows = [0.3 * Ld + k * (0.65 * Ld) / max(1, n_rows - 1) for k in range(n_rows)]
-    w_row = max(1e-4, m_cool_down / n_rows / len(walls) / (rho3 * u_j * 2 * math.pi * r_hi))
+    w_row = max(SLOT_MIN, m_cool_down / n_rows / len(walls) / (rho3 * u_j * 2 * math.pi * r_hi))
     zs = [0.0, z_dil, z_dil + w_dil] + sum(([z, z + w_row] for z in z_rows), []) + [Ld]
     zs = sorted(set(round(z, 9) for z in zs if 0 <= z <= Ld))
     slots = {round(z_dil, 9): "inlet_dil"}
@@ -499,7 +503,12 @@ def build_liner_case(e, cell_out, out, level="coarse", of="2512", iters=None):
     for p in patches:
         if p.startswith("inlet_dil") or p.startswith("inlet_cool"):
             sign = -1.0 if p.endswith("_o") else 1.0
-            inlets[p] = dict(U=(sign * u_j, 0.0, 0.0), T=T3, Y=air_Y(), kind="dilution" if "dil" in p else "cooling")
+            r_w = r_hi if p.endswith("_o") else r_lo
+            if "dil" in p:
+                u_s = m_dil_can / len(walls) / (rho3 * w_dil * 2 * math.pi * r_w)
+            else:
+                u_s = m_cool_down / n_rows / len(walls) / (rho3 * w_row * 2 * math.pi * r_w)
+            inlets[p] = dict(U=(sign * u_s, 0.0, 0.0), T=T3, Y=air_Y(), kind="dilution" if "dil" in p else "cooling")
     _write_common(case, e, L, inlets, patches, of, it, hot_box=None, Lscale=H)
     desc = dict(kind="liner", load=1.0, level=level, of=of, zs=zs, rs=rs, nz=nz, nr=nr, n_cells=B.n_cells(),
                 patches=patches, annular=annular, z0_in_liner=z0, L_dil=Ld, r_lo=r_lo, r_hi=r_hi,
@@ -580,9 +589,9 @@ def _write_common(case, e, L, inlets, patches, of, it, hot_box, Lscale, special=
               "        solver          PCG;\n        preconditioner  DIC;\n        tolerance       1e-5;\n        relTol          0.1;\n"
               "    }\n    GFinal\n    {\n        $G;\n        relTol          0;\n    }\n}\n\n"
               "PIMPLE\n{\n    momentumPredictor   yes;\n    nOuterCorrectors    1;\n    nCorrectors         2;\n"
-              "    nNonOrthogonalCorrectors 0;\n    maxDeltaT           1e-4;\n    maxCo               0.2;\n"
+              "    nNonOrthogonalCorrectors 0;\n    maxDeltaT           1e-4;\n    maxCo               0.3;\n"
               "    alphaTemp           0.05;\n    alphaY              0.05;\n    Yref\n    {\n        O2                  0.1;\n"
-              "        CH4                 0.1;\n    }\n    rDeltaTSmoothingCoeff   0.025;\n    rDeltaTDampingCoeff     1;\n}\n\n"
+              "        CH4                 0.1;\n    }\n    rDeltaTSmoothingCoeff   0.1;\n    rDeltaTDampingCoeff     1;\n}\n\n"
               "relaxationFactors\n{\n    equations\n    {\n        \".*\"            1;\n    }\n}")
     if hot_box is not None:
         r0, z0, r1, z1 = hot_box
