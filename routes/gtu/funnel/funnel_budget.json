@@ -1,0 +1,393 @@
+{
+ "title": "Воронка двигателя-заменителя: сводная смета уровней 0-3 против потолка 2000 долл.",
+ "date": "2026-11-14",
+ "status": "оценка",
+ "method": "машино-часы × тариф спота c7a.16xlarge us-east-1 (ожидаемо 0,748 долл./ч - us-east-1b, запас к 0,706 us-east-1c; верхняя граница - MaxPrice раннера 1,4206 × (max_min + 10 мин) на машину) + диск gp3 и IPv4 (ставки раннера) + хранение S3 3 мес. и передача (0,023 долл./ГБ·мес, 0,09 долл./ГБ - допущения); сделанные прогоны - по ledger.jsonl (цена спота фактической зоны × время машины); задачи без кода (pending) - по планируемой сумме",
+ "software": "python 3.13.18; runner.py plan (раннер v2 в рабочей копии)",
+ "inputs": [
+  {
+   "file": "routes/gtu/funnel/jobs_l0_debug.json"
+  },
+  {
+   "file": "routes/gtu/funnel/jobs_l0.json"
+  },
+  {
+   "file": "routes/gtu/funnel/jobs_l1_debug.json"
+  },
+  {
+   "file": "routes/gtu/funnel/jobs_l1.json"
+  },
+  {
+   "file": "routes/gtu/funnel/jobs_l1_fea.json"
+  },
+  {
+   "file": "routes/gtu/funnel/jobs_l2.json"
+  },
+  {
+   "file": "routes/gtu/funnel/jobs_l3.json"
+  },
+  {
+   "file": "routes/gtu/platform/aws/ledger.jsonl"
+  },
+  {
+   "file": "routes/gtu/combustor/comb_budget_results.json"
+  },
+  {
+   "file": "routes/gtu/platform/su2/jobs_aws_su2_kv3.json",
+   "field": "estimate.time_model"
+  }
+ ],
+ "price": {
+  "expected": 0.706,
+  "alt": 0.748,
+  "upper": 1.4206,
+  "basis": "ожидаемая: спот c7a.16xlarge us-east-1c 0,706 долл./ч, us-east-1b 0,748 (замер сессии с ключами 22:08 14.11.2026, задача владельца); верхняя граница: MaxPrice раннера 1,4206 долл./ч (максимум по зонам × 1,2, ledger.jsonl живого прогона smoke 22:14 14.11.2026)"
+ },
+ "plan_exit_codes": {
+  "jobs_l0_debug.json": 0,
+  "jobs_l0.json": 0,
+  "jobs_l1_debug.json": 0,
+  "jobs_l1.json": 0,
+  "jobs_l1_fea.json": 0,
+  "jobs_l2.json": 0,
+  "jobs_l3.json": 0
+ },
+ "budget": {
+  "spent_ledger": 1.197,
+  "spent_funnel_runs": 0.405,
+  "runs": {
+   "20261114T221451Z-d5be": {
+    "usd": 0.016,
+    "machine_min": 1.0,
+    "jobs": [
+     "smoke"
+    ]
+   },
+   "20261114T231610Z-9b64": {
+    "usd": 0.037,
+    "machine_min": 3.1,
+    "jobs": [
+     "smoke-ccx",
+     "smoke-py"
+    ]
+   },
+   "20261114T231900Z-b7cc": {
+    "usd": 0.037,
+    "machine_min": 3.1,
+    "jobs": [
+     "l0-debug-m0",
+     "l0-debug-m1"
+    ]
+   },
+   "20261114T232200Z-7ce3": {
+    "usd": 0.078,
+    "machine_min": 6.5,
+    "jobs": [
+     "l0-full-m0",
+     "l0-full-m1",
+     "l0-full-m2"
+    ]
+   },
+   "20261115T001745Z-f55e": {
+    "usd": 0.049,
+    "machine_min": 4.1,
+    "jobs": [
+     "organic-cycles"
+    ]
+   },
+   "20261115T001745Z-f1da": {
+    "usd": 0.629,
+    "machine_min": 52.8,
+    "jobs": [
+     "comb-l0-m0",
+     "comb-l0-m1",
+     "comb-l0-m2",
+     "comb-l0-m3",
+     "comb-l0-m4",
+     "comb-l0-m5"
+    ]
+   },
+   "20261115T003035Z-c8f9": {
+    "usd": 0.061,
+    "machine_min": 5.1,
+    "jobs": [
+     "su2-kv3-core130-smoke"
+    ]
+   },
+   "20261115T010201Z-1a6e": {
+    "usd": 0.049,
+    "machine_min": 4.1,
+    "jobs": [
+     "l0-debug-m0",
+     "l0-debug-m1"
+    ]
+   },
+   "20261115T010625Z-8893": {
+    "usd": 0.241,
+    "machine_min": 20.4,
+    "jobs": [
+     "l0-full-m0",
+     "l0-full-m1",
+     "l0-full-m2",
+     "l0-full-m3",
+     "l0-full-m4",
+     "l0-full-m5"
+    ]
+   }
+  },
+  "engine_rows": [
+   {
+    "file": "routes/gtu/funnel/jobs_l0_debug.json",
+    "jobs": 2,
+    "expected": 0.165,
+    "upper": 1.91,
+    "planning": null,
+    "pending_expected": 0.0,
+    "pending_planning": 0.0,
+    "level": "L0",
+    "status": "сделан: 20261115T010201Z-1a6e",
+    "plan_exit_code": 0,
+    "actual_usd": 0.049,
+    "actual_machine_min": 4.1
+   },
+   {
+    "file": "routes/gtu/funnel/jobs_l0.json",
+    "jobs": 6,
+    "expected": 1.157,
+    "upper": 6.14,
+    "planning": null,
+    "pending_expected": 0.0,
+    "pending_planning": 0.0,
+    "level": "L0",
+    "status": "сделан: 20261115T010625Z-8893",
+    "plan_exit_code": 0,
+    "actual_usd": 0.241,
+    "actual_machine_min": 20.4
+   },
+   {
+    "file": "routes/gtu/funnel/jobs_l1_debug.json",
+    "jobs": 2,
+    "expected": 0.303,
+    "upper": 1.91,
+    "planning": null,
+    "pending_expected": 0.0,
+    "pending_planning": 0.0,
+    "level": "L1",
+    "status": "ждёт",
+    "plan_exit_code": 0
+   },
+   {
+    "file": "routes/gtu/funnel/jobs_l1.json",
+    "jobs": 6,
+    "expected": 5.679,
+    "upper": 23.34,
+    "planning": null,
+    "pending_expected": 0.0,
+    "pending_planning": 0.0,
+    "level": "L1",
+    "status": "ждёт",
+    "plan_exit_code": 0
+   },
+   {
+    "file": "routes/gtu/funnel/jobs_l1_fea.json",
+    "jobs": 1,
+    "expected": 0.37,
+    "upper": 1.19,
+    "planning": null,
+    "pending_expected": 0.0,
+    "pending_planning": 0.0,
+    "level": "L1",
+    "status": "ждёт входа",
+    "plan_exit_code": 0
+   },
+   {
+    "file": "routes/gtu/funnel/jobs_l2.json",
+    "jobs": 19,
+    "expected": 26.96,
+    "upper": 168.86,
+    "planning": 72.89,
+    "pending_expected": 38.3,
+    "pending_planning": 126.94,
+    "level": "L2",
+    "status": "ждёт уровня 1 и ворот SU2",
+    "plan_exit_code": 0
+   },
+   {
+    "file": "routes/gtu/funnel/jobs_l3.json",
+    "jobs": 20,
+    "expected": 43.1,
+    "upper": 252.06,
+    "planning": 109.3,
+    "pending_expected": 49.97,
+    "pending_planning": 133.29,
+    "level": "L3",
+    "status": "ждёт уровня 2",
+    "plan_exit_code": 0
+   }
+  ],
+  "engine": {
+   "expected": 76.7,
+   "planning": 449.06,
+   "upper": 707.88,
+   "pending_planning": 260.23
+  },
+  "level01_upper": 26.73,
+  "level01_budget": 1500.0,
+  "level01_ok": true,
+  "others": [
+   {
+    "name": "воронка камеры: калибровка + уровни 1-3 + каналы (comb_budget_results.json)",
+    "expected": 426.01,
+    "planning": 799.98,
+    "upper": 1204.11
+   },
+   {
+    "name": "камера L0, N = 262 144 (сделан 20261115T001745Z-f1da)",
+    "file": "routes/gtu/combustor/jobs_aws_comb_l0.json",
+    "expected": 0.629,
+    "planning": 0.629,
+    "upper": 0.629
+   },
+   {
+    "name": "SU2 KV-3: перебор стратегий разгона",
+    "file": "routes/gtu/platform/su2/jobs_aws_su2_kv3_sweep.json",
+    "expected": 2.21,
+    "planning": 2.21,
+    "upper": 7.86
+   },
+   {
+    "name": "SU2 KV-3: medium",
+    "file": "routes/gtu/platform/su2/jobs_aws_su2_kv3.json",
+    "expected": 14.22,
+    "planning": 14.22,
+    "upper": 41.02
+   },
+   {
+    "name": "SU2 KV-3: fine",
+    "file": "routes/gtu/platform/su2/jobs_aws_su2_kv3_fine.json",
+    "expected": 32.38,
+    "planning": 32.38,
+    "upper": 93.23
+   },
+   {
+    "name": "органические циклы (сделан 20261115T001745Z-f55e)",
+    "file": "routes/gtu/organic/jobs_aws_organic.json",
+    "expected": 0.049,
+    "planning": 0.049,
+    "upper": 0.049
+   }
+  ],
+  "others_sum": {
+   "expected": 475.5,
+   "planning": 849.47,
+   "upper": 1346.9
+  },
+  "other_spent_outside_lists": 0.114,
+  "total": {
+   "expected": 552.31,
+   "planning": 1298.64,
+   "upper": 2054.89
+  },
+  "ceiling": 2000.0,
+  "report_step": 500.0,
+  "headroom_upper": -54.89,
+  "engine_launch_order": [
+   {
+    "step": "L1 отладка",
+    "expected": 0.303,
+    "upper": 1.91,
+    "cum_expected": 1.5,
+    "cum_upper": 3.11,
+    "report_threshold_crossed": []
+   },
+   {
+    "step": "L1 полный + l1-starts2x",
+    "expected": 5.679,
+    "upper": 23.34,
+    "cum_expected": 7.18,
+    "cum_upper": 26.45,
+    "report_threshold_crossed": []
+   },
+   {
+    "step": "L1 CalculiX лучших 300",
+    "expected": 0.37,
+    "upper": 1.19,
+    "cum_expected": 7.55,
+    "cum_upper": 27.64,
+    "report_threshold_crossed": []
+   },
+   {
+    "step": "L2 геометрия + прочность",
+    "expected": 0.52,
+    "upper": 2.62,
+    "cum_expected": 8.07,
+    "cum_upper": 30.26,
+    "report_threshold_crossed": []
+   },
+   {
+    "step": "L2 SU2 coarse (после ворот)",
+    "expected": 26.44,
+    "upper": 166.24,
+    "cum_expected": 34.51,
+    "cum_upper": 196.5,
+    "report_threshold_crossed": []
+   },
+   {
+    "step": "L3 SU2 medium, 5 вариантов",
+    "expected": 43.1,
+    "upper": 252.06,
+    "cum_expected": 77.61,
+    "cum_upper": 448.56,
+    "report_threshold_crossed": []
+   }
+  ]
+ },
+ "criteria": {
+  "L0": [
+   "полнота: все части и индексы 0..N-1 ровно по разу, у всех частей один отпечаток выборки и кода (merge_l0 - иначе код 2)",
+   "доля допустимых по точке отличается от отладки N = 2000 не больше чем вдвое (тот же код и выборка; KV-3 v2: 54,3 %, 393 ниши; KV-1 и KV-6 - по их results)",
+   "сходимость: новых допустимых ниш при удвоении N - не больше 1 % (KV-3: +1 из 393 - сошлось); топ-50 по чистой оценке не обязан сходиться (27 новых при удвоении при приросте средней оценки +0,025 - плато): уровень 1 оптимизирует непрерывные оси внутри ниш",
+   "отбор на уровень 1: каждая допустимая ниша хотя бы одним вариантом, 3000-5000 записей (KV-3: 3983)"
+  ],
+  "L1": [
+   "полнота: 3983 из 3983 вариантов, части 0..39 ровно по разу, один отпечаток кода и входа (merge_l1 - иначе код 2)",
+   "время на вариант на AWS не больше 2 × сметного (307 с на ядро при 4 стартах) - иначе остановка и пересчёт сметы",
+   "допустимых с оценкой >= 5,0 - не меньше 50 (иначе итог - меньше 50 вариантов, причины - reject_detail; это результат моделей)",
+   "сходимость по стартам (l1-starts2x, 640 вариантов, 4 против 8 стартов): у >= 90 % вариантов оценка меняется меньше чем на 0,05 и допустимость не меняется; иначе - повтор с 8 стартами",
+   "сходимость по объёму (таблица convergence, M/2 против M): общих ниш в отборе 50 >= 80 % и средняя оценка 50 разных меняется < 0,05; иначе - merge_l0 --target 10000 и повтор (смета ×2,5)",
+   "цена разнообразия: средняя оценка 50 разных против чистого топ-50 и число вытесненных - записать (критерия нет: это мера)"
+  ],
+  "L2": [
+   "полнота: все колёса и диски 50 вариантов ровно по разу (funnel_l2 merge, иначе код 2)",
+   "геометрия: impeller.py построил каждое центробежное колесо (код 0); предупреждения impeller.py просмотрены",
+   "прочность (disk.py, сетка 80×12): запас по разрушающей частоте при 120 % >= 1,0 у всех колёс и дисков; ресурс по ползучести >= 25 000 ч",
+   "SU2 coarse: линия частоты получена у >= 3 из 4 точек каждой ступени; в расчётной точке |Δη| <= 2 п. п. и |Δπ|/π <= 5 % против одномерной модели уровня 1 - иначе КПД варианта пересчитывается по SU2 и оценка обновляется",
+   "на уровень 3 - прошедшие по убыванию оценки, не больше 2 на архетип; меньше 5 прошедших - стоп и разбор (уровень 3 не запускается)"
+  ],
+  "L3": [
+   "SU2 medium: запас по помпажу по линии частоты >= 10 % (граница - последняя устойчивая точка), КПД в расчётной точке отличается от coarse не больше 1 п. п. (иначе сетка не сошлась - fine для одного колеса)",
+   "3D-прочность (когда будет код): запас по разрушению при 120 % >= 1,0; резонансы с порядками 1-4 и числом лопаток соплового аппарата вне ±10 % рабочих частот 90-105 % на диаграмме Кэмпбелла; ползучесть 25 000 ч",
+   "сопряжённый теплообмен (когда будет код): температура металла не выше предела класса охлаждения и сплава (make_model.t41_limit, dT_cap печатных сплавов)",
+   "камера (воронка камеры): её критерии - рост мод <= 0, пульсации <= 1 % p3, стенка <= 1173 K, ресурс 30 000 ч",
+   "итог - 1-2 варианта на стенд"
+  ]
+ },
+ "local_before_aws": [
+  "тесты: python3 -m pytest -q test_models.py test_funnel_l0.py test_funnel_l1.py test_funnel_l2.py (минуты)",
+  "проба уровня 1: python3 merge_l1.py --probe (12 вариантов, 2 старта, ~15 мин на 4 ядрах)",
+  "покрытие осей уровня 0: python3 coverage_l0.py (closure по всем шаблонам трёх точек, ~2 мин)",
+  "уровень 2 на пробе: funnel_l2.py prepare по funnel_l1_top50.json, run --what geom,fea --no-mesh (STEP и disk.py, ~2 мин на вариант), run --what su2 --dry (команды); одна сетка coarse impeller.py - 37 с на 4 потоках",
+  "проверка входов: funnel_l1.load_select для отборов l0_aws_debug и l0_aws_full (отпечатки выборки и кода)",
+  "plan всех файлов задач: make_jobs_l1.py и make_jobs_l23.py (без AWS)",
+  "нельзя локально: SU2 (сборки нет, 4 ядра), объёмы уровней 0-1 больше N 300 и 12 вариантов (решение владельца), 3D CalculiX и OpenFOAM"
+ ],
+ "stop_points": [
+  "предохранитель раннера: итого (израсходовано + в работе + новая) <= 2000 долл. перед каждым запуском - жёсткий стоп",
+  "отчёт владельцу после каждых 500 долл. общего расхода (report_step раннера; решение владельца 14.11.2026) - продолжение после ответа",
+  "уровни 0 + 1 - до 1500 долл. (решение владельца); по смете - доли процента, объём ограничен пользой",
+  "после отладки уровня 1: фактическое время на вариант > 2 × сметы - стоп, пересчёт make_jobs_l1.py",
+  "после двух первых задач l2-su2: нет линии частоты (база разошлась) - стоп SU2 уровня 2 (остальные 15 машин не запускать)",
+  "уровень 2 прошли меньше 5 - уровень 3 не запускается, разбор",
+  "расширение уровня 3 до 10 вариантов - только если после уровня 3 на 5 запас до 2000 по верхней границе больше её удвоения"
+ ]
+}

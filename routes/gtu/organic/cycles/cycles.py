@@ -1503,23 +1503,41 @@ def keq_table():
 
 
 def catalyst_estimate(out, key="R90-ic-RH-ibc-none-steam"):
-    """масса катализатора и покрываемая площадь для варианта с паровым риформингом (оценка): кинетика Xu — Froment,
-    95 % равновесного превращения при 650 °C, 17 бар, S/C 2 (ближайшая строка study_reformer)"""
+    """масса катализатора и покрываемая площадь для варианта с паровым риформингом (оценка): кинетика Xu — Froment
+    в изотермическом реакторе идеального вытеснения при фактических условиях варианта — T = T риформера − подход
+    к равновесию, давление топлива 1,25·p3, S/C варианта; 95 % равновесного превращения при этих условиях.
+    (До проверки 15.11.2026 бралась строка study_reformer 650 °C, 17 бар, S/C 2 — не те T, p и S/C варианта.)"""
     o = next((x for x in out["results"] if x["key"] == key), None)
     if not o or not o["opt"].get("ok"):
         return None
     r = o["opt"]
-    kin = next(k for k in out["reformer"]["kinetics"] if k["P_bar"] == 17.0 and k["T_C"] == 650.0 and k["sc"] == 2.0)
+    fi = r["fuel_info"]
+    sc = float(fi.get("sc", r["prm"]["sc"]))
+    P = float(r["p3_bar"]) * 1e5 * A["p_fuel_k"]
+    T_eq = float(fi["T_ref_C"]) + 273.15 - A["approach_eq"]
+    Xf = np.zeros(len(SP))
+    Xf[I["CH4"]], Xf[I["H2O"]] = 1 / (1 + sc), sc / (1 + sc)
+    Yf = Xf * MW / np.dot(Xf, MW)
+    Ye, _ = equil(Yf, T_eq, P)
+    Xeq = 1 - (Ye[I["CH4"]] / MW[I["CH4"]]) / (Yf[I["CH4"]] / MW[I["CH4"]])
+    W, Xc, _ = xf_pfr(Xf, 1.0 + sc, T_eq, P, 20.0)
+    W95 = float(np.interp(0.95 * Xeq, Xc, W)) if Xc[-1] >= 0.95 * Xeq else None
     n_ch4 = r["W_fuel_CH4"] / (MW[I["CH4"]] / 1000.0)
-    W = kin["W95_kg_per_molCH4_s"] * n_ch4
+    Wcat = W95 * n_ch4 if W95 is not None else None
     ref = [h for h in r["hx"]["lpbf"] if h["name"].startswith("риформер")]
     A_hx = ref[0].get("A_m2") if ref else None
     if A_hx is None and ref:
         A_hx = ref[0]["V_core_m3"] / (HX_TECH["lpbf"]["Dh"] / 2 + HX_TECH["lpbf"]["t"])
-    return dict(key=key, CH4_mol_s=n_ch4, W95_kg_per_mol_s=kin["W95_kg_per_molCH4_s"], catalyst_kg=W,
-                coated_area_m2=W / A["cat_loading"], reformer_wall_area_m2=A_hx, T_ref_C=r["fuel_info"].get("T_ref_C"),
+    kin650 = next((k for k in out["reformer"]["kinetics"] if k["P_bar"] == 17.0 and k["T_C"] == 650.0 and k["sc"] == 2.0), None)
+    return dict(key=key, CH4_mol_s=n_ch4, T_ref_C=fi.get("T_ref_C"), T_kin_C=T_eq - 273.15, P_bar=P / 1e5, sc=sc, X_eq=Xeq,
+                W95_kg_per_mol_s=W95, catalyst_kg=Wcat, coated_area_m2=(Wcat / A["cat_loading"] if Wcat is not None else None),
+                reformer_wall_area_m2=A_hx,
+                ref_row_650C_17bar_sc2=(dict(W95_kg_per_mol_s=kin650["W95_kg_per_molCH4_s"],
+                                             catalyst_kg=kin650["W95_kg_per_molCH4_s"] * n_ch4) if kin650 else None),
                 note="константы Xu — Froment не сверены с оригиналом; покрытие стенок: фактор эффективности 1 (для гранул ~0,05 — "
-                     "в 20 раз больше катализатора); загрузка 50 г/м² — оценка")
+                     "в 20 раз больше катализатора); загрузка 50 г/м² — оценка; изотермический реактор при T на выходе — "
+                     "нижняя оценка массы (в действительности газ нагревается по длине); природный газ с C2+ и серой "
+                     "требует сероочистки и предриформинга — вне модели")
 
 
 def crosscheck_gtu_cycle():

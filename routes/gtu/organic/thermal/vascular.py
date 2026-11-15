@@ -864,6 +864,8 @@ def run(out_dir=HERE, quick=False):
             if r is not None:
                 eq.append(strip(r))
     ngv["equal_flow_T41_1100"] = eq
+    ngv["equal_flow_note"] = ("все сети при расходе прямых каналов на пределе 950 °C (T41 = 1100 °C); давление подвода "
+                              "подобрано под расход")
     res["cases"]["ngv"] = ngv
     # ---------------- жаровая труба
     a = A["liner"]
@@ -1035,10 +1037,11 @@ if __name__ == "__main__":
     for st in stl.values():
         pth = Path(st["path"])
         st["path"] = str(pth.relative_to(ROOT)) if str(pth).startswith(str(ROOT)) else pth.name
-    res["geometry"] = dict(stl=stl, note="каналы — трубки в плоскости развёртки, мм; для печати — вычитаются из стенки")
+    res["geometry"] = dict(stl=stl, note="каналы — трубки в плоскости развёртки стороны лопатки (T41-независимо), мм; "
+                                         "для печати — вычитаются из стенки")
     res["networks"] = {k: dict(nodes=len(n.nodes), segments=len(n.seg), outlets=len(n.outlets),
                                d_min_mm=1e3 * min(d for _, _, d in n.seg if d < 0.01),
                                d_max_mm=1e3 * max(d for _, _, d in n.seg if d < 0.01),
-                               length_mm=1e3 * n.length()) for k, n in nets.items()}
+                               length_mm=1e3 * n.length(), volume_mm3=1e9 * n.volume()) for k, n in nets.items()}
     (out / "vascular_results.json").write_text(json.dumps(res, ensure_ascii=False, indent=1, default=float))
     print("готово", res["runtime_s"])

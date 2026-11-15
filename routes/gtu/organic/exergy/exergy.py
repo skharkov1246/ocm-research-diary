@@ -17,7 +17,6 @@
 
 Запуск: python3 exergy.py  (около 5 мин на одном ядре) -> exergy_results.json и *.svg рядом со скриптом.
 AWS не вызывается. Все КПД узлов, потери и модель охлаждения — оценка (см. assumptions в JSON)."""
-import datetime
 import json
 import math
 import os
@@ -40,6 +39,7 @@ import cantera as ct  # noqa: E402
 
 FRAME3 = os.path.join(GTU, "frame3", "frame3_point_results.json")
 OUT = os.path.join(HERE, "exergy_results.json")
+DATE = "2026-11-14"                # дата расчёта (правило трека: date 2026-11-14), не дата перезапуска
 T0, P0 = C.T0, C.P0
 RH_ISO = 0.60                      # ISO 3977-2: 15 °C, 101,325 кПа, 60 % (по выдержке поиска, см. README)
 BALANCE_TOL_PCT = 0.5              # требование задачи: баланс эксергии закрыт до 0,5 % эксергии топлива
@@ -1088,7 +1088,7 @@ def main():
                 "охлаждение — x = K·ε/(1-ε) (Holland & Thake 1980; Horlock et al. 2001), K литья — по классу K трека, печать — "
                 "K·η_c,литьё/η_c,печать"),
         software=f"python {sys.version.split()[0]}, cantera {ct.__version__}, numpy {np.__version__}, scipy {__import__('scipy').__version__}",
-        date=datetime.date.today().isoformat(),
+        date=DATE,
         status="оценка уровня облика: КПД узлов, потери, модель охлаждения — принятые величины (оценка); газ — идеальный, "
                "конденсация воды в выхлопе при T0 не учитывается; кинетическая энергия не учитывается (полные параметры)",
         inputs=[

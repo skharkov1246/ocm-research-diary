@@ -26,7 +26,10 @@ def main():
         dict(name="struct-lattice-n80", max_min=90,
              command=f"python -u {S}/lattice.py --N 80 --n-dense 80 --conv --out \"$GTU_OUT/lattice_results_n80.json\""),
         dict(name="struct-axi-fine", max_min=300,
-             command=f"ORGANIC_OUT=\"$GTU_OUT\" python -u {S}/disk_topo.py --all --h-t 0.5e-3 --h-c 0.75e-3 --workers 9 "
+             # радиус фильтра — тот же в метрах, что у основного прогона (2,5 / 3,75 мм): иначе при 2,5h он уменьшается
+             # вдвое вместе с сеткой и меняется сама постановка, а не только сетка (проверка 15.11.2026)
+             command=f"ORGANIC_OUT=\"$GTU_OUT\" python -u {S}/disk_topo.py --all --h-t 0.5e-3 --h-c 0.75e-3 "
+                     f"--r-filter-t 2.5e-3 --r-filter-c 3.75e-3 --workers 9 "
                      f"--results \"$GTU_OUT/disk_topo_results_fine.json\""),
         dict(name="struct-topo3d-disk-h20", max_min=360,
              command=f"python -u {S}/topo3d.py --problem disk --h 2.0e-3 --iters 160 --out \"$GTU_OUT\""),

@@ -300,6 +300,20 @@ def merge_rows(buf: dict | None, data: dict) -> dict:
     return {k: buf[k] + data[k] for k in keys}
 
 
+NAN_COLS = ("Avg_Massflow(inlet)", "Avg_Massflow(outlet)", "Avg_TotalPress(inlet)", "Avg_TotalPress(outlet)",
+            "Avg_TotalTemp(inlet)", "Avg_TotalTemp(outlet)")
+
+
+def deadline_verdict(gate_kind: str, gate: dict, base_done: bool, why: str) -> tuple:
+    """Вердикт по сроку. На базе с пройденным гейтом — established; база достигнута (порция итогового шага дошла до
+    конца без NaN), гейт не пройден — reached_base (стратегия дошла дальше, чем stuck); иначе — timeout."""
+    if gate_kind == "final" and gate.get("established"):
+        return ("established", "срок на базе")
+    if gate_kind == "final" and base_done:
+        return ("reached_base", "срок на базе, гейт не пройден: " + "; ".join(gate.get("reasons") or []))
+    return ("timeout", why)
+
+
 def gate_metrics(d: dict, gamma: float, window: int, imb_rows: int, pi_eta_window: int = 500) -> dict:
     m_in, m_out = d.get("Avg_Massflow(inlet)", []), d.get("Avg_Massflow(outlet)", [])
     n = min(len(m_in), len(m_out))
@@ -345,7 +359,9 @@ def gate_metrics(d: dict, gamma: float, window: int, imb_rows: int, pi_eta_windo
         out["m_out_meas"] = d["MassFlowOut_1"][-1]
     elif d.get("Avg_Massflow(outlet)"):
         out["m_out_meas"] = -d["Avg_Massflow(outlet)"][-1]
-    last = [v[-1] for v in d.values() if v]
+    # NaN решения — по невязкам и столбцам гейта; вспомогательные столбцы (TURBO_PERF, однородность MARKER_ANALYZE)
+    # могут быть нечислом и при целом решении — шаг из-за них не бракуется (гейт базы их всё равно проверяет)
+    last = [d[k][-1] for k in d if d[k] and (k.startswith("rms[") or k in NAN_COLS)]
     out["nan_in_last_row"] = any(isinstance(v, float) and math.isnan(v) for v in last)
     return out
 
@@ -591,14 +607,14 @@ def run_strategy(strat: dict, ctx: dict, runner=None, clock=time.monotonic) -> d
         hold = dict({"iter": 300, "max": 3}, **st.get("hold", {}))
         st["hold"] = hold
         buf, chunk, decided, last_met, last_gate = None, 0, None, {}, {}
+        base_done = False   # порция итогового шага дошла до конца без NaN: база достигнута
         while True:
             if _CUR["signal"]:
                 decided = ("terminated", "сигнал останова")
                 break
             left = ctx["deadline"] - clock()
             if left < MIN_STEP_S:
-                decided = (("established", "срок на базе") if gate_kind == "final" and last_gate.get("established")
-                           else ("timeout", f"до срока {left:.0f} с — порция не начата"))
+                decided = deadline_verdict(gate_kind, last_gate, base_done, f"до срока {left:.0f} с — порция не начата")
                 break
             st["_dir"] = f"{idx:02d}_{st['name']}" + (f"_h{chunk}" if chunk else "")
             res = run(st, state, chunk)
@@ -646,10 +662,12 @@ def run_strategy(strat: dict, ctx: dict, runner=None, clock=time.monotonic) -> d
                 rec["decision"] = "stopped"
                 if gate_kind == "final" and gate.get("established"):
                     decided = ("established", "срок на базе")
+                elif status == "terminated" or _CUR["signal"]:
+                    decided = ("terminated", f"{status} на шаге {st['name']}")
                 else:
-                    decided = ("terminated" if status == "terminated" or _CUR["signal"] else "timeout",
-                               f"{status} на шаге {st['name']}")
+                    decided = deadline_verdict(gate_kind, gate, base_done, f"{status} на шаге {st['name']}")
             else:
+                base_done = base_done or gate_kind == "final"
                 # порция дошла до конца: состояние зафиксировано, её рестарт — начало следующей
                 if outlet == "massflow":
                     new_load = None
@@ -683,7 +701,7 @@ def run_strategy(strat: dict, ctx: dict, runner=None, clock=time.monotonic) -> d
                     if gate_kind == "final":
                         decided = ("established" if gate.get("established") else "reached_base", "миниатюра")
                 else:
-                    rec["decision"] = "gate_failed"
+                    rec["decision"] = "hold_exhausted" if gate.get("established") else "gate_failed"
                     why = "; ".join(gate["reasons"])
                     decided = (("established" if gate.get("established") else "reached_base", "удержание исчерпано: " + why)
                                if gate_kind == "final" else ("stuck", f"гейт шага {st['name']}: {why}"))
@@ -694,8 +712,10 @@ def run_strategy(strat: dict, ctx: dict, runner=None, clock=time.monotonic) -> d
                 continue
             break
         backflow_stuck = decided and decided[0] == "reached_base" and not last_met.get("sign_ok")
+        # откат — только если на него есть время: иначе шаг отката сразу кончится по сроку и вердикт diverged или
+        # reached_base подменится на timeout
         if decided and (decided[0] in ("diverged", "stuck") or backflow_stuck) and backoff_cfg and enforce \
-                and summ["backoffs"] < int(backoff_cfg.get("max_total", 0)):
+                and summ["backoffs"] < int(backoff_cfg.get("max_total", 0)) and ctx["deadline"] - clock() >= MIN_STEP_S:
             new = backoff_steps(st, state, strat.get("set", {}))
             if new:
                 summ["backoffs"] += 1
@@ -711,7 +731,7 @@ def run_strategy(strat: dict, ctx: dict, runner=None, clock=time.monotonic) -> d
         summ["verdict"], summ["verdict_detail"] = "reached_base", "шаги кончились"
     summ["divergence"] = summ["divergences"][-1] if summ["verdict"] in ("diverged", "error") and summ["divergences"] else None
     summ["final_state"] = {"frac": state["frac"], "p_out": state["p"], "load": state.get("load"),
-                           "restart": state.get("restart")}
+                           "outlet": state.get("outlet", "pressure"), "restart": state.get("restart")}
     summ["seconds_total"] = round(clock() - t_start, 1)
     fin = [r for r in summ["steps"] if r["gate"].get("established") is not None]
     summ["criteria"] = (({k: fin[-1]["gate"].get(k) for k in ("established", "success", "converged_skill",
@@ -861,8 +881,9 @@ def merge(paths: list, run_id: str | None = None) -> dict:
     return {"about": ("Перебор стратегий разгона базовой точки SU2 (sweep_ramp.py на AWS): колесо KV-3 ступень 1 и "
                       "core130, сетка coarse. Вердикт колеса: success — дисбаланс расхода <= 1 %, расход установился, "
                       "невязка плотности упала >= 3 порядков от первой итерации, п и КПД физичны; established — всё, "
-                      "кроме 3 порядков; reached_base — база достигнута без NaN, гейт не пройден; stuck — гейт "
-                      "промежуточного шага не пройден; diverged — NaN; timeout — срок. Сетки — тетраэдры без "
+                      "кроме 3 порядков; reached_base — база достигнута без NaN (первая порция итогового шага дошла до "
+                      "конца), гейт не пройден до срока или до конца удержания; stuck — гейт промежуточного шага не "
+                      "пройден; timeout — срок кончился до базы; diverged — NaN. Сетки — тетраэдры без "
                       "пристенных призм, покрышка и стенки за колесом без трения: числа — проверка разгона, не "
                       "характеристика колеса."),
             "run_id": run_id, "created_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),

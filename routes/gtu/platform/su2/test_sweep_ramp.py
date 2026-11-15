@@ -413,3 +413,43 @@ def test_run_strategy_deadline_on_established_base(tmp_path):
     fr = FakeRunner(str(tmp_path), default={"rho1": -5.0})        # невязка упала только на порядок
     s = SW.run_strategy(strat_two_steps(), dict(CTX, deadline=1000.0), runner=fr, clock=clock)
     assert s["verdict"] == "established" and s["criteria"]["established"] and not s["criteria"]["success"]
+
+
+def _clock(step=100.0):
+    t = [0.0]
+
+    def clock():
+        t[0] += step
+        return t[0]
+    return clock
+
+
+def test_run_strategy_deadline_on_base_gate_not_passed(tmp_path):
+    """Срок кончился во время удержания базы, гейт базы не пройден — reached_base (дошла до базы), а не timeout,
+    который ниже stuck; срок в первой порции итогового шага (база не достигнута) — timeout."""
+    fr = FakeRunner(str(tmp_path), script={"b_base": {"backflow": True}})
+    s = SW.run_strategy(strat_two_steps(), dict(CTX, deadline=600.0), runner=fr, clock=_clock())
+    assert [c[:2] for c in fr.calls] == [("a_spin", 0), ("b_base", 0), ("b_base", 1)]
+    assert s["verdict"] == "reached_base" and "срок на базе" in s["verdict_detail"]
+    fr = FakeRunner(str(tmp_path / "t"), script={("b_base", 0): {"status": "timeout", "n": 50}})
+    s = SW.run_strategy(strat_two_steps(), dict(CTX), runner=fr)
+    assert s["verdict"] == "timeout" and s["verdict_step"] == "b_base"
+    fr = FakeRunner(str(tmp_path / "h"), script={("b_base", 0): {"backflow": True}, ("b_base", 1): {"status": "timeout", "n": 50, "backflow": True}})
+    s = SW.run_strategy(strat_two_steps(), dict(CTX), runner=fr)
+    assert s["verdict"] == "reached_base"
+
+
+def test_run_strategy_no_backoff_without_time(tmp_path):
+    """NaN у самого срока: откат не начинается (он сразу кончился бы по сроку), вердикт остаётся diverged."""
+    strat = strat_two_steps(backoff={"max_total": 2})
+    fr = FakeRunner(str(tmp_path), script={("a_spin", 0): {"status": "diverged", "n": 7, "nan_last": True}})
+    s = SW.run_strategy(strat, dict(CTX, deadline=350.0), runner=fr, clock=_clock())
+    assert s["verdict"] == "diverged" and s["backoffs"] == 0 and [c[0] for c in fr.calls] == ["a_spin"]
+
+
+def test_nan_only_in_auxiliary_column_is_not_divergence():
+    d = {"Inner_Iter": [0.0, 1.0], "rms[Rho]": [-5.0, -5.1], "Avg_Massflow(inlet)": [1.0, 1.0],
+         "Avg_Massflow(outlet)": [-1.0, -1.0], "TotTotEff": [70.0, float("nan")], "Uniformity(outlet)": [0.9, float("nan")]}
+    assert not SW.gate_metrics(d, 1.4, 1, 2)["nan_in_last_row"]
+    d["rms[Rho]"][-1] = float("nan")
+    assert SW.gate_metrics(d, 1.4, 1, 2)["nan_in_last_row"]

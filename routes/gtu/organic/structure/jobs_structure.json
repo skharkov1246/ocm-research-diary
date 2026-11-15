@@ -28,7 +28,7 @@
   {
    "name": "struct-axi-fine",
    "max_min": 300,
-   "command": "ORGANIC_OUT=\"$GTU_OUT\" python -u routes/gtu/organic/structure/disk_topo.py --all --h-t 0.5e-3 --h-c 0.75e-3 --workers 9 --results \"$GTU_OUT/disk_topo_results_fine.json\""
+   "command": "ORGANIC_OUT=\"$GTU_OUT\" python -u routes/gtu/organic/structure/disk_topo.py --all --h-t 0.5e-3 --h-c 0.75e-3 --r-filter-t 2.5e-3 --r-filter-c 3.75e-3 --workers 9 --results \"$GTU_OUT/disk_topo_results_fine.json\""
   },
   {
    "name": "struct-topo3d-disk-h20",

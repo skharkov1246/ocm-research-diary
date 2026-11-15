@@ -359,6 +359,10 @@ def main():
     ap.add_argument("--h-c", type=float, default=1.5e-3)
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--results", default=RESULTS)
+    # радиус фильтра в метрах (по умолчанию 2,5h — меняется вместе с сеткой); для проверки независимости от сетки
+    # его держат постоянным: 2,5e-3 (диск) и 3,75e-3 (колесо) — как у основного прогона h 1,0 / 1,5 мм
+    ap.add_argument("--r-filter-t", type=float, default=None)
+    ap.add_argument("--r-filter-c", type=float, default=None)
     a = ap.parse_args()
     os.makedirs(OUTDIR, exist_ok=True)
     t0 = time.time()
@@ -369,6 +373,10 @@ def main():
         print(part, "baseline", json.dumps(b, default=float)[:400], flush=True)
     u_eq = {p: [c["u_max"] for c in base[p]["cases"]] for p in base}
     S = specs(a.h_t, a.h_c, u_eq)
+    for s in S:
+        rf = a.r_filter_t if s["part"] == "turb1" else a.r_filter_c
+        if rf is not None:
+            s["R_filter"] = rf
     if a.only:
         S = [s for s in S if s["name"] in a.only.split(",")]
     with Pool(a.workers) as pool:

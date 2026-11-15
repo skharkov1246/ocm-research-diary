@@ -18,6 +18,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
 RUNNER = os.path.join(REPO, "routes", "gtu", "platform", "aws", "runner.py")
 REL = "routes/gtu/funnel"
+BRANCH = "claude/lucid-allen-yvps5d"                            # код задач (PR #62); runner.py run/plan - с --branch BRANCH
 
 PIP = ["cantera==3.2.0", "scipy==1.18.1", "numpy==2.5.3"]      # закреплены: скремблирование Соболя зависит от версии scipy
 PROFILES = {
@@ -106,17 +107,18 @@ def estimate(P, S, M, jobs, t_concept, bytes_per_concept):
 
 
 def plan_check(path, outdir):
-    cmd = [sys.executable, RUNNER, "plan", path, "--assume-price", str(PRICE["alt"]),
+    # --branch: по умолчанию раннер клонирует main (или $GTU_BRANCH), где кода воронки нет (проверка 15.11.2026)
+    cmd = [sys.executable, RUNNER, "plan", path, "--branch", BRANCH, "--assume-price", str(PRICE["alt"]),
            "--assume-zone-prices", f"us-east-1a=0.955,us-east-1b={PRICE['alt']},us-east-1c={PRICE['expected']}", "--out", outdir]
     r = subprocess.run(cmd, capture_output=True, text=True, cwd=REPO)
     out = r.stdout + r.stderr
     keep = [ln for ln in out.splitlines() if re.match(r"^\[(задача|план|зоны|очередь|бюджет)\]", ln.strip())]
-    return dict(command="python3 routes/gtu/platform/aws/runner.py plan " + os.path.relpath(path, REPO) +
+    return dict(command="python3 routes/gtu/platform/aws/runner.py plan " + os.path.relpath(path, REPO) + f" --branch {BRANCH}" +
                         f" --assume-price {PRICE['alt']} --assume-zone-prices us-east-1a=0.955,us-east-1b={PRICE['alt']},"
                         f"us-east-1c={PRICE['expected']}",
                 exit_code=r.returncode, lines=keep[:40],
-                runner_note="раннер v2 в рабочей копии (поля python, pip, NPROC, самая дешёвая зона); если v2 ещё не влит в ветку - "
-                            "перепроверить plan после влития")
+                runner_note=f"раннер v2 в ветке {BRANCH} (поля python, pip, NPROC, самая дешёвая зона); run - с --branch {BRANCH} "
+                            "(без него раннер клонирует main); при правке раннера повторить plan")
 
 
 def main(argv=None):

@@ -363,7 +363,8 @@ def base_from_sweep(summary_path: str, returncode: int) -> tuple:
                 strategy=s.get("strategy"), criteria=s.get("criteria"), su2_version=s.get("su2_version"),
                 key_check=s.get("key_check"), iters_total=s.get("iters_total"), final_state=fs)
     rf = os.path.join(os.path.dirname(summary_path), s["final_restart"]) if s.get("final_restart") else None
-    ok = s.get("verdict") in BASE_STRATEGY_OK and rf and os.path.isfile(rf) and abs(float(fs.get("frac", 0)) - 1.0) < 1e-9
+    ok = (s.get("verdict") in BASE_STRATEGY_OK and rf and os.path.isfile(rf) and abs(float(fs.get("frac", 0)) - 1.0) < 1e-9
+          and fs.get("outlet", "pressure") == "pressure")
     base["restart_ok"] = bool(ok)
     return base, (rf if ok else None), (float(fs["p_out"]) if ok else None)
 

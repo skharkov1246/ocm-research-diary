@@ -1,0 +1,58 @@
+{
+ "title": "Уровень 1 воронки двигателя-заменителя: готовность к AWS",
+ "date": "2026-11-14",
+ "ready_for_aws": true,
+ "files": {
+  "debug": "routes/gtu/funnel/jobs_l1_debug.json",
+  "full": "routes/gtu/funnel/jobs_l1.json",
+  "fea": "routes/gtu/funnel/jobs_l1_fea.json"
+ },
+ "order": [
+  "1. уровень 0 прошёл: отладка 20261115T010201Z-1a6e (l0_aws_debug/), полный 20261115T010625Z-8893 (l0_aws_full/, отбор KV-3 - 3983 записей) - оба входа уровня 1 в ветке",
+  "2. jobs_l1_debug.json (150 вариантов, 2 машины) -> merge_l1 (команда merge.command) -> проверить время на вариант при 64 процессах, доли допустимых, отбор 50; при большом расхождении с пробой - перегенерировать make_jobs_l1.py",
+  "3. jobs_l1.json (3983 вариантов, 5 машин + l1-starts2x) -> merge_l1 --compare-in (сходимость по стартам) -> funnel_l1_fea_cases.json в ветку -> jobs_l1_fea.json (CalculiX, лучшие 300) -> итог 50 разных"
+ ],
+ "plan_exit_codes": {
+  "debug": 0,
+  "full": 0,
+  "fea": 0
+ },
+ "plan_note": "раннер v2 в ветке claude/lucid-allen-yvps5d (поля python, pip, NPROC, самая дешёвая зона); run - с --branch claude/lucid-allen-yvps5d (без него раннер клонирует main); при правке раннера повторить plan",
+ "estimate": {
+  "level0": {
+   "expected": 1.32,
+   "upper_bound": 8.05,
+   "cap_level0_usd": 300,
+   "cap_ok": true
+  },
+  "level1": {
+   "expected": 6.35,
+   "upper_bound": 26.44,
+   "by_file": {
+    "debug": {
+     "expected": 0.303,
+     "upper_bound": 1.91,
+     "machine_hours": 0.4,
+     "core_hours": 12.8
+    },
+    "full": {
+     "expected": 5.679,
+     "upper_bound": 23.34,
+     "machine_hours": 7.495,
+     "core_hours": 441.26
+    }
+   }
+  },
+  "total_expected": 7.67,
+  "total_upper_bound": 34.49,
+  "budget_l01_usd": 1500.0,
+  "budget_ok": true,
+  "note": "уровни 0 + 1 по верхней границе раннера - доли процента бюджета 1500 долл.: объём ограничен пользой (сходимость отбора), а не деньгами; запас бюджета - уровням 2-3, камере и живой геометрии"
+ },
+ "known_limitations": [
+  "время на вариант - процессорное время короткой пробы (12 вариантов, 2 старта) с запасом ×1,5; фактическое даст jobs_l1_debug.json; сторож max_min и предохранитель раннера ограничивают перерасход",
+  "раннер v2 - в ветке claude/lucid-allen-yvps5d; если к запуску он изменится, повторить plan",
+  "окончательное слияние (merge.final в jobs_l1.json) масштабирует 50 отобранных на KV-1 и KV-6 повтором оптимизации (100 вариантов × 4 старта) внутри merge_l1.py, то есть на машине сессии, а не на AWS; в смете уровня 1 его нет"
+ ],
+ "how_to_regenerate": "python3 routes/gtu/funnel/make_jobs_l1.py"
+}
