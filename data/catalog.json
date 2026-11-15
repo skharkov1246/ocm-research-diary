@@ -4,12 +4,12 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 408,
-    "total_bytes": 13762688,
-    "results_files": 179,
+    "datasets": 410,
+    "total_bytes": 13782198,
+    "results_files": 180,
     "results_with_script": 54,
     "results_referenced_in_site": 22,
-    "results_with_provenance_fields": 30,
+    "results_with_provenance_fields": 31,
     "by_track": {
       "ammonia": 91,
       "battery-cathode": 1,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 88,
+      "не определён": 90,
       "прочее": 25
     }
   },
@@ -7445,6 +7445,55 @@
       "last_commit": "460a5cb"
     },
     {
+      "path": "routes/gtu/organic/structure/jobs_structure.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 1829,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "_comment",
+        "defaults",
+        "jobs"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "497bb58"
+    },
+    {
+      "path": "routes/gtu/organic/structure/shell_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 17652,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "inputs",
+        "geometry",
+        "mesh",
+        "optimized",
+        "reference_8_spokes",
+        "stiffness_ratio_worst",
+        "compliance_ratio_worst_bearing",
+        "iterations",
+        "parts",
+        "printer_fit",
+        "seconds"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "497bb58"
+    },
+    {
       "path": "routes/gtu/platform/aws/iam_policy_addendum.json",
       "track": "не определён",
       "kind": "данные",
@@ -7651,7 +7700,7 @@
       "path": "routes/gtu/platform/bench/jobs_aws_bench.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 14876,
+      "bytes": 14905,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -7665,7 +7714,7 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "bdc87fd"
+      "last_commit": "497bb58"
     },
     {
       "path": "routes/gtu/platform/bench/mesh_stats.json",
