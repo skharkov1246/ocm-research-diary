@@ -5,7 +5,7 @@
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
     "datasets": 489,
-    "total_bytes": 20455062,
+    "total_bytes": 20462121,
     "results_files": 204,
     "results_with_script": 65,
     "results_referenced_in_site": 22,
@@ -6895,7 +6895,7 @@
       "path": "routes/gtu/combustor/jobs_aws_comb_l0_v2.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 12240,
+      "bytes": 19299,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -6903,11 +6903,13 @@
         "defaults",
         "jobs",
         "estimate",
-        "merge"
+        "merge",
+        "plan_check",
+        "mini_check"
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "3e3838b"
+      "last_commit": "24da21f"
     },
     {
       "path": "routes/gtu/combustor/jobs_aws_comb_l0.json",
