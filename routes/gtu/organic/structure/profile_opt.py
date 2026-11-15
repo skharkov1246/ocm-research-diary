@@ -96,9 +96,12 @@ def run(mode, maxiter=90):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mode", choices=["eq", "lim"], required=True)
+    ap.add_argument("--mode", choices=["eq", "lim", "comp2"], required=True)
     ap.add_argument("--maxiter", type=int, default=90)
     a = ap.parse_args()
+    if a.mode == "comp2":
+        run_comp2(a.maxiter)
+        return
     out = run(a.mode, a.maxiter)
     out.update(title="Диск турбины ступени 1: оптимизация формы гладкого профиля в CalculiX (disk.py)", date="2026-11-14",
                method=__doc__.strip().splitlines()[0], software=dict(ccx=DT.TA.DK.ccx_version(), python=sys.version.split()[0]),
@@ -107,6 +110,78 @@ def main():
                knots_m=list(R_KNOTS))
     with open(os.path.join(HERE, f"profile_opt_{a.mode}.json"), "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=1, default=float)
+
+
+
+# =========================================================================== колесо ступени 2: задняя поверхность
+RC_KNOTS = (0.07, 0.11, 0.15, 0.20, 0.25, 0.30)
+
+
+def comp2_case(tag, zb_knots, rpm, mesh=(80, 12)):
+    """профиль колеса: тракт (верх) — как у кованого frame3, задняя поверхность — PCHIP по узлам RC_KNOTS"""
+    sys.path.insert(0, DT.TA.FEA)
+    import disk as DK
+    from scipy.interpolate import PchipInterpolator
+    d = DT.frame3(); P = d["parts"]["comp2"]; s = P["variants"]["solid"]; pr = s["profile"]
+    r0 = np.asarray(pr["r"]); t0 = np.asarray(pr["t"]); zc0 = np.asarray(pr["zc"]); hb0 = np.asarray(pr["hb"])
+    ztop = zc0 + t0 / 2; zbot0 = zc0 - t0 / 2
+    kr = np.r_[0.0, 0.058, RC_KNOTS, r0[-1]]
+    kz = np.r_[zbot0[0], zbot0[0], zb_knots, zbot0[-1]]
+    zb = PchipInterpolator(kr, kz)(r0)
+    zb = np.minimum(zb, ztop - 0.010)
+    t = ztop - zb; zc = 0.5 * (ztop + zb)
+    case = dict(name=tag, material="ti64", rpm=rpm, profile=dict(r=r0.tolist(), t=t.tolist(), zc=zc.tolist(), hb=hb0.tolist()),
+                profile_interp="pchip", blade_fill=P["blade_fill"], T_C=s["T_C"], mesh=dict(nr=mesh[0], nz=mesh[1]))
+    wd = os.path.join(SP.OUTDIR, "diskpy", f"{tag}_{int(rpm)}")
+    res = DK.run_case(case, workdir=wd, keep=False)
+    rr = np.linspace(0, r0[-1], 4001); tt = np.interp(rr, r0, t); hh = np.interp(rr, r0, hb0)
+    mass = float(np.trapezoid(4430 * tt * 2 * math.pi * rr, rr)); J = float(np.trapezoid(4430 * tt * 2 * math.pi * rr ** 3, rr))
+    return dict(mass_kg=mass, J_kgm2=J, yield_ratio=res["yield_ratio_max"], yield_at=res["yield_ratio_at"],
+                burst_margin=res["burst"]["margin"], vm_max_MPa=res["vm_max_node_MPa"], gate=res["quality"]["passed"],
+                profile=case["profile"])
+
+
+def run_comp2(maxiter=70):
+    t0 = time.time()
+    d = DT.frame3(); pr = d["parts"]["comp2"]["variants"]["solid"]["profile"]
+    r0 = np.asarray(pr["r"]); zb0 = np.asarray(pr["zc"]) - np.asarray(pr["t"]) / 2
+    x0 = np.interp(RC_KNOTS, r0, zb0)
+    b1 = comp2_case("pc2_base", x0, DT.RPM0); b2 = comp2_case("pc2_base", x0, 1.2 * DT.RPM0)
+    Y1, Y2 = b1["yield_ratio"], b2["yield_ratio"]
+    hist, cache = [], {}
+
+    def ev(x):
+        key = tuple(np.round(x, 6))
+        if key not in cache:
+            a = comp2_case("pc2", x, DT.RPM0); b = comp2_case("pc2", x, 1.2 * DT.RPM0)
+            cache[key] = (a, b)
+            hist.append(dict(x=list(map(float, x)), mass=a["mass_kg"], J=a["J_kgm2"], y100=a["yield_ratio"], y120=b["yield_ratio"]))
+            print("c2", len(hist), round(a["mass_kg"], 2), round(a["yield_ratio"], 4), round(b["yield_ratio"], 4), flush=True)
+        return cache[key]
+    zmin = float(zb0.min())
+    cons = [dict(type="ineq", fun=lambda x: 1 - ev(x)[0]["yield_ratio"] / Y1),
+            dict(type="ineq", fun=lambda x: 1 - ev(x)[1]["yield_ratio"] / Y2)]
+    for i in range(len(RC_KNOTS)):
+        cons.append(dict(type="ineq", fun=lambda x, i=i: x[i] - zmin))
+    r = minimize(lambda x: ev(x)[0]["mass_kg"] / b1["mass_kg"], x0, method="COBYLA", constraints=cons,
+                 options=dict(maxiter=maxiter, rhobeg=0.008, catol=1e-4))
+    feas = [h for h in hist if h["y100"] <= Y1 * 1.001 and h["y120"] <= Y2 * 1.001]
+    best = min(feas, key=lambda h: h["mass"]) if feas else None
+    out = dict(title="Колесо ступени 2: оптимизация гладкой задней поверхности в CalculiX (disk.py)", date="2026-11-14",
+               method="задняя поверхность — PCHIP по узлам RC_KNOTS, тракт и обод — как у кованого профиля frame3; масса лопаток — "
+                      "в плотности столбца (как frame3); цель — масса; ограничения — наибольшее σ/σ0,2 при 100 и 120 % не выше "
+                      "кованого (k = 1); COBYLA; проверка лучшего на сетке 160×24",
+               software=dict(ccx=DT.TA.DK.ccx_version()), knots_m=list(RC_KNOTS), base=dict(c100=b1, c120=b2), n_eval=len(hist),
+               cobyla=dict(success=bool(r.success), message=str(r.message)), best=best, history=hist)
+    if best:
+        a = comp2_case("pc2_fine", np.asarray(best["x"]), DT.RPM0, mesh=(160, 24))
+        b = comp2_case("pc2_fine", np.asarray(best["x"]), 1.2 * DT.RPM0, mesh=(160, 24))
+        bb1 = comp2_case("pc2_base_fine", x0, DT.RPM0, mesh=(160, 24)); bb2 = comp2_case("pc2_base_fine", x0, 1.2 * DT.RPM0, mesh=(160, 24))
+        out["check_160x24"] = dict(c100=a, c120=b, base_c100=bb1, base_c120=bb2)
+    out["seconds"] = round(time.time() - t0, 1)
+    with open(os.path.join(HERE, "profile_opt_comp2.json"), "w", encoding="utf-8") as f:
+        json.dump(out, f, ensure_ascii=False, indent=1, default=float)
+    return out
 
 
 if __name__ == "__main__":
