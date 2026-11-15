@@ -1,0 +1,516 @@
+{
+ "created_utc": "2026-11-15T01:21:55Z",
+ "label": "core130",
+ "case": "core130",
+ "level": "coarse",
+ "job": "su2-kv3-core130-smoke",
+ "run_id": "20261115T011451Z-371e",
+ "itype": "c7a.16xlarge",
+ "az": "us-east-1c",
+ "mesh": {
+  "file": "passage_core130_coarse.su2",
+  "json": "impeller_core130_coarse.json",
+  "header": {
+   "NDIME": 3,
+   "NELEM": 616206,
+   "NPOIN": 139006,
+   "NMARK": 7,
+   "markers": {
+    "inlet": 1213,
+    "outlet": 996,
+    "hub": 7675,
+    "shroud": 64639,
+    "blade": 69693,
+    "periodic_1": 5954,
+    "periodic_2": 5954
+   }
+  },
+  "double_sided": false
+ },
+ "d1_reference": {
+  "m": 9.95,
+  "m_side": 9.95,
+  "PR": 4.25,
+  "rpm": 22197.0,
+  "D2": 0.435,
+  "U2": 505.57100795506165,
+  "b2": 0.02341520477246604,
+  "T01": 288.15,
+  "p01": 101325.0,
+  "eta_comp_stage": 0.8585973705037672
+ },
+ "estimate": {
+  "p_out_estimate": 311427.257614276,
+  "double_sided": false,
+  "m_for_estimate": 9.95,
+  "r_out": 0.28275,
+  "p_out_estimate_run_case": 311427.257614276,
+  "note": "оценка run_case.estimate_p_out"
+ },
+ "base_pfrac": 0.75,
+ "p_base_Pa": 233570.44321070702,
+ "pfracs_assigned": [
+  0.7,
+  0.9,
+  1.0,
+  1.1
+ ],
+ "nproc": 64,
+ "np_per_point": 16,
+ "budget": {
+  "time_s": 2405.1,
+  "uptime_at_start_s": 414.9,
+  "job_max_min": 60,
+  "reserve_s": 300.0,
+  "base_max_frac": 0.3
+ },
+ "plans": {
+  "base": "smoke075",
+  "point": [
+   {
+    "name": "c1_point",
+    "frac": 1.0,
+    "pfrac": 1.0,
+    "ramp": 0,
+    "pramp": 100,
+    "iter": 200,
+    "muscl": true
+   }
+  ],
+  "iter_scale_base": 1.0,
+  "iter_scale_point": 1.0
+ },
+ "settings": {
+  "shroud": "slip",
+  "vaneless": "slip",
+  "turb": "SST",
+  "output_files": "RESTART, SURFACE_PARAVIEW",
+  "extra": [
+   "MARKER_PLOTTING= (blade, hub)"
+  ],
+  "mpi_args": "--use-hwthread-cpus"
+ },
+ "base": {
+  "returncode": 0,
+  "dir": "base",
+  "statuses": [
+   "finished",
+   "finished",
+   "finished"
+  ],
+  "smoke_checks": {
+   "statuses": [
+    "finished",
+    "finished",
+    "finished"
+   ],
+   "all_stages_finished": true,
+   "iterations_in_run": 520,
+   "no_divergence": true,
+   "rms_rho_first_stage_start": -3.801212581,
+   "rms_rho_last": -4.804962204,
+   "rms_rho_drop_over_run": 1.0037496229999996,
+   "rms_rho_last_stage_drop_from_max": 0.19587444799999965,
+   "rms_rho_slope_last_half_per_100": -0.7466152392830726,
+   "slope_max_per_100": -0.1,
+   "mass_imbalance": 0.004423100578781421,
+   "mass_sign_ok": true,
+   "residuals_falling": true,
+   "mass_within_tol": true,
+   "mass_tol": 0.05,
+   "passed": true
+  },
+  "record": {
+   "pfrac": 0.75,
+   "p_out_Pa": 233570.44321070702,
+   "statuses": [
+    "finished",
+    "finished",
+    "finished"
+   ],
+   "status": "finished",
+   "dir": "base",
+   "stage": "s3_point_p075",
+   "history_rows": 150,
+   "seconds": 12.0,
+   "sec_per_iter": 0.08,
+   "rms_rho": {
+    "first": -4.609087756,
+    "max": -4.609087756,
+    "last": -4.804962204,
+    "slope_per_100_last_half": -0.7466152392830726
+   },
+   "performance": {
+    "m_in_passage": 0.69498605,
+    "m_out_passage": -0.6980600432,
+    "mass_imbalance": 0.004423100578781421,
+    "mass_sign_ok": true,
+    "m_wheel": 6.25487445,
+    "PR_tt": 3.218819610385385,
+    "TR_tt": 1.6006389763892797,
+    "eta_tt_isentropic": 0.6602119231917482,
+    "m_wheel_corrected": 6.25895215722286,
+    "PRTT_su2": 3.218178452,
+    "TotTotEff_su2": 69.05837752,
+    "PRTS_su2": 2.303773556,
+    "TotStaticEff_su2": 44.79648245,
+    "MassFlowIn_turbo": 0.69498605,
+    "MassFlowOut_turbo": 0.6980603868,
+    "EulerianWork_su2": 173993.0377,
+    "window_iters": 50,
+    "window_rel_change": {
+     "m_in": 0.008735477352387217,
+     "pt_out": 0.009968037599478691,
+     "tt_out": 0.028691559017383836
+    },
+    "m_wheel_total": 6.25487445,
+    "m_wheel_corrected_total": 6.25895215722286
+   },
+   "mass_sign_ok": true,
+   "periodic": {
+    "periodic_matched_points": 6270,
+    "periodic_max_distance": 1.70109e-16,
+    "bad_match": 0
+   },
+   "nan": false,
+   "su2_error": null,
+   "window": {
+    "window_iters": 500,
+    "rows": 150,
+    "rel_change": {
+     "m_in": null,
+     "PR_tt": null,
+     "tt_out": null,
+     "eta_tt": null
+    },
+    "converged_pi_eta": false
+   },
+   "usable": true,
+   "converged": false
+  },
+  "su2_version": "SU2 v8.6.0 \"Harrier\", The Open-Source CFD Code",
+  "key_check": {
+   "cconfig": "/opt/SU2-src/Common/src/CConfig.cpp",
+   "registered_keys": 770,
+   "unknown": []
+  },
+  "files": [
+   "run_summary.json",
+   "history_s1_ramp60.csv",
+   "history_s2_ramp100_p075.csv",
+   "history_s3_point_p075.csv",
+   "su2_s1_ramp60.log",
+   "su2_s2_ramp100_p075.log",
+   "su2_s3_point_p075.log",
+   "case_s1_ramp60.cfg",
+   "case_s2_ramp100_p075.cfg",
+   "case_s3_point_p075.cfg",
+   "surface.vtu"
+  ],
+  "restart_ok": true
+ },
+ "points": [
+  {
+   "pfrac": 0.7,
+   "p_out_Pa": 217999.08032999322,
+   "statuses": [
+    "finished"
+   ],
+   "status": "finished",
+   "dir": "p0.700",
+   "stage": "c1_point",
+   "history_rows": 200,
+   "seconds": 42.6,
+   "sec_per_iter": 0.213,
+   "rms_rho": {
+    "first": -4.791636146,
+    "max": -4.71327208,
+    "last": -5.048768661,
+    "slope_per_100_last_half": -0.05126921960876086
+   },
+   "performance": {
+    "m_in_passage": 0.6477843902,
+    "m_out_passage": -0.6676975708,
+    "mass_imbalance": 0.03074044527972021,
+    "mass_sign_ok": true,
+    "m_wheel": 5.8300595118,
+    "PR_tt": 2.9517127394041403,
+    "TR_tt": 1.6441107516093945,
+    "eta_tt_isentropic": 0.562647107802403,
+    "m_wheel_corrected": 5.834600084616143,
+    "PRTT_su2": 2.950986111,
+    "TotTotEff_su2": 59.99034159,
+    "PRTS_su2": 2.151005815,
+    "TotStaticEff_su2": 37.95092724,
+    "MassFlowIn_turbo": 0.6477843902,
+    "MassFlowOut_turbo": 0.6676978855,
+    "EulerianWork_su2": 186578.3285,
+    "window_iters": 50,
+    "window_rel_change": {
+     "m_in": 0.005319758166658051,
+     "pt_out": 0.0005878330036223101,
+     "tt_out": 0.0009371369886130217
+    },
+    "m_wheel_total": 5.8300595118,
+    "m_wheel_corrected_total": 5.834600084616143
+   },
+   "mass_sign_ok": true,
+   "periodic": {
+    "periodic_matched_points": 6270,
+    "periodic_max_distance": 1.70109e-16,
+    "bad_match": 0
+   },
+   "nan": false,
+   "su2_error": null,
+   "window": {
+    "window_iters": 500,
+    "rows": 200,
+    "rel_change": {
+     "m_in": null,
+     "PR_tt": null,
+     "tt_out": null,
+     "eta_tt": null
+    },
+    "converged_pi_eta": false
+   },
+   "usable": true,
+   "converged": false,
+   "returncode": 0,
+   "files": [
+    "run_summary.json",
+    "history_c1_point.csv",
+    "su2_c1_point.log",
+    "case_c1_point.cfg",
+    "surface.vtu",
+    "restart_c1_point.dat"
+   ]
+  },
+  {
+   "pfrac": 0.9,
+   "p_out_Pa": 280284.5318528484,
+   "statuses": [
+    "finished"
+   ],
+   "status": "finished",
+   "dir": "p0.900",
+   "stage": "c1_point",
+   "history_rows": 200,
+   "seconds": 43.7,
+   "sec_per_iter": 0.21850000000000003,
+   "rms_rho": {
+    "first": -4.791636146,
+    "max": -4.731125706,
+    "last": -5.559611918,
+    "slope_per_100_last_half": -0.30851399088688863
+   },
+   "performance": {
+    "m_in_passage": 0.6168941741,
+    "m_out_passage": -0.5141867185,
+    "mass_imbalance": 0.16649120693973507,
+    "mass_sign_ok": true,
+    "m_wheel": 5.552047566900001,
+    "PR_tt": 3.8280482210849667,
+    "TR_tt": 1.744020469385847,
+    "eta_tt_isentropic": 0.6282832586309525,
+    "m_wheel_corrected": 5.552318125891217,
+    "PRTT_su2": 3.827689937,
+    "TotTotEff_su2": 66.10202495,
+    "PRTS_su2": 2.76075946,
+    "TotStaticEff_su2": 45.21600385,
+    "MassFlowIn_turbo": 0.6168941741,
+    "MassFlowOut_turbo": 0.5141869781,
+    "EulerianWork_su2": 215533.2013,
+    "window_iters": 50,
+    "window_rel_change": {
+     "m_in": 0.008959395844617014,
+     "pt_out": 0.0014936805439177056,
+     "tt_out": 0.000608437397075061
+    },
+    "m_wheel_total": 5.552047566900001,
+    "m_wheel_corrected_total": 5.552318125891217
+   },
+   "mass_sign_ok": true,
+   "periodic": {
+    "periodic_matched_points": 6270,
+    "periodic_max_distance": 1.70109e-16,
+    "bad_match": 0
+   },
+   "nan": false,
+   "su2_error": null,
+   "window": {
+    "window_iters": 500,
+    "rows": 200,
+    "rel_change": {
+     "m_in": null,
+     "PR_tt": null,
+     "tt_out": null,
+     "eta_tt": null
+    },
+    "converged_pi_eta": false
+   },
+   "usable": false,
+   "converged": false,
+   "returncode": 0,
+   "files": [
+    "run_summary.json",
+    "history_c1_point.csv",
+    "su2_c1_point.log",
+    "case_c1_point.cfg",
+    "surface.vtu",
+    "restart_c1_point.dat"
+   ]
+  },
+  {
+   "pfrac": 1.0,
+   "p_out_Pa": 311427.257614276,
+   "statuses": [
+    "finished"
+   ],
+   "status": "finished",
+   "dir": "p1.000",
+   "stage": "c1_point",
+   "history_rows": 200,
+   "seconds": 41.2,
+   "sec_per_iter": 0.20600000000000002,
+   "rms_rho": {
+    "first": -4.791636146,
+    "max": -4.727279169,
+    "last": -5.422116473,
+    "slope_per_100_last_half": -0.21631182888448844
+   },
+   "performance": {
+    "m_in_passage": 0.592715801,
+    "m_out_passage": -0.4326006045,
+    "mass_imbalance": 0.27013822852345387,
+    "mass_sign_ok": true,
+    "m_wheel": 5.334442209,
+    "PR_tt": 4.28227757741239,
+    "TR_tt": 1.7877450481328998,
+    "eta_tt_isentropic": 0.6540566080190957,
+    "m_wheel_corrected": 5.3318389388963645,
+    "PRTT_su2": 4.281828803,
+    "TotTotEff_su2": 68.5198479,
+    "PRTS_su2": 3.063536065,
+    "TotStaticEff_su2": 47.82345217,
+    "MassFlowIn_turbo": 0.592715801,
+    "MassFlowOut_turbo": 0.4326010242,
+    "EulerianWork_su2": 228235.9593,
+    "window_iters": 50,
+    "window_rel_change": {
+     "m_in": 0.019733581558423748,
+     "pt_out": 0.0014004951376676887,
+     "tt_out": 0.0006377789009012444
+    },
+    "m_wheel_total": 5.334442209,
+    "m_wheel_corrected_total": 5.3318389388963645
+   },
+   "mass_sign_ok": true,
+   "periodic": {
+    "periodic_matched_points": 6270,
+    "periodic_max_distance": 1.70109e-16,
+    "bad_match": 0
+   },
+   "nan": false,
+   "su2_error": null,
+   "window": {
+    "window_iters": 500,
+    "rows": 200,
+    "rel_change": {
+     "m_in": null,
+     "PR_tt": null,
+     "tt_out": null,
+     "eta_tt": null
+    },
+    "converged_pi_eta": false
+   },
+   "usable": false,
+   "converged": false,
+   "returncode": 0,
+   "files": [
+    "run_summary.json",
+    "history_c1_point.csv",
+    "su2_c1_point.log",
+    "case_c1_point.cfg",
+    "surface.vtu",
+    "restart_c1_point.dat"
+   ]
+  },
+  {
+   "pfrac": 1.1,
+   "p_out_Pa": 342569.9833757036,
+   "statuses": [
+    "finished"
+   ],
+   "status": "finished",
+   "dir": "p1.100",
+   "stage": "c1_point",
+   "history_rows": 200,
+   "seconds": 47.8,
+   "sec_per_iter": 0.239,
+   "rms_rho": {
+    "first": -4.791636146,
+    "max": -4.719856806,
+    "last": -5.390670167,
+    "slope_per_100_last_half": -0.4225560257041703
+   },
+   "performance": {
+    "m_in_passage": 0.1683800061,
+    "m_out_passage": -0.1740820483,
+    "mass_imbalance": 0.03386412871735832,
+    "mass_sign_ok": true,
+    "m_wheel": 1.5154200549,
+    "PR_tt": 4.783534702334397,
+    "TR_tt": 1.8320741622663208,
+    "eta_tt_isentropic": 0.6777256534306474,
+    "m_wheel_corrected": 1.5152408868870042,
+    "PRTT_su2": 4.784948058,
+    "TotTotEff_su2": 70.84368216,
+    "PRTS_su2": 3.356730394,
+    "TotStaticEff_su2": 49.64320043,
+    "MassFlowIn_turbo": 0.1683800061,
+    "MassFlowOut_turbo": 0.1740825367,
+    "EulerianWork_su2": 241052.5553,
+    "window_iters": 50,
+    "window_rel_change": {
+     "m_in": 0.6575884035438339,
+     "pt_out": 0.005062203829395172,
+     "tt_out": 0.0021791784100908484
+    },
+    "m_wheel_total": 1.5154200549,
+    "m_wheel_corrected_total": 1.5152408868870042
+   },
+   "mass_sign_ok": true,
+   "periodic": {
+    "periodic_matched_points": 6270,
+    "periodic_max_distance": 1.70109e-16,
+    "bad_match": 0
+   },
+   "nan": false,
+   "su2_error": null,
+   "window": {
+    "window_iters": 500,
+    "rows": 200,
+    "rel_change": {
+     "m_in": null,
+     "PR_tt": null,
+     "tt_out": null,
+     "eta_tt": null
+    },
+    "converged_pi_eta": false
+   },
+   "usable": true,
+   "converged": false,
+   "returncode": 0,
+   "files": [
+    "run_summary.json",
+    "history_c1_point.csv",
+    "su2_c1_point.log",
+    "case_c1_point.cfg",
+    "surface.vtu",
+    "restart_c1_point.dat"
+   ]
+  }
+ ],
+ "verdict": "ok",
+ "t_total_s": 89.5
+}
