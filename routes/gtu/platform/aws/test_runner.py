@@ -2698,3 +2698,69 @@ def test_v3_terminate_survives_client_factory_error_and_reconcile_keeps_region(t
     r2.reconcile()
     end = [x for x in R.Ledger(tmp_path / "l2.jsonl").records() if x["ev"] == "end"]
     assert [(x["outcome"], x["region"], x["market"]) for x in end] == [("reconciled", "us-west-2", "on-demand")]
+
+
+def test_v3_ambiguous_launch_error_fails_job_instead_of_second_region(tmp_path, monkeypatch):
+    """RunInstances ответил InternalError (5xx после повторов botocore), а машина всё же создана и по ClientToken ещё
+    не видна: следующий регион запустил бы вторую машину той же задачи (вне журнала и бюджета, в тот же префикс S3).
+    Как в версии 2 — задача снимается со статусом failed, в другие регионы и рынки не идёт; сборщик по тегам в finally
+    гасит возможную машину."""
+    clk = Clock()
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(384, 384)), us_west_2=dict(sq=sq_vals(384, 300)))
+    e1 = sky.clouds["us-east-1"]
+    orig = e1.ec2.run_instances
+
+    def ghost(**p):
+        orig(**p)                                       # машина создана
+        raise cerr("InternalError", "RunInstances")
+    monkeypatch.setattr(e1.ec2, "run_instances", ghost)
+    monkeypatch.setattr(R.Runner, "_find_by_token", lambda self, tok, region=None: None)   # описание запаздывает
+    r = sky.runner(tmp_path, regions=["us-east-1", "us-west-2"], on_demand_fallback=True)
+    r.load_quotas()
+    assert r.launch(make_job(name="a")) == ("failed", None)
+    assert len(e1.inst) == 1 and not sky.clouds["us-west-2"].runs                      # второй машины нет
+    assert "InternalError" in r._why["a"] and "другие регионы и типы не пробуются" in r._why["a"]
+    assert [(x["region"], x["code"]) for x in ledger(tmp_path, "launch_error")] == [("us-east-1", "InternalError")]
+    # полный прогон: задача failed, «призрак» погашен сборщиком по тегам в finally, журнал без открытых записей
+    clk2 = Clock()
+    sky2 = Sky(clk2, us_east_1=dict(sq=sq_vals(384, 384)), us_west_2=dict(sq=sq_vals(384, 300)))
+    g1 = sky2.clouds["us-east-1"]
+    orig2 = g1.ec2.run_instances
+
+    def ghost2(**p):
+        orig2(**p)
+        raise cerr("InternalError", "RunInstances")
+    monkeypatch.setattr(g1.ec2, "run_instances", ghost2)
+    r2 = sky2.runner(tmp_path / "b", regions=["us-east-1", "us-west-2"])
+    res = r2.run([make_job(name="b")])
+    assert res["b"]["status"] == "failed" and not sky2.clouds["us-west-2"].runs
+    assert [i["state"] for i in g1.inst.values()] == ["terminated"]
+    assert R.Ledger(tmp_path / "b" / "ledger.jsonl").summary()["open"] == []
+
+
+def test_v3_dryrun_reveals_neighbor_region_without_describe(tmp_path):
+    """`run` без --live (первый шаг сессии с ключами): DescribeInstances DryRun соседнего региона — до цены и запуска;
+    отказ в правах исключает регион для обоих рынков (журнал DryRun), задачи раскладываются по остальным регионам,
+    общий журнал не тронут."""
+    clk = Clock()
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(128)), us_east_2=dict(sq=sq_vals(64)),
+              us_west_2=dict(sq=sq_vals(384), deny=("observe",)))
+
+    class DryEc2(_RegionEc2):
+        def run_instances(self, **p):
+            if p.pop("DryRun", False):
+                self.c.calls.append(("run_instances_dry", None))
+                raise cerr("DryRunOperation", "RunInstances")
+            return super().run_instances(**p)
+    for cl in sky.clouds.values():
+        cl.ec2 = DryEc2(cl)
+    r = sky.runner(tmp_path, dryrun=True)
+    res = r.run([make_job(name=f"p{i}") for i in range(5)])
+    assert all(v["status"] == "dryrun_ok" for v in res.values())
+    assert {reg for _w, _n, reg, _m in r._placements} == {"us-east-1", "us-east-2"}
+    assert [c[0] for c in sky.clouds["us-west-2"].calls] == ["get_service_quota", "describe_instances_dry"]
+    jr = [json.loads(x) for x in (tmp_path / "runs" / RUN / "journal.dryrun.jsonl").read_text().splitlines()]
+    assert [(x["region"], x["ok"]) for x in jr if x["ev"] == "region_check"] == [("us-east-2", True), ("us-west-2", False)]
+    assert {(x["region"], x["market"]) for x in jr if x["ev"] == "region_denied"} == {("us-west-2", "spot"),
+                                                                                      ("us-west-2", "on-demand")}
+    assert not (tmp_path / "ledger.jsonl").exists()
