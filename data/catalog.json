@@ -4,12 +4,12 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 477,
-    "total_bytes": 19244129,
-    "results_files": 200,
+    "datasets": 479,
+    "total_bytes": 19259186,
+    "results_files": 201,
     "results_with_script": 65,
     "results_referenced_in_site": 22,
-    "results_with_provenance_fields": 51,
+    "results_with_provenance_fields": 52,
     "by_track": {
       "ammonia": 91,
       "battery-cathode": 1,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 157,
+      "не определён": 159,
       "прочее": 25
     }
   },
@@ -6692,6 +6692,43 @@
       "last_commit": "c4a6fd7"
     },
     {
+      "path": "routes/gtu/combustor/comb_bc_v2_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 11413,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "method",
+        "software",
+        "status",
+        "inputs",
+        "D2_m",
+        "far_st_CH4",
+        "far_st_diesel",
+        "LHV_J_kg",
+        "LHV_diesel_J_kg",
+        "eq_table",
+        "flame_table",
+        "ign_table",
+        "title",
+        "date",
+        "bc1_key",
+        "loads",
+        "check",
+        "key",
+        "runtime_s"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "515becf"
+    },
+    {
       "path": "routes/gtu/combustor/comb_budget_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
@@ -6978,6 +7015,31 @@
       "last_change": "2026-11-14",
       "last_author": "Claude",
       "last_commit": "493cb81"
+    },
+    {
+      "path": "routes/gtu/combustor/targets_v2.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 3644,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "schema",
+        "title",
+        "date",
+        "base_file",
+        "base_date",
+        "base_targets",
+        "new_targets",
+        "funnel_interface",
+        "trl_multiplier"
+      ],
+      "provenance_fields": [
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "515becf"
     },
     {
       "path": "routes/gtu/combustor/targets.json",
