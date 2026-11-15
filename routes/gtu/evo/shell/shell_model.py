@@ -215,6 +215,7 @@ _g("f_n", 3, 12, "int"); _g("f_lean", 0.0, 40.0); _g("f_bow", 0.0, 0.2); _g("f_c
 _g("f_chord", 0.04, 0.16); _g("f_tc", 0.08, 0.30); _g("f_tub", 0.0, 0.10)
 _g("r_n", 3, 14, "int"); _g("r_lean", 0.0, 45.0); _g("r_bow", 0.0, 0.2); _g("r_cone", 0.0, 50.0)
 _g("r_chord", 0.05, 0.18); _g("r_tc", 0.08, 0.30)
+_g("ring_h", 0.0, 0.08); _g("ring_w", 0.01, 0.06)
 _g("hf_n", 6, 48, "int"); _g("hf_t", 0.0015, 0.008); _g("hf_b", 0.01, 0.06); _g("hf_shape", 1.0, 3.0); _g("hf_span", 0.05, 0.20)
 _g("emb", 0, 1, "int6")
 _g("fuel_port", 0.0, 1.0); _g("murray_k", 2.0, 3.0)
@@ -282,25 +283,22 @@ def _zone_of(z):
     return np.clip(np.searchsorted(zs, z, side="right") - 1, 0, len(zs) - 2)
 
 
-def envelope(variant, extract="вперёд", beta=120.0, ramp=0.06):
-    """гладкая огибающая требуемых радиусов: LSE от «плато» зон (≥ max по построению, превышение ≤ ln(n)/β ≈ 1,3 см).
-    Картридж: плато продлено в сторону выемки — канал не сужается по пути картриджа."""
+def envelope(variant, extract="вперёд", w=0.08):
+    """гладкая огибающая требуемых радиусов: E = K_w * (расширение на w ступенчатой r_req), K — ядро (1 − u²)³ с носителем
+    [−w, w]: среднее по окну расширенной функции не меньше r_req в центре окна, поэтому E ≥ r_req везде, и E гладкая (C³),
+    переход между зонами — на длине 2w. Картридж: сначала накопленный максимум в сторону выемки (канал не сужается по пути)."""
     z = ZG
-    fs = []
-    for k, zn in enumerate(INP["zones"]):
-        a, b = zn["z0"], zn["z1"]
-        if variant == "картридж":
-            if extract == "вперёд":
-                a = 0.0
-            else:
-                b = INP["zs"][-1]
-        left = S.smoothstep5((z - (a - ramp)) / ramp)
-        right = 1.0 - S.smoothstep5((z - b) / ramp)
-        plateau = np.where(z < a, left, np.where(z > b, right, 1.0))
-        fs.append(zn["r_req"] * plateau + 0.05 * (1 - plateau))
-    F = np.stack(fs)
-    m = F.max(axis=0)
-    return m + np.log(np.exp(beta * (F - m)).sum(axis=0)) / beta
+    dz = float(z[1] - z[0])
+    req = np.array([INP["zones"][k]["r_req"] for k in _zone_of(z)])
+    if variant == "картридж":
+        req = np.maximum.accumulate(req[::-1])[::-1] if extract == "вперёд" else np.maximum.accumulate(req)
+    n = int(math.ceil(w / dz))
+    pad = np.pad(req, n, mode="edge")
+    dil = np.array([pad[i:i + 2 * n + 1].max() for i in range(len(req))])
+    u = np.arange(-n, n + 1) * dz / w
+    ker = np.clip(1 - u * u, 0, None) ** 3
+    ker /= ker.sum()
+    return np.convolve(np.pad(dil, n, mode="edge"), ker, mode="valid")
 
 
 ENV = {("оболочка", "вперёд"): envelope("оболочка"), ("оболочка", "назад"): envelope("оболочка"),
@@ -484,6 +482,25 @@ def shell_freq_donnell(R, Lz, A11, A22, A12, A66, D11, D22, D12, D66, rho_s, m_m
     return best
 
 
+def membrane_shell(z, r_m, t, p_z):
+    """безмоментная теория оболочки вращения: N_φ = p·R2/2, N_θ = p·R2·(1 − R2·κ1/2); R2 = r·√(1 + r'²), κ1 = −r''/(1 + r'²)^1,5.
+    Кривизна сглажена по длине изгибного краевого эффекта 0,78·√(Rt) — у излома меридиана изгиб размывает его на эту длину
+    (оценка). Возврат: σ_θ/p·…, точнее N_θ, N_φ (Н/м) на сетке z."""
+    dz = float(z[1] - z[0])
+    lam = 0.78 * math.sqrt(float(np.mean(r_m)) * float(np.mean(t)))
+    w = max(1, int(round(lam / dz)))
+    uu = np.arange(-2 * w, 2 * w + 1) / max(w, 1)
+    ker = np.exp(-0.5 * (2 * uu) ** 2)               # гаусс, σ = λ/2
+    ker /= ker.sum()
+    rs = np.convolve(np.pad(r_m, 2 * w, mode="edge"), ker, mode="valid")
+    r1 = np.gradient(rs, dz); r2 = np.gradient(r1, dz)
+    R2 = rs * np.sqrt(1 + r1 ** 2)
+    k1 = -r2 / (1 + r1 ** 2) ** 1.5
+    Nphi = p_z * R2 / 2.0
+    Nth = p_z * R2 * (1.0 - R2 * k1 / 2.0)
+    return Nth, Nphi
+
+
 def strut_frame(N, L0, lean_deg, bow, cone_deg, chord, tc, E, alpha, T_case, T_hub, T_strut, r_case, r_hub, d_service=0.0, rho=4430.0):
     """рама подшипника из N стоек-профилей (NACA 00tc, площадь 0,685·c·t, I_min ≈ 0,0393·c·t³ — оценка формы профиля).
     Изгиб (bow) — прогиб e = bow·L: осевая податливость L/EA + (8/15)·e²L/EI (Кастильяно, параболическая ось).
@@ -533,6 +550,66 @@ def strut_frame(N, L0, lean_deg, bow, cone_deg, chord, tc, E, alpha, T_case, T_h
     return dict(K_lat=float(Klat), sigma=float(sig), sig_thermal=float(s_ax + s_b), sig_load=float(s_load), k_axial=float(k_a), k_trans=float(k_t),
                 dr_th=float(dr), blockage=float(blockage), mass=float(mass), L=float(L), t=float(t), t_service=float(t_serv),
                 service_ok=bool(t_serv <= 0.35 * chord + 1e-9))
+
+
+_RING_C = {}
+
+
+def ring_coeff(N, nseg=144):
+    """податливость кольца рамы: δ = c(N)·F·R³/(EI) — смещение жёсткой ступицы относительно поступательного смещения кольца при
+    боковой силе F, переданной N жёсткими радиальными стойками на кольцо, которое держит оболочка касательным потоком
+    q = F·sinθ/(πR) (классическая схема шпангоута). Считается своим плоским КЭ кольца (прямые балочные элементы на 144-угольнике)."""
+    if N in _RING_C:
+        return _RING_C[N]
+    k = max(1, int(math.ceil(nseg / N)))
+    n = N * k
+    th = 2 * math.pi * np.arange(n) / n
+    X = np.stack([np.cos(th), np.sin(th)], 1)
+    nd = 3 * n + 2
+    K = np.zeros((nd, nd)); Fv = np.zeros(nd)
+    EA, EI = 1e4, 1.0
+    for e in range(n):
+        a, b = e, (e + 1) % n
+        d = X[b] - X[a]; L = float(np.hypot(*d)); c, s_ = d / L
+        kl = np.array([[EA / L, 0, 0, -EA / L, 0, 0], [0, 12 * EI / L ** 3, 6 * EI / L ** 2, 0, -12 * EI / L ** 3, 6 * EI / L ** 2],
+                       [0, 6 * EI / L ** 2, 4 * EI / L, 0, -6 * EI / L ** 2, 2 * EI / L], [-EA / L, 0, 0, EA / L, 0, 0],
+                       [0, -12 * EI / L ** 3, -6 * EI / L ** 2, 0, 12 * EI / L ** 3, -6 * EI / L ** 2],
+                       [0, 6 * EI / L ** 2, 2 * EI / L, 0, -6 * EI / L ** 2, 4 * EI / L]])
+        T = np.zeros((6, 6)); r = np.array([[c, s_, 0], [-s_, c, 0], [0, 0, 1]]); T[:3, :3] = r; T[3:, 3:] = r
+        idx = [3 * a, 3 * a + 1, 3 * a + 2, 3 * b, 3 * b + 1, 3 * b + 2]
+        K[np.ix_(idx, idx)] += T.T @ kl @ T
+        # касательный поток оболочки (равномерно по элементу, на узлы поровну)
+        tm = 0.5 * (th[a] + (th[b] if b else 2 * math.pi))
+        q = math.sin(tm) / math.pi
+        fx, fy = -q * math.sin(tm) * L, q * math.cos(tm) * L
+        Fv[3 * a] += fx / 2; Fv[3 * a + 1] += fy / 2; Fv[3 * b] += fx / 2; Fv[3 * b + 1] += fy / 2
+    ks = 1e6
+    hx, hy = 3 * n, 3 * n + 1
+    for j in range(N):
+        i = j * k
+        er = X[i]
+        v = np.zeros(nd); v[3 * i] = er[0]; v[3 * i + 1] = er[1]; v[hx] = -er[0]; v[hy] = -er[1]
+        K += ks * np.outer(v, v)
+    Fv[hx] = 1.0
+    K += 1e-9 * np.eye(nd)
+    U = np.linalg.solve(K, Fv)
+    c = float(U[hx] - np.mean(U[0:3 * n:3]))
+    _RING_C[N] = c
+    return c
+
+
+for _N in range(3, 49):
+    ring_coeff(_N)           # заранее (кэш) — до ветвления процессов островов
+
+
+def ring_I(R, t, ring_h, ring_w, t_extra=0.0):
+    """изгибная жёсткость сечения кольца рамы в своей плоскости: полоса стенки шириной 2·0,78·√(Rt) и кольцо жёсткости
+    ring_w × ring_h снаружи (составное сечение, ось — через общий центр тяжести)"""
+    b = 2 * 0.78 * math.sqrt(R * t)
+    A1, y1, I1 = b * t, 0.0, b * t ** 3 / 12
+    A2, y2, I2 = ring_w * ring_h, 0.5 * t + 0.5 * ring_h, ring_w * ring_h ** 3 / 12
+    yc = (A1 * y1 + A2 * y2) / (A1 + A2)
+    return I1 + A1 * (y1 - yc) ** 2 + I2 + A2 * (y2 - yc) ** 2 + t_extra
 
 
 def hot_cage(p):
@@ -664,9 +741,24 @@ def evaluate_params(p, variant, with_geom=False):
     mr = mat_props("in718p", T_STRUT_REAR)
     fr_r = strut_frame(p["r_n"], rE - R_HUB, p["r_lean"], p["r_bow"], p["r_cone"], p["r_chord"], p["r_tc"], mr["E"], mr["alpha"],
                        INP["zones"][4]["T"], T_HUB[1], T_STRUT_REAR, rE, R_HUB, d_serv_r, mr["rho"])
+    # кольца рам: податливость кольца последовательно со стойками (ring_coeff — свой КЭ); у картриджа кольцо — на его обечайке 8 мм
+    t_at = lambda zz: float(np.interp(zz, z, t)) if variant == "оболочка" else 0.008  # noqa: E731
+    E_ring = mp["E"] if variant == "оболочка" else mat_props("ti64", 300.0)["E"]
+    rings = {}
+    z_cage = INP["zones"][4]["z0"] + p["hf_span"]
+    for key, zz, Nn, Rr in (("front", INP["z_fb"], p["f_n"], rA), ("rear", INP["z_rb"], p["r_n"], rE), ("cage", z_cage, p["hf_n"],
+                            float(np.interp(z_cage, z, r_i)) if variant == "оболочка" else INP["zones"][4]["r_req"])):
+        I_r = ring_I(Rr, t_at(zz), p["ring_h"], p["ring_w"] + p["rib_fillet"])
+        Kr = E_ring * I_r / (ring_coeff(int(Nn)) * Rr ** 3)
+        rings[key] = dict(K_ring=Kr, I=I_r, R=Rr, mass=2 * math.pi * Rr * (p["ring_w"] + p["rib_fillet"]) * p["ring_h"] * rho_m)
+    fr_f["K_struts"], fr_r["K_struts"] = fr_f["K_lat"], fr_r["K_lat"]
+    fr_f["K_lat"] = 1.0 / (1.0 / fr_f["K_struts"] + 1.0 / rings["front"]["K_ring"])
+    fr_r["K_lat"] = 1.0 / (1.0 / fr_r["K_struts"] + 1.0 / rings["rear"]["K_ring"])
     sy_f = mf["sy"] * K_ROUTE["печать"] / SF_YIELD
     sy_r = mr["sy"] * K_ROUTE["печать"] / SF_YIELD
     cage = hot_cage(p)
+    cage["K_fingers"] = cage["K"]
+    cage["K"] = 1.0 / (1.0 / cage["K_fingers"] + 1.0 / rings["cage"]["K_ring"])
     # ---------------- каналы
     fsegs, finfo = fuel_tree(p, prof)
     emb_list = [CHANNELS[k][0] for k in range(min(emb, 5))]
@@ -693,7 +785,8 @@ def evaluate_params(p, variant, with_geom=False):
             ch_mass += 2 * (Lc * math.pi * d * 0.0015 * 7850 + 0.5)
     # ---------------- опоры (бобышки цапф и тяги: 3 × 6 кг — оценка) и итоговая масса
     m_mounts = 18.0
-    mass = m_wall + m_ribs + fr_f["mass"] + fr_r["mass"] + cage["mass"] + boss_m + max(ch_mass, -0.5 * m_wall) + m_mounts
+    m_rings = sum(r_["mass"] for r_ in rings.values())
+    mass = m_rings + m_wall + m_ribs + fr_f["mass"] + fr_r["mass"] + cage["mass"] + boss_m + max(ch_mass, -0.5 * m_wall) + m_mounts
     m_cart_case = 0.0
     if variant == "картридж":
         # корпус картриджа (статор внутри) — тонкая стальная/титановая обечайка 8 мм по требуемому радиусу (оценка)
@@ -706,6 +799,8 @@ def evaluate_params(p, variant, with_geom=False):
     sig_th_max = 0.0
     zone_rows = []
     rib_bz = rs["by_zone"]
+    p_z = np.array([INP["zones"][k]["p_g"] for k in zi])
+    Nth_z, Nphi_z = membrane_shell(z, r_m, t, p_z)
     for k, zn in enumerate(INP["zones"]):
         m = zi == k
         R = float(np.mean(r_m[m])); tt = float(np.mean(t[m])); tc = float(np.mean(t_c[m])); ts = tt - tc
@@ -715,9 +810,14 @@ def evaluate_params(p, variant, with_geom=False):
         a_ax = rib_bz[k, 0] / circA
         t_hoop = ts + Er * tc + a_hoop
         t_ax = ts + Er * tc + a_ax
-        sth = zn["p_g"] * R / t_hoop
-        sz = zn["p_g"] * R / (2 * t_ax)
-        svm = math.sqrt(sth ** 2 - sth * sz + sz ** 2)
+        # безмоментная теория оболочки вращения (кривизна меридиана), наибольшее по зоне
+        t_hz = (t - t_c + Er * t_c)[m] + a_hoop
+        t_az = (t - t_c + Er * t_c)[m] + a_ax
+        sth_z = Nth_z[m] / t_hz
+        sz_z = Nphi_z[m] / t_az
+        svm_z = np.sqrt(sth_z ** 2 - sth_z * sz_z + sz_z ** 2)
+        jm = int(np.argmax(svm_z))
+        sth, sz, svm = float(sth_z[jm]), float(sz_z[jm]), float(svm_z[jm])
         mpz = mat_props(shell_mat, float(np.max(T_z[m])))
         allow = route_k * mpz["sy"] / SF_YIELD
         # температура стенки растёт линейно по длине каждой ступени (оценка); на границах зон — излом с перепадом
@@ -953,7 +1053,7 @@ def evaluate_params(p, variant, with_geom=False):
                 smooth_fair=sm["fairness"], turning=sm["turning"], curv_excess=curv, inflections=sm["inflections"])
     out = dict(objs=objs, desc=desc, feats=feats, cons=cons, CV=CV)
     if with_geom:
-        out.update(prof=prof, segs=segs, mounts=mounts, minfo=minfo, rib=rs, frames=dict(front=fr_f, rear=fr_r), cage=cage,
+        out.update(rings=rings, prof=prof, segs=segs, mounts=mounts, minfo=minfo, rib=rs, frames=dict(front=fr_f, rear=fr_r), cage=cage,
                    fuel=dict(segs=fsegs, info=finfo), zone_rows=zone_rows, f_shell_mode=f_shell_mode, pm=pm, rules=rules, svc=svc,
                    notes=notes, emb=emb_list, sym=sym, mat=shell_mat, bom_case=bom["case"], conn=bom["conn"], R_ref=R_ref)
     return out
@@ -964,13 +1064,15 @@ def reference_params(variant="оболочка", kind="литой с фланц�
     """типовые формы изготовителей (для нормировки и новизны): литой стальной корпус с кольцевыми фланцами и прямыми
     радиальными стойками, трубки снаружи; вариант с осевыми рёбрами; гладкая оболочка без рёбер (оценка)"""
     p = decode(np.full(DIM, 0.5))
+    # типовой литой корпус по гладкой огибающей, стенка 22 мм (оценка)
     p.update({f"off{k}": 0.0 for k in range(8)})
     p.update({f"t{k}": 0.022 for k in range(4)})
     p.update({f"core{k}": 0.0 for k in range(4)})
     p.update(route="литьё", cast_mat="zg15", rib_type="кольца", rib_n=0.0, rib_n2=0.3, rib_h=0.04, rib_w=0.03, rib_fillet=0.006,
              sym_n=1, asym1=0.0, asym2=0.0, asym_phase=0.0, f_n=8, f_lean=0.0, f_bow=0.0, f_cone=0.0, f_chord=0.10, f_tc=0.18,
              f_tub=0.0, r_n=10, r_lean=0.0, r_bow=0.0, r_cone=0.0, r_chord=0.12, r_tc=0.18, hf_n=48, hf_t=0.0015, hf_b=0.06,
-             hf_shape=1.0, hf_span=0.10, emb=0, murray_k=2.41, build_dir="+z", extract="вперёд", mount_drop=0.0)
+             hf_shape=1.0, hf_span=0.10, emb=0, murray_k=2.41, build_dir="+z", extract="вперёд", mount_drop=0.0,
+             ring_h=0.05, ring_w=0.04)
     if kind == "литой с осевыми рёбрами":
         p.update(rib_type="ортогрид", rib_n=0.7, sym_n=4, rib_h=0.03)
     elif kind == "гладкая оболочка":

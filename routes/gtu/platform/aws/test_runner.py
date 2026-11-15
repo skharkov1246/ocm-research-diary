@@ -2104,6 +2104,14 @@ def test_v3_region_by_price_and_quota_full_batch(tmp_path):
         cl = sky.clouds[reg]
         assert cl.max_vcpu <= q
         assert {i["maxp"] for i in cl.inst.values()} == {V3_MAXP}             # MaxPrice — максимум по всем регионам
+        for prm in cl.runs:                                                   # гашение тремя способами — в любом регионе
+            assert prm["InstanceInitiatedShutdownBehavior"] == "terminate"
+            assert prm["InstanceMarketOptions"]["SpotOptions"]["InstanceInterruptionBehavior"] == "terminate"
+            assert prm["UserData"].splitlines()[1] == "shutdown -P +60"
+            assert "AWS_DEFAULT_REGION=us-east-1" in prm["UserData"]           # бакет — в us-east-1 для всех машин
+            tags = {t["Key"]: t["Value"] for t in prm["TagSpecifications"][0]["Tags"]}
+            assert (tags["Project"], tags["RunId"]) == (R.DEFAULT_TAG, RUN)
+        assert all(i["state"] == "terminated" for i in cl.inst.values())       # сборщик и гашение после итога
     launches = ledger(tmp_path, "launch")
     assert {(x["region"], x["market"]) for x in launches} == {("us-east-1", "spot"), ("us-east-2", "spot"),
                                                               ("us-west-2", "spot")}

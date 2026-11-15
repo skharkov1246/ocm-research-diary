@@ -41,8 +41,9 @@ CONFIG = dict(
     family="blades", run_key="kv3-blades-v1",
     archive=dict(kind="cvt", k={"mini": 128, "aws": 1024}),
     me=dict(batch=32, s_iso=(0.01, 0.06), s_line=(0.1, 0.4), p_gauss=0.3, s_gauss=0.08, init_frac=0.1),
-    fitness=dict(comp="100·η + 50·min(SM, 0,30) − 20·(J/J_ref − 1) − 10·(m/m_ref − 1); недопустимые: −1000 − нарушение",
-                 turb="100·η − 20·(J/J_ref − 1) − 10·(m/m_ref − 1); недопустимые: −1000 − нарушение"),
+    fitness=dict(comp="100·η + 50·min(SM, 0,30) − 5·(J/J_ref − 1) − 5·(m/m_ref − 1); недопустимые: −1000 − нарушение",
+                 turb="100·η − 5·(J/J_ref − 1) − 5·(m/m_ref − 1); недопустимые: −1000 − нарушение",
+                 policy="положительные поправки-гипотезы (тандем, бонусы порога срыва) в цель не входят; штрафы входят"),
     point="routes/gtu/frame3/frame3_point_results.json",
 )
 
@@ -85,7 +86,7 @@ def _centroids(key, k, dim):
 
 def slim_meta(m):
     """что хранить в архиве на ячейку (полный расчёт элиты повторяется детерминированно по геному)"""
-    keep = ("comp", "eta", "eta_level1", "SM", "mass_kg", "J_kgm2", "u_disk", "burst", "route", "corrections", "D2", "beta2b", "Zeff",
+    keep = ("comp", "eta", "eta_level1", "eta_hyp", "SM_hyp", "corrections_hyp", "SM", "mass_kg", "J_kgm2", "u_disk", "burst", "route", "corrections", "D2", "beta2b", "Zeff",
             "parts", "novelty_vec", "sig_bend_MPa", "hollow", "Dm", "Dtip", "why", "viol")
     out = {k: m.get(k) for k in keep if k in m}
     if "stages" in m:
@@ -207,13 +208,14 @@ def cma_polish(comp, arch, cell, max_evals, seed_tag="cma"):
     """доводка элиты в её ячейке: CMA-ES по −f; выход из ячейки — штраф (разнообразие архива сохраняется)"""
     import blade_eval as BE
     x0 = arch.G[cell].copy()
+    src_feasible = bool(arch.meta[cell] and arch.meta[cell].get("why") is None)
 
     def fun(X):
         out = []
         for x in X:
             r = BE.evaluate(comp, x)
-            pen = 0.0 if arch.index(np.asarray(r["d"], float)) == cell else 50.0
-            out.append(-(r["f"] if r["feasible"] else -1000.0) + pen)
+            pen = 0.0 if (arch.index(np.asarray(r["d"], float)) == cell or not src_feasible) else 50.0
+            out.append(-r["f"] + pen)          # недопустимые: f = −1000 − нарушение — CMA-ES снижает нарушение
         return np.array(out)
     xb, fb, n, log = C.cmaes_minimize(fun, x0, 0.05, C.rng_of(CONFIG["run_key"], seed_tag, comp, cell), max_evals=max_evals, lam=8)
     r = BE.evaluate(comp, xb)
@@ -388,29 +390,93 @@ def cmd_elites(a):
 
 
 def cmd_part(a):
-    """одна часть на машине AWS: острова всех компонент → слияние своих островов (неполный набор — это норма части) →
-    доводка → свои элиты → проверка элит в CalculiX (если ccx есть)"""
+    """одна часть на машине AWS: острова всех компонент → архив части (слияние своих островов) с манифестом островов
+    (номер, зерно, оценки, отпечаток архива, хэши конфигурации и кода) → доводка не делается (она — после слияния всех
+    частей) → свои элиты → проверка элит в CalculiX (если --ccx). Файлы островов после слияния удаляются (объём S3)."""
     t0 = time.time()
     summary = dict(part=a.part, n_parts=a.n_parts, comps={})
     for comp in a.comps.split(","):
+        tc = time.time()
         isl = C.islands_of_part(a.part, a.n_parts, a.n_islands)
         d_isl = os.path.join(a.out, "islands")
-        run_islands(comp, isl, a.evals, a.scale, d_isl, a.workers)
+        res = run_islands(comp, isl, a.evals, a.scale, d_isl, a.workers)
+        manifest = [dict(island=r["island"], seed=r["seed"], n_evals=r["n_evals"], config_hash=r["config_hash"],
+                         code_hash=r["code_hash"], digest=C.archive_from_dict(r["archive"], make_archive(comp, a.scale).C).digest(),
+                         feasible_cells=r["feasible_cells"], seconds=r["seconds"]) for r in res]
         arch, rep = merge(comp, [d_isl], a.n_islands, a.scale, allow_partial=True)
+        pp = os.path.join(a.out, f"part_{comp}_{a.part:03d}.json")
+        with open(pp, "w", encoding="utf-8") as f:
+            json.dump(dict(comp=comp, part=a.part, n_parts=a.n_parts, n_islands=a.n_islands, islands=manifest,
+                           config_hash=config_hash(a.scale), code_hash=code_hash(), archive=arch.to_dict()), f, ensure_ascii=False)
+        for r in res:
+            try:
+                os.remove(os.path.join(d_isl, f"island_{comp}_{r['island']:04d}.json"))
+            except OSError:
+                pass
         cells = select_elites(comp, arch, a.k)
         recs = elite_records(comp, arch, cells)
         p = os.path.join(a.out, f"elites_{comp}_part{a.part:03d}.json")
         with open(p, "w", encoding="utf-8") as f:
-            json.dump(C._canon(dict(comp=comp, part=a.part, elites=recs, report=rep)), f, ensure_ascii=False)
+            json.dump(C._canon(dict(comp=comp, part=a.part, elites=recs)), f, ensure_ascii=False)
         cc = None
-        if a.ccx:
+        if a.ccx and recs:
             import ccx_elites as CE
             cc = CE.check_file(p, os.path.join(a.out, "ccx"), workers=a.workers)
-        summary["comps"][comp] = dict(report=rep, elites=len(recs), ccx=None if cc is None else cc.get("summary"))
+        summary["comps"][comp] = dict(islands=len(isl), evals=sum(m["n_evals"] for m in manifest), filled=rep["filled"],
+                                      feasible_cells=rep["feasible_cells"], elites=len(recs),
+                                      ccx=None if cc is None else cc.get("summary"), seconds=round(time.time() - tc, 1))
     summary["seconds"] = round(time.time() - t0, 1)
     with open(os.path.join(a.out, f"part_{a.part:03d}_summary.json"), "w", encoding="utf-8") as f:
         json.dump(C._canon(summary), f, ensure_ascii=False, indent=1)
     print(json.dumps(C._canon(summary), ensure_ascii=False)[:2000])
+
+
+def merge_parts(comp, dirs, n_islands, scale, allow_partial=False):
+    """слияние архивов частей (AWS) с контролем полноты по манифестам островов: объединение островов всех частей
+    = range(n_islands), без повторов, хэши конфигурации и кода у всех островов одни. Слияние «лучший в ячейке» с
+    разрешением равенства по геному ассоциативно и коммутативно — итог равен слиянию всех островов сразу"""
+    files = []
+    for d in dirs:
+        files += sorted(glob.glob(os.path.join(d, "**", f"part_{comp}_*.json"), recursive=True))
+    cfg = config_hash(scale)
+    seen, dup, bad = {}, [], []
+    arch = None
+    cen = make_archive(comp, scale).C
+    n_ev = 0
+    for fp in files:
+        d = json.load(open(fp, encoding="utf-8"))
+        ok_part = True
+        for m in d["islands"]:
+            i = int(m["island"])
+            if i in seen:
+                dup.append(i)
+                ok_part = False
+            if m["config_hash"] != cfg:
+                bad.append(i)
+                ok_part = False
+            seen[i] = m
+        if ok_part or allow_partial:
+            a = C.archive_from_dict(d["archive"], cen)
+            arch = a if arch is None else arch.merge(a)
+            n_ev += sum(int(m["n_evals"]) for m in d["islands"])
+    codes = sorted({m["code_hash"] for m in seen.values()})
+    missing = [i for i in range(n_islands) if i not in seen]
+    rep = dict(comp=comp, parts=len(files), expected=n_islands, received=len(seen), missing=missing, duplicates=sorted(set(dup)),
+               config_mismatch=sorted(set(bad)), code_hashes=codes, n_evals_total=n_ev)
+    rep["complete"] = not (missing or dup or bad or len(codes) > 1)
+    if not rep["complete"] and not allow_partial:
+        raise ValueError(f"части неполны или несогласованы: { {k: v for k, v in rep.items() if k != 'missing'} }, нет островов: {len(missing)}")
+    rep["filled"] = int(arch.filled.sum()) if arch is not None else 0
+    rep["feasible_cells"] = len([c for c in arch.elites() if arch.meta[c] and arch.meta[c].get("why") is None]) if arch else 0
+    rep["digest"] = arch.digest() if arch is not None else None
+    return arch, rep
+
+
+def cmd_merge_parts(a):
+    arch, rep = merge_parts(a.comp, a.inp, a.n_islands, a.scale, a.allow_partial)
+    with open(a.out, "w", encoding="utf-8") as f:
+        json.dump(dict(report=rep, archive=arch.to_dict()), f, ensure_ascii=False)
+    print(json.dumps(rep, ensure_ascii=False)[:1500])
 
 
 def cmd_mini(a):
@@ -422,7 +488,9 @@ def cmd_mini(a):
     for comp in a.comps.split(","):
         tc = time.time()
         d_isl = os.path.join(a.out, "islands")
-        run_islands(comp, range(a.n_islands), a.evals, "mini", d_isl, a.workers, _parents(a.parents, comp))
+        ev_c = a.evals * (a.turb_factor if comp == "turb" else 1)
+        isl_res = run_islands(comp, range(a.n_islands), ev_c, "mini", d_isl, a.workers, _parents(a.parents, comp))
+        ms_eval = float(np.mean([r_["seconds"] / r_["n_evals"] for r_ in isl_res]) * 1e3)
         arch, rep = merge(comp, [d_isl], a.n_islands, "mini")
         merged_p = os.path.join(a.out, f"merged_{comp}.json")
         with open(merged_p, "w", encoding="utf-8") as f:
@@ -436,8 +504,11 @@ def cmd_mini(a):
                 arch.try_add(np.asarray(e["g"]), e["meta"]["f"], np.asarray(e["meta"]["d"]),
                              {k: v for k, v in e["meta"].items() if k not in ("f", "d", "feasible")})
         cm = []
-        for c in select_elites(comp, arch, k=a.cma_elites):
-            pr = cma_polish(comp, arch, c, a.cma_evals)
+        pol = select_elites(comp, arch, k=a.cma_elites)
+        if not pol:          # допустимых ещё нет — доводим наименее нарушающие (CMA-ES по штрафу ведёт к допустимости)
+            pol = sorted(arch.elites(), key=lambda c: -arch.F[c])[:a.cma_elites]
+        for c in pol:
+            pr = cma_polish(comp, arch, c, a.cma_evals if comp != "turb" else a.cma_evals * a.turb_factor)
             cm.append(pr)
             if pr["feasible"] and pr["f1"] > arch.F[c]:
                 arch.try_add(np.asarray(pr["g"]), pr["f1"], np.asarray(pr["d"]), pr["meta"])
@@ -460,7 +531,8 @@ def cmd_mini(a):
                              J_kgm2=e["meta"].get("J_kgm2")) for e in (ns["front"] if ns else [])],
             nsga_log=ns["log"] if ns else None,
             cma=[dict(cell=p["cell"], f0=p["f0"], f1=p["f1"], feasible=p["feasible"], n_evals=p["n_evals"]) for p in cm],
-            elites=recs, seconds=round(time.time() - tc, 1))
+            elites=recs, seconds=round(time.time() - tc, 1),
+            timing=dict(ms_per_eval_island=ms_eval, workers=a.workers, note="время острова / число оценок; машина общая с другими расчётами"))
         merged_p2 = os.path.join(a.out, f"merged_{comp}_polished.json")
         with open(merged_p2, "w", encoding="utf-8") as f:
             json.dump(dict(report=rep, archive=arch.to_dict()), f, ensure_ascii=False)
@@ -525,6 +597,14 @@ def main(argv=None):
     s.add_argument("--ccx", action="store_true")
     s.add_argument("--out", required=True)
     s.set_defaults(fn=cmd_part)
+    s = sub.add_parser("merge-parts")
+    s.add_argument("--comp", required=True, choices=["comp1", "comp2", "turb"])
+    s.add_argument("--n-islands", type=int, required=True)
+    s.add_argument("--in", dest="inp", nargs="+", required=True)
+    s.add_argument("--scale", default="aws", choices=["mini", "aws"])
+    s.add_argument("--allow-partial", action="store_true")
+    s.add_argument("--out", required=True)
+    s.set_defaults(fn=cmd_merge_parts)
     s = sub.add_parser("mini")
     s.add_argument("--comps", default="comp1,comp2,turb")
     s.add_argument("--n-islands", type=int, default=4)
@@ -534,6 +614,7 @@ def main(argv=None):
     s.add_argument("--cma-elites", type=int, default=2)
     s.add_argument("--cma-evals", type=int, default=48)
     s.add_argument("--k", type=int, default=8)
+    s.add_argument("--turb-factor", type=int, default=2, help="во сколько раз больше оценок у турбины (узкая допустимая область)")
     s.add_argument("--workers", type=int, default=None)
     s.add_argument("--parents", default=None)
     s.add_argument("--out", default=os.path.join(SCRATCH, "mini"))

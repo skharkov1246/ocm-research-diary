@@ -38,6 +38,8 @@ BURST_MIN = 1.30                  # запас по разрушающей ча�
 BLADE_BEND_MAX = 0.5              # изгиб лопатки колеса от навала при 120 % не выше 0,5·σ0,2 (оценка: запас на вибрацию)
 LIFE_H = 25000.0                  # ресурс по длительной прочности, ч (как funnel/strength_l1.RUPTURE_H)
 SM_CAP = 0.30                     # запас помпажа сверх 30 % в пригодность не засчитывается
+W_J, W_M = 5.0, 5.0               # веса: 1 п. КПД ≈ 2 п. запаса помпажа ≈ 20 % момента инерции ≈ 20 % массы (приоритет владельца:
+                                  # детали и узлы, затем КПД при наименьшем размере; принято, Парето — NSGA-II без весов)
 
 # =========================================================================== приёмы: поправки и их статус
 TECH = {
@@ -213,8 +215,13 @@ def riblet_check(st, route):
     return dict(s_needed_um=s * 1e6, min_feature_um=feat * 1e6, feasible=bool(ok), d_eta=gain)
 
 
+HYP_POSITIVE = {"tandem", "sweep_le", "tubercles_stall"}     # положительные поправки со статусом «гипотеза»: не в цели
+
+
 def comp_corrections(p, st, route):
+    """поправки КПД (в цель — оценки с источником и все штрафы) и бонус порога срыва; гипотезы — отдельно (_hyp)"""
     d = {}
+    hyp = {}
     if p["tub_A"] > 0:
         d["tubercles"] = TECH["tubercles"]["d_eta_per_Ac"] * p["tub_A"]
     if p["lsp"] > 0:
@@ -224,14 +231,16 @@ def comp_corrections(p, st, route):
         d["serrations"] = TECH["serrations"]["d_eta_per"] * p["ser_A"]
     if p["tand"] > 0:
         o = TECH["tandem"]
-        d["tandem"] = _bump(p["tand_clk"], o["opt"], o["width"], o["d_eta_max"], -0.005)
+        v = _bump(p["tand_clk"], o["opt"], o["width"], o["d_eta_max"], -0.005)
+        (hyp if v > 0 else d)["tandem"] = v
     rib = riblet_check(st, route)
     if rib["d_eta"]:
         d["riblets"] = rib["d_eta"]
-    bonus = TECH["tubercles"]["d_stall_deg_per_Ac"] * p["tub_A"] + TECH["sweep_le"]["d_stall_deg_per_sw"] * max(0.0, p["sweep"])
+    # бонусы порога срыва — перенос с крыла/вентилятора на колесо: гипотезы, в цель не входят
+    bonus_hyp = TECH["tubercles"]["d_stall_deg_per_Ac"] * p["tub_A"] + TECH["sweep_le"]["d_stall_deg_per_sw"] * max(0.0, p["sweep"])
     if p["tand"] > 0:
-        bonus += TECH["tandem"]["d_stall_deg"]
-    return d, bonus, rib
+        bonus_hyp += TECH["tandem"]["d_stall_deg"]
+    return d, hyp, bonus_hyp, rib
 
 
 def comp_temperature(stage, r, r2):
@@ -340,9 +349,11 @@ def eval_comp(comp, x, want_geom=False, use_ref=True):
     bad = rules_comp(st)
     geo = BG.impeller(st, p, stage, build_mesh=want_geom)
     d = np.array([st["beta2b_deg"], geo["wrap_shroud_deg"], p["lsp"], p["tub_A"], p["lean"]])
-    corr, bonus, rib = comp_corrections(p, st, route)
-    sm = surge_margin(st, P["T01"], P["p01"], P["m_side"], P["n"], bonus)
+    corr, corr_hyp, bonus_hyp, rib = comp_corrections(p, st, route)
+    sm = surge_margin(st, P["T01"], P["p01"], P["m_side"], P["n"], 0.0)
+    sm_hyp = surge_margin(st, P["T01"], P["p01"], P["m_side"], P["n"], bonus_hyp) if bonus_hyp > 0 else sm
     eta = st["eta_p"] + sum(corr.values())
+    eta_hyp = eta + sum(corr_hyp.values())
     # прочность диска (быстро) при 100 и 120 %
     dk = geo["disk"]
     r = dk["r"]
@@ -383,6 +394,7 @@ def eval_comp(comp, x, want_geom=False, use_ref=True):
     feats = geo["features"]
     nov = novelty_vector(comp, p, d)
     meta = dict(comp=comp, eta=eta, eta_level1=st["eta_p"], eta_uncapped=st["eta_uncapped"], capped=st["capped"], corrections=corr,
+                corrections_hyp=corr_hyp, eta_hyp=eta_hyp, SM_hyp=sm_hyp.get("SM"), stall_bonus_hyp_deg=bonus_hyp,
                 SM=SM, surge=sm, mass_kg=mass, J_kgm2=J, mass_blades_kg=geo["mass_blades_kg"], mass_disk_kg=geo["mass_disk_kg"],
                 u_disk=u_disk, yr100=s100["yield_ratio_max"], yr120=s120["yield_ratio_max"], burst=s100["burst_margin"],
                 sig_bend_MPa=sig_b / 1e6, u_blade=u_blade, parts=1, route=route, D2=st["D2"], b2=st["b2"], U2=st["U2"],
@@ -391,7 +403,7 @@ def eval_comp(comp, x, want_geom=False, use_ref=True):
     if cons:
         out = _infeasible("; ".join(c[0] for c in cons), _viol(cons), d, meta)
     else:
-        f = 100 * eta + 50 * min(SM, SM_CAP) - 20 * (J / ref["J"] - 1) - 10 * (mass / ref["mass"] - 1)
+        f = 100 * eta + 50 * min(SM, SM_CAP) - W_J * (J / ref["J"] - 1) - W_M * (mass / ref["mass"] - 1)
         out = dict(f=float(f), d=d, feasible=True, meta=meta)
     if want_geom:
         out["geom"] = geo
@@ -553,7 +565,7 @@ def eval_turb(x, want_geom=False, use_ref=True):
     if cons:
         out = _infeasible("; ".join(c[0] for c in cons), _viol(cons), d, meta)
     else:
-        f = 100 * eta - 20 * (J / ref["J"] - 1) - 10 * (mass / ref["mass"] - 1)
+        f = 100 * eta - W_J * (J / ref["J"] - 1) - W_M * (mass / ref["mass"] - 1)
         out = dict(f=float(f), d=d, feasible=True, meta=meta)
     if want_geom:
         out["geom"] = dict(blades=blades, disks=disks, tm=tm)

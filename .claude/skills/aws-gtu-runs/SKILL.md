@@ -1,6 +1,6 @@
 ---
 name: aws-gtu-runs
-description: Прогоны трека «Простая литая ГТУ-заменитель» на AWS через доступ MatterForge скриптом routes/gtu/platform/aws/runner.py — где действуют ключи (окружение Coldun, дочерняя сессия), us-east-1, квоты 384 vCPU и очередь под них, спот c7a.16xlarge с запасным c7i.16xlarge в самой дешёвой зоне (подсеть по умолчанию зоны), образ al2023 с Python нужной версии через uv, контейнеры Docker (SU2, OpenFOAM, CalculiX), NPROC на машине, бакет из ALPHA_O_S3 с подпапкой gtu/, IMDSv2, автогашение тремя способами, бюджетный предохранитель 2000 долл. (решение владельца 14.11.2026; отчёт после каждых 500) и журнал ledger.jsonl, пакет задач, сбор и проверка результатов, прерывание спота, запрет ключей в файлах и выводе. Используй, когда ставишь расчёт SU2, OpenFOAM, CalculiX или скрипт трека на облачные машины, проверяешь права и бюджет, гасишь машины прогона, забираешь результаты или разбираешь сбой прогона. Триггеры — «прогон на AWS», «запусти на споте», «runner.py», «облачный расчёт ГТУ», «Coldun», «ALPHA_O_S3», «погаси машины», «бюджет AWS», «прерывание спота», «ledger.jsonl», «дешёвая зона», «контейнер на AWS», «Python 3.12 на машине», «очередь под квоту», «smoke2».
+description: Прогоны трека «Простая литая ГТУ-заменитель» на AWS через доступ MatterForge скриптом routes/gtu/platform/aws/runner.py — где действуют ключи (окружение Coldun, дочерняя сессия), us-east-1, квоты 384 vCPU и очередь под них, спот c7a.16xlarge с запасным c7i.16xlarge в самой дешёвой зоне (подсеть по умолчанию зоны), образ al2023 с Python нужной версии через uv, контейнеры Docker (SU2, OpenFOAM, CalculiX), NPROC на машине, бакет из ALPHA_O_S3 с подпапкой gtu/, IMDSv2, автогашение тремя способами, бюджетный предохранитель 2000 долл. (решение владельца 14.11.2026; отчёт после каждых 500) и журнал ledger.jsonl, пакет задач, сбор и проверка результатов, прерывание спота, запрет ключей в файлах и выводе; версия 3 — соседние мощности: регионы us-east-2 и us-west-2 флагом --regions (фактическая квота каждого региона, образ al2023 через DescribeImages вне us-east-1, один бакет, MaxPrice и бюджет по максимуму по регионам) и запасные машины по требованию --on-demand-fallback. Используй, когда ставишь расчёт SU2, OpenFOAM, CalculiX или скрипт трека на облачные машины, проверяешь права и бюджет, гасишь машины прогона, забираешь результаты или разбираешь сбой прогона. Триггеры — «прогон на AWS», «запусти на споте», «runner.py», «облачный расчёт ГТУ», «Coldun», «ALPHA_O_S3», «погаси машины», «бюджет AWS», «прерывание спота», «ledger.jsonl», «дешёвая зона», «контейнер на AWS», «Python 3.12 на машине», «очередь под квоту», «smoke2», «соседние мощности», «соседний регион», «--regions», «us-west-2», «us-east-2», «машины по требованию», «on-demand».
 ---
 
 # Прогоны трека ГТУ на AWS
@@ -13,6 +13,9 @@ description: Прогоны трека «Простая литая ГТУ-зам
 «Состояние»). Версия 2 проверена тестами на заглушках — 94 passed (прогнано 14.11.2026, после правок трёх
 проверок: неподтверждённое гашение, сеть в сборщике, машина за ошибкой 5xx, сверка, ёмкость, метка 143,
 окружение OpenFOAM) — и `plan`; живого запуска v2 ещё не было, первый — `jobs.smoke2.json`.
+15.11.2026 — версия 3 «соседние мощности» (решение владельца: «можешь занять ещё соседние мощности»; потолок
+2000 долл. и отчёт каждые 500 — прежние): флаги `--regions` и `--on-demand-fallback`, раздел 12. Без новых флагов
+раннер работает точно как версия 2. Тесты — 112 passed (прогнано 15.11.2026); живого запуска v3 не было.
 
 ## 1. Что где лежит
 
@@ -23,6 +26,7 @@ description: Прогоны трека «Простая литая ГТУ-зам
 | второй пробный прогон: `smoke-py` (al2023 + Python 3.12) и `smoke-ccx` (контейнер ubuntu:24.04 + CalculiX), проверки | `jobs.smoke2.json`, `smoke2.py` там же |
 | порядок проверки, формат задач, формула бюджета, откат | `routes/gtu/platform/aws/README.md` |
 | права спота (дополнение, применяет владелец) | `routes/gtu/platform/aws/iam_policy_addendum.json` |
+| справочник версии 3: цены по требованию по регионам и межрегиональная передача (дата, источник, «предварительно») | `routes/gtu/platform/aws/aws_prices_ref.json` |
 | журнал расходов (появится после первого боевого прогона; коммитить) | `routes/gtu/platform/aws/ledger.jsonl` |
 | результаты, `summary.json`, журнал проверок `journal.dryrun.jsonl` (в `.gitignore`) | `routes/gtu/platform/aws/runs/<run_id>/` |
 | разовая настройка аккаунта (владелец, админ-ключи, не агент) | `calc/aws_setup/setup.sh`, `user_policy.json`, `instance_role_policy.json` |
@@ -57,9 +61,9 @@ description: Прогоны трека «Простая литая ГТУ-зам
 
 | параметр | значение | откуда |
 |---|---|---|
-| регион | us-east-1 | `REGION` в коде; eu-central-1 занят флотом `fleet_status.py` |
-| регион ручных команд | всегда `--region us-east-1` | значение `AWS_DEFAULT_REGION` в Coldun не читалось |
-| квоты | 384 vCPU on-demand и спот (данные владельца) | `--max-vcpu 384` (= `--vcpu-quota`) = 6 машин × 64; `--max-parallel 6`; сверх — очередь |
+| регион | us-east-1; соседние — только флагом `--regions` (версия 3, раздел 12) | `REGION` в коде; eu-central-1 занят флотом `fleet_status.py` |
+| регион ручных команд | `--region` региона машины (us-east-1, если журнал не пишет `region`) | значение `AWS_DEFAULT_REGION` в Coldun не читалось |
+| квоты | us-east-1: 384 vCPU спот (заявка до 1536 на рассмотрении) и 384 по требованию — проверка 15.11.2026 | `--max-vcpu 384` (= `--vcpu-quota`) = 6 машин × 64; `--max-parallel 6`; сверх — очередь; версия 3 — квота каждого региона (раздел 12) |
 | типы | `c7a.16xlarge`, запас `c7i.16xlarge` (по 64 vCPU) | `DEFAULT_TYPE`, `DEFAULT_FALLBACK`, `VCPU` |
 | зона | самая дешёвая по последней цене спота; сбой ёмкости — следующая зона, затем запасной тип | `zone_order`, подсеть по умолчанию (`describe_subnets`), без прав — `Placement` |
 | образ | `al2023` по умолчанию; `ubuntu2404` — только старые задачи с `apt` (SSM Canonical агенту запрещён) | `DEFAULT_IMAGE`, `IMAGES` |
@@ -101,7 +105,7 @@ Instance Requests (по выдержкам поиска, не сверено). �
 
 **Шаг 2. Офлайн-проверка (любой контейнер).**
 ```bash
-python3 -m pytest -q -p no:cacheprovider routes/gtu/platform/aws/test_runner.py   # 94 passed
+python3 -m pytest -q -p no:cacheprovider routes/gtu/platform/aws/test_runner.py   # 112 passed
 python3 routes/gtu/platform/aws/runner.py plan <jobs.json> --assume-price 1.5 --show-userdata \
         [--assume-zone-prices us-east-1a=0.955,us-east-1b=0.748,us-east-1c=0.706] \
         --out <scratchpad>/runs                                                    # цены — допущение
@@ -237,7 +241,9 @@ aws budgets create-budget --account-id <аккаунт> \
   EXAMPLE или PLACEHOLDER (сканер `gate.yml`).
 - Живой запуск — только `--live` (или `GTU_LIVE=1`) и с разрешения владельца; программный `Config.dryrun`
   по умолчанию живой — не вызывать `Runner` из своего кода без `dryrun=True`.
-- Запись — только под префиксом `ALPHA_O_S3`, подпапка `gtu/<run_id>/`; регион — только us-east-1.
+- Запись — только под префиксом `ALPHA_O_S3`, подпапка `gtu/<run_id>/`; бакет один (us-east-1). Машины — в us-east-1,
+  в соседних регионах — только флагом `--regions` (решение владельца 15.11.2026), по требованию — только
+  `--on-demand-fallback`.
 - Гасить только свой `run_id`. Прежний сборщик `aws_orchestrate.py` по одному `Project` убил соседний прогон
   fe4s4 (сейчас он только под `ALPHA_O_REAP_ALL=1`) — не повторять.
 - Только владелец: политики IAM, служебная роль `AWSServiceRoleForEC2Spot`, квоты, Budgets, удаление
@@ -260,6 +266,10 @@ aws budgets create-budget --account-id <аккаунт> \
 | `SpotMaxPriceTooLow` | цена выше `MaxPrice`: тоже следующая зона, затем запасной тип (код по документации не сверен) |
 | `image_unavailable` | образ `ubuntu2404` не разрешён ключу (SSM Canonical, `DescribeImages`): `image: al2023` или `container: ubuntu:24.04` с `apt-get` в `container_setup` |
 | `[подсети] describe_subnets: UnauthorizedOperation` | нет прав — зона задаётся `Placement`; не ошибка |
+| `[квоты] <регион> спот: 0 vCPU … регион не используется` | версия 3: квоту соседнего региона не дали ни флаг, ни service-quotas — `--vcpu-quota-per-region <регион>=<vCPU>` (не выше фактической) |
+| `[регион] <регион> …: отказ в правах … исключён до конца прогона` | версия 3: ключ агента не может запускать (или читать цену) в регионе; остальные регионы работают; запись `ev=region_denied` |
+| `образ al2023 в <регион> недоступен` | версия 3: `ssm:GetParameter` вне us-east-1 запрещён, а `ec2:DescribeImages` тоже не дал образ — регион пропускается |
+| итог `capacity` / `quota` с перечнем регионов в `detail` | версия 3: ни один регион не дал машину; `--on-demand-fallback` добавит машины по требованию (если квота по требованию есть) |
 | `cheapest_zone: false` в итоге | в дешёвой зоне не было ёмкости (`launch_error` с зоной) или зона после прерывания |
 | фаза в `_DONE.json`: `base`/`venv`/`packages`/`clone` | сбой подготовки, коды 10–17; читать `_job.log` |
 | фаза `venv`, код 18 / 19; `requirements`, 23 | uv не поставился / Python не скачан; файла зависимостей нет в ветке |
@@ -286,11 +296,61 @@ aws budgets create-budget --account-id <аккаунт> \
 ## 11. Ссылки трека
 
 `routes/gtu/platform/aws/` (`runner.py`, `test_runner.py`, `README.md`, `jobs.example.json`,
-`iam_policy_addendum.json`); `calc/aws_orchestrate.py`; `calc/aws_setup/` (`setup.sh`, `README.md`, политики);
+`iam_policy_addendum.json`, `aws_prices_ref.json`); `calc/aws_orchestrate.py`; `calc/aws_setup/` (`setup.sh`, `README.md`, политики);
 `routes/gtu/gtu_cycle.py`, `gtu_explore.py`, `gtu_dropin.py` и их `*_results.json`; навыки `gtu-cycle`,
 `gtu-dropin`, `su2-turbo`, `openfoam-combustor`, `calculix-rotor`, `surrogate-opt`.
 
-## Источники (проверено 14.11.2026)
+## 12. Соседние мощности (версия 3)
+
+Решение владельца 15.11.2026: «можешь занять ещё соседние мощности»; потолок 2000 долл. со стоп-краном и отчётом
+каждые 500 — без изменений. Регионы и запасной путь — флаги запуска; файлы задач не меняются. Без новых флагов —
+точно версия 2 (те же вызовы AWS и журнал; проверено 94 прежними тестами и дифференциальным сравнением с кодом
+версии 2: 22 сценария заглушки, `plan` по 37 файлам задач, `status` по живому журналу).
+
+Проверка сессии с ключами 15.11.2026 10:45 UTC (без трат), спот c7a.16xlarge, долл./ч:
+
+| регион | спот, vCPU | по требованию, vCPU | лучшие зоны | SSM | DryRun |
+|---|---|---|---|---|---|
+| us-east-1 | 384 (заявка 1536) | 384 | 1c 0,703 · 1b 0,747 · 1d 0,879 | да | да |
+| us-east-2 | 5 (заявка 1536) | 5 | 2b 0,601 · 2a 0,606 · 2c 0,940 | AccessDenied | да |
+| us-west-2 | 384 | 300 | 2a 0,866 · 2d 0,952 · 2c 1,422 | AccessDenied | да |
+| eu-north-1 | 5 | 5 | 1a 0,601 | AccessDenied | да |
+
+Сегодня это значит: +6 машин спота в us-west-2; us-east-2 и eu-north-1 — после одобрения заявок (с квотой 5 vCPU
+машина 64 vCPU не помещается, раннер туда не просится); `--on-demand-fallback` — ещё до 10 машин по требованию
+(6 в us-east-1, 4 в us-west-2), только когда спот не дал машину нигде.
+
+Как работает (подробно — README узла, раздел «Соседние мощности»):
+- **квота региона** — service-quotas (`L-34B43A08` спот, `L-1216C47A` по требованию); флаг
+  `--vcpu-quota-per-region` / `--od-vcpu-quota-per-region` только ограничивает сверху; service-quotas не ответил —
+  флаг, иначе запасное: us-east-1 — `--max-vcpu`, соседний — `--vcpu-quota-fallback` (0 — не использовать). Есть ли у
+  ключа агента право `servicequotas:GetServiceQuota` — неизвестно: задавать квоты флагом по таблице выше;
+- **регион задачи** — наименьшая цена спота среди регионов со свободной квотой; соседний — с запасом
+  `--region-price-margin` (0,05); регион с отказом в правах исключается, с квотной ошибкой AWS — на паузу;
+- **MaxPrice и бюджет** — по максимуму цены за окно по всем разрешённым регионам; передача результатов в бакет
+  us-east-1 из соседнего региона — 0,02 долл./ГБ × `min(disk_gb, --xfer-gb 10)` в смете (`xfer_usd` в журнале);
+- **образ** — SSM своего региона, при отказе — `DescribeImages` (amazon, `al2023-ami-2023*-x86_64`, самый свежий);
+- **по требованию** — без `InstanceMarketOptions`, тег `Market=on-demand`, гашение — те же три способа; в бюджете
+  — максимум цены справочника `aws_prices_ref.json` по регионам × `--price-margin` (MaxPrice у такой машины нет).
+  Справочник — **предварительный** (выдержки поиска: c7a.16xlarge 3,2845 в трёх регионах США, c7i.16xlarge 2,856
+  только us-east-1): сверить со страницей цен AWS перед первым живым прогоном по требованию;
+- **журнал** пишет `region` и `market` (запуск, окончание, ошибки, DryRun), проверка бюджета — `regions`;
+  `status` — разбивка по регионам и рынкам; `reap` и сверка — по всем регионам прогона из журнала; `collect` — как
+  было (бакет один). Журнал после прогона с `--regions` читать только раннером версии 3.
+
+```bash
+python3 routes/gtu/platform/aws/runner.py plan <jobs.json> --assume-price 0.95 --regions us-east-1,us-east-2,us-west-2 \
+        --assume-zone-prices us-east-1c=0.703,us-east-2b=0.601,us-west-2a=0.866 \
+        --vcpu-quota-per-region us-east-1=384,us-east-2=5,us-west-2=384          # регион каждой задачи и волны
+python3 routes/gtu/platform/aws/runner.py run <jobs.json> --branch <ветка> --regions us-east-1,us-east-2,us-west-2 \
+        --vcpu-quota-per-region us-east-1=384,us-east-2=5,us-west-2=384          # DryRun: права в каждом регионе
+# живой: + --on-demand-fallback --od-vcpu-quota-per-region us-east-1=384,us-west-2=300 --live (п. 2 — разрешение)
+```
+
+Не проверено вживую: запуск в us-west-2 и us-east-2, `DescribeImages` и service-quotas у ключа агента, разрешён
+ли ключу запуск по требованию (политика писалась под спот), цены справочника.
+
+## Источники (проверено 14.11.2026; версия 3 — 15.11.2026)
 
 docs.aws.amazon.com из контейнера не открывается; параметры API сверены по модели API в botocore 1.44.3,
 имена ключей CLI — по awscli 1.46.3 (разбор команд без ключей, до отказа «Unable to locate credentials»),
@@ -310,6 +370,9 @@ docs.aws.amazon.com из контейнера не открывается; па�
 - Образы Ubuntu в SSM: https://documentation.ubuntu.com/aws/aws-how-to/instances/find-ubuntu-images/
 - Облачные окружения Claude Code (переменные, сон ВМ): https://code.claude.com/docs/en/cloud-environments
 - OpenFOAM 1912 в Ubuntu 24.04: `apt-cache policy openfoam` (noble/universe, 1912.200626-2build3)
+- Версия 3: квоты, цены спота, SSM и DryRun по регионам — проверка сессии с ключами 15.11.2026 10:45 UTC (без трат);
+  цены по требованию — выдержки поиска 15.11.2026 (calculator.holori.com, aws-pricing.com), страница цен AWS и
+  агрегаторы из контейнера агента не открываются — `aws_prices_ref.json`, статус «предварительно»
 - 64 vCPU у c7a/c7i.16xlarge — выдержки поиска по сторонним каталогам
   (https://instances.vantage.sh/aws/ec2/c7a.16xlarge); страница типов AWS недоступна из контейнера
 

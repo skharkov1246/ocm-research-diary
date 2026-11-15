@@ -39,8 +39,8 @@ def build(parts, evals, k_elites, comps=("comp1", "comp2", "turb")):
     total = n_isl * evals * len(comps)
     return dict(
         _comment=("Семейство «лопатки и колёса» (routes/gtu/evo/blades, README): стадия 1 — острова MAP-Elites по частям, элиты части → "
-                  f"CalculiX. Островов на компонент {n_isl} ({parts} частей × {NPROC}), оценок на остров {evals}, всего оценок {total:,}"
-                  .replace(",", " ") + f". Срок задачи {max_min} мин (расчёт ≈ {compute_min:.0f} мин + установка + CalculiX). "
+                  f"CalculiX. Островов на компонент {n_isl} ({parts} частей × {NPROC}), оценок на остров {evals}, всего оценок "
+                  + f"{total:,}".replace(",", " ") + f". Срок задачи {max_min} мин (расчёт ≈ {compute_min:.0f} мин + установка + CalculiX). "
                   "Сгенерировано make_jobs_evo_blades.py; правки — в нём. После сбора: evo_blades.py merge-parts (контроль полноты)."),
         defaults=dict(instance_type="c7a.16xlarge", fallback_types=["c7i.16xlarge"], image="al2023", disk_gb=30),
         jobs=jobs)
