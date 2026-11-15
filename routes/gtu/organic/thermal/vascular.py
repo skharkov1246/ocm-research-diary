@@ -103,9 +103,13 @@ class Net:
     def add(self, a, b, d):
         self.seg.append([a, b, d])
 
+    def _ch(self):
+        man = set(getattr(self, "manifold_segs", []))
+        return [s for i, s in enumerate(self.seg) if i not in man]
+
     def volume(self):
         P = np.array(self.nodes)
-        return float(sum(math.pi * d * d / 4 * np.hypot(*(P[b] - P[a])) for a, b, d in self.seg))
+        return float(sum(math.pi * d * d / 4 * np.hypot(*(P[b] - P[a])) for a, b, d in self._ch()))
 
     def scale_d(self, k):
         for s in self.seg:
@@ -113,7 +117,7 @@ class Net:
 
     def length(self):
         P = np.array(self.nodes)
-        return float(sum(np.hypot(*(P[b] - P[a])) for a, b, d in self.seg))
+        return float(sum(np.hypot(*(P[b] - P[a])) for a, b, d in self._ch()))
 
 
 def net_straight(Lx, H, N, d):
@@ -130,55 +134,69 @@ def net_straight(Lx, H, N, d):
     return n
 
 
-def net_delta(Lx, H, K, d0, exponent, name):
-    """двоичное дерево: уровень k в x = Lx·k/K, 2^k узлов по y; d_child = d_parent·2^(−1/exponent)"""
+def net_delta(Lx, H, K, d0, exponent, name, n_root=1):
+    """n_root корней вдоль подвода (x = 0), у каждого — двоичное дерево «дельта» из K уровней:
+    уровень k в x = Lx·k/K, 2^k узлов по y в полосе корня; d_child = d_parent·2^(−1/exponent).
+    n_root = N, K = 0 — прямые каналы; n_root = 1 — одно дерево (развёртка по сложности, Бежан)."""
     n = Net(name)
-    root = n.node(0.0, H / 2)
-    level = [(root, H / 2, H)]
-    ratio = 2 ** (-1.0 / exponent)
-    d = d0
-    for k in range(1, K + 1):
-        x = Lx * k / K
-        new = []
-        for (nid, yc, span) in level:
-            for sgn in (-1, 1):
-                yc2 = yc + sgn * span / 4
-                c = n.node(x, yc2)
-                n.add(nid, c, d)
-                new.append((c, yc2, span / 2))
-        level = new
-        d *= ratio
-    n.outlets = [nid for nid, _, _ in level]
+    n.node(0.0, H / 2)                                 # общий подвод (коллектор у входной кромки)
     n.manifold_segs = []
+    ratio = 2 ** (-1.0 / exponent)
+    outs = []
+    for r in range(n_root):
+        span = H / n_root
+        yc = span * (r + 0.5)
+        root = n.node(0.0, yc)
+        n.add(0, root, 50 * d0)
+        n.manifold_segs.append(len(n.seg) - 1)
+        level = [(root, yc, span)]
+        d = d0
+        if K == 0:
+            e = n.node(Lx, yc)
+            n.add(root, e, d)
+            outs.append(e)
+            continue
+        for k in range(1, K + 1):
+            x = Lx * k / K
+            new = []
+            for (nid, y0, sp_) in level:
+                for sgn in (-1, 1):
+                    y2 = y0 + sgn * sp_ / 4
+                    c = n.node(x, y2)
+                    n.add(nid, c, d)
+                    new.append((c, y2, sp_ / 2))
+            level = new
+            d *= ratio
+        outs += [nid for nid, _, _ in level]
+    n.outlets = outs
     return n
 
 
-def net_cco(Lx, H, qfun, Nterm, d_term, exponent=3.0, seed=0, root=(0.0, None)):
-    """растущее дерево: окончания по плотности теплового потока; подключение — к сегменту с наименьшим Σ L·Q^(2/exp... )"""
+def net_cco(Lx, H, qfun, Nterm, d_term, exponent=3.0, seed=0, n_root=4):
+    """растущее дерево (CCO, упрощённо): n_root точек подвода у входной кромки; окончания (выпуски в газ) —
+    с плотностью ∝ тепловому потоку; каждое новое окончание подключается к сегменту леса с наименьшим
+    «объёмом Мюррея» Σ L·N^(2/exponent) (N — число окончаний ниже по течению; Q ∝ N при равных расходах)"""
     rng = np.random.default_rng(seed)
-    # выборка окончаний с плотностью ∝ q (отбор с отклонением), не ближе rmin друг к другу
     pts = []
-    qs = qfun(np.array([[x, y] for x in np.linspace(0, Lx, 40) for y in np.linspace(0, H, 30)]))
-    qmax = qs.max()
-    rmin = 0.6 * math.sqrt(Lx * H / Nterm)
+    grid_pts = np.array([[x, y] for x in np.linspace(0, Lx, 40) for y in np.linspace(0, H, 30)])
+    qmax = qfun(grid_pts).max()
+    rmin = 0.55 * math.sqrt(Lx * H / Nterm)
     tries = 0
-    while len(pts) < Nterm and tries < 200000:
+    while len(pts) < Nterm and tries < 400000:
         tries += 1
-        p = np.array([rng.uniform(0.15 * Lx / 10, Lx), rng.uniform(0.02 * H, 0.98 * H)])
+        p = np.array([rng.uniform(0.04 * Lx, Lx), rng.uniform(0.03 * H, 0.97 * H)])
         if rng.uniform(0, qmax) > qfun(p[None])[0]:
             continue
         if pts and min(np.hypot(*(p - q)) for q in pts) < rmin:
             continue
         pts.append(p)
-    # порядок добавления — сначала ближние к подводу (как рост от корня)
-    r0 = np.array([0.0, H / 2 if root[1] is None else root[1]])
-    pts.sort(key=lambda p: np.hypot(*(p - r0)))
-    # дерево: узлы, сегменты (родитель→потомок); число окончаний ниже сегмента
-    nodes = [r0, pts[0]]
-    segs = [[0, 1]]
-    term_of = {1: True}
+    roots = [np.array([0.0, H * (r + 0.5) / n_root]) for r in range(n_root)]
+    nodes = [np.array([0.0, H / 2])] + roots          # 0 — коллектор подвода
+    segs = []                                          # [a, b] — от подвода
+    is_term = set()
+    pts.sort(key=lambda p: p[0] + 0.3 * min(abs(p[1] - r[1]) for r in roots))
 
-    def downstream_counts(nodes, segs):
+    def counts(segs):
         child = {}
         for i, (a, b) in enumerate(segs):
             child.setdefault(a, []).append(i)
@@ -186,55 +204,71 @@ def net_cco(Lx, H, qfun, Nterm, d_term, exponent=3.0, seed=0, root=(0.0, None)):
 
         def rec(i):
             a, b = segs[i]
-            c = 1 if term_of.get(b) else 0
+            c = 1 if b in is_term else 0
             for j in child.get(b, []):
                 c += rec(j)
             cnt[i] = c
             return c
         for i, (a, b) in enumerate(segs):
-            if a == 0:
+            if 1 <= a <= n_root:
                 rec(i)
         return cnt
 
     def cost(nodes, segs):
-        cnt = downstream_counts(nodes, segs)
+        cnt = counts(segs)
         return sum(np.hypot(*(nodes[b] - nodes[a])) * cnt[i] ** (2.0 / exponent) for i, (a, b) in enumerate(segs))
 
-    for p in pts[1:]:
+    for p in pts:
         best = None
+        ip = len(nodes) + 1
+        # вариант 1: прямо к корню
+        for r in range(1, n_root + 1):
+            ss = segs + [[r, len(nodes)]]
+            is_term.add(len(nodes))
+            c = cost(nodes + [p], ss)
+            is_term.discard(len(nodes))
+            if best is None or c < best[0]:
+                best = (c, "root", r, None)
+        # вариант 2: ответвление от сегмента
         for si in range(len(segs)):
             a, b = segs[si]
-            A, B = nodes[a], nodes[b]
-            # точка ветвления: перебор по сегменту и к окончанию (грубая оптимизация положения)
-            for t in (0.3, 0.5, 0.7):
-                base = A + t * (B - A)
-                for w in (0.0, 0.25, 0.5):
+            A_, B_ = nodes[a], nodes[b]
+            for t in (0.35, 0.65):
+                base = A_ + t * (B_ - A_)
+                for w in (0.0, 0.35):
                     bp = base + w * (p - base)
-                    nn = nodes + [bp, p]
-                    ib, ip = len(nodes), len(nodes) + 1
-                    ss = [s[:] for s in segs]
+                    ib = len(nodes)
+                    ss = [x[:] for x in segs]
                     ss[si] = [a, ib]
-                    ss += [[ib, b], [ib, ip]]
-                    term_of[ip] = True
-                    c = cost(nn, ss)
-                    del term_of[ip]
-                    if best is None or c < best[0]:
-                        best = (c, si, bp)
-        c, si, bp = best
-        a, b = segs[si]
-        nodes += [bp, p]
-        ib, ip = len(nodes) - 2, len(nodes) - 1
-        segs[si] = [a, ib]
-        segs += [[ib, b], [ib, ip]]
-        term_of[ip] = True
-    cnt = downstream_counts(nodes, segs)
+                    ss += [[ib, b], [ib, ib + 1]]
+                    is_term.add(ib + 1)
+                    c = cost(nodes + [bp, p], ss)
+                    is_term.discard(ib + 1)
+                    if c < best[0]:
+                        best = (c, "seg", si, bp)
+        if best[1] == "root":
+            segs.append([best[2], len(nodes)])
+            nodes.append(p)
+            is_term.add(len(nodes) - 1)
+        else:
+            si, bp = best[2], best[3]
+            a, b = segs[si]
+            ib = len(nodes)
+            nodes += [bp, p]
+            segs[si] = [a, ib]
+            segs += [[ib, b], [ib, ib + 1]]
+            is_term.add(ib + 1)
+    cnt = counts(segs)
     n = Net("cco")
     for q in nodes:
         n.node(float(q[0]), float(q[1]))
+    n.manifold_segs = []
+    for r in range(1, n_root + 1):
+        n.add(0, r, 50 * d_term * Nterm)
+        n.manifold_segs.append(len(n.seg) - 1)
     for i, (a, b) in enumerate(segs):
         n.add(a, b, d_term * cnt[i] ** (1.0 / exponent))
-    n.outlets = [i for i in term_of if term_of[i]]
-    n.manifold_segs = []
+    n.outlets = sorted(is_term)
     return n
 
 
@@ -291,16 +325,17 @@ def hydraulics(net, p_in, p_out, Tc_seg, p_mean, K_out=1.0, max_it=60):
         Gout = np.zeros(nn)
         for o in net.outlets:
             s_last = [s for s, (a, bb, d) in enumerate(segs) if bb == o][0]
+            Ko = getattr(net, "K_out", {}).get(o, K_out)
             if m is None:
-                go = G[s_last] * 4
+                go = G[s_last] * 4 / Ko
             else:
                 mo = abs(m[s_last]) + 1e-12
-                dpo = K_out * mo ** 2 / (2 * rho[s_last] * A[s_last] ** 2)
+                dpo = Ko * mo ** 2 / (2 * rho[s_last] * A[s_last] ** 2)
                 go = mo / max(dpo, 1e-9)
             Gout[o] = go
             io = idx[o]
             rows.append(io); cols.append(io); vals.append(go)
-            b[io] += go * p_out
+            b[io] += go * (p_out(P[o][0]) if callable(p_out) else p_out)
         M = sp.coo_matrix((vals, (rows, cols)), shape=(len(free), len(free))).tocsc()
         pf = spla.spsolve(M, b)
         p = np.zeros(nn)
@@ -447,6 +482,33 @@ def thermal(panel, net, hyd, Tc_in, p_mean):
                 node_cool=node_cool, seg_T=seg_T)
 
 
+def meter_outlets(panel, net, p_in, p_out, Tc_in, qcell, iters=25):
+    """дозирование выпусков: K_i такие, что расход окончания ∝ теплу его площадки (ячейка Вороного × q);
+    K ≥ 1 (не меньше скоростного напора выпуска). Возвращает долю K, упёршихся в 1."""
+    P = np.array(net.nodes)
+    outs = net.outlets
+    pts = P[outs]
+    Xc = np.stack([panel.X.ravel(), panel.Y.ravel()], 1)
+    near = np.argmin(((Xc[:, None, :] - pts[None, :, :]) ** 2).sum(-1), axis=1)
+    dem = np.bincount(near, weights=qcell.ravel() * panel.dx * panel.dy, minlength=len(outs))
+    w = dem / dem.sum()
+    net.K_out = {o: 1.0 for o in outs}
+    last = {o: None for o in outs}
+    for it in range(iters):
+        p_mean = 0.5 * (p_in + (p_out(panel.Lx) if callable(p_out) else p_out))
+        hyd = hydraulics(net, p_in, p_out, np.full(len(net.seg), Tc_in + 100), p_mean)
+        mo = np.array([abs(hyd["m"][[s for s, (a, b, d) in enumerate(net.seg) if b == o][0]]) for o in outs])
+        tgt = w * mo.sum()
+        ratio = mo / np.maximum(tgt, 1e-15)
+        for k, o in enumerate(outs):
+            net.K_out[o] = max(1.0, net.K_out[o] * ratio[k] ** 2)
+        if np.max(np.abs(ratio - 1)[ratio > 1]) < 0.02 if np.any(ratio > 1) else True:
+            break
+    floor = float(np.mean([net.K_out[o] <= 1.0 + 1e-9 for o in outs]))
+    dev = float(np.max(np.abs(mo / np.maximum(tgt, 1e-15) - 1)))
+    return dict(iterations=it + 1, share_unmetered=floor, max_dev=dev, K_max=float(max(net.K_out.values())))
+
+
 def surface_T(panel, Tw):
     """температура горячей поверхности: средняя по толщине + перепад в наружном слое"""
     hg = panel.hg
@@ -455,7 +517,7 @@ def surface_T(panel, Tw):
 
 
 def evaluate(panel, net, p_in, p_out, Tc_in, outer=3):
-    p_mean = 0.5 * (p_in + p_out)
+    p_mean = 0.5 * (p_in + (p_out(panel.Lx) if callable(p_out) else p_out))
     panel.Tc_seg = np.full(len(net.seg), Tc_in + 50.0)
     if panel.rad is not None:
         Tw = np.full((panel.nx, panel.ny), 1100.0)
@@ -493,7 +555,8 @@ def evaluate(panel, net, p_in, p_out, Tc_in, outer=3):
     vmax = float(np.max(np.abs(hyd["m"]) / (hyd["rho"] * hyd["A"])))
     pr = air_props(np.array([Tc_in]), p_mean)
     a_snd = math.sqrt(1.4 * 287.05 * Tc_in)
-    return dict(net=net.name, m_c=hyd["m_in"], dp=p_in - p_out, Tc_out=th["Tc_out"],
+    return dict(net=net.name, m_c=hyd["m_in"], dp=p_in - (p_out(panel.Lx) if callable(p_out) else p_out),
+                Tc_out=th["Tc_out"],
                 T_max=float(Ts.max()), T_min=float(Ts.min()), T_mean=float(Ts.mean()),
                 T_spread=float(Ts.max() - Ts.min()), T_std=float(Ts.std()),
                 Tw_mid_max=float(Tw.max()), Q_gas_W=Q_g, Q_cool_W=float(Q_c),
@@ -503,11 +566,19 @@ def evaluate(panel, net, p_in, p_out, Tc_in, outer=3):
                 _Ts=Ts, _hyd=hyd)
 
 
+def p_floor(net, p_out):
+    """наименьшее давление подвода без обратного течения: наибольшее давление среди выпусков"""
+    if not callable(p_out):
+        return p_out
+    P = np.array(net.nodes)
+    return max(p_out(P[o][0]) for o in net.outlets)
+
+
 def mdot_for(panel, net, p_out, Tc_in, m_target, p_hi):
     """давление подвода (дросселирование), дающее заданный расход охладителя"""
     def r(pin):
         return evaluate(panel, net, pin, p_out, Tc_in, outer=1)["m_c"] - m_target
-    lo = p_out * (1 + 1e-4)
+    lo = p_floor(net, p_out) * (1 + 1e-4)
     if r(p_hi) < 0:
         return None
     pin = brentq(r, lo, p_hi, rtol=1e-5)
@@ -522,9 +593,363 @@ def min_flow_for_limit(panel, net, p_out, Tc_in, T_lim, p_hi):
 
     def r(pin):
         return evaluate(panel, net, pin, p_out, Tc_in, outer=2)["T_max"] - T_lim
-    lo = p_out * (1 + 1e-5)
+    lo = p_floor(net, p_out) * (1 + 1e-5)
+    if r(lo) < 0:          # предел держится даже у порога обратного течения — расход нельзя уменьшить
+        res = evaluate(panel, net, lo, p_out, Tc_in, outer=3)
+        res.update(feasible=True, p_in=lo, at_backflow_floor=True)
+        return res
     pin = brentq(r, lo, p_hi, rtol=1e-6)
     res = evaluate(panel, net, pin, p_out, Tc_in, outer=3)
     res["feasible"] = True
     res["p_in"] = pin
     return res
+
+
+# ================================================================== случаи KV-3
+def kv3_point():
+    """расчётная точка KV-3 — frame3_point_results.json"""
+    d = json.loads((GTU / "frame3" / "frame3_point_results.json").read_text())
+    cyc = d["cycle"]["frame3"]
+    st1 = d["turbine"]["options"]["3"]["stages"][0]
+    PR = d["split"]["pi"]
+    return dict(PR=PR, p3=PR * 101325.0, T3=cyc["T3_C"] + 273.15, T41=1000.0 + 273.15, G=25.55,
+                c2=st1["c2"], M2=st1["M2"], h_blade=st1["h_rotor_in_m"], Dm=d["turbine"]["options"]["3"]["Dm"],
+                dp_comb=0.04, src="routes/gtu/frame3/frame3_point_results.json: split.pi, cycle.frame3.T3_C, "
+                                  "turbine.options.3.Dm, turbine.options.3.stages[0].c2/M2/h_rotor_in_m; G — inputs[0].used.G")
+
+
+A = dict(   # допущения уровня облика (все — оценка)
+    ngv=dict(chord=0.040, s_over_c=0.80, side_len_over_c=1.2, D_LE=0.004, V1=120.0, PF=0.20, k_w=22.0, t_w=1.0e-3,
+             t_skin=0.6e-3, T_lim_C=950.0, feed_loss=0.02, N_straight=16, d_straight=0.6e-3, K_tree=4, N_cco=32,
+             note="хорда 40 мм, шаг 0,8 хорды, длина развёртки стороны 1,2 хорды, кромка Ø4 мм, скорость на входе 120 м/с, "
+                  "коэффициент неравномерности поля температуры 0,20 (горячая полоса посередине высоты), "
+                  "печатный никелевый сплав k = 22 Вт/(м·К), предел поверхности 950 °C, канал 0,6 мм — оценки"),
+    liner=dict(Lx=0.10, H=0.06, Tg_pz=1900.0, Tg_exit_over_T41=150.0, h_conv=400.0, eps_rad=0.20, k_w=24.0, t_w=1.5e-3,
+               t_skin=0.5e-3, T_lim_C=900.0, dp_frac=0.03, N_straight=16, d_straight=1.0e-3, K_tree=4, N_cco=48,
+               note="участок жаровой трубы 100 × 60 мм у первичной зоны; газ 1900 K в первичной зоне, к выходу — T41 + 150 K; "
+                    "конвекция 400 Вт/(м²·К), излучение ε = 0,20 (несветящееся пламя газа); печатный Hastelloy X k = 24; "
+                    "предел 900 °C; перепад на стенке 3 % p3 — оценки"),
+)
+
+
+def gas_props_T(T, p):
+    return air_props(np.asarray(T, float), p)   # продукты сгорания ≈ воздух по переносу (оценка)
+
+
+def ngv_case(pt, T41):
+    a = A["ngv"]
+    Lx = a["side_len_over_c"] * a["chord"]
+    H = pt["h_blade"]
+    p4 = pt["p3"] * (1 - pt["dp_comb"])
+    g = 1.33
+    cp_g = 1180.0
+    Rg = 287.0
+    T3, T4 = pt["T3"], T41
+
+    def Tg(X, Y):
+        eta = (Y - H / 2) / (0.22 * H)
+        sh = np.exp(-eta ** 2)
+        ym = np.linspace(0, H, 400)
+        sbar = np.exp(-((ym - H / 2) / (0.22 * H)) ** 2).mean()
+        return T4 + a["PF"] * (T4 - T3) * (sh - sbar)
+
+    def hg(X, Y):
+        x = np.maximum(X, 1e-5)
+        V = a["V1"] + (pt["c2"] - a["V1"]) * np.clip(X / Lx, 0, 1)
+        Ts = T4 - V ** 2 / (2 * cp_g)
+        p = p4 * (Ts / T4) ** (g / (g - 1))
+        rho = p / (Rg * Ts)
+        pr = gas_props_T(Ts, p4)
+        mu, k, Pr = pr["mu"], pr["k"], pr["Pr"]
+        Re_x = rho * V * x / mu
+        h_t = 0.0296 * Re_x ** 0.8 * Pr ** (1 / 3) * k / x
+        # передняя кромка: Nu_D = 1,14·Re_D^0,5·Pr^0,4 (цилиндр, точка торможения — справочная формула, не открыт)
+        pr1 = gas_props_T(np.array([T4]), p4)
+        rho1 = p4 / (Rg * T4)
+        ReD = rho1 * a["V1"] * a["D_LE"] / pr1["mu"][0]
+        hLE = 1.14 * ReD ** 0.5 * pr1["Pr"][0] ** 0.4 * pr1["k"][0] / a["D_LE"]
+        xs = math.pi * a["D_LE"] / 4
+        return np.where(X < xs, np.maximum(hLE, h_t), np.maximum(h_t, hLE * np.exp(-((X - xs) / xs) ** 2)))
+
+    panel = Panel(Lx, H, 120, 70, a["k_w"], a["t_w"], hg, Tg, t_skin=a["t_skin"])
+    p_in = pt["p3"] * (1 - a["feed_loss"])
+    def p_out(x):
+        """статическое давление на поверхности в точке x (та же изоэнтропа, что для h_g): выпуск охладителя"""
+        V = a["V1"] + (pt["c2"] - a["V1"]) * min(max(x / Lx, 0.0), 1.0)
+        Ts = T4 - V ** 2 / (2 * cp_g)
+        return p4 * (Ts / T4) ** (g / (g - 1))
+    N_v = int(round(math.pi * pt["Dm"] / (a["s_over_c"] * a["chord"])))
+    return panel, p_in, p_out, N_v
+
+
+def liner_case(pt):
+    a = A["liner"]
+    T41 = pt["T41"]
+
+    def Tg(X, Y):
+        x = X / a["Lx"]
+        Te = T41 + a["Tg_exit_over_T41"]
+        return np.where(x < 0.3, a["Tg_pz"], a["Tg_pz"] + (Te - a["Tg_pz"]) * (x - 0.3) / 0.7)
+
+    def hg(X, Y):
+        return np.full_like(X, a["h_conv"])
+    panel = Panel(a["Lx"], a["H"], 100, 60, a["k_w"], a["t_w"], hg, Tg, t_skin=a["t_skin"])
+    panel.rad = (a["eps_rad"], panel.Tg)
+    p_in = pt["p3"] * 0.99
+    p_out = pt["p3"] * (0.99 - a["dp_frac"])
+    return panel, p_in, p_out
+
+
+NET_TITLE = {"straight": "прямые каналы (16 корней, K = 0)", "tree_r8": "8 деревьев, K = 1 (Мюррей)",
+             "tree_r4": "4 дерева, K = 2 (Мюррей)", "tree_r2": "2 дерева, K = 3 (Мюррей)",
+             "tree_r1": "1 дерево, K = 4 (Мюррей)", "tree_r4_u": "4 дерева, K = 2 (Uylings 7/3)",
+             "cco": "растущее дерево по тепловому потоку (4 корня)"}
+NET_K = {"straight": 0, "tree_r8": 1, "tree_r4": 2, "tree_r2": 3, "tree_r1": 4}
+
+
+def build_nets(panel, Ns, ds, K, Ncco, qmap, meter=None):
+    """сети одного объёма каналов V = Ns·(π/4)·ds²·Lx и одного числа окончаний Ns (кроме cco — Ncco выпусков)"""
+    Lx, H = panel.Lx, panel.H
+    nets = {}
+    s = net_straight(Lx, H, Ns, ds)
+    V = Ns * math.pi * ds * ds / 4 * Lx
+    nets["straight"] = s
+    for name, nr, ex in (("tree_r8", 8, 3.0), ("tree_r4", 4, 3.0), ("tree_r2", 2, 3.0), ("tree_r1", 1, 3.0),
+                         ("tree_r4_u", 4, 7.0 / 3.0)):
+        Kk = int(round(math.log2(Ns / nr)))
+        t = net_delta(Lx, H, Kk, 1e-3, ex, name, n_root=nr)
+        t.scale_d(math.sqrt(V / t.volume()))
+        nets[name] = t
+
+    def qfun(P):
+        return np.array([qmap(x, y) for x, y in P])
+    c = net_cco(Lx, H, qfun, Ncco, 1e-4, exponent=3.0, seed=1, n_root=4)
+    c.scale_d(math.sqrt(V / c.volume()))
+    nets["cco"] = c
+    if meter is not None:
+        p_in, p_out, Tc_in, qcell = meter
+        c.metering = meter_outlets(panel, c, p_in, p_out, Tc_in, qcell)
+    for n in nets.values():
+        n.V_target = V
+    return nets
+
+
+def qmap_from(panel, Tc):
+    hg = panel.hg
+    q = hg * (panel.Tg - Tc)
+    if panel.rad is not None:
+        q = q + SIGMA * panel.rad[0] * (panel.rad[1] ** 4 - (Tc + 300) ** 4)
+    from scipy.interpolate import RegularGridInterpolator
+    f = RegularGridInterpolator((panel.X[:, 0], panel.Y[0]), q, bounds_error=False, fill_value=None)
+    return lambda x, y: float(f([[x, y]])[0])
+
+
+def strip(r):
+    return {k: v for k, v in r.items() if not k.startswith("_")}
+
+
+def run(out_dir=HERE, quick=False):
+    t0 = time.time()
+    pt = kv3_point()
+    res = dict(title="«Сосудистая» сеть охлаждения: сопловая лопатка и жаровая труба KV-3",
+               method=__doc__.strip().split("\n\n")[0] + " Подробно — docstring vascular.py.",
+               software=f"python {sys.version.split()[0]}, numpy {np.__version__}, scipy, cantera (свойства воздуха)",
+               date="2026-11-14", status="оценка уровня облика: 1D-сеть + 2D-стенка; нужны сопряжённый расчёт (CFD + "
+                                         "теплопроводность, задача AWS) и испытание",
+               inputs=[dict(file="routes/gtu/frame3/frame3_point_results.json", used=strip(pt))],
+               assumptions=A, cases={})
+    figs = {}
+    # ---------------- сопловая лопатка
+    a = A["ngv"]
+    T41s = [1000.0, 1050.0, 1100.0, 1150.0] if not quick else [1000.0, 1100.0]
+    ngv = dict(T41_C=T41s, rows=[])
+    panel0, p_in, p_out, N_v = ngv_case(pt, pt["T41"])
+    qm = qmap_from(panel0, pt["T3"] + 150)
+    p11 = ngv_case(pt, 1100.0 + 273.15)
+    qcell = p11[0].hg * (p11[0].Tg - (A["ngv"]["T_lim_C"] + 273.15))
+    nets = build_nets(panel0, a["N_straight"], a["d_straight"], a["K_tree"], a["N_cco"], qm,
+                      meter=(p11[1], p11[2], pt["T3"], np.maximum(qcell, 0)))
+    ngv.update(N_vanes_estimate=N_v, p_in_kPa=p_in / 1e3, p_out_TE_kPa=p_out(panel0.Lx) / 1e3,
+               p_out_LE_kPa=p_out(0.0) / 1e3, panel_mm=[panel0.Lx * 1e3, panel0.H * 1e3],
+               channel_volume_mm3=nets["straight"].V_target * 1e9,
+               note="сторона лопатки — одна панель; на лопатку 2 стороны; доля охладителя x_ngv = 2·N·ṁ/G")
+    for T41 in T41s:
+        panel, p_in, p_out, _ = ngv_case(pt, T41 + 273.15)
+        for name, net in nets.items():
+            r = min_flow_for_limit(panel, net, p_out, pt["T3"], a["T_lim_C"] + 273.15, p_in)
+            row = dict(T41_C=T41, net=name, feasible=r["feasible"])
+            if r["feasible"]:
+                row.update(strip(r))
+                row["x_ngv_pct"] = 100 * 2 * N_v * r["m_c"] / pt["G"]
+                row["p_in_kPa"] = r["p_in"] / 1e3
+                if T41 == 1100.0:
+                    figs[("ngv", T41, name)] = (panel, net, r["_Ts"])
+            else:
+                row["at_full_dp"] = strip(r["at_full_dp"])
+            ngv["rows"].append(row)
+            print("NGV", T41, name, row.get("x_ngv_pct"), row.get("T_spread"), round(time.time() - t0), flush=True)
+    # одинаковый расход (как у прямых при 1100 °C): сравнение неравномерности и энтропии
+    panel, p_in, p_out, _ = ngv_case(pt, 1100.0 + 273.15)
+    base = [r for r in ngv["rows"] if r["T41_C"] == 1100.0 and r["net"] == "straight" and r["feasible"]]
+    eq = []
+    if base:
+        m_eq = base[0]["m_c"]
+        for name, net in nets.items():
+            r = mdot_for(panel, net, p_out, pt["T3"], m_eq, p_in)
+            if r is not None:
+                eq.append(strip(r))
+    ngv["equal_flow_T41_1100"] = eq
+    res["cases"]["ngv"] = ngv
+    # ---------------- жаровая труба
+    a = A["liner"]
+    panel, p_in, p_out = liner_case(pt)
+    qm = qmap_from(panel, pt["T3"] + 300)
+    qcell = panel.hg * (panel.Tg - (a["T_lim_C"] + 273.15)) + SIGMA * a["eps_rad"] * (panel.Tg ** 4 - (a["T_lim_C"] + 273.15) ** 4)
+    nets_l = build_nets(panel, a["N_straight"], a["d_straight"], a["K_tree"], a["N_cco"], qm,
+                        meter=(p_in, p_out, pt["T3"], np.maximum(qcell, 0)))
+    lin = dict(p_in_kPa=p_in / 1e3, p_out_kPa=p_out / 1e3, panel_mm=[a["Lx"] * 1e3, a["H"] * 1e3],
+               channel_volume_mm3=nets_l["straight"].V_target * 1e9, rows=[])
+    for name, net in nets_l.items():
+        full = evaluate(panel, net, p_in, p_out, pt["T3"], outer=3)
+        r = min_flow_for_limit(panel, net, p_out, pt["T3"], a["T_lim_C"] + 273.15, p_in)
+        row = dict(net=name, at_full_dp=strip(full), feasible=r["feasible"])
+        if r["feasible"]:
+            row["at_limit"] = strip(r)
+            row["coolant_per_m2_kg_s"] = r["m_c"] / (a["Lx"] * a["H"])
+        figs[("liner", 0, name)] = (panel, net, full["_Ts"])
+        lin["rows"].append(row)
+        print("liner", name, full["T_max"] - 273.15, row.get("coolant_per_m2_kg_s"), round(time.time() - t0), flush=True)
+    res["cases"]["liner"] = lin
+    res["runtime_s"] = round(time.time() - t0, 1)
+    return res, figs, nets, nets_l
+
+
+def tube_mesh(P0, P1, r, nseg=10):
+    P0, P1 = np.asarray(P0, float), np.asarray(P1, float)
+    ax = P1 - P0
+    L = np.linalg.norm(ax)
+    if L < 1e-12:
+        return np.zeros((0, 3)), np.zeros((0, 3), int)
+    ax /= L
+    tmp = np.array([0, 0, 1.0]) if abs(ax[2]) < 0.9 else np.array([1.0, 0, 0])
+    u = np.cross(ax, tmp); u /= np.linalg.norm(u)
+    v = np.cross(ax, u)
+    th = np.linspace(0, 2 * np.pi, nseg, endpoint=False)
+    ring = np.cos(th)[:, None] * u + np.sin(th)[:, None] * v
+    V = np.vstack([P0 + r * ring, P1 + r * ring, P0, P1])
+    F = []
+    for i in range(nseg):
+        j = (i + 1) % nseg
+        F += [[i, j, nseg + i], [j, nseg + j, nseg + i], [2 * nseg, j, i], [2 * nseg + 1, nseg + i, nseg + j]]
+    return V, np.array(F)
+
+
+def net_stl(net, path, z=0.0):
+    """каналы сети — трубки (негатив для печати; поверхность для CFD), мм"""
+    from tpms_geom import write_stl
+    P = np.array(net.nodes) * 1e3
+    Vs, Fs, off = [], [], 0
+    for a, b, d in net.seg:
+        if d > 0.01:       # коллектор прямых каналов не выводим
+            continue
+        V, F = tube_mesh([*P[a], z], [*P[b], z], d * 1e3 / 2)
+        Vs.append(V); Fs.append(F + off); off += len(V)
+    return write_stl(path, np.vstack(Vs), np.vstack(Fs), solid=net.name)
+
+
+def plots(res, figs, out_dir):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    names = ["straight", "tree_r4", "tree_r1", "cco"]
+    title = NET_TITLE
+    for art, T41 in (("ngv", 1100.0), ("liner", 0)):
+        fig, axs = plt.subplots(1, 4, figsize=(17, 4.6) if art == "ngv" else (17, 3.9))
+        vmin = min(figs[(art, T41, n)][2].min() for n in names if (art, T41, n) in figs) - 273.15
+        vmax = max(figs[(art, T41, n)][2].max() for n in names if (art, T41, n) in figs) - 273.15
+        for ax, n in zip(axs, names):
+            if (art, T41, n) not in figs:
+                ax.axis("off"); continue
+            panel, net, Ts = figs[(art, T41, n)]
+            ext = [0, panel.Lx * 1e3, 0, panel.H * 1e3]
+            im = ax.imshow((Ts - 273.15).T, origin="lower", extent=ext, cmap="magma", vmin=vmin, vmax=vmax, aspect="equal")
+            P = np.array(net.nodes) * 1e3
+            dmax = max(d for a_, b_, d in net.seg if d < 0.01)
+            for a_, b_, d in net.seg:
+                if d > 0.01:
+                    continue
+                ax.plot([P[a_, 0], P[b_, 0]], [P[a_, 1], P[b_, 1]], color="#7fd3ff", lw=0.6 + 3.0 * d / dmax,
+                        solid_capstyle="round")
+            rows = res["cases"][art]["rows"]
+            if art == "ngv":
+                rr = [r for r in rows if r["net"] == n and r["T41_C"] == T41]
+                lab = f"x_ngv = {rr[0]['x_ngv_pct']:.2f} %, разброс {rr[0]['T_spread']:.0f} K" if rr and rr[0]["feasible"] else "не держит предел"
+            else:
+                rr = [r for r in rows if r["net"] == n][0]
+                lab = f"T_max {rr['at_full_dp']['T_max'] - 273.15:.0f} °C, разброс {rr['at_full_dp']['T_spread']:.0f} K"
+            ax.set_title(f"{title[n]}\n{lab}", fontsize=9)
+            ax.set_xlabel("x, мм (от входной кромки)" if art == "ngv" else "x, мм (по оси камеры)", fontsize=8)
+            ax.tick_params(labelsize=7)
+        cb = fig.colorbar(im, ax=axs, shrink=0.85, pad=0.01)
+        cb.set_label("температура горячей поверхности, °C", fontsize=8)
+        fig.suptitle(("Сопловая лопатка KV-3, сторона (развёртка), T41 = 1100 °C, расход — наименьший для предела 950 °C"
+                      if art == "ngv" else
+                      "Жаровая труба KV-3, участок у первичной зоны, весь перепад 3 % p3"), fontsize=10)
+        fig.savefig(out_dir / f"vascular_{art}.png", dpi=130, bbox_inches="tight")
+        plt.close(fig)
+    # x_ngv(T41)
+    fig, ax = plt.subplots(figsize=(6.4, 4.2))
+    mk = {"straight": "o", "tree_r8": "v", "tree_r4": "s", "tree_r2": "<", "tree_r1": "^", "tree_r4_u": "x", "cco": "D"}
+    for n in NET_TITLE:
+        rr = [r for r in res["cases"]["ngv"]["rows"] if r["net"] == n and r["feasible"]]
+        ax.plot([r["T41_C"] for r in rr], [r["x_ngv_pct"] for r in rr], marker=mk[n], label=title[n])
+    ax.axhline(3.0, color="0.5", ls="--", lw=0.8)
+    ax.text(1002, 3.05, "класс N в gtu_family: x_ngv = 3 %", fontsize=8, color="0.3")
+    ax.set_xlabel("T41, °C"); ax.set_ylabel("охладитель соплового аппарата, % расхода компрессора")
+    ax.set_title("Печатная лопатка с сетью каналов: расход на охлаждение (оценка)", fontsize=10)
+    ax.grid(alpha=0.3); ax.legend(fontsize=8)
+    fig.tight_layout()
+    fig.savefig(out_dir / "vascular_xngv.png", dpi=130)
+    plt.close(fig)
+    # развёртка по сложности (Бежан): число уровней ветвления K при равном объёме и 16 окончаниях
+    fig, ax = plt.subplots(figsize=(6.4, 4.0))
+    for T41, c in ((1050.0, "#1f77b4"), (1100.0, "#d62728"), (1150.0, "#2ca02c")):
+        xs, ys = [], []
+        for n, K in NET_K.items():
+            rr = [r for r in res["cases"]["ngv"]["rows"] if r["net"] == n and r["T41_C"] == T41 and r["feasible"]]
+            if rr:
+                xs.append(K); ys.append(rr[0]["x_ngv_pct"])
+        if xs:
+            ax.plot(xs, ys, marker="o", color=c, label=f"T41 = {T41:.0f} °C")
+    ax.set_xticks(list(NET_K.values()))
+    ax.set_xticklabels(["0\n(прямые)", "1", "2", "3", "4\n(одно дерево)"])
+    ax.set_xlabel("уровней ветвления K (16 окончаний, равный объём каналов)")
+    ax.set_ylabel("x_ngv, % расхода компрессора")
+    ax.set_title("Оптимальная сложность сети (конструктальная развёртка, оценка)", fontsize=10)
+    ax.grid(alpha=0.3); ax.legend(fontsize=8)
+    fig.tight_layout()
+    fig.savefig(out_dir / "vascular_complexity.png", dpi=130)
+    plt.close(fig)
+
+
+if __name__ == "__main__":
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--quick", action="store_true")
+    ap.add_argument("--out", default=str(HERE))
+    a_ = ap.parse_args()
+    out = Path(a_.out)
+    res, figs, nets, nets_l = run(out, quick=a_.quick)
+    plots(res, figs, out)
+    stl = {}
+    for name, net in nets.items():
+        stl[name] = net_stl(net, out / f"vascular_ngv_{name}.stl")
+    for st in stl.values():
+        st["path"] = str(Path(st["path"]).relative_to(ROOT))
+    res["geometry"] = dict(stl=stl, note="каналы — трубки в плоскости развёртки, мм; для печати — вычитаются из стенки")
+    res["networks"] = {k: dict(nodes=len(n.nodes), segments=len(n.seg), outlets=len(n.outlets),
+                               d_min_mm=1e3 * min(d for _, _, d in n.seg if d < 0.01),
+                               d_max_mm=1e3 * max(d for _, _, d in n.seg if d < 0.01),
+                               length_mm=1e3 * n.length()) for k, n in nets.items()}
+    (out / "vascular_results.json").write_text(json.dumps(res, ensure_ascii=False, indent=1, default=float))
+    print("готово", res["runtime_s"])

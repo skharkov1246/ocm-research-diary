@@ -441,7 +441,20 @@ def mma_update(x, df, dg, g, low, upp, xold1, xold2, it, move=0.2, asyinit=0.2, 
     return xof(hi), low, upp
 
 
-def optimize_uniform(case="comb6", nx=80, vol=0.30, Da=1e-5, rmin=1.5, qs=(0.01, 0.1, 1.0), iters=(80, 60, 60),
+def project(rt, beta, eta=0.5):
+    """проекция Хевисайда (Wang, Lazarov, Sigmund 2011) и её производная"""
+    if beta <= 0:
+        return rt, np.ones_like(rt)
+    den = math.tanh(beta * eta) + math.tanh(beta * (1 - eta))
+    rb = (math.tanh(beta * eta) + np.tanh(beta * (rt - eta))) / den
+    d = beta * (1 - np.tanh(beta * (rt - eta)) ** 2) / den
+    return rb, d
+
+
+STAGES = ((0.01, 0, 60), (0.1, 0, 40), (0.1, 2, 30), (0.1, 4, 30), (0.1, 8, 30), (0.1, 16, 30))
+
+
+def optimize_uniform(case="comb6", nx=80, vol=0.30, Da=1e-5, rmin=1.5, stages=STAGES,
                      w=1.0, move=0.1, verbose=True):
     """выходы на одинаковое давление; цель J = Φ/Φ0 + w·N·Σ(Q_k/Q̄ − 1)² при доле жидкости ≤ vol;
     Φ — самосопряжённая часть, разброс расходов — сопряжённая задача с той же (симметричной) матрицей"""
@@ -475,12 +488,13 @@ def optimize_uniform(case="comb6", nx=80, vol=0.30, Da=1e-5, rmin=1.5, qs=(0.01,
     Phi0 = None
     t0 = time.time()
     k = 0
-    for q, nit in zip(qs, iters):
+    for q, beta, nit in stages:
         low = upp = None
         for it in range(nit):
-            rho = (H @ x) / Hs
+            rt = (H @ x) / Hs
+            rho, drp = project(rt, beta)
             al = alpha_of(rho, amax, q)
-            dal = dalpha_of(rho, amax, q)
+            dal = dalpha_of(rho, amax, q) * drp
             alpha_f = S.Pf @ al
             K = S.Kvis + sp.diags(alpha_f * h * h)
             Kff = K[fi][:, fi]
@@ -511,8 +525,8 @@ def optimize_uniform(case="comb6", nx=80, vol=0.30, Da=1e-5, rmin=1.5, qs=(0.01,
             dJ2 = -(S.Pf.T @ (lam_u * u * h * h)) * dal
             dJ_drho = dPhi + dJ2
             dJ_dx = H.T @ (dJ_drho / Hs)
-            gV = float(((H @ x) / Hs).mean() - vol)
-            dV = (H.T @ (np.ones_like(x) / Hs)) / x.size
+            gV = float(rho.mean() - vol)
+            dV = (H.T @ (drp / Hs)) / x.size
             xn, low, upp = mma_update(x, dJ_dx, dV, gV, low if low is not None else x - 0.2,
                                       upp if upp is not None else x + 0.2, xold1, xold2,
                                       it if low is not None else 0, move=move)
@@ -520,14 +534,16 @@ def optimize_uniform(case="comb6", nx=80, vol=0.30, Da=1e-5, rmin=1.5, qs=(0.01,
             change = float(np.abs(xn - x).max())
             x = xn
             mnd = float(4 * (rho * (1 - rho)).mean())
-            hist.append(dict(q=q, it=it, J=J, Phi=Phi, J2=J2, max_dev=float(np.abs(dev).max()), change=change, mnd=mnd))
+            hist.append(dict(q=q, beta=beta, it=it, J=J, Phi=Phi, J2=J2, max_dev=float(np.abs(dev).max()),
+                             change=change, mnd=mnd))
             if verbose and it % 10 == 0:
-                print(f"[U] q={q} it={it} J={J:.4g} Phi={Phi:.4g} maxdev={np.abs(dev).max():.3f} mnd={mnd:.3f} "
+                print(f"[U] q={q} b={beta} it={it} J={J:.4g} Phi={Phi:.4g} maxdev={np.abs(dev).max():.3f} mnd={mnd:.3f} "
                       f"t={time.time() - t0:.0f}s", flush=True)
             k += 1
-    rho = (H @ x) / Hs
-    return dict(case=cs, S=S, rho=rho.reshape(nx, ny), x=x, hist=hist, amax=amax, q=qs[-1], time_s=time.time() - t0,
-                w=w, Phi0=Phi0)
+    q, beta, _ = stages[-1]
+    rho, _ = project((H @ x) / Hs, beta)
+    return dict(case=cs, S=S, rho=rho.reshape(nx, ny), x=x, hist=hist, amax=amax, q=q, beta=beta,
+                time_s=time.time() - t0, w=w, Phi0=Phi0)
 
 
 def comb_baseline(cs, vol):

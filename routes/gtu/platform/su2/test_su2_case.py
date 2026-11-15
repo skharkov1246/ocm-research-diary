@@ -388,7 +388,8 @@ def test_record_appends(tmp_path, monkeypatch):
 
 def test_aws_plan_jobs_pass_runner_and_budget(tmp_path):
     trial = {"runs": [{"np": 4, "mesh": {"NPOIN": 250000},
-                       "stages": [{"rows": 100, "sec_per_iter_median": 2.0}, {"rows": 300, "sec_per_iter_median": 3.0}]}]}
+                       "stages": [{"name": "s1_ramp", "rows": 100, "sec_per_iter_median": 2.0, "sec_per_iter_p10": 1.0},
+                                  {"name": "s2_ramp", "rows": 300, "sec_per_iter_median": 3.0, "sec_per_iter_p10": 2.0}]}]}
     tp = tmp_path / "trial_SYNTHETIC.json"
     tp.write_text(json.dumps(trial))
     geom = {"stages": {"stage1": {"levels": {"medium": {"n_nodes": 1000000}}},
@@ -419,3 +420,9 @@ def test_aws_plan_jobs_pass_runner_and_budget(tmp_path):
     except ImportError as e:  # pragma: no cover
         pytest.skip(f"runner.py не импортируется: {e}")
     assert len(runner.load_jobs(str(jp))) == 10
+    # замер только по выбранной стадии и по нижнему децилю
+    assert S.main(["aws-plan", "--trial-results", str(tp), "--geom-results", str(gp), "--out", str(jp),
+                   "--t-ref-kind", "p10", "--t-ref-stages", "s1_ramp"]) == 0
+    plan = json.load(open(tp))["aws_plan"]
+    assert plan["t_ref_s_per_iter"] == pytest.approx(1.0) and "s1_ramp" in plan["t_ref_source"]
+    assert plan["t_ref_by_kind"]["p10"] == pytest.approx((100 * 1.0 + 300 * 2.0) / 400)

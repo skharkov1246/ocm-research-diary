@@ -954,8 +954,74 @@ def _n_window(c, stn, Ut, Q5, t):
 _EX = None
 
 
+class FastGas:
+    """те же таблицы свойств газа gtu_explore (Cantera GRI-Mech 3.0, равномерная сетка 200-2400 K с шагом 2 K) и та же линейная
+    интерполяция, но скалярно на чистом Python: gtu_explore.h(T, b) на каждый вызов собирает массив (1-b)·HA + b·HS из 1101
+    точек. Совпадение с gtu_explore - до округления (тест test_fastgas_matches_gtu_explore); прочие имена - из модуля"""
+
+    def __init__(self, ex):
+        self._ex = ex
+        self.T_lo, self.dT = float(ex.TG[0]), float(ex.TG[1] - ex.TG[0])
+        self.nT = len(ex.TG)
+        self.HA, self.HS, self.SA, self.SS = (ex.HA.tolist(), ex.HS.tolist(), ex.SA.tolist(), ex.SS.tolist())
+        self.RA, self.RS, self.HF, self.AFST, self.LHV, self.T0, self.P0 = ex.RA, ex.RS, ex.HF, ex.AFST, ex.LHV, ex.T0, ex.P0
+
+    def __getattr__(self, k):
+        return getattr(self._ex, k)
+
+    def _f(self, A, B, T, b):
+        x = (T - self.T_lo) / self.dT
+        if x <= 0:
+            return (1 - b) * A[0] + b * B[0]
+        if x >= self.nT - 1:
+            return (1 - b) * A[-1] + b * B[-1]
+        i = int(x); f = x - i
+        y0 = (1 - b) * A[i] + b * B[i]; y1 = (1 - b) * A[i + 1] + b * B[i + 1]
+        return y0 + f * (y1 - y0)
+
+    def _inv(self, A, B, v, b):
+        lo, hi = 0, self.nT - 1
+        if v <= (1 - b) * A[0] + b * B[0]:
+            return self.T_lo
+        if v >= (1 - b) * A[-1] + b * B[-1]:
+            return self.T_lo + self.dT * (self.nT - 1)
+        while hi - lo > 1:
+            mid = (lo + hi) // 2
+            if (1 - b) * A[mid] + b * B[mid] <= v:
+                lo = mid
+            else:
+                hi = mid
+        y0 = (1 - b) * A[lo] + b * B[lo]; y1 = (1 - b) * A[hi] + b * B[hi]
+        return self.T_lo + self.dT * (lo + (v - y0) / (y1 - y0))
+
+    def h(self, T, b=0.0):
+        return self._f(self.HA, self.HS, T, b)
+
+    def s0(self, T, b=0.0):
+        return self._f(self.SA, self.SS, T, b)
+
+    def T_h(self, hv, b=0.0):
+        return self._inv(self.HA, self.HS, hv, b)
+
+    def T_s(self, sv, b=0.0):
+        return self._inv(self.SA, self.SS, sv, b)
+
+    def Rg(self, b=0.0):
+        return (1 - b) * self.RA + b * self.RS
+
+    def far_for(self, T3, T4):
+        return (self.h(T4) - self.h(T3)) / (self.HF + self.AFST * self.h(T4) - (1 + self.AFST) * self.h(T4, 1.0))
+
+    def bfrac(self, f):
+        return f * (1 + self.AFST) / (1 + f)
+
+    @staticmethod
+    def eta_axial(psi):
+        return 0.885 - 0.035 * max(0.0, psi - 1.2)
+
+
 def _E():
-    """таблицы свойств газа gtu_explore (импорт делает chdir в папку трека - возвращаемся)"""
+    """свойства газа: таблицы gtu_explore через FastGas (импорт gtu_explore делает chdir в папку трека - возвращаемся)"""
     global _EX
     if _EX is None:
         cwd = os.getcwd()
@@ -963,7 +1029,7 @@ def _E():
             sys.path.insert(0, GTU)
         import gtu_explore as ex
         os.chdir(cwd)
-        _EX = ex
+        _EX = FastGas(ex)
     return _EX
 
 

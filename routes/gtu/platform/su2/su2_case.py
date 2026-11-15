@@ -936,12 +936,14 @@ def aws_plan(a) -> int:
     tr = json.load(open(a.trial_results, encoding="utf-8"))
     run0 = tr["runs"][-1]
     kcol = f"sec_per_iter_{a.t_ref_kind}"
-    stages_t = [s for s in run0["stages"] if s.get(kcol) and s.get("rows")]
+    want = [x for x in (a.t_ref_stages or "").split(",") if x]
+    stages_t = [s for s in run0["stages"] if s.get(kcol) and s.get("rows") and (not want or s.get("name") in want)]
     if a.t_ref:
         t_ref, t_src = a.t_ref, "--t-ref (задано)"
     elif stages_t:
         t_ref = sum(s[kcol] * s["rows"] for s in stages_t) / sum(s["rows"] for s in stages_t)
-        t_src = f"{kcol} (Time(sec) = ITER_TIME истории) по стадиям пробного прогона, взвешенное по итерациям"
+        t_src = (f"{kcol} (Time(sec) = ITER_TIME истории) по стадиям пробного прогона "
+                 f"{[x.get('name') for x in stages_t]}, взвешенное по итерациям")
     else:
         raise SystemExit("в пробном прогоне нет замера времени итерации (--t-ref)")
     n_ref, np_ref = run0["mesh"]["NPOIN"], run0["np"]
@@ -1013,6 +1015,8 @@ def aws_plan(a) -> int:
                        "per_line": iters_line},
         "t_ref_s_per_iter": t_ref, "t_ref_source": t_src,
         "t_ref_by_kind": t_kind,
+        "trial_stage_timing": [{k: x.get(k) for k in ("name", "rows", "sec_per_iter_median", "sec_per_iter_p10",
+                                                      "loadavg_start", "loadavg_end")} for x in run0["stages"]],
         "n_ref_nodes": n_ref, "np_ref": np_ref, "procs_aws": a.procs, "parallel_eff": a.parallel_eff,
         "parallel_eff_note": "EXAMPLE: принято (как batch/cost_estimate.toml), не замер — ускорение 4 → 64 процесса не мерилось",
         "setup_min": a.setup_min, "mesh_min": a.mesh_min, "upload_min": a.upload_min, "time_margin": a.time_margin,
@@ -1104,6 +1108,7 @@ def build_parser() -> argparse.ArgumentParser:
     w.add_argument("--t-ref-kind", default="median", choices=["median", "p10"],
                    help="какое время итерации пробного прогона брать: медиану (с чужой нагрузкой, с запасом) или нижний дециль")
     w.add_argument("--t-ref", type=float, default=None, help="своё время итерации эталона, с (вместо замера)")
+    w.add_argument("--t-ref-stages", default=None, help="стадии пробного прогона для замера, через запятую (по умолчанию все)")
     w.add_argument("--procs", type=int, default=64)
     w.add_argument("--parallel-eff", type=float, default=0.6)
     w.add_argument("--setup-min", type=float, default=15.0)
