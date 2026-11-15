@@ -44,7 +44,7 @@ def _tab(tab, x):
 
 
 def solve(r_nodes, h_nodes, rho_fac, T_nodes, mat_key, rpm, p_rim_Pa=0.0, T_ref=20.0, burst_k=1.0, k_peak=1.0, r_split=None,
-          k_zone=None):
+          k_zone=None, return_field=False, k_table=None):
     """r_nodes возрастают (r_nodes[0] = 0 — сплошной диск, u(0) = 0; иначе — свободная граница отверстия), h, rho_fac
     (множитель плотности от лопаток), T — в узлах. p_rim_Pa — растягивающее радиальное напряжение на ободе (лопатки
     турбины). k_peak — поправка пика Мизеса толстой ступицы (калибровка по CalculiX, calibrate()); средние напряжения,
@@ -113,7 +113,10 @@ def solve(r_nodes, h_nodes, rho_fac, T_nodes, mat_key, rpm, p_rim_Pa=0.0, T_ref=
     ys = _tab(m["ys_MPa"], Tg) * 1e6
     uts = _tab(m["uts_MPa"], Tg) * 1e6
     yr0 = vm / ys
-    if r_split is not None and k_zone is not None:
+    if k_table is not None:
+        # поправка по местной толщине: k(h/r) — таблица по CalculiX (ccx_elites.calibrate), верхняя огибающая
+        kz = np.interp(hg / np.maximum(rg, 1e-6), k_table[0], k_table[1])
+    elif r_split is not None and k_zone is not None:
         # две зоны: у оси (толстая ступица, r < r_split) и полотно — свои поправки по CalculiX (calibrate_zones)
         kz = np.where(rg < r_split, k_zone[0], k_zone[1])
     else:
@@ -132,6 +135,8 @@ def solve(r_nodes, h_nodes, rho_fac, T_nodes, mat_key, rpm, p_rim_Pa=0.0, T_ref=
                yield_at_T=float(Tg[k]), hoop_max_MPa=float(st.max() / 1e6), hoop_mean_MPa=lhs / float(np.sum(wts)) / 1e6,
                burst_margin=burst, equilibrium_rel=abs(lhs - rhs) / max(abs(rhs), 1e-300), u_rim_mm=float(u[-1] * 1e3),
                k_peak=k_peak, **zone)
+    if return_field:
+        res["field"] = dict(r=rg, yr_raw=yr0, h=hg)
     lmp = m.get("_lmp")
     if lmp is not None:
         life, ex = lmp.life_h_v(kz * vm / 1e6, Tg)
@@ -224,6 +229,16 @@ def k_peak_cal():
 
 
 R_SPLIT_FRAC = 0.25        # граница зон «у оси» / «полотно», доля r2
+
+
+def k_table_cal():
+    """таблица k(h/r) из disk1d_calibration.json → table; нет — None"""
+    import json
+    if os.path.exists(CAL_JSON):
+        t = json.load(open(CAL_JSON, encoding="utf-8")).get("table")
+        if t:
+            return np.asarray(t["x"], float), np.asarray(t["k"], float)
+    return None
 
 
 def k_zones_cal():

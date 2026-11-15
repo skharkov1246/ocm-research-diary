@@ -16,6 +16,8 @@ from scipy import ndimage as ndi
 
 from . import shapes as S
 
+_trapz = getattr(np, "trapezoid", None) or getattr(np, "trapz")   # numpy 2.x и 1.x (контейнер ubuntu:24.04)
+
 
 def voxelize(sdf, lo, hi, h, chunk_z=None):
     """φ на узлах сетки с шагом h в коробке [lo, hi] (точки — центры вокселей). sdf(P (..., 3)) → (...)."""
@@ -116,4 +118,4 @@ def smooth_profile(P, closed=False):
     L = s[-1]
     dk = np.gradient(k, s + 1e-300 * np.arange(len(s)))
     return dict(self_intersections=S.polyline_self_intersections(P, closed), kappa_jump_max=float(np.max(np.abs(np.diff(k))) * L),
-                fairness=float(np.trapezoid(dk ** 2, s) * L ** 3), turning=S.turning_total(P), length=float(L))
+                fairness=float(_trapz(dk ** 2, s) * L ** 3), turning=S.turning_total(P), length=float(L))

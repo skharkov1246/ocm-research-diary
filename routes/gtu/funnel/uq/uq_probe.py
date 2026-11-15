@@ -112,7 +112,7 @@ def main(argv=None):
     res["title"] = "Устойчивый отбор: локальная миниатюра на пробе уровня 1 (12 вариантов)"
     res["status"] = (f"локальная миниатюра (4 общих ядра): N = {a.n} выборок на вариант, нерасчётные режимы - первые {a.n_od} строк у "
                      f"вариантов с P(расчётная) >= {a.od_pdp_min}; на AWS - N 500, N_od 100 (jobs_uq*.json)")
-    res["probe"] = dict(params=vars(a), nominal_check=nomc, merge_rejects_missing_part=miss_ok, wall_s=round(time.time() - t0, 1),
+    res["probe"] = dict(params=dict(vars(a), out=os.path.basename(a.out), keep_parts=None), nominal_check=nomc, merge_rejects_missing_part=miss_ok, wall_s=round(time.time() - t0, 1),
                         rows=[dict(u=r["u"], j=r["j_src"], idx=r["idx"], arch=r["arch"], P_dp=r["dp"]["P_dp"], P_dp_ci=r["dp"]["P_dp_ci"],
                                    P_od_dp=(r.get("od") or {}).get("P_od_dp"), P_feas=r.get("P_feas"), od_status=r.get("od_status"),
                                    score_f=r["dp"]["score_f"], nominal=r["dp"]["nominal"], viol_freq=r["dp"]["viol_freq"],

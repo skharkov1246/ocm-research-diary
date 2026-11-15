@@ -32,7 +32,9 @@ import math
 import os
 import sys
 
-import numpy as np
+for _v in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS"):
+    os.environ.setdefault(_v, "1")          # малые матрицы: многопоточный BLAS на занятой машине в десятки раз медленнее
+import numpy as np  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 EVO = os.path.dirname(HERE)
@@ -56,7 +58,8 @@ VARIANTS = ("оболочка", "картридж")
 F_MARGIN = 1.15          # частоты системы не ниже 1,15·f раб (принято для отбора, оценка; не норма API)
 SF_YIELD = 1.5           # запас по пределу текучести (оценка, не нормативное значение)
 K_ROUTE = {"печать": 0.9, "литьё_ti": 0.85, "литьё_сталь": 1.0}   # снижение прочности способа (оценка; печать — k_AM organic/structure)
-K_MOUNT = 1.0e9          # Н/м, жёсткость опоры пакета (оценка: данных пакета нет — запрос заказчику, навык gtu-dropin)
+K_MOUNT = 1.0e11         # Н/м: опоры пакета приняты жёсткими — считаются упругие моды корпуса и узлов; моды двигателя на раме
+#                          пакета зависят от пакета (данных нет — запрос заказчику, навык gtu-dropin)
 K_SPIGOT = 2.0e9         # Н/м, посадка картриджа в корпусе на плоскость (оценка)
 C_KT = 0.15              # Kt = 1 + C_KT·√(H/r_f) у корня ребра (оценка; проверяется CalculiX)
 SKIN_CHANNEL = 0.002     # м, стенка встроенного канала (оценка, как обшивка organic/structure)
@@ -314,7 +317,7 @@ def _halton(i, b):
     return r
 
 
-def _subdiv(z0, s0, z1, s1, w, step=0.05):
+def _subdiv(z0, s0, z1, s1, w, step=0.10):
     n = max(1, int(math.ceil(math.hypot(z1 - z0, s1 - s0) / step)))
     t = np.linspace(0, 1, n + 1)
     zz, ss = z0 + t * (z1 - z0), s0 + t * (s1 - s0)
@@ -376,10 +379,10 @@ def rib_segments(p, R_ref, mounts):
             if 0.0 <= mid < C:
                 segs += _subdiv(va[0], va[1], vb[0], vb[1], w)
     if typ == "ветвящиеся":
-        it = 2 + int(p["rib_n2"] * 2.99)
-        rules = {"X": "F[+X][-X]FX", "F": "FF"}
+        it = 2 + int(p["rib_n2"] * 1.99)
+        rules = {"X": "F[+X]F[-X]+X"}
         s_l = S.lsystem("X", rules, it)
-        step = (0.18 + 0.25 * p["rib_n"]) / (2 ** it)
+        step = (0.12 + 0.20 * p["rib_n"]) / (1.6 ** it)
         rng = np.random.Generator(np.random.PCG64(20261115))
         for (zm, sm, head, mirror) in mounts:
             for mir in ((1, -1) if mirror else (1,)):
@@ -589,7 +592,7 @@ CHANNELS = [  # (система, d, м, длина-оценка, назначе�
 ]
 
 
-def fuel_tree(p, prof):
+def fuel_tree(p, prof, n_pts=2):
     n = INP["fuel"]["n_inj"]
     z_inj = INP["zones"][3]["z0"] + 0.25 * (INP["zones"][3]["z1"] - INP["zones"][3]["z0"])
     R = float(np.interp(z_inj, prof["z"], prof["r_m"]))
@@ -602,7 +605,7 @@ def fuel_tree(p, prof):
     T = np.stack([np.full(n, z_inj), ss], 1)
     order = np.argsort(ss)
     segs = S.murray_tree((port_z, port_s), T, INP["fuel"]["d_leaf"], k=p["murray_k"] if "murray_k" in p else INP["fuel"]["k"],
-                         order=order, n_pts=8)
+                         order=order, n_pts=n_pts)
     Ltot = sum(float(np.sum(np.linalg.norm(np.diff(sg["pts"], axis=0), axis=1))) for sg in segs)
     dmax = max(sg["d"] for sg in segs)
     return segs, dict(L=Ltot, d_max=dmax, R=R, z_inj=z_inj)
@@ -703,13 +706,14 @@ def evaluate_params(p, variant, with_geom=False):
         svm = math.sqrt(sth ** 2 - sth * sz + sz ** 2)
         mpz = mat_props(shell_mat, zn["T"])
         allow = route_k * mpz["sy"] / SF_YIELD
-        # перепад температур к соседней зоне: ступенька — не больше 0,5·EαΔT (решение для оболочки, см. README)
-        dT = 0.0
-        if k > 0:
-            dT = max(dT, abs(zn["T"] - INP["zones"][k - 1]["T"]))
-        if k < 4:
-            dT = max(dT, abs(zn["T"] - INP["zones"][k + 1]["T"]))
-        s_th = 0.5 * mpz["E"] * mpz["alpha"] * dT
+        # перепад температур к соседней зоне на длине перехода ℓ = 0,5·min(L зон) (оценка): решение для оболочки с изломами
+        # температуры (функция Грина балки на упругом основании) σ ≈ 0,40·EαΔT·√(Rt)/ℓ, не больше, чем у ступеньки (0,55·EαΔT) — README
+        s_th = 0.0
+        for kk in (k - 1, k + 1):
+            if 0 <= kk < 5:
+                dT = abs(zn["T"] - INP["zones"][kk]["T"])
+                ell = 0.5 * min(Lz, INP["zones"][kk]["z1"] - INP["zones"][kk]["z0"])
+                s_th = max(s_th, mpz["E"] * mpz["alpha"] * dT * min(0.55, 0.40 * math.sqrt(R * tt) / ell))
         Kt = 1.0 + (C_KT * math.sqrt(min(p["rib_h"], tt) / p["rib_fillet"]) if (rib_bz[k, 2] > 0) else 0.0)
         speak = Kt * svm + s_th
         u = speak / allow
@@ -999,7 +1003,7 @@ DESC_NAMES = ["доля решётки", "топология рёбер", "си�
 DESC_EDGES = [[0.0, 0.02, 0.15, 0.35, 0.6, 1.0001],
               [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5],
               [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5],
-              [0.0, 0.15, 0.4, 0.8, 1.4, 50.0]]
+              [0.0, 0.25, 0.6, 1.1, 1.8, 50.0]]
 DESC_LABELS = [["нет", "мало", "треть", "половина", "много"],
                list(G[GENE_INDEX["rib_type"]]["opts"]),
                ["осесимм.", "N 6–11", "N 3–5", "N 2 / зеркало", "асимм."],

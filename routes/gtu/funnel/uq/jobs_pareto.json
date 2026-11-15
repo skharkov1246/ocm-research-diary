@@ -1,0 +1,287 @@
+{
+ "_comment": "Фронты Парето ниш (NSGA-II): KV-3, затем KV-1, KV-6; номинальный и устойчивый режимы. Раннер ставит задачи по порядку очереди под квоту. Сгенерировано make_jobs_uq.py.",
+ "defaults": {
+  "instance_type": "c7a.16xlarge",
+  "fallback_types": [
+   "c7i.16xlarge"
+  ],
+  "image": "al2023",
+  "disk_gb": 30,
+  "python": "3.12",
+  "pip": [
+   "cantera==3.2.0",
+   "scipy==1.18.1",
+   "numpy==2.5.3"
+  ]
+ },
+ "jobs": [
+  {
+   "name": "par-kv-3-m0",
+   "command": "python routes/gtu/funnel/uq/pareto_niche.py --select routes/gtu/funnel/l0_aws_full/funnel_l0_select_KV-3_n200000.json --pop 200 --gens 100 --check 24 --l1-in routes/gtu/funnel/aws/l1_full --l1-m 3983 --l1-shards 40 --l1-optional --shards 50 --shard 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 285
+  },
+  {
+   "name": "par-kv-3-rob16-m0",
+   "command": "python routes/gtu/funnel/uq/pareto_niche.py --select routes/gtu/funnel/l0_aws_full/funnel_l0_select_KV-3_n200000.json --pop 120 --gens 80 --check 24 --l1-in routes/gtu/funnel/aws/l1_full --l1-m 3983 --l1-shards 40 --l1-optional --robust 16 --p-target 0.75 --tag _rob16 --shards 50 --shard 0,5,10,15,20,25,30,35,40,45 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 303
+  },
+  {
+   "name": "par-kv-3-rob16-m1",
+   "command": "python routes/gtu/funnel/uq/pareto_niche.py --select routes/gtu/funnel/l0_aws_full/funnel_l0_select_KV-3_n200000.json --pop 120 --gens 80 --check 24 --l1-in routes/gtu/funnel/aws/l1_full --l1-m 3983 --l1-shards 40 --l1-optional --robust 16 --p-target 0.75 --tag _rob16 --shards 50 --shard 1,6,11,16,21,26,31,36,41,46 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 303
+  },
+  {
+   "name": "par-kv-3-rob16-m2",
+   "command": "python routes/gtu/funnel/uq/pareto_niche.py --select routes/gtu/funnel/l0_aws_full/funnel_l0_select_KV-3_n200000.json --pop 120 --gens 80 --check 24 --l1-in routes/gtu/funnel/aws/l1_full --l1-m 3983 --l1-shards 40 --l1-optional --robust 16 --p-target 0.75 --tag _rob16 --shards 50 --shard 2,7,12,17,22,27,32,37,42,47 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 303
+  },
+  {
+   "name": "par-kv-3-rob16-m3",
+   "command": "python routes/gtu/funnel/uq/pareto_niche.py --select routes/gtu/funnel/l0_aws_full/funnel_l0_select_KV-3_n200000.json --pop 120 --gens 80 --check 24 --l1-in routes/gtu/funnel/aws/l1_full --l1-m 3983 --l1-shards 40 --l1-optional --robust 16 --p-target 0.75 --tag _rob16 --shards 50 --shard 3,8,13,18,23,28,33,38,43,48 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 303
+  },
+  {
+   "name": "par-kv-3-rob16-m4",
+   "command": "python routes/gtu/funnel/uq/pareto_niche.py --select routes/gtu/funnel/l0_aws_full/funnel_l0_select_KV-3_n200000.json --pop 120 --gens 80 --check 24 --l1-in routes/gtu/funnel/aws/l1_full --l1-m 3983 --l1-shards 40 --l1-optional --robust 16 --p-target 0.75 --tag _rob16 --shards 50 --shard 4,9,14,19,24,29,34,39,44,49 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 303
+  },
+  {
+   "name": "par-kv-1-m0",
+   "command": "python routes/gtu/funnel/uq/pareto_niche.py --select routes/gtu/funnel/l0_aws_full/funnel_l0_select_KV-1_n50000.json --pop 200 --gens 100 --check 24 --shards 50 --shard 0,5,10,15,20,25,30,35,40,45 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 266
+  },
+  {
+   "name": "par-kv-1-m1",
+   "command": "python routes/gtu/funnel/uq/pareto_niche.py --select routes/gtu/funnel/l0_aws_full/funnel_l0_select_KV-1_n50000.json --pop 200 --gens 100 --check 24 --shards 50 --shard 1,6,11,16,21,26,31,36,41,46 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 266
+  },
+  {
+   "name": "par-kv-1-m2",
+   "command": "python routes/gtu/funnel/uq/pareto_niche.py --select routes/gtu/funnel/l0_aws_full/funnel_l0_select_KV-1_n50000.json --pop 200 --gens 100 --check 24 --shards 50 --shard 2,7,12,17,22,27,32,37,42,47 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 266
+  },
+  {
+   "name": "par-kv-1-m3",
+   "command": "python routes/gtu/funnel/uq/pareto_niche.py --select routes/gtu/funnel/l0_aws_full/funnel_l0_select_KV-1_n50000.json --pop 200 --gens 100 --check 24 --shards 50 --shard 3,8,13,18,23,28,33,38,43,48 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 266
+  },
+  {
+   "name": "par-kv-1-m4",
+   "command": "python routes/gtu/funnel/uq/pareto_niche.py --select routes/gtu/funnel/l0_aws_full/funnel_l0_select_KV-1_n50000.json --pop 200 --gens 100 --check 24 --shards 50 --shard 4,9,14,19,24,29,34,39,44,49 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 266
+  },
+  {
+   "name": "par-kv-1-rob16-m0",
+   "command": "python routes/gtu/funnel/uq/pareto_niche.py --select routes/gtu/funnel/l0_aws_full/funnel_l0_select_KV-1_n50000.json --pop 120 --gens 80 --check 24 --robust 16 --p-target 0.75 --tag _rob16 --top 400 --shards 50 --shard 0,5,10,15,20,25,30,35,40,45 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 302
+  },
+  {
+   "name": "par-kv-1-rob16-m1",
+   "command": "python routes/gtu/funnel/uq/pareto_niche.py --select routes/gtu/funnel/l0_aws_full/funnel_l0_select_KV-1_n50000.json --pop 120 --gens 80 --check 24 --robust 16 --p-target 0.75 --tag _rob16 --top 400 --shards 50 --shard 1,6,11,16,21,26,31,36,41,46 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 302
+  },
+  {
+   "name": "par-kv-1-rob16-m2",
+   "command": "python routes/gtu/funnel/uq/pareto_niche.py --select routes/gtu/funnel/l0_aws_full/funnel_l0_select_KV-1_n50000.json --pop 120 --gens 80 --check 24 --robust 16 --p-target 0.75 --tag _rob16 --top 400 --shards 50 --shard 2,7,12,17,22,27,32,37,42,47 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 302
+  },
+  {
+   "name": "par-kv-1-rob16-m3",
+   "command": "python routes/gtu/funnel/uq/pareto_niche.py --select routes/gtu/funnel/l0_aws_full/funnel_l0_select_KV-1_n50000.json --pop 120 --gens 80 --check 24 --robust 16 --p-target 0.75 --tag _rob16 --top 400 --shards 50 --shard 3,8,13,18,23,28,33,38,43,48 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 302
+  },
+  {
+   "name": "par-kv-1-rob16-m4",
+   "command": "python routes/gtu/funnel/uq/pareto_niche.py --select routes/gtu/funnel/l0_aws_full/funnel_l0_select_KV-1_n50000.json --pop 120 --gens 80 --check 24 --robust 16 --p-target 0.75 --tag _rob16 --top 400 --shards 50 --shard 4,9,14,19,24,29,34,39,44,49 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 302
+  },
+  {
+   "name": "par-kv-6-m0",
+   "command": "python routes/gtu/funnel/uq/pareto_niche.py --select routes/gtu/funnel/l0_aws_full/funnel_l0_select_KV-6_n50000.json --pop 200 --gens 100 --check 24 --shards 20 --shard 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 71
+  },
+  {
+   "name": "par-kv-6-rob16-m0",
+   "command": "python routes/gtu/funnel/uq/pareto_niche.py --select routes/gtu/funnel/l0_aws_full/funnel_l0_select_KV-6_n50000.json --pop 120 --gens 80 --check 24 --robust 16 --p-target 0.75 --tag _rob16 --shards 20 --shard 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 313
+  }
+ ],
+ "merge": {
+  "par-kv-3": "python3 routes/gtu/funnel/uq/merge_pareto.py --kv KV-3 --nn 401 --shards 50 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/uq/aws/pareto --suffix _KV-3",
+  "par-kv-3-rob16": "python3 routes/gtu/funnel/uq/merge_pareto.py --kv KV-3 --nn 401 --shards 50 --tag _rob16 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/uq/aws/pareto --suffix _rob16_KV-3",
+  "par-kv-1": "python3 routes/gtu/funnel/uq/merge_pareto.py --kv KV-1 --nn 1864 --shards 50 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/uq/aws/pareto --suffix _KV-1",
+  "par-kv-1-rob16": "python3 routes/gtu/funnel/uq/merge_pareto.py --kv KV-1 --nn 400 --shards 50 --tag _rob16 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/uq/aws/pareto --suffix _rob16_KV-1",
+  "par-kv-6": "python3 routes/gtu/funnel/uq/merge_pareto.py --kv KV-6 --nn 83 --shards 20 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/uq/aws/pareto --suffix _KV-6",
+  "par-kv-6-rob16": "python3 routes/gtu/funnel/uq/merge_pareto.py --kv KV-6 --nn 83 --shards 20 --tag _rob16 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/uq/aws/pareto --suffix _rob16_KV-6"
+ },
+ "estimate": {
+  "machine_hours": 41.345,
+  "usd": {
+   "spot_expected": 29.19,
+   "spot_alt": 30.926,
+   "disk_ipv4": 0.3427,
+   "s3_month": 0.0011,
+   "transfer": 0.0045,
+   "total_expected": 31.274
+  },
+  "upper_bound_usd": 123.93,
+  "core_hours": 2530.88,
+  "machines": 18,
+  "groups": {
+   "par-kv-3": {
+    "core_hours": 143.62,
+    "machines": 1,
+    "compute_min_per_machine": 134.6,
+    "max_min": 285,
+    "kv": "KV-3",
+    "niches": 401,
+    "pop": 200,
+    "gens": 100,
+    "evals_per_niche": 20200,
+    "robust": 0,
+    "p_target": null,
+    "check": 24,
+    "core_s_basis": "SAFETY × ниши × (вычисления × t + проверка × t_нерасч + затравка)"
+   },
+   "par-kv-3-rob16": {
+    "core_hours": 766.6,
+    "machines": 5,
+    "compute_min_per_machine": 143.7,
+    "max_min": 303,
+    "kv": "KV-3",
+    "niches": 401,
+    "pop": 120,
+    "gens": 80,
+    "evals_per_niche": 9720,
+    "robust": 16,
+    "p_target": 0.75,
+    "check": 24,
+    "core_s_basis": "SAFETY × ниши × (вычисления × t + проверка × t_нерасч + затравка) ; устойчивый: каждое построенное решение ещё × K выборок"
+   },
+   "par-kv-1": {
+    "core_hours": 667.59,
+    "machines": 5,
+    "compute_min_per_machine": 125.2,
+    "max_min": 266,
+    "kv": "KV-1",
+    "niches": 1864,
+    "pop": 200,
+    "gens": 100,
+    "evals_per_niche": 20200,
+    "robust": 0,
+    "p_target": null,
+    "check": 24,
+    "core_s_basis": "SAFETY × ниши × (вычисления × t + проверка × t_нерасч + затравка)"
+   },
+   "par-kv-1-rob16": {
+    "core_hours": 764.68,
+    "machines": 5,
+    "compute_min_per_machine": 143.4,
+    "max_min": 302,
+    "kv": "KV-1",
+    "niches": 400,
+    "pop": 120,
+    "gens": 80,
+    "evals_per_niche": 9720,
+    "robust": 16,
+    "p_target": 0.75,
+    "check": 24,
+    "core_s_basis": "SAFETY × ниши × (вычисления × t + проверка × t_нерасч + затравка) ; устойчивый: каждое построенное решение ещё × K выборок"
+   },
+   "par-kv-6": {
+    "core_hours": 29.73,
+    "machines": 1,
+    "compute_min_per_machine": 27.9,
+    "max_min": 71,
+    "kv": "KV-6",
+    "niches": 83,
+    "pop": 200,
+    "gens": 100,
+    "evals_per_niche": 20200,
+    "robust": 0,
+    "p_target": null,
+    "check": 24,
+    "core_s_basis": "SAFETY × ниши × (вычисления × t + проверка × t_нерасч + затравка)"
+   },
+   "par-kv-6-rob16": {
+    "core_hours": 158.67,
+    "machines": 1,
+    "compute_min_per_machine": 148.8,
+    "max_min": 313,
+    "kv": "KV-6",
+    "niches": 83,
+    "pop": 120,
+    "gens": 80,
+    "evals_per_niche": 9720,
+    "robust": 16,
+    "p_target": 0.75,
+    "check": 24,
+    "core_s_basis": "SAFETY × ниши × (вычисления × t + проверка × t_нерасч + затравка) ; устойчивый: каждое построенное решение ещё × K выборок"
+   }
+  },
+  "safety": 1.5,
+  "price": {
+   "expected": 0.706,
+   "alt": 0.748,
+   "upper": 1.4206,
+   "basis": "ожидаемая: спот c7a.16xlarge us-east-1c 0,706 долл./ч, us-east-1b 0,748 (замер сессии с ключами 22:08 14.11.2026, задача владельца); верхняя граница: MaxPrice раннера 1,4206 долл./ч (максимум по зонам × 1,2, ledger.jsonl живого прогона smoke 22:14 14.11.2026)"
+  },
+  "upper_bound_rule": "раннер: (MaxPrice + диск + IPv4) × (max_min + 10) / 60 на машину"
+ },
+ "needs": [
+  "отборы уровня 0 l0_aws_full/*.json - уже в ветке",
+  "KV-3: затравка - routes/gtu/funnel/aws/l1_full (--l1-optional: без частей ниши идут без затравки)"
+ ],
+ "niches": {
+  "KV-3": 401,
+  "KV-1": 1864,
+  "KV-6": 83
+ },
+ "plan_check": {
+  "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/funnel/uq/jobs_pareto.json --branch claude/lucid-allen-yvps5d --assume-price 0.748 --assume-zone-prices us-east-1a=0.955,us-east-1b=0.748,us-east-1c=0.706",
+  "exit_code": 0,
+  "lines": [
+   "[задача] par-kv-3-m0: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 285 мин",
+   "[бюджет] par-kv-3-m0 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 0.00 + новая 5.68 = 6.98 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] par-kv-3-m0 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] par-kv-3-rob16-m0: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 303 мин",
+   "[бюджет] par-kv-3-rob16-m0 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 5.68 + новая 6.02 = 13.00 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] par-kv-3-rob16-m0 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] par-kv-3-rob16-m1: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 303 мин",
+   "[бюджет] par-kv-3-rob16-m1 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 11.70 + новая 6.02 = 19.03 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] par-kv-3-rob16-m1 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] par-kv-3-rob16-m2: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 303 мин",
+   "[бюджет] par-kv-3-rob16-m2 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 17.72 + новая 6.02 = 25.05 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] par-kv-3-rob16-m2 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] par-kv-3-rob16-m3: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 303 мин",
+   "[бюджет] par-kv-3-rob16-m3 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 23.74 + новая 6.02 = 31.07 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] par-kv-3-rob16-m3 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] par-kv-3-rob16-m4: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 303 мин",
+   "[бюджет] par-kv-3-rob16-m4 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 29.76 + новая 6.02 = 37.09 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] par-kv-3-rob16-m4 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] par-kv-1-m0: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 266 мин",
+   "[бюджет] par-kv-1-m0 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 35.78 + новая 5.31 = 42.40 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] par-kv-1-m0 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] par-kv-1-m1: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 266 мин",
+   "[бюджет] par-kv-1-m1 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 41.09 + новая 5.31 = 47.71 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] par-kv-1-m1 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] par-kv-1-m2: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 266 мин",
+   "[бюджет] par-kv-1-m2 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 46.40 + новая 5.31 = 53.02 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] par-kv-1-m2 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] par-kv-1-m3: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 266 мин",
+   "[бюджет] par-kv-1-m3 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 51.71 + новая 5.31 = 58.33 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] par-kv-1-m3 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] par-kv-1-m4: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 266 мин",
+   "[бюджет] par-kv-1-m4 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 57.02 + новая 5.31 = 63.64 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] par-kv-1-m4 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] par-kv-1-rob16-m0: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 302 мин",
+   "[бюджет] par-kv-1-rob16-m0 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 62.33 + новая 6.00 = 69.64 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] par-kv-1-rob16-m0 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] par-kv-1-rob16-m1: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 302 мин",
+   "[бюджет] par-kv-1-rob16-m1 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 68.33 + новая 6.00 = 75.64 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] par-kv-1-rob16-m1 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] par-kv-1-rob16-m2: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 302 мин"
+  ],
+  "runner_note": "раннер v2 в ветке claude/lucid-allen-yvps5d (поля python, pip, NPROC, самая дешёвая зона); run - с --branch claude/lucid-allen-yvps5d (без него раннер клонирует main); при правке раннера повторить plan"
+ }
+}

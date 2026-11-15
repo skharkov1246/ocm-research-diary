@@ -245,9 +245,9 @@ _REF = {}
 _KP = []
 
 
-def _kzones():
+def _ktable():
     if not _KP:
-        _KP.append(D1.k_zones_cal())
+        _KP.append(D1.k_table_cal())
     return _KP[0]
 
 
@@ -342,10 +342,14 @@ def eval_comp(comp, x, want_geom=False, use_ref=True):
     hb = geo["hb"]
     fac = 1 + geo["blade_fill_phi"] * hb / np.maximum(dk["h_eff"], 1e-6)
     T = comp_temperature(stage, r, r[-1])
-    kz = _kzones()
-    rs = D1.R_SPLIT_FRAC * r[-1]
-    s100 = D1.solve(r, dk["h_eff"], fac, T, "ti64", P["n"], r_split=rs, k_zone=kz)
-    s120 = D1.solve(r, dk["h_eff"], fac, T, "ti64", 1.2 * P["n"], r_split=rs, k_zone=kz)
+    kt = _ktable()
+    if kt is not None:
+        s100 = D1.solve(r, dk["h_eff"], fac, T, "ti64", P["n"], k_table=kt)
+        s120 = D1.solve(r, dk["h_eff"], fac, T, "ti64", 1.2 * P["n"], k_table=kt)
+    else:                     # нет калибровки по CalculiX — единая поправка пика (консервативно)
+        kp = D1.k_peak_cal()
+        s100 = D1.solve(r, dk["h_eff"], fac, T, "ti64", P["n"], k_peak=kp)
+        s120 = D1.solve(r, dk["h_eff"], fac, T, "ti64", 1.2 * P["n"], k_peak=kp)
     u_disk = max(1.5 * s100["yield_ratio_max"], s120["yield_ratio_max"]) / K_ROUTE
     # изгиб лопатки от навала на выходе при 120 %
     mat = D1.material("ti64")
@@ -378,9 +382,10 @@ def eval_comp(comp, x, want_geom=False, use_ref=True):
                 beta2b=st["beta2b_deg"], Zeff=Zeff, M1t=st["M1t"], riblets=rib, checks=_jsonable(checks), features=feats,
                 novelty_vec=nov.tolist(), rules_bad=[b[0] for b in bad], blade_fill_phi=geo["blade_fill_phi"])
     if cons:
-        return _infeasible("; ".join(c[0] for c in cons), _viol(cons), d, meta)
-    f = 100 * eta + 50 * min(SM, SM_CAP) - 20 * (J / ref["J"] - 1) - 10 * (mass / ref["mass"] - 1)
-    out = dict(f=float(f), d=d, feasible=True, meta=meta)
+        out = _infeasible("; ".join(c[0] for c in cons), _viol(cons), d, meta)
+    else:
+        f = 100 * eta + 50 * min(SM, SM_CAP) - 20 * (J / ref["J"] - 1) - 10 * (mass / ref["mass"] - 1)
+        out = dict(f=float(f), d=d, feasible=True, meta=meta)
     if want_geom:
         out["geom"] = geo
         out["ml"] = st
@@ -539,9 +544,10 @@ def eval_turb(x, want_geom=False, use_ref=True):
                 Dtip=tm["Dtip"], hollow=float(np.mean([bl_["hollow"] for bl_ in blades])), novelty_vec=novelty_vector("turb", p, d).tolist(),
                 features=blades[-1]["features"], SM=None)
     if cons:
-        return _infeasible("; ".join(c[0] for c in cons), _viol(cons), d, meta)
-    f = 100 * eta - 20 * (J / ref["J"] - 1) - 10 * (mass / ref["mass"] - 1)
-    out = dict(f=float(f), d=d, feasible=True, meta=meta)
+        out = _infeasible("; ".join(c[0] for c in cons), _viol(cons), d, meta)
+    else:
+        f = 100 * eta - 20 * (J / ref["J"] - 1) - 10 * (mass / ref["mass"] - 1)
+        out = dict(f=float(f), d=d, feasible=True, meta=meta)
     if want_geom:
         out["geom"] = dict(blades=blades, disks=disks, tm=tm)
     return out

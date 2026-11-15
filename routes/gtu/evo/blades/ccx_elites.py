@@ -58,6 +58,31 @@ def comp_case(comp, g, rpm_factor=1.0, mesh=(80, 12), tag="c"):
     return case, r
 
 
+def columns(case, res_dir):
+    """наибольшее σ_Мизес/σ0,2(T) по узлам каждого столбца сетки (одинаковый радиус): (r, yr)"""
+    mat = DK.load_material(case["material"])
+    prof = DK.Profile(case["profile"], case.get("profile_interp", "linear"))
+    mesh = DK.build_mesh(prof, case["mesh"]["nr"], case["mesh"]["nz"])
+    frd = DK.parse_frd(os.path.join(res_dir, "disk.frd"))
+    S, TN = frd["STRESS"], frd.get("NDTEMP", {})
+    ys = np.asarray(mat["ys_MPa"], float)
+    col, colr = {}, {}
+    for n, (r, z, i, j) in mesh["nodes"].items():
+        if n not in S:
+            continue
+        s = S[n]
+        vm = DK.von_mises(*s[:6])
+        Tn = TN[n][0] if n in TN else DK.temperature_field(case, r)
+        yr = vm / 1e6 / float(np.interp(Tn, ys[:, 0], ys[:, 1]))
+        if yr > col.get(i, -1):
+            col[i], colr[i] = yr, r
+    ii = sorted(col)
+    return np.array([colr[i] for i in ii]), np.array([col[i] for i in ii])
+
+
+X_BINS = [0.0, 0.1, 0.2, 0.35, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 5.0, 1e9]
+
+
 def zone_max(case, res_dir, r_split):
     """σ_Мизес/σ0,2(T) по узлам .frd в двух зонах"""
     mat = DK.load_material(case["material"])
@@ -73,7 +98,7 @@ def zone_max(case, res_dir, r_split):
         s = S[n]
         vm = DK.von_mises(s[0], s[1], s[2], s[3], s[4] if len(s) > 4 else 0.0, s[5] if len(s) > 5 else 0.0)
         Tn = TN[n][0] if n in TN else DK.temperature_field(case, r)
-        yr = vm / float(np.interp(Tn, ys[:, 0], ys[:, 1]))
+        yr = vm / 1e6 / float(np.interp(Tn, ys[:, 0], ys[:, 1]))
         zk = "axis" if r < r_split else "web"
         if yr > out[zk][0]:
             out[zk] = (yr, r)
@@ -95,7 +120,17 @@ def run_comp(job):
     fac = 1 + geo["blade_fill_phi"] * geo["hb"] / np.maximum(dk["h_eff"], 1e-6)
     stage = 1 if comp == "comp1" else 2
     T = BE.comp_temperature(stage, dk["r"], dk["r"][-1])
-    fast = D1.solve(dk["r"], dk["h_eff"], fac, T, "ti64", case["rpm"], r_split=rs)
+    fast = D1.solve(dk["r"], dk["h_eff"], fac, T, "ti64", case["rpm"], r_split=rs, return_field=True)
+    rc, yc = columns(case, wd)
+    F = fast.pop("field")
+    o = np.argsort(F["r"])
+    fy = np.interp(rc, F["r"][o], F["yr_raw"][o])
+    hx = np.interp(rc, F["r"][o], F["h"][o]) / np.maximum(rc, 1e-3)
+    col = dict(r=rc.tolist(), x=hx.tolist(), ccx=yc.tolist(), fast=fy.tolist())
+    kt = D1.k_table_cal()
+    fast_cal = None
+    if kt is not None:
+        fast_cal = D1.solve(dk["r"], dk["h_eff"], fac, T, "ti64", case["rpm"], k_table=kt)["yield_ratio_max"]
     if not keep:
         import shutil
         shutil.rmtree(wd, ignore_errors=True)
@@ -103,7 +138,7 @@ def run_comp(job):
                 burst_margin=res["burst"]["margin"] if isinstance(res.get("burst"), dict) else res.get("burst_margin"),
                 gate=res["quality"]["passed"], seconds=res["run"]["seconds"], **zm),
                 fast=dict(yr_axis_raw=fast["yr_axis_raw"], yr_web_raw=fast["yr_web_raw"], burst_margin=fast["burst_margin"],
-                          r_web_peak=fast["r_web_peak"]),
+                          r_web_peak=fast["r_web_peak"], yield_ratio_cal=fast_cal), columns=col,
                 mass_kg=r["meta"].get("mass_kg"), feasible_fast=r["feasible"], seconds=round(time.time() - t0, 1))
 
 
@@ -146,6 +181,26 @@ def calibrate(n=12, mesh=(80, 12), workers=4):
     jobs = [(c, x.tolist(), tag, mesh, 1.0, False) for c, x, tag in calibration_set(n)]
     with Pool(min(workers, len(jobs))) as pool:
         rows = pool.map(run_comp, jobs)
+    X, K = [], []
+    for r_ in rows:
+        if not r_["ccx"]["gate"]:
+            continue
+        cc = r_["columns"]
+        for x, a, b, rv in zip(cc["x"], cc["ccx"], cc["fast"], cc["r"]):
+            if a >= 0.15 and b > 0 and rv < 0.97 * cc["r"][-1]:      # у обода напряжения малы — отношение неустойчиво
+                X.append(x)
+                K.append(a / b)
+    X, K = np.array(X), np.array(K)
+    xs, ks, ns = [], [], []
+    for lo_, hi_ in zip(X_BINS[:-1], X_BINS[1:]):
+        m = (X >= lo_) & (X < hi_)
+        if m.any():
+            xs.append(float(np.median(X[m])))
+            ks.append(float(K[m].max()))
+            ns.append(int(m.sum()))
+    ks = np.maximum.accumulate(np.array(ks)).tolist()        # не убывает с толщиной (огибающая)
+    table = dict(x=[0.0] + xs + [1e6], k=[ks[0]] + ks + [ks[-1]], n_points=ns, bins=X_BINS[:-1],
+                 method="верхняя огибающая отношения ccx/тонкий диск по столбцам сетки, сгруппированного по местному h/r; не убывает")
     ka = np.array([r_["ccx"]["yr_axis"] / r_["fast"]["yr_axis_raw"] for r_ in rows if r_["ccx"]["gate"]])
     kw = np.array([r_["ccx"]["yr_web"] / r_["fast"]["yr_web_raw"] for r_ in rows if r_["ccx"]["gate"]])
     zones = dict(method=("CalculiX disk.py (CAX8 %d×%d, 100 %% частоты) против тонкого диска на %d профилях: облик frame3 и варианты "
@@ -155,9 +210,30 @@ def calibrate(n=12, mesh=(80, 12), workers=4):
                  k_web_mean=float(kw.mean()), k_axis_range=[float(ka.min()), float(ka.max())], k_web_range=[float(kw.min()), float(kw.max())],
                  cases=rows, date=time.strftime("%Y-%m-%d"))
     d = json.load(open(D1.CAL_JSON, encoding="utf-8")) if os.path.exists(D1.CAL_JSON) else D1.calibrate(write=False)
+    for r_ in zones["cases"]:
+        r_.pop("columns", None)
     d["zones"] = zones
+    d["table"] = table
     with open(D1.CAL_JSON, "w", encoding="utf-8") as f:
         json.dump(d, f, ensure_ascii=False, indent=1, default=float)
+    # проверка таблицы на тех же профилях: max_r k(h/r)·быстрая против max ccx
+    chk = []
+    kt = (np.asarray(table["x"]), np.asarray(table["k"]))
+    for c_, x_, tag in calibration_set(n):
+        case, r = comp_case(c_, x_, 1.0, mesh, tag)
+        geo = r["geom"]
+        dk = geo["disk"]
+        fac = 1 + geo["blade_fill_phi"] * geo["hb"] / np.maximum(dk["h_eff"], 1e-6)
+        T = __import__("blade_eval").comp_temperature(1 if c_ == "comp1" else 2, dk["r"], dk["r"][-1])
+        f_ = D1.solve(dk["r"], dk["h_eff"], fac, T, "ti64", case["rpm"], k_table=kt)["yield_ratio_max"]
+        ccx_ = [q for q in rows if q["tag"] == tag][0]["ccx"]["yield_ratio_max"]
+        chk.append(dict(tag=tag, ccx=ccx_, fast_table=f_, ratio=ccx_ / f_))
+    d["table_check"] = dict(cases=chk, ratio_min=min(q["ratio"] for q in chk), ratio_max=max(q["ratio"] for q in chk),
+                            note="ratio ≤ 1 — быстрая оценка с таблицей не ниже CalculiX (консервативна) на калибровочных профилях")
+    with open(D1.CAL_JSON, "w", encoding="utf-8") as f:
+        json.dump(d, f, ensure_ascii=False, indent=1, default=float)
+    zones["table"] = table
+    zones["table_check"] = d["table_check"]
     return zones
 
 
@@ -209,13 +285,13 @@ def check_file(path, out_dir, workers=4, mesh=(80, 12)):
                 jobs.append((comp, e["g"], f"{e['id']}_{int(f * 100)}", mesh, f, False))
         with Pool(max(1, min(workers, len(jobs)))) as pool:
             rows = pool.map(run_comp, jobs)
-        kz = D1.k_zones_cal()
         for r_ in rows:
-            r_["fast_cal"] = max(kz[0] * r_["fast"]["yr_axis_raw"], kz[1] * r_["fast"]["yr_web_raw"])
-            r_["ratio_ccx_to_fast_cal"] = r_["ccx"]["yield_ratio_max"] / r_["fast_cal"]
+            r_["fast_cal"] = r_["fast"]["yield_ratio_cal"]
+            r_["ratio_ccx_to_fast_cal"] = r_["ccx"]["yield_ratio_max"] / r_["fast_cal"] if r_["fast_cal"] else None
+            r_.pop("columns", None)
     summ = dict(comp=comp, n=len(rows))
     if comp != "turb" and rows:
-        rr = np.array([r_["ratio_ccx_to_fast_cal"] for r_ in rows])
+        rr = np.array([r_["ratio_ccx_to_fast_cal"] for r_ in rows if r_["ratio_ccx_to_fast_cal"] is not None])
         summ.update(ratio_min=float(rr.min()), ratio_max=float(rr.max()), all_gates=all(r_["ccx"]["gate"] for r_ in rows),
                     conservative_share=float(np.mean(rr <= 1.0)))
     out = dict(source=os.path.basename(path), rows=rows, summary=summ)

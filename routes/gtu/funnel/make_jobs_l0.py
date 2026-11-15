@@ -54,7 +54,7 @@ def v3_kv1_profile(n):
     return dict(file=f"jobs_l0_v3_kv1_n{n}.json", runs=[("KV-1", n)], shards=30, machines=6, max_min=None,
                 merge=dict(top=1000, target=4000, k_near=1, near_max=0.25), v3=True,
                 why=f"сходимость ниш KV-1 (v3): N = {n} - запускать, только если при N = {n // 2} прирост допустимых ниш при удвоении "
-                    f"(convergence: new_feasible_niches_vs_half / feasible_niches при N/2) не меньше {V3_CONV:.0%}")
+                    f"(convergence: new_feasible_niches_vs_half / feasible_niches при N/2) не меньше {V3_CONV * 100:g} %")
 
 
 PRICE = dict(expected=0.706, alt=0.748, upper=1.4206,
@@ -186,7 +186,7 @@ def write_v3(plan_out, kv1_next=400000, only_kv1=None):
                              "(нагрузка 11-15 на 4 ядрах) с холодным кэшем: на AWS быстрее (v2: смета 1,16 долл., факт 0,24)")
         n1 = next((n for kv, n in P["runs"] if kv == "KV-1"), None)
         conv = dict(rule=(f"KV-1: после слияния при N = {n1} взять в funnel_l0_results_KV-1_n{n1}.json convergence.rows последнюю строку: "
-                          f"прирост = new_feasible_niches_vs_half / feasible_niches предыдущей строки (N/2); если прирост < {V3_CONV:.0%} - "
+                          f"прирост = new_feasible_niches_vs_half / feasible_niches предыдущей строки (N/2); если прирост < {V3_CONV * 100:g} % - "
                           "сошлось, KV-1 готов; иначе запустить следующий шаг (удвоение N) и слить с тем же правилом"),
                     next_file=f"{REL}/jobs_l0_v3_kv1_n{2 * n1}.json",
                     next_make=f"python3 {REL}/make_jobs_l0.py --v3-kv1 {2 * n1}",

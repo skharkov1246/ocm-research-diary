@@ -52,12 +52,12 @@
   "commands": [
    "python3 routes/gtu/funnel/merge_l0.py --kv KV-1 --n 400000 --shards 30 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/l0_aws_v3 --suffix _KV-1_n400000 --top 1000 --target 4000 --k-near 1 --near-max 0.25 --csv-gz --csv-dir routes/gtu/platform/aws/runs/<run_id>/merged"
   ],
-  "profile_why": "сходимость ниш KV-1 (v3): N = 400000 - запускать, только если при N = 200000 прирост допустимых ниш при удвоении (convergence: new_feasible_niches_vs_half / feasible_niches при N/2) не меньше 3%",
+  "profile_why": "сходимость ниш KV-1 (v3): N = 400000 - запускать, только если при N = 200000 прирост допустимых ниш при удвоении (convergence: new_feasible_niches_vs_half / feasible_niches при N/2) не меньше 3 %",
   "checks": "слияние откажет (код 2), если потеряна или задвоена часть, индекс или запись оси «корпус», или у частей разные отпечатки выборки и кода",
   "after": "отбор KV-3 v3 (funnel_l0_select_KV-3_n200000.json) -> в ветку -> python3 routes/gtu/funnel/make_jobs_l1.py --v3 (M = число записей отбора) -> jobs_l1_v3.json"
  },
  "converge": {
-  "rule": "KV-1: после слияния при N = 400000 взять в funnel_l0_results_KV-1_n400000.json convergence.rows последнюю строку: прирост = new_feasible_niches_vs_half / feasible_niches предыдущей строки (N/2); если прирост < 3% - сошлось, KV-1 готов; иначе запустить следующий шаг (удвоение N) и слить с тем же правилом",
+  "rule": "KV-1: после слияния при N = 400000 взять в funnel_l0_results_KV-1_n400000.json convergence.rows последнюю строку: прирост = new_feasible_niches_vs_half / feasible_niches предыдущей строки (N/2); если прирост < 3 % - сошлось, KV-1 готов; иначе запустить следующий шаг (удвоение N) и слить с тем же правилом",
   "next_file": "routes/gtu/funnel/jobs_l0_v3_kv1_n800000.json",
   "next_make": "python3 routes/gtu/funnel/make_jobs_l0.py --v3-kv1 800000",
   "note": "ниши - с осью «корпус» (feasible_niches) и без неё (feasible_niches_v2) - обе в convergence.rows; правило - по первым; выборка следующего шага включает предыдущую (префикс Соболя), считается целиком заново: шаг стоит долей доллара"

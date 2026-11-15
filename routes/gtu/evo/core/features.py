@@ -11,6 +11,8 @@ import numpy as np
 
 from . import shapes as S
 
+_trapz = getattr(np, "trapezoid", None) or getattr(np, "trapz")   # numpy 2.x и 1.x (контейнер ubuntu:24.04)
+
 
 def standardize(F, mu=None, sd=None):
     F = np.asarray(F, float)
@@ -41,7 +43,7 @@ def curve_smoothness(P):
     L = max(s[-1], 1e-12)
     dk = np.gradient(k, s + 1e-15 * np.arange(len(s)))
     sign = np.sign(k[np.abs(k) > 1e-6 / L])
-    return dict(kappa_jump=float(np.max(np.abs(np.diff(k))) * L), fairness=float(np.trapezoid(dk ** 2, s) * L ** 3),
+    return dict(kappa_jump=float(np.max(np.abs(np.diff(k))) * L), fairness=float(_trapz(dk ** 2, s) * L ** 3),
                 inflections=int(np.sum(sign[1:] != sign[:-1])) if len(sign) > 1 else 0, turning=S.turning_total(P))
 
 

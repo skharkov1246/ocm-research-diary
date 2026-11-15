@@ -1,0 +1,205 @@
+{
+ "title": "Фронты Парето ниш (NSGA-II) - KV-3, 1 ниш, устойчивый режим K = 8",
+ "software": "python 3.13.18, numpy 2.5.3, scipy 1.18.1, cantera 3.2.0",
+ "date": "2026-11-15",
+ "method": "Многокритериальный поиск внутри каждой ниши (NSGA-II) - фронт Парето ниши (на AWS). Всё - оценка.",
+ "kv": "KV-3",
+ "NN": 1,
+ "input": {
+  "file": "funnel_l0_select_KV-3_n2000.json",
+  "sha256": "fb5bac9c653edd25556930ac39da128cc418710912cacd8ff2798bb29c4d8df7",
+  "kv": "KV-3",
+  "n": 2000,
+  "seed": 20261114,
+  "l0_code_sha": "5f99d76a48e9e6db",
+  "fingerprint": "f5fad5c6f4eb42e5",
+  "niches": 218,
+  "niche_filter": [
+   "литой монолит|2р|2Ц|О|K|нет|сварка:литьё"
+  ]
+ },
+ "l1": {
+  "seed_cands": {
+   "kind": "L1-csv",
+   "kv": "KV-3",
+   "file": "probe_cands.json",
+   "sha256": "0efb1139014aa46c9d01d717d8b63b32a7b24157a0634708fdabdfee24633ea0",
+   "source": "funnel_l1.csv",
+   "code_match": true,
+   "n": 12,
+   "rebuilt": 0,
+   "rebuild_lost": 0
+  }
+ },
+ "code_sha": "54006f6599d6a672",
+ "l1_code_sha": "3d8acb616add4e6c",
+ "params": {
+  "pop": 24,
+  "gens": 12,
+  "check": 1,
+  "robust": 8,
+  "p_target": 0.75
+ },
+ "genes": [
+  "cores",
+  "n_ax",
+  "inlet",
+  "comb",
+  "bear",
+  "mat_cw",
+  "mat_tw",
+  "m_hot",
+  "mat_hot",
+  "m_comb",
+  "m_case",
+  "hot_integral",
+  "recup_integral",
+  "conn",
+  "cartridge",
+  "split_bl",
+  "t41",
+  "pi",
+  "split",
+  "mu1",
+  "mu2",
+  "phi1",
+  "lt",
+  "kcm",
+  "zc",
+  "zt",
+  "zn",
+  "phit",
+  "kUpt",
+  "phipt",
+  "eps_rec",
+  "kD_case",
+  "nt",
+  "npt"
+ ],
+ "objectives": [
+  "1 − s_parts/10",
+  "1 − s_plugplay/10",
+  "1 − s_service/10",
+  "(45 − η_el)/30",
+  "ln V_env / ln 60"
+ ],
+ "merge_checks": {
+  "files": 1,
+  "shards_expected": 1,
+  "missing": [],
+  "duplicate_same": [],
+  "duplicate_conflict": [],
+  "meta_mismatch": [],
+  "index_errors": [],
+  "unreadable": [],
+  "indices_ok": true,
+  "n_rows": 1
+ },
+ "timing": {
+  "cpu_s": 28.8,
+  "evals": 312,
+  "robust_evals": 2232,
+  "calls": [
+   {
+    "shards": [
+     0
+    ],
+    "niches": 1,
+    "elapsed_s": 38.94,
+    "evals": 312,
+    "robust_evals": 2232,
+    "checked": 0,
+    "cpu_s": 28.84,
+    "host_cpus": 4,
+    "started": "2026-11-15T10:50:23.307428+00:00",
+    "shard": 0
+   }
+  ],
+  "merge_s": 0.0
+ },
+ "summary": {
+  "niches": 1,
+  "with_feasible_front": 0,
+  "front_size": {
+   "n": 1,
+   "mean": 0.0,
+   "p50": 0.0,
+   "max": 0.0
+  },
+  "hv": {
+   "n": 1,
+   "mean": 0.0,
+   "p50": 0.0,
+   "max": 0.0
+  },
+  "hv_gain_second_half": null,
+  "hv_gain_gt_001": 0,
+  "checked": 0,
+  "checked_feasible": 0,
+  "evals": 312,
+  "robust_evals": 2232,
+  "l1_compare": {
+   "niches": 1,
+   "l1_feasible": 1,
+   "dominated": 0,
+   "gain": null,
+   "gain_positive": 0
+  },
+  "by_arch": {
+   "литой монолит": {
+    "niches": 1,
+    "with_front": 0,
+    "checked_feasible": 0,
+    "hv_max": 0.0,
+    "best_score_w": null
+   }
+  },
+  "note": "гиперобъём - Монте-Карло 20 000 точек в нормированных целях (0 - лучшее, 1 - точка отсчёта); рост со второй половины поколений - мера сходимости"
+ },
+ "global_front": {
+  "n": 0
+ },
+ "niches": [
+  {
+   "k": 0,
+   "niche": "литой монолит|2р|2Ц|О|K|нет|сварка:литьё",
+   "arch": "литой монолит",
+   "ref_idx": 1858,
+   "n_l1_seeds": 1,
+   "n_l0_seeds": 7,
+   "evals": 312,
+   "feasible_evals": 11,
+   "robust_evals": 2232,
+   "hv": 0.0,
+   "half": {
+    "gen": 6,
+    "hv": 0.0,
+    "front": 0
+   },
+   "front_size": 0,
+   "checked_feasible": 0,
+   "best_score_w": null,
+   "best_score_f": null,
+   "l1_compare": {
+    "l1_feasible": 1,
+    "dominated_by_checked_front": 0,
+    "best_l1_score": 6.1427,
+    "best_front_score_checked": null,
+    "gain": null
+   },
+   "t_cpu_s": 28.84,
+   "t_cpu": {
+    "seed": 1.67,
+    "nsga": 27.17,
+    "check": 0.0,
+    "per_eval": 0.01068,
+    "per_check": null
+   }
+  }
+ ],
+ "files": {
+  "candidates": "pareto_cands_rob8_probe.json.gz",
+  "csv": "pareto_rob8_probe.csv",
+  "n_candidates": 0
+ }
+}
