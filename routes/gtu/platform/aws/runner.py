@@ -827,13 +827,14 @@ class _Try:
     failed: list = field(default_factory=list)         # версия 3: иная ошибка запуска в регионе
     image_bad: list = field(default_factory=list)      # версия 3: образ недоступен в регионе
     image_ok: bool = False
+    wait: list = field(default_factory=list)           # версия 3: регион ждёт проверки гашения первой машины
     od_no_price: list = field(default_factory=list)    # версия 3: нет цены по требованию в справочнике
     ami: dict = field(default_factory=dict)            # регион -> образ (или ImageUnavailable)
 
     def spot_unavailable(self) -> bool:
         """Спот не дал машину по причине, которую машина по требованию может обойти."""
-        if self.refused or (self.image_bad and not self.image_ok):
-            return False
+        if self.refused or self.wait or (self.image_bad and not self.image_ok):
+            return False                  # регион в ожидании проверки гашения — спот там будет через опрос
         return bool(self.cap or self.quota or self.no_price or self.denied)
 
 
@@ -893,6 +894,12 @@ class Runner:
         self._budget_wait: dict = {}
         # Гашение не подтверждено: машина, возможно, жива и занимает квоту — новых машин прогон не запускает.
         self._unconfirmed: dict = {}
+        # Версия 3, соседний регион: права наблюдения (DescribeInstances) и гашения (TerminateInstances) у ключа агента
+        # не проверены (шаблон calc/aws_setup/user_policy.json закрепляет их условием aws:RequestedRegion за одним
+        # регионом). Без них сборщик и гашение после итога в регионе не работают — остаются сторож и shutdown.
+        self._observe: dict = {}        # регион -> True (DescribeInstances DryRun прошёл: права есть)
+        self._term_ok: set = set()      # регионы, где TerminateInstances DryRun на машине прогона прошёл
+        self._term_bad: dict = {}       # регион -> код отказа TerminateInstances
         self._reconciled = False    # сверка журнала прошла: бюджет считает открытые машины по факту, если дольше срока
         self._closed_n = 0          # счётчик закрытых машин: бюджет пересчитывается, когда он меняется
         self._seq = 0
@@ -1101,7 +1108,72 @@ class Runner:
             return f"нет прав ({self._denied[(region, market)]})"
         if self._qblock.get((region, market), 0.0) > self.clock():
             return "квота (пауза после ошибки)"
+        if self._term_unverified_busy(region):
+            return "ждём проверки гашения первой машины региона"
         return ""
+
+    def _term_unverified_busy(self, region: str) -> bool:
+        """Соседний регион, где гашение ещё не проверено DryRun на машине прогона, а машина там уже есть: вторую не
+        запускаем (если TerminateInstances там запрещён — без сборщика окажется одна машина, а не очередь)."""
+        return (self.v3 and not self._sideline and region != self.cfg.region and region not in self._term_ok
+                and any((a.region or self.cfg.region) == region for a in self.active.values()))
+
+    def _observe_ok(self, region: str, tr: _Try) -> bool:
+        """Версия 3, соседний регион (боевой прогон и DryRun): DescribeInstances DryRun до первой машины региона.
+        Отказ в правах — регион исключён для обоих рынков: без наблюдения опрос уронил бы прогон, а сборщик не нашёл
+        бы машин по тегам. Иная ошибка (сеть) — регион пропущен в этот раз, проверка повторится."""
+        if not self.v3 or self.offline or region == self.cfg.region:
+            return True
+        if region in self._observe:
+            return True
+        from botocore.exceptions import ClientError
+        try:
+            self.client(region, "ec2").describe_instances(DryRun=True)
+            code = "DryRunOperation"            # DryRun проигнорирован — чтение прошло, права есть
+        except ClientError as e:
+            code = e.response.get("Error", {}).get("Code", "?")
+        except Exception as e:                  # сеть, нет клиента региона — проверка не прошла
+            code = type(e).__name__
+        if code == "DryRunOperation":
+            self._observe[region] = True
+            self.journal.append("region_check", run_id=self.cfg.run_id, region=region, op="DescribeInstances", ok=True)
+            return True
+        self.journal.append("region_check", run_id=self.cfg.run_id, region=region, op="DescribeInstances", ok=False,
+                            code=code)
+        if code in DENY_ERRORS:
+            for m in MARKETS:
+                self._deny(region, m, f"{code} (DescribeInstances)")
+            tr.denied.append(f"{region}: {code} (DescribeInstances)")
+        else:
+            tr.failed.append(f"{region}: DescribeInstances {code}")
+            self.say(f"[регион] {region}: проверка DescribeInstances — {code}, регион пропущен в этот раз")
+        return False
+
+    def _verify_terminate(self, region: str, iid: str) -> None:
+        """Версия 3, соседний регион: TerminateInstances DryRun на первой машине прогона (до неё проверить нельзя —
+        право завязано на тег машины). Отказ — регион исключён для новых машин; эта машина гаснет сторожем
+        (shutdown -P) или сама после итога (poweroff = terminate). NotFound и сеть — повтор на следующем опросе."""
+        from botocore.exceptions import ClientError
+        try:
+            self.client(region, "ec2").terminate_instances(InstanceIds=[iid], DryRun=True)
+            code = "DryRunOperation"            # DryRun проигнорирован — гашение прошло, права есть
+        except ClientError as e:
+            code = e.response.get("Error", {}).get("Code", "?")
+        except Exception as e:                  # сеть, нет клиента региона — проверка не прошла
+            code = type(e).__name__
+        if code == "DryRunOperation":
+            self._term_ok.add(region)
+            self.journal.append("region_check", run_id=self.cfg.run_id, region=region, op="TerminateInstances",
+                                ok=True, iid=iid)
+            self.say(f"[регион] {region}: гашение машин прогона разрешено (TerminateInstances DryRun на {iid})")
+        elif code in DENY_ERRORS:
+            self._term_bad[region] = code
+            self.journal.append("region_check", run_id=self.cfg.run_id, region=region, op="TerminateInstances",
+                                ok=False, code=code, iid=iid)
+            for m in MARKETS:
+                self._deny(region, m, f"{code} (TerminateInstances)")
+            self.say(f"[гашение][ОШИБКА] {region}: TerminateInstances запрещён ({code}) — сборщик здесь не гасит; "
+                     f"{iid} погаснет сторожем или сама после итога; новых машин в регионе не будет")
 
     # ---- цены и бюджет
     def price(self, itype: str, region: str | None = None) -> PriceInfo:
@@ -1554,6 +1626,8 @@ class Runner:
                 place = "по требованию"
             self.say(f"[запуск] {job.name} (попытка {attempt}): {iid} {itype}{where} {az_act} ({place}, "
                      f"{price_h:.4f} долл./ч), сторож {job.max_min} мин, сборщик через {self.allot_min(job)} мин")
+            if self.v3 and region != self.cfg.region and region not in self._term_ok and region not in self._term_bad:
+                self._verify_terminate(region, iid)
             return "launched", act
         if order:
             nxt = "следующий регион или тип" if self.v3 else "следующий тип"
@@ -1595,7 +1669,8 @@ class Runner:
                 continue
             why = self._blocked(r, market)
             if why:
-                (tr.denied if why.startswith("нет прав") else tr.quota).append(f"{r} {mname}: {why}")
+                (tr.denied if why.startswith("нет прав") else tr.wait if why.startswith("ждём")
+                 else tr.quota).append(f"{r} {mname}: {why}")
                 notes.append(f"{r} — {why}")
                 continue
             q, used = self.quota(r, market), self._used(r, market)
@@ -1624,6 +1699,8 @@ class Runner:
     def _region_try(self, job: Job, attempt: int, itype: str, region: str, market: str, info, maxp: float,
                     nums: dict, tr: _Try, od_price: float = 0.0):
         """Версия 3: образ своего региона и зоны региона; сигналы _zones_try — в tr и переход дальше."""
+        if not self._observe_ok(region, tr):
+            return None
         try:
             ami = self.ami(job.image, region)
         except ImageUnavailable as e:
@@ -1650,7 +1727,13 @@ class Runner:
             self._deny(region, market, sig[1])
             tr.denied.append(f"{region} {'спот' if market == 'spot' else 'по требованию'}: {sig[1]}")
         else:
-            tr.failed.append(f"{itype}@{region}: {sig[1]}")
+            # Неклассифицированный отказ RunInstances (InternalError / Unavailable после повторов botocore), поиск по
+            # ClientToken машину не нашёл: EC2 мог её всё же создать, а описание запаздывает. Следующий регион или тип
+            # запустил бы вторую машину той же задачи — вне журнала и бюджета и в тот же префикс S3. Поэтому — как в
+            # версии 2: задача снимается со статусом failed; возможную машину гасят сборщик по тегам (finally) и сторож.
+            self._why[job.name] = (f"{itype}@{region}: {sig[1]} — машина могла быть создана; другие регионы и типы "
+                                   f"не пробуются (как в версии 2), её найдёт сборщик по тегам")
+            return "failed", None
         return None
 
     def _launch_v3(self, job: Job, attempt: int) -> tuple:
@@ -1676,6 +1759,8 @@ class Runner:
             for r in self.regions:
                 if (r, "spot") in self._denied:
                     tr.denied.append(f"{r} спот: {self._denied[(r, 'spot')]}")
+                    continue
+                if not self._observe_ok(r, tr):
                     continue
                 try:
                     info = self.price(itype, r)
@@ -1743,7 +1828,7 @@ class Runner:
         why = []
         for label, lst in (("нет ёмкости", tr.cap), ("нет подсети по умолчанию", tr.skipped),
                            ("нет цены спота", tr.no_price), ("квота", tr.quota), ("нет прав", tr.denied),
-                           ("ошибка", tr.failed), ("образ", tr.image_bad),
+                           ("ошибка", tr.failed), ("образ", tr.image_bad), ("ждём", tr.wait),
                            ("нет цены по требованию в справочнике", tr.od_no_price)):
             if lst:
                 why.append(f"{label}: " + ", ".join(dict.fromkeys(lst)))
@@ -1754,7 +1839,7 @@ class Runner:
         if tr.image_bad and not tr.image_ok:
             self._why[job.name] = "; ".join(dict.fromkeys(tr.image_bad))
             return "image_unavailable", None
-        if tr.quota and (self.active or not tr.cap):
+        if (tr.quota or tr.wait) and (self.active or not tr.cap):
             return "defer", None
         if tr.cap:
             return "capacity", None
@@ -1864,8 +1949,8 @@ class Runner:
             self.say(f"[гашение]{where} {ids} ({why})")
             try:
                 ec2 = self.client(region, "ec2")
-            except RunnerError as e:                          # нет клиента региона — хотя бы команда вручную
-                self._manual(ids, str(e), region)
+            except Exception as e:                            # нет клиента региона — хотя бы команда вручную
+                self._manual(ids, str(e) if isinstance(e, RunnerError) else type(e).__name__, region)
                 continue
             try:
                 ec2.terminate_instances(InstanceIds=ids)
@@ -2018,14 +2103,15 @@ class Runner:
         for iid in open_:
             st = info.get(iid, {}).get("state", "not-found")
             L = launches[iid]
+            rm = {k: L[k] for k in ("region", "market") if k in L}
             if st in ("shutting-down", "terminated", "not-found"):
                 t_end = min(now, L["t_launch"] + L["allot_min"] * 60)   # верхняя граница
                 self.ledger.append("end", run_id=L["run_id"], job=L["job"], iid=iid, t_end=round(t_end, 1),
-                                   outcome="reconciled", state=st, reason="закрыто сверкой")
+                                   outcome="reconciled", state=st, reason="закрыто сверкой", **rm)
             elif now > L["t_launch"] + L["allot_min"] * 60:
                 if iid in self._terminate([iid], f"сверка: {st} после срока {L['allot_min']} мин"):
                     self.ledger.append("end", run_id=L["run_id"], job=L["job"], iid=iid, t_end=round(now, 1),
-                                       outcome="reaped_overdue", state=st, reason="жива после срока")
+                                       outcome="reaped_overdue", state=st, reason="жива после срока", **rm)
                 else:
                     self.say(f"[сверка] {iid} ({L.get('job', '?')}) жива после срока и не погашена — в бюджете "
                              f"прогона считается по фактическому времени ({(now - L['t_launch']) / 3600:.1f} ч)")
@@ -2190,6 +2276,9 @@ class Runner:
         now = self.clock()
         for iid in list(self.active):
             a = self.active[iid]
+            if (self.v3 and a.region and a.region != self.cfg.region and a.region not in self._term_ok
+                    and a.region not in self._term_bad):
+                self._verify_terminate(a.region, iid)
             st = info.get(iid, {})
             state, reason = st.get("state", "pending?"), st.get("reason", "")
             if st.get("az") and not a.az:

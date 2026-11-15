@@ -2005,12 +2005,24 @@ class _RegionEc2(_FakeEc2):
         c.max_vcpu = max(c.max_vcpu, sum(i["vcpu"] for i in live))
         return {"Instances": [{"InstanceId": iid, "Placement": {"AvailabilityZone": az}}]}
 
-    def describe_instances(self, Filters, **kw):
+    def describe_instances(self, Filters=None, DryRun=False, **kw):
+        if DryRun:                                  # проверка наблюдения в соседнем регионе (версия 3)
+            self.c.calls.append(("describe_instances_dry", None))
+            raise cerr("UnauthorizedOperation" if "observe" in self.c.deny else "DryRunOperation", "DescribeInstances")
+        if "observe" in self.c.deny:
+            raise cerr("UnauthorizedOperation", "DescribeInstances")
         self.c.calls.append(("describe_instances", sorted(x["Name"] for x in Filters)))
         return super().describe_instances(Filters, **kw)
 
-    def terminate_instances(self, InstanceIds):
+    def terminate_instances(self, InstanceIds, DryRun=False):
+        if DryRun:                                  # проверка гашения на первой машине соседнего региона (версия 3)
+            self.c.calls.append(("terminate_dry", list(InstanceIds)))
+            if InstanceIds[0] not in self.c.inst:
+                raise cerr("InvalidInstanceID.NotFound", "TerminateInstances")
+            raise cerr("UnauthorizedOperation" if "terminate" in self.c.deny else "DryRunOperation", "TerminateInstances")
         self.c.calls.append(("terminate_instances", list(InstanceIds)))
+        if "terminate" in self.c.deny:
+            raise cerr("UnauthorizedOperation", "TerminateInstances")
         return super().terminate_instances(InstanceIds)
 
 
@@ -2568,3 +2580,121 @@ def test_v3_quota_error_pauses_region_and_price_denied_region_skipped(tmp_path):
     assert res["status"] == "quota" and "us-east-1 спот: квота (пауза после ошибки)" in res["detail"]
     assert sorted((x["region"], x["code"]) for x in ledger(tmp_path / "b", "launch_error")) == [
         ("us-east-1", "VcpuLimitExceeded"), ("us-east-2", "VcpuLimitExceeded")]   # на паузе AWS не дёргается
+
+
+# ----------------------------------------------------------------------------- версия 3: проверки скептика «деньги и гашение»
+def test_v3_neighbor_region_without_describe_is_excluded_before_any_machine(tmp_path):
+    """Шаблон политики ключа агента закрепляет DescribeInstances и TerminateInstances за одним регионом
+    (aws:RequestedRegion). Соседний регион без DescribeInstances исключается ДО первой машины (DescribeInstances
+    DryRun): иначе опрос уронил бы прогон, а сборщик не нашёл бы и не погасил машины региона."""
+    clk, out = Clock(), []
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(64)), us_west_2=dict(sq=sq_vals(384), deny=("observe", "terminate")))
+    r = sky.runner(tmp_path, out=out, regions=["us-east-1", "us-west-2"], max_parallel=4)
+    res = r.run([make_job(name=f"p{i}") for i in range(3)])
+    assert all(v["status"] == "ok" and v["region"] == "us-east-1" for v in res.values())   # очередь под квоту us-east-1
+    w2 = sky.clouds["us-west-2"]
+    assert not w2.runs and ("describe_instances_dry", None) in w2.calls
+    assert sum(1 for c in w2.calls if c[0] == "describe_instances_dry") == 1                # проверка — один раз
+    chk = ledger(tmp_path, "region_check")
+    assert [(x["region"], x["op"], x["ok"], x["code"]) for x in chk] == [
+        ("us-west-2", "DescribeInstances", False, "UnauthorizedOperation")]
+    assert {(x["region"], x["market"]) for x in ledger(tmp_path, "region_denied")} == {("us-west-2", "spot"),
+                                                                                       ("us-west-2", "on-demand")}
+    assert all(b["regions"] == ["us-east-1"] for b in ledger(tmp_path, "budget"))           # не входит и в MaxPrice
+    assert R.Ledger(tmp_path / "ledger.jsonl").summary()["open"] == []
+
+
+def test_v3_terminate_denied_in_neighbor_region_limits_exposure_to_one_machine(tmp_path):
+    """DescribeInstances разрешён, TerminateInstances — нет: проверить до машины нельзя (право завязано на её тег),
+    поэтому первая машина соседнего региона сразу проходит TerminateInstances DryRun; отказ — регион исключён,
+    второй машины там нет, машина без подтверждённого гашения остаётся в бюджете верхней границей."""
+    clk, out = Clock(), []
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(64)), us_west_2=dict(sq=sq_vals(384), deny=("terminate",)))
+    r = sky.runner(tmp_path, out=out, regions=["us-east-1", "us-west-2"], max_parallel=10)
+    res = r.run([make_job(name=f"p{i}") for i in range(4)])
+    w2 = sky.clouds["us-west-2"]
+    assert len(w2.runs) == 1 and ("terminate_dry", list(w2.inst)) in w2.calls
+    chk = [(x["region"], x["op"], x["ok"]) for x in ledger(tmp_path, "region_check")]
+    assert chk == [("us-west-2", "DescribeInstances", True), ("us-west-2", "TerminateInstances", False)]
+    assert ("us-west-2", "spot") in r._denied and ("us-west-2", "on-demand") in r._denied
+    assert any("TerminateInstances запрещён" in m and "новых машин в регионе не будет" in m for m in out)
+    assert any("погасите вручную: aws ec2 terminate-instances --region us-west-2" in m for m in out)
+    iid = next(iter(w2.inst))
+    s = R.Ledger(tmp_path / "ledger.jsonl").summary()
+    assert iid in s["open"] and s["committed"] > 0                                            # в бюджете — до сверки
+    assert all(v["status"] in ("ok", "halted") for v in res.values())
+
+
+def test_v3_unverified_region_takes_one_machine_and_waits_instead_of_on_demand(tmp_path):
+    """Проверка гашения сразу после запуска не прошла (InvalidInstanceID.NotFound — машина ещё не видна): пока гашение
+    в регионе не проверено, там одна машина; задача ждёт опроса, а не уходит в дорогую машину по требованию
+    (спот в регионе есть — просто не проверен); после проверки на опросе — вторая машина в регионе."""
+    clk = Clock()
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(64, 384)), us_west_2=dict(sq=sq_vals(384, 300)))
+    w2 = sky.clouds["us-west-2"]
+    lag = {"n": 1}
+    orig = w2.ec2.terminate_instances
+
+    def lagging(InstanceIds, DryRun=False):
+        if DryRun and lag["n"]:
+            lag["n"] -= 1
+            w2.calls.append(("terminate_dry", list(InstanceIds)))
+            raise cerr("InvalidInstanceID.NotFound", "TerminateInstances")
+        return orig(InstanceIds, DryRun=DryRun)
+    w2.ec2.terminate_instances = lagging
+    r = sky.runner(tmp_path, regions=["us-east-1", "us-west-2"], on_demand_fallback=True)
+    r.load_quotas()
+    for name, reg in (("a", "us-east-1"), ("b", "us-west-2")):
+        st, act = r.launch(make_job(name=name))
+        assert st == "launched" and (act.region, act.market) == (reg, "spot")
+        r.active[act.iid] = act
+    st, _ = r.launch(make_job(name="c"))                    # us-east-1 занят, us-west-2 ждёт проверки гашения
+    assert st == "defer" and "ждём" in r._why["c"]
+    assert not [c for cl in sky.clouds.values() for c in cl.calls if c == ("run_instances", "on-demand")]
+    r._poll(deque())                                        # опрос: DryRun-гашение прошло
+    assert "us-west-2" in r._term_ok
+    st, act = r.launch(make_job(name="c"))
+    assert st == "launched" and (act.region, act.market) == ("us-west-2", "spot")
+    chk = [(x["op"], x["ok"]) for x in ledger(tmp_path, "region_check")]
+    assert chk == [("DescribeInstances", True), ("TerminateInstances", True)]
+
+
+def test_v3_terminate_survives_client_factory_error_and_reconcile_keeps_region(tmp_path):
+    """Сбой получения клиента одного региона (не RunnerError) в гашении не обрывает гашение остальных регионов и
+    печатает команду вручную; запись end сверки несёт регион и рынок записи launch."""
+    clk, out = Clock(), []
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(64)), us_east_2=dict(sq=sq_vals(64)), us_west_2=dict(sq=sq_vals(64)))
+    r = sky.runner(tmp_path, out=out, max_parallel=10)
+    r.load_quotas()
+    acts = []
+    for n in ("a", "b", "c"):
+        st, a = r.launch(make_job(name=n))
+        r.active[a.iid] = a
+        acts.append(a)
+    assert sorted(a.region for a in acts) == ["us-east-1", "us-east-2", "us-west-2"]
+    r._rc.pop("us-east-2")
+
+    def factory(region):
+        if region == "us-east-2":
+            raise ValueError("FIXTURE: client factory failed")
+        return sky.clients(region)
+    r.region_clients = factory
+    done = r._terminate([a.iid for a in acts], "проба")
+    states = {a.region: sky.clouds[a.region].inst[a.iid]["state"] for a in acts}
+    assert states == {"us-east-1": "terminated", "us-east-2": "running", "us-west-2": "terminated"}
+    e2 = next(a for a in acts if a.region == "us-east-2")
+    assert e2.iid not in done and any(f"--region us-east-2 --instance-ids {e2.iid}" in m for m in out)
+    # сверка: закрытые записи end — с регионом и рынком (by_region и разбор журнала по регионам)
+    clk2 = Clock(T0 + 5 * 3600)
+    sky2 = Sky(clk2, us_east_1=dict(), us_west_2=dict())
+    write_ledger(tmp_path / "l2.jsonl", [{"ev": "launch", "run_id": RUN, "job": "x", "iid": "i-gone0001",
+                                          "itype": "c7a.16xlarge", "az": "us-west-2a", "spot_usd_h": 3.2845,
+                                          "max_usd_h": 3.9414, "ebs_usd_h": 0.0, "ip_usd_h": 0.0, "t_launch": T0,
+                                          "allot_min": 70, "region": "us-west-2", "market": "on-demand",
+                                          "xfer_usd": 0.2}])
+    home = sky2.clouds["us-east-1"]
+    r2 = R.Runner(make_cfg(tmp_path, ledger_path=tmp_path / "l2.jsonl"), home.ec2, sky2.s3, home.ssm, clock=clk2,
+                  out=lambda m: None, region_clients=sky2.clients)
+    r2.reconcile()
+    end = [x for x in R.Ledger(tmp_path / "l2.jsonl").records() if x["ev"] == "end"]
+    assert [(x["outcome"], x["region"], x["market"]) for x in end] == [("reconciled", "us-west-2", "on-demand")]

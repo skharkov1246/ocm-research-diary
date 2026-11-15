@@ -98,7 +98,7 @@ GENES = [
     # ---- непрерывные параметры облика
     dict(id="pi", kind="cont", block="compressor", what="π: доля ln-диапазона типа компрессора (funnel_space.PI_RANGE)"),
     dict(id="split", kind="cont", block="compressor", what="распределение π: доля ln π первой ступени (2Ц 0,35-0,65) / осевой части (ОЦ 0,12-0,60)"),
-    dict(id="t41", kind="cont", block="turbine", what="T41: от 850 °C (funnel_space.T41_MIN) до предела класса и сплава (make_model.t41_limit)"),
+    dict(id="t41", kind="cont", block="turbine", what="T41 по классу: от предела минус 200 K (не ниже 850 °C) до предела класса и сплава (make_model.t41_limit)"),
     dict(id="eps", kind="cont", block="hx", what="ε рекуператора 0,70-0,92 (диапазон блока hx.RECUP_EPS)"),
     dict(id="xrh", kind="cont", block="hx", what="подогрев: доля ln p до межтурбинной камеры 0,35-0,65 (organic/cycles A x_rh)"),
     dict(id="trh", kind="cont", block="hx", what="подогрев: температура после камеры от max(850, T41-150) до предела класса"),
@@ -118,9 +118,11 @@ D = len(GENES)
 
 RANGES = dict(
     eps=(0.70, 0.92), xrh=(0.35, 0.65), sc=(1.5, 3.0), R_egr=(0.5, 4.0), kcm=(0.20, 0.35), lt_ax=(1.2, 2.3), lt_rad=(0.62, 0.78),
-    phit=(0.45, 0.80), kUpt=(0.85, 1.00), phipt=(0.45, 0.80), kD=(1.7, 2.1), trh_below=150.0,
+    phit=(0.45, 0.80), kUpt=(0.85, 1.00), phipt=(0.45, 0.80), kD=(1.7, 2.1), trh_below=150.0, t41_below=200.0,
     basis="окна непрерывных осей воронки (funnel_space.CONT: kcm, lt, phit, kUpt, phipt, kD_case), блока hx (ε 0,70-0,92), "
-          "перебора циклов (organic/cycles A: x_rh 0,35-0,65, sc 1,5-3, R_egr 0,5-4); trh - на 150 K ниже T41 до предела класса (оценка)",
+          "перебора циклов (organic/cycles A: x_rh 0,35-0,65, sc 1,5-3, R_egr 0,5-4); T41 - от предела класса минус 200 K (не ниже 850 °C, "
+          "funnel_space.T41_MIN) до предела: ниже удельной работы не хватает на допуск расхода +20 % (проба 300 концепций: 49 % отказов "
+          "по расходу) - оценка; trh - на 150 K ниже T41 до предела класса (оценка)",
 )
 
 # =========================================================================== ниши
@@ -219,7 +221,8 @@ def decode(x, kv="KV-3"):
         nt = 2
         rep.append("радиальная турбина: не больше 2 ступеней")
     tl = MK.t41_limit(ttype, cool, tmat, t_make)[0]
-    t41 = round(_lin(v["t41"], FS.T41_MIN, max(tl, FS.T41_MIN)), 1)
+    t41_lo = max(FS.T41_MIN, tl - RANGES["t41_below"])
+    t41 = round(_lin(v["t41"], t41_lo, max(tl, t41_lo)), 1)
     # ---- компрессор
     arch = v["comp"]
     n_ax = int(v["n_ax"]) if arch == "ОЦ" else 0
@@ -238,7 +241,8 @@ def decode(x, kv="KV-3"):
     ic_after = None
     if ic != "нет":
         if len(stypes) < 2:
-            pass      # одна ступень: правило ic_stages (оценка отклонит) - не чинится, ниша «ПО» с 1Ц/Д недостижима
+            ic = "нет"
+            rep.append("промохлаждение при одной ступени сжатия (1Ц, Д) -> нет (охладителю негде стоять)")
         else:
             ic_after = _pick(list(range(len(stypes) - 1)), v["icpos"])
     cmat = v["cmat"]

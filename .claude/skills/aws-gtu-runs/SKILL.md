@@ -15,7 +15,7 @@ description: Прогоны трека «Простая литая ГТУ-зам
 окружение OpenFOAM) — и `plan`; живого запуска v2 ещё не было, первый — `jobs.smoke2.json`.
 15.11.2026 — версия 3 «соседние мощности» (решение владельца: «можешь занять ещё соседние мощности»; потолок
 2000 долл. и отчёт каждые 500 — прежние): флаги `--regions` и `--on-demand-fallback`, раздел 12. Без новых флагов
-раннер работает точно как версия 2. Тесты — 112 passed (прогнано 15.11.2026); живого запуска v3 не было.
+раннер работает точно как версия 2. Тесты — 116 passed (прогнано 15.11.2026); живого запуска v3 не было.
 
 ## 1. Что где лежит
 
@@ -105,7 +105,7 @@ Instance Requests (по выдержкам поиска, не сверено). �
 
 **Шаг 2. Офлайн-проверка (любой контейнер).**
 ```bash
-python3 -m pytest -q -p no:cacheprovider routes/gtu/platform/aws/test_runner.py   # 112 passed
+python3 -m pytest -q -p no:cacheprovider routes/gtu/platform/aws/test_runner.py   # 116 passed
 python3 routes/gtu/platform/aws/runner.py plan <jobs.json> --assume-price 1.5 --show-userdata \
         [--assume-zone-prices us-east-1a=0.955,us-east-1b=0.748,us-east-1c=0.706] \
         --out <scratchpad>/runs                                                    # цены — допущение
@@ -336,7 +336,11 @@ aws budgets create-budget --account-id <аккаунт> \
   только us-east-1): сверить со страницей цен AWS перед первым живым прогоном по требованию;
 - **журнал** пишет `region` и `market` (запуск, окончание, ошибки, DryRun), проверка бюджета — `regions`;
   `status` — разбивка по регионам и рынкам; `reap` и сверка — по всем регионам прогона из журнала; `collect` — как
-  было (бакет один). Журнал после прогона с `--regions` читать только раннером версии 3.
+  было (бакет один). Журнал после прогона с `--regions` читать только раннером версии 3;
+- **право гашения в соседнем регионе** — шаблон политики ключа закрепляет `DescribeInstances` и `TerminateInstances`
+  за одним регионом: до первой машины региона — `DescribeInstances` DryRun (отказ — регион исключён), первая машина
+  сразу проходит `TerminateInstances` DryRun, до этого второй машины в регионе нет; отказ — регион исключён, одна
+  машина гаснет сторожем или сама (`ev=region_check`).
 
 ```bash
 python3 routes/gtu/platform/aws/runner.py plan <jobs.json> --assume-price 0.95 --regions us-east-1,us-east-2,us-west-2 \
@@ -347,7 +351,8 @@ python3 routes/gtu/platform/aws/runner.py run <jobs.json> --branch <ветка> 
 # живой: + --on-demand-fallback --od-vcpu-quota-per-region us-east-1=384,us-west-2=300 --live (п. 2 — разрешение)
 ```
 
-Не проверено вживую: запуск в us-west-2 и us-east-2, `DescribeImages` и service-quotas у ключа агента, разрешён
+Не проверено вживую: запуск в us-west-2 и us-east-2, `DescribeInstances` и `TerminateInstances` вне us-east-1
+(проверка 15.11.2026 их не смотрела), `DescribeImages` и service-quotas у ключа агента, разрешён
 ли ключу запуск по требованию (политика писалась под спот), цены справочника.
 
 ## Источники (проверено 14.11.2026; версия 3 — 15.11.2026)
