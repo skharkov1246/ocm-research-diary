@@ -4,12 +4,12 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 424,
-    "total_bytes": 16116720,
-    "results_files": 186,
-    "results_with_script": 57,
+    "datasets": 426,
+    "total_bytes": 16130527,
+    "results_files": 188,
+    "results_with_script": 58,
     "results_referenced_in_site": 22,
-    "results_with_provenance_fields": 37,
+    "results_with_provenance_fields": 39,
     "by_track": {
       "ammonia": 91,
       "battery-cathode": 1,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 104,
+      "не определён": 106,
       "прочее": 25
     }
   },
@@ -7661,6 +7661,37 @@
       "last_commit": "497bb58"
     },
     {
+      "path": "routes/gtu/organic/structure/lattice_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 12787,
+      "referenced_in_site": false,
+      "produced_by": "routes/lattice.py",
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "inputs",
+        "points",
+        "convergence",
+        "law",
+        "fit_power",
+        "sheet_thickness_mm",
+        "surface_area_per_cell_L2",
+        "schwarz_d_threshold"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "4f8f9af"
+    },
+    {
       "path": "routes/gtu/organic/structure/manifold_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
@@ -7724,6 +7755,28 @@
       "last_change": "2026-11-15",
       "last_author": "Claude",
       "last_commit": "497bb58"
+    },
+    {
+      "path": "routes/gtu/organic/structure/topo3d_demo_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 1020,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "date",
+        "method",
+        "disk",
+        "frame"
+      ],
+      "provenance_fields": [
+        "method",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "4f8f9af"
     },
     {
       "path": "routes/gtu/organic/structure/turb_sizing_results.json",
