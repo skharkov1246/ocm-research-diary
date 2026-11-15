@@ -2171,9 +2171,9 @@ def test_v3_on_demand_when_spot_unavailable_everywhere(tmp_path):
     требованию по цене справочника: без InstanceMarketOptions, тег Market, журнал market=on-demand, бюджет — по
     максимуму цены справочника × запас; квота по требованию своя (us-east-1 — одна машина, вторая — в us-west-2)."""
     clk = Clock()
-    n1, n2 = 3 + 1, 3 + 1          # зоны c7a + зона c7i в каждом регионе
-    sky = Sky(clk, us_east_1=dict(sq=sq_vals(384, 64), fail_spot=["InsufficientInstanceCapacity"] * (2 * n1)),
-              us_west_2=dict(sq=sq_vals(384, 300), fail_spot=["InsufficientInstanceCapacity"] * (2 * n2)))
+    per_job = 3 + 1                # попыток спота на задачу в регионе: три зоны c7a и одна зона c7i
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(384, 64), fail_spot=["InsufficientInstanceCapacity"] * (2 * per_job)),
+              us_west_2=dict(sq=sq_vals(384, 300), fail_spot=["InsufficientInstanceCapacity"] * (2 * per_job)))
     r = sky.runner(tmp_path, regions=["us-east-1", "us-west-2"], on_demand_fallback=True)
     r.load_quotas()
     st, act = r.launch(make_job(name="a"))
@@ -2189,15 +2189,15 @@ def test_v3_on_demand_when_spot_unavailable_everywhere(tmp_path):
     r.active[act.iid] = act
     st2, act2 = r.launch(make_job(name="b"))                                   # квота по требованию us-east-1 занята
     assert st2 == "launched" and (act2.region, act2.market) == ("us-west-2", "on-demand")
-    # без флага — машины по требованию нет, статус capacity с пояснением
+    # без --on-demand-fallback — машины по требованию нет, статус capacity с пояснением по регионам
     clk3 = Clock()
-    sky3 = Sky(clk3, us_east_1=dict(sq=sq_vals(384, 384), fail_spot=["InsufficientInstanceCapacity"] * 100))
-    r3 = sky3.runner(tmp_path / "c", regions=["us-east-1", "us-west-2"] if False else ["us-east-1"],
-                     vcpu_quota_region={"us-east-1": 384})
-    assert not r3.v3                                                           # один регион без флагов — версия 2
-    r3b = sky3.runner(tmp_path / "d", regions=["us-east-1"], on_demand_fallback=False)
-    assert r3b.launch(make_job(name="c"))[0] == "capacity"
-    assert all(c[1] == "spot" for c in sky3.clouds["us-east-1"].calls if c[0] == "run_instances")
+    sky3 = Sky(clk3, us_east_1=dict(sq=sq_vals(384, 384), fail_spot=["InsufficientInstanceCapacity"] * 100),
+               us_west_2=dict(sq=sq_vals(384, 300), fail_spot=["InsufficientInstanceCapacity"] * 100))
+    r3 = sky3.runner(tmp_path / "c", regions=["us-east-1", "us-west-2"])
+    assert r3.v3 and r3.launch(make_job(name="c"))[0] == "capacity"
+    assert "нет ёмкости: c7a.16xlarge@us-east-1c:InsufficientInstanceCapacity" in r3._why["c"]
+    for cl in sky3.clouds.values():
+        assert all(c[1] == "spot" for c in cl.calls if c[0] == "run_instances")
 
 
 def test_v3_on_demand_when_own_spot_quota_exhausted(tmp_path):
@@ -2211,7 +2211,7 @@ def test_v3_on_demand_when_own_spot_quota_exhausted(tmp_path):
     mk = sorted(v["market"] for v in res.values())
     assert mk == ["on-demand", "on-demand", "spot", "spot"]
     cl = sky.clouds["us-east-1"]
-    assert max(sum(1 for i in cl.inst.values() if i["market"] == "spot" and i["t"] <= t) for t in (T0,)) == 2
+    assert [i["market"] for i in cl.inst.values()].count("spot") == 2 and cl.max_live == 4   # все четыре — сразу
     recs = ledger(tmp_path)
     for L in [x for x in recs if x["ev"] == "launch"]:
         prev = recs[recs.index(L) - 1]
@@ -2527,3 +2527,36 @@ def test_v3_lost_on_demand_machine_retried_and_terminated_in_its_region(tmp_path
     assert r._avoided("c7a.16xlarge/od", "us-west-2a") and not r._avoided("c7a.16xlarge", "us-west-2a")
     term = [c for c in w2.calls if c[0] == "terminate_instances"]
     assert term and not [c for c in sky.clouds["us-east-1"].calls if c[0] == "terminate_instances"]
+
+
+def test_v3_quota_error_pauses_region_and_price_denied_region_skipped(tmp_path):
+    """service-quotas показал свободную квоту, но AWS ответил квотной ошибкой (квоту держат чужие машины аккаунта):
+    регион — на паузу, задача — в следующий регион; через паузу регион снова пробуется. Регион без права на цену
+    спота — исключён (в бюджет и MaxPrice не входит)."""
+    clk, out = Clock(), []
+    sky = Sky(clk, us_east_1=dict(sq=sq_vals(384)), us_east_2=dict(sq=sq_vals(384), fail_spot=["MaxSpotInstanceCountExceeded"]),
+              us_west_2=dict(sq=sq_vals(384), deny=("price",)))
+    r = sky.runner(tmp_path, out=out)
+    r.load_quotas()
+    st, act = r.launch(make_job(name="a"))
+    assert st == "launched" and act.region == "us-east-1"
+    assert [(x["region"], x["code"]) for x in ledger(tmp_path, "launch_error")] == [("us-east-2", "MaxSpotInstanceCountExceeded")]
+    assert r._blocked("us-east-2", "spot").startswith("квота")
+    assert ("us-west-2", "spot") in r._denied and not sky.clouds["us-west-2"].runs
+    b = ledger(tmp_path, "budget")[0]
+    assert b["regions"] == ["us-east-1", "us-east-2"] and b["max_usd_h"] == pytest.approx(math_ceil4(0.940 * 1.2))
+    r.active[act.iid] = act
+    st, act2 = r.launch(make_job(name="b"))                                  # пауза ещё идёт — снова us-east-1
+    assert st == "launched" and act2.region == "us-east-1" and len(sky.clouds["us-east-2"].runs) == 1
+    clk.sleep(5 * 60 + 1)                                                    # пауза min(avoid_s, 5 × poll_s) прошла
+    st, act3 = r.launch(make_job(name="c"))
+    assert st == "launched" and act3.region == "us-east-2"
+    # все регионы на паузе или без прав, своих машин нет — defer: очередь подождёт, а не снимет задачу
+    clk2 = Clock()
+    sky2 = Sky(clk2, us_east_1=dict(sq=sq_vals(384), fail_spot=["VcpuLimitExceeded"] * 9),
+               us_east_2=dict(sq=sq_vals(384), fail_spot=["VcpuLimitExceeded"] * 9))
+    r2 = sky2.runner(tmp_path / "b", regions=["us-east-1", "us-east-2"], quota_wait_polls=1)
+    res = r2.run([make_job(name="solo")])["solo"]
+    assert res["status"] == "quota" and "us-east-1 спот: квота (пауза после ошибки)" in res["detail"]
+    assert sorted((x["region"], x["code"]) for x in ledger(tmp_path / "b", "launch_error")) == [
+        ("us-east-1", "VcpuLimitExceeded"), ("us-east-2", "VcpuLimitExceeded")]   # на паузе AWS не дёргается
