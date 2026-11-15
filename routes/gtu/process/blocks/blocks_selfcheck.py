@@ -1,6 +1,6 @@
 """Самопроверка библиотеки блоков «от топлива до вала» -> blocks_results.json (рядом) и полные записи примеров в scratchpad.
 
-python3 routes/gtu/process/blocks/blocks_selfcheck.py [--out <файл>] [--full <папка>]
+python3 routes/gtu/process/blocks/blocks_selfcheck.py [--out <файл>] [--full <папка; по умолчанию $GTU_SCRATCH>]
 AWS не вызывается; около 15 с на одном ядре. Всё - оценка уровня облика (README узла).
 """
 import argparse
@@ -10,6 +10,7 @@ import json
 import os
 import platform
 import sys
+import tempfile
 import time
 
 for _v in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS"):
@@ -22,7 +23,7 @@ from blocks import _track as T  # noqa: E402
 from blocks import reference  # noqa: E402
 from blocks.catalog import catalog  # noqa: E402
 
-SCRATCH = "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/process"
+SCRATCH = os.environ.get("GTU_SCRATCH") or os.path.join(tempfile.gettempdir(), "gtu_process")   # полные записи - вне репозитория
 CODE = ["__init__.py", "_track.py", "concept.py", "chain.py", "fuel.py", "compressor.py", "combustor.py", "turbine.py", "hx.py",
         "shaft.py", "compat.py", "evaluator.py", "reference.py", "catalog.py"]
 

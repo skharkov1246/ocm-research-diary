@@ -233,16 +233,28 @@ def check_global(p, variant, h=0.006):
 
 
 def check_patch(p, variant, h=4e-4, size=0.05):
-    """участок стенки: обшивки skin, между ними решётка (тип и плотность генома), 2 отверстия выноса порошка Ø max(5 мм, ячейка/2)
-    во внутренней обшивке; боковые грани закрыты, снаружи от внутренней обшивки — пустота, связанная с краем сетки"""
+    """участок стенки элиты (место наибольшей толщины решётки) — см. patch_escape"""
     prof = SM.profiles(p, variant)
     k = int(np.argmax(prof["t_core"]))
     t = float(prof["t"][k]); ts = min(p["skin"], 0.5 * t); rho = float(prof["rho"][k])
     tc = t - 2 * ts
     if tc <= 2 * h or p["route"] != "печать":
         return dict(note="решётки нет")
-    L = p["cell"]
-    kind = p["lat_type"]
+    r = patch_escape(p["lat_type"], p["cell"], rho, tc, ts, size, h)
+    return r
+
+
+def pore_rule(kind, cell, rho, t_core):
+    """дешёвое правило модели (shell_model): характерная пора решётки"""
+    tl = float(S.tpms_t_for_density("gyroid" if kind == "voronoi" else kind, rho))
+    return cell * max(0.5 - tl, 0.05) if kind != "voronoi" else cell * (1 - rho) * 0.6
+
+
+def patch_escape(kind, L, rho, tc, ts, size=0.05, h=4e-4):
+    """участок стенки: обшивки ts, между ними решётка толщины tc (тип, ячейка L, плотность ρ), 2 отверстия выноса порошка
+    Ø max(5 мм, L/2) во внутренней обшивке; боковые грани закрыты, снаружи от внутренней обшивки — пустота, связанная с краем.
+    Возврат: наименьший лист решётки, доля пустоты решётки, куда шар 3 и 5 мм не проходит от отверстий, правило модели."""
+    t = tc + 2 * ts
     d_hole = max(0.005, 0.5 * L)
     if kind == "voronoi":
         rng = np.random.Generator(np.random.PCG64(7))
@@ -252,36 +264,29 @@ def check_patch(p, variant, h=4e-4, size=0.05):
 
     def sdf(P):
         x, y, zz = P[..., 0], P[..., 1], P[..., 2]
-        # z: 0 … ts — внутренняя обшивка, ts … ts+tc — решётка, ts+tc … t — наружная; ниже 0 — пустота наружу
-        if kind == "voronoi":
-            lat = S.voronoi_sdf(P, seeds, tv, "open")
-        else:
-            lat = S.tpms_sheet_sdf(P, kind, L, tl * L)
-        core_box = np.maximum(np.maximum(-zz + ts, zz - (ts + tc)), -1.0)
+        lat = S.voronoi_sdf(P, seeds, tv, "open") if kind == "voronoi" else S.tpms_sheet_sdf(P, kind, L, tl * L)
+        core_box = np.maximum(-zz + ts, zz - (ts + tc))
         d_lat = np.maximum(lat, core_box)
         skin_in = np.maximum(-zz, zz - ts)
         skin_out = np.maximum(-(zz - ts - tc), zz - t)
         d_side = np.minimum(np.minimum(x, size - x), np.minimum(y, size - y)) - 0.002
         frame = np.maximum(d_side, np.maximum(-zz, zz - t))
-        d = np.minimum(np.minimum(d_lat, skin_in), skin_out)
-        d = np.minimum(d, frame)
+        d = np.minimum(np.minimum(np.minimum(d_lat, skin_in), skin_out), frame)
         for (cx, cy) in ((0.25 * size, 0.25 * size), (0.75 * size, 0.75 * size)):
-            hole = S.sd_cylinder_z(P - np.array([cx, cy, 0.0]), 0.5 * d_hole, -0.01, ts + 1e-4)
-            d = np.maximum(d, -hole)
+            d = np.maximum(d, -S.sd_cylinder_z(P - np.array([cx, cy, 0.0]), 0.5 * d_hole, -0.01, ts + 1e-4))
         return d
     phi, ax = C.voxelize(sdf, (0.0, 0.0, -0.004), (size, size, t + 0.0004), h)
-    # снаружи наружной обшивки — металл не нужен: верх сетки закрываем (порошок уходит только вниз, через отверстия)
     phi[:, :, -1] = -1.0
     phi[[0, -1], :, :] = -1.0; phi[:, [0, -1], :] = -1.0
-    core = (phi > 0)
     zc = ax[2]
-    in_core = core & ((zc > ts) & (zc < ts + tc))[None, None, :]
+    band = ((zc > ts) & (zc < ts + tc))[None, None, :]
+    in_core = (phi > 0) & band
     mw = C.min_wall(np.where(((zc > ts + h) & (zc < ts + tc - h))[None, None, :], phi, 1.0), h, t_min=SM.PRINT_SKIN_MIN)
     pe = C.powder_escape(phi, h, d_list=(SM.PORE_MIN, SM.PORE_LONG))
     vc = float(in_core.sum()) * h ** 3
+    # доля пустоты решётки, куда шар не проходит: пересчёт blocked_m3 только по слою решётки
     rel = {k2: (min(1.0, v / vc) if vc > 0 else None) for k2, v in pe["blocked_m3"].items()}
-    # дешёвое правило модели (shell_model: поры решётки)
-    pore_rule = L * max(0.5 - tl, 0.05) if kind != "voronoi" else L * (1 - rho) * 0.6
+    pr = pore_rule(kind, L, rho, tc)
     return dict(kind=kind, cell_m=L, rho=rho, skin_m=ts, t_core_m=tc, h_m=h, d_hole_m=d_hole, lattice_wall_min_m=mw.get("t_min_m"),
                 lattice_wall_p05_m=mw.get("t_p05_m"), core_void_m3=vc, blocked_share=rel, n_closed=pe["n_closed"],
-                pore_rule_m=pore_rule, rule_says_ok_3mm=bool(pore_rule >= SM.PORE_MIN), rule_says_ok_5mm=bool(pore_rule >= SM.PORE_LONG))
+                pore_rule_m=pr, rule_says_ok_3mm=bool(pr >= SM.PORE_MIN), rule_says_ok_5mm=bool(pr >= SM.PORE_LONG))

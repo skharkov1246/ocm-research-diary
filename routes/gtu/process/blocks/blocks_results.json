@@ -4,7 +4,7 @@
  "software": "python 3.13.18, numpy 2.5.3, scipy 1.18.1, cantera 3.2.0",
  "date": "2026-11-15",
  "status": "оценка уровня облика; КПД узлов, потери, пределы, детали и TRL - принятые величины трека и оценки; массы не калиброваны",
- "code_sha": "ff95acaf9e832d27",
+ "code_sha": "7783f67bfffd44d6",
  "inputs": [
   {
    "file": "routes/gtu/gtu_family_results.json",
@@ -1028,7 +1028,7 @@
    "mass_funnel_estimate_kg": 1463,
    "funnel_score": 3.7736,
    "comb_dp": 0.04,
-   "runtime_s": 0.0012
+   "runtime_s": 0.0016
   },
   {
    "name": "простой 2Ц π 13,5, LPP",
@@ -1087,7 +1087,7 @@
    "mass_funnel_estimate_kg": 1581,
    "funnel_score": 3.8999,
    "comb_dp": 0.0485,
-   "runtime_s": 0.0012
+   "runtime_s": 0.0016
   },
   {
    "name": "+ подогрев топлива",
@@ -1144,7 +1144,7 @@
    "mass_funnel_estimate_kg": 1581,
    "funnel_score": 3.708,
    "comb_dp": 0.0485,
-   "runtime_s": 0.0013
+   "runtime_s": 0.0018
   },
   {
    "name": "+ паровой риформинг (S/C 2)",
@@ -1196,7 +1196,7 @@
    "mass_funnel_estimate_kg": 1568,
    "funnel_score": 4.2432,
    "comb_dp": 0.0485,
-   "runtime_s": 0.0066
+   "runtime_s": 0.0089
   },
   {
    "name": "+ сухой риформинг (R 1)",
@@ -1254,7 +1254,7 @@
    "mass_funnel_estimate_kg": 1580,
    "funnel_score": 2.5629,
    "comb_dp": 0.0485,
-   "runtime_s": 0.0089
+   "runtime_s": 0.0076
   },
   {
    "name": "промохлаждение + рекуператор 0,90",
@@ -1308,7 +1308,7 @@
    "mass_funnel_estimate_kg": 4301,
    "funnel_score": 5.1999,
    "comb_dp": 0.0485,
-   "runtime_s": 0.0022
+   "runtime_s": 0.0033
   },
   {
    "name": "рекуператор 0,90 (фольга) + подогрев, π 8,2",
@@ -1364,7 +1364,7 @@
    "mass_funnel_estimate_kg": 3680,
    "funnel_score": 4.7757,
    "comb_dp": 0.0485,
-   "runtime_s": 0.0022
+   "runtime_s": 0.0034
   },
   {
    "name": "рекуператор 0,90 (печать) + подогрев, π 8,2",
@@ -1420,7 +1420,7 @@
    "mass_funnel_estimate_kg": 11039,
    "funnel_score": 4.1574,
    "comb_dp": 0.0485,
-   "runtime_s": 0.0021
+   "runtime_s": 0.0034
   },
   {
    "name": "рекуператор 0,90 + подогрев, π 13,5 (как есть)",
@@ -1472,7 +1472,7 @@
    "mass_funnel_estimate_kg": 4039,
    "funnel_score": 4.3878,
    "comb_dp": 0.0485,
-   "runtime_s": 0.0018
+   "runtime_s": 0.0028
   },
   {
    "name": "обращённый Брайтон (IBC)",
@@ -1523,7 +1523,7 @@
    "mass_funnel_estimate_kg": 1573,
    "funnel_score": 4.0897,
    "comb_dp": 0.0485,
-   "runtime_s": 0.0055
+   "runtime_s": 0.0022
   },
   {
    "name": "FLOX + рекуператор 0,88",
@@ -1582,7 +1582,7 @@
    "mass_funnel_estimate_kg": 3945,
    "funnel_score": 3.4167,
    "comb_dp": 0.0692,
-   "runtime_s": 0.0021
+   "runtime_s": 0.0023
   },
   {
    "name": "TVC (полость - пассивный пилот)",
@@ -1697,7 +1697,7 @@
    "mass_funnel_estimate_kg": 3274,
    "funnel_score": 3.6968,
    "comb_dp": 0.0461,
-   "runtime_s": 0.0021
+   "runtime_s": 0.002
   },
   {
    "name": "детонационная (RDC), класс N",
@@ -1749,7 +1749,7 @@
    "mass_funnel_estimate_kg": 1597,
    "funnel_score": 3.5644,
    "comb_dp": 0.04,
-   "runtime_s": 0.0025
+   "runtime_s": 0.0024
   },
   {
    "name": "волновой ротор, класс N",
@@ -1857,7 +1857,7 @@
    "mass_funnel_estimate_kg": 1531,
    "funnel_score": 3.4784,
    "comb_dp": 0.0485,
-   "runtime_s": 0.0114
+   "runtime_s": 0.0073
   },
   {
    "name": "свободная СТ",
@@ -1919,7 +1919,7 @@
    "mass_funnel_estimate_kg": 2796,
    "funnel_score": 3.4194,
    "comb_dp": 0.0485,
-   "runtime_s": 0.0015
+   "runtime_s": 0.0014
   },
   {
    "name": "свободная СТ + межтурбинная камера, класс K",
@@ -1978,7 +1978,7 @@
    "mass_funnel_estimate_kg": 2303,
    "funnel_score": 2.4675,
    "comb_dp": 0.0485,
-   "runtime_s": 0.0017
+   "runtime_s": 0.0016
   },
   {
    "name": "класс K, T41 1150, π 16",
@@ -2144,7 +2144,7 @@
    "mass_funnel_estimate_kg": 246,
    "funnel_score": 3.9287,
    "comb_dp": 0.0485,
-   "runtime_s": 0.012
+   "runtime_s": 0.0079
   },
   {
    "name": "ОЦ (1 осевая + центробежная), класс K",
@@ -2306,7 +2306,7 @@
    "mass_funnel_estimate_kg": 429,
    "funnel_score": 6.0971,
    "comb_dp": 0.0485,
-   "runtime_s": 0.009
+   "runtime_s": 0.0088
   },
   {
    "name": "KV-6: ОЦ (2 осевые + центробежная), свободная СТ, класс K",
@@ -2367,8 +2367,8 @@
    "mass_funnel_estimate_kg": 1285,
    "funnel_score": 5.3388,
    "comb_dp": 0.0485,
-   "runtime_s": 0.0027
+   "runtime_s": 0.0026
   }
  ],
- "runtime_s": 6.16
+ "runtime_s": 6.0
 }

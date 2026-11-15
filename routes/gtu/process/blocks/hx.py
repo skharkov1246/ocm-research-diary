@@ -11,8 +11,6 @@ eta_ibc_t 0,86, eta_ibc_c 0,82, eps_ibc 0,85, dp_ibc 2 %, сетка plow). Ра
 import inspect
 import math
 
-import numpy as np
-
 from . import _track as T
 
 TECH = {"фольга": "foil", "печать": "lpbf"}

@@ -43,7 +43,7 @@ def frame3_concept(eta_given=False):
 
 
 def check_frame3():
-    FS, L0 = T.FS(), T.L0()
+    L0 = T.L0()
     from .concept import normalize, to_funnel
     f3 = T.load_json(T.F_FRAME3)["cycle"]["frame3"]
     C = frame3_concept()

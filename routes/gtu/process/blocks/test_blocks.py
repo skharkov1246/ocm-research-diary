@@ -15,7 +15,7 @@ import pytest  # noqa: E402
 
 import blocks  # noqa: E402
 from blocks import _track as T  # noqa: E402
-from blocks import chain, combustor, reference, shaft  # noqa: E402,F401
+from blocks import chain, combustor, reference  # noqa: E402
 from blocks import evaluator as EV  # noqa: E402
 from blocks.concept import normalize  # noqa: E402
 
@@ -128,7 +128,8 @@ def test_highspeed_shaft_through_package_gearbox():
     r = blocks.evaluate(dict(shaft=dict(drive="быстроходный")))
     sh = r["blocks"]["shaft"]
     assert len(sh["n_scan"]) >= 10                       # частота выбрана перебором в окне отношения частот
-    lo, hi = blocks.shaft.HS_RATIO
+    from blocks.shaft import HS_RATIO
+    lo, hi = HS_RATIO
     assert lo - 1e-6 <= sh["n_engine_rpm"] / sh["n_package_rpm"] <= hi + 1e-6
     assert r["plugplay"]["states"]["вал и муфта"] == "переходник"
     assert any(it["trl"] == 7 for it in r["trl"]["items"])

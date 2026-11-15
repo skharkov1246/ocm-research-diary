@@ -39,7 +39,7 @@ sys.path.insert(0, os.path.dirname(HERE))
 import shell_geom as SG  # noqa: E402
 import shell_model as SM  # noqa: E402
 
-MESH = dict(coarse=dict(nz=56, nt=96, sub=3), fine=dict(nz=200, nt=360, sub=2))
+MESH = dict(coarse=dict(nz=56, nt=96, sub=3), fine=dict(nz=120, nt=240, sub=2))
 STIFF = dict(E=2.0e13, nu=0.3, rho=1.0, alpha=13e-6)
 
 

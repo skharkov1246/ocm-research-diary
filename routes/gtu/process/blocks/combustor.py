@@ -14,8 +14,6 @@
     не выполняет все жёсткие цели (hard_ok 0) - выбросы показываются как ограничение, которое ещё не закрыто;
   * готовность - comb_space.TRL_SCHEME (STATE_OF_ART.md, оценка), для RDC и ВР - не выше make_model.TRL (3).
 """
-import math
-
 from . import _track as T
 
 SCHEME = {

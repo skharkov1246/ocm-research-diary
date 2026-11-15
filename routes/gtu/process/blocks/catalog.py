@@ -8,7 +8,7 @@ from .concept import DEFAULT, PSI_AUTO, NU_AUTO
 
 
 def catalog():
-    CY, FS, MK, CS = T.CY(), T.FS(), T.MK(), T.CS()
+    CY, FS, MK = T.CY(), T.FS(), T.MK()
     A = CY.A
     sig = inspect.signature(T.GC().recup).parameters
     l0 = combustor.l0()
