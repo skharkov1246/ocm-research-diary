@@ -1,0 +1,1963 @@
+{
+ "title": "Модель массы агрегата-заменителя по блокам, калиброванная по реальным двигателям (уровень облика)",
+ "method": "блоки массы по размерам и материалам (колёса - коэффициент формы CAD frame3, осевые ступени - диск + лопатки, корпуса - стенка по давлению, материалу и способу изготовления, камера по объёму, теплообменники по поверхности и стенке, подшипники, рама); размеры по паспорту - 0D-термодинамика с постоянными свойствами; калибровка: m = Σ ротор + K_практики·Σ неподвижная, МНК в логарифмах, проверка исключением по одной машине (LOO) и сравнение со степенной зависимостью от мощности",
+ "software": "Python 3, numpy, scipy (minimize_scalar)",
+ "date": "2026-11-15",
+ "status": "оценка уровня облика: калибровка по 8 двигателям (3 промышленных, 5 авиационных); блоковое деление массы не проверено по реальным машинам (известны только итоги); теплообменники и рама не калиброваны (полоса)",
+ "inputs": {
+  "db": "routes/gtu/process/mass/mass_db.json",
+  "db_sha16": "6843e9f0f42d7c68",
+  "frame3_point": "routes/gtu/frame3/frame3_point_results.json",
+  "frame3_geom": "routes/gtu/frame3/frame3_geom_results.json",
+  "cycles": "routes/gtu/organic/cycles/cycles_results.json",
+  "fleet": "routes/gtu/fleet",
+  "densities": "routes/gtu/funnel/make_model.py: MAT[*].rho",
+  "code_sha16": "33997809a6d2f26d"
+ },
+ "assumptions": {
+  "A": {
+   "cp_a": 1005.0,
+   "g_a": 1.4,
+   "R_a": 287.05,
+   "cp_g": 1150.0,
+   "g_g": 1.333,
+   "R_g": 287.0,
+   "T0": 288.15,
+   "p0": 101325.0,
+   "eta_pc": {
+    "industrial": 0.88,
+    "aero": 0.9
+   },
+   "eta_pt": 0.88,
+   "eta_cf": 0.84,
+   "dp_comb": 0.04,
+   "p_exh_k": 1.03,
+   "G_sp": {
+    "industrial": 185.0,
+    "aero": 200.0
+   },
+   "htr1": 0.5,
+   "htr_hp": 0.6,
+   "U_tip_c": {
+    "industrial": 380.0,
+    "aero": 420.0
+   },
+   "AR_c": 2.0,
+   "c_min_c": 0.015,
+   "Lst_c": 2.2,
+   "AR_t": 1.6,
+   "c_min_t": 0.02,
+   "Lst_t": 2.4,
+   "psi_t": {
+    "industrial": 1.6,
+    "aero": 1.8
+   },
+   "phi_t": 0.55,
+   "lam_cf": 0.68,
+   "phi_cf": 0.085,
+   "nu_rt": 0.7,
+   "sigma_b": 1.3,
+   "tc_b": 0.08,
+   "k_prof": 0.7,
+   "k_taper": 0.8,
+   "k_vane": 1.2,
+   "k_ngv": 1.5,
+   "k_disk_c": 0.05,
+   "k_disk_t": 0.12,
+   "k_fill_disk": 0.7,
+   "k_cf_single": 0.06903329580867458,
+   "k_cf_double": 0.11756580352010867,
+   "k_bore": 0.95,
+   "k_rt": 0.099,
+   "k_cf_dif": 0.03,
+   "k_rt_noz": 0.02,
+   "shaft_d": 0.15,
+   "shaft_fill": 0.5,
+   "U_ref": {
+    "annular": 10.0,
+    "can": 12.0,
+    "silo": 8.0
+   },
+   "LH_annular": 3.0,
+   "LD_can": 3.0,
+   "H_liner": 0.7,
+   "t_liner": {
+    "sheet": 0.0015,
+    "lpbf": 0.0012
+   },
+   "k_liner": 1.6,
+   "k_tp": 0.3,
+   "m_inj": {
+    "industrial": 4.0,
+    "aero": 2.5
+   },
+   "k_frame_bh": 0.02,
+   "k_fastener": 0.02,
+   "m_pipe_bearing": 15.0,
+   "T_case_hot_C": 450.0,
+   "amb_p": 400000.0,
+   "amb_margin": 3.0,
+   "amb_axial": 4.0,
+   "amb_ctrl_kg": 30.0,
+   "amb_backup_kg": 3.0,
+   "foil_kg": 2.0,
+   "foil_rotor_max_kg": 150.0,
+   "oil_own_base": 120.0,
+   "oil_own_per_kW": 0.015,
+   "cradle_k": 0.08,
+   "cradle_per_m": 60.0
+  },
+  "basis": {
+   "thermo": "постоянные cp, γ; КПД политропный компрессора 0,88 / 0,90, турбины 0,88 - оценка (только для размеров проточной части)",
+   "G_sp": "удельный расход на входе осевого компрессора 185 / 200 кг/(с·м²), втулочное отношение 0,50 (ВД 0,60) - оценка",
+   "U_tip_c": "окружная скорость на периферии первой ступени, если частота не дана, 380 / 420 м/с - оценка",
+   "blades": "лопатки: густота 1,3, t/c 0,08, площадь профиля 0,7·t·c, сужение 0,8; удлинение 2,0 компрессор / 1,6 турбина; хорда не меньше 15 / 20 мм; длина ступени 2,2 / 2,4 хорды - оценка",
+   "disks": "диск осевой ступени: (π/4)·D_обода²·w·0,7, w = 0,05 D_обода (компрессор, барабан) / 0,12 D_обода (турбина) - оценка",
+   "k_cf": "центробежное колесо m = k·ρ·D2³: k по объёму CAD-тел frame3 (frame3_geom_results.json → stages.stageN.solid.volume_m3 / D2³): одностороннее - ступень 2, двустороннее - ступень 1; без отверстия; с отверстием ×0,95 (оценка)",
+   "k_rt": "радиальная турбина m = 0,099·ρ·D³ (0,0825·1,2 - gtu_explore.finalize), аппарат 0,02·ρ·D³ (funnel_space.derive) - оценка",
+   "turbine": "коэффициент нагрузки ψ = Δh/U² 1,6 / 1,8, расхода φ = c_a/U 0,55, U/C0 радиальной 0,70 - оценка",
+   "centrifugal": "коэффициент работы λ = w/U2² 0,68 (frame3: 0,648 и 0,716 - среднее), оптимальный φ = 0,085 (funnel_space.PHI_OPT['Ц']); осевая длина 0,30 D2 (одност.) / 0,65 D2 (двуст.) - по frame3; корпус ступени 1,45 D2 - оценка",
+   "combustor": "площадь отсчёта A = G/(ρ3·U_ref), U_ref 10 (кольцевая) / 12 (трубчатая) / 8 (выносная) м/с; жаровая труба высотой 0,7 H, длиной 3 H; стенка 1,5 мм (лист) / 1,2 мм (печать), ×1,6 на фронтовое устройство и кольца; форсунка 4 / 2,5 кг; переходные патрубки 0,3 массы труб - оценка",
+   "frames": "опоры подшипников: n_опор × 0,02·ρ_стали·D_корпуса³; крепёж 2 % неподвижной части; трубы масла 15 кг на подшипник - оценка",
+   "case_hot": "металл корпуса турбины 450 °C (охлаждаемый/теплоизолированный) - оценка",
+   "amb": "магнитный подшипник: удельная несущая способность 0,4 МПа на проекцию (B²/2μ0 при 1,0-1,2 Тл = 0,40-0,57 МПа × геометрия), запас 3 по весу ротора, осевой - 4 веса ротора; статор 2,2 D; контроллер 30 кг (funnel_space.derive), страховочные подшипники 3 кг - оценка",
+   "foil": "лепестковый газовый подшипник 2 кг; опыт - роторы до 150 кг (оценка, не проверено)",
+   "cradle": "рама модуля: 0,08 опираемой массы + 60 кг на метр длины, сталь - оценка (без калибровки: рамы двигателей в открытых данных не отделены от рам пакетов)"
+  },
+  "rho": {
+   "Ti64": 4430.0,
+   "Al": 2800.0,
+   "K418": 8000.0,
+   "IN718": 8190.0,
+   "HastX": 8220.0,
+   "IN625": 8440.0,
+   "steel": 7850.0,
+   "SC": 8700.0,
+   "CM247LC": 8500.0,
+   "Haynes282": 8270.0,
+   "NodIron": 7100.0,
+   "SS410": 7740.0,
+   "SS347": 7960.0,
+   "IN800": 7940.0,
+   "SiFe": 7650.0
+  },
+  "rho_basis": {
+   "Ti64": "funnel/make_model.MAT['Ti64'].rho",
+   "Al": "funnel/make_model.MAT['Al'].rho",
+   "K418": "funnel/make_model.MAT['K418'].rho",
+   "IN718": "funnel/make_model.MAT['IN718'].rho",
+   "HastX": "funnel/make_model.MAT['HastX'].rho",
+   "IN625": "funnel/make_model.MAT['IN625'].rho",
+   "steel": "funnel/make_model.MAT['steel'].rho",
+   "SC": "funnel/make_model.MAT['SC'].rho",
+   "CM247LC": "funnel/make_model.MAT['CM247LC'].rho",
+   "Haynes282": "funnel/make_model.MAT['Haynes282'].rho",
+   "NodIron": "чугун с шаровидным графитом (корпуса Solar - 'Nodular Iron', TPS); 7100 - справочное, оценка",
+   "SS410": "нерж. 410 (корпус камеры Solar - '410 Stainless Steel', TPS); 7740 - справочное, оценка",
+   "SS347": "нерж. 347 (фольга рекуператора первичной поверхности, Mercury 50 - по выдержке поиска); 7960 - справочное, оценка",
+   "IN800": "Incoloy 800 (трубы риформера); 7940 - справочное, оценка",
+   "SiFe": "электротехническая сталь (магнитные подшипники); 7650 - справочное, оценка"
+  },
+  "allow_MPa": {
+   "NodIron": [
+    [
+     20,
+     100.0
+    ],
+    [
+     350,
+     100.0
+    ],
+    [
+     450,
+     40.0
+    ]
+   ],
+   "steel": [
+    [
+     20,
+     140.0
+    ],
+    [
+     400,
+     140.0
+    ],
+    [
+     500,
+     80.0
+    ],
+    [
+     550,
+     40.0
+    ]
+   ],
+   "SS410": [
+    [
+     20,
+     120.0
+    ],
+    [
+     450,
+     120.0
+    ],
+    [
+     550,
+     60.0
+    ]
+   ],
+   "Ti64": [
+    [
+     20,
+     250.0
+    ],
+    [
+     300,
+     250.0
+    ],
+    [
+     400,
+     180.0
+    ],
+    [
+     450,
+     120.0
+    ]
+   ],
+   "Al": [
+    [
+     20,
+     80.0
+    ],
+    [
+     150,
+     80.0
+    ],
+    [
+     200,
+     40.0
+    ]
+   ],
+   "IN718": [
+    [
+     20,
+     300.0
+    ],
+    [
+     650,
+     300.0
+    ],
+    [
+     700,
+     150.0
+    ],
+    [
+     750,
+     60.0
+    ]
+   ],
+   "HastX": [
+    [
+     20,
+     120.0
+    ],
+    [
+     700,
+     120.0
+    ],
+    [
+     850,
+     60.0
+    ],
+    [
+     900,
+     30.0
+    ]
+   ],
+   "IN625": [
+    [
+     20,
+     140.0
+    ],
+    [
+     650,
+     140.0
+    ],
+    [
+     800,
+     60.0
+    ],
+    [
+     900,
+     25.0
+    ]
+   ],
+   "K418": [
+    [
+     20,
+     200.0
+    ],
+    [
+     750,
+     200.0
+    ],
+    [
+     850,
+     120.0
+    ],
+    [
+     950,
+     60.0
+    ]
+   ]
+  },
+  "process": {
+   "cast_sand": {
+    "t_min": 0.01,
+    "k_D": 0.015,
+    "k_flange": 1.35,
+    "name": "литьё в песок"
+   },
+   "cast_invest": {
+    "t_min": 0.004,
+    "k_D": 0.008,
+    "k_flange": 1.25,
+    "name": "точное литьё (КНР)"
+   },
+   "forged_fab": {
+    "t_min": 0.003,
+    "k_D": 0.006,
+    "k_flange": 1.3,
+    "name": "поковка, сварка (авиационная)"
+   },
+   "lpbf": {
+    "t_min": 0.002,
+    "k_D": 0.005,
+    "k_flange": 1.1,
+    "name": "печать LPBF"
+   },
+   "sheet": {
+    "t_min": 0.0015,
+    "k_D": 0.003,
+    "k_flange": 1.15,
+    "name": "лист"
+   }
+  },
+  "process_basis": "оценка: t = max(t_min, k_D·D, p·D/(2σ_доп)); масса оболочки = π·D·L·t·ρ·k_flange",
+  "practice": {
+   "industrial": {
+    "name": "промышленная (литые корпуса, тяжёлые диски; Solar)",
+    "cold": [
+     "NodIron",
+     "cast_sand"
+    ],
+    "warm": [
+     "steel",
+     "cast_sand"
+    ],
+    "comb_case": [
+     "SS410",
+     "cast_sand"
+    ],
+    "hot_case": [
+     "steel",
+     "cast_sand"
+    ],
+    "diffuser": [
+     "NodIron",
+     "cast_sand"
+    ],
+    "inlet": [
+     "NodIron",
+     "cast_sand"
+    ],
+    "comp_rotor": "steel",
+    "turb_rotor": "IN718",
+    "liner": [
+     "HastX",
+     "sheet"
+    ],
+    "vanes_c": "steel",
+    "vanes_t": "K418",
+    "include_inlet": true,
+    "include_diffuser": true
+   },
+   "aero": {
+    "name": "авиационная (кованые и сварные корпуса из Ti и Ni, лёгкие диски; GE LM, SGT-A05)",
+    "cold": [
+     "Ti64",
+     "forged_fab"
+    ],
+    "warm": [
+     "IN718",
+     "forged_fab"
+    ],
+    "comb_case": [
+     "IN718",
+     "forged_fab"
+    ],
+    "hot_case": [
+     "IN718",
+     "forged_fab"
+    ],
+    "diffuser": [
+     "IN718",
+     "sheet"
+    ],
+    "inlet": [
+     "Ti64",
+     "forged_fab"
+    ],
+    "comp_rotor": "Ti64",
+    "turb_rotor": "IN718",
+    "liner": [
+     "HastX",
+     "sheet"
+    ],
+    "vanes_c": "Ti64",
+    "vanes_t": "K418",
+    "include_inlet": false,
+    "include_diffuser": false
+   }
+  },
+  "hx_types": {
+   "psr": {
+    "name": "первичная поверхность, гофрированная фольга (Solar Mercury, Capstone)",
+    "t": 0.0001,
+    "mat": "SS347",
+    "k_core": 1.15,
+    "k_hdr": [
+     1.5,
+     2.0,
+     2.5
+    ],
+    "basis": "фольга 0,1 мм (Mercury 50: 'about 0.1 mm wall' - по выдержке поиска); k_core 1,15 (кромки, прокладки) и коллекторы/корпус k_hdr 1,5-2,5 - оценка"
+   },
+   "plate_fin": {
+    "name": "пластинчато-ребристый паяный",
+    "t": 0.00025,
+    "mat": "SS347",
+    "k_core": 1.25,
+    "k_hdr": [
+     1.5,
+     2.0,
+     2.5
+    ],
+    "basis": "эквивалентная стенка 0,25 мм (пластина + рёбра) - оценка"
+   },
+   "plate_print": {
+    "name": "печатные пластины LPBF с опорами",
+    "t": 0.00035,
+    "mat": "IN625",
+    "k_core": 1.45,
+    "k_hdr": [
+     1.2,
+     1.5,
+     1.8
+    ],
+    "basis": "стенка 0,35 мм (organic/thermal); опоры листа ×1,38-1,58 (organic/verify_phys: 4,48-5,13 т против 3,25 т без опор) -> 1,45; печатные коллекторы заодно k_hdr 1,2-1,8 - оценка"
+   },
+   "tpms_print": {
+    "name": "печатная решётка TPMS (гироид) LPBF",
+    "t": 0.0003,
+    "mat": "IN625",
+    "k_core": 1.0,
+    "k_hdr": [
+     1.2,
+     1.5,
+     1.8
+    ],
+    "basis": "стенка 0,25-0,35 мм (organic/thermal/tpms_results.json; 0,30 - середина); листовая TPMS самонесущая k_core 1,0; печатные коллекторы заодно k_hdr 1,2-1,8 - оценка"
+   },
+   "tube": {
+    "name": "трубчатый (кожухотрубный, промежуточный охладитель)",
+    "t": 0.001,
+    "mat": "steel",
+    "k_core": 1.3,
+    "k_hdr": [
+     1.5,
+     2.0,
+     2.5
+    ],
+    "basis": "трубка 1,0 мм, решётки и перегородки ×1,3, корпус и коллекторы k_hdr 1,5-2,5 - оценка"
+   },
+   "reformer": {
+    "name": "риформер трубчатый с катализатором",
+    "t": 0.002,
+    "mat": "IN800",
+    "k_core": 1.3,
+    "k_hdr": [
+     1.5,
+     2.0,
+     2.5
+    ],
+    "cat_rho": 900.0,
+    "basis": "трубы 2 мм Incoloy 800, катализатор 900 кг/м³ насыпной - оценка"
+   }
+  },
+  "k_cf_frame3": {
+   "double": {
+    "k": 0.11756580352010867,
+    "V": 0.039394760018745076,
+    "D2": 0.694575,
+    "sides": 2,
+    "r_bore": 0.0
+   },
+   "single": {
+    "k": 0.06903329580867458,
+    "V": 0.02393721561833611,
+    "D2": 0.702541,
+    "sides": 1,
+    "r_bore": 0.0
+   }
+  }
+ },
+ "criterion": {
+  "name": "КПД на тонну",
+  "formula": "КПД, % / масса агрегата-заменителя, т",
+  "mass_scope": "двигатель + камера + теплообменники + корпус и рама модуля; генератор, редуктор, вход и выхлоп пакета не входят",
+  "also": [
+   "КПД",
+   "масса",
+   "кВт/кг (мощность на валу / масса)",
+   "фронт Парето КПД - масса"
+  ]
+ },
+ "database": {
+  "engines": [
+   {
+    "id": "taurus60_md",
+    "name": "Solar Taurus 60, двухвальный (компрессорный агрегат / механический привод)",
+    "practice": "industrial",
+    "use": "calibration",
+    "mass_kg": 3290,
+    "P_kW": 5740,
+    "kW_per_kg": 1.745,
+    "eta_pct": 32.0,
+    "status": "открыт"
+   },
+   {
+    "id": "taurus70_md",
+    "name": "Solar Taurus 70, двухвальный (компрессорный агрегат / механический привод), редакция TPS70CSMD/309",
+    "practice": "industrial",
+    "use": "calibration",
+    "mass_kg": 5630,
+    "P_kW": 7690,
+    "kW_per_kg": 1.366,
+    "eta_pct": 34.8,
+    "status": "открыт; открыт; конфликт кг/фунты"
+   },
+   {
+    "id": "titan250_gs",
+    "name": "Solar Titan 250, двухвальный, генераторный агрегат (предварительная редакция TPS250GS/908)",
+    "practice": "industrial",
+    "use": "calibration",
+    "mass_kg": 19050,
+    "P_kW": 22370,
+    "kW_per_kg": 1.174,
+    "eta_pct": 40.0,
+    "status": "открыт; открыт (число ступеней газогенератора - как напечатано)"
+   },
+   {
+    "id": "lm2500",
+    "name": "GE LM2500 (газогенератор 16 ступеней + силовая турбина 6 ступеней, 3600 об/мин)",
+    "practice": "aero",
+    "use": "calibration",
+    "mass_kg": 4672,
+    "P_kW": 23261,
+    "kW_per_kg": 4.979,
+    "eta_pct": 37.7,
+    "status": "открыт (GE Oil & Gas / Nuovo Pignone, 2005); по выдержке поиска"
+   },
+   {
+    "id": "lm2500plus",
+    "name": "GE LM2500+ (газогенератор 17 ступеней + силовая турбина)",
+    "practice": "aero",
+    "use": "calibration",
+    "mass_kg": 5237,
+    "P_kW": 30200,
+    "kW_per_kg": 5.767,
+    "eta_pct": 41.1,
+    "status": "открыт; по выдержке поиска"
+   },
+   {
+    "id": "lm6000",
+    "name": "GE LM6000 (компрессоры НД 5 + ВД 14, турбины ВД 2 + НД, выход 3600 об/мин)",
+    "practice": "aero",
+    "use": "calibration",
+    "mass_kg": 7863,
+    "P_kW": 43679,
+    "kW_per_kg": 5.555,
+    "eta_pct": 41.9,
+    "status": "открыт; по выдержке поиска"
+   },
+   {
+    "id": "sgta05_kb5",
+    "name": "Siemens SGT-A05 KB5S (Allison 501-K), одновальный",
+    "practice": "aero",
+    "use": "calibration",
+    "mass_kg": 783,
+    "P_kW": 4000,
+    "kW_per_kg": 5.109,
+    "eta_pct": 29.7,
+    "status": "открыт (брошюра, стр. 11); открыт (стр. 5); открыт в паспорте fleet; открыт в паспорте routes/gtu/fleet/gtu_fleet_sgta05.json (sources.engine_kg_alt_centrax)"
+   },
+   {
+    "id": "sgta05_kb7he",
+    "name": "Siemens SGT-A05 KB7HE, одновальный (14 ступеней + нулевая)",
+    "practice": "aero",
+    "use": "calibration",
+    "mass_kg": 1000,
+    "P_kW": 5800,
+    "kW_per_kg": 5.8,
+    "eta_pct": 33.2,
+    "status": "открыт (стр. 5); открыт в паспорте routes/gtu/fleet/gtu_fleet_sgta05.json; конфликт с Siemens '< 766 Kg'"
+   },
+   {
+    "id": "kg2_3",
+    "name": "Kongsberg KG2-3 (всё радиальное: одно центробежное колесо + радиальная турбина), 1970-е",
+    "practice": "industrial",
+    "use": "check",
+    "mass_kg": 2495,
+    "P_kW": 1193,
+    "kW_per_kg": 0.478,
+    "eta_pct": null,
+    "status": "по выдержке поиска"
+   },
+   {
+    "id": "d336",
+    "name": "Мотор Сич Д-336 (газотурбинный привод ГПА, авиационный)",
+    "practice": "aero",
+    "use": "reference",
+    "mass_kg": 1470,
+    "P_kW": 6300,
+    "kW_per_kg": 4.286,
+    "eta_pct": 31.0,
+    "status": "по выдержке поиска"
+   },
+   {
+    "id": "ase40b",
+    "name": "Vericor ASE40B (промышленный вариант Lycoming T55)",
+    "practice": "aero",
+    "use": "reference",
+    "mass_kg": 601,
+    "P_kW": 3200,
+    "kW_per_kg": 5.324,
+    "eta_pct": null,
+    "status": "по выдержке поиска"
+   },
+   {
+    "id": "ase50b",
+    "name": "Vericor ASE50B",
+    "practice": "aero",
+    "use": "reference",
+    "mass_kg": 654,
+    "P_kW": 3682,
+    "kW_per_kg": 5.63,
+    "eta_pct": null,
+    "status": "по выдержке поиска"
+   }
+  ],
+  "packages": [
+   {
+    "id": "taurus60_md_skid",
+    "name": "Solar Taurus 60 MD - приводной модуль (рама, двигатель, маслосистема, пуск), без кожуха, без масла",
+    "mass_kg": 15422,
+    "engine_kg": 3290,
+    "P_kW": 5740,
+    "source": {
+     "url": "https://www.manualsdir.com/manuals/214702/taurus-group-60.html?page=9",
+     "quote": "Total Driver (unenclosed package, without oil) 15 422 kg (34,000 lb)",
+     "status": "открыт"
+    }
+   },
+   {
+    "id": "taurus70_md_skid",
+    "name": "Solar Taurus 70 MD - приводной модуль без кожуха, без масла",
+    "mass_kg": 24494,
+    "engine_kg": 5630,
+    "P_kW": 7690,
+    "source": {
+     "url": "https://www.manualsdir.com/manuals/66910/caterpillar-taurus-70.html?page=9",
+     "quote": "Total Driver (unenclosed package, without oil) 24 494 kg (54,000 lb)",
+     "status": "открыт"
+    }
+   },
+   {
+    "id": "titan250_gs_skid",
+    "name": "Solar Titan 250 GS - приводной модуль без кожуха, без масла (без генератора)",
+    "mass_kg": 49900,
+    "engine_kg": 19050,
+    "P_kW": 22370,
+    "source": {
+     "url": "https://www.manualsdir.com/manuals/59759/cat-titan-250.html?page=9",
+     "quote": "Total Driver (unenclosed package, without oil) 49 900 kg (110,000 lb)",
+     "status": "открыт"
+    }
+   },
+   {
+    "id": "mercury50_vs_centaur50",
+    "name": "Solar Mercury 50 GS (рекуператор первичной поверхности) против Centaur 50 GS - пакеты одной мощности 4600 кВт",
+    "mass_kg": 45700,
+    "ref_mass_kg": 37785,
+    "P_kW": 4600,
+    "note": "разность 7915 кг = рекуператор с газоходами + более длинный пакет (11,1 м против 9,8 м) + разница двигателей (Mercury: 10 ступеней, π 9,9; Centaur 50: 11 ступеней, π 10,6). Верхняя граница массы системы рекуператора, не её масса",
+    "source": {
+     "url": "routes/gtu/fleet/gtu_fleet_mercury50.json; routes/gtu/fleet/gtu_fleet_centaur50.json",
+     "quote": "Mercury 50 GS pkg_kg 45 700 (DSM50PG/1118); Centaur 50 GS pkg_kg 37 785",
+     "status": "открыт в паспортах fleet"
+    }
+   },
+   {
+    "id": "capstone_c65",
+    "name": "Capstone C65 (рекуператор, воздушные подшипники, высокооборотный генератор, силовая электроника, кожух), сеть",
+    "mass_kg": 758,
+    "P_kW": 65,
+    "eta_pct": 29.0,
+    "note": "масса всего блока с генератором и электроникой; КПД 29 % - по памяти, не проверено (в выдержке нет)",
+    "source": {
+     "url": "https://d1io3yog0oux5.cloudfront.net/_7343c66b0bbfdaf8b5c0fee2d0c8bce7/capstonegreenenergy/db/235/9453/file/Data+Sheet_Digester+Gas.pdf",
+     "quote": "Width x Depth x Height 0.76 x 1.95 x 2.08 m ... grid-connect version weighs 758 kg, dual-mode 1,121 kg (выдержка поиска)",
+     "status": "по выдержке поиска"
+    }
+   },
+   {
+    "id": "capstone_c200",
+    "name": "Capstone C200 (сеть)",
+    "mass_kg": 2270,
+    "mass_range_kg": [
+     2270,
+     2776
+    ],
+    "P_kW": 200,
+    "source": {
+     "url": "https://d1io3yog0oux5.cloudfront.net/_18a8265537239cb4513d1501f53d28d1/capstoneturbine/db/235/7016/file/C200+HPNG_331043A_lowres.pdf",
+     "quote": "1700 x 3660 x 2490 mm ... 2270 kg (grid connect); другая редакция 2730 kg; HPNG 2,776 kg (выдержки поиска)",
+     "status": "по выдержке поиска; конфликт редакций"
+    }
+   },
+   {
+    "id": "capstone_c1000",
+    "name": "Capstone C1000 (5 ядер по 200 кВт), сеть, старая редакция",
+    "mass_kg": 7711,
+    "P_kW": 1000,
+    "source": {
+     "url": "https://pdf.directindustry.com/pdf/capstone-turbine/c1000-product-literature/22062-58086.html",
+     "quote": "2438 x 8534 x 2896 mm, weight 7,711 kg (grid connect) (выдержка поиска); C1000S - 17 100 kg",
+     "status": "по выдержке поиска"
+    }
+   }
+  ],
+  "not_used": [
+   {
+    "what": "GE Oil & Gas 2005, стр. 30: массы рам газовых турбин без кожуха (28 000 ... 217 500 кг)",
+    "why": "в тексте страницы 14 строк масс на 15 моделей - соответствие строк моделям неоднозначно",
+    "url": "https://www.manualsdir.com/manuals/106729/ge-gas-turbine.html?page=30"
+   },
+   {
+    "what": "SGT-A65 (Industrial Trent 60): пакеты 190 512 и 106 000 кг",
+    "why": "масса пакета с генератором, двигатель отдельно не найден",
+    "url": "https://pdf.directindustry.com/pdf/siemens-power-genereration/sgt-a65-gas-turbine/23116-773844.html"
+   },
+   {
+    "what": "Kawasaki M1A/M5A/M7A: массы пакетов в таблице gtgs.pdf",
+    "why": "текст таблицы перемешан в выдержке, хост не разрешён",
+    "url": "https://global.kawasaki.com/assets/pdf/en/gtgs.pdf"
+   },
+   {
+    "what": "OPRA OP16, Solar Saturn 20 / Centaur / Mars, MAN MGT6000, АЛ-31СТ, ПС-90ГП-2, НК-16СТ",
+    "why": "масса двигателя в открытых выдержках не найдена (есть только массы пакетов или авиационных прототипов)",
+    "url": null
+   }
+  ],
+  "legend": {
+   "открыт": "документ открыт в этой сессии (manualsdir.com, assets.siemens-energy.com) или в паспорте fleet/ того же трека (адрес и цитата там)",
+   "по выдержке поиска": "число видно только в выдержке поисковой системы; документ не открывался (хост не разрешён сетью сессии: geaerospace.com, wikipedia.org, vericor.com, motorsich.com, trid.trb.org, capstone cloudfront и др.)",
+   "конфликт": "источники расходятся; принятое значение и разброс указаны",
+   "оценка": "допущение модели, не из источника"
+  }
+ },
+ "calibration": {
+  "per_practice": {
+   "industrial": {
+    "name": "промышленная (литые корпуса, тяжёлые диски; Solar)",
+    "n": 3,
+    "K": 3.0843,
+    "insample": {
+     "rms_log": 0.13857772808521854,
+     "mean_log": -0.0008861595291396185,
+     "max_abs_pct": 20.793432504926244,
+     "rms_pct": 14.4430336966205
+    },
+    "loo": {
+     "rms_log": 0.20933898872284934,
+     "mean_log": -6.604907831449698e-05,
+     "max_abs_pct": 33.185110817140554,
+     "rms_pct": 22.438860067518807
+    },
+    "machines": [
+     "taurus60_md",
+     "taurus70_md",
+     "titan250_gs"
+    ]
+   },
+   "aero": {
+    "name": "авиационная (кованые и сварные корпуса из Ti и Ni, лёгкие диски; GE LM, SGT-A05)",
+    "n": 5,
+    "K": 0.6741,
+    "insample": {
+     "rms_log": 0.5695242097860561,
+     "mean_log": 0.013741640029711455,
+     "max_abs_pct": 87.24961832202432,
+     "rms_pct": 58.76105386226386
+    },
+    "loo": {
+     "rms_log": 0.7135537921613988,
+     "mean_log": 0.008300262354590337,
+     "max_abs_pct": 117.20477310405796,
+     "rms_pct": 75.47975035553091
+    },
+    "machines": [
+     "lm2500",
+     "lm2500plus",
+     "lm6000",
+     "sgta05_kb5",
+     "sgta05_kb7he"
+    ]
+   }
+  },
+  "table": [
+   {
+    "id": "taurus60_md",
+    "name": "Solar Taurus 60, двухвальный (компрессорный агрегат / механический привод)",
+    "practice": "industrial",
+    "mass_kg": 3290,
+    "mass_range_kg": [
+     3290,
+     3290
+    ],
+    "P_kW": 5740,
+    "kW_per_kg": 1.745,
+    "rotor_kg": 205.0,
+    "static_raw_kg": 1222.0,
+    "rotor_share_pct": 5.2,
+    "pred_insample_kg": 3974.1,
+    "K_loo": 3.418,
+    "pred_loo_kg": 4381.8,
+    "err_loo_pct": 33.2,
+    "within_source_range": false,
+    "dims": {
+     "m_air": 21.3,
+     "m_basis": "паспорт",
+     "T2_C": 375.9817545076986,
+     "p3_bar": 12.361650000000012,
+     "T4_C": 1059.8002011785688,
+     "wc_kJkg": 362.7866632802371,
+     "wt_kJkg": 632.2702313553544,
+     "P_shaft_kW": 5740.0,
+     "comp1": {
+      "type": "A",
+      "Dt1": 0.4421,
+      "Dm": 0.3316,
+      "h1": 0.1105,
+      "h_last": 0.0235,
+      "rpm": 15000,
+      "U_tip1": 347.2,
+      "n": 12
+     },
+     "turb_gg": {
+      "type": "A",
+      "n": 2,
+      "Dm": 0.4287,
+      "U": 336.7,
+      "rpm": 15000,
+      "h1": 0.0488,
+      "h_last": 0.0848
+     },
+     "turb_lp": {
+      "type": "A",
+      "n": 2,
+      "Dm": 0.3876,
+      "U": 290.2,
+      "rpm": 14300,
+      "h1": 0.1616,
+      "h_last": 0.236
+     },
+     "L_engine": 2.982,
+     "D_case_max": 0.717,
+     "combustor": {
+      "kind": "annular",
+      "L": 0.543,
+      "D": 0.773
+     }
+    }
+   },
+   {
+    "id": "taurus70_md",
+    "name": "Solar Taurus 70, двухвальный (компрессорный агрегат / механический привод), редакция TPS70CSMD/309",
+    "practice": "industrial",
+    "mass_kg": 5630,
+    "mass_range_kg": [
+     5107,
+     5630
+    ],
+    "P_kW": 7690,
+    "kW_per_kg": 1.366,
+    "rotor_kg": 298.5,
+    "static_raw_kg": 1493.2,
+    "rotor_share_pct": 6.1,
+    "pred_insample_kg": 4904.0,
+    "K_loo": 2.8639,
+    "pred_loo_kg": 4574.9,
+    "err_loo_pct": -18.7,
+    "within_source_range": false,
+    "dims": {
+     "m_air": 26.2,
+     "m_basis": "паспорт",
+     "T2_C": 442.83779429079505,
+     "p3_bar": 16.71862500000001,
+     "T4_C": 1124.120377081677,
+     "wc_kJkg": 429.97698326224895,
+     "wt_kJkg": 723.4884336439284,
+     "P_shaft_kW": 7690.0,
+     "comp1": {
+      "type": "A",
+      "Dt1": 0.4903,
+      "Dm": 0.3677,
+      "h1": 0.1226,
+      "h_last": 0.0211,
+      "rpm": 15200,
+      "U_tip1": 390.2,
+      "n": 14
+     },
+     "turb_gg": {
+      "type": "A",
+      "n": 2,
+      "Dm": 0.4606,
+      "U": 366.6,
+      "rpm": 15200,
+      "h1": 0.0438,
+      "h_last": 0.0834
+     },
+     "turb_lp": {
+      "type": "A",
+      "n": 2,
+      "Dm": 0.482,
+      "U": 302.9,
+      "rpm": 12000,
+      "h1": 0.147,
+      "h_last": 0.2194
+     },
+     "L_engine": 3.161,
+     "D_case_max": 0.807,
+     "combustor": {
+      "kind": "annular",
+      "L": 0.515,
+      "D": 0.792
+     }
+    }
+   },
+   {
+    "id": "titan250_gs",
+    "name": "Solar Titan 250, двухвальный, генераторный агрегат (предварительная редакция TPS250GS/908)",
+    "practice": "industrial",
+    "mass_kg": 19050,
+    "mass_range_kg": [
+     19050,
+     19050
+    ],
+    "P_kW": 22370,
+    "kW_per_kg": 1.174,
+    "rotor_kg": 1349.1,
+    "static_raw_kg": 5417.1,
+    "rotor_share_pct": 7.5,
+    "pred_insample_kg": 18057.4,
+    "K_loo": 2.9997,
+    "pred_loo_kg": 17598.7,
+    "err_loo_pct": -7.6,
+    "within_source_range": false,
+    "dims": {
+     "m_air": 67.3,
+     "m_basis": "паспорт",
+     "T2_C": 535.4600912938414,
+     "p3_bar": 24.318000000000023,
+     "T4_C": 1208.873621872161,
+     "wc_kJkg": 523.0623917503106,
+     "wt_kJkg": 855.4546651529852,
+     "P_shaft_kW": 22370.0,
+     "comp1": {
+      "type": "A",
+      "Dt1": 0.7859,
+      "Dm": 0.5894,
+      "h1": 0.1965,
+      "h_last": 0.0263,
+      "rpm": 10500,
+      "U_tip1": 432.1,
+      "n": 16
+     },
+     "turb_gg": {
+      "type": "A",
+      "n": 3,
+      "Dm": 0.6004,
+      "U": 330.1,
+      "rpm": 10500,
+      "h1": 0.0606,
+      "h_last": 0.1659
+     },
+     "turb_lp": {
+      "type": "A",
+      "n": 2,
+      "Dm": 0.8793,
+      "U": 322.3,
+      "rpm": 7000,
+      "h1": 0.1824,
+      "h_last": 0.279
+     },
+     "L_engine": 5.026,
+     "D_case_max": 1.332,
+     "combustor": {
+      "kind": "annular",
+      "L": 0.71,
+      "D": 1.106
+     }
+    }
+   },
+   {
+    "id": "lm2500",
+    "name": "GE LM2500 (газогенератор 16 ступеней + силовая турбина 6 ступеней, 3600 об/мин)",
+    "practice": "aero",
+    "mass_kg": 4672,
+    "mass_range_kg": [
+     4672,
+     4700
+    ],
+    "P_kW": 23261,
+    "kW_per_kg": 4.979,
+    "rotor_kg": 2421.3,
+    "static_raw_kg": 6228.4,
+    "rotor_share_pct": 36.6,
+    "pred_insample_kg": 6620.0,
+    "K_loo": 0.7652,
+    "pred_loo_kg": 7187.0,
+    "err_loo_pct": 53.8,
+    "within_source_range": false,
+    "dims": {
+     "m_air": 68.9,
+     "m_basis": "паспорт",
+     "T2_C": 446.87859607535756,
+     "p3_bar": 18.137174999999978,
+     "T4_C": 1195.9940991473477,
+     "wc_kJkg": 434.0379890557344,
+     "wt_kJkg": 771.6432140194499,
+     "P_shaft_kW": 23261.0,
+     "comp1": {
+      "type": "A",
+      "Dt1": 0.7647,
+      "Dm": 0.5736,
+      "h1": 0.1912,
+      "h_last": 0.0302,
+      "rpm": 10489,
+      "U_tip1": 420.0,
+      "n": 16
+     },
+     "turb_gg": {
+      "type": "A",
+      "n": 2,
+      "Dm": 0.6322,
+      "U": 347.2,
+      "rpm": 10489,
+      "h1": 0.0846,
+      "h_last": 0.1592
+     },
+     "turb_lp": {
+      "type": "A",
+      "n": 6,
+      "Dm": 0.938,
+      "U": 176.8,
+      "rpm": 3600,
+      "h1": 0.2471,
+      "h_last": 0.5278
+     },
+     "L_engine": 6.167,
+     "D_case_max": 1.686,
+     "combustor": {
+      "kind": "annular",
+      "L": 0.862,
+      "D": 1.167
+     }
+    }
+   },
+   {
+    "id": "lm2500plus",
+    "name": "GE LM2500+ (газогенератор 17 ступеней + силовая турбина)",
+    "practice": "aero",
+    "mass_kg": 5237,
+    "mass_range_kg": [
+     5237,
+     5237
+    ],
+    "P_kW": 30200,
+    "kW_per_kg": 5.767,
+    "rotor_kg": 3025.4,
+    "static_raw_kg": 7604.2,
+    "rotor_share_pct": 37.1,
+    "pred_insample_kg": 8151.5,
+    "K_loo": 0.7897,
+    "pred_loo_kg": 9030.4,
+    "err_loo_pct": 72.4,
+    "within_source_range": false,
+    "dims": {
+     "m_air": 84.3,
+     "m_basis": "паспорт",
+     "T2_C": 491.1339428169056,
+     "p3_bar": 21.886199999999995,
+     "T4_C": 1227.6165025154723,
+     "wc_kJkg": 478.5146125309901,
+     "wt_kJkg": 836.7589778927933,
+     "P_shaft_kW": 30200.0,
+     "comp1": {
+      "type": "A",
+      "Dt1": 0.8459,
+      "Dm": 0.6344,
+      "h1": 0.2115,
+      "h_last": 0.0294,
+      "rpm": 9483,
+      "U_tip1": 420.0,
+      "n": 17
+     },
+     "turb_gg": {
+      "type": "A",
+      "n": 2,
+      "Dm": 0.7343,
+      "U": 364.6,
+      "rpm": 9483,
+      "h1": 0.0759,
+      "h_last": 0.1503
+     },
+     "turb_lp": {
+      "type": "A",
+      "n": 6,
+      "Dm": 0.9662,
+      "U": 182.1,
+      "rpm": 3600,
+      "h1": 0.2698,
+      "h_last": 0.5895
+     },
+     "L_engine": 6.667,
+     "D_case_max": 1.789,
+     "combustor": {
+      "kind": "annular",
+      "L": 0.83,
+      "D": 1.249
+     }
+    }
+   },
+   {
+    "id": "lm6000",
+    "name": "GE LM6000 (компрессоры НД 5 + ВД 14, турбины ВД 2 + НД, выход 3600 об/мин)",
+    "practice": "aero",
+    "mass_kg": 7863,
+    "mass_range_kg": [
+     7337,
+     7863
+    ],
+    "P_kW": 43679,
+    "kW_per_kg": 5.555,
+    "rotor_kg": 5382.4,
+    "static_raw_kg": 13856.6,
+    "rotor_share_pct": 36.6,
+    "pred_insample_kg": 14723.4,
+    "K_loo": 0.8441,
+    "pred_loo_kg": 17078.8,
+    "err_loo_pct": 117.2,
+    "within_source_range": false,
+    "dims": {
+     "m_air": 126.5,
+     "m_basis": "паспорт",
+     "T2_C": 555.8233962329855,
+     "p3_bar": 28.269674999999992,
+     "T4_C": 1227.8835224030936,
+     "wc_kJkg": 543.5275132141504,
+     "wt_kJkg": 888.8160507635575,
+     "P_shaft_kW": 43679.0,
+     "comp1": {
+      "type": "A",
+      "Dt1": 1.0362,
+      "Dm": 0.7772,
+      "h1": 0.2591,
+      "h_last": 0.0301,
+      "rpm": 7741,
+      "U_tip1": 420.0,
+      "n": 19
+     },
+     "turb_gg": {
+      "type": "A",
+      "n": 2,
+      "Dm": 0.9587,
+      "U": 388.6,
+      "rpm": 7741,
+      "h1": 0.0712,
+      "h_last": 0.1568
+     },
+     "turb_lp": {
+      "type": "A",
+      "n": 6,
+      "Dm": 0.9486,
+      "U": 178.8,
+      "rpm": 3600,
+      "h1": 0.4044,
+      "h_last": 0.8643
+     },
+     "L_engine": 8.973,
+     "D_case_max": 2.085,
+     "combustor": {
+      "kind": "annular",
+      "L": 0.83,
+      "D": 1.479
+     }
+    }
+   },
+   {
+    "id": "sgta05_kb5",
+    "name": "Siemens SGT-A05 KB5S (Allison 501-K), одновальный",
+    "practice": "aero",
+    "mass_kg": 783,
+    "mass_range_kg": [
+     766,
+     800
+    ],
+    "P_kW": 4000,
+    "kW_per_kg": 5.109,
+    "rotor_kg": 131.0,
+    "static_raw_kg": 406.5,
+    "rotor_share_pct": 32.3,
+    "pred_insample_kg": 405.1,
+    "K_loo": 0.5059,
+    "pred_loo_kg": 336.7,
+    "err_loo_pct": -57.0,
+    "within_source_range": false,
+    "dims": {
+     "m_air": 15.4,
+     "m_basis": "паспорт",
+     "T2_C": 331.0131752982347,
+     "p3_bar": 10.436475000000003,
+     "T4_C": 1062.029131230422,
+     "wc_kJkg": 317.5932411747259,
+     "wt_kJkg": 577.3335009149856,
+     "P_shaft_kW": 4000.0,
+     "comp1": {
+      "type": "A",
+      "Dt1": 0.3616,
+      "Dm": 0.2712,
+      "h1": 0.0904,
+      "h_last": 0.0206,
+      "rpm": 14200,
+      "U_tip1": 268.8,
+      "n": 14
+     },
+     "turb_gg": {
+      "type": "A",
+      "n": 4,
+      "Dm": 0.3809,
+      "U": 283.2,
+      "rpm": 14200,
+      "h1": 0.0504,
+      "h_last": 0.1893
+     },
+     "L_engine": 2.063,
+     "D_case_max": 0.656,
+     "combustor": {
+      "kind": "can",
+      "L": 0.638,
+      "D": 0.234
+     }
+    }
+   },
+   {
+    "id": "sgta05_kb7he",
+    "name": "Siemens SGT-A05 KB7HE, одновальный (14 ступеней + нулевая)",
+    "practice": "aero",
+    "mass_kg": 1000,
+    "mass_range_kg": [
+     766,
+     1000
+    ],
+    "P_kW": 5800,
+    "kW_per_kg": 5.8,
+    "rotor_kg": 173.6,
+    "static_raw_kg": 486.2,
+    "rotor_share_pct": 34.6,
+    "pred_insample_kg": 501.4,
+    "K_loo": 0.5083,
+    "pred_loo_kg": 420.7,
+    "err_loo_pct": -57.9,
+    "within_source_range": false,
+    "dims": {
+     "m_air": 21.4,
+     "m_basis": "паспорт",
+     "T2_C": 398.82443126285807,
+     "p3_bar": 14.590799999999978,
+     "T4_C": 1079.105731132478,
+     "wc_kJkg": 385.7435534191723,
+     "wt_kJkg": 656.7715908023498,
+     "P_shaft_kW": 5800.0,
+     "comp1": {
+      "type": "A",
+      "Dt1": 0.4262,
+      "Dm": 0.3197,
+      "h1": 0.1066,
+      "h_last": 0.0195,
+      "rpm": 14600,
+      "U_tip1": 325.8,
+      "n": 15
+     },
+     "turb_gg": {
+      "type": "A",
+      "n": 4,
+      "Dm": 0.3951,
+      "U": 302.0,
+      "rpm": 14600,
+      "h1": 0.0492,
+      "h_last": 0.223
+     },
+     "L_engine": 2.298,
+     "D_case_max": 0.711,
+     "combustor": {
+      "kind": "can",
+      "L": 0.671,
+      "D": 0.246
+     }
+    }
+   }
+  ],
+  "single_K_all": {
+   "K": 1.3426,
+   "loo": {
+    "rms_log": 0.8642213208635462,
+    "mean_log": 0.028736478597766513,
+    "max_abs_pct": 250.373879779639,
+    "rms_pct": 128.11408520778505
+   },
+   "note": "одна K без деления на практику - для сравнения"
+  },
+  "baselines": {
+   "industrial": {
+    "power_law": {
+     "a": 0.07050183815039587,
+     "b": 1.2508226835875451,
+     "loo": {
+      "rms_log": 0.4539152981519126,
+      "mean_log": 0.2620681195772961,
+      "max_abs_pct": 110.11425634513465,
+      "rms_pct": 65.45076868688578
+     }
+    },
+    "const_specific": {
+     "kW_per_kg": 1.4091859824729607,
+     "loo": {
+      "rms_log": 0.24469740864318065,
+      "mean_log": 5.921189464667501e-16,
+      "max_abs_pct": 37.75948797668094,
+      "rms_pct": 25.944867391762337
+     }
+    }
+   },
+   "aero": {
+    "power_law": {
+     "a": 0.20340481035309765,
+     "b": 0.9896286907539739,
+     "loo": {
+      "rms_log": 0.09973183888298652,
+      "mean_log": -0.002640883585766396,
+      "max_abs_pct": 13.30976639581751,
+      "rms_pct": 9.923982964268003
+     }
+    },
+    "const_specific": {
+     "kW_per_kg": 5.431153908875888,
+     "loo": {
+      "rms_log": 0.07852258374199711,
+      "mean_log": 3.552713678800501e-16,
+      "max_abs_pct": 10.300133559582102,
+      "rms_pct": 7.776534985936452
+     }
+    }
+   }
+  }
+ },
+ "checks": {
+  "kg2_3_radial": {
+   "real_kg": 2495,
+   "pred_kg": 2714.9,
+   "band_kg": [
+    2202.1,
+    3347.1
+   ],
+   "err_pct": 8.8,
+   "dims": {
+    "m_air": 7.562559485243438,
+    "m_basis": "из мощности и принятой T4 (оценка)",
+    "T2_C": 188.59365239491262,
+    "p3_bar": 4.053,
+    "T4_C": 876.85,
+    "wc_kJkg": 174.4616206568872,
+    "wt_kJkg": 332.2124459334169,
+    "P_shaft_kW": 1193.0,
+    "comp1": {
+     "type": "C",
+     "D2": 0.3787,
+     "U2": 506.5,
+     "rpm": 25547,
+     "sides": 1,
+     "pi": 4.0,
+     "T_out_C": 188.6
+    },
+    "turb_gg": {
+     "type": "R",
+     "D": 0.4547,
+     "U": 608.2,
+     "rpm": 25547
+    },
+    "L_engine": 2.876,
+    "D_case_max": 0.549,
+    "combustor": {
+     "kind": "silo",
+     "L": 1.882,
+     "D": 0.69
+    }
+   },
+   "note": "π 4,0 и T4 1150 K - оценка (в источнике нет); единственная найденная масса всё-радиальной промышленной машины"
+  },
+  "frame3_sizing": {
+   "D2_model": [
+    0.6807,
+    0.7253
+   ],
+   "D2_frame3": [
+    0.694575,
+    0.702541
+   ],
+   "D2_err_pct": [
+    -2.0,
+    3.2
+   ],
+   "turb_Dm_model": 0.4659,
+   "turb_Dm_frame3": 0.536549,
+   "note": "проверка размерного пути: λ 0,68 (среднее двух ступеней frame3) против своих λ ступеней"
+  },
+  "mercury50_recuperator": {
+   "eps_0.85": {
+    "A_m2": 616.2,
+    "mass_lo_mid_hi_kg": [
+     846,
+     1128,
+     1410
+    ]
+   },
+   "eps_0.9": {
+    "A_m2": 898.1,
+    "mass_lo_mid_hi_kg": [
+     1233,
+     1644,
+     2055
+    ]
+   },
+   "package_delta_kg": 7915,
+   "U_basis": "U 143,2 Вт/(м²·К) - фольга organic/cycles (hx foil)",
+   "eps_basis": "ε рекуператора Mercury 50 не опубликован в открытых источниках - 0,85 и 0,90 оценка",
+   "verdict": "модель должна давать меньше разности пакетов (в разность входят газоходы, удлинение пакета, разница двигателей)"
+  },
+  "sgta05_bound": {
+   "siemens_upper_kg": 766,
+   "centrax_kg": 800,
+   "pred_loo_kg": 336.7
+  },
+  "fleet_packages_kg_per_kW": {
+   "min": 2.09,
+   "max": 9.93,
+   "n": 28,
+   "rows": [
+    {
+     "model": "Centaur 40",
+     "variant": "GS",
+     "P_kW": 3515,
+     "pkg_kg": 33480,
+     "kg_per_kW": 9.52,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_centaur40.json"
+    },
+    {
+     "model": "Centaur 40",
+     "variant": "MD",
+     "P_kW": 3500,
+     "pkg_kg": 14970,
+     "kg_per_kW": 4.28,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_centaur40.json"
+    },
+    {
+     "model": "Centaur 50",
+     "variant": "GS",
+     "P_kW": 4600,
+     "pkg_kg": 37785,
+     "kg_per_kW": 8.21,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_centaur50.json"
+    },
+    {
+     "model": "Centaur 50",
+     "variant": "MD",
+     "P_kW": 4570,
+     "pkg_kg": 16330,
+     "kg_per_kW": 3.57,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_centaur50.json"
+    },
+    {
+     "model": "Mars 100",
+     "variant": "GS",
+     "P_kW": 11350,
+     "pkg_kg": 82145,
+     "kg_per_kW": 7.24,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_mars100.json"
+    },
+    {
+     "model": "Mars 100",
+     "variant": "MD",
+     "P_kW": 11860,
+     "pkg_kg": 33565,
+     "kg_per_kW": 2.83,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_mars100.json"
+    },
+    {
+     "model": "Mars 90",
+     "variant": "GS",
+     "P_kW": 9450,
+     "pkg_kg": 86180,
+     "kg_per_kW": 9.12,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_mars90.json"
+    },
+    {
+     "model": "Mars 90",
+     "variant": "MD",
+     "P_kW": 9860,
+     "pkg_kg": 33565,
+     "kg_per_kW": 3.4,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_mars90.json"
+    },
+    {
+     "model": "Mercury 50",
+     "variant": "GS",
+     "P_kW": 4600,
+     "pkg_kg": 45700,
+     "kg_per_kW": 9.93,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_mercury50.json"
+    },
+    {
+     "model": "Saturn 20",
+     "variant": "GS",
+     "P_kW": 1210,
+     "pkg_kg": 10205,
+     "kg_per_kW": 8.43,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_saturn20.json"
+    },
+    {
+     "model": "Saturn 20",
+     "variant": "MD",
+     "P_kW": 1185,
+     "pkg_kg": 6805,
+     "kg_per_kW": 5.74,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_saturn20.json"
+    },
+    {
+     "model": "SGT-100 (5.1 MW)",
+     "variant": "PG 5.1 MW",
+     "P_kW": 5100,
+     "pkg_kg": 34927,
+     "kg_per_kW": 6.85,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_sgt100.json"
+    },
+    {
+     "model": "SGT-100 (5.4 MW)",
+     "variant": "PG 5.4 MW",
+     "P_kW": 5400,
+     "pkg_kg": 34927,
+     "kg_per_kW": 6.47,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_sgt100.json"
+    },
+    {
+     "model": "SGT-100 (5.7 MW)",
+     "variant": "MD 5.7 MW",
+     "P_kW": 5700,
+     "pkg_kg": 26944,
+     "kg_per_kW": 4.73,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_sgt100.json"
+    },
+    {
+     "model": "SGT-300",
+     "variant": "PG 8.0 MW",
+     "P_kW": 8000,
+     "pkg_kg": 58967,
+     "kg_per_kW": 7.37,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_sgt300.json"
+    },
+    {
+     "model": "SGT-300 (8.4 MW)",
+     "variant": "MD 8.4 MW",
+     "P_kW": 8400,
+     "pkg_kg": 30409,
+     "kg_per_kW": 3.62,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_sgt300.json"
+    },
+    {
+     "model": "SGT-300 (9.1 MW)",
+     "variant": "MD 9.1 MW",
+     "P_kW": 9100,
+     "pkg_kg": 30409,
+     "kg_per_kW": 3.34,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_sgt300.json"
+    },
+    {
+     "model": "SGT-400 (13 MW version)",
+     "variant": "PG 13 MW",
+     "P_kW": 12900,
+     "pkg_kg": 83825,
+     "kg_per_kW": 6.5,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_sgt400.json"
+    },
+    {
+     "model": "SGT-400 (15 MW version)",
+     "variant": "PG 15 MW",
+     "P_kW": 14300,
+     "pkg_kg": 83825,
+     "kg_per_kW": 5.86,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_sgt400.json"
+    },
+    {
+     "model": "SGT-400 (13 MW version)",
+     "variant": "MD 13 MW",
+     "P_kW": 13400,
+     "pkg_kg": 40000,
+     "kg_per_kW": 2.99,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_sgt400.json"
+    },
+    {
+     "model": "SGT-400 (15 MW version)",
+     "variant": "MD 15 MW",
+     "P_kW": 14900,
+     "pkg_kg": 40000,
+     "kg_per_kW": 2.68,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_sgt400.json"
+    },
+    {
+     "model": "Taurus 60",
+     "variant": "GS",
+     "P_kW": 5670,
+     "pkg_kg": 37920,
+     "kg_per_kW": 6.69,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_taurus60.json"
+    },
+    {
+     "model": "Taurus 60",
+     "variant": "MD",
+     "P_kW": 5740,
+     "pkg_kg": 15422,
+     "kg_per_kW": 2.69,
+     "engine_kg": 3290,
+     "source": "routes/gtu/fleet/gtu_fleet_taurus60.json"
+    },
+    {
+     "model": "Taurus 65",
+     "variant": "GS",
+     "P_kW": 6500,
+     "pkg_kg": 39600,
+     "kg_per_kW": 6.09,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_taurus65.json"
+    },
+    {
+     "model": "Taurus 70",
+     "variant": "GS",
+     "P_kW": 8180,
+     "pkg_kg": 61775,
+     "kg_per_kW": 7.55,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_taurus70.json"
+    },
+    {
+     "model": "Taurus 70",
+     "variant": "MD",
+     "P_kW": 8290,
+     "pkg_kg": 24494,
+     "kg_per_kW": 2.95,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_taurus70.json"
+    },
+    {
+     "model": "Titan 130",
+     "variant": "GS",
+     "P_kW": 16530,
+     "pkg_kg": 87510,
+     "kg_per_kW": 5.29,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_titan130.json"
+    },
+    {
+     "model": "Titan 130",
+     "variant": "MD",
+     "P_kW": 17500,
+     "pkg_kg": 36540,
+     "kg_per_kW": 2.09,
+     "engine_kg": null,
+     "source": "routes/gtu/fleet/gtu_fleet_titan130.json"
+    }
+   ]
+  },
+  "skid_to_engine": [
+   {
+    "id": "taurus60_md_skid",
+    "ratio": 4.69
+   },
+   {
+    "id": "taurus70_md_skid",
+    "ratio": 4.35
+   },
+   {
+    "id": "titan250_gs_skid",
+    "ratio": 2.62
+   }
+  ]
+ },
+ "examples": {
+  "items": [
+   {
+    "name": "KV-3 простой, промышл. практика, масло пакета",
+    "practice": "industrial",
+    "K": 3.0843,
+    "sigma_log": 0.20933898872284934,
+    "groups_raw": {
+     "rotor": 546.1,
+     "static": 2295.2,
+     "hx": 0,
+     "bearings": 0,
+     "frame": 0
+    },
+    "engine_kg": 7625.3,
+    "hx_kg": 0,
+    "bearings_extra_kg": 0,
+    "frame_kg": 789.0,
+    "total_kg": 8414.3,
+    "total_lo_kg": 6858.8,
+    "total_hi_kg": 10332.0,
+    "kW_per_kg": 0.687,
+    "eta_pct": 31.63,
+    "kpd_per_t": 3.759,
+    "kpd_per_t_range": [
+     3.061,
+     4.612
+    ]
+   },
+   {
+    "name": "KV-3 простой, промышл. практика, магнитные",
+    "practice": "industrial",
+    "K": 3.0843,
+    "sigma_log": 0.20933898872284934,
+    "groups_raw": {
+     "rotor": 546.1,
+     "static": 2249.3,
+     "hx": 0,
+     "bearings": 188.9,
+     "frame": 0
+    },
+    "engine_kg": 7483.7,
+    "hx_kg": 0,
+    "bearings_extra_kg": 188.9,
+    "frame_kg": 792.8,
+    "total_kg": 8465.4,
+    "total_lo_kg": 6938.8,
+    "total_hi_kg": 10347.5,
+    "kW_per_kg": 0.6829,
+    "eta_pct": 31.63,
+    "kpd_per_t": 3.736,
+    "kpd_per_t_range": [
+     3.057,
+     4.558
+    ]
+   },
+   {
+    "name": "KV-3 простой, авиац. практика, масло пакета",
+    "practice": "aero",
+    "K": 0.6741,
+    "sigma_log": 0.7135537921613988,
+    "groups_raw": {
+     "rotor": 530.0,
+     "static": 999.0,
+     "hx": 0,
+     "bearings": 0,
+     "frame": 0
+    },
+    "engine_kg": 1203.4,
+    "hx_kg": 0,
+    "bearings_extra_kg": 0,
+    "frame_kg": 209.6,
+    "total_kg": 1413.0,
+    "total_lo_kg": 750.0,
+    "total_hi_kg": 2766.2,
+    "kW_per_kg": 4.0913,
+    "eta_pct": 31.63,
+    "kpd_per_t": 22.386,
+    "kpd_per_t_range": [
+     11.434,
+     42.174
+    ]
+   },
+   {
+    "name": "KV-3 простой, авиац. практика, магнитные",
+    "practice": "aero",
+    "K": 0.6741,
+    "sigma_log": 0.7135537921613988,
+    "groups_raw": {
+     "rotor": 530.0,
+     "static": 953.1,
+     "hx": 0,
+     "bearings": 183.0,
+     "frame": 0
+    },
+    "engine_kg": 1172.5,
+    "hx_kg": 0,
+    "bearings_extra_kg": 183.0,
+    "frame_kg": 221.7,
+    "total_kg": 1577.1,
+    "total_lo_kg": 931.2,
+    "total_hi_kg": 2895.6,
+    "kW_per_kg": 3.6654,
+    "eta_pct": 31.63,
+    "kpd_per_t": 20.055,
+    "kpd_per_t_range": [
+     10.923,
+     33.966
+    ]
+   },
+   {
+    "name": "KV-3 + рекуператор 0,90 + подогрев (как есть), сердцевина psr",
+    "practice": "industrial",
+    "K": 3.0843,
+    "sigma_log": 0.20933898872284934,
+    "groups_raw": {
+     "rotor": 560.2,
+     "static": 2231.1,
+     "hx": 2098.3,
+     "bearings": 0,
+     "frame": 0
+    },
+    "engine_kg": 7441.6,
+    "hx_kg": 2098.3,
+    "bearings_extra_kg": 0,
+    "frame_kg": 937.0,
+    "total_kg": 10476.9,
+    "total_lo_kg": 8392.3,
+    "total_hi_kg": 12914.9,
+    "kW_per_kg": 0.5518,
+    "eta_pct": 35.7,
+    "kpd_per_t": 3.408,
+    "kpd_per_t_range": [
+     2.764,
+     4.254
+    ],
+    "note": "межтурбинная камера подогрева не добавлена отдельным блоком; турбина в размерах - перепад до входа в рекуператор; мощность принята равной простому KV-3 (cycles считает на 1 кг/с - масштаб по расходу)"
+   },
+   {
+    "name": "KV-3 + рекуператор 0,90 + подогрев (как есть), сердцевина tpms_print",
+    "practice": "industrial",
+    "K": 3.0843,
+    "sigma_log": 0.20933898872284934,
+    "groups_raw": {
+     "rotor": 560.2,
+     "static": 2231.1,
+     "hx": 5816.6,
+     "bearings": 0,
+     "frame": 0
+    },
+    "engine_kg": 7441.6,
+    "hx_kg": 5816.6,
+    "bearings_extra_kg": 0,
+    "frame_kg": 1234.5,
+    "total_kg": 14492.7,
+    "total_lo_kg": 11718.3,
+    "total_hi_kg": 17620.6,
+    "kW_per_kg": 0.3989,
+    "eta_pct": 35.7,
+    "kpd_per_t": 2.463,
+    "kpd_per_t_range": [
+     2.026,
+     3.047
+    ],
+    "note": "межтурбинная камера подогрева не добавлена отдельным блоком; турбина в размерах - перепад до входа в рекуператор; мощность принята равной простому KV-3 (cycles считает на 1 кг/с - масштаб по расходу)"
+   },
+   {
+    "name": "KV-3 + рекуператор 0,90 + подогрев (как есть), сердцевина plate_print",
+    "practice": "industrial",
+    "K": 3.0843,
+    "sigma_log": 0.20933898872284934,
+    "groups_raw": {
+     "rotor": 560.2,
+     "static": 2231.1,
+     "hx": 9839.8,
+     "bearings": 0,
+     "frame": 0
+    },
+    "engine_kg": 7441.6,
+    "hx_kg": 9839.8,
+    "bearings_extra_kg": 0,
+    "frame_kg": 1556.3,
+    "total_kg": 18837.7,
+    "total_lo_kg": 15194.3,
+    "total_hi_kg": 22834.6,
+    "kW_per_kg": 0.3069,
+    "eta_pct": 35.7,
+    "kpd_per_t": 1.895,
+    "kpd_per_t_range": [
+     1.563,
+     2.35
+    ],
+    "note": "межтурбинная камера подогрева не добавлена отдельным блоком; турбина в размерах - перепад до входа в рекуператор; мощность принята равной простому KV-3 (cycles считает на 1 кг/с - масштаб по расходу)"
+   }
+  ],
+  "pareto_idx": [
+   2,
+   4
+  ],
+  "pareto_names": [
+   "KV-3 простой, авиац. практика, масло пакета",
+   "KV-3 + рекуператор 0,90 + подогрев (как есть), сердцевина psr"
+  ]
+ },
+ "how_to_use": "import mass_model as MM; g = MM.size_from_passport(spec) (spec - как запись mass_db.json или MM.kv3_spec()); ev = MM.evaluate(g) -> total_kg, total_lo_kg/total_hi_kg, kW_per_kg, kpd_per_t; свои блоки: g['rows'] - список строк MM.block_* (группы rotor/static/hx/bearings/frame), g['hx'] - [dict(type, A_m2)], g['bearings'] - dict(kind); MM.pareto_front(list_of_evaluations)",
+ "not_done": [
+  "нет открытой массы двигателя с центробежным компрессором и современной радиальной схемой (OPRA OP16, Kawasaki M1A, Capstone - только пакеты); K промышленной практики получен на осевых Solar и переносится на центробежные KV по допущению; единственная проверка - KG2-3 (1970-е, π и T4 приняты)",
+  "доли блоков (ротор / корпуса / камера) не сверены с реальными машинами - известны только итоговые массы",
+  "теплообменники не калиброваны по реальной массе (открыта только разность пакетов Mercury 50 - Centaur 50 как верхняя граница)",
+  "рама модуля - оценка без калибровки (рамы пакетов Solar включают маслосистему, пуск, кожух - не отделить)",
+  "печатные и литые КНР корпуса считаются стенкой своего способа, но множитель K - промышленной или авиационной практики: реальная масса печатной оболочки лежит между ними (показаны обе)",
+  "двухвальный LM6000 сведён к средней линии на каждую группу ступеней; LM2500 и LM2500+ - силовая турбина принята 6-ступенчатой 3600 об/мин",
+  "хосты geaerospace.com, wikipedia.org, vericor.com, motorsich.com, trid.trb.org, cloudfront Capstone не разрешены сетью сессии - их числа только по выдержке поиска"
+ ],
+ "runtime_s": 0.1
+}

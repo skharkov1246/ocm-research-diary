@@ -306,7 +306,7 @@ def cmd_gallery(a):
                         f"наименьшая частота {o['f_min_Hz']:.0f} Гц (нужно ≥ {SM.F_MARGIN * SM.INP['f_op']:.0f}); загрузка стенки {o['u_wall']:.2f}, "
                         f"клетки {o['u_cage']:.2f}; новизна против типовых форм {r['novelty_oem']:.2f}",
                         "все числа — дешёвые модели уровня облика (оценка); проверка — CalculiX (shell_ccx.py)"],
-                       px_per_m=px, backend=a.backend, view_px=(760, 600))
+                       px_per_m=1.4 * px, backend=a.backend, view_px=(760, 600))
         sheets.append(os.path.basename(fn))
     dump(dict(variant=a.variant, rows=rows, contact=os.path.basename(cs), sheets=sheets, px_per_m=px), os.path.join(a.out, f"gallery_{tag}.json"))
 

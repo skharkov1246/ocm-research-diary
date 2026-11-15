@@ -658,9 +658,10 @@ def crowding(F):
     return d
 
 
-def nsga2(evaluate, n_genes, rng, pop=100, gens=100, init=None, eta_c=15.0, eta_m=20.0, p_c=0.9):
+def nsga2(evaluate, n_genes, rng, pop=100, gens=100, init=None, eta_c=2.0, eta_m=5.0, p_c=0.9):
     """NSGA-II. evaluate(G) -> (F (n, m) — минимизация, CV (n,) ≥ 0, meta list). Возврат: последняя популяция,
-    её F, CV, ранги, meta и журнал"""
+    её F, CV, ранги, meta и журнал. Индексы распределения SBX 2 и мутации 5 — по тесту ZDT1 (IGD 0,006 за 25 000 оценок;
+    при 15/20 в этой реализации — 0,20: SBX без границ с обрезкой исследует слабее)"""
     P = rng.random((pop, n_genes))
     if init is not None and len(init):
         k = min(pop, len(init))

@@ -77,7 +77,9 @@ class CMAES:
 def fmin(f, x0, sigma0, rng, max_evals, ftarget=-np.inf, popsize=None, lb=0.0, ub=1.0, batch_f=None, tol_sigma=1e-12):
     """минимизация f (или batch_f(X) → значения) в [lb, ub]^n. Возврат dict(x, f, evals, history)."""
     es = CMAES(x0, sigma0, rng, popsize, lb, ub)
-    best_x, best_f = np.clip(np.asarray(x0, float), lb, ub), np.inf
+    best_x = np.clip(np.asarray(x0, float), lb, ub)
+    f0 = batch_f(best_x[None, :])[0] if batch_f else f(best_x)
+    best_f = float(f0) if np.isfinite(f0) else np.inf          # итог никогда не хуже начальной точки
     hist = []
     while es.counteval < max_evals:
         X = es.ask()

@@ -86,7 +86,8 @@ def main(argv=None):
                 continue
             meshes = load_meshes(mp)
             paths, eng = C.render_views(meshes, os.path.join(a.out, f"{e['id']}_v{{}}.png"), (a.size, a.size), a.backend)
-            tiles.append((f"{e['id']}  (пригодность {e['f']:.2f})", paths, caption(comp, e)))
+            lab = f"{e['id']}  (пригодность {e['f']:.2f})" if e["feasible"] else f"{e['id']}  НЕДОПУСТИМО: {e['meta'].get('why')}"
+            tiles.append((lab, paths, caption(comp, e)))
         if not tiles:
             continue
         title = f"Семейство «лопатки и колёса» — {TITLES[comp]}: элиты мини-прогона (MAP-Elites → NSGA-II → CMA-ES)"

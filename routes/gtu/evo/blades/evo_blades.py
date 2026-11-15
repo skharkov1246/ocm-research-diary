@@ -117,6 +117,7 @@ def make_evaluator(comp):
 def run_island(args):
     comp, island, n_evals, scale, out_dir, parents = args
     t0 = time.time()
+    c0 = time.process_time()
     rng = C.rng_of(CONFIG["run_key"], CONFIG["family"], comp, island)
     me = CONFIG["me"]
     # шаги мутации острова — детерминированно из номера (разнообразие поиска без разных пригодностей)
@@ -135,6 +136,7 @@ def run_island(args):
     res = dict(family=CONFIG["family"], comp=comp, island=island, seed=C.seed_of(CONFIG["run_key"], CONFIG["family"], comp, island),
                config_hash=config_hash(scale), code_hash=code_hash(), scale=scale, n_evals=n_evals, s_iso=s_iso, s_line=s_line,
                archive=arch.to_dict(), log=log, feasible_cells=feas, seconds=round(time.time() - t0, 2),
+               cpu_seconds=round(time.process_time() - c0, 2),
                parents=len(par) if par is not None else 0)
     if out_dir:
         os.makedirs(out_dir, exist_ok=True)
@@ -226,10 +228,12 @@ def cma_polish(comp, arch, cell, max_evals, seed_tag="cma"):
 # =========================================================================== элиты
 
 
-def select_elites(comp, arch, k=16, top_frac=0.5):
+def select_elites(comp, arch, k=16, top_frac=0.5, feasible_only=True):
     """элиты для CalculiX и галереи: среди допустимых ячеек верхняя доля по пригодности, из неё k самых непохожих
-    (выбор дальней точки в нормированном векторе признаков формы, первая — лучшая по пригодности)"""
-    cells = [c for c in arch.elites() if arch.meta[c] and arch.meta[c].get("why") is None]
+    (выбор дальней точки в нормированном векторе признаков формы, первая — лучшая по пригодности). feasible_only=False —
+    из всех ячеек (наименьшее нарушение — первыми): для показа ближайших к допустимости, когда допустимых нет"""
+    cells = [c for c in arch.elites() if arch.meta[c] and (arch.meta[c].get("why") is None or not feasible_only)
+             and arch.meta[c].get("novelty_vec")]
     if not cells:
         return []
     cells = sorted(cells, key=lambda c: -arch.F[c])
@@ -491,6 +495,7 @@ def cmd_mini(a):
         ev_c = a.evals * (a.turb_factor if comp == "turb" else 1)
         isl_res = run_islands(comp, range(a.n_islands), ev_c, "mini", d_isl, a.workers, _parents(a.parents, comp))
         ms_eval = float(np.mean([r_["seconds"] / r_["n_evals"] for r_ in isl_res]) * 1e3)
+        ms_cpu = float(np.mean([r_["cpu_seconds"] / r_["n_evals"] for r_ in isl_res]) * 1e3)
         arch, rep = merge(comp, [d_isl], a.n_islands, "mini")
         merged_p = os.path.join(a.out, f"merged_{comp}.json")
         with open(merged_p, "w", encoding="utf-8") as f:
@@ -513,6 +518,10 @@ def cmd_mini(a):
             if pr["feasible"] and pr["f1"] > arch.F[c]:
                 arch.try_add(np.asarray(pr["g"]), pr["f1"], np.asarray(pr["d"]), pr["meta"])
         cells = select_elites(comp, arch, a.k)
+        near = False
+        if not cells:        # допустимых нет — в галерею идут ближайшие к допустимости (с пометкой «недопустимо»)
+            cells = select_elites(comp, arch, a.k, top_frac=0.2, feasible_only=False)
+            near = True
         recs = elite_records(comp, arch, cells)
         export_elite_meshes(comp, arch, cells, os.path.join(a.out, "meshes"))
         import blade_eval as BE
@@ -531,8 +540,11 @@ def cmd_mini(a):
                              J_kgm2=e["meta"].get("J_kgm2")) for e in (ns["front"] if ns else [])],
             nsga_log=ns["log"] if ns else None,
             cma=[dict(cell=p["cell"], f0=p["f0"], f1=p["f1"], feasible=p["feasible"], n_evals=p["n_evals"]) for p in cm],
-            elites=recs, seconds=round(time.time() - tc, 1),
-            timing=dict(ms_per_eval_island=ms_eval, workers=a.workers, note="время острова / число оценок; машина общая с другими расчётами"))
+            elites=recs, elites_are_near_feasible=near,
+            best_violation=float(min(arch.meta[c].get("viol", 0.0) or 0.0 for c in arch.elites())) if near else 0.0,
+            seconds=round(time.time() - tc, 1),
+            timing=dict(ms_per_eval_wall=ms_eval, ms_per_eval_cpu=ms_cpu, workers=a.workers,
+                        note="на остров (один процесс): стенное время и время ЦП / число оценок; машина общая с другими расчётами"))
         merged_p2 = os.path.join(a.out, f"merged_{comp}_polished.json")
         with open(merged_p2, "w", encoding="utf-8") as f:
             json.dump(dict(report=rep, archive=arch.to_dict()), f, ensure_ascii=False)

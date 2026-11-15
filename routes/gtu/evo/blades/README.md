@@ -27,14 +27,14 @@
 | `render_blades.py` | рендер элит (pyvista вне экрана; иначе matplotlib) и лист-галерея; модель расчёта не импортирует |
 | `blades_report.py` → `blades_mini_results.json` | сводка мини-прогона, проверки CalculiX, калибровки и плана AWS |
 | `make_jobs_evo_blades.py` → `jobs_evo_blades.json` | задачи AWS (части × острова × оценки; элиты → CalculiX в контейнере) |
-| `test_blades.py` | 17 проверок pytest (ядро и семейство) |
+| `test_blades.py` | 16 проверок pytest (ядро и семейство) |
 | `gallery_*.png` | галереи элит (уменьшенные; полные — в `$EVO_OUT/mini/render/`) |
 
 ## Команды
 
 ```bash
 # python 3.13, numpy 2.5.3, scipy 1.18.1, cantera 3.2.0, ccx 2.21; рендер — окружение с pyvista 0.49.2 (OSMesa)
-python3 -m pytest -q test_blades.py                         # 17 проверок
+python3 -m pytest -q test_blades.py                         # 16 проверок
 python3 disk1d.py --calibrate                               # поправка пика по 6 готовым расчётам CalculiX
 python3 ccx_elites.py --calibrate --n 32                    # таблицы k(h/r): 32 + 4 профиля в CalculiX, ~20 с на 4 ядрах
 export EVO_OUT=<каталог>                                    # тяжёлое — вне репозитория
