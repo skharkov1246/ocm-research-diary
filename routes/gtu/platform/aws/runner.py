@@ -1193,7 +1193,8 @@ class Runner:
             self.say(f"[бюджет] ОТЧЁТ ВЛАДЕЛЬЦУ: с этой задачей расходы пересекают {порог:.0f} долл. "
                      f"(всего {total:.2f} из {self.cfg.ceiling:.0f})")
         mk = " (по требованию)" if not spot else ""
-        price_txt = f"MaxPrice {maxp:.4f}/ч" if spot else f"цена по требованию {maxp:.4f}/ч"
+        price_txt = (f"MaxPrice {maxp:.4f}/ч" if spot else
+                     f"по требованию — верхняя граница {maxp:.4f}/ч: справочник × запас {self.cfg.price_margin:g}")
         xf = f" (в т. ч. передача {xfer:.2f})" if xfer else ""
         self.say(f"[бюджет] {job.name} на {itype}{mk}: израсходовано {spent:.2f} + в работе "
                  f"{s['committed']:.2f} + пакет {self.virtual:.2f} + новая {new:.2f}{xf} = {total:.2f} "
@@ -1215,13 +1216,14 @@ class Runner:
         return [z for z in zs if not self._avoided(itype, z[0])] + [z for z in zs if self._avoided(itype, z[0])]
 
     def _say_zones(self, job: Job, itype: str, order: list, by_price: list, maxp: float,
-                   region: str | None = None, market: str = "spot", akey: str | None = None) -> None:
+                   region: str | None = None, market: str = "spot", akey: str | None = None,
+                   od_price: float = 0.0) -> None:
         akey = akey or itype
         where = self._where(region)
         if market != "spot":
             txt = " → ".join(order_z for order_z, _ in order) if order else "зону выберет EC2"
-            self.say(f"[зоны] {job.name} {itype}{where} по требованию: {txt}; цена по требованию {maxp:.4f} "
-                     f"долл./ч (справочник от {self.ref['date']})")
+            self.say(f"[зоны] {job.name} {itype}{where} по требованию: {txt}; цена справочника {od_price:.4f} "
+                     f"долл./ч (от {self.ref['date']}), в бюджете — верхняя граница {maxp:.4f}")
             return
         if not order:
             hint = " (в plan — --assume-zone-prices)" if self.offline else ""
@@ -1280,7 +1282,11 @@ class Runner:
         """Образ из SSM своего региона (id образа в каждом регионе свой)."""
         region = region or self.cfg.region
         if self.offline:
-            return f"<ssm:{IMAGES[image]['ssm']}>" + (f"@{region}" if self.v3 and region != self.cfg.region else "")
+            img = IMAGES[image]
+            if self.v3 and region != self.cfg.region:
+                alt = f"; отказ — DescribeImages {img['owner']} {img['name']}" if img.get("owner") else ""
+                return f"<ssm:{img['ssm']}@{region}{alt}>"
+            return f"<ssm:{img['ssm']}>"
         key = (region, image)
         hit = self._ami.get(key)
         if isinstance(hit, ImageUnavailable):
@@ -1455,7 +1461,7 @@ class Runner:
             by_price = sorted(order)
         rank = {z: i for i, (z, _) in enumerate(by_price)}
         cheapest = by_price[0][0] if by_price else ""
-        self._say_zones(job, itype, order, by_price, maxp, region=region, market=market, akey=akey)
+        self._say_zones(job, itype, order, by_price, maxp, region=region, market=market, akey=akey, od_price=od_price)
         for az, _p in (order or [(None, None)]):
             how, subnet = self.placement(az, region)
             if how == "skip":
@@ -1649,12 +1655,22 @@ class Runner:
 
     def _launch_v3(self, job: Job, attempt: int) -> tuple:
         """Версия 3: спот во всех разрешённых регионах (регион — по цене среди регионов со свободной квотой);
-        не вышло ни в одном (ёмкость, цена, права, квота) — при --on-demand-fallback машина по требованию."""
+        не вышло ни в одном (ёмкость, цена, права, квота) — при --on-demand-fallback машина по требованию.
+        plan / DryRun: квоты всех регионов «заняты» задачами пакета — следующая волна и ещё одна попытка."""
+        self._room(job)
+        res = self._launch_v3_once(job, attempt)
+        if res[0] == "defer" and self._sideline and any(self._planned.values()):
+            self._wave += 1
+            self._planned.clear()
+            self.say(f"[план] квоты регионов заняты пакетом — волна {self._wave} (после освобождения машин)")
+            res = self._launch_v3_once(job, attempt)
+        return res
+
+    def _launch_v3_once(self, job: Job, attempt: int) -> tuple:
         from botocore.exceptions import BotoCoreError, ClientError
         tr = _Try()
         self._why.pop(job.name, None)
         self.last_region = self.last_market = None
-        self._room(job)                         # plan / DryRun: следующая волна, если квоты заняты пакетом
         for itype in job.types:
             infos, answered = {}, 0
             for r in self.regions:
@@ -1680,7 +1696,8 @@ class Runner:
                 tr.no_price.append(itype)
                 self.journal.append("launch_error", run_id=self.cfg.run_id, job=job.name, itype=itype,
                                     attempt=attempt, code="NoSpotPrice", regions=list(self.regions))
-                self.say(f"[цена] нет истории цены спота для {itype} ни в одном регионе — тип пропущен")
+                hint = " (допущение plan --assume-no-spot)" if self.cfg.offline_no_spot else ""
+                self.say(f"[цена] нет истории цены спота для {itype} ни в одном регионе{hint} — тип пропущен")
                 continue
             cands = self._pick(job, itype, "spot", {r: self._best(itype, i) for r, i in infos.items()}, tr)
             if not cands:
