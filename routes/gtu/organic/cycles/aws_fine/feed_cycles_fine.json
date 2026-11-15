@@ -1,0 +1,397 @@
+{
+ "source": "routes/gtu/organic/cycles/cycles_results.json",
+ "date": "2026-11-14",
+ "status": "оценка уровня облика (0D-цикл); числа — из cycles_results.json",
+ "key_finding": "при T41 1000 °C (класс U) мягкий допуск по расходу требует удельной работы ≥ 230.5 кДж/кг; простой цикл KV-3 на пределе, рекуператор сам по себе её снижает (потери давления) и не проходит; проходит рекуператор вместе с повторным подогревом (или с промохлаждением) — см. representative",
+ "recommended": {
+  "note": "рекомендуемое для KV: рекуператор 0,90 + межтурбинный подогрев; as_is — с компрессором KV-3 (π 13,5)",
+  "opt": {
+   "key": "R90-ic-RH-ibc-none-none",
+   "name": "рекуператор 0.90 + подогрев",
+   "PR": 7.12,
+   "eff_el": 0.4018,
+   "W_air": 23.3,
+   "EGT_C": 338.8,
+   "T_rec_in_C": 699.7,
+   "added_lpbf": 12,
+   "V_added_m3_lpbf": 4.88,
+   "mass_hx_kg_lpbf": 8550,
+   "mass_hx_kg_foil": 2286,
+   "limits_ok": true,
+   "T41_for_G_cap_C": null,
+   "prm": {
+    "x_rh": 0.3,
+    "sc": 2.0,
+    "R_egr": 1.0
+   }
+  },
+  "as_is": {
+   "key": "R90-ic-RH-ibc-none-none",
+   "name": "рекуператор 0.90 + подогрев",
+   "PR": 13.5,
+   "eff_el": 0.3575,
+   "W_air": 20.72,
+   "EGT_C": 447.8,
+   "T_rec_in_C": 659.9,
+   "added_lpbf": 12,
+   "V_added_m3_lpbf": 4.03,
+   "mass_hx_kg_lpbf": 7058,
+   "mass_hx_kg_foil": 1886,
+   "limits_ok": true,
+   "T41_for_G_cap_C": null,
+   "prm": {
+    "x_rh": 0.4,
+    "sc": 2.0,
+    "R_egr": 1.0
+   }
+  }
+ },
+ "representative": {
+  "simple": {
+   "key": "R00-ic-rh-ibc-none-none",
+   "name": "простой",
+   "PR": 12.56,
+   "eff_el": 0.3007,
+   "W_air": 25.69,
+   "EGT_C": 470.8,
+   "T_rec_in_C": null,
+   "added_lpbf": 0,
+   "V_added_m3_lpbf": 0.0,
+   "mass_hx_kg_lpbf": 0,
+   "mass_hx_kg_foil": 0,
+   "limits_ok": true,
+   "T41_for_G_cap_C": null,
+   "prm": {
+    "x_rh": 0.5,
+    "sc": 2.0,
+    "R_egr": 1.0
+   }
+  },
+  "recup_only_out_of_limits": {
+   "key": "R94-ic-rh-ibc-none-none",
+   "name": "рекуператор 0.94",
+   "PR": 3.17,
+   "eff_el": 0.4242,
+   "W_air": 37.36,
+   "EGT_C": 203.6,
+   "T_rec_in_C": 746.3,
+   "added_lpbf": 10,
+   "V_added_m3_lpbf": 14.11,
+   "mass_hx_kg_lpbf": 24705,
+   "mass_hx_kg_foil": 6604,
+   "limits_ok": false,
+   "T41_for_G_cap_C": null,
+   "prm": {
+    "x_rh": 0.5,
+    "sc": 2.0,
+    "R_egr": 1.0
+   }
+  },
+  "recup_reheat": {
+   "key": "R94-ic-RH-ibc-none-none",
+   "name": "рекуператор 0.94 + подогрев",
+   "PR": 7.11,
+   "eff_el": 0.4147,
+   "W_air": 23.35,
+   "EGT_C": 321.1,
+   "T_rec_in_C": 699.9,
+   "added_lpbf": 13,
+   "V_added_m3_lpbf": 7.78,
+   "mass_hx_kg_lpbf": 13618,
+   "mass_hx_kg_foil": 3640,
+   "limits_ok": true,
+   "T41_for_G_cap_C": null,
+   "prm": {
+    "x_rh": 0.3,
+    "sc": 2.0,
+    "R_egr": 1.0
+   }
+  },
+  "recup_reheat_fuelheat": {
+   "key": "R94-ic-RH-ibc-none-fh",
+   "name": "рекуператор 0.94 + подогрев + подогрев топлива",
+   "PR": 6.62,
+   "eff_el": 0.4192,
+   "W_air": 23.89,
+   "EGT_C": 309.1,
+   "T_rec_in_C": 699.9,
+   "added_lpbf": 15,
+   "V_added_m3_lpbf": 8.08,
+   "mass_hx_kg_lpbf": 14139,
+   "mass_hx_kg_foil": 3779,
+   "limits_ok": true,
+   "T41_for_G_cap_C": null,
+   "prm": {
+    "x_rh": 0.3,
+    "sc": 2.0,
+    "R_egr": 1.0
+   }
+  },
+  "recup_intercool": {
+   "key": "R94-IC-rh-ibc-none-none",
+   "name": "рекуператор 0.94 + промохлаждение",
+   "PR": 5.62,
+   "eff_el": 0.4503,
+   "W_air": 25.67,
+   "EGT_C": 183.3,
+   "T_rec_in_C": 631.0,
+   "added_lpbf": 17,
+   "V_added_m3_lpbf": 13.87,
+   "mass_hx_kg_lpbf": 24284,
+   "mass_hx_kg_foil": 6494,
+   "limits_ok": true,
+   "T41_for_G_cap_C": null,
+   "prm": {
+    "x_rh": 0.5,
+    "sc": 2.0,
+    "R_egr": 1.0
+   }
+  },
+  "fuel_heat": {
+   "key": "R00-ic-rh-ibc-none-fh",
+   "name": "подогрев топлива",
+   "PR": 12.38,
+   "eff_el": 0.3062,
+   "W_air": 25.69,
+   "EGT_C": 459.4,
+   "T_rec_in_C": null,
+   "added_lpbf": 2,
+   "V_added_m3_lpbf": 0.05,
+   "mass_hx_kg_lpbf": 85,
+   "mass_hx_kg_foil": 23,
+   "limits_ok": true,
+   "T41_for_G_cap_C": null,
+   "prm": {
+    "x_rh": 0.5,
+    "sc": 2.0,
+    "R_egr": 1.0
+   }
+  },
+  "pgc": [
+   {
+    "key": "R00-ic-rh-ibc-real-none",
+    "name": "горение с ростом давления (25 %)",
+    "PR": 12.94,
+    "eff_el": 0.304,
+    "W_air": 25.68,
+    "EGT_C": 464.0,
+    "T_rec_in_C": null,
+    "added_lpbf": 3,
+    "V_added_m3_lpbf": 0.0,
+    "mass_hx_kg_lpbf": 0,
+    "mass_hx_kg_foil": 0,
+    "limits_ok": true,
+    "T41_for_G_cap_C": null,
+    "prm": {
+     "x_rh": 0.5,
+     "sc": 2.0,
+     "R_egr": 1.0
+    }
+   },
+   {
+    "key": "R00-ic-rh-ibc-ideal-none",
+    "name": "горение с ростом давления (предел)",
+    "PR": 11.86,
+    "eff_el": 0.3617,
+    "W_air": 20.94,
+    "EGT_C": 436.4,
+    "T_rec_in_C": null,
+    "added_lpbf": 3,
+    "V_added_m3_lpbf": 0.0,
+    "mass_hx_kg_lpbf": 0,
+    "mass_hx_kg_foil": 0,
+    "limits_ok": true,
+    "T41_for_G_cap_C": null,
+    "prm": {
+     "x_rh": 0.5,
+     "sc": 2.0,
+     "R_egr": 1.0
+    }
+   }
+  ]
+ },
+ "engine_funnel": {
+  "target": "routes/gtu/funnel/funnel_space.py (CAT, CONT, ARCH)",
+  "new_axes": [
+   {
+    "axis": "reheat",
+    "kind": "CAT",
+    "values": [
+     "нет",
+     "межтурбинная камера"
+    ],
+    "note": "повторный подогрев на одном валу: газ после первой ступени турбины снова до T41; поднимает удельную работу и температуру газа перед рекуператором — делает рекуператор выполнимым при мягком допуске",
+    "model": "cycles.evaluate(topo с rh=True, PR, prm=dict(x_rh=…))"
+   },
+   {
+    "axis": "x_rh",
+    "kind": "CONT",
+    "range": [
+     0.3,
+     0.7
+    ],
+    "note": "доля ln(p4/p5) до подогрева; оптимум — см. representative.recup_reheat.prm"
+   },
+   {
+    "axis": "fuel_preheat",
+    "kind": "CAT",
+    "values": [
+     "нет",
+     "до 400 °C выхлопом"
+    ],
+    "note": "дешёвый узел (+2 детали), прирост КПД — representative.fuel_heat против simple"
+   },
+   {
+    "axis": "T_rec_max_C",
+    "kind": "CAT",
+    "values": [
+     700,
+     800
+    ],
+    "note": "700 — LIM gtu_explore (нержавеющая сталь); 800 — печатный Inconel 625 (оценка, нужна ползучесть) — trec800"
+   },
+   {
+    "axis": "recup_core_tech",
+    "kind": "CAT",
+    "values": [
+     "foil",
+     "lpbf"
+    ],
+    "note": "масса сердцевины: фольга 0,1 мм против печатной стенки 0,35 мм — hx_wall_sensitivity; печать — для коллекторов и корпуса, сердцевина — фольга или печать тонкой стенкой"
+   }
+  ],
+  "changes": [
+   {
+    "axis": "eps_rec",
+    "now": "0,75–0,92",
+    "proposed": "0,80–0,92 только вместе с reheat или промохлаждением; без них при T41 1000 °C вариант вне допуска по расходу (T41_for_G_cap_C)"
+   },
+   {
+    "axis": "pgain",
+    "now": "RDC 0–0,10",
+    "proposed": "идеальный предел EAP посчитан (pgc_ideal_PG); при реализации 25 % и штрафе КПД турбины 2 п. п. выигрыш около нуля — весу архетипа RDC снизить",
+    "model": "cycles.pgc_gain"
+   }
+  ],
+  "models": [
+   "cycles.evaluate — цикл любой топологии на одном валу (Cantera)",
+   "cycles.size_hx — объём, масса, модули печати",
+   "cycles.exergy_account — разрушение эксергии по узлам двумя способами"
+  ],
+  "drop": [
+   "паровой риформинг: вода в пакете (Plug&Play — нет), выигрыш в основном от впрыска пара",
+   "риформинг рециркулятом выхлопа: кислород обеднённого выхлопа сжигает метан, теплотворность не растёт",
+   "IBC: колесо компрессора IBC не помещается на вал 14 950 об/мин (нужен отдельный вал), охладитель громоздкий",
+   "горение с ростом давления: TRL 3, реальный выигрыш около нуля"
+  ],
+  "pgc_ideal_PG": {
+   "R00-ic-rh-ibc-real-none": 1.2313134609966794,
+   "R00-ic-rh-ibc-ideal-none": 1.2514522243163764
+  }
+ },
+ "combustor_funnel": {
+  "target": "routes/gtu/combustor (targets.json)",
+  "conditions": {
+   "рекуператор + подогрев": [
+    {
+     "node": "Камера сгорания",
+     "T_in_C": 675.6139418179839,
+     "p_in_bar": 7.022072164321209,
+     "O2_in_vol": 0.20949999999999994,
+     "O2_out_vol": 0.17737452750614915,
+     "T_out_C": 999.9999999998846,
+     "fuel_air_mass": 0.008171705024965151,
+     "fuel_T_C": 15.0,
+     "fuel_H2_vol": 0.0,
+     "fuel_CH4_vol": 1.0
+    },
+    {
+     "node": "Камера подогрева",
+     "T_in_C": 858.8799835952133,
+     "p_in_bar": 3.880544831264395,
+     "O2_in_vol": 0.17737452750614915,
+     "O2_out_vol": 0.1630891604677295,
+     "T_out_C": 1000.0000000061494,
+     "fuel_air_mass": 0.0036816257702599366,
+     "fuel_T_C": 15.0,
+     "fuel_H2_vol": 0.0,
+     "fuel_CH4_vol": 1.0
+    }
+   ],
+   "простой": [
+    {
+     "node": "Камера сгорания",
+     "T_in_C": 394.0465623436303,
+     "p_in_bar": 12.728756451907488,
+     "O2_in_vol": 0.20949999999999994,
+     "O2_out_vol": 0.15163769140094366,
+     "T_out_C": 999.9999999975813,
+     "fuel_air_mass": 0.014894396443426744,
+     "fuel_T_C": 15.0,
+     "fuel_H2_vol": 0.0,
+     "fuel_CH4_vol": 1.0
+    }
+   ],
+   "рекуператор + промохлаждение": [
+    {
+     "node": "Камера сгорания",
+     "T_in_C": 602.7455878709259,
+     "p_in_bar": 5.445526267095227,
+     "O2_in_vol": 0.20949999999999994,
+     "O2_out_vol": 0.17050139028490954,
+     "T_out_C": 999.9999999996434,
+     "fuel_air_mass": 0.009951426782143797,
+     "fuel_T_C": 15.0,
+     "fuel_H2_vol": 0.0,
+     "fuel_CH4_vol": 1.0
+    }
+   ]
+  },
+  "new_axes": [
+   {
+    "axis": "T3_combustor_inlet_C",
+    "values": [
+     390.0,
+     600.0,
+     680.0
+    ],
+    "note": "рекуперированный цикл — горячий воздух на входе в камеру: проскок пламени, NOx"
+   },
+   {
+    "axis": "reheat_combustor",
+    "values": [
+     {
+      "node": "Камера подогрева",
+      "T_in_C": 858.8799835952133,
+      "p_in_bar": 3.880544831264395,
+      "O2_in_vol": 0.17737452750614915,
+      "O2_out_vol": 0.1630891604677295,
+      "T_out_C": 1000.0000000061494,
+      "fuel_air_mass": 0.0036816257702599366,
+      "fuel_T_C": 15.0,
+      "fuel_H2_vol": 0.0,
+      "fuel_CH4_vol": 1.0
+     }
+    ],
+    "note": "межтурбинная камера в обеднённом кислородом газе (вход — после ступени турбины)"
+   },
+   {
+    "axis": "fuel_T_C",
+    "values": [
+     15,
+     400
+    ],
+    "note": "подогрев топлива выхлопом; выше 400 °C — разложение метана на стенках"
+   }
+  ],
+  "models": [
+   "cycles.burn — полное сгорание любой смеси CH4/H2/CO/H2O/CO2",
+   "cycles.pgc_gain — предел горения с ростом давления",
+   "cycles.carbon_activity — сажеобразование в подогретом или риформированном топливе"
+  ]
+ },
+ "aws": {
+  "jobs": "routes/gtu/organic/cycles/aws_jobs_cycles.json",
+  "note": "мелкая сетка (CYCLES_FINE): 864 топологии, π через 0,5; проверено командой plan без AWS; выполнимо после попадания файлов в ветку claude/lucid-allen-yvps5d"
+ }
+}
