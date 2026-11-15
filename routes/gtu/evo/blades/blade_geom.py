@@ -384,7 +384,7 @@ def impeller(ml, p, stage, nu_=29, ns=9, n_th=72, build_mesh=True, route=None):
                     da = np.interp(mq, Ma[:, j], THa[:, j])
                     db_ = np.interp(mq, Mb[:, j], THb[:, j])
                     rq = np.interp(mq, mt, rr[:, j])
-                    dth = np.mod(db_ - da + np.pi, pitch)
+                    dth = np.mod(db_ - da, pitch)
                     dist = rq * np.minimum(dth, pitch - dth) - 0.5 * (np.interp(mq, Ma[:, j], ta[:, j]) + np.interp(mq, Mb[:, j], tb[:, j]))
                     gap_min = min(gap_min, float(dist.min()))
     checks["row_gap_min_m"] = None if not np.isfinite(gap_min) else gap_min
@@ -394,7 +394,10 @@ def impeller(ml, p, stage, nu_=29, ns=9, n_th=72, build_mesh=True, route=None):
     bw = np.linalg.norm(hub - sh, axis=1)
     area = 2 * np.pi * 0.5 * (hub[:, 1] + sh[:, 1]) * bw
     checks["area_ratio_out_in"] = float(area[-1] / area[0])
-    checks["area_monotone"] = bool(np.all(np.diff(area) <= 1e-6 * area[0]))
+    checks["area_max_over_in"] = float(area.max() / area[0])
+    # меридиональный канал: площадь нигде не больше входной на 30 % и выход/вход 0,3…1,1 (оценка; у облика impeller.py
+    # с Безье 0,5/0,5 — 1,13 у ступени 1 и 1,24 у ступени 2)
+    checks["area_monotone"] = bool(area.max() <= 1.30 * area[0] and 0.3 <= area[-1] / area[0] <= 1.1)
     # ---------------- диск колеса
     rho = 4430.0
     disk = impeller_disk(ml, p, stage, hub, Z, theta, mt, rr)
@@ -452,23 +455,19 @@ def impeller_disk(ml, p, stage, hub, Z, theta, mt, rr, n=241):
         xb = None
         fish = np.zeros_like(r)
     else:
-        # кованый профиль frame3 ступени 2: задняя поверхность x_b0(r) = Lz + 0,1·D2·(...) — подобие по D2 (boss 0,1·D2)
-        # базовая задняя поверхность: от Lz + 0,10·D2 у оси (ступица) до Lz + t_rim у обода, PCHIP через 1,3·r1h
-        D2 = 2 * r2
-        r_knots = np.array([0.0, 0.058 / 0.3513, 0.07 / 0.3513, 0.11 / 0.3513, 0.15 / 0.3513, 0.20 / 0.3513, 0.25 / 0.3513,
-                            0.30 / 0.3513, 1.0]) * r2
-        base = PchipInterpolator([0, 0.165 * r2, 0.42 * r2, 0.75 * r2, r2],
-                                 [0.1 * D2, 0.1 * D2, 0.035 * D2, 0.026 * D2, t_rim])(r_knots)
-        lo = np.maximum(t_rim, 0.010 + 0 * r_knots)
+        # база — задняя поверхность кованого профиля frame3 ступени 2 (frame3_fea_results.json → parts.comp2.variants.solid),
+        # подобием по r2; узлы PCHIP — те же радиусы, что organic/structure/profile_opt.py (RC_KNOTS), в долях r2
+        fb = FRAME3_BACK()
+        r_knots = np.r_[0.0, 0.058, 0.07, 0.11, 0.15, 0.20, 0.25, 0.30, fb["r2"]] / fb["r2"] * r2
+        base = np.interp(r_knots / r2 * fb["r2"], fb["r"], fb["depth"]) * r2 / fb["r2"]     # отступ за плоскость Lz
+        lo = np.full_like(r_knots, 0.010)
         zb = np.array([p[f"zb{i}"] for i in range(6)])
-        # отступ задней поверхности за плоскость Lz: между тонким (стенка 10 мм от втулки) и базовым ×1,15
         xh_k = np.interp(r_knots, hub[:, 1], hub[:, 0], left=0.0, right=Lz)
         xb_min = xh_k + 0.010                     # стенка не тоньше 10 мм (как profile_opt)
         xb_base = Lz + base
         xb_max = Lz + 1.15 * base
         xb_k = xb_base.copy()
         xb_k[2:8] = xb_min[2:8] + zb * (xb_max[2:8] - xb_min[2:8])
-        xb_k[0] = xb_k[1] = xb_base[0]
         xb_k[-1] = Lz + t_rim
         xb = PchipInterpolator(r_knots, np.maximum(xb_k, xb_min))(r)
         xb = np.maximum(xb, xh + 0.010)
@@ -486,6 +485,23 @@ def impeller_disk(ml, p, stage, hub, Z, theta, mt, rr, n=241):
     ok = bool(np.all(h_eff > 0.004))
     return dict(r=r, h=h, h_eff=h_eff, xh=xh, xb=xb, fish=fish, mass=mass, J=J, ok=ok, t_rim=t_rim, info=info, Lz=Lz,
                 stage=stage, Z=Z, theta_hub=np.interp(r, rr[:, 0], theta[:, 0]))
+
+
+_FB = {}
+
+
+def FRAME3_BACK():
+    """задняя поверхность кованого профиля frame3 ступени 2: отступ за плоскость обода (z_top обода = 0) — depth(r)"""
+    if not _FB:
+        import json
+        import os
+        p = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "frame3", "frame3_fea_results.json")
+        pr = json.load(open(p, encoding="utf-8"))["parts"]["comp2"]["variants"]["solid"]["profile"]
+        r = np.asarray(pr["r"], float)
+        zb = np.asarray(pr["zc"], float) - 0.5 * np.asarray(pr["t"], float)
+        ztop_rim = pr["zc"][-1] + 0.5 * pr["t"][-1]
+        _FB.update(r=r, depth=ztop_rim - zb, r2=float(r[-1]))
+    return _FB
 
 
 def _mi(r, h, rho):

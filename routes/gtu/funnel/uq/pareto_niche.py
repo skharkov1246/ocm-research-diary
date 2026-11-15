@@ -269,6 +269,7 @@ def run_niche(task):
             init.append(N.encode(FS.concept(int(idx), n0, kv, seed)))
         except (ValueError, ZeroDivisionError, OverflowError, KeyError):
             pass
+    t_seed = time.process_time() - tc0
     rv = None
     if P["robust"]:
         _, _, vals = UF.sample(max(P["robust"], 2), UF.UQ_SEED)
@@ -281,7 +282,9 @@ def run_niche(task):
         if g == max(1, P["gens"] // 2):
             m = NS.front_mask(F, V)
             half.update(gen=g, hv=NS.hv_mc(F[m]) if m.any() else 0.0, front=int(m.sum()))
+    tn0 = time.process_time()
     res = NS.run(ev_fn, NG, 5, pop=P["pop"], gens=P["gens"], seed=rseed, init=np.array(init) if init else None, callback=cb)
+    t_nsga = time.process_time() - tn0
     X, F, V = res["X"], res["F"], res["V"]
     m = NS.front_mask(F, V)
     fi = np.where(m)[0]
@@ -292,6 +295,7 @@ def run_niche(task):
         front.append(dict(g=[round(float(x), 5) for x in X[i]], G=[round(x, 5) for x in r["G"]], score_w=_r(r["score_w"]), score_f=_r(r["score_f"]),
                           trl=r["trl"], eta_el=_r(r["eta_el"], 3), V_env=_r(r["V_env"], 4), p_rob=_r(r.get("p_rob"), 4)))
     checked = []
+    tk0 = time.process_time()
     if front:
         G = np.array([f["G"] for f in front])
         reps = representatives(G, np.array([f["score_w"] for f in front]), np.array([f["score_f"] for f in front]), P["check"])
@@ -300,6 +304,7 @@ def run_niche(task):
             fr = full(N, c) if c is not None else dict(feasible=0, reject="ниша не совпала")
             checked.append(dict(front_i=int(q), g=front[q]["g"], G_nominal=front[q]["G"], **{x: (_r(v) if isinstance(v, float) else v)
                                                                                                 for x, v in fr.items()}))
+    t_check = time.process_time() - tk0
     cmp_ = None
     l1f = [cc for cc in l1_seeds if (cc.get("rec") or {}).get("feasible")]
     if l1f:
@@ -320,7 +325,10 @@ def run_niche(task):
                 history=res["history"][::max(1, len(res["history"]) // 10)], hv=round(hv, 5), half=half,
                 front_size=len(front), front=front, checked=checked, checked_feasible=nfe,
                 best_score_w=_r(max([f["score_w"] for f in front], default=None)), best_score_f=_r(max([f["score_f"] for f in front], default=None)),
-                l1_compare=cmp_, t_s=round(time.time() - t0, 2), t_cpu_s=round(time.process_time() - tc0, 2))
+                l1_compare=cmp_, t_s=round(time.time() - t0, 2), t_cpu_s=round(time.process_time() - tc0, 2),
+                t_cpu=dict(seed=round(t_seed, 2), nsga=round(t_nsga, 2), check=round(t_check, 2),
+                           per_eval=round(t_nsga / max(1, stats["evals"] + stats["robust_evals"]), 5),
+                           per_check=round(t_check / max(1, len(checked)), 2) if checked else None))
 
 
 # =========================================================================== ниши, части, пул
@@ -359,7 +367,12 @@ def run_parts(select_path, shard_list, shards, out, pop=DEFAULT_POP, gens=DEFAUL
     l1_by = {}
     l1_meta = None
     if l1:
-        cands, l1_meta = U.load_l1(l1["dirs"], kv, l1["M"], l1["shards"], l1.get("tag", ""))
+        try:
+            cands, l1_meta = U.load_l1(l1["dirs"], kv, l1["M"], l1["shards"], l1.get("tag", ""))
+        except M1.MergeError as e:
+            if not l1.get("optional"):
+                raise
+            cands, l1_meta = [], dict(kind="L1", missing=str(e)[:300], note="части уровня 1 не найдены - ниши без затравки уровня 1")
         for cd in cands:
             l1_by.setdefault(cd["niche"], []).append(cd)
     if seed_cands:
@@ -415,6 +428,7 @@ def main(argv=None):
     ap.add_argument("--l1-m", type=int, default=None)
     ap.add_argument("--l1-shards", type=int, default=None)
     ap.add_argument("--l1-tag", default="")
+    ap.add_argument("--l1-optional", action="store_true", help="нет частей уровня 1 - без затравки (запись в meta), а не ошибка")
     ap.add_argument("--seed-cands", default=None, help="файл кандидатов (формат uq_l1 --candidates) - затравка ниш (локальные пробы)")
     ap.add_argument("--niche", nargs="*", default=None, help="только эти ниши (локальные пробы)")
     ap.add_argument("--top", type=int, default=0, help="первых ниш (0 - все)")
@@ -428,7 +442,7 @@ def main(argv=None):
     a = ap.parse_args(argv)
     if a.local and ((a.top or 10 ** 9) > LOCAL_MAX["niches"] or a.pop > LOCAL_MAX["pop"] or a.gens > LOCAL_MAX["gens"] or a.check > LOCAL_MAX["check"]):
         ap.error(f"локально - не больше {LOCAL_MAX}")
-    l1 = dict(dirs=a.l1_in, M=a.l1_m, shards=a.l1_shards, tag=a.l1_tag) if a.l1_in else None
+    l1 = dict(dirs=a.l1_in, M=a.l1_m, shards=a.l1_shards, tag=a.l1_tag, optional=a.l1_optional) if a.l1_in else None
     sl = L0.parse_shards(a.shard, a.shards)
     w = a.workers or L0.default_workers()
     paths, meta, got = run_parts(a.select, sl, a.shards, a.out, a.pop, a.gens, a.check, a.robust, w, a.gzip, a.tag, l1, a.top or None,

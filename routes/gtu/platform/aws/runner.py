@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Прогоны расчётной платформы ГТУ на спотовых машинах AWS (us-east-1), версия 2.
+"""Прогоны расчётной платформы ГТУ на спотовых машинах AWS (us-east-1 и соседние регионы), версия 3.
 
 Запускается ИЗ СЕССИИ, где действуют ключи ограниченного IAM-пользователя (окружение
 Coldun). Машины работают под ролью экземпляра: ключей на машине и в user-data нет.
@@ -37,6 +37,18 @@ Coldun). Машины работают под ролью экземпляра: �
 живую после срока; DryRun-успех гасится; user-data всех попыток — до первого запуска; статусы capacity
 (с повтором), no_price, halted; метка 143 при гашении изнутри (Client.…) — не прерывание; окружение OpenFOAM
 (/openfoam/bash.rc) в контейнере.
+
+Версия 3 — соседние мощности (решение владельца 15.11.2026). Без новых флагов — точно как версия 2: те же
+вызовы AWS, тот же журнал. Новые флаги:
+  Е) --regions us-east-1,us-east-2,us-west-2: на регион — свои клиенты EC2/SSM, образ из SSM своего региона,
+     подсеть по умолчанию самой дешёвой зоны, группа безопасности по умолчанию и своя квота
+     (--vcpu-quota-per-region, иначе service-quotas, иначе запасное значение); профиль роли (IAM глобален)
+     и бакет (в --region, us-east-1) — общие; регион очередной задачи — с наименьшей ценой спота среди
+     регионов со свободной квотой (соседний — с запасом цены --region-price-margin); бюджет и MaxPrice — по
+     максимуму цены по всем разрешённым регионам; межрегиональная передача результатов — в смете;
+  Ж) --on-demand-fallback: спот недоступен во всех регионах (нет ёмкости, цены, прав или квоты спота) —
+     машина по требованию по цене из справочника aws_prices_ref.json, при своей квоте по требованию;
+  З) status, reap, collect и сверка — по всем регионам, где у прогона были машины; журнал пишет регион и рынок.
 """
 from __future__ import annotations
 
@@ -92,6 +104,20 @@ IMAGES = {
 
 CAPACITY_ERRORS = {"InsufficientInstanceCapacity", "SpotMaxPriceTooLow", "Unsupported"}
 QUOTA_ERRORS = {"MaxSpotInstanceCountExceeded", "VcpuLimitExceeded", "InstanceLimitExceeded"}
+# Версия 3: отказ в правах в регионе (политика ключа агента закреплена за us-east-1 условием
+# aws:RequestedRegion; регион не включён в аккаунте) — регион исключается до конца прогона для этого рынка.
+DENY_ERRORS = {"UnauthorizedOperation", "AccessDenied", "AccessDeniedException", "AuthFailure", "OptInRequired",
+               "UnrecognizedClientException", "InvalidClientTokenId"}
+
+# --------------------------------------------------------------------------- версия 3: регионы
+REGION_RE = re.compile(r"^[a-z]{2}(?:-[a-z]+)+-\d$")
+MARKETS = ("spot", "on-demand")
+# Коды квот EC2 в vCPU: L-1216C47A — Running On-Demand Standard (A, C, D, H, I, M, R, T, Z) instances (сверено по
+# примеру awscli 1.46.3 examples/service-quotas/get-service-quota.rst); L-34B43A08 — All Standard (A, C, D, H, I,
+# M, R, T, Z) Spot Instance Requests (по выдержкам поиска, не сверено).
+QUOTA_CODES = {"spot": "L-34B43A08", "on-demand": "L-1216C47A"}
+QUOTA_FALLBACK = 64                    # квота соседнего региона, если её не задали и service-quotas не ответил
+PRICE_REF = HERE / "aws_prices_ref.json"   # справочник: цены по требованию и межрегиональная передача, с датой
 
 NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 BRANCH_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]{0,199}$")
@@ -580,6 +606,8 @@ class Ledger:
         `now` (живой прогон после сверки): открытая машина старше отпущенного срока — значит, её не
         погасили ни сторож, ни сборщик, ни сверка — считается по фактическому времени, а не по сроку.
         Без `now` (status, plan, DryRun — сверки не было) — по сроку, как раньше.
+        Версия 3: машина по требованию пишет свою цену в spot_usd_h и max_usd_h (журнал читает и версия 2);
+        межрегиональная передача результатов (xfer_usd, разово) прибавляется и к закрытой, и к открытой.
         """
         recs = self.records()
         launches = {r["iid"]: r for r in recs if r.get("ev") == "launch"}
@@ -590,12 +618,12 @@ class Ledger:
             extra = L["ebs_usd_h"] + L.get("ip_usd_h", 0.0)
             if iid in ends:
                 dur = max(60.0, ends[iid]["t_end"] - L["t_launch"])
-                spent += (L["spot_usd_h"] + extra) * dur / 3600.0
+                spent += (L["spot_usd_h"] + extra) * dur / 3600.0 + L.get("xfer_usd", 0.0)
             else:
                 hours = L["allot_min"] / 60.0
                 if now is not None:
                     hours = max(hours, (now - L["t_launch"]) / 3600.0)
-                committed += (L["max_usd_h"] + extra) * hours
+                committed += (L["max_usd_h"] + extra) * hours + L.get("xfer_usd", 0.0)
                 open_.append(iid)
         return {"spent": spent, "committed": committed, "open": open_,
                 "closed": len(launches) - len(open_)}
@@ -633,6 +661,27 @@ class Config:
     dryrun: bool = False
     offline_price: float | None = None   # режим plan: цена спота задана вручную, AWS не вызывается
     offline_zones: dict | None = None    # режим plan: цены по зонам (допущение) для порядка зон
+    # ---- версия 3 (без этих полей — точно версия 2)
+    regions: list = field(default_factory=list)          # разрешённые регионы машин; [] — только region
+    vcpu_quota_region: dict = field(default_factory=dict)      # явная квота спота по регионам, vCPU
+    od_vcpu_quota_region: dict = field(default_factory=dict)   # явная квота по требованию по регионам, vCPU
+    od_vcpu_quota: int = 384             # запасная квота по требованию в region (данные владельца: 384)
+    vcpu_quota_fallback: int = QUOTA_FALLBACK   # запасная квота соседнего региона (спот и по требованию)
+    on_demand_fallback: bool = False     # спот недоступен везде — машина по требованию
+    region_price_margin: float = 0.05    # соседний регион берётся, только если дешевле с этим запасом
+    xfer_gb: float = 10.0                # объём результатов задачи для сметы межрегиональной передачи, ГБ
+    price_ref: Path = PRICE_REF          # справочник цен по требованию и передачи
+    max_parallel_auto: bool = False      # --max-parallel не задан: в режиме регионов — по сумме квот
+    offline_no_spot: bool = False        # режим plan: спот недоступен (проверка пути по требованию)
+
+    @property
+    def region_list(self) -> list:
+        return list(self.regions) or [self.region]
+
+    @property
+    def multi(self) -> bool:
+        """Режим версии 3: регионы сверх region или запас по требованию."""
+        return self.region_list != [self.region] or self.on_demand_fallback
 
 
 def parse_s3_uri(uri: str) -> tuple:
@@ -662,6 +711,57 @@ def parse_zone_prices(text: str) -> dict:
     return out
 
 
+def parse_regions(text: str) -> list:
+    """'us-east-1,us-east-2' -> ['us-east-1', 'us-east-2'] (порядок сохраняется, повторы отброшены)."""
+    out = []
+    for part in (text or "").split(","):
+        r = part.strip()
+        if not r:
+            continue
+        if not REGION_RE.match(r):
+            raise RunnerError(f"--regions: недопустимый регион {r!r}")
+        if r not in out:
+            out.append(r)
+    if not out:
+        raise RunnerError("--regions: пусто")
+    return out
+
+
+def parse_region_ints(text: str, flag: str) -> dict:
+    """'us-east-1=384,us-east-2=256' -> {регион: vCPU}."""
+    out = {}
+    for part in (text or "").split(","):
+        if not part.strip():
+            continue
+        r, _, v = part.partition("=")
+        r = r.strip()
+        try:
+            n = int(v)
+        except ValueError:
+            raise RunnerError(f"{flag}: значение {v!r} не целое") from None
+        if not REGION_RE.match(r) or n < 0:
+            raise RunnerError(f"{flag}: ожидается регион=vCPU, получено {part.strip()!r}")
+        out[r] = n
+    if not out:
+        raise RunnerError(f"{flag}: пусто")
+    return out
+
+
+def load_price_ref(path) -> dict:
+    """Справочник цен (версия 3): по требованию {тип: {регион: долл./ч}}, передача {"откуда>куда" | default: долл./ГБ}."""
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+        od, xf = data["on_demand_usd_h"], data["xfer_usd_gb"]
+        od = {t: {r: float(p) for r, p in m.items()} for t, m in od.items()}
+        xf = {k: float(v) for k, v in xf.items()}
+    except (OSError, ValueError, KeyError, TypeError, AttributeError) as e:
+        raise RunnerError(f"справочник цен {Path(path).name} не прочитан: {type(e).__name__}") from None
+    if "default" not in xf or any(p <= 0 for m in od.values() for p in m.values()) or any(v < 0 for v in xf.values()):
+        raise RunnerError(f"справочник цен {Path(path).name}: нужны цены > 0 и xfer_usd_gb.default")
+    return {"on_demand_usd_h": od, "xfer_usd_gb": xf, "date": str(data.get("date", "?")),
+            "status": str(data.get("status", ""))}
+
+
 def new_run_id(clock=time.time) -> str:
     t = dt.datetime.fromtimestamp(clock(), tz=dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     return f"{t}-{_secrets.token_hex(2)}"
@@ -679,8 +779,32 @@ class Active:
     az_req: str = ""          # зона, в которую просили
     az_rank: int = -1         # место зоны по цене (0 — самая дешёвая)
     az_cheapest: str = ""     # самая дешёвая зона типа на момент запуска
-    spot_usd_h: float = 0.0   # цена спота в фактической зоне на момент запуска
+    spot_usd_h: float = 0.0   # цена спота в фактической зоне на момент запуска (по требованию — его цена)
     t_mark: float = 0.0       # когда впервые увидели метку с кодом 143 при ещё живой машине
+    region: str = ""          # версия 3: регион машины ("" — region конфигурации)
+    market: str = "spot"      # версия 3: spot | on-demand
+
+
+@dataclass
+class _Try:
+    """Итоги попыток запуска одной задачи (по типам, регионам, рынкам) — для статуса и пояснения."""
+    refused: bool = False
+    no_price: list = field(default_factory=list)       # типы без цены спота ни в одном регионе
+    cap: list = field(default_factory=list)
+    skipped: list = field(default_factory=list)
+    quota: list = field(default_factory=list)          # версия 3: квота (ошибка, пауза региона, нет свободной)
+    denied: list = field(default_factory=list)         # версия 3: отказ в правах в регионе
+    failed: list = field(default_factory=list)         # версия 3: иная ошибка запуска в регионе
+    image_bad: list = field(default_factory=list)      # версия 3: образ недоступен в регионе
+    image_ok: bool = False
+    od_no_price: list = field(default_factory=list)    # версия 3: нет цены по требованию в справочнике
+    ami: dict = field(default_factory=dict)            # регион -> образ (или ImageUnavailable)
+
+    def spot_unavailable(self) -> bool:
+        """Спот не дал машину по причине, которую машина по требованию может обойти."""
+        if self.refused or (self.image_bad and not self.image_ok):
+            return False
+        return bool(self.cap or self.quota or self.no_price or self.denied)
 
 
 @dataclass
@@ -700,9 +824,21 @@ class PriceInfo:
 # --------------------------------------------------------------------------- исполнитель
 class Runner:
     def __init__(self, cfg: Config, ec2=None, s3=None, ssm=None, sts=None,
-                 clock=time.time, sleep=time.sleep, out=print):
+                 clock=time.time, sleep=time.sleep, out=print, region_clients=None):
+        """`region_clients(регион) -> {"ec2", "ssm", "servicequotas"}` — клиенты регионов, кроме cfg.region
+        (для него — ec2/ssm из аргументов). Вызывается лениво: только когда регион действительно нужен."""
         self.cfg, self.ec2, self.s3, self.ssm, self.sts = cfg, ec2, s3, ssm, sts
         self.clock, self.sleep, self._out = clock, sleep, out
+        self.region_clients = region_clients
+        self.regions = cfg.region_list
+        self.v3 = cfg.multi
+        self._rc: dict = {}             # регион -> клиенты
+        self._quota: dict = {}          # (регион, рынок) -> (vCPU, источник)
+        self._qblock: dict = {}         # (регион, рынок) -> до какого времени пауза после квотной ошибки
+        self._denied: dict = {}         # (регион, рынок) -> код отказа в правах
+        self._iid_region: dict = {}     # машина -> регион
+        self._ledger_regions = None
+        self._ref = None                # справочник цен (версия 3), читается лениво
         self.redact = Redactor(cfg.bucket)
         self.ledger = Ledger(cfg.ledger_path, self.redact, clock)          # общий учёт
         side = cfg.dryrun or cfg.offline_price is not None
@@ -712,9 +848,9 @@ class Runner:
         self.results: dict = {}
         self.virtual = 0.0          # DRYRUN/plan: прогноз уже «запущенных» задач пакета
         self.last_params = None
-        self._prices: dict = {}
-        self._ami: dict = {}
-        self._subnets = None        # None — не читались; dict зона -> подсеть; False — отказ в правах
+        self._prices: dict = {}     # (регион, тип) -> (время, PriceInfo)
+        self._ami: dict = {}        # (регион, образ) -> id | ImageUnavailable
+        self._subnets: dict = {}    # регион -> dict зона -> подсеть; False — отказ в правах (нет ключа — не читались)
         self._avoid: dict = {}      # (тип, зона) -> до какого времени зона в конце очереди
         self._why: dict = {}        # задача -> пояснение к статусу
         self._quota_wait: dict = {}
@@ -746,23 +882,167 @@ class Runner:
         base = f"{self.cfg.prefix}/gtu/{run_id or self.cfg.run_id}"
         return f"{base}/{job_name}" if attempt <= 1 else f"{base}/_attempt{int(attempt)}/{job_name}"
 
+    # ---- регионы (версия 3)
+    def client(self, region: str | None, kind: str):
+        """Клиент EC2 / SSM / Service Quotas региона. Для cfg.region — переданные в конструктор (как v2)."""
+        region = region or self.cfg.region
+        if region == self.cfg.region and kind in ("ec2", "ssm") and getattr(self, kind) is not None:
+            return getattr(self, kind)
+        if region not in self._rc:
+            if self.region_clients is None:
+                raise RunnerError(f"нет клиентов AWS для региона {region}")
+            self._rc[region] = self.region_clients(region)
+        return self._rc[region].get(kind)
+
+    def _rf(self, region: str | None, market: str | None = None) -> dict:
+        """Поля журнала версии 3 (регион, рынок); в режиме версии 2 — пусто: журнал как прежде."""
+        if not self.v3:
+            return {}
+        out = {"region": region or self.cfg.region}
+        if market:
+            out["market"] = market
+        return out
+
+    def _where(self, region: str | None) -> str:
+        return f" @{region or self.cfg.region}" if self.v3 else ""
+
+    def _region_of(self, iid: str) -> str:
+        for d in (self.active, self._unconfirmed):
+            a = d.get(iid)
+            if a is not None and a.region:
+                return a.region
+        if iid in self._iid_region:
+            return self._iid_region[iid]
+        if self._ledger_regions is None:
+            self._ledger_regions = {r["iid"]: r["region"] for r in self.ledger.records()
+                                    if r.get("ev") == "launch" and r.get("region") and r.get("iid")}
+        return self._ledger_regions.get(iid, self.cfg.region)
+
+    def _by_region(self, iids) -> dict:
+        """{регион: [id в исходном порядке]}; в режиме версии 2 — один регион."""
+        out: dict = {}
+        for iid in iids:
+            out.setdefault(self._region_of(iid), []).append(iid)
+        return out
+
+    @property
+    def ref(self) -> dict:
+        if self._ref is None:
+            self._ref = load_price_ref(self.cfg.price_ref)
+        return self._ref
+
+    def od_prices(self, itype: str) -> dict:
+        """Цены по требованию типа по разрешённым регионам из справочника: {регион: долл./ч}."""
+        m = self.ref["on_demand_usd_h"].get(itype, {})
+        return {r: m[r] for r in self.regions if r in m}
+
+    def xfer_usd(self, job: Job, region: str | None) -> float:
+        """Смета передачи результатов из региона машины в бакет (region): объём — min(диск, --xfer-gb)."""
+        region = region or self.cfg.region
+        if not self.v3 or region == self.cfg.region:
+            return 0.0
+        xf = self.ref["xfer_usd_gb"]
+        rate = xf.get(f"{region}>{self.cfg.region}", xf["default"])
+        return min(float(job.disk_gb), self.cfg.xfer_gb) * rate
+
+    def quota(self, region: str | None, market: str = "spot") -> int:
+        region = region or self.cfg.region
+        if not self.v3:
+            return self.cfg.vcpu_quota
+        if (region, market) not in self._quota:
+            self._quota[(region, market)] = self._read_quota(region, market)
+        return self._quota[(region, market)][0]
+
+    def _read_quota(self, region: str, market: str) -> tuple:
+        """(vCPU, источник): флаг → service-quotas → запасное значение (только чтение, без изменений)."""
+        cfg = self.cfg
+        explicit = cfg.vcpu_quota_region if market == "spot" else cfg.od_vcpu_quota_region
+        if region in explicit:
+            return int(explicit[region]), "флаг"
+        if region == cfg.region:
+            fb = cfg.vcpu_quota if market == "spot" else cfg.od_vcpu_quota
+        else:
+            fb = cfg.vcpu_quota_fallback
+        if self.offline:
+            return fb, "запасное (plan: service-quotas не вызывается)"
+        try:
+            sq = self.client(region, "servicequotas")
+            if sq is None:
+                return fb, "запасное (нет клиента service-quotas)"
+            v = sq.get_service_quota(ServiceCode="ec2", QuotaCode=QUOTA_CODES[market])["Quota"]["Value"]
+            return int(v), f"service-quotas {QUOTA_CODES[market]}"
+        except Exception as e:      # нет прав (у ключа агента их нет), сеть, неизвестный ответ — запасное
+            resp = getattr(e, "response", None)
+            code = resp.get("Error", {}).get("Code") if isinstance(resp, dict) else None
+            return fb, f"запасное (service-quotas: {code or type(e).__name__})"
+
+    def markets(self) -> list:
+        return ["spot", "on-demand"] if self.cfg.on_demand_fallback else ["spot"]
+
+    def load_quotas(self) -> None:
+        """Версия 3: квоты по регионам — в начале прогона и plan, с источником; --max-parallel по сумме квот."""
+        if not self.v3:
+            return
+        rows = []
+        for r in self.regions:
+            for m in self.markets():
+                self.quota(r, m)
+                v, src = self._quota[(r, m)]
+                rows.append([r, m, v, src])
+                self.say(f"[квоты] {r} {'спот' if m == 'spot' else 'по требованию'}: {v} vCPU ({src})")
+        self.journal.append("quotas", run_id=self.cfg.run_id, quotas=rows)
+        if self.cfg.max_parallel_auto:
+            n = max(self.cfg.max_parallel, sum(self.quota(r, "spot") for r in self.regions) // 64)
+            if n != self.cfg.max_parallel:
+                self.say(f"[очередь] --max-parallel не задан: {n} машин (сумма квот спота по регионам / 64 vCPU)")
+            self.cfg.max_parallel = n
+
+    def total_quota(self) -> int:
+        if not self.v3:
+            return self.cfg.vcpu_quota
+        return sum(self.quota(r, m) for r in self.regions for m in self.markets())
+
+    def _used(self, region: str, market: str = "spot") -> int:
+        return sum(a.job.vcpu for a in self.active.values()
+                   if (a.region or self.cfg.region) == region and a.market == market)
+
+    def _fits(self, job: Job) -> bool:
+        """Есть ли регион (и рынок), где задача помещается в квоту вместе с машинами прогона."""
+        if not self.v3:
+            return sum(a.job.vcpu for a in self.active.values()) + job.vcpu <= self.cfg.vcpu_quota
+        return any(self._used(r, m) + job.vcpu <= self.quota(r, m) for r in self.regions for m in self.markets())
+
+    def _blocked(self, region: str, market: str) -> str:
+        """Почему регион сейчас не годится для рынка: отказ в правах / пауза после квотной ошибки / ''."""
+        if (region, market) in self._denied:
+            return f"нет прав ({self._denied[(region, market)]})"
+        if self._qblock.get((region, market), 0.0) > self.clock():
+            return "квота (пауза после ошибки)"
+        return ""
+
     # ---- цены и бюджет
-    def price(self, itype: str) -> PriceInfo:
+    def price(self, itype: str, region: str | None = None) -> PriceInfo:
+        region = region or self.cfg.region
         now = self.clock()
-        hit = self._prices.get(itype)
+        hit = self._prices.get((region, itype))
         if hit and now - hit[0] < 300:
             return hit[1]
         if self.offline:
             p = float(self.cfg.offline_price)
             zp = dict(self.cfg.offline_zones or {})
+            if self.v3:                      # зоны своего региона (имя зоны = регион + буква)
+                zp = {z: v for z, v in zp.items() if z[:-1] == region}
             info = PriceInfo(itype, zp or {"assumed": p}, max([p] + list(zp.values())))
+            if self.cfg.offline_no_spot:     # plan: спот недоступен — проверка пути по требованию
+                info = PriceInfo(itype, {}, 0.0)
         else:
             end = dt.datetime.fromtimestamp(now, tz=dt.timezone.utc)
             start = end - dt.timedelta(hours=self.cfg.price_window_h)
             kw = dict(InstanceTypes=[itype], ProductDescriptions=[PRODUCT], StartTime=start, EndTime=end)
             latest, ts, wmax = {}, {}, 0.0
+            ec2 = self.client(region, "ec2")
             while True:
-                r = self.ec2.describe_spot_price_history(**kw)
+                r = ec2.describe_spot_price_history(**kw)
                 for e in r.get("SpotPriceHistory", []):
                     if e.get("InstanceType") != itype:
                         continue

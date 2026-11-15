@@ -187,7 +187,7 @@ def run_merge(found, kv, NN, shards, out_dir, sfx=""):
                            robust_evals=sum(c.get("robust_evals") or 0 for c in calls), calls=calls),
                summary=summarize(rows), global_front=global_front(rows),
                niches=[{k: r.get(k) for k in ("k", "niche", "arch", "ref_idx", "n_l1_seeds", "n_l0_seeds", "evals", "feasible_evals", "robust_evals",
-                                               "hv", "half", "front_size", "checked_feasible", "best_score_w", "best_score_f", "l1_compare", "t_cpu_s")}
+                                               "hv", "half", "front_size", "checked_feasible", "best_score_w", "best_score_f", "l1_compare", "t_cpu_s", "t_cpu")}
                        for r in rows],
                files=dict(candidates=os.path.basename(p_c), csv=os.path.basename(p_csv), n_candidates=len(cands)))
     res["timing"]["merge_s"] = round(time.time() - t0, 1)

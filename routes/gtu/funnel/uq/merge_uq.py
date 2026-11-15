@@ -42,14 +42,25 @@ class MergeError(Exception):
 
 
 def find_parts(dirs, kv, K, shards, tag=""):
-    pat = re.compile(rf"^{U.PART_PREFIX}{re.escape(tag)}_{re.escape(kv)}_c{K}_s(\d{{3}})of{shards:03d}\.json(\.gz)?$")
-    out = []
+    """части прогона; K = 0 - число кандидатов по именам частей (должно быть одно)"""
+    kk = r"(\d+)" if not K else str(K)
+    pat = re.compile(rf"^{U.PART_PREFIX}{re.escape(tag)}_{re.escape(kv)}_c{kk}_s(\d{{3}})of{shards:03d}\.json(\.gz)?$")
+    out, ks = [], set()
     for d in dirs:
-        for p in glob.glob(os.path.join(d, "**", f"{U.PART_PREFIX}{tag}_{kv}_c{K}_s*of{shards:03d}.json*"), recursive=True):
+        for p in glob.glob(os.path.join(d, "**", f"{U.PART_PREFIX}{tag}_{kv}_c*_s*of{shards:03d}.json*"), recursive=True):
             m = pat.match(os.path.basename(p))
             if m:
-                out.append((int(m.group(1)), p))
+                if not K:
+                    ks.add(int(m.group(1)))
+                out.append((int(m.group(2 if not K else 1)), p))
+    if not K and len(ks) > 1:
+        raise MergeError(f"в папках части с разным числом кандидатов: {sorted(ks)} - укажите --k")
     return sorted(out)
+
+
+def detect_k(found):
+    m = re.search(r"_c(\d+)_s\d{3}of", os.path.basename(found[0][1])) if found else None
+    return int(m.group(1)) if m else None
 
 
 def load_part(p):
@@ -423,7 +434,7 @@ def run_merge(found, kv, K, shards, out_dir, sfx="", p_min=P_MIN, score_min=U.SC
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--kv", required=True)
-    ap.add_argument("--k", type=int, required=True, help="число кандидатов K (имя частей _c<K>_)")
+    ap.add_argument("--k", type=int, default=0, help="число кандидатов K (имя частей _c<K>_; 0 - по именам частей)")
     ap.add_argument("--shards", type=int, required=True)
     ap.add_argument("--tag", default="")
     ap.add_argument("--in", dest="dirs", nargs="+", required=True)
@@ -431,9 +442,12 @@ def main(argv=None):
     ap.add_argument("--suffix", default="")
     ap.add_argument("--p-min", type=float, default=P_MIN)
     a = ap.parse_args(argv)
-    found = find_parts(a.dirs, a.kv, a.k, a.shards, a.tag)
     try:
-        out = run_merge(found, a.kv, a.k, a.shards, a.out_dir, a.suffix, a.p_min)
+        found = find_parts(a.dirs, a.kv, a.k, a.shards, a.tag)
+        k = a.k or detect_k(found)
+        if k is None:
+            raise MergeError("частей не найдено")
+        out = run_merge(found, a.kv, k, a.shards, a.out_dir, a.suffix, a.p_min)
     except MergeError as e:
         print("слияние отклонено:", e)
         return 2

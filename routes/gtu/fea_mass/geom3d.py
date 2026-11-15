@@ -203,6 +203,10 @@ def _mesh_volume(gmsh, vol, pairs, pitch, size_cb, h_min, h_max, threads=1, opt_
         gmsh.option.setNumber(k, v)
     gmsh.model.addPhysicalGroup(3, [vol], name="EVOL")
     gmsh.model.mesh.generate(3)
+    et, _, _ = gmsh.model.mesh.getElements(3)
+    if not len(et):
+        errs = [w for w in gmsh.logger.get() if "rror" in w][-3:]
+        raise RuntimeError(f"Gmsh не построил объёмную сетку: {errs}")
     q = _quality(gmsh)
     if q["minSICN"] < 0.05 and opt_netgen:
         gmsh.model.mesh.optimize("Netgen")
@@ -590,15 +594,12 @@ def _box_wedge(occ, r0, r1, L, a0, da):
 
 
 def _platform(occ, r0, t, L, w_ang, k_ch):
-    """полка: тонкий слой r0..r0+t, в развёртке (z, θ) - параллелограмм ширины w_ang вдоль хорды пера (θ = z·k_ch/r)"""
-    wires = []
-    for r in (r0, r0 + t):
-        pts = []
-        for z, sgn in ((-L / 2, -1), (-L / 2, 1), (L / 2, 1), (L / 2, -1)):
-            th = sgn * 0.5 * w_ang + z * k_ch / r
-            pts.append(occ.addPoint(r * math.cos(th), r * math.sin(th), z))
-        wires.append(occ.addWire([occ.addLine(pts[i], pts[(i + 1) % 4]) for i in range(4)]))
-    return [x for dd, x in occ.addThruSections(wires, makeSolid=True, makeRuled=True) if dd == 3][0]
+    """полка: плоская пластина толщиной t на радиусе r0 (касательная плоскость при θ = 0), в плане - параллелограмм
+    ширины w_ang·r0 со сторонами вдоль хорды пера (y = z·k_ch); отличие от цилиндра на краях - доли мм (оценка)"""
+    w = w_ang * r0
+    pts = [occ.addPoint(r0, y0 + z * k_ch, z) for z, y0 in ((-L / 2, -w / 2), (-L / 2, w / 2), (L / 2, w / 2), (L / 2, -w / 2))]
+    f = occ.addPlaneSurface([occ.addCurveLoop([occ.addLine(pts[i], pts[(i + 1) % 4]) for i in range(4)])])
+    return [x for dd, x in occ.extrude([(2, f)], t, 0, 0) if dd == 3][0]
 
 
 def axial_sector(spec, level="base", threads=1, keep_step=None):
@@ -626,12 +627,24 @@ def axial_sector(spec, level="base", threads=1, keep_step=None):
         gmsh.model.add("axial")
         # 1) диск и обод: меридиональный контур, симметричный относительно z = 0
         r_top = r_h if blisk else R
-        up = [(0.5 * max(t, 1e-4), r) for r, t in zip(prof_r, prof_t) if r < r_top - 1e-9]
-        up.append((0.5 * max(prof_t[-1], 1e-4), min(R, r_top)) if prof_r[-1] >= r_top - 1e-9 else (0.5 * prof_t[-1], prof_r[-1]))
-        if r_top > up[-1][1] + 1e-9:
-            up.append((0.5 * w_rim, up[-1][1]))
-            up.append((0.5 * w_rim, r_top))
+        up = [(0.5 * max(t, 1e-4), r) for r, t in zip(prof_r, prof_t) if r <= R + 1e-12]
+        if up[-1][1] < R - 1e-9:
+            up.append((up[-1][0], R))
+        if blisk:                                  # обод блиска: ширина w_rim от живого обода до корня пера
+            up += [(0.5 * w_rim, R), (0.5 * w_rim, r_top)]
+        ded = [up[0]]
+        for q in up[1:]:
+            if math.hypot(q[0] - ded[-1][0], q[1] - ded[-1][1]) > 1e-7:
+                ded.append(q)
+        up = ded
         contour = up + [(-z, r) for z, r in reversed(up)]
+        ded = [contour[0]]
+        for q in contour[1:]:
+            if math.hypot(q[0] - ded[-1][0], q[1] - ded[-1][1]) > 1e-7:
+                ded.append(q)
+        if math.hypot(ded[0][0] - ded[-1][0], ded[0][1] - ded[-1][1]) <= 1e-7:
+            ded.pop()
+        contour = ded
         tags = [occ.addPoint(r, 0.0, z) for z, r in contour]
         face = occ.addPlaneSurface([occ.addCurveLoop([occ.addLine(tags[i], tags[(i + 1) % len(tags)]) for i in range(len(tags))])])
         occ.rotate([(2, face)], 0, 0, 0, 0, 0, 1, -0.5 * pitch)
@@ -639,23 +652,20 @@ def axial_sector(spec, level="base", threads=1, keep_step=None):
         solids = [(3, disc)]
         r_root = r_h
         if not blisk:
-            # 2) замок: хвостовик + ножка лопатки от живого обода; выступ диска между хвостовиками (половины у границ сектора)
-            s_rim = R * pitch
+            # 2) замок: хвостовик и ножка лопатки от живого обода, выступ диска между хвостовиками (половины у границ
+            #    сектора) - кольцевые сегменты (стороны - радиальные плоскости), связаны с ободом перекрытием ov
             h_neck = A["neck_h_c"] * chord
             r_ft = max(R + 0.3 * (r_h - R), r_h - h_neck)
-            w_foot, w_neck = A["foot_w_pitch"] * s_rim, A["neck_w_pitch"] * s_rim
+            a_foot = 0.5 * A["foot_w_pitch"] * pitch
+            a_neck = 0.5 * A["neck_w_pitch"] * pitch * R / r_ft
             L_att = A["rim_w_bx"] * bx
-            ov = 1e-4 * R
-            foot = occ.addBox(R - ov, -0.5 * w_foot, -0.5 * L_att, r_ft - R + ov, w_foot, L_att)
-            neck = occ.addBox(r_ft - ov, -0.5 * w_neck, -0.5 * L_att, r_h - r_ft + 2 * ov, w_neck, L_att)
-            g_lug = A["lug_gap_pitch"] * s_rim
-            y0 = 0.5 * w_foot + g_lug
-            lug = occ.addBox(R - ov, y0, -0.5 * L_att, r_ft - R + ov, s_rim - 2 * y0, L_att)
-            lug2 = occ.copy([(3, lug)])
-            occ.rotate(lug2, 0, 0, 0, 0, 0, 1, -pitch)
-            wv = _box_wedge(occ, R - 2 * ov, r_h + 0.1 * (r_t - r_h), 2 * L_att, -0.5 * pitch, pitch)
-            lugs, _ = occ.intersect([(3, lug)] + lug2, [(3, wv)], removeTool=True)
-            solids += [(3, foot), (3, neck)] + [x for x in lugs if x[0] == 3]
+            ov = 2e-3 * R
+            foot = _box_wedge(occ, R - ov, r_ft, L_att, -a_foot, 2 * a_foot)
+            neck = _box_wedge(occ, r_ft - ov, r_h + ov, L_att, -a_neck, 2 * a_neck)
+            a_lug = a_foot + A["lug_gap_pitch"] * pitch
+            lug1 = _box_wedge(occ, R - ov, r_ft, L_att, a_lug, 0.5 * pitch - a_lug)
+            lug2 = _box_wedge(occ, R - ov, r_ft, L_att, -0.5 * pitch, 0.5 * pitch - a_lug)
+            solids += [(3, foot), (3, neck), (3, lug1), (3, lug2)]
             # 3) полка
             plat = _platform(occ, r_h, t_plat, A["plat_len_bx"] * bx, (1 - A["plat_gap_pitch"]) * pitch, k_ch)
             solids.append((3, plat))

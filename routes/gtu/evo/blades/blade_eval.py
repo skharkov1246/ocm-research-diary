@@ -241,6 +241,13 @@ def comp_temperature(stage, r, r2):
 
 
 _REF = {}
+_KP = []
+
+
+def _kpeak():
+    if not _KP:
+        _KP.append(D1.k_peak_cal())
+    return _KP[0]
 
 
 def baseline_genes(comp):
@@ -255,9 +262,35 @@ def baseline_genes(comp):
              law1=1 / 3, law2=2 / 3, lean=0.0, sweep=0.0, tub_A=0.0, tub_n=4, ser_A=0.0, ser_n=5, tand=0.0, tand_m=0.3, tand_clk=0.2,
              t_hub_k=1.0, t_tip_k=1.0, ffd1=0.0, ffd2=0.0, ffd3=0.0, ffd4=0.0, route=0)
     if comp == "comp2":
-        p.update({f"zb{i}": (1 / 1.15) for i in range(6)})    # база: xb = xb_min + zb(xb_max − xb_min) ≈ кованая
+        p.update({f"zb{i}": 0.0 for i in range(6)})
+        x = BG.encode(comp, dict(p, fish=0.0, fish_r0=0.4, fish_r1=0.8))
+        x = base_backface(x)
+        return x
         p.update(fish=0.0, fish_r0=0.4, fish_r1=0.8)
     return BG.encode(comp, p)
+
+
+def base_backface(x):
+    """гены zb0..zb5, при которых задняя поверхность ступени 2 совпадает с кованой frame3 (подобием)"""
+    import scipy.optimize as so  # noqa: F401
+    p = BG.decode("comp2", x)
+    P = point()["stage2"]
+    st = ML.cc_stage(P["T01"], P["p01"], P["m_side"], P["PR"], P["n"], p["mu"], p["kcm"], p["Z"] * (1 + p["lsp"]) / (1 + ML.A["spl"]),
+                     False, kD=1.9, nu=p["nu"])
+    g = st["g"]
+    r2, Lz = g["r2"], g["Lax"]
+    hub, _ = BG.meridional(g, p)
+    fb = BG.FRAME3_BACK()
+    r_knots = np.r_[0.0, 0.058, 0.07, 0.11, 0.15, 0.20, 0.25, 0.30, fb["r2"]] / fb["r2"] * r2
+    base = np.interp(r_knots / r2 * fb["r2"], fb["r"], fb["depth"]) * r2 / fb["r2"]
+    xh_k = np.interp(r_knots, hub[:, 1], hub[:, 0], left=0.0, right=Lz)
+    xb_min = xh_k + 0.010
+    zb = (Lz + base - xb_min) / (Lz + 1.15 * base - xb_min)
+    names = [gg.name for gg in BG.genes_for("comp2")]
+    x = np.array(x, float)
+    for i in range(6):
+        x[names.index(f"zb{i}")] = float(np.clip(zb[2 + i], 0, 1))
+    return x
 
 
 def reference(comp):
@@ -308,7 +341,7 @@ def eval_comp(comp, x, want_geom=False, use_ref=True):
     hb = geo["hb"]
     fac = 1 + geo["blade_fill_phi"] * hb / np.maximum(dk["h_eff"], 1e-6)
     T = comp_temperature(stage, r, r[-1])
-    kp = D1.k_peak_cal()
+    kp = _kpeak()
     s100 = D1.solve(r, dk["h_eff"], fac, T, "ti64", P["n"], k_peak=kp)
     s120 = D1.solve(r, dk["h_eff"], fac, T, "ti64", 1.2 * P["n"], k_peak=kp)
     u_disk = max(1.5 * s100["yield_ratio_max"], s120["yield_ratio_max"]) / K_ROUTE
@@ -497,7 +530,7 @@ def eval_turb(x, want_geom=False, use_ref=True):
     zt = int(p["zt"])
     mass = sum(dk["mass"] + zt * bl["mass_blade"] for dk, bl in zip(disks, blades))
     J = sum(dk["J"] + zt * bl["J_blade"] for dk, bl in zip(disks, blades))
-    d = np.array([math.degrees(math.atan(1 / p["phi"])), blades[-1]["features"]["twist_in_deg"], gam_b, p["sweep"], p["tub_A"]])
+    d = np.array([math.degrees(math.atan(1 / p["phi"])), abs(blades[-1]["features"]["twist_in_deg"]), gam_b, p["sweep"], p["tub_A"]])
     ref = reference("turb") if use_ref else dict(mass=mass, J=J)
     meta = dict(comp="turb", eta=eta, eta_level1=tm["eta_p"], corrections=corr, mass_kg=mass, J_kgm2=J, parts=3,
                 parts_inserted_equiv=3 * (1 + zt), route=route, stages=stages, Dm=tm["Dm"], length_m=tm["length"],
