@@ -135,3 +135,50 @@ def check_recup_gtu_cycle(PR=6.5, T41=1000.0, eps=0.85, eta_c=0.86, eta_t=0.875)
                 d_eff_pp=round(r["eff_shaft"] - gc["eff"] * 100, 3), d_w_pct=round((r["w_kJkg"] / gc["sp_work_kJkg"] - 1) * 100, 3),
                 d_T3r_K=round(r["T3_C"] - gc["T3r_C"], 2),
                 note="gtu_cycle.recup: EGT_C - температура газа за турбиной (на входе рекуператора); T3r - воздух за рекуператором")
+
+
+# =========================================================================== примеры: каждый вариант блока на точке KV-3 (+ KV-1, KV-6)
+REC90_RH = dict(compressor=dict(arch="2Ц", pi=8.2), hx=dict(recup=0.90, recup_make="фольга", reheat=True, x_rh=0.35))
+EXAMPLES = {
+    "опорная точка frame3": None,                                     # frame3_concept()
+    "простой 2Ц π 13,5, LPP": dict(compressor=dict(arch="2Ц", inlet="двух", pi=13.5)),
+    "+ подогрев топлива": dict(compressor=dict(arch="2Ц", inlet="двух", pi=13.5), fuel=dict(prep="подогрев")),
+    "+ паровой риформинг (S/C 2)": dict(compressor=dict(arch="2Ц", inlet="двух", pi=13.5), fuel=dict(prep="паровой риформинг", sc=2.0)),
+    "+ сухой риформинг (R 1)": dict(compressor=dict(arch="2Ц", inlet="двух", pi=13.5), fuel=dict(prep="сухой риформинг", R_egr=1.0)),
+    "промохлаждение + рекуператор 0,90": dict(compressor=dict(arch="2Ц", pi=6.0, intercool="воздух"), hx=dict(recup=0.90)),
+    "рекуператор 0,90 (фольга) + подогрев, π 8,2": REC90_RH,
+    "рекуператор 0,90 (печать) + подогрев, π 8,2": dict(REC90_RH, hx=dict(recup=0.90, recup_make="печать", reheat=True, x_rh=0.35)),
+    "рекуператор 0,90 + подогрев, π 13,5 (как есть)": dict(compressor=dict(arch="2Ц", inlet="двух", pi=13.5),
+                                                          hx=dict(recup=0.90, reheat=True, x_rh=0.35)),
+    "обращённый Брайтон (IBC)": dict(compressor=dict(arch="2Ц", inlet="двух", pi=13.5), hx=dict(ibc=True)),
+    "FLOX + рекуператор 0,88": dict(compressor=dict(arch="2Ц", pi=8.0), combustor=dict(scheme="FLOX"), hx=dict(recup=0.88)),
+    "TVC (полость - пассивный пилот)": dict(compressor=dict(arch="2Ц", inlet="двух", pi=13.5), combustor=dict(scheme="TVC")),
+    "каталитическая + рекуператор 0,85": dict(compressor=dict(arch="2Ц", pi=8.0), combustor=dict(scheme="CAT"), hx=dict(recup=0.85)),
+    "детонационная (RDC), класс N": dict(compressor=dict(arch="2Ц", inlet="двух", pi=13.5), combustor=dict(scheme="RDC"),
+                                       turbine=dict(cool="N", t41=1050)),
+    "волновой ротор, класс N": dict(compressor=dict(arch="2Ц", inlet="двух", pi=13.5), combustor=dict(scheme="ВР"),
+                                   turbine=dict(cool="N", t41=1050)),
+    "быстроходный через редуктор пакета": dict(compressor=dict(arch="2Ц", inlet="двух", pi=13.5), shaft=dict(drive="быстроходный")),
+    "свободная СТ": dict(compressor=dict(arch="2Ц", pi=13.5), shaft=dict(drive="свободная СТ")),
+    "свободная СТ + межтурбинная камера, класс K": dict(compressor=dict(arch="2Ц", pi=13.5), shaft=dict(drive="свободная СТ"),
+                                                      turbine=dict(cool="K", t41=1150), hx=dict(reheat=True, t_rh=1000)),
+    "класс K, T41 1150, π 16": dict(compressor=dict(arch="2Ц", pi=16.0), turbine=dict(cool="K", t41=1150)),
+    "печатный класс P, оболочка": dict(compressor=dict(arch="2Ц", pi=13.5),
+                                      turbine=dict(cool="P", mat="CM247LC", make="печать", hot_make="печать", hot_mat="Haynes282", t41=1150),
+                                      build=dict(case="оболочка")),
+    "керамика C, быстроходный": dict(compressor=dict(arch="1Ц", pi=6.0), shaft=dict(drive="быстроходный"),
+                                    turbine=dict(type="Р", cool="C", mat="Si3N4", make="керамика", hot_make="керамика", hot_mat="CMC",
+                                                 t41=1250)),
+    "ОЦ (1 осевая + центробежная), класс K": dict(compressor=dict(arch="ОЦ", n_ax=1, pi=12.0), turbine=dict(cool="K", t41=1150)),
+    "кластер 2 ядра + СТ": dict(build=dict(cores=2), compressor=dict(arch="2Ц", pi=13.5), shaft=dict(drive="свободная СТ"),
+                                turbine=dict(cool="N", t41=1050)),
+    "KV-1: 1Ц радиальная, быстроходный": dict(kv="KV-1", compressor=dict(arch="1Ц", pi=6.0),
+                                             turbine=dict(type="Р", mat="K418", make="литьё", t41=950), shaft=dict(drive="быстроходный")),
+    "KV-6: ОЦ (2 осевые + центробежная), свободная СТ, класс K": dict(kv="KV-6", compressor=dict(arch="ОЦ", n_ax=2, pi=16.0), shaft=dict(drive="свободная СТ"),
+                                                    turbine=dict(cool="K", t41=1200)),
+}
+
+
+def example(name):
+    c = EXAMPLES[name]
+    return frame3_concept() if c is None else dict(c, name=name)

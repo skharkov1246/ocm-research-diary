@@ -249,7 +249,8 @@ def calibrate(n=12, mesh=(80, 12), workers=4):
                         verdict_ccx=bool(ccx_ <= 0.9), verdict_fast=bool(f_ <= 0.9)))
     ind = [q for q in chk if q["in_domain"]]
     d["domain"] = dict(slope_max_limit=__import__("blade_geom").SLOPE_MAX, rmin_over_h=__import__("blade_geom").RMIN_H,
-                       rule="|dh/dr| ≤ 20 на 0,1…0,95·r2; задняя поверхность монотонна (глубина убывает к ободу), R_min/h ≥ 0,3",
+                       rule=("|dh/dr| ≤ %g на 0,1…0,95·r2; задняя поверхность монотонна (глубина убывает к ободу), R_min/h ≥ %g"
+                             % (__import__("blade_geom").SLOPE_MAX, __import__("blade_geom").RMIN_H)),
                        out_of_domain=[q for q in chk if not q["in_domain"]],
                        note="вне области (крутой переход ступицы в тонкое полотно) отношение ccx/тонкий диск неустойчиво — такие профили недопустимы в поиске")
     agree = [q["verdict_ccx"] == q["verdict_fast"] for q in ind]
@@ -291,7 +292,7 @@ def run_turb(job):
         res = DK.run_case(case, workdir=wd, keep=False)
         creep = res.get("creep") if isinstance(res.get("creep"), dict) else {}
         rows.append(dict(stage=case["name"][-1], ccx_burst=res["burst"]["margin"] if isinstance(res.get("burst"), dict) else res.get("burst_margin"),
-                         ccx_life_h=creep.get("life_min_h") if creep else None, ccx_gate=res["quality"]["passed"],
+                         ccx_life_h=creep.get("local_min_h") if creep else None, ccx_gate=res["quality"]["passed"],
                          ccx_vm_max_MPa=res.get("vm_max_node_MPa"), fast_burst=dk["burst"], fast_life_h=dk["life"]))
     return dict(tag=tag, stages=rows)
 

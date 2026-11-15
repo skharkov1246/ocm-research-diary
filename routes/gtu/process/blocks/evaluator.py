@@ -68,6 +68,36 @@ def funnel_pass(C, tgt, pgain=0.0):
     return fc, sol, etas, nt, npt, note
 
 
+HS_GRID = 10                # точек сетки частоты быстроходного вала в окне shaft.HS_RATIO (лог-равномерно)
+
+
+def pick_highspeed(C, tgt0, sol0):
+    """частота быстроходного вала: кандидаты - φ-оптимум первой центробежной ступени (shaft.n_highspeed) и сетка HS_GRID в окне
+    отношения частот; выбор - наименьшее суммарное нарушение правил воронки (funnel_space.check, violation), при равенстве -
+    наибольший КПД быстрого цикла. Возврат: n, таблица кандидатов"""
+    FS = T.FS()
+    lo, hi = shaft.HS_RATIO
+    cands = [tgt0["n_pkg"] * lo * (hi / lo) ** (k / (HS_GRID - 1)) for k in range(HS_GRID)]
+    if sol0["g"] is not None:
+        typ = stage_types(C)
+        k0 = next(k for k, x in enumerate(typ) if x != "О")
+        cands.append(shaft.n_highspeed(tgt0["n_pkg"], sol0["g"]["stages"][k0]["phi"], typ[k0])[0])
+    rows = []
+    for n in sorted(set(round(x / 10.0) * 10.0 for x in cands)):
+        tgt = T.package_target(C["kv"], n_out=n)
+        fc, sol, etas, nt, npt, _ = funnel_pass(C, tgt)
+        if sol["g"] is None or not sol["perf"]["ok"]:
+            rows.append(dict(n=n, violation=None, eta=None))
+            continue
+        bad = [r for r in FS.check(fc, tgt, sol["perf"], sol["g"]) if not r["ok"]]
+        rows.append(dict(n=n, violation=FS.violation(bad), eta=round(sol["perf"]["eta_th"] * 100, 3), reject=[r["code"] for r in bad]))
+    ok = [r for r in rows if r["violation"] is not None]
+    if not ok:
+        return tgt0["n_pkg"], rows
+    best = min(ok, key=lambda r: (r["violation"], -r["eta"]))
+    return best["n"], rows
+
+
 def chain_spec(C, etas, PRb_obj):
     xn, xr, xn2, xr2 = turbine.cool_fracs(C)
     cores = C["build"]["cores"]
@@ -142,11 +172,9 @@ def evaluate(concept, detail=False):
     rules = compat.check_static(C, tgt0)
     tgt = tgt0
     fc, sol, etas_f, nt, npt, eta_note = funnel_pass(C, tgt)
-    n_hs = None
-    if C["shaft"]["drive"] == "быстроходный" and sol["g"] is not None:
-        typ = stage_types(C)
-        k0 = next(k for k, x in enumerate(typ) if x != "О")
-        n_hs, _ = shaft.n_highspeed(tgt0["n_pkg"], sol["g"]["stages"][k0]["phi"], typ[k0])
+    hs_scan = None
+    if C["shaft"]["drive"] == "быстроходный":
+        n_hs, hs_scan = pick_highspeed(C, tgt0, sol)
         tgt = T.package_target(C["kv"], n_out=C["shaft"].get("n_out") or n_hs)
         fc, sol, etas_f, nt, npt, eta_note = funnel_pass(C, tgt)
     given = C["eta"].get("source") == "задано"
@@ -281,6 +309,8 @@ def evaluate(concept, detail=False):
         hx=hx.report(C, ch, sz, ibc_w),
         shaft=shaft.report(C, tgt, g2, ch, G, P),
     )
+    if hs_scan is not None:
+        out["blocks"]["shaft"]["n_scan"] = hs_scan
     if detail:
         out["chain"] = _jsonable(ch)
         out["funnel_concept"] = {k: v for k, v in fc.items()}

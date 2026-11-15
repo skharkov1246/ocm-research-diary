@@ -568,8 +568,7 @@ def size_from_passport(spec):
             g["_geo"] = stg
             comp_stages_geo += stg
             rows.append(block_axial_rotor(f"компрессор осевой {gi + 1}: диски и лопатки", stg, P["comp_rotor"], "comp"))
-            rows.append(block_vanes(f"компрессор осевой {gi + 1}: направляющие аппараты", stg,
-                                    P["vanes_c"] if pr_name == "industrial" else P["vanes_c"], "comp"))
+            rows.append(block_vanes(f"компрессор осевой {gi + 1}: направляющие аппараты", stg, P["vanes_c"], "comp"))
             # корпус: холодная и тёплая части (граница 300 °C)
             Lc_cold = sum(A["Lst_c"] * s["c"] for s in stg if s["T_C"] < 300)
             Lc_warm = sum(A["Lst_c"] * s["c"] for s in stg if s["T_C"] >= 300)
