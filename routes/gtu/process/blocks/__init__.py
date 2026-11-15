@@ -4,4 +4,4 @@
 совместимость - compat; цепочка - chain; единый вызов - evaluate.evaluate(concept). Уровень облика, всё - оценка.
 """
 from .concept import DEFAULT, normalize, label  # noqa: F401
-from .evaluate import evaluate  # noqa: F401
+from .evaluator import evaluate  # noqa: F401
