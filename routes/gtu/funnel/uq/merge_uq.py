@@ -154,7 +154,11 @@ def _top_rule(r):
 
 
 def _top_factor(r):
-    s = (r["dp"].get("sobol") or {}).get("y") or (r["dp"].get("sobol") or {}).get("feas")
+    """главный фактор варианта: по запасу самого частого нарушаемого правила (непрерывная величина), иначе по y"""
+    for d in r["dp"].get("rules") or []:
+        if d.get("sobol") and d["sobol"][0][0] != UF.DUMMY and d["sobol"][0][1] > max(2 * (d.get("noise") or 0.0), 0.02):
+            return [f"{d['sobol'][0][0]} (запас {d['rule']})", d["sobol"][0][1]]
+    s = [x for x in ((r["dp"].get("sobol") or {}).get("y") or []) if x[0] != UF.DUMMY]
     return s[0] if s else None
 
 
@@ -223,17 +227,56 @@ def _mn(v):
 
 
 # =========================================================================== сводки
+NAMES_D = UF.NAMES + [UF.DUMMY]
+
+
 def sobol_summary(rows, key="y_all", subset=None):
     S = [r["dp"]["sobol"].get(key) for r in rows if (subset is None or r["u"] in subset) and r["dp"]["sobol"].get(key)]
     if not S:
         return None
     A = np.array(S, dtype=float)
-    top1 = Counter(UF.NAMES[int(np.argmax(s))] for s in A)
+    top1 = Counter(NAMES_D[int(np.argmax(s[:-1]))] for s in A)
     order = np.argsort(-A.mean(axis=0))
-    return dict(n_variants=len(S), mean=[[UF.NAMES[i], round(float(A[:, i].mean()), 4), round(float(np.percentile(A[:, i], 90)), 4)]
+    return dict(n_variants=len(S), mean=[[NAMES_D[i], round(float(A[:, i].mean()), 4), round(float(np.percentile(A[:, i], 90)), 4)]
                                          for i in order],
+                noise_mean=round(float(A[:, -1].mean()), 4),
                 top1_share={k: round(v / len(S), 4) for k, v in top1.most_common()},
-                note="средний по вариантам индекс первого порядка и его P90; доля вариантов, где фактор - главный")
+                note="средний по вариантам индекс первого порядка и его P90; пустышка - уровень шума оценки; доля вариантов, где фактор - "
+                     "главный")
+
+
+def rules_margin_summary(rows, subset=None):
+    """по семействам правил (номер ступени отброшен): у скольких вариантов правило близко к пределу, P(нарушено), запас, нужный для
+    90 % выборок (медиана и P90 по вариантам), какие факторы чаще всего главные для запаса правила"""
+    acc = {}
+    for r in rows:
+        if subset is not None and r["u"] not in subset:
+            continue
+        for d in r["dp"].get("rules") or []:
+            fam = re.sub(r"\d+$", "", d["rule"]).rstrip("_")
+            a = acc.setdefault(fam, dict(n=0, pf=[], need=[], m0=[], top=Counter()))
+            a["n"] += 1
+            a["pf"].append(d["P_fail"])
+            if d.get("need90") is not None:
+                a["need"].append(d["need90"])
+            if d.get("m_nominal") is not None:
+                a["m0"].append(d["m_nominal"])
+            if d.get("sobol"):
+                nz = d.get("noise") or 0.0
+                for name, sv in d["sobol"][:1]:
+                    if sv > max(2 * nz, 0.02):
+                        a["top"][name] += 1
+    out = []
+    for fam, a in acc.items():
+        out.append(dict(rule=fam, variants=a["n"], P_fail_mean=round(float(np.mean(a["pf"])), 4),
+                        m_nominal_p50=round(float(np.median(a["m0"])), 4) if a["m0"] else None,
+                        need90_p50=round(float(np.median(a["need"])), 4) if a["need"] else None,
+                        need90_p90=round(float(np.percentile(a["need"], 90)), 4) if a["need"] else None,
+                        main_factor={k: v for k, v in a["top"].most_common(4)}))
+    out.sort(key=lambda d: (-d["variants"] * d["P_fail_mean"], d["rule"]))
+    return dict(rows=out[:25], note="запас - доля предела правила; need90 - запас, при котором правило выполнено в 90 % выборок (линейно: "
+                                    "номинальный запас − P10 запаса по выборкам); главный фактор - наибольший индекс Соболя запаса выше "
+                                    "двойного шума (пустышки) и 0,02")
 
 
 def rule_summary(rows):
@@ -285,6 +328,7 @@ def entry(r, k, sel):
                 score_f_p10_p50_p90=r["dp"]["score_f"], score_nominal=r["dp"]["nominal"].get("score_f"),
                 eta_el_p10_p50_p90=r["dp"]["eta_el"], viol_freq=r["dp"]["viol_freq"], od_fail_freq=(r.get("od") or {}).get("od_fail_freq"),
                 SM_min_p10_p50_p90=(r.get("od") or {}).get("SM_min"), sobol_top5=r["dp"]["sobol"].get("y"),
+                sobol_noise=r["dp"]["sobol"].get("noise"), rules=r["dp"].get("rules"),
                 l1=dict(score=rec.get("score"), feasible=rec.get("feasible"), eta_th_shaft=rec.get("eta_th_shaft"), V_env=rec.get("V_env"),
                         trl_min=rec.get("trl_min"), n_parts=rec.get("n_parts"), steps=rec.get("steps")),
                 adj=round(sel.get("_adj"), 4) if sel.get("_adj") is not None else None, penalty=round(sel.get("_pen", 0.0), 4))
@@ -350,7 +394,8 @@ def run_merge(found, kv, K, shards, out_dir, sfx="", p_min=P_MIN, score_min=U.SC
                    od_done=sum(1 for r in rows if r.get("P_feas") is not None), robust_eligible=len(eligible_ids),
                    P_hist_upper=p_hist(rows), P_hist_od=p_hist([r for r in rows if r.get("P_feas") is not None], "P_feas"),
                    rules_under_uncertainty=rule_summary(rows), by_arch=by_arch(rows)),
-               sobol=dict(y=sobol_summary(rows), feas=sobol_summary(rows, "feas_all"),
+               rules_margins=dict(all=rules_margin_summary(rows), eligible=rules_margin_summary(rows, eligible_ids)),
+               sobol=dict(y=sobol_summary(rows), feas=sobol_summary(rows, "feas_all"), score=sobol_summary(rows, "score_all"),
                           y_eligible=sobol_summary(rows, subset=eligible_ids),
                           estimator="по готовой выборке: корреляционное отношение по слоям x_i (M = √N/1,5) с поправкой на смещение (Plischke - "
                                     "Borgonovo - Smith 2013, по памяти); y = оценка × [допустим в расчётной точке]"),

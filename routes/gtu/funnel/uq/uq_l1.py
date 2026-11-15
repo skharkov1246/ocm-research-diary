@@ -90,9 +90,29 @@ def load_l1(dirs, kv, M, shards, tag=""):
 
 
 def load_candidates(path):
-    d = json.load(gzip.open(path, "rt", encoding="utf-8") if path.endswith(".gz") else open(path, encoding="utf-8"))
-    meta = dict(kind=d.get("kind", "pareto"), kv=d["kv"], file=os.path.basename(path), source=d.get("source"))
-    return list(d["candidates"]), meta
+    """файл кандидатов (merge_pareto.py или проба): концепция целиком (concept) или компактно - ниша, опорная концепция и гены (g):
+    концепция строится заново pareto_niche.Niche.build (тот же код - отпечаток source.l1_code_sha сверяется и пишется)"""
+    with (gzip.open(path, "rt", encoding="utf-8") if path.endswith(".gz") else open(path, encoding="utf-8")) as fh:
+        d = json.load(fh)
+    src = d.get("source") if isinstance(d.get("source"), dict) else {}
+    meta = dict(kind=d.get("kind", "pareto"), kv=d["kv"], file=os.path.basename(path), sha256=hashlib.sha256(open(path, "rb").read()).hexdigest(),
+                source=d.get("source"), code_match=(src.get("l1_code_sha") in (None, L1.code_sha())))
+    cands, niches, lost = [], {}, 0
+    for cd in d["candidates"]:
+        if not cd.get("concept") and cd.get("g") is not None:
+            import pareto_niche as PN                    # noqa: E402 - здесь, чтобы не было круговой загрузки
+            key = (cd["niche"], int(cd["ref_idx"]))
+            if key not in niches:
+                L1._prep(int(cd["n0"]), int(cd["seed"]), cd["kv"])
+                niches[key] = PN.Niche(cd["niche"], cd["kv"], cd["ref_idx"], cd["n0"], cd["seed"])
+            c = niches[key].build(np.array(cd["g"], dtype=float))
+            if c is None:
+                lost += 1
+                continue
+            cd = dict(cd, concept=c)
+        cands.append(cd)
+    meta.update(n=len(d["candidates"]), rebuilt=len(niches) and sum(1 for x in d["candidates"] if not x.get("concept")), rebuild_lost=lost)
+    return cands, meta
 
 
 def cand_sha(cands):
@@ -104,7 +124,7 @@ def cand_sha(cands):
 # =========================================================================== расчёт одной выборки
 def margins(rules):
     """запас по каждому числовому правилу, доля предела: > 0 - выполнено, < 0 - превышено (|val − lim| / |lim|; у правила с двумя
-    пределами - до ближнего, по наибольшему из них)"""
+    пределами - до ближнего, по наибольшему из них; у предела-вероятности меньше 0,01 - в порядках величины)"""
     out = {}
     for r in rules:
         val, lim = r.get("val"), r.get("lim")
@@ -112,8 +132,11 @@ def margins(rules):
             sc = max(abs(lim[0]), abs(lim[1]), 1e-9)
             m = min(val - lim[0], lim[1] - val) / sc
         elif isinstance(val, (int, float)) and isinstance(lim, (int, float)) and math.isfinite(val):
-            sc = abs(lim) if abs(lim) > 1e-9 else 1.0
-            m = abs(val - lim) / sc * (1.0 if r["ok"] else -1.0)
+            if 0 < lim < 1e-2 and val > 0:              # предел-вероятность (Вейбулл): запас в порядках, lg(предел / величина)
+                m = abs(math.log10(val / lim)) * (1.0 if r["ok"] else -1.0)
+            else:
+                sc = abs(lim) if abs(lim) > 1e-9 else 1.0
+                m = abs(val - lim) / sc * (1.0 if r["ok"] else -1.0)
         else:
             continue
         out[r["code"]] = float(m)
@@ -428,7 +451,7 @@ def main(argv=None):
     ap.add_argument("--l1-m", type=int, default=None)
     ap.add_argument("--l1-shards", type=int, default=None)
     ap.add_argument("--l1-tag", default="")
-    ap.add_argument("--candidates", default=None, help="файл кандидатов merge_pareto.py (вместо частей уровня 1)")
+    ap.add_argument("--candidates", nargs="*", default=None, help="файлы кандидатов merge_pareto.py (вместе с частями уровня 1 или без)")
     ap.add_argument("--top", type=int, default=0, help="первых кандидатов (0 - все)")
     ap.add_argument("--n", type=int, default=DEFAULT_N, help="выборок латинского гиперкуба на вариант")
     ap.add_argument("--n-od", type=int, default=DEFAULT_N_OD, help="выборок с нерасчётными режимами (первые строки гиперкуба)")
@@ -444,14 +467,21 @@ def main(argv=None):
     ap.add_argument("--tag", default="")
     ap.add_argument("--local", action="store_true", help=f"локальная миниатюра: не больше {LOCAL_MAX}")
     a = ap.parse_args(argv)
-    if a.candidates:
-        cands, meta_in = load_candidates(a.candidates)
-    elif a.l1_in:
+    if not (a.candidates or a.l1_in):
+        ap.error("нужен --l1-in и/или --candidates")
+    cands, metas = [], []
+    if a.l1_in:                                           # объединённый набор: сначала варианты уровня 1, затем файлы кандидатов
         if not (a.l1_m and a.l1_shards):
             ap.error("--l1-in требует --l1-m и --l1-shards")
-        cands, meta_in = load_l1(a.l1_in, a.l1_kv, a.l1_m, a.l1_shards, a.l1_tag)
-    else:
-        ap.error("нужен --l1-in или --candidates")
+        c1, m1 = load_l1(a.l1_in, a.l1_kv, a.l1_m, a.l1_shards, a.l1_tag)
+        cands += c1; metas.append(m1)
+    for path in a.candidates or []:
+        c2, m2 = load_candidates(path)
+        cands += c2; metas.append(m2)
+    kvs = {m["kv"] for m in metas}
+    if len(kvs) != 1:
+        ap.error(f"кандидаты разных точек: {kvs}")
+    meta_in = metas[0] if len(metas) == 1 else dict(kind="union", kv=kvs.pop(), parts=metas)
     if a.top:
         cands = cands[:a.top]
         meta_in["top"] = a.top

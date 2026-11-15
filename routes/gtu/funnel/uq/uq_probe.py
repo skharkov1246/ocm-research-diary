@@ -54,6 +54,15 @@ def candidates_from_csv(path=PROBE_CSV, n0=PROBE_N0, kv=PROBE_KV, seed=FS.SEED):
     return out
 
 
+def write_candidates(path, cands=None):
+    """кандидаты пробы в файл (формат uq_l1 --candidates; затравка pareto_niche --seed-cands)"""
+    cands = cands if cands is not None else candidates_from_csv()
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(dict(kind="L1-csv", kv=PROBE_KV, source=os.path.relpath(PROBE_CSV, FUNNEL), candidates=cands), fh, ensure_ascii=False,
+                  default=U._r)
+    return path
+
+
 def nominal_check(cands):
     """номинальная выборка против строки пробы: оценка и допустимость расчётной точки"""
     tgt = FS.target(cands[0]["kv"])
@@ -107,7 +116,8 @@ def main(argv=None):
                         rows=[dict(u=r["u"], j=r["j_src"], idx=r["idx"], arch=r["arch"], P_dp=r["dp"]["P_dp"], P_dp_ci=r["dp"]["P_dp_ci"],
                                    P_od_dp=(r.get("od") or {}).get("P_od_dp"), P_feas=r.get("P_feas"), od_status=r.get("od_status"),
                                    score_f=r["dp"]["score_f"], nominal=r["dp"]["nominal"], viol_freq=r["dp"]["viol_freq"],
-                                   sobol_y=r["dp"]["sobol"]["y"], sobol_feas=r["dp"]["sobol"]["feas"], half=r["dp"]["half"])
+                                   sobol_y=r["dp"]["sobol"]["y"], sobol_score=r["dp"]["sobol"]["score"], sobol_noise=r["dp"]["sobol"]["noise"],
+                                   rules=r["dp"]["rules"], half=r["dp"]["half"])
                               for r in out["rows"]])
     with open(a.out, "w", encoding="utf-8") as fh:
         json.dump(res, fh, ensure_ascii=False, indent=1, default=U._r)

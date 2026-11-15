@@ -65,24 +65,25 @@ def static_deck(N, mat_cards, rpm, fractions, node_ids, T):
     L += ["*TRANSFORM, NSET=NFIX, TYPE=C", "0., 0., 0., 0., 0., 1.", "*BOUNDARY", "NFIX, 2, 3",
           "*INITIAL CONDITIONS, TYPE=TEMPERATURE", "NALL, 20."]
     for k, f in enumerate(fractions):
-        L += ["*STEP, NLGEOM, INC=100", "*STATIC", "0.25, 1." if k == 0 else "1., 1.", "*DLOAD", f"EALL, CENTRIF, {omega2(rpm * f):.9e}, 0., 0., 0., 0., 0., 1."]
+        L += ["*STEP, NLGEOM, INC=200", "*STATIC", "0.125, 1." if k == 0 else "0.5, 1.", "*DLOAD", f"EALL, CENTRIF, {omega2(rpm * f):.9e}, 0., 0., 0., 0., 0., 1."]
         L += temperature_cards(node_ids, T)
         L += ["*NODE FILE", "U", "*EL FILE", "S", "*END STEP"]
     return "\n".join(L) + "\n"
 
 
-def freq_deck(N, mat_cards, rpm, fractions, node_ids, T, nmodes, nd_max, cold_zero=True):
-    """частоты: f = 0 - *FREQUENCY без нагрузки; f > 0 - *STATIC (NLGEOM) + *STEP, PERTURBATION *FREQUENCY"""
+def freq_deck(N, mat_cards, rpm, fractions, node_ids, T, nmodes, nd_max, cold_zero=False):
+    """частоты с преднагружением: для каждой доли f (0 допускается) - *STATIC с NLGEOM (CENTRIF при f > 0 и поле
+    температур режима), затем *STEP, PERTURBATION + *FREQUENCY. cold_zero - ещё шаг без нагрузки и нагрева в начале
+    (частоты в покое на стенде, для сведения)"""
     sel = f"*SELECT CYCLIC SYMMETRY MODES, NMIN=0, NMAX={int(nd_max)}"
     L = ["*HEADING", "fea_mass frequency", "*INCLUDE, INPUT=mesh.inp"] + mat_cards + cyclic_cards(N)
     L += ["*BOUNDARY", "NBORE, 1, 3", "*INITIAL CONDITIONS, TYPE=TEMPERATURE", "NALL, 20."]
-    for f in fractions:
-        if f <= 0:
-            if cold_zero:
-                L += ["*STEP", "*FREQUENCY", str(int(nmodes)), sel, "*TEMPERATURE", "NALL, 20.", "*END STEP"]
-            continue
-        first = not any(x > 0 for x in fractions[:fractions.index(f)])
-        L += ["*STEP, NLGEOM, INC=100", "*STATIC", "0.25, 1." if first else "1., 1.", "*DLOAD", f"EALL, CENTRIF, {omega2(rpm * f):.9e}, 0., 0., 0., 0., 0., 1."]
+    if cold_zero:
+        L += ["*STEP", "*FREQUENCY", str(int(nmodes)), sel, "*TEMPERATURE", "NALL, 20.", "*END STEP"]
+    for k, f in enumerate(fractions):
+        L += ["*STEP, NLGEOM, INC=200", "*STATIC", "0.125, 1." if k == 0 else "0.5, 1."]
+        if f > 0:
+            L += ["*DLOAD", f"EALL, CENTRIF, {omega2(rpm * f):.9e}, 0., 0., 0., 0., 0., 1."]
         L += temperature_cards(node_ids, T)
         L += ["*END STEP", "*STEP, PERTURBATION", "*FREQUENCY", str(int(nmodes)), sel, "*END STEP"]
     return "\n".join(L) + "\n"
@@ -145,44 +146,44 @@ def read_frd_steps(path, blocks=("DISP", "STRESS")):
 
 
 def read_eigen_steps(path):
-    """таблицы собственных частот .dat по шагам *FREQUENCY: [ {ND: [f, ...]} ]. При циклике ccx пишет таблицу на каждый
-    узловой диаметр, частоты в ней - дважды (вещественная форма удвоенной задачи); здесь - уникальные (отн. допуск 1e-6)"""
-    steps, cur_nd, on, got = [], None, False, 0
-    seen_nd = set()
+    """таблицы собственных частот .dat по шагам: [ {ND: [f, ...]} ] в порядке шагов с выводом частот. Строка таблицы ccx 2.21
+    при циклике: «ND, номер формы, собственное число, ω, f [Гц], мнимая часть»; без циклики - без ND. Частоты в таблице ND
+    идут парами (вещественная форма удвоенной задачи) - здесь уникальные (отн. допуск 1e-6)"""
+    steps, cur, on, step_no, cur_no = [], None, False, None, None
     with open(path) as f:
-        lines = f.readlines()
-    for ln in lines:
-        if "E I G E N V A L U E   O U T P U T" in ln:
-            on, got = True, 0
-            continue
-        u = ln.upper()
-        if "NODAL DIAMETER" in u:
+        for ln in f:
+            if "S T E P" in ln:
+                try:
+                    step_no = int(ln.split()[-1])
+                except ValueError:
+                    step_no = None
+                on = False
+                continue
+            if "E I G E N V A L U E   O U T P U T" in ln:
+                if cur is None or step_no != cur_no:          # таблицы всех ND одного шага - вместе
+                    cur, cur_no = {}, step_no
+                    steps.append(cur)
+                on = True
+                continue
+            if not on:
+                continue
+            if "P A R T I C I P A T I O N" in ln or "E F F E C T I V E" in ln or "T O T A L" in ln:
+                on = False
+                continue
+            p = ln.split()
             try:
-                cur_nd = int(ln.split()[-1])
-            except ValueError:
-                cur_nd = None
-            if not steps or cur_nd in seen_nd and cur_nd == 0:
-                steps.append({})
-                seen_nd = set()
-            seen_nd.add(cur_nd)
-            continue
-        if not on:
-            continue
-        p = ln.split()
-        if len(p) >= 4 and p[0].isdigit():
-            try:
-                fhz = float(p[3]) if len(p) == 5 else float(p[4]) if len(p) >= 6 else float(p[3])
+                if len(p) == 6 and p[0].isdigit() and p[1].isdigit():
+                    nd, fhz = int(p[0]), float(p[4])
+                elif len(p) == 5 and p[0].isdigit():
+                    nd, fhz = 0, float(p[3])
+                else:
+                    continue
             except ValueError:
                 continue
-            if not steps:
-                steps.append({})
-            lst = steps[-1].setdefault(cur_nd if cur_nd is not None else 0, [])
+            lst = cur.setdefault(nd, [])
             if not any(abs(fhz - g) <= 1e-6 * max(abs(fhz), 1e-9) for g in lst):
                 lst.append(fhz)
-            got += 1
-        elif p and not p[0].isdigit() and got:
-            on = False
-    return [{nd: sorted(v) for nd, v in st.items()} for st in steps]
+    return [{nd: sorted(v) for nd, v in st.items()} for st in steps if st]
 
 
 def von_mises(S):

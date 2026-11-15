@@ -197,7 +197,8 @@ def main():
     pkg["estimate"] = est
     pkg["merge"] = dict(
         where="сессия с ключами после run (runs/<run_id>/<задача>/); тот же коммит, что в _job.log задач; Python с "
-              + ", ".join(pins) + "; слияние потоковое (~1-2 КБ на строку)",
+              + ", ".join(pins) + "; слияние потоковое, свободной памяти не меньше 6 ГБ (замер: пик 0,47 ГБ на 40 000 "
+              "строк, 0,89 ГБ на 88 000 -> ~4-5 ГБ на 524 288, экстраполяция) и ~10-15 мин (88 000 строк - 88 с)",
         commands=[
             "bash -euo pipefail -c 'for S in main b0 b2; do D=/tmp/comb_l0v2_<run_id>_$S; mkdir -p \"$D\"; done; "
             "find routes/gtu/platform/aws/runs/<run_id> -path \"*/_lost\" -prune -o -name \"comb_l0v2_*.json.gz\" -print | "

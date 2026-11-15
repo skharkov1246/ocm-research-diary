@@ -9,8 +9,9 @@ RDC / волнового ротора - не ось (свойство техно
 
 Цели (все - минимум, нормированы 0-1): 1 − детали/10, 1 − Plug&Play/10, 1 − монтаж/10 (баллы моделей уровня 0 для геометрии уровня 1),
 (45 − КПД на клеммах, %)/30, ln(объём габарита, м³)/ln 60. Ограничение - правила расчётной точки уровня 1 (funnel_l1.evaluate_point:
-сумма относительных превышений = 0). Режим --robust K: ещё P(расчётная точка допустима) по K общим выборкам неопределённостей
-(uq_factors, первые K строк гиперкуба) >= P_TARGET - ограничение «устойчиво допустим».
+сумма относительных превышений = 0). Режим --robust K: ограничение «устойчиво допустим» - расчётная точка допустима не меньше
+чем в доле P_TARGET из K общих выборок неопределённостей (uq_factors, первые K строк гиперкуба); превышение - квантиль уровня
+P_TARGET превышений по выборкам (непрерывно: у отбора есть направление и там, где ни одна выборка не проходит).
 Начальная популяция: варианты уровня 1 этой ниши (если даны части funnel_l1), концепции отбора уровня 0 этой ниши, остальное -
 латинский гиперкуб. Итог ниши: фронт (недоминируемые допустимые последней популяции), до K_CHECK представителей (крайние по
 каждой цели, лучшие по взвешенной и итоговой оценке, остальные - наиболее удалённые) проходят нерасчётные режимы (full_check) с
@@ -50,7 +51,8 @@ GENES = FREE_DISC + CONT_GENES
 NG = len(GENES)
 OBJ = ["1 − s_parts/10", "1 − s_plugplay/10", "1 − s_service/10", "(45 − η_el)/30", "ln V_env / ln 60"]
 PGAIN_MID = {"RDC": 0.05, "ВР": 0.075}
-P_TARGET = 0.5                # режим --robust: P(расчётная точка) по K выборкам не ниже (оценка: как P_MIN устойчивого отбора)
+P_TARGET = 0.75               # режим --robust: P(расчётная точка) по K выборкам не ниже (оценка: нерасчётные режимы снимают ещё
+#                               часть - итоговое P(допустим) устойчивого отбора должно остаться >= P_MIN 0,5)
 K_CHECK = 24                  # представителей фронта на нерасчётные режимы (около 30 с каждый)
 L0_SEEDS = 16                 # концепций отбора уровня 0 ниши в начальной популяции (concept() - около 0,5 с)
 DEFAULT_POP, DEFAULT_GENS = 200, 100
@@ -158,8 +160,12 @@ def objectives(ev):
                 V_env=V)
 
 
-def evaluator(N, robust_vals=None, stats=None):
-    """X -> (F, V) для NSGA-II; robust_vals - список значений факторов (K выборок): V += max(0, P_TARGET − P̂)"""
+def evaluator(N, robust_vals=None, stats=None, p_target=None):
+    """X -> (F, V) для NSGA-II. robust_vals - значения факторов K выборок: превышение заменяется квантилем уровня p_target
+    превышений по K выборкам (k-е по возрастанию, k = ⌈p_target·K⌉): ноль - точка допустима не меньше чем в доле p_target выборок,
+    иначе - непрерывная мера, насколько далеко (у отбора есть направление и при P̂ = 0)"""
+    pt = P_TARGET if p_target is None else p_target
+
     def f(X):
         R = [N.evaluate(x) for x in X]
         F = np.array([r["G"] if r["ok"] else [2.0] * 5 for r in R])
@@ -168,10 +174,12 @@ def evaluator(N, robust_vals=None, stats=None):
             stats["evals"] += len(X)
             stats["feasible"] += int((V <= 0).sum())
         if robust_vals:
-            idx = [i for i, r in enumerate(R) if r["ok"] and r["viol"] <= 0 and "p_rob" not in r]
+            K = len(robust_vals)
+            kq = max(1, int(math.ceil(pt * K)))
+            idx = [i for i, r in enumerate(R) if r["ok"] and "v_rob" not in r]
             if idx:
-                hits = np.zeros(len(idx))
-                for v in robust_vals:
+                vs = np.zeros((len(idx), K))
+                for s_, v in enumerate(robust_vals):
                     with UP.Perturb(v):
                         for m, i in enumerate(idx):
                             c = dict(R[i]["c"])
@@ -179,14 +187,15 @@ def evaluator(N, robust_vals=None, stats=None):
                                 c["pgain"] = c["pgain"] * float(v["k_pgain"])
                             UP.set_variant(c)
                             ev = L1.evaluate_point(c, N.tgt)
-                            hits[m] += 1.0 if (ev["ok"] and ev["viol"] == 0) else 0.0
+                            vs[m, s_] = float(ev["viol"]) if ev["ok"] else 5.0
                 for m, i in enumerate(idx):
-                    R[i]["p_rob"] = float(hits[m] / len(robust_vals))
+                    R[i]["p_rob"] = float((vs[m] <= 0).mean())
+                    R[i]["v_rob"] = float(np.sort(vs[m])[kq - 1])
                 if stats is not None:
-                    stats["robust_evals"] += len(idx) * len(robust_vals)
+                    stats["robust_evals"] += len(idx) * K
             for i, r in enumerate(R):
-                if r["ok"] and r["viol"] <= 0:
-                    V[i] = max(0.0, P_TARGET - r.get("p_rob", 0.0))
+                if r["ok"]:
+                    V[i] = max(r["viol"], r["v_rob"])
         return F, V
     return f
 
@@ -265,7 +274,7 @@ def run_niche(task):
         _, _, vals = UF.sample(max(P["robust"], 2), UF.UQ_SEED)
         rv = vals[:P["robust"]]
     stats = dict(evals=0, feasible=0, robust_evals=0)
-    ev_fn = evaluator(N, rv, stats)
+    ev_fn = evaluator(N, rv, stats, P.get("p_target"))
     half = {}
 
     def cb(g, X, F, V, rank):
@@ -336,9 +345,12 @@ def part_path(out, kv, NN, shard, shards, tag="", gz=False):
 
 
 def run_parts(select_path, shard_list, shards, out, pop=DEFAULT_POP, gens=DEFAULT_GENS, check=K_CHECK, robust=0, workers=1, gz=False,
-              tag="", l1=None, top=None):
+              tag="", l1=None, top=None, seed_cands=None, niche_filter=None, p_target=P_TARGET):
     t0 = time.time()
     niches, meta_in = load_niches(select_path)
+    if niche_filter:
+        niches = [r for r in niches if r["niche"] in set(niche_filter)]
+        meta_in["niche_filter"] = list(niche_filter)
     if top:
         niches = niches[:top]
     NN = len(niches)
@@ -350,7 +362,13 @@ def run_parts(select_path, shard_list, shards, out, pop=DEFAULT_POP, gens=DEFAUL
         cands, l1_meta = U.load_l1(l1["dirs"], kv, l1["M"], l1["shards"], l1.get("tag", ""))
         for cd in cands:
             l1_by.setdefault(cd["niche"], []).append(cd)
-    P = dict(pop=pop, gens=gens, check=check, robust=robust, tag=tag)
+    if seed_cands:
+        cands, sm = U.load_candidates(seed_cands)
+        l1_meta = dict(l1_meta or {}, seed_cands=sm)
+        for cd in cands:
+            if cd.get("concept"):
+                l1_by.setdefault(cd["niche"], []).append(cd)
+    P = dict(pop=pop, gens=gens, check=check, robust=robust, tag=tag, p_target=p_target)
     idx_by = {k: FS.shard_indices(NN, k, shards) for k in shard_list}
     ks = sorted(k for v in idx_by.values() for k in v)
     tasks = []
@@ -368,7 +386,7 @@ def run_parts(select_path, shard_list, shards, out, pop=DEFAULT_POP, gens=DEFAUL
     el = time.time() - t0
     meta = dict(level=LEVEL, date=DATE, software=FS.software(), method=__doc__.split("\n")[0], kv=kv, NN=NN, shards=shards, tag=tag,
                 input=meta_in, l1=l1_meta, code_sha=code_sha(), l1_code_sha=L1.code_sha(), factors_sha=UF.table_sha(), pop=pop, gens=gens,
-                check=check, robust=robust, p_target=P_TARGET if robust else None, genes=GENES, objectives=OBJ, workers=workers,
+                check=check, robust=robust, p_target=p_target if robust else None, genes=GENES, objectives=OBJ, workers=workers,
                 call=dict(shards=shard_list, niches=len(ks), elapsed_s=round(el, 2), evals=sum(g["evals"] for g in got),
                           robust_evals=sum(g["robust_evals"] for g in got), checked=sum(len(g["checked"]) for g in got),
                           cpu_s=round(sum(g["t_cpu_s"] for g in got), 2), host_cpus=os.cpu_count(),
@@ -392,10 +410,13 @@ def main(argv=None):
     ap.add_argument("--gens", type=int, default=DEFAULT_GENS)
     ap.add_argument("--check", type=int, default=K_CHECK, help="представителей фронта на нерасчётные режимы")
     ap.add_argument("--robust", type=int, default=0, help="K выборок неопределённостей в ограничении (0 - номинальный фронт)")
+    ap.add_argument("--p-target", type=float, default=P_TARGET, help="доля K выборок, в которой расчётная точка должна быть допустима")
     ap.add_argument("--l1-in", nargs="*", default=None)
     ap.add_argument("--l1-m", type=int, default=None)
     ap.add_argument("--l1-shards", type=int, default=None)
     ap.add_argument("--l1-tag", default="")
+    ap.add_argument("--seed-cands", default=None, help="файл кандидатов (формат uq_l1 --candidates) - затравка ниш (локальные пробы)")
+    ap.add_argument("--niche", nargs="*", default=None, help="только эти ниши (локальные пробы)")
     ap.add_argument("--top", type=int, default=0, help="первых ниш (0 - все)")
     ap.add_argument("--shards", type=int, required=True)
     ap.add_argument("--shard", default="all")
@@ -410,7 +431,8 @@ def main(argv=None):
     l1 = dict(dirs=a.l1_in, M=a.l1_m, shards=a.l1_shards, tag=a.l1_tag) if a.l1_in else None
     sl = L0.parse_shards(a.shard, a.shards)
     w = a.workers or L0.default_workers()
-    paths, meta, got = run_parts(a.select, sl, a.shards, a.out, a.pop, a.gens, a.check, a.robust, w, a.gzip, a.tag, l1, a.top or None)
+    paths, meta, got = run_parts(a.select, sl, a.shards, a.out, a.pop, a.gens, a.check, a.robust, w, a.gzip, a.tag, l1, a.top or None,
+                                 a.seed_cands, a.niche, a.p_target)
     c = meta["call"]
     print(f"{meta['kv']} фронты ниш: {meta['NN']} ниш, части {sl[0]}..{sl[-1]} ({len(sl)} из {a.shards}), {c['niches']} ниш, {c['evals']} "
           f"вычислений (+{c['robust_evals']} под неопределённостью), проверено {c['checked']}; {c['elapsed_s']} с, {w} процессов -> {a.out}")

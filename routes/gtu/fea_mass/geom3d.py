@@ -39,7 +39,8 @@ A = dict(
                 fine=dict(k_blade=0.65, k_hub=4.0, grow=0.25)),
     core_bore_r1h=0.15,        # цельное колесо (заодно, сварка): технологическое отверстие r = 0,15 r1h (ось внутри
     #                            сектора ccx не держит; пик у этого отверстия из оценок исключается - концентрация ×2 ложная)
-    tie_bore_r1h=0.35,         # колесо сборного ротора: отверстие под стяжку r = 0,35 r1h (как impeller.DEFAULTS r_bore)
+    tie_bore_r1h=0.35,
+    shaft_r1h=0.60,            # цельное колесо: опора для частот - торцы ступицы у оси до r = 0,6 r1h (цапфы вала, оценка)         # колесо сборного ротора: отверстие под стяжку r = 0,35 r1h (как impeller.DEFAULTS r_bore)
     # осевое колесо
     t_max_c_hub=0.20, t_max_c_tip=0.08,    # наибольшая толщина пера / хорда у корня и на периферии
     t_te_c=0.015,              # толщина выходной кромки / хорда
@@ -240,7 +241,22 @@ def _extract(gmsh, vol, master_faces, slave_faces, bore_faces):
             nt = gmsh.model.mesh.getNodes(2, f, includeBoundary=True)[0]
             s |= {new[int(t)] for t in nt if int(t) in new}
         return sorted(s)
+    _LAST_MAP.clear()
+    _LAST_MAP.update(new)
     return nodes, np.arange(1, len(used) + 1), elems, nset(master_faces), nset(slave_faces), nset(bore_faces)
+
+
+_LAST_MAP = {}
+
+
+def _extract_nodes(gmsh, faces, ids_map=None, nodes=None):
+    """номера (новые) узлов граней по карте последнего _extract"""
+    mp = ids_map or _LAST_MAP
+    s = set()
+    for f in faces:
+        nt = gmsh.model.mesh.getNodes(2, f, includeBoundary=True)[0]
+        s |= {mp[int(t)] for t in nt if int(t) in mp}
+    return sorted(s)
 
 
 def _match_periodic(nodes, master, slave, pitch, tol):
@@ -473,12 +489,15 @@ def wheel_sector(spec, level="base", threads=1, keep_step=None):
         occ.synchronize()
         tol = max(1e-6, 2e-4 * d["b2"])
         master, slave = _classify_periodic(gmsh, vol, refm, refs, tol)
-        bore_f = []
+        bore_f, end_f = [], []
+        z_ends = [z_n] + ([2 * z_bk - z_n] if dbl else [z_bk])
         for _, f in gmsh.model.getBoundary([(3, vol)], oriented=False):
             f = abs(f)
             P = _face_points(gmsh, f)
             if np.all(np.abs(np.hypot(P[:, 0], P[:, 1]) - r_b) < tol):
                 bore_f.append(f)
+            elif any(np.all(np.abs(P[:, 2] - ze) < tol) for ze in z_ends):
+                end_f.append(f)
         occ.remove([(2, t) for t in refm + refs], recursive=True)
         occ.synchronize()
         if not master or not bore_f:
@@ -502,6 +521,7 @@ def wheel_sector(spec, level="base", threads=1, keep_step=None):
         t1 = time.time()
         q, snap = _mesh_volume(gmsh, vol, pairs, pitch, size, 0.25 * h_b, h_hub, threads)
         nodes, ids, elems, nm, ns, nb = _extract(gmsh, vol, master, slave, bore_f)
+        ne = _extract_nodes(gmsh, end_f, ids_map=None, nodes=nodes)
         t_mesh = time.time() - t1
     finally:
         gmsh.logger.stop()
@@ -515,7 +535,16 @@ def wheel_sector(spec, level="base", threads=1, keep_step=None):
     ecls = np.where(inside, CLASS_HUB, CLASS_BLADE)
     z_mid = z_bk if dbl else 0.5 * (z_n + z_bk)
     nfix = _fix_node(nodes, nb, ns, nm, z_mid)
-    sets = dict(NMASTER=nm, NSLAVE=ns, NBORE=[t for t in nb if t not in set(ns)], NFIX=[nfix])
+    # опора для частот: колесо сборного ротора - отверстие под стяжку; цельное - торцы ступицы у оси (цапфы вала, r <= 0,6 r1h)
+    # и технологическое отверстие
+    sl = set(ns)
+    if solid:
+        Pe = nodes[np.asarray(ne, dtype=int) - 1] if ne else np.zeros((0, 3))
+        shaft = [t for t, x in zip(ne, Pe) if math.hypot(x[0], x[1]) <= A["shaft_r1h"] * d["r1h"]]
+        nhub = sorted((set(nb) | set(shaft)) - sl)
+    else:
+        nhub = sorted(set(nb) - sl)
+    sets = dict(NMASTER=nm, NSLAVE=ns, NBORE=nhub, NFIX=[nfix])
     meta = dict(kind="wheel", Z=Z, pitch_rad=pitch, splitters=bool(p["splitters"]), double_sided=dbl, bore=spec.get("bore"),
                 r_bore=r_b, z_nose=z_n, z_back=z_bk, t_back=t_back, D2=d["D2"], r2=d["r2"], r1h=d["r1h"], r1s=d["r1s"], b2=d["b2"],
                 Lz=d["Lz"], beta1h=d["beta1h"], beta1s=d["beta1s"], beta2b=d["beta2b"], wrap_hub_deg=imp.geo["wrap_hub_deg"],
