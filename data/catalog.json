@@ -4,12 +4,12 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 510,
-    "total_bytes": 21406677,
-    "results_files": 209,
+    "datasets": 519,
+    "total_bytes": 24539487,
+    "results_files": 212,
     "results_with_script": 67,
     "results_referenced_in_site": 22,
-    "results_with_provenance_fields": 60,
+    "results_with_provenance_fields": 63,
     "by_track": {
       "ammonia": 91,
       "battery-cathode": 1,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 190,
+      "не определён": 199,
       "прочее": 25
     }
   },
@@ -7280,6 +7280,23 @@
       "last_commit": "3e3838b"
     },
     {
+      "path": "routes/gtu/evo/shell/jobs_evo_shell.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 9346,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "_comment",
+        "defaults",
+        "jobs",
+        "estimate"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "1726217"
+    },
+    {
       "path": "routes/gtu/frame3/frame3_fea_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
@@ -7377,6 +7394,205 @@
       "last_change": "2026-11-14",
       "last_author": "Claude",
       "last_commit": "493cb81"
+    },
+    {
+      "path": "routes/gtu/funnel/aws/l1_debug/funnel_l1_results_KV-3_m150.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 20948,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "status",
+        "kv",
+        "target",
+        "M",
+        "input",
+        "inputs",
+        "code_sha",
+        "starts",
+        "maxfev",
+        "de_gens",
+        "de_pop",
+        "merge_checks",
+        "calibration",
+        "strength_facts",
+        "rules_l1",
+        "timing",
+        "timing_detail",
+        "summary",
+        "selection",
+        "convergence",
+        "starts_check"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "ed111a1"
+    },
+    {
+      "path": "routes/gtu/funnel/aws/l1_debug/funnel_l1_top50_KV-3_m150.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 794013,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "kv",
+        "M",
+        "input",
+        "input_sha256",
+        "code_sha",
+        "starts",
+        "maxfev",
+        "rule",
+        "selection_note",
+        "price_of_diversity",
+        "selected",
+        "note"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "ed111a1"
+    },
+    {
+      "path": "routes/gtu/funnel/aws/l1_fea/funnel_l1_fea_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 52931,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "method",
+        "date",
+        "input",
+        "n",
+        "results"
+      ],
+      "provenance_fields": [
+        "method",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "ed111a1"
+    },
+    {
+      "path": "routes/gtu/funnel/aws/l1_full/funnel_l1_fea_cases.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 655424,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "date",
+        "kv",
+        "M",
+        "code_sha",
+        "top",
+        "cases"
+      ],
+      "provenance_fields": [
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "ed111a1"
+    },
+    {
+      "path": "routes/gtu/funnel/aws/l1_full/funnel_l1_results_KV-3_m3983.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 31171,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "status",
+        "kv",
+        "target",
+        "M",
+        "input",
+        "inputs",
+        "code_sha",
+        "starts",
+        "maxfev",
+        "de_gens",
+        "de_pop",
+        "merge_checks",
+        "calibration",
+        "strength_facts",
+        "rules_l1",
+        "timing",
+        "timing_detail",
+        "summary",
+        "selection",
+        "convergence",
+        "starts_check"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "ed111a1"
+    },
+    {
+      "path": "routes/gtu/funnel/aws/l1_full/funnel_l1_top50_KV-3_m3983.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 1551220,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "kv",
+        "M",
+        "input",
+        "input_sha256",
+        "code_sha",
+        "starts",
+        "maxfev",
+        "rule",
+        "selection_note",
+        "price_of_diversity",
+        "selected",
+        "note"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "ed111a1"
     },
     {
       "path": "routes/gtu/funnel/aws/RUNS.json",
@@ -10130,6 +10346,31 @@
       "last_commit": "493cb81"
     },
     {
+      "path": "routes/gtu/platform/bench/speed_aws_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 14686,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "run_id",
+        "created_utc",
+        "prices",
+        "upper",
+        "assumptions",
+        "su2",
+        "ccx"
+      ],
+      "provenance_fields": [
+        "method"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "08ed903"
+    },
+    {
       "path": "routes/gtu/platform/bench/tariffs_us-east-1.json",
       "track": "не определён",
       "kind": "данные",
@@ -10947,6 +11188,28 @@
       "last_change": "2026-11-14",
       "last_author": "Claude",
       "last_commit": "ec29828"
+    },
+    {
+      "path": "routes/gtu/validation/aws_repro_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 3071,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "run_id",
+        "method",
+        "created_utc",
+        "ok",
+        "jobs"
+      ],
+      "provenance_fields": [
+        "method"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "08ed903"
     },
     {
       "path": "routes/gtu/validation/balances_results.json",
