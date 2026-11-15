@@ -4,8 +4,8 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 438,
-    "total_bytes": 16518923,
+    "datasets": 442,
+    "total_bytes": 17740438,
     "results_files": 191,
     "results_with_script": 59,
     "results_referenced_in_site": 22,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 118,
+      "не определён": 122,
       "прочее": 25
     }
   },
@@ -6695,7 +6695,7 @@
       "path": "routes/gtu/combustor/comb_budget_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 12182,
+      "bytes": 12343,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -6720,7 +6720,7 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "fa60b23"
+      "last_commit": "0c587fa"
     },
     {
       "path": "routes/gtu/combustor/comb_l0_debug_results.json",
@@ -6765,7 +6765,7 @@
       "path": "routes/gtu/combustor/comb_l1_smoke_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 14600,
+      "bytes": 22709,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -6785,7 +6785,7 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "fa60b23"
+      "last_commit": "0c587fa"
     },
     {
       "path": "routes/gtu/combustor/jobs_aws_comb_l0.json",
@@ -6811,7 +6811,7 @@
       "path": "routes/gtu/combustor/jobs_calib.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 4217,
+      "bytes": 4214,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -6824,7 +6824,7 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "fa60b23"
+      "last_commit": "0c587fa"
     },
     {
       "path": "routes/gtu/combustor/jobs_l0.json",
@@ -6846,7 +6846,7 @@
       "path": "routes/gtu/combustor/jobs_l1.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 12405,
+      "bytes": 12411,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -6859,13 +6859,13 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "fa60b23"
+      "last_commit": "0c587fa"
     },
     {
       "path": "routes/gtu/combustor/jobs_l2.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 11534,
+      "bytes": 14740,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -6878,13 +6878,13 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "fa60b23"
+      "last_commit": "0c587fa"
     },
     {
       "path": "routes/gtu/combustor/jobs_l3.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 7756,
+      "bytes": 7749,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -6897,7 +6897,7 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "fa60b23"
+      "last_commit": "0c587fa"
     },
     {
       "path": "routes/gtu/combustor/l0_aws/comb_l0_KV-3_n262144_results.json",
@@ -7374,10 +7374,10 @@
       "last_commit": "fa60b23"
     },
     {
-      "path": "routes/gtu/funnel/l0_aws_debug/funnel_l0_results_KV-3_n2000.json",
+      "path": "routes/gtu/funnel/l0_aws_debug/funnel_l0_results_KV-1_n2000.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 340338,
+      "bytes": 419171,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -7412,15 +7412,101 @@
         "software",
         "date"
       ],
-      "last_change": "2026-11-14",
+      "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "f92879b"
+      "last_commit": "b3ae620"
     },
     {
-      "path": "routes/gtu/funnel/l0_aws_debug/funnel_l0_select_KV-3_n2000.json",
+      "path": "routes/gtu/funnel/l0_aws_debug/funnel_l0_results_KV-3_n2000.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 21678,
+      "bytes": 356432,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "status",
+        "kv",
+        "target",
+        "n",
+        "seed",
+        "shards",
+        "inputs",
+        "calib_ns",
+        "merge_checks",
+        "timing",
+        "weights",
+        "normalization",
+        "summary",
+        "top",
+        "pareto",
+        "sensitivity",
+        "niches",
+        "selection",
+        "convergence",
+        "cycle_check",
+        "files"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "b3ae620"
+    },
+    {
+      "path": "routes/gtu/funnel/l0_aws_debug/funnel_l0_results_KV-6_n2000.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 409768,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "status",
+        "kv",
+        "target",
+        "n",
+        "seed",
+        "shards",
+        "inputs",
+        "calib_ns",
+        "merge_checks",
+        "timing",
+        "weights",
+        "normalization",
+        "summary",
+        "top",
+        "pareto",
+        "sensitivity",
+        "niches",
+        "selection",
+        "convergence",
+        "cycle_check",
+        "files"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "b3ae620"
+    },
+    {
+      "path": "routes/gtu/funnel/l0_aws_debug/funnel_l0_select_KV-1_n2000.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 239032,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -7444,9 +7530,73 @@
         "software",
         "date"
       ],
-      "last_change": "2026-11-14",
+      "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "f92879b"
+      "last_commit": "b3ae620"
+    },
+    {
+      "path": "routes/gtu/funnel/l0_aws_debug/funnel_l0_select_KV-3_n2000.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 111872,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "kv",
+        "n",
+        "seed",
+        "fingerprint",
+        "code_sha",
+        "weights",
+        "params",
+        "how_to_rebuild",
+        "summary",
+        "selected"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "b3ae620"
+    },
+    {
+      "path": "routes/gtu/funnel/l0_aws_debug/funnel_l0_select_KV-6_n2000.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 35784,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "kv",
+        "n",
+        "seed",
+        "fingerprint",
+        "code_sha",
+        "weights",
+        "params",
+        "how_to_rebuild",
+        "summary",
+        "selected"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "b3ae620"
     },
     {
       "path": "routes/gtu/funnel/l0_aws_full/funnel_l0_results_KV-1_n50000.json",
