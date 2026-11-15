@@ -21,7 +21,13 @@ code_hash fae37b9aadf85961; v2 импортирует их и добавляет
     давления не получала выигрыш даром;
   * цель «низкие выбросы 30-100 % на одном клапане» (lowem_30_100_1valve) - в дополнение к 13 целям targets.json;
   * каталитическая и детонационная схемы в v2 не входят: у них по два клапана на газ (v1: fuel_valves не выполнена ни
-    разу из 27 083 допустимых), решению 2 они не отвечают.
+    разу из 27 083 допустимых), решению 2 они не отвечают;
+  * исправления проверок скептиков 15.11.2026 (физика и код): пилот «гидравлика» - часть смесителей того же купола
+    (время = tau_pz); эжектор - струйный насос в трубе не шире ячейки элемента; жёсткость подачи - по отклику расхода
+    (закон контура); разброс сопротивления пористой вставки (ОБРАТНЫЙ_ТОК_РАЗБРОС); холостой ход 0 % (оценка,
+    экстраполяция цикла) - обратный ток и устойчивость для load_range; времена зон при неизменном объёме; узлы
+    неравномерности без прибавки топлива; запас по срыву ниже 1 - уточнённый; каналы - верхняя оценка с поджиганием
+    группы B газом группы A (отбор - без неё); пометка «вне области облика»; сброс состояния Cantera перед вариантом.
 
 Все числа модели - облик (0D + корреляции), «оценка» для отбора на уровень 1. AWS не вызывается.
 Запуск: python comb_v2.py --bc (границы v2) | --targets (targets_v2.json) | --one I --n N | --selfcheck
@@ -59,10 +65,12 @@ PASSIVE_NOTE = {
              "доле воздуха (C/C_OPT)^k_str, расслоение затухает по длине смешения медленнее при малом J (оценка)",
     "каналы": "пассивное деление топлива каналами: смесители двух групп (доля w_grp - группа A) от одного коллектора; "
               "A - сопла, впрыск у выхода канала; B - пористая вставка + сопла, впрыск у входа канала; на малой нагрузке "
-              "топливо уходит в группу A (ступенчатость без клапана); группа B догорает в горячем газе A",
+              "топливо уходит в группу A (ступенчатость без клапана); группа B горит сама (отбор), верхняя оценка - "
+              "с поджиганием горячим газом A (gas_cross)",
     "рециркуляция": "горячая рециркуляция (FLOX): воздушная струя элемента - эжектор, подсасывает газ догорания по "
-                    "печатному каналу; кратность - унос Ricou - Spalding на длине трубы эжектора l_ej калибров (тот же "
-                    "закон, что у внутренней рециркуляции FLOX v1); топливо - на выходе эжектора",
+                    "печатному каналу; кратность - меньшее из уноса Ricou - Spalding на длине трубы эжектора l_ej "
+                    "калибров и струйного насоса в трубе не шире ячейки элемента (баланс импульса, потери возвратного "
+                    "канала, выброс в жаровую трубу); топливо - на выходе эжектора",
 }
 # Готовность пассивного элемента - ОЦЕНКА (открытых оценок нет): деление по закону расхода и сдвигу давления в ГТУ не
 # найдено (идея STATE_OF_ART.md, разд. 6.4 - «не считались»); самостратификация - только идея; эжекторная рециркуляция
@@ -102,7 +110,8 @@ CONT_V2 = {
     "k_pass": "гидравлика и каналы - отношение phi пилота (группы A) к phi основного контура при 100 % (0,8-1,6); "
               "TVC - phi полости при 100 % (0,6-1,4)",
     "k_str": "показатель самостратификации: доля воздуха, встречающая топливо у входа канала, (C/C_OPT)^k_str (0,5-1,5)",
-    "tau_pz": "время зоны пламени, мс (CS.SCH)", "tau_aux": "время пилотной зоны или полости TVC, мс (лог 0,5-5)",
+    "tau_pz": "время зоны пламени, мс (CS.SCH)",
+    "tau_aux": "время полости TVC, мс (лог 0,5-5); у пилота «гидравлика» = tau_pz (часть смесителей того же купола)",
     "tau_bo": "время догорания, мс (лог 2-20)", "tau_dil": "время разбавления, мс (1-8)", "LD": "L/D жаровой трубы (1,5-4)",
     "dp_inj": "перепад на смесителе при 100 %, доля p3 (CS.SCH)", "dp_wall": "перепад на решётке стенки (0,3-2 %)",
     "porosity": "пористость охлаждения (CS.POROSITY)", "l_mix": "длина смешения, калибров (CS.INJ)",
@@ -122,11 +131,23 @@ BETA_LOWJ = BETA_LOWJ_NOMINAL   # затухание при недопроник
 DP_BACK_MIN = 0.01     # наименьший запас давления коллектора над давлением за соплами на любой нагрузке, доля p3: не
                        # меньше допустимого размаха пульсаций (targets.json combustion_dynamics 1 % p3), иначе воздух
                        # входит в топливный контур (обратный ток)
+POR_TOL = 0.8          # сопротивление пористой вставки ниже расчётного на 20 % (разброс печати пористой структуры, оценка,
+                       # не сверено): правило ОБРАТНЫЙ_ТОК проверяется и при нём (проверка скептика 15.11.2026)
 DPF_REF = 0.03         # перепад топлива (доля p3), ниже которого расход топлива заметно откликается на пульсации
                        # давления: множитель индекса пульсаций (DPF_REF/dpf_min)^0,5 (оценка, по памяти, не сверено)
 TAU_AUX = (0.5, 5.0)
 SCH_AUX = {"pilot": (0.05, 0.40), "cavity": (0.04, 0.15)}   # пилот v2 шире v1 (0,05-0,25): на 30 % пилот должен
                                                                # нести почти всё топливо (оценка)
+# Холостой ход без нагрузки при полной частоте (цель load_range: stable_pct [0, 100]; проверка скептика 15.11.2026):
+# модель цикла не считает ниже доли топлива 0,005 (brentq в gtu_cycle), поэтому точка 0 % - ЛИНЕЙНАЯ ЭКСТРАПОЛЯЦИЯ
+# p3, T3 и расхода топлива по точкам 50 и 30 % (оценка; вторым способом - квадратичная по четырём точкам, расхождение
+# пишется в границы). На холостом ходу проверяются только устойчивость опорной зоны и обратный ток, не выбросы.
+IDLE_LOAD = 0.0
+# Область облика (оценка): за её пределами корреляции смешения экстраполированы - вариант помечается, проверка - L1 RANS
+DOMAIN = dict(S_mix_max=0.6,            # S по корреляции срезается до 0,6 (mixing): выше - формула не действует
+              C_rel=(0.25, 4.0),        # C/C_OPT: форма f_C v1 вне четырёхкратного отклонения - экстраполяция (оценка)
+              a_eff_min=0.5)            # самостратификация: меньше половины воздуха встречает топливо (закон - оценка)
+TAU_EXT_LADDER = (3.0, 10.0, 30.0, 100.0, 300.0, 1000.0)   # уточнение запаса по срыву ниже 1 (v1 - только 1/3, 1/10, 1/30)
 
 
 def _pick(u, vals):
@@ -207,7 +228,9 @@ def concept(i, n, kv="KV-3", seed=SEED):
         c["k_pass"] = 0.0
     c["k_str"] = CS._lerp(u["k_str"], 0.5, 1.5) if stra else 0.0
     c["tau_pz_ms"] = CS._loglerp(u["tau_pz"], *S["tau_pz"])
-    c["tau_aux_ms"] = CS._loglerp(u["tau_aux"], *TAU_AUX) if (s == "TVC" or spl == "гидравлика") else 0.0
+    # пилот «гидравлика» - часть смесителей того же купола: своего времени пребывания у него нет (проверка скептика
+    # 15.11.2026: tau_aux до 8·tau_pz давало пилоту запас по срыву даром); отдельное время - только у полости TVC
+    c["tau_aux_ms"] = CS._loglerp(u["tau_aux"], *TAU_AUX) if s == "TVC" else (c["tau_pz_ms"] if spl == "гидравлика" else 0.0)
     c["tau_bo_ms"] = CS._loglerp(u["tau_bo"], 2.0, 20.0)
     c["tau_dil_ms"] = CS._lerp(u["tau_dil"], 1.0, 8.0)
     c["LD"] = CS._lerp(u["LD"], 1.5, 4.0)
@@ -252,8 +275,35 @@ def _load_point(lf, inp, C, kw, P100, far_st, LHV_CH4, LHV_DZ, far_st_dz):
                 W_fuel_diesel=Wfd, phi_ov_diesel=(Wfd / W) / far_st_dz)
 
 
+def _idle_point(loads, far_st, LHV_CH4, LHV_DZ, far_st_dz, T0):
+    """холостой ход без нагрузки при полной частоте (0 %): T41, PR, p3, T3 и расход топлива - линейная экстраполяция по
+    точкам 50 и 30 % (ОЦЕНКА: модель цикла ниже доли топлива 0,005 не считает); второй способ - квадратичная по
+    100/75/50/30 %, относительное расхождение - в check_quadratic. Свойства воздуха и равновесие на выходе - Cantera"""
+    import cantera as ct
+    by = {L["load"]: L for L in loads}
+    a, b = by[0.5], by[0.3]
+    keys = ("T41_C", "PR", "p3_Pa", "T3_K", "W_fuel")
+    lin = {k: b[k] + (IDLE_LOAD - 0.3) * (a[k] - b[k]) / (0.5 - 0.3) for k in keys}
+    xs = np.array(LOADS, dtype=float)
+    quad = {k: float(np.polyval(np.polyfit(xs, [by[x][k] for x in LOADS], 2), IDLE_LOAD)) for k in keys}
+    p3, T3, W, Wf = lin["p3_Pa"], lin["T3_K"], b["W_air"], lin["W_fuel"]
+    air = ct.Solution("gri30.yaml")
+    air.TPX = T3, p3, CR.AIR
+    g4, _ = CR._mixed((Wf / W) / far_st, "CH4:1", p3, T3, T0); g4.equilibrate("HP")
+    gs, _ = CR._mixed(1.0, "CH4:1", p3, T3, T0); gs.equilibrate("HP")
+    Wfd = Wf * LHV_CH4 / LHV_DZ
+    return dict(load=IDLE_LOAD, T41_C=lin["T41_C"], PR=lin["PR"], p3_Pa=p3, T3_K=T3, W_air=W, W_fuel=Wf,
+                phi_ov=(Wf / W) / far_st, P_shaft_kW=0.0, T4_K=g4.T, T4_adiab_K=g4.T, rho4=g4.density,
+                rho3=air.density, mu3=air.viscosity, k3=air.thermal_conductivity, cp3=air.cp_mass, T_st_K=gs.T,
+                W_fuel_diesel=Wfd, phi_ov_diesel=(Wfd / W) / far_st_dz, fuel_share_of_100=Wf / by[1.0]["W_fuel"],
+                method="линейная экстраполяция по точкам 50 и 30 % (оценка); T4 - адиабатическое равновесие",
+                check_quadratic={k: dict(linear=lin[k], quadratic=quad[k], rel=abs(quad[k] - lin[k]) / abs(lin[k]))
+                                 for k in keys})
+
+
 def _bc2_key(bc1_key):
-    src = bc1_key + inspect.getsource(_load_point) + inspect.getsource(compute_boundary_v2) + json.dumps(LOADS)
+    src = bc1_key + inspect.getsource(_load_point) + inspect.getsource(compute_boundary_v2) + json.dumps(LOADS) + \
+        inspect.getsource(_idle_point) + repr(IDLE_LOAD)
     return hashlib.sha256(src.encode()).hexdigest()[:16]
 
 
@@ -277,8 +327,11 @@ def compute_boundary_v2():
         src = L75 if lf == 0.75 else old[lf]
         loads.append({k: v for k, v in src.items()})
     res = {k: v for k, v in bc1.items() if k not in ("eq_T", "loads", "key", "runtime_s", "title", "date", "check")}
-    res.update(title="Камера сгорания KV-3, уровень 0 v2: границы (точки 100/75/50/30 %) и таблицы v1",
-               date=DATE, bc1_key=bc1["key"], loads=loads,
+    idle = _idle_point(loads, bc1["far_st_CH4"], bc1["LHV_J_kg"]["CH4"], bc1["LHV_diesel_J_kg"], bc1["far_st_diesel"],
+                       C.T0)
+    res.update(title="Камера сгорания KV-3, уровень 0 v2: границы (точки 100/75/50/30 % и холостой ход 0 % - оценка) и "
+                     "таблицы v1",
+               date=DATE, bc1_key=bc1["key"], loads=loads, idle=idle,
                check=dict(v1=bc1["check"], point_50_recomputed=check50,
                           note="точка 50 % пересчитана кодом v2 и сверена с v1 (rel - относительное расхождение)"),
                status="расчёт; точки частичной нагрузки - оценка (допущения targets_basis, как v1)")
@@ -316,6 +369,14 @@ def boundary(path=BC_FILE, write=True):
 
 def li_of(load):
     return LOADS.index(load)
+
+
+IDLE_LI = len(LOADS)        # индекс холостого хода в границах с холостым ходом (with_idle)
+
+
+def with_idle(bc):
+    """границы, у которых loads = 100/75/50/30 % + холостой ход (индекс IDLE_LI): для гидравлики и сети на 0 %"""
+    return dict(bc, loads=list(bc["loads"]) + [bc["idle"]])
 
 
 # =========================================================================== гидравлика топлива (газ)
@@ -376,6 +437,35 @@ def solve_manifold(circuits, backs, Wf):
         p_s = brentq(lambda p: tot(p) - Wf, p_lo, p_hi, xtol=1e-3)
     out = [circuit_m(cir, p_s, pb) for cir, pb in zip(circuits, backs)]
     return p_s, [m for m, _ in out], [pu for _, pu in out]
+
+
+EJ_ZETA = 1.0          # потери возвратного канала эжектора, скоростных напоров подсоса (оценка)
+
+
+def ejector_K(a, rs, l_ej, f, zeta=EJ_ZETA):
+    """кратность эжектора как струйного насоса с выбросом в жаровую трубу (проверка скептика 15.11.2026: закон свободной
+    струи Ricou - Spalding не знает стенки трубы и потерь возвратного канала): труба смешения постоянного сечения
+    (1 + a)·A0, a - площадь подсоса / площадь струи (не больше ячейки элемента), баланс импульса, потери возвратного
+    канала zeta, трение f·L/D, выброс в жаровую трубу; безразмерно (dp_inj·p3 = 1, плотность струи 1); оценка"""
+    if a <= 0 or l_ej <= 0:
+        return 0.0
+    At = 1.0 + a
+    LD = l_ej / math.sqrt(At)
+
+    def resid(us):
+        ds = (1 + zeta) * 0.5 * rs * us * us
+        u0 = math.sqrt(2 * (1 + ds))
+        ms = rs * us * a
+        mm = u0 + ms
+        rm = mm / (u0 + ms / rs)
+        return -ds * At + 2 * (1 + ds) + rs * us * us * a - mm * mm / (rm * At) * (1 + f * LD / 2)
+    if resid(1e-9) <= 0:
+        return 0.0
+    hi = 1.0
+    while resid(hi) > 0:
+        hi *= 2.0
+    us = brentq(resid, 1e-9, hi, xtol=1e-12)
+    return rs * us * a / math.sqrt(2 * (1 + (1 + zeta) * 0.5 * rs * us * us))
 
 
 # =========================================================================== согласованное смешение
@@ -556,6 +646,8 @@ def derive(c, bc):
     # --- нагрузки: давление коллектора, расходы контуров, смешение
     d["loads"] = [load_state(c, d, bc, li, cir, A_air) for li in range(len(LOADS))] if ok_win and not d["n_el_bad"] \
         else None
+    # холостой ход (0 %, границы - оценка): только для обратного тока и устойчивости опорной зоны (цель load_range)
+    d["idle"] = load_state(c, d, with_idle(bc), IDLE_LI, cir, A_air) if d["loads"] else None
     if d["loads"]:
         l100 = d["loads"][0]
         mi = l100["circ"][main["kind"]]
@@ -581,7 +673,7 @@ def load_state(c, d, bc, li, cir, A_air):
     p_s, ms, pus = solve_manifold(act, [back[k["back"]] for k in act], Wf)
     st = dict(load=L["load"], dp_air=dp, u_a=u_a, p_sup_Pa=p_s, p_sup_ratio=p_s / p3,
               backflow_margin=(p_s - max(back[k["back"]] for k in act)) / p3, circ={})
-    dpf_w = 0.0
+    dpf_w, inv_eff = 0.0, 0.0
     for k, m, pu in zip(act, ms, pus):
         pb = back[k["back"]]
         u_f, rho_f = jet_state(pu, pb) if m > 0 else (0.0, 0.0)
@@ -593,9 +685,15 @@ def load_state(c, d, bc, li, cir, A_air):
         phi = (m / (k["air"] * W)) / bc["far_st_CH4"]
         dpf = (p_s - pb) / p3
         dpf_w += dpf * m / Wf
+        e = 1e-4 * max(p_s - pb, 1.0)                     # закон контура: n = dln m / dln Δp (сопло 0,5, запирание 0, Дарси до 1)
+        m_a, m_b = circuit_m(k, p_s, pb - e)[0], circuit_m(k, p_s, pb + e)[0]
+        n_law = ((math.log(m_a) - math.log(m_b)) / (math.log(p_s - pb + e) - math.log(p_s - pb - e))
+                 if m_a > 0 and m_b > 0 else 0.5)
+        inv_eff += (m / Wf) * n_law / max(dpf, 1e-6)
         st["circ"][k["kind"]] = dict(m=m, share=m / Wf, p_up=pu, p_back=pb, dpf=dpf, u_f=u_f, J=J, a_eff=a_eff, a0=a0,
                                      phi=phi, phi_reached=phi / a_eff, **mx)
     st["dpf_weighted"] = dpf_w
+    st["dpf_eff"] = 0.5 / max(inv_eff, 1e-12)            # перепад сопла с тем же откликом расхода на пульсацию давления
     return st
 
 
@@ -608,35 +706,173 @@ def check(c, d, bc):
     if d["n_el_bad"]:
         bad.append(("ЭЛЕМЕНТЫ_КОНТУРОВ", c["n_el"], 2, "на контур (пилот/основной, группы A/B) не хватает элементов"))
     if d["loads"]:
-        bm = min(x["backflow_margin"] for x in d["loads"])
+        # нагрузки 100/75/50/30 % и холостой ход (0 %, оценка): двигатель проходит холостой ход при каждом пуске, а
+        # пассивное деление там слабее всего (проверка скептика 15.11.2026)
+        sts = list(d["loads"]) + ([d["idle"]] if d.get("idle") else [])
+        bm = min(x["backflow_margin"] for x in sts)
+        bcx = with_idle(bc)
         if bm < DP_BACK_MIN:
+            where = min(sts, key=lambda x: x["backflow_margin"])["load"]
             bad.append(("ОБРАТНЫЙ_ТОК", round(bm, 5), DP_BACK_MIN, "давление коллектора над давлением за соплами "
-                        "основного контура меньше 1 % p3 на одной из нагрузок - воздух может войти в топливный контур"))
+                        "основного контура меньше 1 % p3 на одной из нагрузок - воздух может войти в топливный контур "
+                        f"(наименьший запас - {int(round(where * 100))} %)"))
+        elif any(k.get("porous") and k.get("A", 0) > 0 for k in d["circuits"]):
+            soft = [dict(k, a=k.get("a", 0.0) * POR_TOL, b=k.get("b", 0.0) * POR_TOL) if k.get("porous") else k
+                    for k in d["circuits"]]
+            bt = min(load_state(c, d, bcx, li, soft, d["A_air_m2"])["backflow_margin"] for li in range(len(sts)))
+            if bt < DP_BACK_MIN:
+                bad.append(("ОБРАТНЫЙ_ТОК_РАЗБРОС", round(bt, 5), DP_BACK_MIN, "при сопротивлении пористой вставки ниже "
+                            "расчётного на 20 % (разброс печати, оценка) запас коллектора меньше 1 % p3"))
     return bad
+
+
+def domain(d):
+    """область облика (DOMAIN, оценка): по всем контурам с топливом на 100/75/50/30 % - S по корреляции до среза,
+    C/C_OPT, доля воздуха, встречающая топливо; вне области - пометка (проверка скептика 15.11.2026: единственный
+    устойчивый без RQL вариант пробы стоял вне области корреляций), отсева нет - проверка на L1 RANS"""
+    if not d.get("loads"):
+        return None
+    S_mx, C_lo, C_hi, a_lo, S_cap = 0.0, 1e9, 0.0, 1.0, 0.0
+    for st in d["loads"]:
+        for kind, k in st["circ"].items():
+            if k["share"] < 0.02:
+                continue
+            S_mx = max(S_mx, k["S_mix"])
+            S_cap = max(S_cap, k["S"])
+            C_lo, C_hi = min(C_lo, k["C"] / CS.C_OPT), max(C_hi, k["C"] / CS.C_OPT)
+            a_lo = min(a_lo, k["a_eff"])
+    flags = []
+    if S_mx > DOMAIN["S_mix_max"]:
+        flags.append("S_по_корреляции_выше_среза")
+    if C_lo < DOMAIN["C_rel"][0] or C_hi > DOMAIN["C_rel"][1]:
+        flags.append("C_вне_области")
+    if a_lo < DOMAIN["a_eff_min"]:
+        flags.append("расслоение_сильнее_половины")
+    return dict(ok=not flags, flags=flags, S_mix_max=S_mx, S_used_max=S_cap, C_rel_min=C_lo, C_rel_max=C_hi,
+                a_eff_min=a_lo, nodes_clipped=bool(S_cap > 0.98 / _GH_ZMIN), limits=DOMAIN)
 
 
 # =========================================================================== сеть реакторов v2
 ANCHOR = ("pilot", "cavity", "grpA")
+_GH_ZMIN = float(abs(min(CR.GH[5][0])))
 
 
-def gas_network(c, d, bc, li):
-    """сеть на газе при нагрузке LOADS[li]: опорная зона (пилот, полость, группа A) -> её горячий газ в узлы основной
-    зоны (пилот, полость) -> основная зона с расслоением и рециркуляцией -> совместное догорание (с воздухом, не
-    встретившим топливо) -> разбавление. Узлы неравномерности - 5 узлов Гаусса - Эрмита у всех контуров,
-    S каждого контура - по J этой нагрузки."""
+def _node_streams_v2(K, m_air, m_fuel, S, n_nodes, T3, Tf, p, fuel="CH4:1"):
+    """узлы неравномерности как comb_crn._node_streams (Гаусс - Эрмит, phi_k ~ 1 + S·z_k, не меньше 0,02), но топливо
+    сохраняется: после среза бедного узла доли топлива нормируются на Σ w·f (v1 при S > 0,343 добавлял топливо:
+    +0,18 % при S = 0,4, +0,83 % при S = 0,6 - проверка скептика 15.11.2026)"""
+    z, w = CR.GH[n_nodes]
+    f = [max(0.02, 1 + S * zk) for zk in z]
+    sw = sum(wk * fk for wk, fk in zip(w, f))
+    out = [(wk, K.fresh(m_air * wk, m_fuel * wk * fk / sw, T3, Tf, p, fuel)) for wk, fk in zip(w, f)]
+    return out, sum(x.m for _, x in out)
+
+
+def tau_ext_v2(K, inlet, tau_act, Kr=0.0, init=None):
+    """запас по срыву как v1 (comb_crn.Kin.tau_ext); ниже 1 - уточнение (проверка скептика 15.11.2026: v1 давал только
+    1/3, 1/10, 1/30): лестница TAU_EXT_LADDER до первого горящего времени и 7 шагов бисекции в логарифме между
+    погасшим и горящим (продолжение по горящему решению), шаг <= 1 %; 0 - не горит и при 1000·tau"""
+    m = K.tau_ext(inlet, tau_act, Kr, init)
+    if m >= 1.0:
+        return m
+    tau_r = tau_act / (1 + Kr)
+    lo, hi, s_hi = 1.0, None, None
+    for f in TAU_EXT_LADDER:
+        _, lit, s_ = K.psr(inlet, tau_r * f)
+        if lit:
+            hi, s_hi = f, s_
+            break
+        lo = f
+    if hi is None:
+        return 0.0
+    for _ in range(7):
+        mid = math.sqrt(lo * hi)
+        _, lit, s_ = K.psr(inlet, tau_r * mid, s_hi)
+        if lit:
+            hi, s_hi = mid, s_
+        else:
+            lo = mid
+    return 1.0 / hi
+
+
+def zone_taus(c, d, bc, li, st):
+    """времена пребывания зон на нагрузке li при НЕИЗМЕННОМ объёме зон (геометрия та же, что при 100 %; проверка скептика
+    15.11.2026: постоянное время пребывания завышало время богатой зоны RQL на 30 % и занижало у бедных зон):
+    tau(L) = tau_100·[rho(L)/m(L)]/[rho(100)/m(100)], m - расход зоны этой нагрузки, rho - равновесие при phi зоны этой
+    нагрузки по таблице 100 % × p3(L)/p3(100) (оценка: сдвиг T3 не учтён), у разбавления - rho4 точки. При 100 % -
+    ровно времена осей. -> секунды: виды контуров (pilot, cavity, grpA, main, grpB) или pz/q (RQL), bo, dil"""
+    eqT, far = bc["eq_T"], bc["far_st_CH4"]
+    L0, L = bc["loads"][0], bc["loads"][li]
+    st0 = d["loads"][0]
+    dens = lambda Ld, phi: eqT(phi)[1] * Ld["p3_Pa"] / L0["p3_Pa"]
+    ratio = lambda fn: fn(L, st) / fn(L0, st0)
+    out = {}
+    if c["scheme"] == "RQL":
+        a, aq = c["a_pz"], c["a_pz"] + c["a_aux"]
+        rich = lambda Ld, S_: dens(Ld, Ld["W_fuel"] / Ld["W_air"] / a / far) / (a * Ld["W_air"] + Ld["W_fuel"])
+        lean = lambda Ld, S_: dens(Ld, Ld["W_fuel"] / Ld["W_air"] / aq / far) / (aq * Ld["W_air"] + Ld["W_fuel"])
+        tq = 1e-3 * next(z["tau_ms"] for z in d["zones"] if z["name"] == "гашение")
+        out.update(pz=1e-3 * c["tau_pz_ms"] * ratio(rich), q=tq * ratio(lean), bo=1e-3 * c["tau_bo_ms"] * ratio(lean))
+    else:
+        for k in d["circuits"]:
+            kind = k["kind"]
+            if kind not in st["circ"] or kind not in st0["circ"]:
+                continue
+            fn = lambda Ld, S_, k=k: dens(Ld, S_["circ"][k["kind"]]["phi"]) / (k["air"] * Ld["W_air"] +
+                                                                                S_["circ"][k["kind"]]["m"])
+            tau0 = c["tau_aux_ms"] if kind in ("pilot", "cavity") else c["tau_pz_ms"]
+            out[kind] = 1e-3 * tau0 * ratio(fn)
+        a_b = c["a_pz"] + (c["a_aux"] if c["scheme"] == "TVC" else 0.0)
+        bo = lambda Ld, S_: dens(Ld, Ld["W_fuel"] / Ld["W_air"] / a_b / far) / (a_b * Ld["W_air"] + Ld["W_fuel"])
+        out["bo"] = 1e-3 * c["tau_bo_ms"] * ratio(bo)
+    dil = lambda Ld, S_: Ld["rho4"] / (Ld["W_air"] + Ld["W_fuel"])
+    out["dil"] = 1e-3 * c["tau_dil_ms"] * ratio(dil)
+    return out
+
+
+def _c_at_load(c, d, T):
+    """понятие и производные с временами зон этой нагрузки (для сетей v1: RQL на газе, дизель)"""
+    kind = "pz" if c["scheme"] == "RQL" else ("grpB" if c["split"] == "каналы" else "main")
+    c2 = dict(c, tau_pz_ms=1e3 * T.get(kind, 1e-3 * c["tau_pz_ms"]), tau_bo_ms=1e3 * T["bo"], tau_dil_ms=1e3 * T["dil"])
+    d2 = dict(d)
+    if "q" in T:
+        d2["zones"] = [dict(z, tau_ms=1e3 * T["q"]) if z["name"] == "гашение" else z for z in d["zones"]]
+    return c2, d2
+
+
+def gas_network(c, d, bc, li, st=None, cross=False):
+    """сеть на газе при нагрузке bc["loads"][li] (st - состояние гидравлики этой нагрузки, по умолчанию d["loads"][li]):
+    опорная зона (пилот, полость, группа A) -> её горячий газ в узлы основной зоны (пилот, полость; группа A - только
+    при cross=True, поджигание группы B газом группы A - верхняя оценка) -> основная зона с расслоением и
+    рециркуляцией -> совместное догорание (с воздухом, не встретившим топливо) -> разбавление. Узлы неравномерности -
+    5 узлов Гаусса - Эрмита у всех контуров (топливо сохраняется), S каждого контура - по J этой нагрузки; времена зон -
+    при неизменном объёме (zone_taus); запасы по срыву ниже 1 - уточнённые (tau_ext_v2)."""
     s = c["scheme"]
-    st = d["loads"][li]
+    st = d["loads"][li] if st is None else st
+    T = zone_taus(c, d, bc, li, st)
     if s == "RQL":
-        r = CR.gas_network(c, dict(d, S_unmix=st["circ"]["main"]["S"]), bc, li)
-        r.update(margin_all=r["margin_lbo"], anchor="богатая", p_sup_ratio=st["p_sup_ratio"], dpf=st["dpf_weighted"])
+        c2, d2 = _c_at_load(c, d, T)
+        r = CR.gas_network(c2, dict(d2, S_unmix=st["circ"]["main"]["S"]), bc, li)
+        if (r["margin_lbo"] or 0.0) < 1.0:                   # уточнение запаса богатой зоны ниже 1 (v1 - 1/3, 1/10, 1/30)
+            K = CR.kin()
+            L = bc["loads"][li]
+            K_crz = CR.K_CRZ * max(0.0, c["swirl"] - 0.4) if c["injector"] == "закрутка" else 0.0
+            fr = K.fresh(c["a_pz"] * L["W_air"], L["W_fuel"], L["T3_K"], 288.15, L["p3_Pa"])
+            _, _, rst, rin = K.psr_recirc(fr, T["pz"], K_crz)
+            m = tau_ext_v2(K, rin, T["pz"], K_crz, rst)
+            r["margins"] = dict(r["margins"], богатая=m)
+            r["margin_lbo"] = min(r["margins"].values())
+        r.update(margin_all=r["margin_lbo"], anchor="богатая", p_sup_ratio=st["p_sup_ratio"], dpf=st["dpf_eff"],
+                 backflow_margin=st["backflow_margin"], tau_ms={k: 1e3 * v for k, v in T.items()})
         return r
     K = CR.kin()
     L = bc["loads"][li]
     p, T3, W, Wf = L["p3_Pa"], L["T3_K"], L["W_air"], L["W_fuel"]
     Tf = 288.15
-    tp, tb, td, ta = (1e-3 * c[k] for k in ("tau_pz_ms", "tau_bo_ms", "tau_dil_ms", "tau_aux_ms"))
+    tb, td = T["bo"], T["dil"]
     nn = CR.N_NODES[s]
-    res = dict(load=L["load"], p_sup_ratio=st["p_sup_ratio"], dpf=st["dpf_weighted"], backflow_margin=st["backflow_margin"])
+    res = dict(load=L["load"], p_sup_ratio=st["p_sup_ratio"], dpf=st["dpf_eff"], backflow_margin=st["backflow_margin"],
+               tau_ms={k: 1e3 * v for k, v in T.items()}, cross=bool(cross))
     seg, Ts, margins = [], [], []
     K_crz = CR.K_CRZ * max(0.0, c["swirl"] - 0.4) if c["injector"] == "закрутка" else 0.0
     Krec, S_div = K_crz, 1.0
@@ -648,13 +884,17 @@ def gas_network(c, d, bc, li):
         res["K_flox_int"] = fx["K"]
     if c["recirc"] == "рециркуляция":
         T_b = max(bc["eq_T"](cm["phi_reached"])[0], 800.0)
-        K_ej = min(CR.KV_MAX, max(0.0, 0.32 * c["l_ej"] * math.sqrt(T3 / T_b) - 1.0))
-        res["K_ej"] = K_ej
+        K_rs = 0.32 * c["l_ej"] * math.sqrt(T3 / T_b) - 1.0
+        D_cell = math.sqrt(4 * d["A_L"] * CS.N_CAN[c["chamber"]] / (math.pi * max(1, c["n_el"])))
+        a_max = max(0.0, (D_cell / (1e-3 * d["d_air_mm"])) ** 2 - 1.0)
+        K_jp = ejector_K(a_max, T3 / T_b, c["l_ej"], d["f_ch"])
+        K_ej = min(CR.KV_MAX, max(0.0, min(K_rs, K_jp)))
+        res["K_ej"], res["K_ej_rs"], res["K_ej_jetpump"], res["ej_area_ratio"] = K_ej, K_rs, K_jp, a_max
         Krec = min(CR.KV_MAX, Krec + K_ej)
     res["K_recirc"] = Krec
 
-    def chain(m_air, m_fuel, S_eff, Kr, tau, pre=None, keep=True):
-        nodes, _ = CR._node_streams(K, m_air, m_fuel, S_eff, nn, T3, Tf, p)
+    def chain(m_air, m_fuel, S_eff, Kr, tau, pre=None):
+        nodes, _ = _node_streams_v2(K, m_air, m_fuel, S_eff, nn, T3, Tf, p)
         lit_w, outs = 0.0, []
         for wk, fr in nodes:
             inlet = fr if pre is None else K.mix(fr, CR.Stream(pre.m * wk, pre.h, pre.Y, pre.p))
@@ -670,23 +910,24 @@ def gas_network(c, d, bc, li):
             continue
         k = st["circ"][kind]
         air = next(x["air"] for x in d["circuits"] if x["kind"] == kind) * W
-        tau = ta if kind in ("pilot", "cavity") else tp
+        tau = T[kind]
         Kr = 0.0 if kind == "cavity" else (K_crz if kind == "pilot" else Krec)
         lit_w, outs = chain(air, k["m"], k["S"] / (S_div if kind == "grpA" else 1.0), Kr, tau)
         fr = K.fresh(air, k["m"], T3, Tf, p)
         _, plit, pst, pin = K.psr_recirc(fr, tau, Kr)
-        margins.append((kind, K.tau_ext(pin, tau, Kr, pst)))
+        margins.append((kind, tau_ext_v2(K, pin, tau, Kr, pst)))
         res[f"phi_{kind}"] = k["phi"]
         res[f"fuel_share_{kind}"] = k["share"]
         res[f"lit_{kind}"] = lit_w
         anchor = kind
-        if kind in ("pilot", "cavity") and lit_w >= 0.5:
-            pre = K.mix(*[o for _, o in outs])               # горячий газ пилота/полости уходит в основную зону
+        if (kind in ("pilot", "cavity") or cross) and lit_w >= 0.5:
+            pre = K.mix(*[o for _, o in outs])               # горячий газ пилота/полости (группы A при cross) - в основную
         else:
             for wk, o in outs:
                 o2 = K.pfr(o, CR.F_SEG * tb)
                 seg.append(o2); Ts.append((wk * k["share"], K.T(o2)))
     # основная зона
+    tp = T[main_kind]
     air_m = next(x["air"] for x in d["circuits"] if x["kind"] == main_kind) * W
     a_eff = cm["a_eff"]
     bypass = (1 - a_eff) * air_m
@@ -702,7 +943,7 @@ def gas_network(c, d, bc, li):
     if pre is not None:
         fr = K.mix(fr, pre)
     _, _, st0, inl0 = K.psr_recirc(fr, tp, Krec)
-    margins.append((main_kind, K.tau_ext(inl0, tp, Krec, st0)))
+    margins.append((main_kind, tau_ext_v2(K, inl0, tp, Krec, st0)))
     res["phi_main"] = cm["phi"]
     res["phi_main_reached"] = cm["phi_reached"]
     res["fuel_share_main"] = cm["share"]
@@ -714,8 +955,8 @@ def gas_network(c, d, bc, li):
     hot = K.pfr(K.mix(*parts), (1 - CR.F_SEG) * tb)
     T_hot = K.T(hot)
     wsum = max(sum(w for w, _ in Ts), 1e-12)
-    T_mean = sum(w * T for w, T in Ts) / wsum
-    sigT = math.sqrt(sum(w * (T - T_mean) ** 2 for w, T in Ts) / wsum)
+    T_mean = sum(w * T_ for w, T_ in Ts) / wsum
+    sigT = math.sqrt(sum(w * (T_ - T_mean) ** 2 for w, T_ in Ts) / wsum)
     dil = K.air(d["a_dil"] * W + d["a_cool"] * W, T3, p)
     ex = K.pfr(K.mix(hot, dil), td)
     em = K.emissions(ex, Wf / ex.m, bc["LHV_J_kg"], bc["LHV_J_kg"]["CH4"])
@@ -785,12 +1026,29 @@ def lowem_value(row):
 
 def compliance(c, row):
     out, hard = CR.compliance(c, row)                         # 13 целей targets.json (load_range - по margin_lbo опорной зоны)
+    # load_range требует устойчивого горения 0-100 % (stable_pct [0, 100]): v1 проверял только 30-100 %, v2 добавляет
+    # холостой ход (0 %, границы - экстраполяция, оценка) - запас по срыву опорной зоны (проверка скептика 15.11.2026)
+    idle = row.get("idle") or {}
+    m_idle = idle.get("margin_lbo")
+    lr = out["load_range"]
+    if lr["value"] is not None:
+        v_lr = max(lr["value"], 1.0 / max(m_idle or 0.0, 1e-6))
+        out["load_range"] = dict(value=v_lr, limit=1.0, ok=bool(v_lr <= 1.0), viol=max(0.0, v_lr - 1.0),
+                                 value_30_100=lr["value"], idle_margin_lbo=m_idle,
+                                 note="1/запас опорной зоны на холостом ходу (0 %, оценка) добавлен к v1 (30-100 %)")
     v, terms, stable = lowem_value(row)
     out[NEW_TARGET] = dict(value=v, limit=1.0, ok=bool(v <= 1.0), viol=max(0.0, v - 1.0),
-                           binding=max(terms, key=terms.get), stable_30_100=bool(stable <= 1.0))
+                           binding=max(terms, key=terms.get), stable_30_100=bool(stable <= 1.0),
+                           stable_0_100=bool(stable <= 1.0 and (m_idle or 0.0) >= 1.0))
     strict = dict(row, gas=[dict(r, margin_lbo=r.get("margin_all", r["margin_lbo"])) for r in row["gas"]])
     vs, _, sts = lowem_value(strict)
     out[NEW_TARGET]["ok_strict_all_zones"] = bool(vs <= 1.0)
+    dom = row.get("domain") or {}
+    out[NEW_TARGET]["in_domain"] = bool(dom.get("ok", False))
+    if row.get("gas_cross"):                                  # каналы: группа B поджигается газом группы A (верхняя оценка)
+        vx, tx, sx = lowem_value(dict(row, gas=row["gas_cross"]))
+        out[NEW_TARGET].update(value_cross=vx, ok_cross=bool(vx <= 1.0), stable_30_100_cross=bool(sx <= 1.0),
+                               binding_cross=max(tx, key=tx.get))
     return out, hard + [NEW_TARGET]
 
 
@@ -812,11 +1070,18 @@ def targets_v2():
         status="цель проекта; уровень 0 - облик (сеть реакторов), подтверждение - уровни 1-2",
         notes=["точка 75 % добавлена к 30/50/100 % (между 50 и 100 % v1 не проверял ничего)",
                "смешение - по J каждой нагрузки (согласованная модель); закон затухания при малом J - оценка",
-               "строгий вариант (все зоны с запасом >= 1, как load_range v1) пишется рядом: ok_strict_all_zones"])
+               "строгий вариант (все зоны с запасом >= 1, как load_range v1) пишется рядом: ok_strict_all_zones",
+               "каналы: верхняя оценка с поджиганием группы B горячим газом группы A пишется рядом (value_cross, "
+               "ok_cross) - отбор без неё; вне области облика (DOMAIN, оценка) - пометка in_domain = false"])
     return dict(
         schema="kv.combustor.targets/2", title="Цели камеры сгорания KV, v2: 13 целей v1 + низкие выбросы 30-100 % на "
         "одном клапане", date=DATE, base_file="routes/gtu/combustor/targets.json", base_date=T.get("date"),
         base_targets=[t["id"] for t in T["targets"]], new_targets=[new],
+        base_notes=dict(load_range=("stable_pct [0, 100]: v1 проверял устойчивость только на 30-100 %; v2 добавляет "
+                                    "холостой ход без нагрузки при полной частоте (0 %) - 1/запас по срыву опорной зоны; "
+                                    "границы 0 % - линейная экстраполяция цикла по 50 и 30 % (оценка, модель цикла ниже "
+                                    "доли топлива 0,005 не считает); правило ОБРАТНЫЙ_ТОК - тоже и на 0 % (проверка "
+                                    "скептика 15.11.2026)")),
         funnel_interface=dict(hard=list(T["funnel_interface"]["hard"]) + [NEW_TARGET],
                               objectives=T["funnel_interface"]["objectives"],
                               note="жёсткие v1 + новая; ранжирование - как v1, оценка умножается на (0,5 + 0,5·TRL/9) - "
@@ -843,9 +1108,20 @@ def passive_parts(c):
     return out
 
 
+def _reset_kin():
+    """одно начальное состояние решений Cantera перед каждым вариантом: equilibrate и PSR стартуют с текущего
+    состояния объекта, и без сброса итог варианта зависел от того, что процесс считал до него (~1e-5 отн.)"""
+    K = CR.kin()
+    for g in (K.GIN, K.GR, K.GX, K.GP, K.GM):
+        g.TPX = 300.0, 101325.0, CR.AIR
+    K.DZ.TPX = 300.0, 101325.0, CR.AIR_REITZ
+    K.cache.clear()
+
+
 def evaluate(i, n, kv="KV-3", seed=SEED):
     t0 = time.perf_counter()
     c = concept(i, n, kv, seed)
+    _reset_kin()
     row = dict(idx=i, concept=c, status="ok", reject=[])
     try:
         bc = boundary()
@@ -857,6 +1133,11 @@ def evaluate(i, n, kv="KV-3", seed=SEED):
                                    circ={kk: {x: vv[x] for x in ("share", "phi", "phi_reached", "J", "C", "S", "a_eff",
                                                                   "dpf", "K_decay")} for kk, vv in s["circ"].items()})
                               for s in d["loads"]] if d["loads"] else None
+        if d.get("idle"):
+            s0 = d["idle"]
+            row["idle_state"] = dict({k: v for k, v in s0.items() if k != "circ"},
+                                     circ={kk: {x: vv[x] for x in ("share", "phi", "dpf")} for kk, vv in s0["circ"].items()})
+        row["domain"] = domain(d)
         bad = check(c, d, bc)
         if bad:
             row.update(status="отсев", reject=[dict(code=b[0], value=b[1], limit=b[2], why=b[3]) for b in bad])
@@ -866,6 +1147,13 @@ def evaluate(i, n, kv="KV-3", seed=SEED):
         row["flashback"] = fb
         gas = [gas_network(c, d, bc, li) for li in range(len(LOADS))]
         row["gas"] = gas
+        if c["split"] == "каналы":                          # верхняя оценка: группа B поджигается горячим газом группы A
+            keep = ("load", "NOx", "CO", "eta_c", "margin_lbo", "margin_all", "anchor", "lit_main", "tau_ms")
+            row["gas_cross"] = [{k: g[k] for k in keep if k in g}
+                                for g in (gas_network(c, d, bc, li, cross=True) for li in range(len(LOADS)))]
+        gi = gas_network(c, d, with_idle(bc), IDLE_LI, st=d["idle"])     # холостой ход (0 %, оценка): устойчивость
+        row["idle"] = {k: gi[k] for k in ("load", "margin_lbo", "margin_all", "margins", "anchor", "eta_c", "CO", "NOx",
+                                          "backflow_margin", "p_sup_ratio", "tau_ms") if k in gi}
         g100 = gas[0]
         rej = []
         if (g100.get("margin_all") or 0.0) < 1.0:
@@ -874,7 +1162,11 @@ def evaluate(i, n, kv="KV-3", seed=SEED):
         if fb["margin_CH4"] is not None and fb["margin_CH4"] < 1.0:
             rej.append(dict(code="ПРОСКОК", value=fb["margin_CH4"], limit=1.0,
                             why=f"проскок пламени в смеситель на метане ({fb.get('margin_CH4_where')})"))
-        dz = [CR.diesel_network(c, d, bc, li_of(ld), gas[li_of(ld)]) for ld in (1.0, 0.5)]
+        dz = []
+        for ld in (1.0, 0.5):                               # времена зон этой нагрузки при неизменном объёме (оценка)
+            li = li_of(ld)
+            c2, d2 = _c_at_load(c, d, zone_taus(c, d, bc, li, d["loads"][li]))
+            dz.append(CR.diesel_network(c2, d2, bc, li, gas[li]))
         row["diesel"] = dz
         ig = [r.get("ign_margin") for r in dz if r.get("ign_margin") is not None]
         if ig and min(ig) < CR.IGN_MARGIN_MIN:

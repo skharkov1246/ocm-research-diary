@@ -331,7 +331,7 @@ def test_greedy_rules_and_determinism():
     assert len(s1) <= M1.TOP_N
     cnt = {}
     for r in s1:
-        assert r["feasible"] and r["score"] >= M1.SCORE_MIN
+        assert r["feasible"] and M1._score_w(r) >= M1.SCORE_MIN
         cnt[r["niche"]] = cnt.get(r["niche"], 0) + 1
     assert max(cnt.values()) <= M1.NICHE_MAX
     p = M1.price_of_diversity(recs, s1)
@@ -460,7 +460,9 @@ def test_rescore_l1_records():
         assert math.isclose(r["score"], old[r["j"]] * L0.trl_factor(r["trl_min"]), abs_tol=2e-4)
         assert r["d_score_vs_l0"] is None and r["start_score"] is None and r["opt_gain"] is None
     sel = M1.greedy(recs)
-    assert all(r["score"] >= M1.SCORE_MIN and r["feasible"] for r in sel) and 5 not in {r["j"] for r in sel}
+    assert all(r["score_w"] >= M1.SCORE_MIN and r["feasible"] for r in sel) and 5 not in {r["j"] for r in sel}
+    # порог - по взвешенной оценке: запись с TRL 3 и взвешенной 6,0 (итоговая 4,0) остаётся кандидатом
+    assert {r["j"] for r in M1.eligible(recs)} == {r["j"] for r in recs if r["feasible"] and r["score"] is not None and r["score_w"] >= M1.SCORE_MIN}
     # TRL 9 не теряет, TRL 3 теряет треть - отбор сдвигается к готовым технологиям
     hi = [r for r in recs if r["trl_min"] == 9 and r["score"] is not None]
     assert all(math.isclose(r["score"], r["score_prev"], abs_tol=1e-4) for r in hi)

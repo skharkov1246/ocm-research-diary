@@ -10,7 +10,6 @@
 """
 import argparse
 import collections
-import datetime
 import glob
 import gzip
 import hashlib
@@ -20,7 +19,6 @@ import statistics
 import sys
 import time
 
-import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 if HERE not in sys.path:

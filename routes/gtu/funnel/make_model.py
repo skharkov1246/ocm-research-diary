@@ -303,6 +303,18 @@ def assess_part(part):
         res["hip"] = rot or mat in ("IN718", "Haynes282", "CM247LC", "K418", "Ni")
         res["weeks"] = WEEKS["setup_print"] + hours / 168.0 + (WEEKS["hip"] if res["hip"] else 0.0) + (WEEKS["machining_rot"] if rot else 0.0)
         res["cost_u"] = hours * COST_U["print_h"] + (COST_U["hip"] if res["hip"] else 0.0)
+        if res["hip"] and res["fit"] and not part.get("shell"):
+            # камера ГИП для любой печатной детали с ГИП (вращающиеся, никелевые - в т. ч. цельная горячая часть Haynes 282 у оболочки):
+            # прежде камера проверялась только у холодной оболочки (поправка скептика оценки 15.11.2026; правило - SHELL_RULES["hip_unique"])
+            hr = hip_route(D)
+            res["hip_vessel"] = hr["vessel"]
+            res["proc_q"] = min(res["proc_q"], hr["proc_q"])
+            res["weeks"] += hr["weeks"]; res["cost_u"] += hr["cost_u"]
+            if hr["vessel"] is None:
+                res["hip"] = False
+                res["control"] = f"ГИП нужен, но камеры нет: D + {HIP_MARGIN:g} м больше {max(HIP_VESSELS):g} м"
+            elif hr["vessel"] > HIP_SERIAL_D:
+                res["control"] = f"ГИП в камере Ø{hr['vessel']:g} м (две в мире)"
         if part.get("shell"):                     # печатная оболочка: ГИП обязателен, контроль - ускоритель и купоны (SHELL_RULES)
             sh = shell_process(D)
             if sh["hip"] and not res["hip"]:
@@ -348,18 +360,30 @@ def assess_part(part):
     return res
 
 
+def hip_route(D):
+    """камера ГИП для печатной детали диаметром D, м (ось детали - вдоль камеры: длины камер 2,15-4,2 м больше любой детали воронки).
+    Возврат: vessel (диаметр камеры или None - ГИП невозможен), weeks и cost_u сверх обычного ГИП (очередь и перевозка к одной из двух
+    крупных камер), proc_q - верхняя граница качества способа: 1,0 серийная камера, 0,6 - Ø1,6 / Ø2,05 м, 0,2 - камеры нет
+    (SHELL_RULES["hip_unique"], оценка)"""
+    need = D + HIP_MARGIN
+    fit = [v for v in HIP_VESSELS if v >= need]
+    if not fit:
+        return dict(vessel=None, weeks=0.0, cost_u=0.0, proc_q=0.2)
+    v = min(fit)
+    if v > HIP_SERIAL_D:
+        return dict(vessel=v, weeks=WEEKS["hip_unique"], cost_u=COST_U["hip_unique"], proc_q=0.6)
+    return dict(vessel=v, weeks=0.0, cost_u=0.0, proc_q=1.0)
+
+
 def shell_process(D):
     """печатная оболочка диаметром D, м: ГИП (камера по HIP_VESSELS) и контроль (КТ ускорителем, проливка, купоны) - SHELL_RULES.
     Возврат: hip (возможен), vessel (диаметр камеры или None), proc_q (верхняя граница качества способа), weeks и cost_u сверх печати"""
-    need = D + HIP_MARGIN
-    fit = [v for v in HIP_VESSELS if v >= need]
-    weeks, cost, q = WEEKS["ct_linac"], COST_U["ct_linac"], 0.6
-    if not fit:
-        return dict(hip=False, vessel=None, proc_q=0.2, weeks=weeks, cost_u=cost,
+    hr = hip_route(D)
+    weeks, cost, q = WEEKS["ct_linac"] + hr["weeks"], COST_U["ct_linac"] + hr["cost_u"], min(0.6, hr["proc_q"])
+    v = hr["vessel"]
+    if v is None:
+        return dict(hip=False, vessel=None, proc_q=q, weeks=weeks, cost_u=cost,
                     control="ГИП невозможен (нет камеры) + КТ ускорителем 9 МэВ, проливка каналов, купоны")
-    v = min(fit)
-    if v > HIP_SERIAL_D:
-        weeks += WEEKS["hip_unique"]; cost += COST_U["hip_unique"]
     return dict(hip=True, vessel=v, proc_q=q, weeks=weeks, cost_u=cost,
                 control=f"ГИП в камере Ø{v:g} м" + (" (две в мире)" if v > HIP_SERIAL_D else "") +
                         " + КТ ускорителем 9 МэВ, проливка каналов, купоны")

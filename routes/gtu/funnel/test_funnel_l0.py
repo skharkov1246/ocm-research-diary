@@ -242,6 +242,17 @@ def test_pareto_layers_small():
     assert list(lay) == [1, 1, 1, 2, 3, 1]
 
 
+def test_pareto_front_uses_trl_multiplier():
+    """фронт Парето отбора - по баллам × множитель готовности (как final_score): вариант с лучшими баллами, но TRL 3, не доминирует
+    над вариантом TRL 9 с баллами чуть ниже, если после множителя он хуже по всем критериям"""
+    T = synth_table()
+    T.S[:2] = [[8.0, 8.0, 8.0, 8.0], [7.0, 7.0, 7.0, 7.0]]
+    T.trl[:2] = [3, 9]
+    F = M.pareto_matrix(T, np.array([0, 1]))
+    assert np.allclose(F[0], 8.0 * L0.trl_factor(3)) and np.allclose(F[1], 7.0)
+    assert list(M.pareto_layers(F, 3)) == [2, 1]
+
+
 def test_selection_on_real_sample_keeps_niches(parts, tmp):
     pdir, _ = parts
     r = M.run_merge(M.find_parts([pdir], "KV-3", N_T, S_T), "KV-3", N_T, S_T, os.path.join(tmp, "mr"), k=1, top=1, k_near=0,

@@ -213,6 +213,11 @@ def order_feasible(T, sc, mask=None):
     return pos[np.lexsort((T.idx[pos], -np.round(sc[pos], 9)))]
 
 
+def pareto_matrix(T, pos):
+    """критерии для фронта Парето: частные баллы × множитель готовности (та же поправка, что в final_score)"""
+    return T.S[pos] * L0.trl_factor(T.trl[pos])[:, None]
+
+
 def pareto_layers(F, max_layers=3):
     """слои недоминируемых (максимум по всем столбцам F); 0 - глубже max_layers"""
     layer = np.zeros(len(F), dtype=int)
@@ -634,7 +639,9 @@ def run_merge(found, kv, n, shards, out_dir, sfx="", weights=None, seed=L0.SEED,
     fpos = np.nonzero(T.feas)[0]
     layer = np.zeros(T.n, dtype=int)
     if len(fpos):
-        layer[fpos] = pareto_layers(T.S[fpos], 3)
+        # v3: фронт - по баллам × множитель готовности: final_score = Σ w·(s·k_trl) при любых весах, поэтому фронт S·k_trl - это
+        # множество лучших по итоговой оценке при каких-то весах (фронт по S без множителя проводил в отбор варианты мимо TRL)
+        layer[fpos] = pareto_layers(pareto_matrix(T, fpos), 3)
     front = [int(p) for p in fpos if layer[p] == 1]
     sel_args = dict(k=k, top=top, pareto_pos=front if use_pareto else (), k_near=k_near, near_max=near_max, target=target)
     S = select(T, sc, **sel_args)
@@ -705,7 +712,7 @@ def run_merge(found, kv, n, shards, out_dir, sfx="", weights=None, seed=L0.SEED,
                             sum=round(sum(w.values()), 12), basis="веса - решение владельца 14.11.2026; деление 4-го критерия - оценка"),
                normalization=normalization(T, w), summary=summary(T, sc),
                top=top_entries(T, sc, order, sens["stability"], layer, n, kv, seed, TOP_LIST, detail=bool(detail)),
-               pareto=dict(criteria=L0.CRIT, n_front=len(front), layers={str(L): int((layer[fpos] == L).sum()) for L in (1, 2, 3)},
+               pareto=dict(criteria=L0.CRIT, criteria_scaling="частный балл × множитель готовности k_trl (как в final_score)", n_front=len(front), layers={str(L): int((layer[fpos] == L).sum()) for L in (1, 2, 3)},
                            top_on_front=sum(1 for p in order[:TOP_LIST] if layer[p] == 1),
                            front=[dict(idx=int(T.idx[p]), arch=T.arch[p], niche=T.niche[p], rank=rank[p], score=round(float(sc[p]), 4),
                                        **{L0.CRIT_COL[c]: T.get(p, L0.CRIT_COL[c]) for c in L0.CRIT}, eta_el=T.get(p, "eta_el"))

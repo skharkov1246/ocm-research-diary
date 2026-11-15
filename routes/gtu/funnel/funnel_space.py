@@ -1950,7 +1950,8 @@ def model_inputs(c, tgt, perf, g):
                                                       ngv_ring=(g["ngv_ring"][k] if g["ngv_ring"] else True)) for k in range(c["nt"])]),
                pt=(dict(stages=[dict(blisk=g["pt_blisk"][k], zt=c["zt"], zn=c["zn"], ngv_ring=True) for k in range(c["npt"])])
                    if g["pt"] else None),
-               case=dict(method=c["m_case"], D=g["D_case"], pieces=g["case_pieces"]),
+               case=dict(method=c["m_case"], D=g["D_case"], L=g["L_case"], pieces=g["case_pieces"]),
+               hot=dict(D=g["D_hot"], L=g["L_hot"]),
                comb=dict(kind=comb_kind, method=c["m_comb"], n_inj=g["n_inj"]),
                hot_integral=bool(c["hot_integral"]), ngv_cooled=c["cool"] in ("N", "K", "P"),
                rotor_cooled=MK.rotor_cooled(c["cool"], c["m_tw"]),

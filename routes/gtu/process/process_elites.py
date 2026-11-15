@@ -217,7 +217,6 @@ def _init_worker():
 
 def _eval_one(args):
     x, kv, uid = args
-    global _PE
     if _PE is None:
         _init_worker()
     rec = _PE.evaluate(np.asarray(x, float), kv, uid=uid)
@@ -246,9 +245,13 @@ class Evaluator:
 
 
 def seed_genomes(kv, parents=None):
-    """начальные родители острова: опорные концепции блоков (process_space.reference_seeds) + геномы из файла parents
+    """начальные родители острова: опорные концепции блоков (process_space.reference_seeds), допустимые концепции воронки v3
+    (замороженный process_seeds.json, process_space.file_seeds) + геномы из файла parents
     (слитый архив прошлого этапа или выбор владельца: JSON/JSON.gz со списком archive[].best/front[] или genomes[])"""
-    out = [x for _, x in PS.reference_seeds(kv)]
+    key = (kv, parents)
+    if key in _SEEDS:
+        return _SEEDS[key]
+    out = [x for _, x in PS.reference_seeds(kv)] + [x for _, x in PS.file_seeds(kv)]
     if parents:
         op = gzip.open if parents.endswith(".gz") else open
         with op(parents, "rt", encoding="utf-8") as f:
@@ -264,7 +267,11 @@ def seed_genomes(kv, parents=None):
         if k not in seen:
             seen.add(k)
             uniq.append(np.clip(np.asarray(x, float), 0.0, 1.0 - 1e-12))
+    _SEEDS[key] = uniq
     return uniq
+
+
+_SEEDS = {}
 
 
 def run_config(kv, n_islands, evals, init_frac, batch, seed, parents=None):
@@ -482,6 +489,10 @@ def summarize(arch, stats, rep, cfg, kv, top=25, detail_top=8, t_run=None):
         pareto_global=dict(rule="недоминируемые по (КПД на клеммах max, масса min) среди фронтов всех ниш",
                            rows=[_row(p, p["_cell"]) for p in front][:60]),
         best_by_descriptor=marg,
+        fronts_top_niches=[dict(niche=PS.cell_label(c), points=[dict(uid=p["uid"], eff=p["eff"], mass=p["mass"], fit=round(p["fit"], 3),
+                                                                     parts=p["parts"], pnp=p["pnp"], trl=p["trl"], label=p["label"])
+                                                                for p in arch.cells[c]["front"]])
+                           for c, _ in ordered[:12]],
         detail_top=det,
         history={str(i): s["history"][-1] for i, s in stats.items()},
         run_wall_s=t_run,

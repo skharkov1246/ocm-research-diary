@@ -36,8 +36,6 @@ import os
 import sys
 import time
 
-import numpy as np
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 for _p in (HERE, os.path.join(HERE, "mass")):
     if _p not in sys.path:
@@ -100,7 +98,7 @@ def _rho(mat):
 # =========================================================================== паспорт для модели массы
 def mass_spec(C, r):
     """паспорт концепции в форме mass_db (size_from_passport) по результату blocks.evaluate"""
-    c, t, hx, b = C["compressor"], C["turbine"], C["hx"], C["build"]
+    c, t, b = C["compressor"], C["turbine"], C["build"]
     comp_rep = r["blocks"]["compressor"]["stages"]
     sz = r["sizing"]["engine"]
     groups = []
@@ -124,7 +122,8 @@ def mass_spec(C, r):
                 turb_gg=dict(type="A" if t["type"] == "О" else "R", n=int(r["nt"])),
                 turb_pt=(dict(type="A", n=int(r["npt"])) if free else None), rpm_gg=n_eng, rpm_pt=(pkg_n if free else None),
                 combustor=dict(kind="annular" if C["combustor"]["chamber"] == "кольцевая" else "silo", n_inj=int(sz["n_inj"]),
-                               integral=(b["case"] == "оболочка")),
+                               integral=False),     # оболочка: участок оболочки над камерой - тот же цилиндр, его масса остаётся
+                                                    # (mass_model integral=True убрал бы её совсем - подыграло бы оболочке)
                 bearings=dict(kind="magnetic" if b["bear"] == "магнит" else "oil_pkg", n_radial=2 * rotors, n_thrust=rotors),
                 frame=dict(L=None), hx=[])
     return spec

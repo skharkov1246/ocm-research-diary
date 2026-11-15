@@ -6,7 +6,8 @@
 Слияние: все части funnel_l1<tag>_<KV>_m<M>_s<k>of<S>.json[.gz]; у всех одинаковы вход (sha256 отбора уровня 0), порядок,
 отпечаток кода, число стартов; у части k - ровно номера j % S == k; ни один номер 0..M-1 не потерян и не задвоен (копия части
 после повтора задачи - с тем же содержанием; время счёта t_s, t_opt_s не сравнивается). Нарушение - отказ (код 2).
-Отбор 50 разных (п. 4 приоритета владельца): кандидаты - допустимые на уровне 1 с оценкой не ниже SCORE_MIN; жадно: на
+Отбор 50 разных (п. 4 приоритета владельца): кандидаты - допустимые на уровне 1 со взвешенной оценкой (без множителя TRL;
+SCORE_MIN_ON, флаг --score-min-on) не ниже SCORE_MIN, место - по итоговой оценке; жадно: на
 каждом шаге - наибольшее «оценка - LAMBDA·exp(-d/D0)», d - расстояние до ближайшего уже выбранного (дискретные оси - по
 Хэммингу с весами, непрерывные - нормированные); не больше NICHE_MAX на нишу. Цена разнообразия - против чистого топ-50.
 Масштабирование 50 отобранных на KV-1 и KV-6: та же дискретная схема, непрерывные оси - окна design() и оптимизация.
@@ -18,6 +19,9 @@
   итоговая оценка каждой записи пересчитывается функцией funnel_l0.final_score по её частным баллам (s_parts, s_plugplay, s_service,
   s_effmake) и TRL_min; отбор 50 разных, цена разнообразия и сходимость - заново; масштабирование на KV-1/KV-6 и CalculiX не
   запускаются (это новый счёт). Записи без частных баллов (точка не построилась) оценки не получают и в отбор не идут.
+  Пересчёт - перестановка уже посчитанных записей, а не новая оптимизация: оптимум уровня 1 v2 искался без множителя TRL (в цели был
+  только s_trl внутри изготовимости). Где TRL зависит от непрерывной оси (одно центробежное колесо: TRL 8 при π <= 7 и 5 выше,
+  множитель 0,94 против 0,78), оптимум v3 мог уйти к π <= 7 - такие записи перечислены в rescore.pi7_edge (поправка скептика оценки).
 """
 import argparse, csv, glob, gzip, hashlib, json, math, os, re, sys, tempfile, shutil, time
 from collections import Counter, defaultdict
@@ -43,6 +47,12 @@ SCORE_MIN_BASIS = ("5,0 - середина шкалы 0-10, к которой п
                    "КПД - исходная установка даёт 5 (s_eta); вариант ниже 5 по взвешенной оценке в среднем не лучше опорной конструкции "
                    "по критериям владельца - нести его на уровень 2 незачем. Плюс допустимость на уровне 1 (все правила, включая "
                    "нерасчётные режимы, запас по помпажу, пуск и прочность)")
+SCORE_MIN_ON = "score_w"        # к какой оценке применяется SCORE_MIN: "score_w" - взвешенная без множителя TRL (как в SCORE_MIN_BASIS;
+#                                 по умолчанию, поправка скептика оценки 15.11.2026), "score" - итоговая с множителем (прежний счёт v3);
+#                                 выбор - вопрос владельцу, флаг --score-min-on; отбор и места - всегда по итоговой оценке score
+SCORE_MIN_ON_NOTE = {"score_w": "порог 5,0 - к взвешенной оценке (без множителя готовности), как сформулирован SCORE_MIN_BASIS; место в "
+                                "отборе - по итоговой оценке (с множителем)",
+                     "score": "порог 5,0 - к итоговой оценке (с множителем готовности): при TRL 4 нужна взвешенная 6,92, при TRL 3 - 7,5"}
 LAMBDA, D0 = 1.0, 0.15
 DIV_BASIS = ("штраф LAMBDA·exp(-d/D0), LAMBDA = 1,0 (единицы оценки), D0 = 0,15: двойник (d -> 0) теряет 1,0 балла, вариант на расстоянии "
              "0,15 - 0,37, на 0,3 - 0,14, на 0,5 - 0,04 (оценка: клоны вытесняются, разные почти не штрафуются)")
@@ -181,8 +191,22 @@ def diff_axes(ra, rb):
     return out
 
 
-def eligible(recs, score_min=SCORE_MIN):
-    return [r for r in recs if r.get("feasible") and r.get("score") is not None and r["score"] >= score_min]
+def _score_w(r):
+    """взвешенная оценка записи без множителя готовности (score_w; у записей v2 без этого столбца - score, он тогда и есть взвешенная)"""
+    return r.get("score_w") if r.get("score_w") is not None else r.get("score")
+
+
+def _thr(r, on=None):
+    """оценка, с которой сравнивается порог SCORE_MIN (SCORE_MIN_ON)"""
+    return _score_w(r) if (on or SCORE_MIN_ON) == "score_w" else r.get("score")
+
+
+def eligible(recs, score_min=SCORE_MIN, on=None):
+    """кандидаты отбора: допустимые на уровне 1 с итоговой оценкой, у которых оценка порога (SCORE_MIN_ON: по умолчанию ВЗВЕШЕННАЯ,
+    без множителя TRL) не ниже score_min - порог сформулирован по взвешенной оценке (SCORE_MIN_BASIS); место в отборе - по итоговой
+    оценке score (с множителем). Порог по score с множителем требует взвешенной 6,92 при TRL 4 и 7,5 при TRL 3 и молча убирает из
+    отбора RDC, волновой ротор и кластер (проверка скептика оценки на KV-3, N = 300)"""
+    return [r for r in recs if r.get("feasible") and r.get("score") is not None and _thr(r, on) is not None and _thr(r, on) >= score_min]
 
 
 def greedy(recs, n=TOP_N, niche_max=NICHE_MAX, lam=LAMBDA, d0=D0, score_min=SCORE_MIN):
@@ -269,6 +293,7 @@ def sensitivity_lambda(recs):
 # =========================================================================== пересчёт оценки без нового счёта (v3)
 RESCORE_NEED = ("s_parts", "s_plugplay", "s_service", "s_effmake", "trl_min")
 RESCORE_VOID = ("d_score_vs_l0", "start_score", "opt_gain")
+MK_TRL_ABOVE_7 = FS.MK.TRL["одно_колесо_выше_7"]["trl"]      # TRL одного колеса выше π 7 (make_model)
 
 
 def rescore(recs, w=None):
@@ -293,8 +318,16 @@ def rescore(recs, w=None):
             r["score"] = None
         for k in RESCORE_VOID:
             r[k] = None
+    # TRL зависит от непрерывной оси: одно центробежное колесо - TRL 8 при π <= 7 и 5 выше (make_model.TRL, funnel_space.techs).
+    # Оптимизация v2 множителя не видела (в цели был только s_trl внутри изготовимости), поэтому у таких записей оптимум v3 мог
+    # сместиться к π <= 7: пересчёт - перестановка, а не новая оптимизация
+    pi_edge = [r["j"] for r in recs if r.get("comp") == "1Ц" and r.get("pi") is not None and float(r["pi"]) > 7.0
+               and r.get("trl_min") is not None and int(r["trl_min"]) == MK_TRL_ABOVE_7]
     return dict(rule="score = funnel_l0.final_score(s_parts, s_plugplay, s_service, s_effmake; trl_min) - взвешенная × (0,5 + 0,5·TRL/9)",
                 n=len(recs), rescored=n_ok, missing_scores=miss, missing_scores_feasible=miss_feas, voided=list(RESCORE_VOID),
+                pi7_edge=dict(n=len(pi_edge), j=pi_edge[:50],
+                              note="одно колесо при π > 7 с TRL_min 5 (одно_колесо_выше_7): множитель 0,78 против 0,94 при π <= 7 - "
+                                   "оптимум уровня 1 v3 мог уйти к π <= 7; эти записи пересчитать новым счётом, если они у границы отбора"),
                 d_score=dict(n=len(d), p50=round(float(np.median(d)), 4) if d else None, min=round(float(min(d)), 4) if d else None,
                              max=round(float(max(d)), 4) if d else None),
                 note="частные баллы записи - по моделям того кода, которым считался уровень 1 (code_sha частей); пересчитывается только "
@@ -478,7 +511,8 @@ def summary(recs):
         by[a] = d
     feas = [r for r in recs if r["feasible"]]
     gains = [r["opt_gain"] for r in recs if r.get("opt_gain") is not None and r.get("start_feasible")]
-    return dict(n=len(recs), feasible=len(feas), eligible=len(eligible(recs)), score_min=SCORE_MIN,
+    return dict(n=len(recs), feasible=len(feas), eligible=len(eligible(recs)), score_min=SCORE_MIN, score_min_on=SCORE_MIN_ON,
+                eligible_other_basis=len(eligible(recs, on="score" if SCORE_MIN_ON == "score_w" else "score_w")),
                 reject_reasons=dict(rej.most_common()), by_arch=by,
                 l0_feasible_l1_infeasible=sum(1 for r in recs if r["l0_feasible"] and not r["feasible"]),
                 l0_infeasible_l1_feasible=sum(1 for r in recs if not r["l0_feasible"] and r["feasible"]),
@@ -561,7 +595,8 @@ def run_merge(found, kv, M, shards, out_dir, sfx="", scale_kv=("KV-1", "KV-6"), 
         elif r["j"] in el:
             why = "допустим и выше порога, вытеснен штрафом за близость или лимитом ниши"
         elif r["feasible"]:
-            why = f"допустим, оценка ниже порога {SCORE_MIN}"
+            why = (f"допустим, взвешенная оценка (без множителя TRL) ниже порога {SCORE_MIN}" if SCORE_MIN_ON == "score_w" else
+                   f"допустим, итоговая оценка (с множителем TRL) ниже порога {SCORE_MIN}")
         else:
             why = "отсеян на уровне 1: " + (r["reject_detail"] or r["reject"] or "")
         extra.append([drank.get(r["j"]), prank.get(r["j"]), int(r["j"] in el), why])
@@ -613,7 +648,8 @@ def run_merge(found, kv, M, shards, out_dir, sfx="", scale_kv=("KV-1", "KV-6"), 
     p_top = os.path.join(out_dir, f"funnel_l1_top50{sfx}.json")
     top_doc = dict(title=f"Воронка, уровень 1: {n_sel} разных лучших вариантов - {kv}", **soft, kv=kv, M=M, input=ref["input"],
                    input_sha256=ref["input_sha256"], code_sha=ref["code_sha"], starts=ref["starts"], maxfev=ref["maxfev"],
-                   rule=dict(top_n=TOP_N, niche_max=NICHE_MAX, score_min=SCORE_MIN, score_min_basis=SCORE_MIN_BASIS, lam=LAMBDA, d0=D0,
+                   rule=dict(top_n=TOP_N, niche_max=NICHE_MAX, score_min=SCORE_MIN, score_min_basis=SCORE_MIN_BASIS, score_min_on=SCORE_MIN_ON,
+                             score_min_on_note=SCORE_MIN_ON_NOTE[SCORE_MIN_ON], lam=LAMBDA, d0=D0,
                              basis=DIV_BASIS, distance=dict(disc_weights=DISC_W, cont=CONT_N, cont_weight=CONT_W)),
                    selection_note=sel_note, price_of_diversity=pod, selected=top,
                    note="все числа - оценка уровня 1 (одномерные модели, привязанные к формулам трека; README узла, раздел «Уровень 1»)")
@@ -758,6 +794,7 @@ def probe(out_dir=HERE, **kw):
 
 
 def main(argv=None):
+    global SCORE_MIN_ON
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--probe", action="store_true")
     ap.add_argument("--kv", default="KV-3")
@@ -776,7 +813,11 @@ def main(argv=None):
     ap.add_argument("--fea-results", default=None, help="итог jobs_l1_fea.json (funnel_l1_fea_results.json): отсев по CalculiX до отбора 50")
     ap.add_argument("--rescore", action="store_true", help="пересчёт оценки (final_score, множитель TRL) и отбора 50 по записям частей без "
                                                            "нового счёта; масштабирование и CalculiX не запускаются")
+    ap.add_argument("--score-min-on", choices=("score_w", "score"), default=SCORE_MIN_ON,
+                    help="к какой оценке применять порог SCORE_MIN: score_w - взвешенная без множителя TRL (по умолчанию, SCORE_MIN_BASIS), "
+                         "score - итоговая с множителем (вопрос владельцу)")
     a = ap.parse_args(argv)
+    SCORE_MIN_ON = a.score_min_on
     if a.probe:
         r = probe()
     else:

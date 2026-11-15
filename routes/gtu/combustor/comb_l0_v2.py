@@ -28,6 +28,18 @@ def shard_name(kv, n, shard, shards, beta=None):
     return f"comb_l0v2_{kv}_n{n}{b}_s{shard:03d}of{shards:03d}.json"
 
 
+DATA_FILES = ("targets.json", "targets_basis_results.json")
+
+
+def data_hash():
+    """отпечаток данных, которых не покрывают code_hash и bc_key: цели и базис целей (comb_crn читает их при импорте)"""
+    import hashlib
+    h = hashlib.sha256()
+    for f in DATA_FILES:
+        h.update(open(os.path.join(HERE, f), "rb").read())
+    return h.hexdigest()[:16]
+
+
 def _init(beta=None):
     if beta is not None:
         V.BETA_LOWJ = beta                  # чувствительность к закону затухания при малом J (оценка)
@@ -74,7 +86,8 @@ def run(kv, n, shard, shards, out, workers=None, seed=V.SEED, quiet=False, beta=
         st[r["status"]] = st.get(r["status"], 0) + 1
     res = dict(
         schema=SCHEMA, kv=kv, n=n, seed=seed, shard=shard, shards=shards, n_rows=len(rows),
-        fingerprint=V.fingerprint(n, seed), code_hash=V.code_hash(), bc_key=bc["key"], v1_code_hash=CS.code_hash(),
+        fingerprint=V.fingerprint(n, seed), code_hash=V.code_hash(), data_hash=data_hash(), bc_key=bc["key"],
+        v1_code_hash=CS.code_hash(),
         beta=V.BETA_LOWJ,
         method="уровень 0 v2 воронки камеры: comb_v2 (пассивные схемы частичной нагрузки, 100/75/50/30 %, согласованное "
                "смешение, гидравлика топлива одним клапаном) поверх comb_space и comb_crn v1",

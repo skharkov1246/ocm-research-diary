@@ -135,9 +135,10 @@ def test_backflow_rule(bc):
     d = V.derive(cc, bc)
     if not d["loads"]:
         pytest.skip("нет окна коллектора")
-    bm = min(s["backflow_margin"] for s in d["loads"])
+    bm = min(s["backflow_margin"] for s in d["loads"] + [d["idle"]])     # и на холостом ходу (0 %, оценка)
     codes = [b[0] for b in V.check(cc, d, bc)]
     assert (bm < V.DP_BACK_MIN) == ("ОБРАТНЫЙ_ТОК" in codes)
+    assert d["idle"]["backflow_margin"] <= min(s["backflow_margin"] for s in d["loads"]) + 1e-9
 
 
 def test_evaluate_four_loads_targets_and_repeatable(bc):
@@ -208,3 +209,114 @@ def test_merge_rejects_mixed_beta(tmp_path, bc):
     V.BETA_LOWJ = V.BETA_LOWJ_NOMINAL
     complete, res = M.merge([str(out)], str(tmp_path / "m.json"))
     assert not complete and any("beta" in p for p in res["completeness"]["problems"])
+
+
+def test_hydraulic_pilot_shares_main_residence_time():
+    """пилот «гидравлика» - часть смесителей того же купола: время пилотной зоны = tau_pz; своё время - только у полости TVC"""
+    for i in range(N):
+        c = V.concept(i, N)
+        if c["split"] == "гидравлика" and c["scheme"] != "TVC":
+            assert c["tau_aux_ms"] == c["tau_pz_ms"]
+        if c["scheme"] == "TVC":
+            assert V.TAU_AUX[0] <= c["tau_aux_ms"] <= V.TAU_AUX[1]
+
+
+def test_ejector_jetpump_bounded():
+    """эжектор в трубе: кратность растёт с площадью подсоса и при реальной трубе (a <= 4) меньше закона свободной струи"""
+    rs, l_ej = 683.5 / 1700.0, 15.0
+    ks = [V.ejector_K(a, rs, l_ej, 0.03) for a in (0.5, 1.0, 2.0, 4.0, 8.0)]
+    assert all(x < y for x, y in zip(ks, ks[1:]))
+    assert ks[3] < 0.32 * l_ej * math.sqrt(rs) - 1.0
+    assert V.ejector_K(0.0, rs, l_ej, 0.03) == 0.0
+
+
+def test_fuel_stiffness_uses_flow_law(bc):
+    """мягкий пористый контур (Дарси) откликается на пульсацию сильнее сопла: перепад «по отклику» не больше среднего"""
+    for i in range(N):
+        c = V.concept(i, N)
+        if c["split"] in ("гидравлика", "каналы") and c["x_lin"] > 0.5:
+            d = V.derive(c, bc)
+            if d["loads"]:
+                st = d["loads"][-1]
+                assert st["dpf_eff"] <= st["dpf_weighted"] * 1.0001 or max(v["dpf"] for v in st["circ"].values()) > 0.5
+                return
+    pytest.skip("нет варианта")
+
+
+def test_evaluate_order_independent(bc):
+    """итог варианта не зависит от того, что процесс считал до него (пул раздаёт варианты в разном порядке)"""
+    strip = lambda r: json.dumps({k: v for k, v in r.items() if k != "t_s"}, sort_keys=True)
+    a2, a59 = V.evaluate(2, 300), V.evaluate(59, 300)
+    b59, b2 = V.evaluate(59, 300), V.evaluate(2, 300)
+    assert strip(a2) == strip(b2) and strip(a59) == strip(b59)
+
+
+def test_idle_point_extrapolated(bc):
+    """холостой ход (0 %): линейная экстраполяция по 50 и 30 % (оценка), квадратичная по четырём точкам - в пределах 2 %;
+    расход топлива ~ четверть полного, воздух - как при 100 % (постоянная частота)"""
+    I = bc["idle"]
+    assert I["load"] == V.IDLE_LOAD == 0.0
+    assert 0.2 < I["fuel_share_of_100"] < 0.3
+    assert I["W_air"] == pytest.approx(bc["loads"][0]["W_air"])
+    assert I["p3_Pa"] < bc["loads"][-1]["p3_Pa"] and I["T3_K"] < bc["loads"][-1]["T3_K"]
+    assert all(v["rel"] < 0.02 for v in I["check_quadratic"].values())
+    assert len(V.with_idle(bc)["loads"]) == V.IDLE_LI + 1 and len(bc["loads"]) == len(V.LOADS)
+
+
+def test_zone_taus_constant_volume(bc):
+    """времена зон при неизменном объёме: при 100 % - ровно оси, на 30 % у богатой зоны RQL короче (горячее и ниже p3)"""
+    i, r = _find(lambda c: c["scheme"] == "RQL", need_ok=True)
+    c = r["concept"]
+    d = V.derive(c, bc)
+    T100 = V.zone_taus(c, d, bc, 0, d["loads"][0])
+    assert T100["pz"] == pytest.approx(1e-3 * c["tau_pz_ms"], rel=1e-12)
+    assert T100["bo"] == pytest.approx(1e-3 * c["tau_bo_ms"], rel=1e-12)
+    T30 = V.zone_taus(c, d, bc, 3, d["loads"][3])
+    assert T30["pz"] < T100["pz"]
+    assert r["gas"][3]["tau_ms"]["pz"] == pytest.approx(1e3 * T30["pz"], rel=1e-4)
+
+
+def test_node_streams_conserve_fuel():
+    """узлы неравномерности v2 не добавляют топливо при срезе бедного узла (v1 при S = 0,6 добавлял ~0,8 %)"""
+    K = CR.kin()
+    for S in (0.1, 0.4, 0.6):
+        nodes, _ = V._node_streams_v2(K, 1.0, 0.02, S, 5, 683.5, 288.15, 1.37e6)
+        fuel = sum(st.m - 1.0 * wk for wk, st in nodes)
+        assert fuel == pytest.approx(0.02, rel=1e-9)
+    nodes1, _ = CR._node_streams(K, 1.0, 0.02, 0.6, 5, 683.5, 288.15, 1.37e6)
+    assert sum(st.m - wk for wk, st in nodes1) > 0.02 * 1.005
+
+
+def test_tau_ext_refined_below_one():
+    """запас ниже 1 уточняется между ступенями лестницы: не меньше ступени v1 и меньше предыдущей ступени"""
+    K = CR.kin()
+    fr = K.fresh(1.0, 0.5 * 0.0581, 683.5, 288.15, 1.37e6)        # phi 0,5 при p3, T3 точки 100 %
+    got = {}
+    for tau in (1e-4, 1e-5):                                     # v1: 1/3 и 1/30 (замер 15.11.2026)
+        m1 = K.tau_ext(fr, tau)
+        assert 0.0 < m1 < 1.0
+        m2 = V.tau_ext_v2(K, fr, tau)
+        f1 = 1.0 / m1
+        prev = max([1.0] + [f for f in V.TAU_EXT_LADDER if f < f1 - 1e-9])
+        assert m1 - 1e-12 <= m2 < 1.0 / prev
+        got[tau] = m2
+    # время погасания одно: запас пропорционален времени пребывания (шаг бисекции <= 1 %)
+    assert got[1e-4] == pytest.approx(10 * got[1e-5], rel=0.02)
+
+
+def test_cross_ignition_and_domain(bc):
+    """каналы: верхняя оценка с поджиганием группы B газом группы A пишется рядом (gas_cross), отбор - без неё;
+    пометка области облика - у каждой строки с гидравликой"""
+    for i in range(N):
+        c = V.concept(i, N)
+        if c["split"] != "каналы":
+            continue
+        r = V.evaluate(i, N)
+        if r["status"] != "ok":
+            continue
+        assert len(r["gas_cross"]) == len(V.LOADS)
+        t = r["targets"][V.NEW_TARGET]
+        assert "value_cross" in t and "in_domain" in t and isinstance(r["domain"]["flags"], list)
+        assert r["targets"]["load_range"]["idle_margin_lbo"] == r["idle"]["margin_lbo"]
+        return
+    pytest.skip("нет допустимого варианта с каналами")

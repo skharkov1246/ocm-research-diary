@@ -18,7 +18,7 @@ false и код выхода 2.
   python merge_l0_v2.py runs/<run_id> --out l0_aws_v2/comb_l0v2_KV-3_n<N>_results.json
   python merge_l0_v2.py /tmp/l0v2 --out comb_l0_v2_probe_results.json --top 30
 """
-import argparse, glob, gzip, json, math, os, sys, time
+import argparse, glob, gzip, hashlib, json, math, os, re, sys, time
 
 import numpy as np
 
@@ -28,7 +28,8 @@ if HERE not in sys.path:
 import merge_l0 as M1  # noqa: E402  (веса, нормировки, Парето - те же, что v1)
 
 DATE = "2026-11-15"
-KEYS = ("schema", "kv", "n", "seed", "shards", "fingerprint", "code_hash", "bc_key", "beta")
+KEYS = ("schema", "kv", "n", "seed", "shards", "fingerprint", "code_hash", "data_hash", "bc_key", "beta")
+PART_RE = re.compile(r"^comb_l0v2_.+_s\d{3}of\d{3}\.json(\.gz)?$")   # только части (не итоги слияния)
 
 
 def part_files(paths):
@@ -39,7 +40,14 @@ def part_files(paths):
             files += glob.glob(os.path.join(p, "**", "comb_l0v2_*.json.gz"), recursive=True)
         else:
             files.append(p)
-    return sorted(set(f for f in files if not f.endswith(".tmp")))
+    return sorted(set(f for f in files if PART_RE.match(os.path.basename(f)) and "_lost" not in f.split(os.sep)))
+
+
+def _sig(rows):
+    """подпись части по дискретным полям (статус, коды отсева, выполнение целей) - не зависит от шума 1e-5 между машинами"""
+    return hashlib.sha256(json.dumps([(r["idx"], r["status"], sorted(b["code"] for b in r.get("reject", [])),
+                                       {k: v.get("ok") for k, v in (r.get("targets") or {}).items()}) for r in rows],
+                                      sort_keys=True, ensure_ascii=False).encode()).hexdigest()
 
 
 def _load(f):
@@ -78,7 +86,12 @@ def compact(r, hard, new):
                 V_L=r["derived"]["V_L"], new_value=t[new]["value"], new_binding=t[new]["binding"],
                 new_ok=t[new]["ok"], stable_30_100=t[new]["stable_30_100"], new_ok_strict=t[new]["ok_strict_all_zones"],
                 load_range_ok=t["load_range"]["ok"], hard_ok=r["hard_ok"],
-                hard_fail=[k for k in hard if not t[k]["ok"]], feed=r["feed"])
+                hard_fail=[k for k in hard if not t[k]["ok"]], feed=r["feed"],
+                idle_margin=(r.get("idle") or {}).get("margin_lbo"), stable_0_100=t[new].get("stable_0_100", False),
+                in_domain=t[new].get("in_domain", False), domain_flags=(r.get("domain") or {}).get("flags"),
+                value_cross=t[new].get("value_cross"), ok_cross=t[new].get("ok_cross", False),
+                stable_cross=t[new].get("stable_30_100_cross", False),
+                tau_30_ms=(g[3].get("tau_ms") if len(g) > 3 else None))
 
 
 def merge(paths, out, top=50, keep_holders=3000):
@@ -88,7 +101,7 @@ def merge(paths, out, top=50, keep_holders=3000):
     HARD = list(CR.TARGETS["funnel_interface"]["hard"]) + [V.NEW_TARGET]
     files = part_files(paths)
     rep = dict(files=len(files), problems=[])
-    ref, seen_shards, used = None, {}, set()
+    ref, seen_shards, used, sigs = None, {}, set(), {}
     n = None
     have = None
     dup_idx = 0
@@ -113,9 +126,15 @@ def merge(paths, out, top=50, keep_holders=3000):
                 rep["problems"].append(f"{os.path.basename(f)}: {k}={meta[k]!r} != {ref[k]!r}")
         seen_shards.setdefault(p["shard"], []).append(f)
         inputs.append(dict(file=os.path.basename(f), shard=p["shard"], rows=p["n_rows"], runtime_s=p["runtime_s"]))
-        if p["shard"] in used or any(meta[k] != ref[k] for k in KEYS):
+        if any(meta[k] != ref[k] for k in KEYS):
+            continue
+        if p["shard"] in used:
+            if _sig(p["rows"]) != sigs[p["shard"]]:
+                rep["problems"].append(f"{os.path.basename(f)}: повтор части {p['shard']} с другим содержимым "
+                                       f"(статусы, отсев или цели) - какая копия верна, слияние не знает")
             continue
         used.add(p["shard"])
+        sigs[p["shard"]] = _sig(p["rows"])
         shard_rt.append(p["runtime_s"])
         expect = set(range(p["shard"], n, ref["shards"]))
         got = [r["idx"] for r in p["rows"]]
@@ -134,6 +153,7 @@ def merge(paths, out, top=50, keep_holders=3000):
             c = r["concept"]
             key = f'{c["scheme"]}|{c["passive"]}'
             b = by.setdefault(key, dict(total=0, ok=0, stable_30_100=0, lowem=0, lowem_strict=0, load_range=0, hard_ok=0,
+                                        stable_0_100=0, stable_in_domain=0, stable_cross=0, lowem_cross=0,
                                         reject={}, err=0))
             b["total"] += 1
             for x in r.get("reject", []):
@@ -156,6 +176,10 @@ def merge(paths, out, top=50, keep_holders=3000):
             b["lowem_strict"] += int(cp["new_ok_strict"])
             b["load_range"] += int(cp["load_range_ok"])
             b["hard_ok"] += int(cp["hard_ok"])
+            b["stable_0_100"] += int(cp["stable_0_100"])
+            b["stable_in_domain"] += int(cp["stable_30_100"] and cp["in_domain"])
+            b["stable_cross"] += int(cp["stable_cross"])
+            b["lowem_cross"] += int(cp["ok_cross"])
             binding[cp["new_binding"].split("_")[0]] = binding.get(cp["new_binding"].split("_")[0], 0) + 1
             if cp["new_ok"]:
                 holders_idx.append(i)
@@ -246,6 +270,8 @@ def merge(paths, out, top=50, keep_holders=3000):
         b["new_value_min"] = float(min(r["new_value"] for r in lst))
         b["best_new_idx"] = min(lst, key=lambda r: r["new_value"])["idx"]
     holders = sorted([x[5] for x in feas if x[5]["new_ok"]], key=lambda r: r["new_value"])[:keep_holders]
+    nearest_cross = sorted([x[5] for x in feas if x[5]["value_cross"] is not None],
+                           key=lambda r: r["value_cross"])[:30]
     nearest = sorted([x[5] for x in feas], key=lambda r: r["new_value"])[:30]
     feed = {}
     for j in order:
@@ -264,17 +290,28 @@ def merge(paths, out, top=50, keep_holders=3000):
                "затухания расслоения и неравномерности при малом J - оценка (BETA_LOWJ), проверка - уровень 1",
         complete=complete, completeness=rep, inputs=inputs,
         weights=W, penalty_k=M1.PENALTY_K, hard_targets=HARD, trl_multiplier="0,5 + 0,5·TRL/9",
-        constants=dict(BETA_LOWJ=(ref or {}).get("beta"), DP_BACK_MIN=V.DP_BACK_MIN, DPF_REF=V.DPF_REF, LOADS=V.LOADS),
+        constants=dict(BETA_LOWJ=(ref or {}).get("beta"), DP_BACK_MIN=V.DP_BACK_MIN, DPF_REF=V.DPF_REF, LOADS=V.LOADS,
+                       IDLE_LOAD=V.IDLE_LOAD, POR_TOL=V.POR_TOL, EJ_ZETA=V.EJ_ZETA, DOMAIN=V.DOMAIN),
         counts=dict(n=n, rows=int(sum(status.values())), status=status, reject_codes=reasons, feasible=len(feas),
                     stable_30_100=len(stable_idx), lowem_30_100_1valve=len(holders_idx),
                     lowem_strict_all_zones=int(sum(x[5]["new_ok_strict"] for x in feas)),
                     load_range_base=int(sum(x[5]["load_range_ok"] for x in feas)),
+                    stable_0_100=int(sum(x[5]["stable_0_100"] for x in feas)),
+                    stable_30_100_in_domain=int(sum(x[5]["stable_30_100"] and x[5]["in_domain"] for x in feas)),
+                    lowem_in_domain=int(sum(x[5]["new_ok"] and x[5]["in_domain"] for x in feas)),
+                    in_domain=int(sum(x[5]["in_domain"] for x in feas)),
+                    cross_ignition_upper=dict(
+                        note="каналы: группа B поджигается горячим газом группы A - верхняя оценка (отбор - без неё)",
+                        evaluated=int(sum(x[5]["value_cross"] is not None for x in feas)),
+                        stable_30_100=int(sum(x[5]["stable_cross"] for x in feas)),
+                        lowem=int(sum(x[5]["ok_cross"] for x in feas))),
                     hard_ok=int(sum(x[5]["hard_ok"] for x in feas)), binding_term_among_feasible=binding),
         timing=dict(t_variant_mean_s=float(np.mean(ts)) if ts else None, t_variant_median_s=float(np.median(ts)) if ts else None,
                     cpu_variant_mean_s=float(np.mean(cpu)) if cpu else None,
                     cpu_variant_median_s=float(np.median(cpu)) if cpu else None,
                     cpu_variant_max_s=float(np.max(cpu)) if cpu else None, shard_runtime_s=shard_rt),
         by_scheme_passive=by, convergence=conv, holders=holders, nearest_to_new_target=nearest,
+        nearest_cross_ignition=nearest_cross,
         top=top_rows, pareto=pf_rows, pareto_pool=pool_name, pareto_objectives=M1.PARETO_OBJ,
         sensitivity=dict(one_at_a_time=sens, dirichlet_top10_freq=[dict(idx=i, freq=f / 300) for i, f in
                                                                    sorted(freq.items(), key=lambda x: -x[1])[:15]]),
@@ -295,9 +332,12 @@ def main(argv=None):
     a = ap.parse_args(argv)
     complete, res = merge(a.paths, a.out, a.top)
     c = res["counts"]
-    print(f"полнота: {complete}; строк {c['rows']} из {c['n']}; допустимых {c['feasible']}; держат 30-100 % "
-          f"{c['stable_30_100']}; новая цель {c['lowem_30_100_1valve']}; все жёсткие v2 {c['hard_ok']}; запись {a.out}")
-    return 0 if complete else 2
+    err = c["status"].get("ошибка", 0)
+    print(f"полнота: {complete}; строк {c['rows']} из {c['n']}; ошибок {err}; допустимых {c['feasible']}; держат 30-100 % "
+          f"{c['stable_30_100']} (в области облика {c['stable_30_100_in_domain']}, 0-100 % {c['stable_0_100']}, при поджигании "
+          f"группы B {c['cross_ignition_upper']['stable_30_100']}); новая цель {c['lowem_30_100_1valve']}; все жёсткие v2 "
+          f"{c['hard_ok']}; запись {a.out}")
+    return 2 if not complete else (3 if err else 0)
 
 
 if __name__ == "__main__":

@@ -303,9 +303,10 @@ def _inv_log(v, lo, hi):
 
 
 def make_family(C):
-    """семья изготовления по способам концепции блоков (для encode опорных концепций)"""
+    """семья изготовления по способам концепции блоков (для encode опорных концепций): печатное колесо турбины или корпус -
+    «печать»; печатная горячая часть - «гибрид»; кованые колёса компрессора - «традиционная»; иначе - «литьё КНР»"""
     t, b, c = C["turbine"], C["build"], C["compressor"]
-    if b.get("case_make") == "печать" or c.get("make") == "печать":
+    if t.get("make") == "печать" or b.get("case_make") == "печать":
         return "печать"
     if t.get("hot_make") == "печать":
         return "гибрид"
@@ -387,6 +388,83 @@ def encode(C, make=None):
     if b.get("kD_case") is not None:
         x[GI["kD"]] = _inv_lin(b["kD_case"], *RANGES["kD"])
     return np.clip(x, 0.0, 1.0 - 1e-12)
+
+
+SEEDS_FILE = os.path.join(HERE, "process_seeds.json")
+FUNNEL_V3_SELECT = {"KV-3": ("l0_v3_probe/funnel_l0_select_KV-3_n300.json", 300), "KV-1": ("l0_v3_probe/funnel_l0_select_KV-1_n300.json", 300),
+                    "KV-6": ("l0_v3_probe/funnel_l0_select_KV-6_n1000.json", 1000)}
+
+
+def funnel_to_blocks(fc):
+    """концепция воронки (funnel_space.concept, выборка v3) -> концепция блоков (обратное к blocks.concept.to_funnel)"""
+    st = {"1Ц": ["Ц"], "Д": ["Д"], "2Ц": ["Ц", "Ц"], "ОЦ": ["О"] * max(int(fc.get("n_ax") or 1), 1) + ["Ц"]}[fc["comp"]]
+    mus = [float(fc["mu1"])] * (len(st) - 1) + [float(fc["mu2"])] if len(st) > 1 else [float(fc["mu1"])]
+    comb = fc["comb"]
+    scheme, chamber = ({"RDC": ("RDC", "кольцевая"), "ВР": ("ВР", "кольцевая")}.get(comb) or ("LPP", comb))
+    case = fc.get("case_arch") or ("картридж" if fc.get("cartridge") else "разъём")
+    return dict(
+        kv=fc["kv"], fuel=dict(prep="нет"),
+        compressor=dict(arch=fc["comp"], n_ax=int(fc.get("n_ax") or 0), inlet=fc["inlet"], mat=fc["mat_cw"], make=fc["m_cw"], pi=float(fc["pi"]),
+                        split=float(fc["split"]) if fc["comp"] in ("2Ц", "ОЦ") else None, mu=mus, kcm=float(fc["kcm"]), zc=int(fc["zc"])),
+        combustor=dict(scheme=scheme, chamber=chamber),
+        turbine=dict(type=fc["turb"], nt=int(fc["nt"]), cool=fc["cool"], mat=fc["mat_tw"], make=fc["m_tw"], hot_make=fc["m_hot"],
+                     hot_mat=fc["mat_hot"], t41=float(fc["t41"]), lt=float(fc["lt"]), phit=float(fc["phit"]) or 0.5,
+                     npt=int(fc["npt"]) if fc["rotors"] == 2 else "auto", kUpt=float(fc["kUpt"]) or 1.0, phipt=float(fc["phipt"]) or 0.5),
+        hx=dict(recup=float(fc["eps_rec"]) if fc["recup"] == "печатный" else 0.0, recup_make="печать", recup_integral=int(fc["recup_integral"])),
+        shaft=dict(drive="свободная СТ" if fc["rotors"] == 2 else "прямой"),
+        build=dict(rotor_join=fc["rotor_join"], bear=fc["bear"], case=case, conn=fc["conn"], cores=int(fc["cores"]), comb_make=fc["m_comb"],
+                   case_make=fc["m_case"], kD_case=float(fc["kD_case"])))
+
+
+def make_seeds(kvs=("KV-3", "KV-1", "KV-6"), n_max=40, path=SEEDS_FILE):
+    """замороженный файл опорных родителей из воронки: допустимые концепции отбора уровня 0 v3 (пробы l0_v3_probe; разные
+    ниши воронки сначала, затем по оценке), переведённые в концепцию блоков и в геном. Кластер ядер - пропускается (нет в
+    пространстве). Файл не меняется при правке воронки - отпечаток конфигурации прогона стабилен."""
+    from blocks.concept import normalize
+    FS = T.FS()
+    out = {}
+    for kv in kvs:
+        rel, n = FUNNEL_V3_SELECT[kv]
+        d = T.load_json(os.path.join(T.FUNNEL, rel))
+        fe = [e for e in d["selected"] if e["feasible"]]
+        fe.sort(key=lambda e: (-e["score"], e["idx"], e.get("case_arch") or ""))
+        pick, niches = [], set()
+        for e in fe:
+            if e["niche"] not in niches:
+                niches.add(e["niche"])
+                pick.append(e)
+        pick += [e for e in fe if e not in pick]
+        rows = []
+        for e in pick:
+            if len(rows) >= n_max:
+                break
+            fc = FS.concept(int(e["idx"]), n, kv, int(d["seed"]))
+            if e.get("case_arch"):
+                fc = FS.apply_case(fc, e["case_arch"])
+            if int(fc["cores"]) > 1:
+                continue
+            Cb = normalize(funnel_to_blocks(fc))
+            x = encode(Cb)
+            rows.append(dict(name=f"воронка v3 {kv} #{e['idx']} {e.get('case_arch') or ''}".strip(), niche=e["niche"], score=e["score"],
+                             eta_el_funnel=e["eta_el"], genome=[round(float(v), 6) for v in x]))
+        out[kv] = rows
+    doc = dict(title="Опорные родители островов из воронки уровня 0 v3 (замороженный файл)", date="2026-11-15",
+               source={kv: f"routes/gtu/funnel/{FUNNEL_V3_SELECT[kv][0]}" for kv in kvs}, n_max=n_max,
+               rule="допустимые концепции отбора; разные ниши воронки, затем по оценке; кластер ядер - нет; перевод funnel_to_blocks -> encode "
+                    "(семья изготовления - по способу колеса турбины, корпуса, горячей части): декодированная концепция близка к исходной, "
+                    "но не обязана совпадать с ней (окна process_space), её допустимость проверяет прогон",
+               space_hash=space_hash(), seeds=out)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(doc, f, ensure_ascii=False, indent=1)
+    return doc
+
+
+def file_seeds(kv, path=SEEDS_FILE):
+    try:
+        d = json.load(open(path, encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    return [(r["name"], np.asarray(r["genome"], float)) for r in d.get("seeds", {}).get(kv, [])]
 
 
 def reference_seeds(kv):
@@ -474,7 +552,7 @@ def space_hash():
 
 
 def describe():
-    FS, MK = T.FS(), T.MK()
+    FS = T.FS()
     return dict(
         genes=GENES, D=D, ranges=RANGES, make=MAKE, pi_range={str(k): v for k, v in FS.PI_RANGE.items()},
         split_range=FS.SPLIT_RANGE, mu_range=FS.MU_RANGE, t41_min=FS.T41_MIN, mat_tw=FS.MAT_TW, mat_hot=FS.MAT_HOT,
@@ -492,7 +570,11 @@ def main(argv=None):
     ap.add_argument("--sample", type=int, default=0)
     ap.add_argument("--kv", default="KV-3")
     ap.add_argument("--start", type=int, default=0)
+    ap.add_argument("--make-seeds", action="store_true", help="заморозить опорных родителей из воронки v3 -> process_seeds.json")
     a = ap.parse_args(argv)
+    if a.make_seeds:
+        d = make_seeds()
+        print({kv: len(v) for kv, v in d["seeds"].items()}, "->", os.path.relpath(SEEDS_FILE, T.REPO))
     if a.describe:
         print(json.dumps(describe(), ensure_ascii=False, indent=1, default=str))
     for k, x in enumerate(genomes(a.start, a.sample, a.kv)):

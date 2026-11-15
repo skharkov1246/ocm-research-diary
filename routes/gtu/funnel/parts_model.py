@@ -26,6 +26,11 @@ n_cw + n_t + 1. Недостающие части добавляются (trap):
 оценка): +1 деталь на элемент, если он ещё не разъёмный. Добавленные части холодного корпуса - новые стыки (как прочие части
 корпуса), кольца СА - внутренние, без стыков. Проверка: REF_BOM как оболочка - 211 деталей, крепёж 284 (хомут) / 340 (болты),
 -108 против 319 (organic/print_review_results.json -> shell_assembly).
+Поправки скептика оценки (15.11.2026): половины цельной горячей части у ротора одной деталью стыкуются осевым разъёмом - 2 фланца
+по ceil(L_hot/шаг) болтов (bom["hot"], оценка); картридж (одно ядро) - 2 стыка крепления в корпусе Ø0,5·D, те же, что у модуля
+замены funnel_space.model_inputs (оценка); горизонтальный разъём корпуса (D > SPLIT_D) - половины не удваивают стыки по окружности,
+разъём - 2 продольных фланца по длине корпуса case["L"]. Освобождение одноступенчатой радиальной турбины от половин отклонено: между
+колёсами ротора одной детали всегда есть стенка с отверстием меньше обоих колёс (trap_rule).
 """
 import math
 
@@ -110,6 +115,7 @@ def count(bom):
     case_arch = bom.get("case_arch") or "разъём"
     shell = case_arch == "оболочка"
     hot_int = bom.get("hot_integral", False)
+    cp_chain = None
     if m == "печать":
         cp = case.get("pieces", 1)
         crule = (f"печатная оболочка: вход, корпус, диффузоры и корпуса подшипников одной деталью (частей по камере принтера: {cp})" if shell else
@@ -128,6 +134,7 @@ def count(bom):
         crule = (f"{m}: вход{' + камера двустороннего входа' if bom['inlet'] == 'двух' else ''}; на центробежную ступень "
                  f"{'корпус с диффузором (1)' if m == 'литьё' else 'корпус + диффузор (2)'}; обратный канал перед второй ступенью; "
                  "статор осевой ступени - кольцо")
+        cp_chain = cp                                     # стыков по окружности столько же, сколько частей по длине
         if case["D"] > SPLIT_D:
             cp *= 2; crule += f"; корпус больше {SPLIT_D} м - с горизонтальным разъёмом (x2)"
     sumps = 0 if m == "печать" else 2
@@ -170,9 +177,13 @@ def count(bom):
     cooled_ngv = bom.get("ngv_cooled", False)
     if hot_int:
         ngv_n = 1
+        halves = trap["one_piece"] and trap["add_hot"] > 0 and bom.get("hot")
+        hf = 2 * math.ceil(bom["hot"]["L"] / BOLT_PITCH) if halves else 0     # осевой разъём половин корпуса турбины: 2 фланца (оценка)
         add("горячая часть", parts=(1 + trap["add_hot"]) * cores, cooled=(1 + trap["add_hot"] if cooled_ngv else 0) * cores, assemblies=cores,
+            fasteners=hf * cores,
             rule="цельная горячая часть: сопловые аппараты + корпус турбины (+ жаровая труба кольцевой печатной камеры) - 1"
-                 + (f"; {trap['rule_hot']}" if trap["add_hot"] else ""))
+                 + (f"; {trap['rule_hot']}" if trap["add_hot"] else "")
+                 + (f"; половины цельной горячей части - осевой разъём, 2 фланца по {hf // 2} болтов" if hf else ""))
     else:
         ngv_n = _ngv_parts(turb["stages"], cooled_ngv)
         shrouds = sum(1 for _ in turb["stages"]) if turb["type"] == "О" else 0
@@ -228,7 +239,11 @@ def count(bom):
             rule=f"печатные модули ({mods}) + клапан обвода; вынесенный - ещё 2 короба и 2 компенсатора")
 
     # ------------------------------------------------ крепёж фланцев (отдельно)
-    static_chain = U["корпуса"]["parts"] // max(cores, 1) + (1 if not hot_int else 0) + 1
+    # горизонтальный разъём (половины корпуса) не удваивает стыки по окружности: у стыка двух половин тот же π·D/шаг болтов; разъём -
+    # два продольных фланца по длине корпуса (case["L"]; у ведомости без длины - не считаются). Прежде половины удваивали стыки
+    # по окружности: у REF_BOM 978 единиц крепежа вместо 688 + продольных (поправка скептика оценки 15.11.2026)
+    split_x = cp_chain is not None and case["D"] > SPLIT_D
+    static_chain = (U["корпуса"]["parts"] // max(cores, 1) - (cp - cp_chain if split_x else 0)) + (1 if not hot_int else 0) + 1
     joints = max(1, static_chain - 1) + (2 if rec.get("present") else 0)
     D = case["D"]
     if conn == "быстроразъём" and D <= CLAMP_D_MAX:
@@ -236,6 +251,15 @@ def count(bom):
     else:
         per = math.ceil(math.pi * D / BOLT_PITCH); jr = f"болты фланца: π·D/{BOLT_PITCH} м = {per} на стык"
     add("крепёж фланцев", fasteners=joints * per * cores, rule=f"стыков корпусов на ядро: {joints}; {jr}")
+    if split_x and case.get("L"):
+        nl = 2 * math.ceil(case["L"] / BOLT_PITCH)
+        add("крепёж фланцев", fasteners=nl * cores, rule=f"горизонтальный разъём корпуса: 2 продольных фланца по длине {case['L']:.2f} м - {nl}")
+    if case_arch == "картридж" and cores == 1:
+        # картридж выходит из корпуса целиком: 2 стыка крепления газогенератора в корпусе Ø0,5·D - те же, что у модуля замены
+        # funnel_space.model_inputs (joints=[J(0,5·D_case)]×2); без них картридж получал выигрыш монтажа без крепежа (оценка)
+        Dj = 0.5 * D
+        pj = 2 if (conn == "быстроразъём" and Dj <= CLAMP_D_MAX) else math.ceil(math.pi * Dj / BOLT_PITCH)
+        add("крепёж фланцев", fasteners=2 * pj, rule=f"картридж: 2 стыка крепления в корпусе (Ø{Dj:.2f} м) по {pj}")
 
     tot = {k: sum(u[k] for u in U.values()) for k in ("parts", "moving", "cooled", "fasteners", "assemblies", "welds")}
     n_eff = tot["parts"] + K_ASSEMBLY * tot["assemblies"] + K_FASTENER * tot["fasteners"] + K_MOVING * tot["moving"] + K_COOLED * tot["cooled"]
@@ -272,6 +296,10 @@ def trap_rule(bom, cp):
         elif case["D"] <= SPLIT_D:
             add_c += n_cw - 1                                    # цельные кольца между колёсами одной детали - в половины
             split += n_cw - 1
+        # одноступенчатая радиальная турбина - то же правило: сопловое кольцо снаружи колеса не запирает, но между колесом компрессора и
+        # колесом турбины ротора одной детали стоит стенка с отверстием меньше обоих колёс (внутренний корпус камеры, задняя стенка
+        # компрессора; вал - 0,2·Dc), и одна часть - из половин. Аналогия с корпусом турбокомпрессора не переносится: там колесо
+        # компрессора снимается (гайка), ротор не одной деталью (поправка скептика оценки отклонена 15.11.2026, оценка)
         if hot_int:
             add_h = 1 + 2 * (n_t - 1)                            # цельная горячая часть (СА 1) - из двух половин; СА 2.. - половинами
             split += n_t
@@ -307,10 +335,13 @@ def score_from_neff(n_eff):
 
 # опорная ведомость: KV-3, традиционная сборная схема по frame3 (2 колеса, двусторонний вход, осевая турбина
 # 3 ступени, Dm 0,537 м > 0,50 м - диски с лопатками, класс U, кольцевая камера из листа, литые корпуса, болты);
-# числа лопаток - середина диапазонов воронки (zt 55, zn 40; оценка), форсунок 14, D корпуса 1,9*0,703+0,5
+# числа лопаток - середина диапазонов воронки (zt 55, zn 40; оценка), форсунок 14, D корпуса 1,9*0,703+0,5;
+# длина корпуса - формула воронки funnel_space.derive: L = 0,6·L_rot, L_rot = 0,35·(D2_1 + D2_2) + 0,15·Dm·3 + 0,5·Dc по
+# frame3_point_results (D2 0,695 и 0,703 м, Dm 0,537 м) - нужна для продольных фланцев горизонтального разъёма (D > SPLIT_D)
+REF_L_CASE = round(0.6 * (0.35 * (0.694575 + 0.702541) + 0.15 * 0.536549 * 3 + 0.5 * 0.702541), 3)
 REF_BOM = dict(cores=1, rotors=1, comp=["Ц", "Ц"], rotor_join="сборный", bear="масло", conn="болты", inlet="двух",
                turb=dict(type="О", stages=[dict(blisk=False, zt=55, zn=40, ngv_ring=False)] * 3),
-               pt=None, case=dict(method="литьё", D=1.836), comb=dict(kind="кольцевая", method="обработка", n_inj=14),
+               pt=None, case=dict(method="литьё", D=1.836, L=REF_L_CASE), comb=dict(kind="кольцевая", method="обработка", n_inj=14),
                hot_integral=False, ngv_cooled=False, rotor_cooled=False, recup=dict(present=False), new_starters=0)
 N_HALF = 1.0
 N_HALF = count(REF_BOM)["n_eff"]

@@ -8,6 +8,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import funnel_space as F       # noqa: E402
 import make_model as MK        # noqa: E402
 import parts_model as PM       # noqa: E402
+import math                    # noqa: E402
 import plugplay_model as PP    # noqa: E402
 import service_model as SM     # noqa: E402
 
@@ -333,3 +334,73 @@ def test_make_limits_match_track():
     assert MK.u_limit_turb("Р", "K418", 950.0)[0] == pytest.approx(465.0)
     for p in MK.PRINTERS:
         assert p["src"].startswith("https://") and p["status"]
+
+
+def test_cartridge_pays_for_mounting_joints():
+    """картридж выходит из корпуса целиком: 2 стыка крепления Ø0,5·D (как модуль замены в funnel_space.model_inputs) - крепёж в счёте
+    деталей; разъём и оболочка их не получают"""
+    import copy
+    b = copy.deepcopy(PM.REF_BOM)
+    r0 = PM.count(b)
+    b["case_arch"] = "картридж"
+    r1 = PM.count(b)
+    per = math.ceil(math.pi * 0.5 * b["case"]["D"] / PM.BOLT_PITCH)
+    assert r1["parts"] == r0["parts"] and r1["fasteners"] == r0["fasteners"] + 2 * per and r1["score"] < r0["score"]
+    b["conn"] = "быстроразъём"; b["case"] = dict(b["case"], D=1.0)
+    r2 = PM.count(b); b["case_arch"] = "разъём"; r3 = PM.count(b)
+    assert r2["fasteners"] == r3["fasteners"] + 4
+
+
+def test_trap_one_piece_rotor_hot_halves():
+    """ротор одной деталью: между колесом компрессора и колесом турбины стоит стенка с отверстием меньше обоих колёс - у цельной
+    горячей части она из половин и у одноступенчатой радиальной турбины (освобождение «как корпус турбокомпрессора» отклонено:
+    там колесо компрессора снимается); осевой разъём половин - крепёж; у сборного ротора одна радиальная ступень половин не требует"""
+    import copy
+    base = dict(cores=1, rotors=1, comp=["Ц", "Ц"], rotor_join="заодно", bear="масло", conn="болты", inlet="одно",
+                case=dict(method="печать", D=1.2, pieces=1), case_arch="оболочка", comb=dict(kind="кольцевая", method="печать", n_inj=12),
+                hot_integral=True, ngv_cooled=False, rotor_cooled=False, recup=dict(present=False), new_starters=0, hot=dict(D=0.8, L=0.48))
+    rad = dict(copy.deepcopy(base), turb=dict(type="Р", stages=[dict(blisk=True, zt=0, zn=20, ngv_ring=True)]))
+    ax = dict(copy.deepcopy(base), turb=dict(type="О", stages=[dict(blisk=True, zt=60, zn=40, ngv_ring=True)] * 2))
+    hf = 2 * math.ceil(0.48 / PM.BOLT_PITCH)
+    tr = PM.trap_rule(rad, 1)
+    assert tr["add_hot"] == 1 and tr["one_piece"]
+    assert PM.count(rad)["by_unit"]["горячая часть"]["fasteners"] == hf
+    t = PM.trap_rule(ax, 1)
+    assert t["add_hot"] == 3 and t["one_piece"]
+    r = PM.count(ax)
+    assert r["by_unit"]["горячая часть"]["fasteners"] == hf
+    nohot = copy.deepcopy(ax); nohot.pop("hot")
+    assert PM.count(nohot)["by_unit"]["горячая часть"]["fasteners"] == 0      # ведомость без размеров горячей части (прежний вид)
+    built = dict(copy.deepcopy(rad), rotor_join="сборный")
+    assert PM.trap_rule(built, 1)["add_hot"] == 0 and PM.count(built)["by_unit"]["горячая часть"]["fasteners"] == 0
+
+
+def test_split_case_longitudinal_flanges_not_doubled_rings():
+    """горизонтальный разъём (D > SPLIT_D): половины не удваивают стыки по окружности, разъём - 2 продольных фланца по длине корпуса;
+    у REF_BOM (D 1,84 м, L 0,649 м) крепёж 688 + 14 = 702 (прежде 978 - стыки по окружности считались дважды)"""
+    import copy
+    ref = PM.count(PM.REF_BOM)
+    per = math.ceil(math.pi * PM.REF_BOM["case"]["D"] / PM.BOLT_PITCH)
+    nl = 2 * math.ceil(PM.REF_BOM["case"]["L"] / PM.BOLT_PITCH)
+    assert PM.REF_L_CASE == pytest.approx(0.649, abs=1e-3)
+    nol = copy.deepcopy(PM.REF_BOM); nol["case"].pop("L")
+    assert ref["fasteners"] == PM.count(nol)["fasteners"] + nl
+    small = copy.deepcopy(PM.REF_BOM); small["case"] = dict(small["case"], D=0.95)       # без разъёма: столько же стыков по окружности
+    per_s = math.ceil(math.pi * 0.95 / PM.BOLT_PITCH)
+    fl = lambda r: r["by_unit"]["крепёж фланцев"]["fasteners"]
+    assert fl(ref) - nl == (fl(PM.count(small)) // per_s) * per
+    assert PM.count(small)["parts"] == ref["parts"] - 5       # частей корпуса по длине 5: вход, камера двустороннего входа, 2 корпуса с
+    #                                                          диффузором, обратный канал - у разъёма они же половинами (x2)
+
+
+def test_hip_vessel_checked_for_printed_hot_part():
+    """камера ГИП проверяется у любой печатной детали с ГИП (цельная горячая часть Haynes 282), не только у холодной оболочки"""
+    base = dict(name="горячая часть целиком", kind="static_hot", method="печать", material="Haynes282", mass_kg=200.0, rotating=False)
+    a = MK.assess_part(dict(base, D=0.7, L=0.5))
+    b = MK.assess_part(dict(base, D=1.0, L=0.6))
+    assert a["hip"] and a["hip_vessel"] == 0.88 and a["proc_q"] == MK.MAT["Haynes282"]["print"]
+    assert b["hip"] and b["hip_vessel"] == 1.6 and b["proc_q"] <= 0.6
+    assert b["weeks"] - a["weeks"] >= MK.WEEKS["hip_unique"] - 1e-9
+    assert MK.hip_route(2.1)["vessel"] is None and MK.hip_route(2.1)["proc_q"] == 0.2
+    ti = MK.assess_part(dict(base, material="Ti64", D=1.0, L=0.6))                    # без ГИП - камера не нужна
+    assert not ti["hip"] and "hip_vessel" not in ti

@@ -29,6 +29,11 @@ PROBE = os.path.join(HERE, "comb_l0_v2_probe_results.json")
 V1_JOBS = os.path.join(HERE, "jobs_aws_comb_l0.json")
 V1_AWS = os.path.join(HERE, "l0_aws", "comb_l0_KV-3_n262144_results.json")
 
+# что нужно командам задач из ветки (меньше, чем весь routes/gtu: на машине сессии мало места): код камеры, модель
+# цикла (границы v1), точка frame3 (входы границ), make_model (модуль, детали)
+MINI_PATHS = ("routes/gtu/combustor", "routes/gtu/gtu_cycle.py", "routes/gtu/funnel/make_model.py",
+              "routes/gtu/frame3/frame3_point_results.json")
+V2_FILES = ("comb_v2.py", "comb_l0_v2.py", "merge_l0_v2.py", "comb_bc_v2_results.json", "targets_v2.json")
 P_MIN = 1e-5
 N_CAP = 2 ** 20
 SHARDS, JOBS = 48, 6
@@ -114,12 +119,13 @@ def plan(path, price=PRICE, zones=ZONES):
 
 def mini_check(pkg, n_mini=96):
     """команды задач с n = n_mini в копии ветки (git archive HEAD + файлы v2 рабочей папки), NPROC = 4; слияние"""
-    tmp = tempfile.mkdtemp(prefix="comb_v2_mini_")
-    subprocess.run(f"git archive HEAD routes/gtu | tar -x -C {tmp}", shell=True, check=True, cwd=REPO)
-    for f in ("comb_v2.py", "comb_l0_v2.py", "merge_l0_v2.py", "comb_bc_v2_results.json", "targets_v2.json"):
+    tmp = tempfile.mkdtemp(prefix="comb_v2_mini_", dir=os.environ.get("MINI_TMP"))
+    subprocess.run(f"git archive HEAD {' '.join(MINI_PATHS)} | tar -x -C {tmp}", shell=True, check=True, cwd=REPO)
+    for f in V2_FILES:
         shutil.copy(os.path.join(HERE, f), os.path.join(tmp, "routes", "gtu", "combustor", f))
-    res = dict(n=n_mini, how="копия: git archive HEAD routes/gtu + файлы v2 рабочей папки (ещё не в ветке); команды задач "
-                             "пакета с n = 96, из корня копии, GTU_OUT - своя папка задачи, NPROC = 4", jobs=[])
+    res = dict(n=n_mini, how="копия: git archive HEAD (" + ", ".join(MINI_PATHS) + ") + файлы v2 рабочей папки (" +
+               ", ".join(V2_FILES) + "); команды задач пакета с n = 96, из корня копии, GTU_OUT - своя папка задачи, "
+               "NPROC = 4", jobs=[])
     outs = []
     for j in pkg["jobs"]:
         if not j["name"].startswith("comb-l0v2-m"):
@@ -144,7 +150,8 @@ def mini_check(pkg, n_mini=96):
                 k += 1
     r = subprocess.run([sys.executable, os.path.join(tmp, "routes", "gtu", "combustor", "merge_l0_v2.py"), parts,
                         "--out", os.path.join(tmp, "merged.json"), "--top", "5"], capture_output=True, text=True, cwd=tmp)
-    res["merge"] = dict(parts=k, exit_code=r.returncode, tail=(r.stdout + r.stderr).strip().splitlines()[-1:])
+    res["merge"] = dict(parts=k, exit_code=r.returncode,
+                        tail=[ln.replace(tmp, "<копия>") for ln in (r.stdout + r.stderr).strip().splitlines()[-1:]])
     try:
         m = json.load(open(os.path.join(tmp, "merged.json"), encoding="utf-8"))
         res["merged"] = dict(complete=m["complete"], counts=m["counts"], code_hash=m["completeness"]["ref"]["code_hash"])
