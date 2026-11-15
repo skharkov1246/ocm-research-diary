@@ -71,6 +71,25 @@ def f_churchill(Re, rr=0.0):
     return 8.0 * ((8.0 / Re) ** 12 + (A + B) ** -1.5) ** (1.0 / 12.0)
 
 
+def f_churchill_v(Re, rr=0.0):
+    """векторный вариант f_churchill"""
+    Re = np.maximum(np.asarray(Re, float), 1e-6)
+    A = (2.457 * np.log(1.0 / ((7.0 / Re) ** 0.9 + 0.27 * rr))) ** 16
+    B = (37530.0 / Re) ** 16
+    return 8.0 * ((8.0 / Re) ** 12 + (A + B) ** -1.5) ** (1.0 / 12.0)
+
+
+def seg_into(net):
+    """узел → входящий сегмент (в дереве у каждого узла, кроме подвода, ровно один)"""
+    if getattr(net, "_into", None) is None or len(net._into) != len(net.seg):
+        d = {}
+        for i, (a, b, _) in enumerate(net.seg):
+            d[b] = i
+        net._into = d
+        net._into_len = len(net.seg)
+    return net._into
+
+
 def nu_pipe(Re, Pr, f):
     """Nu: ламинар 4,36 (q = const); турбулентный Gnielinski (1976; Int. Chem. Eng. 16:359 — справочная, не открыт);
     переход 2300…4000 — линейная интерполяция"""
@@ -285,73 +304,108 @@ class Panel:
         return i * self.ny + j
 
 
-def hydraulics(net, p_in, p_out, Tc_seg, p_mean, K_out=1.0, max_it=60):
-    """узловые давления и расходы сегментов (несжимаемо при местной плотности; потери на выпуске K_out·ρV²/2)"""
+def _m_of_dp(dp, rho, mu, D, A, L, Kloc=None):
+    """расход по перепаду (Дарси — Вейсбах + Churchill; Kloc — местная потеря K·ρV²/2 вместо трения),
+    векторно; возвращает m (со знаком) и dm/d(Δp)"""
+    adp = np.maximum(np.abs(dp), 1e-9)
+    if Kloc is not None:
+        m = A * np.sqrt(2 * rho * adp / Kloc)
+        return np.sign(dp) * m, m / (2 * adp)
+    m = A * D ** 2 / (32 * mu * L) * rho * adp          # ламинарная оценка
+    for _ in range(40):
+        Re = m * D / (A * mu)
+        f = f_churchill_v(Re)
+        g = f * L / D * m ** 2 / (2 * rho * A ** 2) - adp
+        # производная по m при «замороженном» наклоне f(Re): d/dm (f m²) ≈ f m (2 + dlnf/dlnm)
+        eps = 1e-4
+        f2 = f_churchill_v(Re * (1 + eps))
+        slope = np.log(f2 / f) / np.log(1 + eps)
+        dg = f * L / D * m / (2 * rho * A ** 2) * (2 + slope)
+        mn = np.clip(m - g / dg, 0.2 * m, 5 * m)
+        if np.max(np.abs(mn / m - 1)) < 1e-10:
+            m = mn
+            break
+        m = mn
+    Re = m * D / (A * mu)
+    f = f_churchill_v(Re)
+    f2 = f_churchill_v(Re * 1.0001)
+    slope = np.log(f2 / f) / np.log(1.0001)
+    dmdp = m / ((2 + slope) * adp)
+    return np.sign(dp) * m, dmdp
+
+
+def hydraulics(net, p_in, p_out, Tc_seg, p_mean, K_out=1.0, max_it=80):
+    """узловые давления (метод Ньютона: якобиан — взвешенный лапласиан) и расходы; выпуск — потеря K_out·ρV²/2
+    к давлению выпуска (p_out — число, функция x или net.p_drain); несжимаемо при местной плотности"""
     P = np.array(net.nodes)
     nn = len(P)
     segs = net.seg
-    L = np.array([max(np.hypot(*(P[b] - P[a])), 1e-6) for a, b, d in segs])
+    a_ = np.array([s[0] for s in segs]); b_ = np.array([s[1] for s in segs])
     D = np.array([d for a, b, d in segs])
+    # длина не меньше диаметра: короткие сегменты у точек ветвления — это сам узел (оценка)
+    L = np.array([max(np.hypot(*(P[b] - P[a])), d) for a, b, d in segs])
     A = math.pi * D ** 2 / 4
     pr = air_props(Tc_seg, p_mean)
     rho, mu = pr["rho"], pr["mu"]
-    # начальная оценка: ламинарная проводимость
-    G = A * D ** 2 / (32 * mu * L) * rho
-    m = None
-    outset = set(net.outlets)
-    free = [i for i in range(nn) if i != 0]
-    idx = {n_: k for k, n_ in enumerate(free)}
+    into = seg_into(net)
+    outs = list(net.outlets)
+    so = np.array([into[o] for o in outs])
+    pdr = getattr(net, "p_drain", None)
+    po = np.array([pdr if pdr is not None else (p_out(P[o][0]) if callable(p_out) else p_out) for o in outs])
+    Ko = np.array([getattr(net, "K_out", {}).get(o, K_out) for o in outs])
+    free = np.arange(1, nn)
+
+    def resid(p):
+        dp = p[a_] - p[b_]
+        m, c = _m_of_dp(dp, rho, mu, D, A, L)
+        mo, co = _m_of_dp(p[outs] - po, rho[so], mu[so], D[so], A[so], L[so], Kloc=Ko)
+        R = np.zeros(nn)
+        np.add.at(R, a_, -m)
+        np.add.at(R, b_, m)
+        np.add.at(R, outs, -mo)
+        return R, m, c, mo, co
+
+    def jac(c, co):
+        rows = np.concatenate([a_, b_, a_, b_, outs])
+        cols = np.concatenate([a_, b_, b_, a_, outs])
+        vals = np.concatenate([c, c, -c, -c, co])
+        J = sp.coo_matrix((vals, (rows, cols)), shape=(nn, nn)).tocsr()
+        return J[free][:, free].tocsc()
+    # начальное приближение: линейная задача (ламинарные проводимости, выпуск — по скоростному напору при 10 м/с)
+    c0 = A * D ** 2 / (32 * mu * L) * rho
+    co0 = A[so] * rho[so] * 10.0 / (Ko * 0.5 * rho[so] * 100.0)
+    J0 = jac(c0, co0)
+    b0 = np.zeros(nn)
+    np.add.at(b0, b_[a_ == 0], c0[a_ == 0] * p_in)
+    np.add.at(b0, a_[b_ == 0], c0[b_ == 0] * p_in)
+    np.add.at(b0, outs, co0 * po)
+    p = np.zeros(nn)
+    p[0] = p_in
+    p[free] = spla.spsolve(J0, b0[free])
+    R, m, c, mo, co = resid(p)
+    nr = np.linalg.norm(R[free])
     for it in range(max_it):
-        # выпускная «труба»: от узла-выпуска к давлению p_out с потерей K_out·ρV²/2 (V — в последнем сегменте)
-        rows, cols, vals = [], [], []
-        b = np.zeros(len(free))
-        for s, (a, bb, d) in enumerate(segs):
-            for (u, v) in ((a, bb), (bb, a)):
-                if u == 0:
-                    continue
-                iu = idx[u]
-                rows.append(iu); cols.append(iu); vals.append(G[s])
-                if v == 0:
-                    b[iu] += G[s] * p_in
-                else:
-                    rows.append(iu); cols.append(idx[v]); vals.append(-G[s])
-        # выпуски
-        Gout = np.zeros(nn)
-        for o in net.outlets:
-            s_last = [s for s, (a, bb, d) in enumerate(segs) if bb == o][0]
-            Ko = getattr(net, "K_out", {}).get(o, K_out)
-            if m is None:
-                go = G[s_last] * 4 / Ko
-            else:
-                mo = abs(m[s_last]) + 1e-12
-                dpo = Ko * mo ** 2 / (2 * rho[s_last] * A[s_last] ** 2)
-                go = mo / max(dpo, 1e-9)
-            Gout[o] = go
-            io = idx[o]
-            rows.append(io); cols.append(io); vals.append(go)
-            pdr = getattr(net, "p_drain", None)
-            b[io] += go * (pdr if pdr is not None else (p_out(P[o][0]) if callable(p_out) else p_out))
-        M = sp.coo_matrix((vals, (rows, cols)), shape=(len(free), len(free))).tocsc()
-        pf = spla.spsolve(M, b)
-        p = np.zeros(nn)
-        p[0] = p_in
-        for n_, k in idx.items():
-            p[n_] = pf[k]
-        dp = np.array([p[a] - p[bb] for a, bb, d in segs])
-        m_new = G * dp
-        # обновить проводимость по Churchill
-        Re = np.abs(m_new) * D / (A * mu)
-        f = np.array([f_churchill(r) for r in Re])
-        Gn = np.where(np.abs(dp) > 1e-12,
-                      np.sqrt(2 * rho * A ** 2 * D / (f * L) / np.maximum(np.abs(dp), 1e-12)), G)
-        Gn = np.minimum(Gn, 1e3 * G + 1e-12)
-        ch = np.max(np.abs(m_new - (m if m is not None else 0))) / max(np.max(np.abs(m_new)), 1e-15)
-        m = m_new
-        G = 0.5 * G + 0.5 * Gn
-        if it > 3 and ch < 1e-7:
+        dpn = spla.spsolve(jac(c, co), R[free])
+        lam = 1.0
+        for _ in range(30):
+            pt_ = p.copy()
+            pt_[free] += lam * dpn
+            Rt, mt, ct, mot, cot = resid(pt_)
+            nrt = np.linalg.norm(Rt[free])
+            if nrt < nr or lam < 1e-6:
+                break
+            lam *= 0.5
+        p, R, m, c, mo, co, nr = pt_, Rt, mt, ct, mot, cot, nrt
+        res = nr / max(np.max(np.abs(m)), 1e-15)
+        if res < 1e-7:
             break
-    m_in = float(sum(m[s] for s, (a, bb, d) in enumerate(segs) if a == 0))
-    return dict(p=p, m=m, Re=Re, f=f, rho=rho, mu=mu, D=D, L=L, A=A, m_in=m_in, iters=it + 1)
+    dp = p[a_] - p[b_]
+    m, c = _m_of_dp(dp, rho, mu, D, A, L)
+    Re = np.abs(m) * D / (A * mu)
+    f = f_churchill_v(Re)
+    m_in = float(np.sum(m[a_ == 0]))
+    return dict(p=p, m=m, Re=Re, f=f, rho=rho, mu=mu, D=D, L=L, A=A, m_in=m_in, iters=it + 1,
+                residual=float(res))
 
 
 def thermal(panel, net, hyd, Tc_in, p_mean):
@@ -386,22 +440,22 @@ def thermal(panel, net, hyd, Tc_in, p_mean):
     node_cool = {}       # узел сети -> индекс узла охладителя (на конце сегмента вниз по течению)
     # порядок: от подвода по дереву (сегменты, у которых вход известен)
     order = []
-    known = {0}
-    pending = list(range(len(net.seg)))
-    while pending:
-        nxt = []
-        for s in pending:
-            a, b, d = net.seg[s]
-            mref = max(np.max(np.abs(hyd["m"])), 1e-30)
-            up, dn = (a, b) if hyd["m"][s] >= -1e-9 * mref else (b, a)
-            if up in known:
-                order.append((s, up, dn))
-                known.add(dn)
-            else:
-                nxt.append(s)
-        if len(nxt) == len(pending):
-            raise RuntimeError("сеть не дерево от подвода")
-        pending = nxt
+    mref = max(np.max(np.abs(hyd["m"])), 1e-30)
+    out_of = {}
+    for s_, (a, b, d) in enumerate(net.seg):
+        up, dn = (a, b) if hyd["m"][s_] >= -1e-9 * mref else (b, a)
+        out_of.setdefault(up, []).append((s_, up, dn))
+    queue = [0]
+    seen = {0}
+    while queue:
+        u = queue.pop(0)
+        for item in out_of.get(u, []):
+            order.append(item)
+            if item[2] not in seen:
+                seen.add(item[2])
+                queue.append(item[2])
+    if len(order) != len(net.seg):
+        raise RuntimeError("сеть не дерево от подвода")
     node_cool[0] = -1                      # -1 означает «вход, T = Tc_in»
     cool_rows, cool_cols, cool_vals, cool_rhs = [], [], [], []
     wall_link = []                         # (cell, cool_mid_a, cool_mid_b, UA) для стенки
@@ -464,8 +518,9 @@ def thermal(panel, net, hyd, Tc_in, p_mean):
     Tc = x[nc:]
     # выход охладителя: средняя по выпускам, взвешенная по расходу
     Tout = []
+    into = seg_into(net)
     for o in net.outlets:
-        s_last = [s for s, (a, bb, d) in enumerate(net.seg) if bb == o][0]
+        s_last = into[o]
         Tout.append((abs(hyd["m"][s_last]), Tc[node_cool[o]] if node_cool[o] >= 0 else Tc_in))
     mo = sum(w for w, _ in Tout)
     Tc_out = sum(w * t for w, t in Tout) / mo if mo > 0 else Tc_in
@@ -493,7 +548,8 @@ def meter_outlets(panel, net, p_in, p_out, Tc_in, qcell, iters=25):
     for it in range(iters):
         p_mean = 0.5 * (p_in + (p_out(panel.Lx) if callable(p_out) else p_out))
         hyd = hydraulics(net, p_in, p_out, np.full(len(net.seg), Tc_in + 100), p_mean)
-        mo = np.array([abs(hyd["m"][[s for s, (a, b, d) in enumerate(net.seg) if b == o][0]]) for o in outs])
+        into = seg_into(net)
+        mo = np.array([abs(hyd["m"][into[o]]) for o in outs])
         tgt = w * mo.sum()
         ratio = mo / np.maximum(tgt, 1e-15)
         for k, o in enumerate(outs):

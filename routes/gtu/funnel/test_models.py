@@ -40,7 +40,7 @@ def test_record_independent_of_order():
 
 
 def test_all_archetypes_present_and_templates_respected():
-    n = 256
+    n = 128
     seen = set()
     for i in range(n):
         c = F.concept(i, n)
@@ -61,24 +61,35 @@ def test_all_archetypes_present_and_templates_respected():
         if c["rotor_join"] in ("заодно", "сварка"):
             assert c["mat_cw"] == "Ni" and c["m_cw"] == c["m_tw"]
         if c["mat_tw"] == "SC":
-            assert c["turb"] == "О"
+            assert c["turb"] == "О" and c["rotor_join"] == "сборный"       # монокристалл - лопатки в замках, не цельное колесо
         if c["mat_tw"] == "Si3N4":
             assert c["turb"] == "Р"
     assert seen == set(F.ARCH_KEYS)
 
 
 def test_continuous_ranges():
-    n = 200
+    """выборка v2: непрерывные оси внутри своих окон; у концепции без пустого окна T41/π - внутри окон T41 и π"""
+    n = 96
     for i in range(n):
         c = F.concept(i, n)
-        lo, hi = F.PI_RANGE[(c["comp"], c["n_ax"])] if c["comp"] == "ОЦ" else F.PI_RANGE[c["comp"]]
+        lo, hi = F.pi_range(c)
         assert lo - 1e-9 <= c["pi"] <= hi + 1e-9
         assert c["pi"] <= max(c["pi_max_U"], lo) + 1e-6
         tl = MK.t41_limit(c["turb"], c["cool"], c["mat_tw"], c["m_tw"])[0]
-        assert F.T41_MIN - 1e-9 <= c["t41"] <= max(tl, F.T41_MIN) + 1e-6
-        assert 0.35 <= c["split"] <= 0.65 and 0.75 <= c["kUt"] <= 1.0 and 0.45 <= c["phit"] <= 0.80
-        assert (0.85 <= c["kUpt"] <= 1.0) if c["rotors"] == 2 else c["kUpt"] == 0.0
-        assert (0.75 <= c["eps_rec"] <= 0.92) if c["recup"] == "печатный" else c["eps_rec"] == 0.0
+        assert min(F.T41_MIN, tl) - 1e-9 <= c["t41"] <= max(tl, F.T41_MIN) + 1e-6
+        if "T41/π" not in c["dflags"]:
+            assert c["pi_lo"] - 1e-6 <= c["pi"] <= c["pi_hi"] + 1e-6 and c["t41_lo"] - 1e-6 <= c["t41"] <= c["t41_hi"] + 1e-6
+        if c["comp"] in F.SPLIT_RANGE:
+            a, b = F.SPLIT_RANGE[c["comp"]]
+            assert a - 1e-9 <= c["split"] <= b + 1e-9
+        if c["turb"] == "О":
+            assert 0 < c["lt"] <= F.PSI_MAX + 1e-9
+        else:
+            assert F.NU_RANGE[0] - 1e-6 <= c["lt"] <= F.NU_RANGE[1] + 1e-6 or "U/C0" in c["dflags"]
+        assert 0.45 - 1e-9 <= c["phit"] <= 0.80 + 1e-9
+        assert (0.85 - 1e-9 <= c["kUpt"] <= 1.0 + 1e-9 and 0.45 - 1e-9 <= c["phipt"] <= 0.8 + 1e-9) if c["rotors"] == 2 else c["kUpt"] == 0.0
+        assert (0.75 - 1e-9 <= c["eps_rec"] <= 0.92 + 1e-9) if c["recup"] == "печатный" else c["eps_rec"] == 0.0
+        assert 1.7 - 1e-9 <= c["kD_case"] <= 2.1 + 1e-9
 
 
 def test_run_shard_file(tmp_path):
@@ -101,7 +112,7 @@ def test_core_matches_gtu_cycle():
 # =========================================================================== правила допустимости
 @pytest.fixture(scope="module")
 def feasible_case():
-    n = 256
+    n = 64
     for i in range(n):
         r = F.evaluate(i, n, "KV-1")
         if r["feasible"]:

@@ -264,14 +264,18 @@ def parse_points(text: str) -> list:
 
 
 def make_plan(speed: float, points: list, startup: bool = True, iter_scale: float = 1.0, point_pramp: int = 100) -> list:
-    """Стадии: разгон (s1: до 0,6 частоты линии, давление 0,95 оценки при этой частоте; s2: до частоты линии и
+    """Стадии: разгон (s1: до 0,6 частоты линии, давление min(0,95; доля первой точки) оценки при этой частоте; s2: до частоты линии и
     давления первой точки; первый порядок, давление растёт вдвое дольше частоты — README узла, диагностика), затем
     точки по противодавлению вторым порядком; давление новой точки — рампой point_pramp итераций от прежнего.
     Длины рамп и итераций масштабируются iter_scale (кроме итераций точек, они заданы явно)."""
     sc = lambda n: max(1, int(round(n * iter_scale)))  # noqa: E731
     plan = []
     if startup:
-        plan += [dict(name="s1_ramp", frac=0.6 * speed, pfrac=0.95, ramp=sc(80), pramp=sc(160), iter=sc(170), muscl=False),
+        # s1 — не выше доли первой точки: в пробном прогоне KV-3 (s1 до 0,95 оценки, как план smoke run_case.py) расход
+        # на выходе к концу s1 был почти нулевым (дисбаланс 99,6 %), а линия от низкого противодавления иначе
+        # сначала поднимала бы давление до 0,95 и затем сбрасывала его в s2
+        plan += [dict(name="s1_ramp", frac=0.6 * speed, pfrac=min(0.95, points[0][0]), ramp=sc(80), pramp=sc(160),
+                      iter=sc(170), muscl=False),
                  dict(name="s2_ramp", frac=speed, pfrac=points[0][0], ramp=sc(80), pramp=sc(160), iter=sc(200), muscl=False)]
     for i, (pf, n) in enumerate(points):
         pr = 0 if (i == 0 and startup) else point_pramp

@@ -241,6 +241,8 @@ def test_make_plan_startup_and_points():
     assert [p["name"] for p in plan] == ["s1_ramp", "s2_ramp", "p1_0_750", "p2_0_850"]
     assert plan[0]["frac"] == pytest.approx(0.54) and plan[1]["frac"] == pytest.approx(0.9)
     assert plan[1]["pfrac"] == 0.75 and not plan[1]["muscl"] and plan[2]["muscl"]
+    assert plan[0]["pfrac"] == 0.75  # s1 — не выше давления первой точки
+    assert S.make_plan(1.0, [(1.0, 10)])[0]["pfrac"] == 0.95
     assert plan[2]["pramp"] == 0 and plan[3]["pramp"] == 100
     assert all(max(p.get("ramp", 0), p.get("pramp", 0)) < p["iter"] for p in plan)
     plan = S.make_plan(1.0, [(1.0, 50)], startup=False, point_pramp=100)

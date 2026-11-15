@@ -399,6 +399,13 @@ def summary(T, sc):
         fp = [p for p in pos if T.feas[p]]
         first = Counter((T.get(p, "reject") or "").split("|")[0] for p in pos if not T.feas[p])
         d = dict(n=len(pos), feasible=len(fp), first_reject=dict(first.most_common(4)))
+        if "repair" in T.C:
+            rp = [(T.get(p, "repair") or "") for p in pos]
+            d["sampler"] = dict(
+                repaired=sum(1 for x in rp if "->" in x and "исходная не замыкает" in x),
+                no_closure=sum(1 for x in rp if x.startswith("нет замыкающей")),
+                no_closure_reason=Counter(x.split(" - ", 1)[1].split(":")[0] for x in rp if x.startswith("нет замыкающей")).most_common(3),
+                design_flags=Counter(f.split(":")[0] for p in pos for f in (T.get(p, "dflags") or "").split("|") if f).most_common(4))
         if fp:
             b = max(fp, key=lambda p: (sc[p], -T.idx[p]))
             d.update(best_idx=int(T.idx[b]), best_score=round(float(sc[b]), 4), eta_el=_q(T.num("eta_el")[fp]),
@@ -409,8 +416,12 @@ def summary(T, sc):
                 b = min(nz, key=lambda p: (T.viol[p], T.idx[p]))
                 d.update(nearest_idx=int(T.idx[b]), nearest_violation=round(float(T.viol[b]), 4), nearest_reject=T.get(b, "reject"))
         by[a] = d
-    return dict(n=T.n, feasible=int(T.feas.sum()), feasible_share=round(float(T.feas.mean()), 5), reject_reasons=dict(rej.most_common()),
-                by_arch=by)
+    out = dict(n=T.n, feasible=int(T.feas.sum()), feasible_share=round(float(T.feas.mean()), 5), reject_reasons=dict(rej.most_common()),
+               archetypes_feasible=sum(1 for a in by.values() if a["feasible"]), by_arch=by)
+    if "dflags" in T.C:
+        out["design_flags"] = dict(Counter(f.split(":")[0] for p in range(T.n) for f in (T.get(p, "dflags") or "").split("|") if f).most_common())
+        out["no_closure"] = sum(1 for p in range(T.n) if (T.get(p, "repair") or "").startswith("нет замыкающей"))
+    return out
 
 
 def normalization(T, w):
@@ -477,8 +488,11 @@ def inputs(parts_meta):
     return out
 
 
+CSV_BRANCH_MAX_MB = 5.0      # CSV крупнее - в ветку не кладётся: --csv-dir вне ветки (S3, routes/gtu/platform/aws/runs/ - в .gitignore)
+
+
 def run_merge(found, kv, n, shards, out_dir, sfx="", weights=None, seed=L0.SEED, k=3, top=40, use_pareto=True, k_near=1,
-              near_max=0.25, target=None, csv_gz=False, detail_top=TOP_LIST, cycle_k=6, extra_results=None):
+              near_max=0.25, target=None, csv_gz=False, detail_top=TOP_LIST, cycle_k=6, extra_results=None, csv_dir=None):
     t0 = time.time()
     cols, rows, ref, checks, calls = merge_parts(found, kv, n, shards, seed)
     w = L0.check_weights(dict(weights or L0.WEIGHTS))
@@ -506,7 +520,8 @@ def run_merge(found, kv, n, shards, out_dir, sfx="", weights=None, seed=L0.SEED,
         sr = S["sel"].get(p)
         extra.append([rank.get(p), nr[0], nr[1], int(layer[p]) if T.feas[p] else None, int(bool(sr)), "; ".join(sr) if sr else None])
     os.makedirs(out_dir, exist_ok=True)
-    p_csv = os.path.join(out_dir, f"funnel_l0{sfx}.csv" + (".gz" if csv_gz else ""))
+    os.makedirs(csv_dir or out_dir, exist_ok=True)
+    p_csv = os.path.join(csv_dir or out_dir, f"funnel_l0{sfx}.csv" + (".gz" if csv_gz else ""))
     p_sel = os.path.join(out_dir, f"funnel_l0_select{sfx}.json")
     p_res = os.path.join(out_dir, f"funnel_l0_results{sfx}.json")
     write_csv(p_csv, T, extra)
@@ -575,14 +590,29 @@ def run_merge(found, kv, n, shards, out_dir, sfx="", weights=None, seed=L0.SEED,
                                 rows=conv),
                cycle_check=cycle_check(T, n, kv, seed, cycle_k) if (cycle_k and checks["fingerprint_local"]["match"]) else None,
                files=dict(csv=os.path.basename(p_csv), select=os.path.basename(p_sel)))
+    csv_mb = os.path.getsize(p_csv) / 1e6
+    res["files"]["csv_detail"] = dict(
+        bytes=os.path.getsize(p_csv), sha256=hashlib.sha256(open(p_csv, "rb").read()).hexdigest(),
+        outside_out_dir=bool(csv_dir) and os.path.abspath(csv_dir) != os.path.abspath(out_dir),
+        note=(f"CSV {csv_mb:.1f} МБ - в ветку не класть (предел {CSV_BRANCH_MAX_MB:g} МБ): лежит в --csv-dir (S3 или локально у сессии с "
+              "ключами); в ветку - только results и select JSON" if csv_mb > CSV_BRANCH_MAX_MB else
+              f"CSV {csv_mb:.2f} МБ - можно в ветку (предел {CSV_BRANCH_MAX_MB:g} МБ)"))
+    if csv_mb > CSV_BRANCH_MAX_MB and not res["files"]["csv_detail"]["outside_out_dir"]:
+        print(f"ВНИМАНИЕ: {p_csv} - {csv_mb:.1f} МБ в папке результатов; в ветку не класть (нужен --csv-dir вне ветки)", file=sys.stderr)
     trad = [p for p in fpos if T.arch[p] == "традиционная"]
     tgt = ref["target"] or {}
     if tgt.get("engine_kg0") and trad:
         mk = T.num("mass_kg")[trad]
+        kgkw = float(np.median(mk)) / tgt["P_shaft_kW"]
         res["mass_reference"] = dict(model_traditional_median_kg=round(float(np.median(mk))), engine_kg0=tgt["engine_kg0"],
-                                     ratio=round(float(np.median(mk)) / tgt["engine_kg0"], 3), note=tgt.get("engine_kg0_note", "") +
-                                     "; масса модели - оценка по оболочкам и колёсам без вспомогательных систем, только для сравнения "
-                                     "концепций между собой (в баллы не входит)")
+                                     ratio=round(float(np.median(mk)) / tgt["engine_kg0"], 3),
+                                     model_kg_per_kW=round(kgkw, 3), engine_kg0_per_kW=round(tgt["engine_kg0"] / tgt["P_shaft_kW"], 3),
+                                     note=tgt.get("engine_kg0_note", "") +
+                                     "; масса модели - оценка по оболочкам и колёсам без вспомогательных систем и занижена против "
+                                     "исходного двигателя (см. ratio). Массы модулей по тем же формулам ВХОДЯТ в баллы: service_model.s_mass "
+                                     "(самый тяжёлый модуль, 0,30 балла монтажа) и подъём plugplay_model (модуль против массы исходного) - "
+                                     "заниженная абсолютная масса завышает эти два балла одинаково для всех концепций; сравнение концепций "
+                                     "между собой - по относительной массе (исправление скептика физики: прежде было написано «в баллы не входит»)")
     if extra_results:
         res.update(extra_results)
     res["timing"]["merge_s"] = round(time.time() - t0, 2)
@@ -683,6 +713,8 @@ def main(argv=None):
     ap.add_argument("--k-near", type=int, default=1, help="почти допустимых на нишу без допустимых (0 - не брать)")
     ap.add_argument("--near-max", type=float, default=0.25, help="наибольшее превышение почти допустимых")
     ap.add_argument("--csv-gz", action="store_true")
+    ap.add_argument("--csv-dir", default=None, help="папка CSV вне ветки (S3, routes/gtu/platform/aws/runs/<run_id>/merged): "
+                                                    f"CSV крупнее {CSV_BRANCH_MAX_MB:g} МБ в ветку не кладётся")
     ap.add_argument("--detail-top", type=int, default=TOP_LIST)
     ap.add_argument("--cycle-check", type=int, default=6)
     ap.add_argument("--scale-check", action="store_true", help="с --probe: слияние синтетических частей N=200000 (память, время)")
@@ -696,7 +728,8 @@ def main(argv=None):
             ap.error("нужны --n и --shards")
         try:
             r = run_merge(find_parts(a.inp, a.kv, a.n, a.shards), a.kv, a.n, a.shards, a.out_dir, a.suffix, parse_weights(a.weights),
-                          a.seed, a.k, a.top, not a.no_pareto, a.k_near, a.near_max, a.target, a.csv_gz, a.detail_top, a.cycle_check)
+                          a.seed, a.k, a.top, not a.no_pareto, a.k_near, a.near_max, a.target, a.csv_gz, a.detail_top, a.cycle_check,
+                          csv_dir=a.csv_dir)
         except MergeError as e:
             print(f"слияние отклонено: {e}", file=sys.stderr)
             return 2

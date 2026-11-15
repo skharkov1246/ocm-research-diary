@@ -268,3 +268,100 @@ def test_jobs_files_cover_every_shard_once(fname):
         S = max(k for a, b, k in seen if (a, b) == (kv, n)) + 1
         assert sorted(k for a, b, k in seen if (a, b) == (kv, n)) == list(range(S))
         assert any(f"--kv {kv} --n {n} --shards {S}" in c for c in doc["merge"]["commands"])
+
+
+# =========================================================================== исправления скептиков и выборка v2
+def test_fastgas_matches_gtu_explore():
+    """скалярные свойства газа FastGas - те же таблицы gtu_explore и та же интерполяция (до округления)"""
+    E = FS._E(); ex = E._ex
+    rng = np.random.default_rng(3)
+    for T, b in zip(rng.uniform(150, 2500, 300), rng.uniform(0, 1, 300)):
+        assert math.isclose(E.h(T, b), ex.h(T, b), rel_tol=1e-12, abs_tol=1e-6)
+        assert math.isclose(E.s0(T, b), ex.s0(T, b), rel_tol=1e-12, abs_tol=1e-9)
+        hv, sv = ex.h(T, b), ex.s0(T, b)
+        assert abs(E.T_h(hv, b) - ex.T_h(hv, b)) < 1e-6 and abs(E.T_s(sv, b) - ex.T_s(sv, b)) < 1e-6
+    assert math.isclose(E.far_for(700.0, 1400.0), ex.far_for(700.0, 1400.0), rel_tol=1e-12)
+
+
+def test_violation_never_negative_and_rounding():
+    """φ 0,019995 при пределе 0,02-0,16: значение не округляется до предела, превышение > 0 (раньше было -0,875)"""
+    r = FS._rule("phi2", False, 0.019995, [0.02, 0.16])
+    assert r["val"] == 0.019995 and FS.violation([r]) > 0
+    for val in (0.0199, 0.17, 0.5, 1e-5):
+        assert FS.violation([FS._rule("phi1", False, val, [0.02, 0.16])]) > 0
+    assert FS.violation([FS._rule("soft_G", False, 30.0, 25.0)]) == round(5 / 25, 4)
+
+
+def test_radial_turbine_polytropic_equivalent():
+    """P1: закон U/C0 - изоэнтропический (gtu_explore.turb_radial), _core расширяет политропно: η_p < η_is при ER > 1,
+    и политропное расширение с η_p даёт ту же работу, что изоэнтропическое с η_is"""
+    E = FS._E()
+    t = dict(ER=3.5, T_in=1300.0, b=0.25)
+    dhs = FS._stage_dhs(t, 1)
+    U = 0.70 * math.sqrt(2 * dhs)
+    eta_p, nu, dh, eta_is = FS._radial_stage(t, 1, U)
+    assert abs(nu - 0.70) < 1e-9 and abs(eta_is - 0.86) < 1e-9 and eta_p < eta_is
+    T2p = E.T_s(E.s0(1300.0, 0.25) - eta_p * E.Rg(0.25) * math.log(3.5), 0.25)
+    assert math.isclose(E.h(1300.0, 0.25) - E.h(T2p, 0.25), eta_is * dhs, rel_tol=1e-6)
+
+
+def test_recuperator_energy_balance_and_density():
+    """P4: выхлоп за рекуператором - из баланса энтальпий; P3: кажущаяся плотность модуля 1777 кг/м3 (стенка 0,15 мм, 1500 м2/м3)"""
+    E = FS._E()
+    for rotors in (1, 2):
+        c = dict(cool="N", m_tw="литьё", cores=1, recup="печатный", comb="кольцевая", pgain=0.0, rotors=rotors, t41=1050.0, eps_rec=0.85)
+        r = FS._core(c, FS._comp([(4.5, 0.86)]), 0.85, 0.87)
+        xn, xr = FS.cool_air(c); mc = 1.0 - xn - xr - 0.015
+        m_g, b_g = (r["t"]["m"] + xr, r["t"]["b"] * r["t"]["m"] / (r["t"]["m"] + xr)) if rotors == 1 else (r["pt"]["m"], r["pt"]["b"])
+        q_gas = m_g * (E.h(r["T5"], b_g) - E.h(r["Tstack"], b_g))
+        q_air = mc * (E.h(r["T3"]) - E.h(r["T2"]))
+        assert math.isclose(q_gas, q_air, rel_tol=1e-6), (rotors, q_gas, q_air)
+    i = next(i for i in range(64) if FS.concept(i, 64)["recup"] == "печатный")
+    c = FS.concept(i, 64); t = FS.target("KV-3"); p = FS.quick_perf(c, t)
+    g = FS.derive(c, t, p)
+    assert math.isclose(g["rec"]["mass_kg"] / g["rec"]["V_m3"], 7900 * 0.00015 * FS.REC_BETA, rel_tol=1e-9)
+
+
+def test_an2_rules_present():
+    """P2: AN² последней ступени турбины и СТ не выше проверенной ступени frame3 (6,03e7); код правила без цифры на конце"""
+    assert FS.AN2_MAX == 6.03e7
+    for code in ("turb_ansq", "pt_ansq"):
+        assert code.rstrip("0123456789") == code
+    n = 64
+    seen = set()
+    for i in range(n):
+        c = FS.concept(i, n); t = FS.target("KV-3")
+        sol = L0.solve(c, t)
+        if sol["g"] is None:
+            continue
+        g = sol["g"]
+        rules = {r["code"]: r for r in FS.check(c, t, sol["perf"], g)}
+        if c["turb"] == "О":
+            assert rules["turb_ansq"]["ok"] == (g["tg"]["AN2"] <= FS.AN2_MAX); seen.add("turb")
+        if g["pt"]:
+            assert rules["pt_ansq"]["ok"] == (g["pt"]["AN2"] <= FS.AN2_MAX); seen.add("pt")
+    assert seen == {"turb", "pt"}
+
+
+def test_sampler_v2_windows_and_repair():
+    """выборка v2: точка (π, T41) - внутри окна, номинальный запас там >= 0; ремонт - только в шаблоне архетипа и замыкает
+    точку; запись не зависит от кэшей и порядка счёта"""
+    n = 48
+    t = FS.target("KV-3")
+    for i in range(n):
+        c = FS.concept(i, n, "KV-3")
+        T = FS.ARCH[c["arch"]]["allowed"]
+        for ax in FS.REPAIR_AXES:
+            if ax in T and not (ax == "rotors" and c["cores"] > 1):
+                assert c[ax] in T[ax], (i, ax, c[ax])
+        if "T41/π" not in c["dflags"]:
+            m, _ = FS._margins(c, t, c["pi"], c["t41"])
+            assert m >= -0.02, (i, m)
+        if "исходная не замыкает" in c["repair"]:
+            assert FS.closure(c)["ok"]
+        if c["rotor_join"] in ("заодно", "сварка"):
+            assert c["mat_tw"] != "SC"
+    a = [FS.concept(i, n, "KV-3") for i in range(6)]
+    FS._CLOSURE.clear(); FS._CANDS.clear(); FS._DM.clear()
+    b = [FS.concept(i, n, "KV-3") for i in reversed(range(6))][::-1]
+    assert a == b

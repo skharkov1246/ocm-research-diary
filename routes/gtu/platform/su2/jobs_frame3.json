@@ -1,0 +1,152 @@
+{
+ "defaults": {
+  "instance_type": "c7a.16xlarge",
+  "fallback_types": [
+   "c7i.16xlarge"
+  ],
+  "image": "al2023",
+  "disk_gb": 60
+ },
+ "jobs": [
+  {
+   "name": "su2-f3-stage1-n070",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv python3-pip git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q -r routes/gtu/platform/docker/requirements.txt",
+    "bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8"
+   ],
+   "command": "set -e\nexport PATH=/opt/venv/bin:/opt/su2/bin:$PATH SU2_RUN=/opt/su2/bin SU2_HOME=/opt/SU2-src\nexport OMPI_MCA_osc=^ucx OMPI_MCA_btl_vader_single_copy_mechanism=none\ngit rev-parse HEAD > \"$GTU_OUT/commit.txt\"\nrc=0\npython3 routes/gtu/frame3/frame3_geom.py --out \"$GTU_OUT/geom\" --levels medium --stages stage1 --gzip-levels --threads \"$NPROC\" --results \"$GTU_OUT/frame3_geom_results.json\"\npython3 routes/gtu/platform/su2/su2_case.py run --geom-results \"$GTU_OUT/frame3_geom_results.json\" --stage stage1 --level medium --point routes/gtu/frame3/frame3_point_results.json:stage1 --speed 0.7 --points 0.45:2500,0.52:1500,0.58:1500,0.64:1500,0.7:1500,0.76:1500,0.83:1500,0.9:1500 --iter-scale 2 --shroud slip --vaneless slip --np \"$NPROC\" --mpi-args \"\" --time-limit 38261 --output-files RESTART --out \"$GTU_OUT/run\" --record \"$GTU_OUT/su2_line.json\" || rc=$?\n# сетки (сотни МБ) не выгружаются: их заново строит frame3_geom.py по коммиту\nrm -f \"$GTU_OUT/run/mesh.su2\" \"$GTU_OUT/run/mesh_split.su2\" \"$GTU_OUT\"/geom/*/passage_custom_*.su2\nexit \"$rc\"",
+   "max_min": 676
+  },
+  {
+   "name": "su2-f3-stage1-n080",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv python3-pip git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q -r routes/gtu/platform/docker/requirements.txt",
+    "bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8"
+   ],
+   "command": "set -e\nexport PATH=/opt/venv/bin:/opt/su2/bin:$PATH SU2_RUN=/opt/su2/bin SU2_HOME=/opt/SU2-src\nexport OMPI_MCA_osc=^ucx OMPI_MCA_btl_vader_single_copy_mechanism=none\ngit rev-parse HEAD > \"$GTU_OUT/commit.txt\"\nrc=0\npython3 routes/gtu/frame3/frame3_geom.py --out \"$GTU_OUT/geom\" --levels medium --stages stage1 --gzip-levels --threads \"$NPROC\" --results \"$GTU_OUT/frame3_geom_results.json\"\npython3 routes/gtu/platform/su2/su2_case.py run --geom-results \"$GTU_OUT/frame3_geom_results.json\" --stage stage1 --level medium --point routes/gtu/frame3/frame3_point_results.json:stage1 --speed 0.8 --points 0.45:2500,0.52:1500,0.58:1500,0.64:1500,0.7:1500,0.76:1500,0.83:1500,0.9:1500 --iter-scale 2 --shroud slip --vaneless slip --np \"$NPROC\" --mpi-args \"\" --time-limit 38261 --output-files RESTART --out \"$GTU_OUT/run\" --record \"$GTU_OUT/su2_line.json\" || rc=$?\n# сетки (сотни МБ) не выгружаются: их заново строит frame3_geom.py по коммиту\nrm -f \"$GTU_OUT/run/mesh.su2\" \"$GTU_OUT/run/mesh_split.su2\" \"$GTU_OUT\"/geom/*/passage_custom_*.su2\nexit \"$rc\"",
+   "max_min": 676
+  },
+  {
+   "name": "su2-f3-stage1-n090",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv python3-pip git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q -r routes/gtu/platform/docker/requirements.txt",
+    "bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8"
+   ],
+   "command": "set -e\nexport PATH=/opt/venv/bin:/opt/su2/bin:$PATH SU2_RUN=/opt/su2/bin SU2_HOME=/opt/SU2-src\nexport OMPI_MCA_osc=^ucx OMPI_MCA_btl_vader_single_copy_mechanism=none\ngit rev-parse HEAD > \"$GTU_OUT/commit.txt\"\nrc=0\npython3 routes/gtu/frame3/frame3_geom.py --out \"$GTU_OUT/geom\" --levels medium --stages stage1 --gzip-levels --threads \"$NPROC\" --results \"$GTU_OUT/frame3_geom_results.json\"\npython3 routes/gtu/platform/su2/su2_case.py run --geom-results \"$GTU_OUT/frame3_geom_results.json\" --stage stage1 --level medium --point routes/gtu/frame3/frame3_point_results.json:stage1 --speed 0.9 --points 0.45:2500,0.52:1500,0.58:1500,0.64:1500,0.7:1500,0.76:1500,0.83:1500,0.9:1500 --iter-scale 2 --shroud slip --vaneless slip --np \"$NPROC\" --mpi-args \"\" --time-limit 38261 --output-files RESTART --out \"$GTU_OUT/run\" --record \"$GTU_OUT/su2_line.json\" || rc=$?\n# сетки (сотни МБ) не выгружаются: их заново строит frame3_geom.py по коммиту\nrm -f \"$GTU_OUT/run/mesh.su2\" \"$GTU_OUT/run/mesh_split.su2\" \"$GTU_OUT\"/geom/*/passage_custom_*.su2\nexit \"$rc\"",
+   "max_min": 676
+  },
+  {
+   "name": "su2-f3-stage1-n100",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv python3-pip git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q -r routes/gtu/platform/docker/requirements.txt",
+    "bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8"
+   ],
+   "command": "set -e\nexport PATH=/opt/venv/bin:/opt/su2/bin:$PATH SU2_RUN=/opt/su2/bin SU2_HOME=/opt/SU2-src\nexport OMPI_MCA_osc=^ucx OMPI_MCA_btl_vader_single_copy_mechanism=none\ngit rev-parse HEAD > \"$GTU_OUT/commit.txt\"\nrc=0\npython3 routes/gtu/frame3/frame3_geom.py --out \"$GTU_OUT/geom\" --levels medium --stages stage1 --gzip-levels --threads \"$NPROC\" --results \"$GTU_OUT/frame3_geom_results.json\"\npython3 routes/gtu/platform/su2/su2_case.py run --geom-results \"$GTU_OUT/frame3_geom_results.json\" --stage stage1 --level medium --point routes/gtu/frame3/frame3_point_results.json:stage1 --speed 1 --points 0.45:2500,0.52:1500,0.58:1500,0.64:1500,0.7:1500,0.76:1500,0.83:1500,0.9:1500 --iter-scale 2 --shroud slip --vaneless slip --np \"$NPROC\" --mpi-args \"\" --time-limit 38261 --output-files RESTART --out \"$GTU_OUT/run\" --record \"$GTU_OUT/su2_line.json\" || rc=$?\n# сетки (сотни МБ) не выгружаются: их заново строит frame3_geom.py по коммиту\nrm -f \"$GTU_OUT/run/mesh.su2\" \"$GTU_OUT/run/mesh_split.su2\" \"$GTU_OUT\"/geom/*/passage_custom_*.su2\nexit \"$rc\"",
+   "max_min": 676
+  },
+  {
+   "name": "su2-f3-stage1-n105",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv python3-pip git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q -r routes/gtu/platform/docker/requirements.txt",
+    "bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8"
+   ],
+   "command": "set -e\nexport PATH=/opt/venv/bin:/opt/su2/bin:$PATH SU2_RUN=/opt/su2/bin SU2_HOME=/opt/SU2-src\nexport OMPI_MCA_osc=^ucx OMPI_MCA_btl_vader_single_copy_mechanism=none\ngit rev-parse HEAD > \"$GTU_OUT/commit.txt\"\nrc=0\npython3 routes/gtu/frame3/frame3_geom.py --out \"$GTU_OUT/geom\" --levels medium --stages stage1 --gzip-levels --threads \"$NPROC\" --results \"$GTU_OUT/frame3_geom_results.json\"\npython3 routes/gtu/platform/su2/su2_case.py run --geom-results \"$GTU_OUT/frame3_geom_results.json\" --stage stage1 --level medium --point routes/gtu/frame3/frame3_point_results.json:stage1 --speed 1.05 --points 0.45:2500,0.52:1500,0.58:1500,0.64:1500,0.7:1500,0.76:1500,0.83:1500,0.9:1500 --iter-scale 2 --shroud slip --vaneless slip --np \"$NPROC\" --mpi-args \"\" --time-limit 38261 --output-files RESTART --out \"$GTU_OUT/run\" --record \"$GTU_OUT/su2_line.json\" || rc=$?\n# сетки (сотни МБ) не выгружаются: их заново строит frame3_geom.py по коммиту\nrm -f \"$GTU_OUT/run/mesh.su2\" \"$GTU_OUT/run/mesh_split.su2\" \"$GTU_OUT\"/geom/*/passage_custom_*.su2\nexit \"$rc\"",
+   "max_min": 676
+  },
+  {
+   "name": "su2-f3-stage2-n070",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv python3-pip git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q -r routes/gtu/platform/docker/requirements.txt",
+    "bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8"
+   ],
+   "command": "set -e\nexport PATH=/opt/venv/bin:/opt/su2/bin:$PATH SU2_RUN=/opt/su2/bin SU2_HOME=/opt/SU2-src\nexport OMPI_MCA_osc=^ucx OMPI_MCA_btl_vader_single_copy_mechanism=none\ngit rev-parse HEAD > \"$GTU_OUT/commit.txt\"\nrc=0\npython3 routes/gtu/frame3/frame3_geom.py --out \"$GTU_OUT/geom\" --levels medium --stages stage2 --gzip-levels --threads \"$NPROC\" --results \"$GTU_OUT/frame3_geom_results.json\"\npython3 routes/gtu/platform/su2/su2_case.py run --geom-results \"$GTU_OUT/frame3_geom_results.json\" --stage stage2 --level medium --point routes/gtu/frame3/frame3_point_results.json:stage2 --speed 0.7 --points 0.45:2500,0.52:1500,0.58:1500,0.64:1500,0.7:1500,0.76:1500,0.83:1500,0.9:1500 --iter-scale 2 --shroud slip --vaneless slip --np \"$NPROC\" --mpi-args \"\" --time-limit 39071 --output-files RESTART --out \"$GTU_OUT/run\" --record \"$GTU_OUT/su2_line.json\" || rc=$?\n# сетки (сотни МБ) не выгружаются: их заново строит frame3_geom.py по коммиту\nrm -f \"$GTU_OUT/run/mesh.su2\" \"$GTU_OUT/run/mesh_split.su2\" \"$GTU_OUT\"/geom/*/passage_custom_*.su2\nexit \"$rc\"",
+   "max_min": 690
+  },
+  {
+   "name": "su2-f3-stage2-n080",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv python3-pip git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q -r routes/gtu/platform/docker/requirements.txt",
+    "bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8"
+   ],
+   "command": "set -e\nexport PATH=/opt/venv/bin:/opt/su2/bin:$PATH SU2_RUN=/opt/su2/bin SU2_HOME=/opt/SU2-src\nexport OMPI_MCA_osc=^ucx OMPI_MCA_btl_vader_single_copy_mechanism=none\ngit rev-parse HEAD > \"$GTU_OUT/commit.txt\"\nrc=0\npython3 routes/gtu/frame3/frame3_geom.py --out \"$GTU_OUT/geom\" --levels medium --stages stage2 --gzip-levels --threads \"$NPROC\" --results \"$GTU_OUT/frame3_geom_results.json\"\npython3 routes/gtu/platform/su2/su2_case.py run --geom-results \"$GTU_OUT/frame3_geom_results.json\" --stage stage2 --level medium --point routes/gtu/frame3/frame3_point_results.json:stage2 --speed 0.8 --points 0.45:2500,0.52:1500,0.58:1500,0.64:1500,0.7:1500,0.76:1500,0.83:1500,0.9:1500 --iter-scale 2 --shroud slip --vaneless slip --np \"$NPROC\" --mpi-args \"\" --time-limit 39071 --output-files RESTART --out \"$GTU_OUT/run\" --record \"$GTU_OUT/su2_line.json\" || rc=$?\n# сетки (сотни МБ) не выгружаются: их заново строит frame3_geom.py по коммиту\nrm -f \"$GTU_OUT/run/mesh.su2\" \"$GTU_OUT/run/mesh_split.su2\" \"$GTU_OUT\"/geom/*/passage_custom_*.su2\nexit \"$rc\"",
+   "max_min": 690
+  },
+  {
+   "name": "su2-f3-stage2-n090",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv python3-pip git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q -r routes/gtu/platform/docker/requirements.txt",
+    "bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8"
+   ],
+   "command": "set -e\nexport PATH=/opt/venv/bin:/opt/su2/bin:$PATH SU2_RUN=/opt/su2/bin SU2_HOME=/opt/SU2-src\nexport OMPI_MCA_osc=^ucx OMPI_MCA_btl_vader_single_copy_mechanism=none\ngit rev-parse HEAD > \"$GTU_OUT/commit.txt\"\nrc=0\npython3 routes/gtu/frame3/frame3_geom.py --out \"$GTU_OUT/geom\" --levels medium --stages stage2 --gzip-levels --threads \"$NPROC\" --results \"$GTU_OUT/frame3_geom_results.json\"\npython3 routes/gtu/platform/su2/su2_case.py run --geom-results \"$GTU_OUT/frame3_geom_results.json\" --stage stage2 --level medium --point routes/gtu/frame3/frame3_point_results.json:stage2 --speed 0.9 --points 0.45:2500,0.52:1500,0.58:1500,0.64:1500,0.7:1500,0.76:1500,0.83:1500,0.9:1500 --iter-scale 2 --shroud slip --vaneless slip --np \"$NPROC\" --mpi-args \"\" --time-limit 39071 --output-files RESTART --out \"$GTU_OUT/run\" --record \"$GTU_OUT/su2_line.json\" || rc=$?\n# сетки (сотни МБ) не выгружаются: их заново строит frame3_geom.py по коммиту\nrm -f \"$GTU_OUT/run/mesh.su2\" \"$GTU_OUT/run/mesh_split.su2\" \"$GTU_OUT\"/geom/*/passage_custom_*.su2\nexit \"$rc\"",
+   "max_min": 690
+  },
+  {
+   "name": "su2-f3-stage2-n100",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv python3-pip git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q -r routes/gtu/platform/docker/requirements.txt",
+    "bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8"
+   ],
+   "command": "set -e\nexport PATH=/opt/venv/bin:/opt/su2/bin:$PATH SU2_RUN=/opt/su2/bin SU2_HOME=/opt/SU2-src\nexport OMPI_MCA_osc=^ucx OMPI_MCA_btl_vader_single_copy_mechanism=none\ngit rev-parse HEAD > \"$GTU_OUT/commit.txt\"\nrc=0\npython3 routes/gtu/frame3/frame3_geom.py --out \"$GTU_OUT/geom\" --levels medium --stages stage2 --gzip-levels --threads \"$NPROC\" --results \"$GTU_OUT/frame3_geom_results.json\"\npython3 routes/gtu/platform/su2/su2_case.py run --geom-results \"$GTU_OUT/frame3_geom_results.json\" --stage stage2 --level medium --point routes/gtu/frame3/frame3_point_results.json:stage2 --speed 1 --points 0.45:2500,0.52:1500,0.58:1500,0.64:1500,0.7:1500,0.76:1500,0.83:1500,0.9:1500 --iter-scale 2 --shroud slip --vaneless slip --np \"$NPROC\" --mpi-args \"\" --time-limit 39071 --output-files RESTART --out \"$GTU_OUT/run\" --record \"$GTU_OUT/su2_line.json\" || rc=$?\n# сетки (сотни МБ) не выгружаются: их заново строит frame3_geom.py по коммиту\nrm -f \"$GTU_OUT/run/mesh.su2\" \"$GTU_OUT/run/mesh_split.su2\" \"$GTU_OUT\"/geom/*/passage_custom_*.su2\nexit \"$rc\"",
+   "max_min": 690
+  },
+  {
+   "name": "su2-f3-stage2-n105",
+   "container": "ubuntu:24.04",
+   "container_setup": [
+    "apt-get update -q",
+    "apt-get install -y -q --no-install-recommends build-essential python3 python3-venv python3-pip git pkg-config ca-certificates openmpi-bin libopenmpi-dev libgl1 libglu1-mesa libxrender1 libxcursor1 libxfixes3 libxft2 libfontconfig1 libxinerama1",
+    "python3 -m venv /opt/venv",
+    "/opt/venv/bin/pip install -q -r routes/gtu/platform/docker/requirements.txt",
+    "bash routes/gtu/platform/su2/install_su2.sh /opt/su2 /opt/SU2-src",
+    "test \"$(git -C /opt/SU2-src rev-parse HEAD)\" = 7048fd35f56d4bf52e586429d6746a36a10255f8"
+   ],
+   "command": "set -e\nexport PATH=/opt/venv/bin:/opt/su2/bin:$PATH SU2_RUN=/opt/su2/bin SU2_HOME=/opt/SU2-src\nexport OMPI_MCA_osc=^ucx OMPI_MCA_btl_vader_single_copy_mechanism=none\ngit rev-parse HEAD > \"$GTU_OUT/commit.txt\"\nrc=0\npython3 routes/gtu/frame3/frame3_geom.py --out \"$GTU_OUT/geom\" --levels medium --stages stage2 --gzip-levels --threads \"$NPROC\" --results \"$GTU_OUT/frame3_geom_results.json\"\npython3 routes/gtu/platform/su2/su2_case.py run --geom-results \"$GTU_OUT/frame3_geom_results.json\" --stage stage2 --level medium --point routes/gtu/frame3/frame3_point_results.json:stage2 --speed 1.05 --points 0.45:2500,0.52:1500,0.58:1500,0.64:1500,0.7:1500,0.76:1500,0.83:1500,0.9:1500 --iter-scale 2 --shroud slip --vaneless slip --np \"$NPROC\" --mpi-args \"\" --time-limit 39071 --output-files RESTART --out \"$GTU_OUT/run\" --record \"$GTU_OUT/su2_line.json\" || rc=$?\n# сетки (сотни МБ) не выгружаются: их заново строит frame3_geom.py по коммиту\nrm -f \"$GTU_OUT/run/mesh.su2\" \"$GTU_OUT/run/mesh_split.su2\" \"$GTU_OUT\"/geom/*/passage_custom_*.su2\nexit \"$rc\"",
+   "max_min": 690
+  }
+ ]
+}

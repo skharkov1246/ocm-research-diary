@@ -140,7 +140,8 @@ ETA_NOM = dict(comp=-0.012, ax=-0.016, rad=-0.042, pt=0.86)  # номиналь�
 #   радиальная -0,027 к первым значениям -0,005 и -0,015) - оценка; остаток покрывают запасы M_W, M_T
 SPLIT_RANGE = {"2Ц": (0.35, 0.65), "ОЦ": (0.12, 0.60)}
 N_PI_GRID, N_T41_GRID, N_SPLIT_GRID = 10, 6, 21
-REPAIR_AXES = ("mat_tw", "mat_cw", "m_tw", "cool", "comp", "turb", "recup", "rotors", "rotor_join")
+REPAIR_AXES = ("m_tw", "cool", "comp", "turb", "recup", "rotors", "rotor_join")   # считаются: не больше REPAIR_MAX_AXES изменений
+REPAIR_FREE = ("mat_tw", "mat_cw")                                                # материалы перебираются внутри каждой замены
 _DEF = dict(rotors=[1, 2], comp=["1Ц", "2Ц", "Д", "ОЦ"], n_ax=[1, 2], inlet=["одно", "двух"], turb=["Р", "О"], nt=[1, 2],
             npt=[1, 2], cool=["U", "N", "K"], recup=["нет", "печатный"], comb=["выносная", "кольцевая"], bear=["масло", "магнит"],
             cores=[1], rotor_join=["сварка", "сборный"], m_cw=["поковка", "литьё", "печать"], m_tw=["литьё", "печать"],
@@ -307,7 +308,45 @@ SIG_KEYS = ("kv", "rotors", "cores", "comp", "n_ax", "turb", "cool", "m_tw", "ma
 
 
 def _sig(c):
-    return tuple((k, c[k]) for k in SIG_KEYS)
+    """ключ кэша замыкания: только то, что меняет номинальный цикл и диапазон π - схема, T41 предела, охлаждаемое колесо,
+    никелевое колесо компрессора, пределы окружной скорости и размера колёс компрессора"""
+    ni = c["rotor_join"] in ("заодно", "сварка")
+    mats = [c["mat_cw"] if not (c["mat_cw"] == "Al" and k > 0) else "Ti64" for k in range(len(stage_types(c)))]
+    ul = tuple(MK.u_limit_comp(m, c["m_cw"])[0] for m in mats)
+    dt = d_cap_turb(c)
+    return (c["kv"], c["rotors"], c["cores"], c["comp"], c["n_ax"], c["turb"], c["cool"], c["recup"], c["comb"],
+            round(MK.t41_limit(c["turb"], c["cool"], c["mat_tw"], c["m_tw"])[0], 3), MK.rotor_cooled(c["cool"], c["m_tw"]), ni,
+            c["mat_cw"] == "Al", ul, round(d_cap_comp(c), 4), _nt_max(c), None if dt is None else round(dt, 4), c["mat_tw"] == "Si3N4")
+
+
+def _nt_max(c):
+    return max(ARCH[c["arch"]]["allowed"].get("nt", _DEF["nt"]))
+
+
+def turbine_exists(c, tgt, t, Q5):
+    """вал с частотой пакета: есть ли число ступеней (до наибольшего в шаблоне), при котором турбина проходит предел
+    окружной скорости (сплав, размер колеса при частоте пакета) с нагрузкой ψ <= 2,5 (осевая) или U/C0 >= 0,5 и быстроходностью
+    в 0,25-1,00 (радиальная). Возврат: (да/нет, пояснение)"""
+    if c["rotors"] != 1:
+        return True, ""
+    U_lim = MK.u_limit_turb(c["turb"], c["mat_tw"], c["t41"])[0]
+    U_max = min(U_lim, u_cap_size(c, d_cap_turb(c)))
+    n = tgt["n_pkg"]
+    for nt in range(1, _nt_max(c) + 1):
+        if c["turb"] == "О":
+            if t["w"] / (nt * U_max ** 2) <= PSI_MAX:
+                return True, ""
+        else:
+            dhs = _stage_dhs(t, nt)
+            ns = (2 * math.pi * n / 60) * math.sqrt(Q5) / dhs ** 0.75
+            if U_max / math.sqrt(2 * dhs) >= NU_RANGE[0] and NS_RANGE[0] <= ns <= NS_RANGE[1]:
+                return True, ""
+    if c["turb"] == "О":
+        return False, (f"турбина на валу пакета: работа {t['w'] / 1e3:.0f} кДж/кг при U <= {U_max:.0f} м/с и {_nt_max(c)} ступенях "
+                       f"даёт ψ {t['w'] / (_nt_max(c) * U_max ** 2):.2f} > 2,5")
+    dhs = _stage_dhs(t, _nt_max(c))
+    return False, (f"турбина на валу пакета: при U <= {U_max:.0f} м/с и {_nt_max(c)} ступенях U/C0 {U_max / math.sqrt(2 * dhs):.2f}, "
+                   f"быстроходность {(2 * math.pi * n / 60) * math.sqrt(Q5) / dhs ** 0.75:.2f} (нужно U/C0 >= 0,5 и 0,25-1,00)")
 
 
 def w_need(tgt):
@@ -481,6 +520,15 @@ def closure(c):
             if best is None or b["m"] > best["m"]:
                 best = b
             if w is not None:
+                cp = dict(cc, pi=math.sqrt(w[0] * w[1]), t41=T)
+                nm = _nominal(cp, tgt)
+                if nm["ok"]:
+                    tt = nm["r"]["t"]
+                    Q5 = tt["m"] * nm["G"] / c["cores"] / (tt["p_out"] / (_E().Rg(tt["b"]) * tt["T_out"]))
+                    te, why_t = turbine_exists(cp, tgt, tt, Q5)
+                    if not te:
+                        best = dict(b, worst="turb", turb=why_t)
+                        break
                 ok, mu_ok = True, mode
                 break
             if b.get("worst") == "w" or b.get("fail"):
@@ -492,40 +540,73 @@ def closure(c):
     if not ok:
         b = best or {}
         why = {"w": "мала удельная работа", "EGT": "горячий выхлоп", "T5": "газ перед рекуператором выше 700 °C",
-               "T_al": "алюминиевое колесо выше 200 °C"}.get(b.get("worst"), b.get("fail", "цикл не решается"))
+               "T_al": "алюминиевое колесо выше 200 °C", "turb": b.get("turb", "")}.get(b.get("worst"), b.get("fail", "цикл не решается"))
         res["why"] = b.get("worst") or "perf"
-        res["reason"] = (f"{why}: лучшая точка T41 {b.get('t41', tl):.0f} °C, π {b.get('pi', 0):.2f} - w {b.get('w', 0):.0f} кДж/кг "
+        res["reason"] = why if b.get("worst") == "turb" else (f"{why}: лучшая точка T41 {b.get('t41', tl):.0f} °C, π {b.get('pi', 0):.2f} - w {b.get('w', 0):.0f} кДж/кг "
                          f"(нужно {res['w_need']:.0f}), выхлоп {b.get('EGT') or 0:.0f} °C (предел {egt_max(tgt) - M_T:.0f})"
                          + (f", газ перед рекуператором {b.get('T5') or 0:.0f} °C" if c["recup"] == "печатный" else ""))
     _CLOSURE[key] = res
     return res
 
 
+_CANDS = {}
+REPAIR_MAX_AXES = 3
+
+
+def _repair_cands(arch, c0):
+    """упорядоченный список замен осей ремонта (чистая функция архетипа и значений осей c0 - кэш не зависит от порядка счёта)"""
+    lists = {a: _axis_vals(c0, arch, a) for a in REPAIR_AXES}
+    key = (arch, tuple(c0[a] for a in REPAIR_AXES), tuple(tuple(lists[a]) for a in REPAIR_AXES))
+    if key in _CANDS:
+        return _CANDS[key]
+
+    def dist(a, v):
+        L = lists[a]
+        if c0[a] not in L:
+            return 1
+        i, j = L.index(c0[a]), L.index(v)
+        return min((i - j) % len(L), (j - i) % len(L))
+    out = [{}]                                    # сначала - только материалы (свободные оси)
+    for k in range(1, REPAIR_MAX_AXES + 1):
+        cands = []
+        for axes in itertools.combinations(REPAIR_AXES, k):
+            alts = [[v for v in lists[a] if v != c0[a]] for a in axes]
+            if any(not x for x in alts):
+                continue
+            for vals in itertools.product(*alts):
+                ch = dict(zip(axes, vals))
+                cands.append(((max(REPAIR_AXES.index(a) for a in axes), sum(dist(a, v) for a, v in ch.items()),
+                               tuple(sorted(ch.items()))), ch))
+        cands.sort(key=lambda x: x[0])
+        out += [ch for _, ch in cands]
+    _CANDS[key] = out
+    return out
+
+
 def _repair(u, arch, c0):
-    """если комбинация не замыкает точку - ближайшая замыкающая: меньше изменённых осей, затем раньше по REPAIR_AXES, затем
-    ближе по индексу значения; оси вне шаблона архетипа не трогаются. Возврат: (концепция, запись)"""
+    """если комбинация не замыкает точку - ближайшая замыкающая: меньше изменённых осей (не больше REPAIR_MAX_AXES), затем раньше
+    по REPAIR_AXES, затем ближе по индексу значения; оси вне шаблона архетипа не трогаются. Возврат: (концепция, запись)"""
     cl = closure(c0)
     if cl["ok"]:
         return c0, ""
-    lists = {a: _axis_vals(c0, arch, a) for a in REPAIR_AXES}
-    cands = []
-    for combo in itertools.product(*[lists[a] for a in REPAIR_AXES]):
-        ch = {a: v for a, v in zip(REPAIR_AXES, combo) if v != c0[a]}
-        if not ch:
+    for ch in _repair_cands(arch, c0):
+        c = _discrete(u, arch, ch); c["kv"] = c0["kv"]
+        if any(c[a] != v for a, v in ch.items()):
             continue
-        dist = sum(min((lists[a].index(v) - lists[a].index(c0[a])) % len(lists[a]),
-                       (lists[a].index(c0[a]) - lists[a].index(v)) % len(lists[a])) if c0[a] in lists[a] else 1 for a, v in ch.items())
-        cands.append(((len(ch), max(REPAIR_AXES.index(a) for a in ch), dist, tuple(sorted(ch.items()))), ch))
-    cands.sort(key=lambda x: x[0])
-    for _, ov in cands:
-        c = _discrete(u, arch, ov)
-        c["kv"] = c0["kv"]
-        if any(c[a] != v for a, v in ov.items()):
-            continue
-        if closure(c)["ok"]:
-            diff = [f"{a}: {c0[a]} -> {c[a]}" for a in CAT if a != "arch" and c[a] != c0[a]]
-            return c, "; ".join(diff) + f" (исходная не замыкает точку - {cl['reason']})"
-    return c0, f"нет замыкающей комбинации в шаблоне архетипа - {cl['reason']}"
+        for mt in [c["mat_tw"]] + [m for m in _axis_vals(c, arch, "mat_tw") if m != c["mat_tw"]]:
+            for mc in [c["mat_cw"]] + [m for m in _axis_vals(c, arch, "mat_cw") if m != c["mat_cw"]]:
+                c2 = c if (mt, mc) == (c["mat_tw"], c["mat_cw"]) else _discrete(u, arch, dict(ch, mat_tw=mt, mat_cw=mc))
+                c2["kv"] = c0["kv"]
+                if (c2["mat_tw"], c2["mat_cw"]) != (mt, mc) or (not ch and (mt, mc) == (c0["mat_tw"], c0["mat_cw"])):
+                    continue
+                if closure(c2)["ok"]:
+                    return c2, _repair_note(c0, c2, cl)
+    return c0, f"нет замыкающей комбинации в шаблоне архетипа (до {REPAIR_MAX_AXES} осей) - {cl['reason']}"
+
+
+def _repair_note(c0, c, cl):
+    diff = [f"{a}: {c0[a]} -> {c[a]}" for a in CAT if a != "arch" and c[a] != c0[a]]
+    return "; ".join(diff) + f" (исходная не замыкает точку - {cl['reason']})"
 
 
 def _interval(bounds):
@@ -1229,10 +1310,14 @@ def _core(c, comp_out, eta_gg, eta_pt):
     T3 = T2
     for _ in range(10 if rec else 1):
         T4 = T41
-        for _ in range(5):
+        for _ in range(8):
             f = E.far_for(T3, T4); b = E.bfrac(f)
             mg4 = mc * (1 + f); m41 = mg4 + xn; b41 = b * mg4 / m41
-            T4 = E.T_h((m41 * E.h(T41, b41) - xn * E.h(T2)) / mg4, b)
+            T4n = E.T_h((m41 * E.h(T41, b41) - xn * E.h(T2)) / mg4, b)
+            if abs(T4n - T4) < 1e-4:
+                T4 = T4n
+                break
+            T4 = T4n
         R41, s41, h41 = E.Rg(b41), E.s0(T41, b41), E.h(T41, b41)
         pt = None
         if c["rotors"] == 1:
