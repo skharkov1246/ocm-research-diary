@@ -5,7 +5,7 @@
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
     "datasets": 504,
-    "total_bytes": 21110936,
+    "total_bytes": 21122341,
     "results_files": 207,
     "results_with_script": 66,
     "results_referenced_in_site": 22,
@@ -7186,7 +7186,7 @@
       "path": "routes/gtu/evo/blades/disk1d_calibration.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 21834,
+      "bytes": 33239,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -7209,7 +7209,7 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "38edb6a"
+      "last_commit": "297a8ba"
     },
     {
       "path": "routes/gtu/evo/core/.owner.json",
