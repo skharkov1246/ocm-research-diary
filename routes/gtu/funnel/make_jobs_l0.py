@@ -77,12 +77,19 @@ def measured(results=os.path.join(HERE, "funnel_l0_results.json")):
     return t, b, d["probe"]["params"]
 
 
-def measured_v3(path=V3_PROBE):
-    """время на концепцию v3 (с, ядро) и байт на концепцию: наибольшее по пробам KV-3 N = 300, KV-1 N = 300, KV-6 N = 1000
-    (пул из 4 процессов на общем контейнере, холодный кэш замыканий - время завышено против AWS)"""
+SAFETY_V3 = 1.5    # v3: время проб v3 - настенное в пуле из 4 процессов при нагрузке контейнера чужими задачами 11-15 (замер uptime во время
+#                    проб 15.11.2026) с холодным кэшем замыканий: оно уже завышено в разы, поэтому запас 1,5 вместо 3 (у v2 смета по
+#                    пробе ×3 дала 1,16 долл., факт прогона - 0,24)
+
+
+def measured_v3(runs=None, path=V3_PROBE):
+    """время на концепцию v3 (с, ядро) и байт на концепцию по пробам KV-3 N = 300, KV-1 N = 300, KV-6 N = 1000 (пул из 4 процессов на
+    общем контейнере, холодный кэш замыканий - время завышено против AWS). runs - [(kv, n)]: время - среднее по объёму выборок
+    каждой точки (своё время у каждой точки); без runs - наибольшее"""
     d = json.load(open(path, encoding="utf-8"))
     pts = {kv: v for kv, v in d.items() if isinstance(v, dict) and "s_per_concept_core" in v}
-    t = max(v["s_per_concept_core"]["v3"] for v in pts.values())
+    tk = {kv: v["s_per_concept_core"]["v3"] for kv, v in pts.items()}
+    t = (sum(n * tk[kv] for kv, n in runs) / sum(n for _, n in runs)) if runs else max(tk.values())
     b = max(v.get("part_bytes_per_concept", {}).get("v3") or 0 for v in pts.values()) or None
     return t, b, {kv: v["s_per_concept_core"] for kv, v in pts.items()}
 
@@ -99,8 +106,8 @@ def build(profile, shards=None, machines=None, branch="claude/lucid-allen-yvps5d
         raise ValueError(f"машин {M}: от 1 до min(6, частей)")
     jobs = []
     if P["max_min"] is None:                     # сторож: подготовка + счёт с запасом ×2 + 10 мин, не меньше 30
-        t, _, _ = measured_v3() if P.get("v3") else measured()
-        comp = sum(n for _, n in P["runs"]) * t * SAFETY / M / VCPU / 60
+        t, _, _ = measured_v3(P["runs"]) if P.get("v3") else measured()
+        comp = sum(n for _, n in P["runs"]) * t * (SAFETY_V3 if P.get("v3") else SAFETY) / M / VCPU / 60
         P["max_min"] = max(30, int(math.ceil(SETUP_MIN + 2 * comp + 10)))
     # v3: код выхода задачи - наихудший из шагов (раннер выполняет команду без -e; иначе упавший расчёт дал бы exit 0)
     for j in range(M):
@@ -124,9 +131,9 @@ def build(profile, shards=None, machines=None, branch="claude/lucid-allen-yvps5d
     return P, S, M, jobs, merge
 
 
-def estimate(P, S, M, jobs, t_concept, bytes_per_concept):
+def estimate(P, S, M, jobs, t_concept, bytes_per_concept, safety=SAFETY):
     n_tot = sum(n for _, n in P["runs"])
-    core_s = n_tot * t_concept * SAFETY
+    core_s = n_tot * t_concept * safety
     per_machine_compute_min = core_s / M / VCPU / 60
     machine_min = SETUP_MIN + per_machine_compute_min + UPLOAD_MIN
     mh = M * machine_min / 60
@@ -138,7 +145,7 @@ def estimate(P, S, M, jobs, t_concept, bytes_per_concept):
                transfer=round(gb * EGRESS_USD_GB, 4))
     usd["total_expected"] = round(usd["spot_alt"] + usd["disk_ipv4"] + usd["s3_month"] + usd["transfer"], 3)
     bound = M * (PRICE["upper"] + ebs + IPV4_USD_H) * (P["max_min"] + 10) / 60
-    return dict(concepts=n_tot, s_per_concept_core_measured=t_concept, safety=SAFETY, core_hours=round(core_s / 3600, 3),
+    return dict(concepts=n_tot, s_per_concept_core_measured=round(t_concept, 5), safety=safety, core_hours=round(core_s / 3600, 3),
                 machines=M, shards=S, vcpu_per_machine=VCPU, compute_min_per_machine=round(per_machine_compute_min, 2),
                 setup_min=SETUP_MIN, upload_min=UPLOAD_MIN, machine_min=round(machine_min, 2), machine_hours=round(mh, 3),
                 parts_gb_gz=round(gb, 4), usd=usd, upper_bound_usd=round(bound, 2),
@@ -167,15 +174,16 @@ def plan_check(path, outdir):
 def write_v3(plan_out, kv1_next=400000, only_kv1=None):
     """файлы задач v3: jobs_l0_v3.json (основная волна) и шаг сходимости ниш KV-1 jobs_l0_v3_kv1_n<N>.json; блоки merge, estimate,
     converge (правило остановки KV-1), plan_check"""
-    t, b, per = measured_v3()
     out = []
     profs = ([] if only_kv1 else [PROFILES["v3"]]) + [v3_kv1_profile(only_kv1 or kv1_next)]
     for P0 in profs:
         P, S, M, jobs, merge = build(P0)
-        est = estimate(P, S, M, jobs, t, b)
-        est["time_basis"] = ("наибольшее s_per_concept_core проб v3 (l0_v3_probe/funnel_v3_probe_compare.json: " +
-                             ", ".join(f"{kv} {v['v3']:.3f} (v2 {v['v2']:.3f})" for kv, v in per.items()) +
-                             f") × запас {SAFETY:g}; пробы - 4 общих ядра и холодный кэш замыканий, на AWS быстрее (v2: смета 1,16 долл., факт 0,24)")
+        t, b, per = measured_v3(P["runs"])
+        est = estimate(P, S, M, jobs, t, b, SAFETY_V3)
+        est["time_basis"] = ("s_per_concept_core проб v3 по точкам (l0_v3_probe/funnel_v3_probe_compare.json: " +
+                             ", ".join(f"{kv} {v['v3']:.3f} с (v2 {v['v2']:.3f})" for kv, v in per.items()) +
+                             f"), среднее по объёму выборок файла × запас {SAFETY_V3:g}; пробы - настенное время на общем контейнере "
+                             "(нагрузка 11-15 на 4 ядрах) с холодным кэшем: на AWS быстрее (v2: смета 1,16 долл., факт 0,24)")
         n1 = next((n for kv, n in P["runs"] if kv == "KV-1"), None)
         conv = dict(rule=(f"KV-1: после слияния при N = {n1} взять в funnel_l0_results_KV-1_n{n1}.json convergence.rows последнюю строку: "
                           f"прирост = new_feasible_niches_vs_half / feasible_niches предыдущей строки (N/2); если прирост < {V3_CONV:.0%} - "

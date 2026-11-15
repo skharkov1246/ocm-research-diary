@@ -62,7 +62,23 @@ def make_archive(comp, scale):
     D = BE.DESC[comp]
     k = CONFIG["archive"]["k"][scale]
     import blade_geom as BG
-    return C.CVTArchive(k, D["lo"], D["hi"], len(BG.genes_for(comp)), seed_key=f"{CONFIG['run_key']}:cvt:{comp}:{k}")
+    key = f"{CONFIG['run_key']}:cvt:{comp}:{k}"
+    return C.CVTArchive(k, D["lo"], D["hi"], len(BG.genes_for(comp)), seed_key=key, centroids=_centroids(key, k, len(D["lo"])))
+
+
+def _centroids(key, k, dim):
+    """центроиды CVT детерминированы ключом; кэш на диске (k = 1024 — около 15 с на ядро)"""
+    os.makedirs(SCRATCH, exist_ok=True)
+    p = os.path.join(SCRATCH, f"cvt_{C.seed_of(key, k, dim):x}.npy")
+    if os.path.exists(p):
+        Cc = np.load(p)
+        if Cc.shape == (k, dim):
+            return Cc
+    Cc = C.cvt_centroids(k, dim, seed_key=key)
+    tmp = p + f".{os.getpid()}.tmp.npy"
+    np.save(tmp, Cc)
+    os.replace(tmp, p)
+    return Cc
 
 
 def slim_meta(m):

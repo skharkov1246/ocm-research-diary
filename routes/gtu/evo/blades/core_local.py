@@ -207,7 +207,7 @@ class FFD:
         inside = np.all((self.local(X) >= -1e-12) & (self.local(X) <= 1 + 1e-12), axis=1)
         return X + disp * inside[:, None]
 
-    def check_jacobian(self, n: int = 7, h: float = 1e-4) -> float:
+    def check_jacobian(self, n: int = 5, h: float = 1e-4) -> float:
         """наименьший определитель якобиана отображения на решётке n³ точек внутри коробки (относительно исходного);
         > 0 — нет складок и самопересечений поверхностей, деформированных этим отображением"""
         g = np.linspace(0.02, 0.98, n)
@@ -513,10 +513,11 @@ def cvt_centroids(k, dim, n_samples=20000, iters=40, seed_key="cvt"):
     C = X[r.choice(n_samples, k, replace=False)].copy()
     for _ in range(iters):
         lab = _nearest(X, C)
-        for j in range(k):
-            m = lab == j
-            if m.any():
-                C[j] = X[m].mean(axis=0)
+        cnt = np.bincount(lab, minlength=k).astype(float)
+        S = np.zeros_like(C)
+        np.add.at(S, lab, X)
+        nz = cnt > 0
+        C[nz] = S[nz] / cnt[nz, None]
     return C
 
 

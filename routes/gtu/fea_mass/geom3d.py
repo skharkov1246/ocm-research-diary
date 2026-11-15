@@ -43,15 +43,14 @@ A = dict(
     shaft_r1h=0.60,            # цельное колесо: опора для частот - торцы ступицы у оси до r = 0,6 r1h (цапфы вала, оценка)         # колесо сборного ротора: отверстие под стяжку r = 0,35 r1h (как impeller.DEFAULTS r_bore)
     # осевое колесо
     t_max_c_hub=0.20, t_max_c_tip=0.08,    # наибольшая толщина пера / хорда у корня и на периферии
-    t_te_c=0.015,              # толщина выходной кромки / хорда
+    t_te_c=0.03,               # толщина выходной кромки / хорда (тоньше - Gmsh не строит объём у кромки; оценка)
     plat_t_c=0.10,             # толщина полки / хорда пера
     plat_len_bx=1.25,          # осевая длина полки / осевая хорда
     plat_gap_pitch=0.03,       # зазор между полками соседних лопаток / шаг (полки не связаны окружно)
     neck_w_pitch=0.30,         # толщина ножки / шаг на ободе (как frame3_fea turb_neck_s)
     neck_h_c=0.40,             # высота ножки / хорда
-    foot_w_pitch=0.50,         # ширина хвостовика / шаг
-    foot_h_bx=0.60,            # высота хвостовика / осевая хорда (как frame3_fea turb_h_ft_cax)
-    lug_gap_pitch=0.04,        # зазор между хвостовиком лопатки и выступом диска / шаг
+    dead_fill=0.90,            # заполнение мёртвого обода металлом (хвостовики + выступы диска; frame3_fea turb_dead_fill)
+    ring_E_theta=1e-3,         # окружная жёсткость мёртвого обода / E (паз рвёт окружную связь; оценка)
     rim_w_bx=1.15,             # ширина обода / осевая хорда (frame3_fea turb_w_rim_cax)
     disc_bore_R=0.20,          # радиус отверстия диска / радиус живого обода (как funnel_l2.R_BORE)
 )
@@ -124,8 +123,8 @@ class Mesh3D:
         return np.asarray(order)
 
 
-CLASS_HUB, CLASS_BLADE, CLASS_ATT = 0, 1, 2
-CLASS_NAMES = {CLASS_HUB: "HUB", CLASS_BLADE: "BLADE", CLASS_ATT: "ATT"}
+CLASS_HUB, CLASS_BLADE, CLASS_ATT, CLASS_RING = 0, 1, 2, 3
+CLASS_NAMES = {CLASS_HUB: "HUB", CLASS_BLADE: "BLADE", CLASS_ATT: "ATT", CLASS_RING: "RING"}
 
 
 # ----------------------------------------------------------------------------- общие шаги Gmsh
@@ -192,12 +191,12 @@ def _quality(gmsh):
                 n_SICN_below_0_1=int((sicn < 0.1).sum()))
 
 
-def _mesh_volume(gmsh, vol, pairs, pitch, size_cb, h_min, h_max, threads=1, opt_netgen=True):
+def _mesh_volume(gmsh, vol, pairs, pitch, size_cb, h_min, h_max, threads=1, opt_netgen=True, curv=0):
     """периодическая сетка C3D10 одного объёма; size_cb(x, y, z) -> размер элемента"""
     for fs, fm in pairs:
         gmsh.model.mesh.setPeriodic(2, [fs], [fm], _rotT(pitch))
     gmsh.model.mesh.setSizeCallback(lambda dim, tag, x, y, z, lc: max(h_min, min(h_max, size_cb(x, y, z))))
-    for k, v in (("Mesh.MeshSizeExtendFromBoundary", 0), ("Mesh.MeshSizeFromPoints", 0), ("Mesh.MeshSizeFromCurvature", 0),
+    for k, v in (("Mesh.MeshSizeExtendFromBoundary", 0), ("Mesh.MeshSizeFromPoints", 0), ("Mesh.MeshSizeFromCurvature", curv),
                  ("Mesh.MeshSizeMin", h_min), ("Mesh.MeshSizeMax", h_max), ("Mesh.Algorithm", 6), ("Mesh.Algorithm3D", 1),
                  ("Mesh.Optimize", 1), ("Mesh.ElementOrder", 1), ("Mesh.MaxNumThreads3D", threads)):
         gmsh.option.setNumber(k, v)
@@ -652,20 +651,17 @@ def axial_sector(spec, level="base", threads=1, keep_step=None):
         solids = [(3, disc)]
         r_root = r_h
         if not blisk:
-            # 2) замок: хвостовик и ножка лопатки от живого обода, выступ диска между хвостовиками (половины у границ
-            #    сектора) - кольцевые сегменты (стороны - радиальные плоскости), связаны с ободом перекрытием ov
+            # 2) замок: «мёртвый» обод R..r_ft (хвостовики лопаток и выступы диска между пазами) - кольцевой слой без окружной
+            #    жёсткости (ортотропный материал в ccx3d: E_θ ≈ 0 - паз рвёт окружную связь), плотность - доля заполнения;
+            #    ножка лопатки r_ft..r_h - сегмент толщиной neck_w_pitch шага, связан с полкой и мёртвым ободом
             h_neck = A["neck_h_c"] * chord
             r_ft = max(R + 0.3 * (r_h - R), r_h - h_neck)
-            a_foot = 0.5 * A["foot_w_pitch"] * pitch
             a_neck = 0.5 * A["neck_w_pitch"] * pitch * R / r_ft
             L_att = A["rim_w_bx"] * bx
             ov = 2e-3 * R
-            foot = _box_wedge(occ, R - ov, r_ft, L_att, -a_foot, 2 * a_foot)
+            ring = _box_wedge(occ, R - ov, r_ft, L_att, -0.5 * pitch, pitch)
             neck = _box_wedge(occ, r_ft - ov, r_h + ov, L_att, -a_neck, 2 * a_neck)
-            a_lug = a_foot + A["lug_gap_pitch"] * pitch
-            lug1 = _box_wedge(occ, R - ov, r_ft, L_att, a_lug, 0.5 * pitch - a_lug)
-            lug2 = _box_wedge(occ, R - ov, r_ft, L_att, -0.5 * pitch, 0.5 * pitch - a_lug)
-            solids += [(3, foot), (3, neck), (3, lug1), (3, lug2)]
+            solids += [(3, ring), (3, neck)]
             # 3) полка
             plat = _platform(occ, r_h, t_plat, A["plat_len_bx"] * bx, (1 - A["plat_gap_pitch"]) * pitch, k_ch)
             solids.append((3, plat))
@@ -673,10 +669,12 @@ def axial_sector(spec, level="base", threads=1, keep_step=None):
         # 4) перо: сечения (свободный вихрь), центр сечения - на оси x
         wires = []
         for i, sec in enumerate(secs):
-            rr = (r_root - 0.3 * t_plat if not blisk else r_root - 0.02 * chord) if i == 0 else (r_t if i == len(secs) - 1 else sec["r"])
+            rr = (r_root - 0.3 * t_plat if not blisk else r_root - 0.06 * chord) if i == 0 else (r_t if i == len(secs) - 1 else sec["r"])
             pts, _ = _airfoil(sec["c_ax"], sec["beta_in"], sec["beta_out"], sec["t_max_c"], A["t_te_c"])
             pts = pts - pts.mean(axis=0)
-            ptags = [occ.addPoint(rr * math.cos(yy / rr), rr * math.sin(yy / rr), xx) for xx, yy in pts]
+            # сечение - плоское (плоскость x = r, касательная при θ = 0): у неплоских сечений OCC не строит торцы и тело
+            # пера выходит незамкнутым
+            ptags = [occ.addPoint(rr, yy, xx) for xx, yy in pts]
             wires.append(occ.addWire([occ.addSpline(ptags + [ptags[0]])]))
         foil = [t for dd, t in occ.addThruSections(wires, makeSolid=True, makeRuled=False) if dd == 3]
         if len(foil) != 1:
@@ -720,7 +718,7 @@ def axial_sector(spec, level="base", threads=1, keep_step=None):
                 return 1.5 * h_b
             return min(h_hub, 1.5 * h_b * (1 + lv["grow"] * (R - r) / (1.5 * h_b)))
         t1 = time.time()
-        q, snap = _mesh_volume(gmsh, vol, pairs, pitch, size, 0.25 * h_b, h_hub, threads)
+        q, snap = _mesh_volume(gmsh, vol, pairs, pitch, size, 0.2 * h_b, h_hub, threads, curv=10)
         nodes, ids, elems, nm, ns, nb = _extract(gmsh, vol, master, slave, bore_f)
         t_mesh = time.time() - t1
     finally:
@@ -733,9 +731,12 @@ def axial_sector(spec, level="base", threads=1, keep_step=None):
     rc = np.hypot(cen[:, 0], cen[:, 1])
     r_disc = r_h if blisk else R
     ecls = np.where(rc < r_disc, CLASS_HUB, np.where(rc < r_root, CLASS_ATT, CLASS_BLADE))
+    if not blisk:
+        ecls = np.where((rc >= R) & (rc < r_ft), CLASS_RING, ecls)
     nfix = _fix_node(nodes, nb, ns, nm, 0.0)
     sets = dict(NMASTER=nm, NSLAVE=ns, NBORE=[t for t in nb if t not in set(ns)], NFIX=[nfix])
     meta = dict(kind="axial", Z=Z, pitch_rad=pitch, blisk=blisk, r_bore=float(prof_r[0]), R_live=R, r_hub=r_h, r_root=r_root, r_tip=r_t,
+                r_foot_top=(None if blisk else r_ft), dead_fill=A["dead_fill"],
                 w_rim=w_rim, chord=chord, bx=bx, t_plat=t_plat, h_blade=h_b, h_hub=h_hub, level=level,
                 volume=dict(V_sector_occ=V_sector, V_airfoil=V_foil), quality=q, periodic=per, periodic_snap=snap,
                 n_nodes=int(len(ids)), n_elems=int(len(elems)), n_hub_elems=int((ecls == CLASS_HUB).sum()),

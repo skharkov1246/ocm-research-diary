@@ -26,8 +26,10 @@ import numpy as np
 import core_local as C
 
 T_MIN = {"print": 1.0e-3, "cast": 1.5e-3}      # наименьшая стенка: LPBF / литьё по выплавляемым моделям (оценка)
+T_EDGE = {"print": 0.5e-3, "cast": 0.8e-3}      # наименьшая толщина у самой кромки (скругление; оценка)
 R_MIN_CURV = 0.5e-3                             # наименьший радиус кривизны кромок под печать/литьё (оценка)
 T_TE_TURB = 0.8e-3                              # выходная кромка турбины (как funnel/meanline_l1.T_TE)
+KB_MAX = 1.6                                    # задняя поверхность ступени 2: не глубже 1,6 кованой frame3 (поиск)
 
 
 # =========================================================================== гены
@@ -61,7 +63,7 @@ class Gene:
 
 
 GENES_COMP = [
-    Gene("mu", 0.58, 0.80, note="коэффициент работы w/U2² (уровень 1 воронки)"),
+    Gene("mu", 0.60, 0.85, note="коэффициент работы w/U2² (уровень 1 воронки)"),
     Gene("kcm", 0.16, 0.34, note="cm2/U2"),
     Gene("Z", 7, 15, "int", note="основные лопатки"),
     Gene("lsp", 0.35, 0.85, "switch", 0.15, "длина разделительной / основной (0 — нет)"),
@@ -71,7 +73,7 @@ GENES_COMP = [
     Gene("hub_a", 0.35, 0.65), Gene("hub_c", 0.35, 0.65), Gene("sh_a", 0.35, 0.65), Gene("sh_c", 0.35, 0.65),
     Gene("law1", 0.0, 0.7, note="закон углов β(m): 2-я управляющая точка"),
     Gene("law2", 0.3, 1.0, note="закон углов β(m): 3-я управляющая точка"),
-    Gene("lean", -25.0, 25.0, note="навал на выходе (rake), град"),
+    Gene("lean", -15.0, 15.0, note="навал на выходе (rake), град"),
     Gene("sweep", -0.20, 0.20, note="стреловидность входной кромки, доля хорды (+ — периферия впереди)"),
     Gene("tub_A", 0.008, 0.06, "switch", 0.25, "бугорки: амплитуда / хорда"),
     Gene("tub_n", 2, 7, "int", note="бугорки: число волн по размаху"),
@@ -85,7 +87,7 @@ GENES_COMP = [
     Gene("ffd1", -1.0, 1.0), Gene("ffd2", -1.0, 1.0), Gene("ffd3", -1.0, 1.0), Gene("ffd4", -1.0, 1.0),
     Gene("route", 0, 1, "choice", note="0 — печать металлом, 1 — литьё"),
 ]
-GENES_COMP2_EXTRA = [Gene(f"zb{i}", 0.0, 1.0, note="задняя поверхность: узел PCHIP") for i in range(6)] + [
+GENES_COMP2_EXTRA = [Gene(f"zb{i}", 0.0, 1.0, note="задняя поверхность: узел PCHIP (0 — стенка 10 мм, 1 — 1,6 кованой)") for i in range(6)] + [
     Gene("fish", 0.10, 0.60, "switch", 0.3, "«рыбья кость»: глубина карманов / толщина"),
     Gene("fish_r0", 0.25, 0.55, note="карманы: от r/r2"), Gene("fish_r1", 0.60, 0.92, note="карманы: до r/r2")]
 
@@ -93,7 +95,7 @@ GENES_TURB = [
     Gene("phi", 0.40, 0.80, note="ca/U"), Gene("U", 380.0, 420.0, note="окружная скорость на среднем диаметре, м/с"),
     Gene("zn", 24, 72, "int"), Gene("zt", 30, 100, "int"),
     Gene("taper", 0.25, 0.90, note="площадь сечения у периферии / у корня"),
-    Gene("hollow", 0.10, 0.45, "switch", 0.3, "доля полости в сечении (только печать)"),
+    Gene("hwall", 1.0, 3.0, "switch", 0.3, "полость с равной стенкой, мм (0 — сплошная; только печать)"),
     Gene("tmax_c", 0.12, 0.26), Gene("vortex", -1.0, 0.3, note="закон закрутки cθ ∝ r^n"),
     Gene("bow", 0.0, 0.25, note="составной навал: смещение середины / высоту"),
     Gene("lean", -15.0, 15.0, note="навал, град"), Gene("sweep", -15.0, 15.0, note="стреловидность, град"),
@@ -343,9 +345,12 @@ def impeller(ml, p, stage, nu_=29, ns=9, n_th=72, build_mesh=True, route=None):
         pieces.append(("разделительная",) + sample(np.full(ns, 0.0) + m_sle, m_te, sp_extra, p["sp_off"] * pitch))
     # ---------------- проверки лопаток
     checks = {}
-    t_all_min = min(float(pc[2].min()) for pc in pieces)
+    k0, k1 = max(1, int(0.05 * nu_)), nu_ - max(1, int(0.05 * nu_))
+    t_all_min = min(float(pc[2][k0:k1].min()) for pc in pieces)          # стенка вне скруглений кромок
+    t_edge_min = min(float(min(pc[2][0].min(), pc[2][-1].min())) for pc in pieces)
     checks["t_min_m"] = t_all_min
-    checks["t_min_ok"] = t_all_min >= tmin - 1e-12
+    checks["t_edge_min_m"] = t_edge_min
+    checks["t_min_ok"] = bool(t_all_min >= tmin - 1e-12 and t_edge_min >= T_EDGE[route] - 1e-12)
     checks["ffd_jac_min"] = jac
     checks["ffd_ok"] = jac > 0.2
     # канал: ширина по шагу на каждом (m, s) у основной лопатки — шаг·r·cos β − t (с разделительной — половина шага)
@@ -465,7 +470,7 @@ def impeller_disk(ml, p, stage, hub, Z, theta, mt, rr, n=241):
         xh_k = np.interp(r_knots, hub[:, 1], hub[:, 0], left=0.0, right=Lz)
         xb_min = xh_k + 0.010                     # стенка не тоньше 10 мм (как profile_opt)
         xb_base = Lz + base
-        xb_max = Lz + 1.15 * base
+        xb_max = Lz + KB_MAX * base
         xb_k = xb_base.copy()
         xb_k[2:8] = xb_min[2:8] + zb * (xb_max[2:8] - xb_min[2:8])
         xb_k[-1] = Lz + t_rim
@@ -610,7 +615,47 @@ def section(chord, beta_in, beta_out, tmax_c, n=41, le_ext=0.0):
     up = cam + 0.5 * th[:, None] * nrm
     lo = cam - 0.5 * th[:, None] * nrm
     poly = np.vstack([up, lo[-2:0:-1]])
-    return poly, cam, th
+    return poly, cam, th, nrm, u
+
+
+def cavity(cam, th, nrm, u, wall, core_min=1.0e-3, u0=0.12, u1=0.88):
+    """полость с равной стенкой: внутренний контур — средняя линия ± (t − 2·wall)/2 там, где t − 2·wall ≥ core_min
+    (иначе стенки сходятся — полости нет); возврат контура полости или None"""
+    ti = th - 2 * wall
+    m = (u >= u0) & (u <= u1) & (ti >= core_min)
+    if m.sum() < 3:
+        return None
+    idx = np.nonzero(m)[0]
+    # только одна непрерывная полость — самый длинный участок
+    br = np.split(idx, np.nonzero(np.diff(idx) > 1)[0] + 1)
+    idx = max(br, key=len)
+    if len(idx) < 3:
+        return None
+    c, t_, n_ = cam[idx], ti[idx], nrm[idx]
+    up = c + 0.5 * t_[:, None] * n_
+    lo = c - 0.5 * t_[:, None] * n_
+    return np.vstack([up, lo[::-1]])
+
+
+def raw_moments(poly):
+    """A, Sx = ∫y dA, Sy = ∫x dA, ∫x² dA, ∫y² dA, ∫xy dA (со знаком обхода)"""
+    x, y = poly[:, 0], poly[:, 1]
+    x1, y1 = np.roll(x, -1), np.roll(y, -1)
+    cr = x * y1 - x1 * y
+    A = 0.5 * cr.sum()
+    Sy = ((x + x1) * cr).sum() / 6
+    Sx = ((y + y1) * cr).sum() / 6
+    Ixx0 = ((y * y + y * y1 + y1 * y1) * cr).sum() / 12
+    Iyy0 = ((x * x + x * x1 + x1 * x1) * cr).sum() / 12
+    Ixy0 = ((x * y1 + 2 * x * y + 2 * x1 * y1 + x1 * y) * cr).sum() / 24
+    s = 1.0 if A >= 0 else -1.0
+    return np.array([A, Sx, Sy, Ixx0, Iyy0, Ixy0]) * s
+
+
+def props_from_raw(R):
+    A, Sx, Sy, Ixx0, Iyy0, Ixy0 = R
+    cx, cy = Sy / A, Sx / A
+    return dict(A=A, cx=cx, cy=cy, Ixx=Ixx0 - A * cy * cy, Iyy=Iyy0 - A * cx * cx, Ixy=Ixy0 - A * cx * cy)
 
 
 def section_props(poly):
@@ -649,22 +694,28 @@ def turbine_rotor_blade(st, p, rpm, rho=7916.0, ns=11, route=None):
     H = Hr
     e_th = H * (math.tan(math.radians(p["lean"])) * s_ + 4 * p["bow"] * s_ * (1 - s_))
     e_x = H * math.tan(math.radians(p["sweep"])) * s_
-    hollow = p["hollow"] if route == "print" else 0.0
-    w_h = smoothstep((s_ - 0.10) / 0.10) * smoothstep((0.95 - s_) / 0.04)    # корень и торец сплошные
-    secs, props = [], []
+    hwall = p["hwall"] * 1e-3 if route == "print" else 0.0
+    secs, props, cavs = [], [], []
     for j in range(ns):
-        poly, cam, th = section(chord[j], b_in[j], b_out[j], p["tmax_c"], le_ext=max(tub[j], 0.0))
-        pr = section_props(poly)
-        f = hollow * w_h[j]
-        pr["A_eff"] = pr["A"] * (1 - f)
-        pr["Ixx_eff"] = pr["Ixx"] * (1 - f * f)
-        pr["Iyy_eff"] = pr["Iyy"] * (1 - f * f)
-        pr["Ixy_eff"] = pr["Ixy"] * (1 - f * f)
+        poly, cam, th, nrm, uu = section(chord[j], b_in[j], b_out[j], p["tmax_c"], le_ext=max(tub[j], 0.0))
+        Ro = raw_moments(poly)
+        pr = props_from_raw(Ro)
+        cav = None
+        if hwall > 0 and 0.12 <= s_[j] <= 0.92:            # корень и торец сплошные (оценка)
+            cav = cavity(cam, th, nrm, uu, hwall)
+        if cav is not None:
+            pe = props_from_raw(Ro - raw_moments(cav))
+        else:
+            pe = pr
+        pr["A_eff"], pr["Ixx_eff"], pr["Iyy_eff"], pr["Ixy_eff"] = pe["A"], pe["Ixx"], pe["Iyy"], pe["Ixy"]
+        pr["cavity_frac"] = 1 - pe["A"] / pr["A"]
         pr["t_max"] = float(th.max())
-        pr["wall_min"] = float(th[int(0.15 * len(th)):int(0.85 * len(th))].min() * (1 - math.sqrt(f)) / 2) if f > 0 else float(th.max())
+        pr["wall_min"] = hwall if cav is not None else float(th.max())
         poly_c = poly - np.array([pr["cx"], pr["cy"]]) + np.array([e_x[j], e_th[j]])
         secs.append(poly_c)
+        cavs.append(None if cav is None else cav - np.array([pr["cx"], pr["cy"]]) + np.array([e_x[j], e_th[j]]))
         props.append(pr)
+    hollow = float(np.mean([q["cavity_frac"] for q in props]))
     A = np.array([q["A_eff"] for q in props])
     om = rpm * math.pi / 30
     # центробежная сила в корне и среднее напряжение
@@ -702,7 +753,7 @@ def turbine_rotor_blade(st, p, rpm, rho=7916.0, ns=11, route=None):
                  bow_endwall_deg=float(math.degrees(math.atan(4 * p["bow"]))), sweep_deg=p["sweep"], lean_deg=p["lean"])
     sc = C.silhouette_complexity(np.vstack([np.c_[e_x - 0.5 * chord, r], np.c_[(e_x + 0.5 * chord)[::-1], r[::-1]]]))
     feats["silhouette_iso"] = sc["isoperimetric"]
-    return dict(r=r, rh=rh, rt=rt, H=H, chord=chord, secs=secs, props=props, A=A, mass_blade=mass, J_blade=J, Fc=Fc,
+    return dict(r=r, rh=rh, rt=rt, H=H, chord=chord, secs=secs, cavs=cavs, props=props, A=A, mass_blade=mass, J_blade=J, Fc=Fc,
                 sig_c_MPa=sig_c / 1e6, sig_b_peak_MPa=float(sig_b.max() / 1e6), sig_b_gas_MPa=float(np.abs(sig_b_gas).max() / 1e6),
                 sig_peak_MPa=float((sig_c + sig_b.max()) / 1e6), Mx_gas=Mx_gas, Mx_cb=Mx_cb, My_cb=My_cb, checks=checks,
                 features=feats, hollow=hollow, route=route, b_in=b_in, b_out=b_out, e_th=e_th, e_x=e_x, ft=ft, tmin_route=tmin,

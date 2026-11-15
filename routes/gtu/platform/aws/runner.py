@@ -1055,8 +1055,16 @@ class Runner:
                     break
                 kw["NextToken"] = tok
             info = PriceInfo(itype, latest, wmax)
-        self._prices[itype] = (now, info)
+        self._prices[(region, itype)] = (now, info)
         return info
+
+    @staticmethod
+    def combine(itype: str, infos: dict) -> PriceInfo:
+        """Цены нескольких регионов в одну: зоны всех регионов, максимум окна — по всем (для бюджета и MaxPrice)."""
+        latest = {}
+        for info in infos.values():
+            latest.update(info.latest)
+        return PriceInfo(itype, latest, max([i.window_max for i in infos.values()] or [0.0]))
 
     def max_price(self, info: PriceInfo) -> float:
         return math.ceil(info.window_max * self.cfg.price_margin * 10000) / 10000.0
@@ -1067,20 +1075,31 @@ class Runner:
     def allot_min(self, job: Job) -> int:
         return job.max_min + self.cfg.grace_min
 
-    def budget_check(self, job: Job, itype: str, info: PriceInfo) -> tuple:
-        """(разрешено?, MaxPrice, цифры). Пишет запись budget в журнал."""
+    def budget_check(self, job: Job, itype: str, info: PriceInfo | None, *, market: str = "spot",
+                     od_rate: float = 0.0, xfer: float = 0.0, regions: list | None = None) -> tuple:
+        """(разрешено?, MaxPrice или цена по требованию, цифры). Пишет запись budget в журнал.
+
+        Версия 3: спот — MaxPrice по максимуму цены за окно по всем разрешённым регионам (info — общий);
+        по требованию — od_rate (максимум цены справочника по регионам-кандидатам); xfer — смета передачи
+        результатов в бакет из соседнего региона (разово, по худшему из регионов-кандидатам).
+        """
         s = self.ledger.summary(now=self.clock() if self._reconciled else None)
-        maxp = self.max_price(info)
-        new = (maxp + self.ebs_usd_h(job) + self.cfg.ipv4_usd_h) * self.allot_min(job) / 60.0
+        spot = market == "spot"
+        maxp = self.max_price(info) if spot else round(float(od_rate), 4)
+        new = (maxp + self.ebs_usd_h(job) + self.cfg.ipv4_usd_h) * self.allot_min(job) / 60.0 + xfer
         spent = s["spent"] + self.cfg.spent_before
         total = spent + s["committed"] + self.virtual + new
-        ok = info.window_max > 0 and total <= self.cfg.ceiling + 1e-9
+        ok = (info.window_max > 0 if spot else maxp > 0) and total <= self.cfg.ceiling + 1e-9
         nums = {"spent": round(spent, 4), "committed": round(s["committed"], 4),
                 "virtual": round(self.virtual, 4), "new": round(new, 4), "total": round(total, 4),
                 "ceiling": self.cfg.ceiling}
+        extra = {}
+        if self.v3:
+            extra = {"market": market, "regions": list(regions or self.regions), "xfer_usd": round(xfer, 4)}
         self.journal.append("budget", run_id=self.cfg.run_id, job=job.name, itype=itype,
-                            spot_usd_h=round(max(info.latest.values()) if info.latest else 0.0, 4),
-                            max_usd_h=maxp, ok=ok, **nums)
+                            spot_usd_h=round(max(info.latest.values()) if spot and info.latest else
+                                             (0.0 if spot else maxp), 4),
+                            max_usd_h=maxp, ok=ok, **nums, **extra)
         verdict = "можно" if ok else "ОТКАЗ: превышение потолка"
         step = self.cfg.report_step
         before = total - new
@@ -1090,39 +1109,59 @@ class Runner:
                                 total=round(total, 4), ceiling=self.cfg.ceiling)
             self.say(f"[бюджет] ОТЧЁТ ВЛАДЕЛЬЦУ: с этой задачей расходы пересекают {порог:.0f} долл. "
                      f"(всего {total:.2f} из {self.cfg.ceiling:.0f})")
-        self.say(f"[бюджет] {job.name} на {itype}: израсходовано {spent:.2f} + в работе "
-                 f"{s['committed']:.2f} + пакет {self.virtual:.2f} + новая {new:.2f} = {total:.2f} "
-                 f"из {self.cfg.ceiling:.2f} долл. (MaxPrice {maxp:.4f}/ч) — {verdict}")
+        mk = " (по требованию)" if not spot else ""
+        price_txt = f"MaxPrice {maxp:.4f}/ч" if spot else f"цена по требованию {maxp:.4f}/ч"
+        xf = f" (в т. ч. передача {xfer:.2f})" if xfer else ""
+        self.say(f"[бюджет] {job.name} на {itype}{mk}: израсходовано {spent:.2f} + в работе "
+                 f"{s['committed']:.2f} + пакет {self.virtual:.2f} + новая {new:.2f}{xf} = {total:.2f} "
+                 f"из {self.cfg.ceiling:.2f} долл. ({price_txt}) — {verdict}")
         return ok, maxp, nums
 
     # ---- зоны и подсети
     def _avoided(self, itype: str, az: str) -> bool:
         return self._avoid.get((itype, az), 0.0) > self.clock()
 
+    @staticmethod
+    def _akey(itype: str, market: str = "spot") -> str:
+        """Ключ «зона после сбоя»: ёмкость спота и по требованию — разные (сбой спота не закрывает зону для другого)."""
+        return itype if market == "spot" else f"{itype}/od"
+
     def zone_order(self, itype: str, info: PriceInfo) -> list:
         """Порядок попыток: по цене, зоны со свежим сбоем ёмкости или прерыванием — в конце."""
         zs = info.by_price()
         return [z for z in zs if not self._avoided(itype, z[0])] + [z for z in zs if self._avoided(itype, z[0])]
 
-    def _say_zones(self, job: Job, itype: str, order: list, by_price: list, maxp: float) -> None:
+    def _say_zones(self, job: Job, itype: str, order: list, by_price: list, maxp: float,
+                   region: str | None = None, market: str = "spot", akey: str | None = None) -> None:
+        akey = akey or itype
+        where = self._where(region)
+        if market != "spot":
+            txt = " → ".join(order_z for order_z, _ in order) if order else "зону выберет EC2"
+            self.say(f"[зоны] {job.name} {itype}{where} по требованию: {txt}; цена по требованию {maxp:.4f} "
+                     f"долл./ч (справочник от {self.ref['date']})")
+            return
         if not order:
             hint = " (в plan — --assume-zone-prices)" if self.offline else ""
-            self.say(f"[зоны] {job.name} {itype}: цены по зонам неизвестны{hint} — зону выберет EC2")
+            self.say(f"[зоны] {job.name} {itype}{where}: цены по зонам неизвестны{hint} — зону выберет EC2")
             return
-        txt = " → ".join(f"{z} {p:.4f}" + (" (после сбоя)" if self._avoided(itype, z) else "") for z, p in order)
+        txt = " → ".join(f"{z} {p:.4f}" + (" (после сбоя)" if self._avoided(akey, z) else "") for z, p in order)
         tag = " (допущение plan)" if self.offline else ""
-        self.say(f"[зоны] {job.name} {itype}: {txt}{tag}; ожидается {order[0][0]} по {order[0][1]:.4f} долл./ч, "
-                 f"самая дешёвая {by_price[0][0]}; MaxPrice {maxp:.4f} и бюджет — по максимуму цены за окно")
+        scope = "по всем регионам" if self.v3 and len(self.regions) > 1 else "за окно"
+        self.say(f"[зоны] {job.name} {itype}{where}: {txt}{tag}; ожидается {order[0][0]} по {order[0][1]:.4f} долл./ч, "
+                 f"самая дешёвая {by_price[0][0]}; MaxPrice {maxp:.4f} и бюджет — по максимуму цены {scope}")
 
-    def subnets(self):
-        """Подсети по умолчанию по зонам (describe_subnets, default-for-az=true); False — нет прав."""
-        if self._subnets is not None:
-            return self._subnets
+    def subnets(self, region: str | None = None):
+        """Подсети по умолчанию по зонам региона (describe_subnets, default-for-az=true); False — нет прав."""
+        region = region or self.cfg.region
+        if region in self._subnets:
+            return self._subnets[region]
         from botocore.exceptions import ClientError
+        where = f" {region}:" if self.v3 else ""
         try:
             out, kw = {}, {"Filters": [{"Name": "default-for-az", "Values": ["true"]}]}
+            ec2 = self.client(region, "ec2")
             while True:
-                r = self.ec2.describe_subnets(**kw)
+                r = ec2.describe_subnets(**kw)
                 for s in r.get("Subnets", []):
                     if s.get("State", "available") == "available" and s.get("AvailabilityZone"):
                         out[s["AvailabilityZone"]] = {"id": s["SubnetId"],
@@ -1130,23 +1169,23 @@ class Runner:
                 if not r.get("NextToken"):
                     break
                 kw["NextToken"] = r["NextToken"]
-            self._subnets = out
-            self.say(f"[подсети] по умолчанию в зонах: {', '.join(sorted(out)) or 'нет'}")
+            self._subnets[region] = out
+            self.say(f"[подсети]{where} по умолчанию в зонах: {', '.join(sorted(out)) or 'нет'}")
         except ClientError as e:
             code = e.response.get("Error", {}).get("Code", "?")
-            self._subnets = False
-            self.journal.append("subnets", run_id=self.cfg.run_id, ok=False, code=code)
-            self.say(f"[подсети] describe_subnets: {code} — зона задаётся Placement.AvailabilityZone "
+            self._subnets[region] = False
+            self.journal.append("subnets", run_id=self.cfg.run_id, ok=False, code=code, **self._rf(region))
+            self.say(f"[подсети]{where} describe_subnets: {code} — зона задаётся Placement.AvailabilityZone "
                      f"(подсеть по умолчанию этой зоны выберет EC2)")
-        return self._subnets
+        return self._subnets[region]
 
-    def placement(self, az: str | None) -> tuple:
+    def placement(self, az: str | None, region: str | None = None) -> tuple:
         """('subnet', подсеть) | ('az', None) | ('none', None) | ('skip', None)."""
         if not az:
             return "none", None
         if self.offline:
             return "subnet", {"id": f"<подсеть по умолчанию {az}>", "public": True}
-        sn = self.subnets()
+        sn = self.subnets(region)
         if not sn:                       # нет прав или нет подсетей по умолчанию — зона через Placement
             return "az", None
         if az in sn:
@@ -1154,43 +1193,52 @@ class Runner:
         return "skip", None
 
     # ---- параметры запуска
-    def ami(self, image: str) -> str:
+    def ami(self, image: str, region: str | None = None) -> str:
+        """Образ из SSM своего региона (id образа в каждом регионе свой)."""
+        region = region or self.cfg.region
         if self.offline:
-            return f"<ssm:{IMAGES[image]['ssm']}>"
-        hit = self._ami.get(image)
+            return f"<ssm:{IMAGES[image]['ssm']}>" + (f"@{region}" if self.v3 and region != self.cfg.region else "")
+        key = (region, image)
+        hit = self._ami.get(key)
         if isinstance(hit, ImageUnavailable):
             raise hit
         if hit:
             return hit
-        from botocore.exceptions import ClientError
+        from botocore.exceptions import BotoCoreError, ClientError
         img = IMAGES[image]
+        where = f" {region}" if self.v3 else ""
         try:
-            self._ami[image] = self.ssm.get_parameter(Name=img["ssm"])["Parameter"]["Value"]
-            return self._ami[image]
+            self._ami[key] = self.client(region, "ssm").get_parameter(Name=img["ssm"])["Parameter"]["Value"]
+            return self._ami[key]
         except ClientError as e:
             code = e.response.get("Error", {}).get("Code", "?")
+        except BotoCoreError as e:
+            if not self.v3:
+                raise
+            code = type(e).__name__
         err = None
         if img.get("owner"):
-            self.say(f"[образ] {image}: ssm:GetParameter {code} — ищу образ владельца {img['owner']} (DescribeImages)")
+            self.say(f"[образ]{where} {image}: ssm:GetParameter {code} — ищу образ владельца {img['owner']} (DescribeImages)")
             try:
-                r = self.ec2.describe_images(Owners=[img["owner"]], Filters=[
+                r = self.client(region, "ec2").describe_images(Owners=[img["owner"]], Filters=[
                     {"Name": "name", "Values": [img["name"]]}, {"Name": "state", "Values": ["available"]},
                     {"Name": "architecture", "Values": ["x86_64"]}])
                 found = sorted(r.get("Images", []), key=lambda i: i.get("CreationDate", ""))
                 if found:
-                    self._ami[image] = found[-1]["ImageId"]
-                    self.say(f"[образ] {image}: {found[-1].get('Name', '')}")
-                    return self._ami[image]
+                    self._ami[key] = found[-1]["ImageId"]
+                    self.say(f"[образ]{where} {image}: {found[-1].get('Name', '')}")
+                    return self._ami[key]
                 err = f"ssm:GetParameter {code}, DescribeImages — образов нет"
             except ClientError as e2:
                 err = f"ssm:GetParameter {code}, ec2:DescribeImages {e2.response.get('Error', {}).get('Code', '?')}"
-        self._ami[image] = ImageUnavailable(
-            f"образ {image} недоступен ({err or 'ssm:GetParameter ' + code}) — используйте image al2023 "
-            f"или container ubuntu:24.04 (пакеты apt — командами container_setup)")
-        raise self._ami[image]
+        self._ami[key] = ImageUnavailable(
+            f"образ {image}{' в ' + region if self.v3 else ''} недоступен ({err or 'ssm:GetParameter ' + code}) — "
+            f"используйте image al2023 или container ubuntu:24.04 (пакеты apt — командами container_setup)")
+        raise self._ami[key]
 
     def build_params(self, job: Job, itype: str, ami: str, maxp: float, attempt: int, *,
-                     az: str | None = None, subnet: dict | None = None, az_cheapest: str = "") -> dict:
+                     az: str | None = None, subnet: dict | None = None, az_cheapest: str = "",
+                     market: str = "spot") -> dict:
         cfg = self.cfg
         ud = build_userdata(job, run_id=cfg.run_id, attempt=attempt, repo=cfg.repo, branch=cfg.branch,
                             bucket=cfg.bucket, key_prefix=self.key_prefix(job.name, attempt=attempt),
@@ -1219,6 +1267,12 @@ class Runner:
             UserData=ud,
             ClientToken=token,
         )
+        if market == "on-demand":
+            # По требованию: без InstanceMarketOptions. Гашение — то же: InstanceInitiatedShutdownBehavior=terminate,
+            # сторож shutdown -P и сборщик по тегам Project+RunId (тег Market — для глаз в консоли).
+            del params["InstanceMarketOptions"]
+            for spec in params["TagSpecifications"]:
+                spec["Tags"] = tags + [{"Key": "Market", "Value": "on-demand"}]
         if subnet:
             if subnet["public"]:          # подсеть по умолчанию выдаёт публичный IPv4 сама — как раньше
                 params["SubnetId"] = subnet["id"]

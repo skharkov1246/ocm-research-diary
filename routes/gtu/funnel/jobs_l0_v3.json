@@ -1,0 +1,131 @@
+{
+ "_comment": "Уровень 0 воронки, выборка v3 (README узла funnel, раздел «v3: решения владельца 15.11.2026»). Раннер берёт только defaults и jobs; блоки merge, converge, estimate, plan_check - для сессии с ключами. Код - ветка claude/lucid-allen-yvps5d. Сгенерировано make_jobs_l0.py --v3; правки - в нём.",
+ "defaults": {
+  "instance_type": "c7a.16xlarge",
+  "fallback_types": [
+   "c7i.16xlarge"
+  ],
+  "image": "al2023",
+  "disk_gb": 30,
+  "python": "3.12",
+  "pip": [
+   "cantera==3.2.0",
+   "scipy==1.18.1",
+   "numpy==2.5.3"
+  ]
+ },
+ "jobs": [
+  {
+   "name": "l0-v3-m0",
+   "command": "rc=0\npython routes/gtu/funnel/funnel_l0.py --kv KV-3 --n 200000 --shards 30 --shard 0,6,12,18,24 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/funnel/funnel_l0.py --kv KV-1 --n 200000 --shards 30 --shard 0,6,12,18,24 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/funnel/funnel_l0.py --kv KV-6 --n 100000 --shards 30 --shard 0,6,12,18,24 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\" || rc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 115
+  },
+  {
+   "name": "l0-v3-m1",
+   "command": "rc=0\npython routes/gtu/funnel/funnel_l0.py --kv KV-3 --n 200000 --shards 30 --shard 1,7,13,19,25 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/funnel/funnel_l0.py --kv KV-1 --n 200000 --shards 30 --shard 1,7,13,19,25 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/funnel/funnel_l0.py --kv KV-6 --n 100000 --shards 30 --shard 1,7,13,19,25 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\" || rc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 115
+  },
+  {
+   "name": "l0-v3-m2",
+   "command": "rc=0\npython routes/gtu/funnel/funnel_l0.py --kv KV-3 --n 200000 --shards 30 --shard 2,8,14,20,26 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/funnel/funnel_l0.py --kv KV-1 --n 200000 --shards 30 --shard 2,8,14,20,26 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/funnel/funnel_l0.py --kv KV-6 --n 100000 --shards 30 --shard 2,8,14,20,26 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\" || rc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 115
+  },
+  {
+   "name": "l0-v3-m3",
+   "command": "rc=0\npython routes/gtu/funnel/funnel_l0.py --kv KV-3 --n 200000 --shards 30 --shard 3,9,15,21,27 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/funnel/funnel_l0.py --kv KV-1 --n 200000 --shards 30 --shard 3,9,15,21,27 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/funnel/funnel_l0.py --kv KV-6 --n 100000 --shards 30 --shard 3,9,15,21,27 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\" || rc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 115
+  },
+  {
+   "name": "l0-v3-m4",
+   "command": "rc=0\npython routes/gtu/funnel/funnel_l0.py --kv KV-3 --n 200000 --shards 30 --shard 4,10,16,22,28 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/funnel/funnel_l0.py --kv KV-1 --n 200000 --shards 30 --shard 4,10,16,22,28 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/funnel/funnel_l0.py --kv KV-6 --n 100000 --shards 30 --shard 4,10,16,22,28 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\" || rc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 115
+  },
+  {
+   "name": "l0-v3-m5",
+   "command": "rc=0\npython routes/gtu/funnel/funnel_l0.py --kv KV-3 --n 200000 --shards 30 --shard 5,11,17,23,29 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/funnel/funnel_l0.py --kv KV-1 --n 200000 --shards 30 --shard 5,11,17,23,29 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\" || rc=$?\npython routes/gtu/funnel/funnel_l0.py --kv KV-6 --n 100000 --shards 30 --shard 5,11,17,23,29 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\" || rc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 115
+  }
+ ],
+ "merge": {
+  "csv_rule": "CSV крупнее 5 МБ - в --csv-dir внутри runs/ (в .gitignore) и в S3; в ветку - только routes/gtu/funnel/l0_aws_v3/funnel_l0_results_*.json и funnel_l0_select_*.json",
+  "where": "сессия с ключами после run: результаты в routes/gtu/platform/aws/runs/<run_id>/<задача>/; Python с теми же версиями пакетов (pip install cantera==3.2.0 scipy==1.18.1 numpy==2.5.3)",
+  "commands": [
+   "python3 routes/gtu/funnel/merge_l0.py --kv KV-3 --n 200000 --shards 30 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/l0_aws_v3 --suffix _KV-3_n200000 --top 1000 --target 4000 --k-near 1 --near-max 0.25 --csv-gz --csv-dir routes/gtu/platform/aws/runs/<run_id>/merged",
+   "python3 routes/gtu/funnel/merge_l0.py --kv KV-1 --n 200000 --shards 30 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/l0_aws_v3 --suffix _KV-1_n200000 --top 1000 --target 4000 --k-near 1 --near-max 0.25 --csv-gz --csv-dir routes/gtu/platform/aws/runs/<run_id>/merged",
+   "python3 routes/gtu/funnel/merge_l0.py --kv KV-6 --n 100000 --shards 30 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/l0_aws_v3 --suffix _KV-6_n100000 --top 1000 --target 4000 --k-near 1 --near-max 0.25 --csv-gz --csv-dir routes/gtu/platform/aws/runs/<run_id>/merged"
+  ],
+  "profile_why": "уровень 0 v3 (решения владельца 15.11.2026): итоговая оценка × (0,5 + 0,5·TRL/9); ось «корпус» - картридж и оболочка для каждой концепции, где оболочка входит в камеру LPBF; KV-6 - правки A, B1, B2 (сначала при исходном входе), C и ключ кэша; KV-3 200 000, KV-1 200 000 (первый шаг сходимости ниш), KV-6 100 000; 6 машин - одна волна под квоту 384 vCPU",
+  "checks": "слияние откажет (код 2), если потеряна или задвоена часть, индекс или запись оси «корпус», или у частей разные отпечатки выборки и кода",
+  "after": "отбор KV-3 v3 (funnel_l0_select_KV-3_n200000.json) -> в ветку -> python3 routes/gtu/funnel/make_jobs_l1.py --v3 (M = число записей отбора) -> jobs_l1_v3.json"
+ },
+ "converge": {
+  "rule": "KV-1: после слияния при N = 200000 взять в funnel_l0_results_KV-1_n200000.json convergence.rows последнюю строку: прирост = new_feasible_niches_vs_half / feasible_niches предыдущей строки (N/2); если прирост < 3% - сошлось, KV-1 готов; иначе запустить следующий шаг (удвоение N) и слить с тем же правилом",
+  "next_file": "routes/gtu/funnel/jobs_l0_v3_kv1_n400000.json",
+  "next_make": "python3 routes/gtu/funnel/make_jobs_l0.py --v3-kv1 400000",
+  "note": "ниши - с осью «корпус» (feasible_niches) и без неё (feasible_niches_v2) - обе в convergence.rows; правило - по первым; выборка следующего шага включает предыдущую (префикс Соболя), считается целиком заново: шаг стоит долей доллара"
+ },
+ "estimate": {
+  "concepts": 500000,
+  "s_per_concept_core_measured": 1.52746,
+  "safety": 1.5,
+  "core_hours": 318.222,
+  "machines": 6,
+  "shards": 30,
+  "vcpu_per_machine": 64,
+  "compute_min_per_machine": 49.72,
+  "setup_min": 5.0,
+  "upload_min": 1.0,
+  "machine_min": 55.72,
+  "machine_hours": 5.572,
+  "parts_gb_gz": 0.3278,
+  "usd": {
+   "spot_expected": 3.934,
+   "spot_alt": 4.168,
+   "disk_ipv4": 0.0462,
+   "s3_month": 0.0156,
+   "transfer": 0.0295,
+   "total_expected": 4.259
+  },
+  "upper_bound_usd": 17.86,
+  "upper_bound_rule": "раннер: (MaxPrice + диск + IPv4) × (max_min + 10) / 60 на машину",
+  "price": {
+   "expected": 0.706,
+   "alt": 0.748,
+   "upper": 1.4206,
+   "basis": "ожидаемая: спот c7a.16xlarge us-east-1c 0,706 долл./ч, us-east-1b 0,748 (замер сессии с ключами 22:08 14.11.2026, задача владельца); верхняя граница: MaxPrice раннера 1,4206 долл./ч (максимум по зонам × 1,2, ledger.jsonl живого прогона smoke 22:14 14.11.2026)"
+  },
+  "assumptions": {
+   "setup": "оценка: smoke 14.11.2026 - 61 с без пакетов; uv, Python 3.12, пакеты, клон - сверху",
+   "s3": "0.023 долл./ГБ-мес, передача 0.09 долл./ГБ - допущения",
+   "disk_ipv4": "ставки раннера, допущения кода"
+  },
+  "cap_300_usd_ok": true,
+  "time_basis": "s_per_concept_core проб v3 по точкам (l0_v3_probe/funnel_v3_probe_compare.json: KV-3 1.463 с (v2 0.138), KV-1 0.150 с (v2 0.036), KV-6 4.412 с (v2 0.260)), среднее по объёму выборок файла × запас 1.5; пробы - настенное время на общем контейнере (нагрузка 11-15 на 4 ядрах) с холодным кэшем: на AWS быстрее (v2: смета 1,16 долл., факт 0,24)"
+ },
+ "plan_check": {
+  "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/funnel/jobs_l0_v3.json --branch claude/lucid-allen-yvps5d --assume-price 0.748 --assume-zone-prices us-east-1a=0.955,us-east-1b=0.748,us-east-1c=0.706",
+  "exit_code": 0,
+  "lines": [
+   "[задача] l0-v3-m0: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 115 мин",
+   "[бюджет] l0-v3-m0 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 0.00 + новая 2.40 = 3.71 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] l0-v3-m0 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] l0-v3-m1: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 115 мин",
+   "[бюджет] l0-v3-m1 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 2.40 + новая 2.40 = 6.12 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] l0-v3-m1 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] l0-v3-m2: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 115 мин",
+   "[бюджет] l0-v3-m2 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 4.81 + новая 2.40 = 8.52 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] l0-v3-m2 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] l0-v3-m3: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 115 мин",
+   "[бюджет] l0-v3-m3 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 7.21 + новая 2.40 = 10.93 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] l0-v3-m3 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] l0-v3-m4: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 115 мин",
+   "[бюджет] l0-v3-m4 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 9.62 + новая 2.40 = 13.33 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] l0-v3-m4 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] l0-v3-m5: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 115 мин",
+   "[бюджет] l0-v3-m5 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 12.02 + новая 2.40 = 15.74 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] l0-v3-m5 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[план] прогноз пакета 14.43 долл. (цена спота — допущение 0.748/ч)"
+  ],
+  "runner_note": "раннер v2 в ветке claude/lucid-allen-yvps5d (поля python, pip, NPROC, самая дешёвая зона); run - с --branch claude/lucid-allen-yvps5d (без него раннер клонирует main); при правке раннера повторить plan"
+ }
+}

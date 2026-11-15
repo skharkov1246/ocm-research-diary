@@ -33,7 +33,8 @@ FRAME3 = os.path.join(GTU, "frame3", "frame3_point_results.json")
 FRAME3_FEA = os.path.join(GTU, "frame3", "frame3_fea_results.json")
 U2_LIMIT = 0.9 * 620.0            # frame3_point: U2 не выше 0,9·620 м/с (проектный запас)
 K_ROUTE = 0.9                     # допускаемое печатного/литого Ti-6Al-4V к деформируемому (оценка, как organic k_AM)
-BURST_MIN = 1.45                  # запас по разрушающей частоте при 100 % (≈ 1,2 × 120 %; оценка)
+BURST_MIN = 1.30                  # запас по разрушающей частоте при 100 % (оценка: на 8 % выше разгона 120 %; у frame3 —
+                                  # колесо 2: 1,90, диск турбины 1: 1,40)
 BLADE_BEND_MAX = 0.5              # изгиб лопатки колеса от навала при 120 % не выше 0,5·σ0,2 (оценка: запас на вибрацию)
 LIFE_H = 25000.0                  # ресурс по длительной прочности, ч (как funnel/strength_l1.RUPTURE_H)
 SM_CAP = 0.30                     # запас помпажа сверх 30 % в пригодность не засчитывается
@@ -254,7 +255,7 @@ def baseline_genes(comp):
     """облик frame3 в генах семейства: μ и cm2/U2 точки, 9 + 9 лопаток, разделительная 0,70 посередине шага, ν 0,40,
     Безье 0,5/0,5, линейный закон углов, без приёмов; задняя поверхность ступени 2 — кованая (база диска)"""
     if comp == "turb":
-        p = dict(phi=0.5, U=420.0, zn=40, zt=60, taper=0.6, hollow=0.0, tmax_c=0.20, vortex=-1.0, bow=0.0, lean=0.0, sweep=0.0,
+        p = dict(phi=0.5, U=420.0, zn=40, zt=60, taper=0.6, hwall=0.0, tmax_c=0.20, vortex=-1.0, bow=0.0, lean=0.0, sweep=0.0,
                  tub_A=0.0, tub_n=4, w1=1.0, w2=1.0, w3=1.0, w4=1.0, fish=0.0, route=1)
         return BG.encode("turb", p)
     P = point()["stage1" if comp == "comp1" else "stage2"]
@@ -285,7 +286,7 @@ def base_backface(x):
     base = np.interp(r_knots / r2 * fb["r2"], fb["r"], fb["depth"]) * r2 / fb["r2"]
     xh_k = np.interp(r_knots, hub[:, 1], hub[:, 0], left=0.0, right=Lz)
     xb_min = xh_k + 0.010
-    zb = (Lz + base - xb_min) / (Lz + 1.15 * base - xb_min)
+    zb = (Lz + base - xb_min) / (Lz + BG.KB_MAX * base - xb_min)
     names = [gg.name for gg in BG.genes_for("comp2")]
     x = np.array(x, float)
     for i in range(6):
@@ -388,7 +389,7 @@ def eval_comp(comp, x, want_geom=False, use_ref=True):
 def novelty_vector(comp, p, d):
     """нормированный вектор признаков формы для новизны (0..1 по каждому)"""
     if comp == "turb":
-        return np.array([(d[0] - 50) / 20, d[1] / 80, d[2] / 45, (d[3] + 15) / 30, d[4] / 0.05, p["hollow"] / 0.45, (p["lean"] + 15) / 30,
+        return np.array([(d[0] - 50) / 20, d[1] / 80, d[2] / 45, (d[3] + 15) / 30, d[4] / 0.05, 1.0 if p.get("hwall", 0) > 0 else 0.0, (p["lean"] + 15) / 30,
                          (p["taper"] - 0.25) / 0.65, p["fish"] / 0.5])
     return np.array([(d[0] - 20) / 40, _clip(d[1], 0, 150) / 150, d[2] / 0.85, d[3] / 0.06, (d[4] + 25) / 50, (p["sweep"] + 0.2) / 0.4,
                      p["ser_A"] / 0.3, 1.0 if p["tand"] > 0 else 0.0, p.get("fish", 0.0) / 0.6, abs(p["sp_off"] - 0.5) / 0.2 if p["lsp"] else 0.0,
@@ -402,7 +403,7 @@ def oem_reference_vectors(comp):
     out = []
     if comp == "turb":
         for b3 in (60.0, 63.4, 66.0):
-            p = dict(hollow=0.0, lean=0.0, taper=0.6, fish=0.0)
+            p = dict(hwall=0.0, lean=0.0, taper=0.6, fish=0.0)
             out.append(novelty_vector("turb", p, np.array([b3, 25.0, 0.0, 0.0, 0.0])))
         return np.array(out)
     for b2b in (40.0, 45.0, 50.0):
@@ -534,7 +535,7 @@ def eval_turb(x, want_geom=False, use_ref=True):
     ref = reference("turb") if use_ref else dict(mass=mass, J=J)
     meta = dict(comp="turb", eta=eta, eta_level1=tm["eta_p"], corrections=corr, mass_kg=mass, J_kgm2=J, parts=3,
                 parts_inserted_equiv=3 * (1 + zt), route=route, stages=stages, Dm=tm["Dm"], length_m=tm["length"],
-                Dtip=tm["Dtip"], hollow=p["hollow"] if route == "print" else 0.0, novelty_vec=novelty_vector("turb", p, d).tolist(),
+                Dtip=tm["Dtip"], hollow=float(np.mean([bl_["hollow"] for bl_ in blades])), novelty_vec=novelty_vector("turb", p, d).tolist(),
                 features=blades[-1]["features"], SM=None)
     if cons:
         return _infeasible("; ".join(c[0] for c in cons), _viol(cons), d, meta)
