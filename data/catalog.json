@@ -4,12 +4,12 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 442,
-    "total_bytes": 17740438,
-    "results_files": 191,
-    "results_with_script": 59,
+    "datasets": 454,
+    "total_bytes": 17986132,
+    "results_files": 194,
+    "results_with_script": 62,
     "results_referenced_in_site": 22,
-    "results_with_provenance_fields": 42,
+    "results_with_provenance_fields": 45,
     "by_track": {
       "ammonia": 91,
       "battery-cathode": 1,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 122,
+      "не определён": 134,
       "прочее": 25
     }
   },
@@ -8007,15 +8007,16 @@
       "path": "routes/gtu/organic/feed_to_funnels.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 12785,
+      "bytes": 26751,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
-        "cycles"
+        "cycles",
+        "thermal"
       ],
-      "last_change": "2026-11-14",
+      "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "8321dd4"
+      "last_commit": "d66e3a0"
     },
     {
       "path": "routes/gtu/organic/jobs_aws_organic.json",
@@ -8298,6 +8299,29 @@
       "last_commit": "a0afbd1"
     },
     {
+      "path": "routes/gtu/organic/thermal/feed_thermal.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 13473,
+      "referenced_in_site": false,
+      "produced_by": "routes/feed_thermal.py",
+      "shape": "объект",
+      "top_keys": [
+        "source",
+        "date",
+        "status",
+        "engine_funnel",
+        "combustor_funnel",
+        "aws"
+      ],
+      "provenance_fields": [
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "d66e3a0"
+    },
+    {
       "path": "routes/gtu/organic/thermal/jobs_thermal.json",
       "track": "не определён",
       "kind": "данные",
@@ -8315,6 +8339,117 @@
       "last_change": "2026-11-15",
       "last_author": "Claude",
       "last_commit": "095cac0"
+    },
+    {
+      "path": "routes/gtu/organic/thermal/topo_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 37276,
+      "referenced_in_site": false,
+      "produced_by": "routes/topo.py",
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "status",
+        "inputs",
+        "parameters",
+        "cases"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "d66e3a0"
+    },
+    {
+      "path": "routes/gtu/organic/thermal/tpms_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 56404,
+      "referenced_in_site": false,
+      "produced_by": "routes/tpms.py",
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "status",
+        "inputs",
+        "geometry",
+        "transport",
+        "recuperator",
+        "stl",
+        "runtime_s"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "d66e3a0"
+    },
+    {
+      "path": "routes/gtu/organic/thermal/tpms_transport_mac32.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 17797,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "method",
+        "software",
+        "date",
+        "args",
+        "runtime_s",
+        "rows"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "d66e3a0"
+    },
+    {
+      "path": "routes/gtu/organic/thermal/vascular_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 42851,
+      "referenced_in_site": false,
+      "produced_by": "routes/vascular.py",
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "status",
+        "inputs",
+        "assumptions",
+        "cases",
+        "runtime_s",
+        "geometry",
+        "networks"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "d66e3a0"
     },
     {
       "path": "routes/gtu/platform/aws/iam_policy_addendum.json",
@@ -8769,13 +8904,13 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "fa60b23"
+      "last_commit": "d66e3a0"
     },
     {
       "path": "routes/gtu/platform/su2/jobs_aws_su2_kv3_smoke.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 7193,
+      "bytes": 7640,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -8790,7 +8925,29 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "fa60b23"
+      "last_commit": "d66e3a0"
+    },
+    {
+      "path": "routes/gtu/platform/su2/jobs_aws_su2_kv3_sweep.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 45372,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "_comment",
+        "defaults",
+        "jobs",
+        "diagnosis",
+        "strategies",
+        "success_criteria",
+        "outputs_per_job",
+        "merge",
+        "estimate"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "d66e3a0"
     },
     {
       "path": "routes/gtu/platform/su2/jobs_aws_su2_kv3.json",
@@ -8811,7 +8968,7 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "fa60b23"
+      "last_commit": "d66e3a0"
     },
     {
       "path": "routes/gtu/platform/su2/jobs_frame3.json",
@@ -8851,6 +9008,146 @@
       "last_change": "2026-11-14",
       "last_author": "Claude",
       "last_commit": "4def261"
+    },
+    {
+      "path": "routes/gtu/platform/su2/plan_sweep_v1_control.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 2217,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "id",
+        "axis",
+        "title",
+        "mechanism",
+        "hypothesis",
+        "differs_from_smoke",
+        "transforms",
+        "set",
+        "steps",
+        "_comment"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "d66e3a0"
+    },
+    {
+      "path": "routes/gtu/platform/su2/plan_sweep_v2_decouple.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 2863,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "id",
+        "axis",
+        "title",
+        "mechanism",
+        "hypothesis",
+        "differs_from_smoke",
+        "transforms",
+        "set",
+        "steps",
+        "_comment"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "d66e3a0"
+    },
+    {
+      "path": "routes/gtu/platform/su2/plan_sweep_v3_ladder.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 3840,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "id",
+        "axis",
+        "title",
+        "mechanism",
+        "hypothesis",
+        "differs_from_smoke",
+        "transforms",
+        "set",
+        "backoff",
+        "steps",
+        "_comment"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "d66e3a0"
+    },
+    {
+      "path": "routes/gtu/platform/su2/plan_sweep_v4_jst.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 2605,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "id",
+        "axis",
+        "title",
+        "mechanism",
+        "hypothesis",
+        "differs_from_smoke",
+        "transforms",
+        "set",
+        "steps",
+        "_comment"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "d66e3a0"
+    },
+    {
+      "path": "routes/gtu/platform/su2/plan_sweep_v5_sa.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 2523,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "id",
+        "axis",
+        "title",
+        "mechanism",
+        "hypothesis",
+        "differs_from_smoke",
+        "transforms",
+        "set",
+        "turb",
+        "steps",
+        "_comment"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "d66e3a0"
+    },
+    {
+      "path": "routes/gtu/platform/su2/plan_sweep_v6_riemann.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 4060,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "id",
+        "axis",
+        "title",
+        "mechanism",
+        "hypothesis",
+        "differs_from_smoke",
+        "transforms",
+        "set",
+        "steps",
+        "_comment"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "d66e3a0"
     },
     {
       "path": "routes/gtu/platform/su2/su2_results.json",
