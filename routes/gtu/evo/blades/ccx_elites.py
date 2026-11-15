@@ -172,9 +172,10 @@ def calibration_set(n=12, n_out=4):
             x[names.index("fish")] = rng.uniform(0, 1)
         r = BE.evaluate(comp, x, want_geom=True)
         sl = r["geom"]["disk"]["slope_max"]
-        if sl <= BG.SLOPE_MAX and len([o for o in out if not o[2].startswith("out_")]) < n:
+        dok = r["geom"]["disk"]["ok"]
+        if dok and len([o for o in out if not o[2].startswith("out_")]) < n:
             out.append((comp, x, f"cal_{comp}_{k:02d}"))
-        elif sl > BG.SLOPE_MAX and n_o < n_out:
+        elif not dok and n_o < n_out:
             out.append((comp, x, f"out_{comp}_{k:02d}"))
             n_o += 1
         k += 1
@@ -240,7 +241,8 @@ def calibrate(n=12, mesh=(80, 12), workers=4):
                         in_domain=not tag.startswith("out_"), used_for_table=(not tag.startswith("out_")) and ccx_ <= YR_CAL_MAX,
                         verdict_ccx=bool(ccx_ <= 0.9), verdict_fast=bool(f_ <= 0.9)))
     ind = [q for q in chk if q["in_domain"]]
-    d["domain"] = dict(slope_max_limit=__import__("blade_geom").SLOPE_MAX, rule="|dh/dr| на 0,1…0,95·r2",
+    d["domain"] = dict(slope_max_limit=__import__("blade_geom").SLOPE_MAX, rmin_over_h=__import__("blade_geom").RMIN_H,
+                       rule="|dh/dr| ≤ 20 на 0,1…0,95·r2; задняя поверхность монотонна (глубина убывает к ободу), R_min/h ≥ 0,3",
                        out_of_domain=[q for q in chk if not q["in_domain"]],
                        note="вне области (крутой переход ступицы в тонкое полотно) отношение ccx/тонкий диск неустойчиво — такие профили недопустимы в поиске")
     agree = [q["verdict_ccx"] == q["verdict_fast"] for q in ind]

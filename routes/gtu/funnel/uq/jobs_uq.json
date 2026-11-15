@@ -17,37 +17,42 @@
  "jobs": [
   {
    "name": "uq-l1_full-m0",
-   "command": "python routes/gtu/funnel/uq/uq_l1.py --l1-in routes/gtu/funnel/aws/l1_full --l1-kv KV-3 --l1-m 3983 --l1-shards 40 --n 500 --n-od 100 --od auto --od-pdp-min 0.2 --od-score-min 4.5 --shards 50 --shard 0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
-   "max_min": 221
+   "command": "python routes/gtu/funnel/uq/uq_l1.py --l1-in routes/gtu/funnel/aws/l1_full --l1-kv KV-3 --l1-m 3983 --l1-shards 40 --n 500 --n-od 100 --od auto --od-pdp-min 0.2 --od-score-min 4.5 --shards 50 --shard 0,3,6,9,12,15,18,21,24,27,30,33,36,39,42,45,48 --tag _l1_full --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 153
   },
   {
    "name": "uq-l1_full-m1",
-   "command": "python routes/gtu/funnel/uq/uq_l1.py --l1-in routes/gtu/funnel/aws/l1_full --l1-kv KV-3 --l1-m 3983 --l1-shards 40 --n 500 --n-od 100 --od auto --od-pdp-min 0.2 --od-score-min 4.5 --shards 50 --shard 1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47,49 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
-   "max_min": 221
+   "command": "python routes/gtu/funnel/uq/uq_l1.py --l1-in routes/gtu/funnel/aws/l1_full --l1-kv KV-3 --l1-m 3983 --l1-shards 40 --n 500 --n-od 100 --od auto --od-pdp-min 0.2 --od-score-min 4.5 --shards 50 --shard 1,4,7,10,13,16,19,22,25,28,31,34,37,40,43,46,49 --tag _l1_full --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 153
+  },
+  {
+   "name": "uq-l1_full-m2",
+   "command": "python routes/gtu/funnel/uq/uq_l1.py --l1-in routes/gtu/funnel/aws/l1_full --l1-kv KV-3 --l1-m 3983 --l1-shards 40 --n 500 --n-od 100 --od auto --od-pdp-min 0.2 --od-score-min 4.5 --shards 50 --shard 2,5,8,11,14,17,20,23,26,29,32,35,38,41,44,47 --tag _l1_full --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "max_min": 153
   }
  ],
  "merge": {
-  "uq-l1_full": "python3 routes/gtu/funnel/uq/merge_uq.py --kv KV-3 --shards 50 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/uq/aws/l1_full --suffix _l1_full"
+  "uq-l1_full": "python3 routes/gtu/funnel/uq/merge_uq.py --kv KV-3 --shards 50 --tag _l1_full --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/uq/aws/l1_full --suffix _l1_full"
  },
  "estimate": {
-  "machine_hours": 3.629,
+  "machine_hours": 3.729,
   "usd": {
-   "spot_expected": 2.562,
-   "spot_alt": 2.714,
-   "disk_ipv4": 0.0301,
+   "spot_expected": 2.633,
+   "spot_alt": 2.789,
+   "disk_ipv4": 0.0309,
    "s3_month": 0.0011,
    "transfer": 0.0045,
-   "total_expected": 2.75
+   "total_expected": 2.826
   },
-  "upper_bound_usd": 11.0,
+  "upper_bound_usd": 11.65,
   "core_hours": 219.46,
-  "machines": 2,
+  "machines": 3,
   "groups": {
    "uq-l1_full": {
     "core_hours": 219.46,
-    "machines": 2,
-    "compute_min_per_machine": 102.9,
-    "max_min": 221,
+    "machines": 3,
+    "compute_min_per_machine": 68.6,
+    "max_min": 153,
     "kv": "KV-3",
     "candidates_assumed": 3983,
     "n": 500,
@@ -79,13 +84,16 @@
   "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/funnel/uq/jobs_uq.json --branch claude/lucid-allen-yvps5d --assume-price 0.748 --assume-zone-prices us-east-1a=0.955,us-east-1b=0.748,us-east-1c=0.706",
   "exit_code": 0,
   "lines": [
-   "[задача] uq-l1_full-m0: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 221 мин",
-   "[бюджет] uq-l1_full-m0 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 0.00 + новая 4.44 = 5.75 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[задача] uq-l1_full-m0: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 153 мин",
+   "[бюджет] uq-l1_full-m0 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 0.00 + новая 3.14 = 4.44 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
    "[зоны] uq-l1_full-m0 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
-   "[задача] uq-l1_full-m1: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 221 мин",
-   "[бюджет] uq-l1_full-m1 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 4.44 + новая 4.44 = 10.20 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[задача] uq-l1_full-m1: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 153 мин",
+   "[бюджет] uq-l1_full-m1 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 3.14 + новая 3.14 = 7.58 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
    "[зоны] uq-l1_full-m1 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
-   "[план] прогноз пакета 8.89 долл. (цена спота — допущение 0.748/ч)"
+   "[задача] uq-l1_full-m2: образ al2023, Python 3.12 (uv), 64 vCPU, сторож 153 мин",
+   "[бюджет] uq-l1_full-m2 на c7a.16xlarge: израсходовано 1.31 + в работе 0.00 + пакет 6.27 + новая 3.14 = 10.72 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] uq-l1_full-m2 c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[план] прогноз пакета 9.41 долл. (цена спота — допущение 0.748/ч)"
   ],
   "runner_note": "раннер v2 в ветке claude/lucid-allen-yvps5d (поля python, pip, NPROC, самая дешёвая зона); run - с --branch claude/lucid-allen-yvps5d (без него раннер клонирует main); при правке раннера повторить plan"
  }

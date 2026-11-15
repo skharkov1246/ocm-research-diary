@@ -1279,7 +1279,7 @@ class Runner:
                 raise
             code = type(e).__name__
         err = None
-        if img.get("owner"):
+        if img.get("owner") and (self.v3 or img.get("fallback") != "v3"):
             self.say(f"[образ]{where} {image}: ssm:GetParameter {code} — ищу образ владельца {img['owner']} (DescribeImages)")
             try:
                 r = self.client(region, "ec2").describe_images(Owners=[img["owner"]], Filters=[
@@ -1353,15 +1353,17 @@ class Runner:
         'capacity' — ни одна зона ни одного типа не приняла (нет ёмкости спота): очередь повторит позже;
         'no_price' — ни у одного типа нет истории цены: без цены нет ни MaxPrice, ни бюджета.
         Причина отказа — в self._why[имя задачи] (уходит в поле detail итога).
+        Версия 3 (--regions / --on-demand-fallback) — _launch_v3; без новых флагов — путь версии 2 ниже.
         """
-        from botocore.exceptions import ClientError
+        if self.v3:
+            return self._launch_v3(job, attempt)
         refused, ami = False, None
-        no_price, cap, skipped = [], [], []
+        tr = _Try()
         self._why.pop(job.name, None)             # пояснение прошлой попытки к этой не относится
         for itype in job.types:
             info = self.price(itype)
             if info.window_max <= 0:
-                no_price.append(itype)
+                tr.no_price.append(itype)
                 self.journal.append("launch_error", run_id=self.cfg.run_id, job=job.name, itype=itype,
                                     attempt=attempt, code="NoSpotPrice")
                 self.say(f"[цена] нет истории цены спота для {itype} — тип пропущен")
@@ -1379,116 +1381,360 @@ class Runner:
                                         code="ImageUnavailable", detail=str(e))
                     self.say(f"[запуск] {job.name}: {e}")
                     return "image_unavailable", None
-            by_price = info.by_price()
-            rank = {z: i for i, (z, _) in enumerate(by_price)}
-            cheapest = by_price[0][0] if by_price else ""
-            order = self.zone_order(itype, info)
-            self._say_zones(job, itype, order, by_price, maxp)
-            for az, _p in (order or [(None, None)]):
-                how, subnet = self.placement(az)
-                if how == "skip":
-                    skipped.append(f"{itype}@{az}")
-                    self.journal.append("zone_skip", run_id=self.cfg.run_id, job=job.name, itype=itype, az=az,
-                                        attempt=attempt, reason="no_default_subnet")
-                    self.say(f"[зоны] {job.name}: в {az} нет подсети по умолчанию — зона пропущена")
-                    continue
-                params = self.build_params(job, itype, ami, maxp, attempt, az=az, subnet=subnet,
-                                           az_cheapest=cheapest)
-                self.last_params = params
-                if self.offline:
-                    self.virtual += nums["new"]
-                    return "planned", None
-                if self.cfg.dryrun:
-                    try:
-                        rr = self.ec2.run_instances(DryRun=True, **params)
-                    except ClientError as e:
-                        code = e.response.get("Error", {}).get("Code", "?")
-                        if code == "DryRunOperation":
-                            self.virtual += nums["new"]
-                            self.say(f"[dryrun] {job.name} на {itype} в {az or 'зоне EC2'}: запуск разрешён (DryRunOperation)")
-                            self.journal.append("dryrun", run_id=self.cfg.run_id, job=job.name, itype=itype,
-                                                az=az or "", ok=True)
-                            return "dryrun_ok", None
-                        self.say(f"[dryrun] {job.name} на {itype} в {az or 'зоне EC2'}: отказ {code}")
-                        self.journal.append("dryrun", run_id=self.cfg.run_id, job=job.name, itype=itype,
-                                            az=az or "", ok=False, code=code)
-                        if code in CAPACITY_ERRORS:
-                            cap.append(f"{itype}@{az or 'EC2'}:{code}")
-                            continue
-                        return "dryrun_denied", None
-                    # DryRun проигнорирован и машина создана: в режиме DryRun сборщика в finally нет — гасим здесь
-                    ids = [i.get("InstanceId") for i in (rr or {}).get("Instances", [])]
-                    self.say(f"[dryrun] {job.name}: неожиданный успех без DryRunOperation — гашу созданное {ids}")
-                    self.journal.append("dryrun", run_id=self.cfg.run_id, job=job.name, itype=itype,
-                                        az=az or "", ok=False, code="UnexpectedSuccess")
-                    self._terminate(ids, "DryRun проигнорирован")
-                    return "dryrun_denied", None
-                try:
-                    r = self.ec2.run_instances(**params)
-                except ClientError as e:
-                    code = e.response.get("Error", {}).get("Code", "?")
-                    self.journal.append("launch_error", run_id=self.cfg.run_id, job=job.name, itype=itype,
-                                        az=az or "", attempt=attempt, code=code)
-                    self.say(f"[запуск] {job.name} на {itype} в {az or 'зоне EC2'}: {code}")
-                    if code in CAPACITY_ERRORS:
-                        cap.append(f"{itype}@{az or 'EC2'}:{code}")
-                        if az:
-                            self._avoid[(itype, az)] = self.clock() + self.cfg.avoid_s
-                        continue                            # следующая зона, затем следующий тип
-                    if code in QUOTA_ERRORS:
-                        return "defer", None
-                    # Иная ошибка (InternalError / Unavailable после повторов botocore): EC2 мог машину
-                    # всё же создать — ищем по ClientToken, чтобы она сразу вошла в учёт, квоту и бюджет.
-                    r = self._find_by_token(params["ClientToken"])
-                    if r is None:
-                        self._why[job.name] = f"RunInstances: {code}"
-                        return "failed", None
-                    self.say(f"[запуск] {job.name}: несмотря на {code} машина создана — беру в учёт")
-                inst = r["Instances"][0]
-                iid = inst["InstanceId"]
-                az_act = inst.get("Placement", {}).get("AvailabilityZone", "") or (az or "")
-                spot = info.az_price(az_act)
-                now = self.clock()
-                act = Active(job, attempt, iid, itype, az_act, now, now + self.allot_min(job) * 60,
-                             az_req=az or "", az_rank=rank.get(az_act, -1), az_cheapest=cheapest, spot_usd_h=spot)
-                self.ledger.append("launch", run_id=self.cfg.run_id, job=job.name, attempt=attempt, iid=iid,
-                                   itype=itype, az=az_act, az_req=az or "", az_rank=act.az_rank,
-                                   az_cheapest=cheapest, zones=[[z, round(p, 4)] for z, p in by_price],
-                                   # как задана зона (id подсети не пишем: журнал коммитится в открытый репозиторий)
-                                   net=("subnet" if subnet["public"] else "eni") if subnet else ("placement" if az else "auto"),
-                                   image=job.image, mode=job.mode,
-                                   spot_usd_h=round(spot, 4), max_usd_h=maxp,
-                                   ebs_usd_h=round(self.ebs_usd_h(job), 5), ip_usd_h=self.cfg.ipv4_usd_h,
-                                   t_launch=round(now, 1), allot_min=self.allot_min(job))
-                where = "самая дешёвая" if az_act and az_act == cheapest else f"место по цене {act.az_rank + 1}"
-                self.say(f"[запуск] {job.name} (попытка {attempt}): {iid} {itype} {az_act} ({where}, "
-                         f"{spot:.4f} долл./ч), сторож {job.max_min} мин, сборщик через {self.allot_min(job)} мин")
-                return "launched", act
-            if order:
-                self.say(f"[зоны] {job.name}: на {itype} ни одна зона не приняла — следующий тип")
+            sig = self._zones_try(job, attempt, itype, self.cfg.region, "spot", info, maxp, nums, ami, tr)
+            if sig is None:
+                continue                          # ни одна зона не приняла — следующий тип
+            kind = sig[0]
+            if kind in ("launched", "planned", "dryrun_ok", "dryrun_denied"):
+                return sig
+            if kind == "quota":
+                return "defer", None
+            if kind == "region_denied":
+                return "dryrun_denied", None
+            self._why[job.name] = sig[1]          # failed: иная ошибка, машины по ClientToken нет
+            return "failed", None
         if refused:
             return "refused", None
-        if len(no_price) == len(job.types):
+        if len(tr.no_price) == len(job.types):
             self._why[job.name] = (f"нет истории цены спота за {self.cfg.price_window_h:g} ч для "
-                                   f"{', '.join(no_price)} — без цены машина не запускается "
+                                   f"{', '.join(tr.no_price)} — без цены машина не запускается "
                                    f"(MaxPrice и бюджет не посчитать)")
             return "no_price", None
         why = []
-        if cap:
-            why.append("нет ёмкости спота: " + ", ".join(cap))
-        if skipped:
-            why.append("нет подсети по умолчанию: " + ", ".join(skipped))
-        if no_price:
-            why.append("нет цены: " + ", ".join(no_price))
+        if tr.cap:
+            why.append("нет ёмкости спота: " + ", ".join(tr.cap))
+        if tr.skipped:
+            why.append("нет подсети по умолчанию: " + ", ".join(tr.skipped))
+        if tr.no_price:
+            why.append("нет цены: " + ", ".join(tr.no_price))
         if why:
             self._why[job.name] = "; ".join(why)
-        return ("capacity" if cap else "failed"), None
+        return ("capacity" if tr.cap else "failed"), None
 
-    def _find_by_token(self, token: str):
+    def _zones_try(self, job: Job, attempt: int, itype: str, region: str, market: str, info: PriceInfo | None,
+                   maxp: float, nums: dict, ami: str, tr: _Try, od_price: float = 0.0):
+        """Зоны одного региона по порядку: запуск (DryRun / plan) в первой принявшей.
+
+        Возвращает ('launched', Active) | ('planned'|'dryrun_ok'|'dryrun_denied', None) — итог;
+        ('quota', код) | ('deny', код) | ('region_denied', код) | ('failed', пояснение) — сигнал: версия 2
+        превращает его в итог задачи, версия 3 — в переход к следующему региону; None — ни одна зона не приняла
+        (ёмкость или нет подсети — в tr), следующий тип или регион.
+        """
+        from botocore.exceptions import ClientError
+        spot = market == "spot"
+        rf = self._rf(region, market)
+        akey = self._akey(itype, market)
+        where = self._where(region)
+        if spot:
+            by_price = info.by_price()
+            order = [z for z in by_price if not self._avoided(akey, z[0])] + \
+                    [z for z in by_price if self._avoided(akey, z[0])]
+        else:
+            order = self._od_zones(itype, region, od_price)
+            by_price = sorted(order)
+        rank = {z: i for i, (z, _) in enumerate(by_price)}
+        cheapest = by_price[0][0] if by_price else ""
+        self._say_zones(job, itype, order, by_price, maxp, region=region, market=market, akey=akey)
+        for az, _p in (order or [(None, None)]):
+            how, subnet = self.placement(az, region)
+            if how == "skip":
+                tr.skipped.append(f"{itype}@{az}")
+                self.journal.append("zone_skip", run_id=self.cfg.run_id, job=job.name, itype=itype, az=az,
+                                    attempt=attempt, reason="no_default_subnet", **rf)
+                self.say(f"[зоны] {job.name}: в {az} нет подсети по умолчанию — зона пропущена")
+                continue
+            params = self.build_params(job, itype, ami, maxp, attempt, az=az, subnet=subnet,
+                                       az_cheapest=cheapest, market=market)
+            self.last_params = params
+            if self.offline:
+                self.virtual += nums["new"]
+                return "planned", None
+            ec2 = self.client(region, "ec2")
+            if self.cfg.dryrun:
+                try:
+                    rr = ec2.run_instances(DryRun=True, **params)
+                except ClientError as e:
+                    code = e.response.get("Error", {}).get("Code", "?")
+                    if code == "DryRunOperation":
+                        self.virtual += nums["new"]
+                        self.say(f"[dryrun] {job.name} на {itype}{where} в {az or 'зоне EC2'}: запуск разрешён (DryRunOperation)")
+                        self.journal.append("dryrun", run_id=self.cfg.run_id, job=job.name, itype=itype,
+                                            az=az or "", ok=True, **rf)
+                        return "dryrun_ok", None
+                    self.say(f"[dryrun] {job.name} на {itype}{where} в {az or 'зоне EC2'}: отказ {code}")
+                    self.journal.append("dryrun", run_id=self.cfg.run_id, job=job.name, itype=itype,
+                                        az=az or "", ok=False, code=code, **rf)
+                    if code in CAPACITY_ERRORS:
+                        tr.cap.append(f"{itype}@{az or 'EC2'}:{code}")
+                        continue
+                    if not self.v3:
+                        return "dryrun_denied", None
+                    return ("quota" if code in QUOTA_ERRORS else "region_denied"), code
+                # DryRun проигнорирован и машина создана: в режиме DryRun сборщика в finally нет — гасим здесь
+                ids = [i.get("InstanceId") for i in (rr or {}).get("Instances", [])]
+                for i in ids:
+                    self._iid_region[i] = region
+                self.say(f"[dryrun] {job.name}: неожиданный успех без DryRunOperation — гашу созданное {ids}")
+                self.journal.append("dryrun", run_id=self.cfg.run_id, job=job.name, itype=itype,
+                                    az=az or "", ok=False, code="UnexpectedSuccess", **rf)
+                self._terminate(ids, "DryRun проигнорирован")
+                return "dryrun_denied", None
+            try:
+                r = ec2.run_instances(**params)
+            except ClientError as e:
+                code = e.response.get("Error", {}).get("Code", "?")
+                self.journal.append("launch_error", run_id=self.cfg.run_id, job=job.name, itype=itype,
+                                    az=az or "", attempt=attempt, code=code, **rf)
+                self.say(f"[запуск] {job.name} на {itype}{where} в {az or 'зоне EC2'}: {code}")
+                if code in CAPACITY_ERRORS:
+                    tr.cap.append(f"{itype}@{az or 'EC2'}:{code}")
+                    if az:
+                        self._avoid[(akey, az)] = self.clock() + self.cfg.avoid_s
+                    continue                            # следующая зона, затем следующий тип
+                if code in QUOTA_ERRORS:
+                    return "quota", code
+                if self.v3 and code in DENY_ERRORS:     # отказ в правах машину не создаёт — следующий регион
+                    return "deny", code
+                # Иная ошибка (InternalError / Unavailable после повторов botocore): EC2 мог машину
+                # всё же создать — ищем по ClientToken, чтобы она сразу вошла в учёт, квоту и бюджет.
+                r = self._find_by_token(params["ClientToken"], region)
+                if r is None:
+                    return "failed", f"RunInstances: {code}"
+                self.say(f"[запуск] {job.name}: несмотря на {code} машина создана — беру в учёт")
+            inst = r["Instances"][0]
+            iid = inst["InstanceId"]
+            az_act = inst.get("Placement", {}).get("AvailabilityZone", "") or (az or "")
+            price_h = info.az_price(az_act) if spot else od_price
+            now = self.clock()
+            act = Active(job, attempt, iid, itype, az_act, now, now + self.allot_min(job) * 60,
+                         az_req=az or "", az_rank=rank.get(az_act, -1), az_cheapest=cheapest, spot_usd_h=price_h,
+                         region=region if self.v3 else "", market=market)
+            self._iid_region[iid] = region
+            v3f = {}
+            if self.v3:
+                v3f = {**rf, "xfer_usd": round(self.xfer_usd(job, region), 4)}
+            self.ledger.append("launch", run_id=self.cfg.run_id, job=job.name, attempt=attempt, iid=iid,
+                               itype=itype, az=az_act, az_req=az or "", az_rank=act.az_rank,
+                               az_cheapest=cheapest, zones=[[z, round(p, 4)] for z, p in by_price],
+                               # как задана зона (id подсети не пишем: журнал коммитится в открытый репозиторий)
+                               net=("subnet" if subnet["public"] else "eni") if subnet else ("placement" if az else "auto"),
+                               image=job.image, mode=job.mode,
+                               spot_usd_h=round(price_h, 4), max_usd_h=maxp,
+                               ebs_usd_h=round(self.ebs_usd_h(job), 5), ip_usd_h=self.cfg.ipv4_usd_h,
+                               t_launch=round(now, 1), allot_min=self.allot_min(job), **v3f)
+            place = "самая дешёвая" if az_act and az_act == cheapest else f"место по цене {act.az_rank + 1}"
+            if not spot:
+                place = "по требованию"
+            self.say(f"[запуск] {job.name} (попытка {attempt}): {iid} {itype}{where} {az_act} ({place}, "
+                     f"{price_h:.4f} долл./ч), сторож {job.max_min} мин, сборщик через {self.allot_min(job)} мин")
+            return "launched", act
+        if order:
+            nxt = "следующий регион или тип" if self.v3 else "следующий тип"
+            self.say(f"[зоны] {job.name}: на {itype}{where} ни одна зона не приняла — {nxt}")
+        return None
+
+    def _od_zones(self, itype: str, region: str, od_price: float) -> list:
+        """Зоны для машины по требованию: цена во всех зонах одна; зоны — где тип есть по истории цены спота
+        (или все с подсетью по умолчанию), зоны после сбоя ёмкости по требованию — в конце."""
+        zs = []
+        hit = self._prices.get((region, itype))
+        if hit:
+            zs = [z for z, _ in hit[1].by_price()]
+        if not zs and self.offline:
+            zs = [z for z in (self.cfg.offline_zones or {}) if z[:-1] == region]
+        if not zs and not self.offline:
+            sn = self.subnets(region)
+            zs = sorted(sn) if sn else []
+        zs = sorted(zs)
+        akey = self._akey(itype, "on-demand")
+        zs = [z for z in zs if not self._avoided(akey, z)] + [z for z in zs if self._avoided(akey, z)]
+        return [(z, od_price) for z in zs]
+
+    def _best(self, itype: str, info: PriceInfo) -> tuple:
+        """(все зоны после сбоя?, лучшая цена) региона: наименьшая последняя цена среди зон без свежего сбоя."""
+        zs = info.by_price()
+        if not zs:
+            return False, info.window_max
+        fresh = [p for z, p in zs if not self._avoided(itype, z)]
+        return (not fresh), min(fresh or [p for _, p in zs])
+
+    def _pick(self, job: Job, itype: str, market: str, prices: dict, tr: _Try) -> list:
+        """Регионы-кандидаты по возрастанию цены: свободная квота, нет отказа в правах и паузы после квотной
+        ошибки. Соседний регион берётся раньше region, только если дешевле с запасом --region-price-margin."""
+        rows, notes = [], []
+        mname = "спот" if market == "spot" else "по требованию"
+        for r in self.regions:
+            if r not in prices:
+                continue
+            why = self._blocked(r, market)
+            if why:
+                (tr.denied if why.startswith("нет прав") else tr.quota).append(f"{r} {mname}: {why}")
+                notes.append(f"{r} — {why}")
+                continue
+            q, used = self.quota(r, market), self._used(r, market)
+            if used + job.vcpu > q:
+                tr.quota.append(f"{r} {mname}: занято {used} из {q} vCPU")
+                notes.append(f"{r} — квота {used}/{q} vCPU")
+                continue
+            stale, best = prices[r] if isinstance(prices[r], tuple) else (False, prices[r])
+            eff = best if r == self.cfg.region else best * (1.0 + self.cfg.region_price_margin)
+            rows.append((stale, eff, r != self.cfg.region, r, best))
+        rows.sort()
+        if rows or notes:
+            txt = " → ".join(f"{r} {best:.4f}" + (f" (с запасом {eff:.4f})" if eff != best else "")
+                             + (" (зоны после сбоя)" if stale else "") for stale, eff, _h, r, best in rows)
+            self.say(f"[регион] {job.name} {itype} {mname}: {txt or 'нет кандидатов'}"
+                     + (f"; не годятся: {', '.join(notes)}" if notes else ""))
+        return [r for *_x, r, _b in rows]
+
+    def _deny(self, region: str, market: str, code: str) -> None:
+        if (region, market) not in self._denied:
+            self._denied[(region, market)] = code
+            self.journal.append("region_denied", run_id=self.cfg.run_id, region=region, market=market, code=code)
+            self.say(f"[регион] {region} ({'спот' if market == 'spot' else 'по требованию'}): отказ в правах {code} — "
+                     f"регион исключён до конца прогона")
+
+    def _region_try(self, job: Job, attempt: int, itype: str, region: str, market: str, info, maxp: float,
+                    nums: dict, tr: _Try, od_price: float = 0.0):
+        """Версия 3: образ своего региона и зоны региона; сигналы _zones_try — в tr и переход дальше."""
+        try:
+            ami = self.ami(job.image, region)
+        except ImageUnavailable as e:
+            tr.image_bad.append(str(e))
+            self.journal.append("launch_error", run_id=self.cfg.run_id, job=job.name, attempt=attempt,
+                                code="ImageUnavailable", detail=str(e), **self._rf(region, market))
+            self.say(f"[запуск] {job.name}: {e} — следующий регион")
+            return None
+        tr.image_ok = True
+        sig = self._zones_try(job, attempt, itype, region, market, info, maxp, nums, ami, tr, od_price=od_price)
+        if sig is None:
+            return None
+        kind = sig[0]
+        if kind in ("launched", "planned", "dryrun_ok", "dryrun_denied"):
+            self.last_region, self.last_market = region, market
+            if kind in ("planned", "dryrun_ok"):
+                self._plan_use(job, region, market)
+            return sig
+        if kind == "quota":
+            # Квоту региона держат и чужие машины аккаунта: регион — на паузу (до следующих опросов), дальше — соседний.
+            self._qblock[(region, market)] = self.clock() + min(self.cfg.avoid_s, 5 * self.cfg.poll_s)
+            tr.quota.append(f"{region} {'спот' if market == 'spot' else 'по требованию'}: {sig[1]}")
+        elif kind in ("deny", "region_denied"):
+            self._deny(region, market, sig[1])
+            tr.denied.append(f"{region} {'спот' if market == 'spot' else 'по требованию'}: {sig[1]}")
+        else:
+            tr.failed.append(f"{itype}@{region}: {sig[1]}")
+        return None
+
+    def _launch_v3(self, job: Job, attempt: int) -> tuple:
+        """Версия 3: спот во всех разрешённых регионах (регион — по цене среди регионов со свободной квотой);
+        не вышло ни в одном (ёмкость, цена, права, квота) — при --on-demand-fallback машина по требованию."""
+        from botocore.exceptions import BotoCoreError, ClientError
+        tr = _Try()
+        self._why.pop(job.name, None)
+        self.last_region = self.last_market = None
+        self._room(job)                         # plan / DryRun: следующая волна, если квоты заняты пакетом
+        for itype in job.types:
+            infos, answered = {}, 0
+            for r in self.regions:
+                if (r, "spot") in self._denied:
+                    tr.denied.append(f"{r} спот: {self._denied[(r, 'spot')]}")
+                    continue
+                try:
+                    info = self.price(itype, r)
+                except (ClientError, BotoCoreError) as e:
+                    code = e.response.get("Error", {}).get("Code", "?") if isinstance(e, ClientError) else type(e).__name__
+                    if code in DENY_ERRORS:
+                        self._deny(r, "spot", code)
+                        tr.denied.append(f"{r} спот: {code}")
+                    else:
+                        tr.failed.append(f"{itype}@{r}: цена спота {code}")
+                    continue
+                answered += 1
+                if info.window_max > 0:
+                    infos[r] = info
+            if not infos:
+                if not answered:                  # ни один регион не ответил (права, сеть) — причина уже в tr
+                    continue
+                tr.no_price.append(itype)
+                self.journal.append("launch_error", run_id=self.cfg.run_id, job=job.name, itype=itype,
+                                    attempt=attempt, code="NoSpotPrice", regions=list(self.regions))
+                self.say(f"[цена] нет истории цены спота для {itype} ни в одном регионе — тип пропущен")
+                continue
+            cands = self._pick(job, itype, "spot", {r: self._best(itype, i) for r, i in infos.items()}, tr)
+            if not cands:
+                continue
+            allinfo = self.combine(itype, infos)       # MaxPrice и бюджет — по максимуму по всем регионам с ценой
+            xfer = max(self.xfer_usd(job, r) for r in cands)
+            ok, maxp, nums = self.budget_check(job, itype, allinfo, market="spot", xfer=xfer, regions=sorted(infos))
+            if not ok:
+                tr.refused = True
+                continue
+            for r in cands:
+                sig = self._region_try(job, attempt, itype, r, "spot", infos[r], maxp, nums, tr)
+                if sig is not None:
+                    return sig
+        if self.cfg.on_demand_fallback and tr.spot_unavailable():
+            self.say(f"[по требованию] {job.name}: спот недоступен во всех регионах — запасной путь по требованию")
+            for itype in job.types:
+                prices = self.od_prices(itype)
+                if not prices:
+                    tr.od_no_price.append(itype)
+                    self.say(f"[по требованию] {itype}: цены в справочнике нет ни для одного региона — тип пропущен")
+                    continue
+                cands = self._pick(job, itype, "on-demand", prices, tr)
+                if not cands:
+                    continue
+                # Верхняя граница: максимум цены справочника по разрешённым регионам × --price-margin
+                # (справочник может устареть, а MaxPrice у машины по требованию нет).
+                rate = math.ceil(max(prices.values()) * self.cfg.price_margin * 10000) / 10000.0
+                xfer = max(self.xfer_usd(job, r) for r in cands)
+                ok, maxp, nums = self.budget_check(job, itype, None, market="on-demand", od_rate=rate, xfer=xfer,
+                                                   regions=sorted(prices))
+                if not ok:
+                    tr.refused = True
+                    continue
+                for r in cands:
+                    sig = self._region_try(job, attempt, itype, r, "on-demand", None, maxp, nums, tr,
+                                           od_price=prices[r])
+                    if sig is not None:
+                        return sig
+        return self._v3_verdict(job, tr)
+
+    def _v3_verdict(self, job: Job, tr: _Try) -> tuple:
+        why = []
+        for label, lst in (("нет ёмкости", tr.cap), ("нет подсети по умолчанию", tr.skipped),
+                           ("нет цены спота", tr.no_price), ("квота", tr.quota), ("нет прав", tr.denied),
+                           ("ошибка", tr.failed), ("образ", tr.image_bad),
+                           ("нет цены по требованию в справочнике", tr.od_no_price)):
+            if lst:
+                why.append(f"{label}: " + ", ".join(dict.fromkeys(lst)))
+        if why:
+            self._why[job.name] = "; ".join(why)
+        if tr.refused:
+            return "refused", None
+        if tr.image_bad and not tr.image_ok:
+            self._why[job.name] = "; ".join(dict.fromkeys(tr.image_bad))
+            return "image_unavailable", None
+        if tr.quota and (self.active or not tr.cap):
+            return "defer", None
+        if tr.cap:
+            return "capacity", None
+        if len(tr.no_price) == len(job.types) and not tr.denied and not tr.failed:
+            od = (f"; нет цены по требованию в справочнике: {', '.join(tr.od_no_price)}" if tr.od_no_price else "")
+            self._why[job.name] = (f"нет истории цены спота за {self.cfg.price_window_h:g} ч для "
+                                   f"{', '.join(tr.no_price)} ни в одном из регионов {', '.join(self.regions)} — "
+                                   f"без цены машина не запускается (MaxPrice и бюджет не посчитать){od}")
+            return "no_price", None
+        if tr.denied and self.cfg.dryrun:
+            return "dryrun_denied", None
+        return "failed", None
+
+    def _find_by_token(self, token: str, region: str | None = None):
         """Машина, созданная запуском с этим ClientToken (не terminated), в виде ответа run_instances; иначе None."""
         from botocore.exceptions import BotoCoreError, ClientError
         try:
-            rr = self.ec2.describe_instances(Filters=[{"Name": "client-token", "Values": [token]}])
+            rr = self.client(region, "ec2").describe_instances(Filters=[{"Name": "client-token", "Values": [token]}])
         except (ClientError, BotoCoreError):
             return None
         found = [i for res in rr.get("Reservations", []) for i in res.get("Instances", [])
@@ -1497,17 +1743,22 @@ class Runner:
 
     # ---- наблюдение
     def describe(self, iids: list) -> dict:
-        out, kw = {}, {"Filters": [{"Name": "instance-id", "Values": list(iids)}]}
-        while True:
-            r = self.ec2.describe_instances(**kw)
-            for res in r.get("Reservations", []):
-                for i in res.get("Instances", []):
-                    out[i["InstanceId"]] = {"state": i["State"]["Name"],
-                                            "reason": i.get("StateReason", {}).get("Code", ""),
-                                            "az": i.get("Placement", {}).get("AvailabilityZone", "")}
-            if not r.get("NextToken"):
-                return out
-            kw["NextToken"] = r["NextToken"]
+        """Состояние машин; версия 3 — по регионам машин (регион — из прогона или журнала)."""
+        out = {}
+        for region, ids in self._by_region(iids).items():
+            ec2 = self.client(region, "ec2")
+            kw = {"Filters": [{"Name": "instance-id", "Values": list(ids)}]}
+            while True:
+                r = ec2.describe_instances(**kw)
+                for res in r.get("Reservations", []):
+                    for i in res.get("Instances", []):
+                        out[i["InstanceId"]] = {"state": i["State"]["Name"],
+                                                "reason": i.get("StateReason", {}).get("Code", ""),
+                                                "az": i.get("Placement", {}).get("AvailabilityZone", "")}
+                if not r.get("NextToken"):
+                    break
+                kw["NextToken"] = r["NextToken"]
+        return out
 
     def marker(self, job_name: str, run_id: str | None = None, attempt: int = 1) -> dict | None:
         from botocore.exceptions import ClientError
@@ -1569,29 +1820,37 @@ class Runner:
         iids = sorted(set(i for i in iids if i))
         if not iids:
             return set()
-        self.say(f"[гашение] {iids} ({why})")
-        try:
-            self.ec2.terminate_instances(InstanceIds=iids)
-            return set(iids)
-        except (ClientError, BotoCoreError) as e:
-            code = _code(e)
-            if len(iids) > 1:
-                self.say(f"[гашение] пакет отвергнут ({code}) — гашу по одной")
-            else:
-                self._manual(iids, code)
-                return set()
         ok = set()
-        for iid in iids:
+        for region, ids in self._by_region(iids).items():     # версия 3: каждый регион — своим клиентом
+            where = f" {region}" if self.v3 or region != self.cfg.region else ""
+            self.say(f"[гашение]{where} {ids} ({why})")
             try:
-                self.ec2.terminate_instances(InstanceIds=[iid])
-                ok.add(iid)
+                ec2 = self.client(region, "ec2")
+            except RunnerError as e:                          # нет клиента региона — хотя бы команда вручную
+                self._manual(ids, str(e), region)
+                continue
+            try:
+                ec2.terminate_instances(InstanceIds=ids)
+                ok |= set(ids)
+                continue
             except (ClientError, BotoCoreError) as e:
-                self._manual([iid], _code(e))
+                code = _code(e)
+                if len(ids) > 1:
+                    self.say(f"[гашение] пакет отвергнут ({code}) — гашу по одной")
+                else:
+                    self._manual(ids, code, region)
+                    continue
+            for iid in ids:
+                try:
+                    ec2.terminate_instances(InstanceIds=[iid])
+                    ok.add(iid)
+                except (ClientError, BotoCoreError) as e:
+                    self._manual([iid], _code(e), region)
         return ok
 
-    def _manual(self, iids: list, code: str) -> None:
+    def _manual(self, iids: list, code: str, region: str | None = None) -> None:
         self.say(f"[гашение][ОШИБКА] {code} — погасите вручную: "
-                 f"aws ec2 terminate-instances --region {self.cfg.region} --instance-ids {' '.join(iids)}")
+                 f"aws ec2 terminate-instances --region {region or self.cfg.region} --instance-ids {' '.join(iids)}")
 
     def _close(self, a: Active, outcome: str, state: str = "", reason: str = "") -> None:
         self.active.pop(a.iid, None)
@@ -1621,39 +1880,75 @@ class Runner:
             if iid in done:
                 self._close(self._unconfirmed.pop(iid), "reaped", reason="повторное гашение")
 
-    def find_own(self, run_id: str | None = None) -> list:
-        """Машины с тегами Project=<tag> и RunId=<run_id> в живых состояниях (с проверкой тегов на месте)."""
+    def reap_regions(self, run_id: str | None = None, known=()) -> list:
+        """Регионы, где у прогона могли быть машины: разрешённые этим запуском, регионы известных id и всё,
+        что журнал знает о прогоне (запуски, проверки бюджета версии 3). Без версии 3 и записей — только region."""
         run_id = run_id or self.cfg.run_id
-        kw = {"Filters": [{"Name": "tag:Project", "Values": [self.cfg.tag]},
-                          {"Name": "tag:RunId", "Values": [run_id]},
-                          {"Name": "instance-state-name", "Values": LIVE_STATES}]}
-        own = []
-        while True:
-            r = self.ec2.describe_instances(**kw)
-            for res in r.get("Reservations", []):
-                for i in res.get("Instances", []):
-                    tags = {t["Key"]: t["Value"] for t in i.get("Tags", [])}
-                    if tags.get("Project") == self.cfg.tag and tags.get("RunId") == run_id:
-                        own.append(i["InstanceId"])
-                    else:
-                        self.say(f"[сборщик] {i['InstanceId']} — не из прогона {run_id}, не трогаю")
-            if not r.get("NextToken"):
-                return own
-            kw["NextToken"] = r["NextToken"]
+        out = list(self.regions)
+        for iid in known:
+            out.append(self._region_of(iid))
+        for rec in self.ledger.records():
+            if rec.get("run_id") != run_id:
+                continue
+            if rec.get("ev") == "launch" and rec.get("region"):
+                out.append(rec["region"])
+            elif rec.get("ev") == "budget" and isinstance(rec.get("regions"), list):
+                out.extend(r for r in rec["regions"] if isinstance(r, str) and REGION_RE.match(r))
+        return list(dict.fromkeys(out))
+
+    def find_own(self, run_id: str | None = None, regions: list | None = None) -> list:
+        """Машины с тегами Project=<tag> и RunId=<run_id> в живых состояниях (с проверкой тегов на месте).
+
+        Версия 3: по всем регионам `regions`; сбой поиска в одном регионе не мешает другим (исключение — только
+        если не удалось ни в одном)."""
+        run_id = run_id or self.cfg.run_id
+        regions = regions or [self.cfg.region]
+        own, errs = [], []
+        for region in regions:
+            kw = {"Filters": [{"Name": "tag:Project", "Values": [self.cfg.tag]},
+                              {"Name": "tag:RunId", "Values": [run_id]},
+                              {"Name": "instance-state-name", "Values": LIVE_STATES}]}
+            try:
+                ec2 = self.client(region, "ec2")
+                while True:
+                    r = ec2.describe_instances(**kw)
+                    for res in r.get("Reservations", []):
+                        for i in res.get("Instances", []):
+                            tags = {t["Key"]: t["Value"] for t in i.get("Tags", [])}
+                            if tags.get("Project") == self.cfg.tag and tags.get("RunId") == run_id:
+                                own.append(i["InstanceId"])
+                                self._iid_region[i["InstanceId"]] = region
+                            else:
+                                self.say(f"[сборщик] {i['InstanceId']} — не из прогона {run_id}, не трогаю")
+                    if not r.get("NextToken"):
+                        break
+                    kw["NextToken"] = r["NextToken"]
+            except Exception as e:
+                if len(regions) == 1:
+                    raise
+                errs.append(e)
+                self.say(f"[сборщик] {region}: поиск по тегам не удался ({type(e).__name__}) — машины региона "
+                         f"по тегам не найдены; известные id гасятся")
+        if errs and len(errs) == len(regions):
+            raise errs[0]
+        return own
 
     def reap(self, why: str, run_id: str | None = None, known: list = (), list_only: bool = False) -> list:
-        """Внешний сборщик: погасить машины этого прогона (по тегам) и известные нам id."""
+        """Внешний сборщик: погасить машины этого прогона (по тегам) и известные нам id — во всех регионах,
+        где у прогона могли быть машины (reap_regions)."""
+        regions = self.reap_regions(run_id, known)
         try:
-            own = self.find_own(run_id)
+            own = self.find_own(run_id, regions)
         except Exception as e:     # не мешаем погасить хотя бы известные id
             self.say(f"[сборщик] поиск по тегам не удался: {type(e).__name__}")
             own = []
         targets = sorted(set(own) | set(known))
+        where = f" (регионы: {', '.join(regions)})" if len(regions) > 1 else ""
         if not targets:
-            self.say(f"[сборщик] живых машин прогона {run_id or self.cfg.run_id} нет")
+            self.say(f"[сборщик] живых машин прогона {run_id or self.cfg.run_id} нет{where}")
             return []
         if list_only:
-            self.say(f"[сборщик] найдены (не гашу): {targets}")
+            self.say(f"[сборщик] найдены (не гашу): {targets}{where}")
             return targets
         done = self._terminate(targets, why)
         for iid in targets:
@@ -1672,6 +1967,7 @@ class Runner:
         Погашена — закрыть верхней границей срока. Жива, но срок (max_min + запас) истёк — сторож и
         сборщик не сработали (user-data не стартовал, сессия упала): журнал доказывает, что машина наша, —
         гасим и закрываем по фактическому времени. Жива в пределах срока — «в работе».
+        Версия 3: каждая машина ищется в своём регионе (поле region записи launch; нет поля — region).
         """
         self._reconciled = True
         open_ = self.ledger.summary()["open"]
@@ -1703,10 +1999,10 @@ class Runner:
 
         Повтор пишет в префикс _attemptN — user-data длиннее; RunnerError (предел 16 КБ и т. п.)
         посреди пакета остановил бы прогон, и сборщик в finally погасил бы работающие машины.
-        Зона и тип — самой длинной записи (длина зон региона одинакова).
+        Зона и тип — самой длинной записи (длина зон региона одинакова; версия 3 — самый длинный из регионов).
         """
         cfg = self.cfg
-        az = f"{cfg.region}a"
+        az = f"{max(self.regions, key=len)}a"
         for j in jobs:
             for att in range(1, cfg.retries + 2):
                 build_userdata(j, run_id=cfg.run_id, attempt=att, repo=cfg.repo, branch=cfg.branch,
@@ -1718,13 +2014,22 @@ class Runner:
         cfg = self.cfg
         mode = "plan" if self.offline else ("dryrun" if cfg.dryrun else "run")
         self.check_userdata(jobs)              # до первого запуска, а не посреди пакета
+        self.load_quotas()                     # версия 3: справочник и квоты регионов до первого запуска
+        extra = {}
+        if self.v3:
+            extra = {"regions": list(self.regions), "on_demand_fallback": cfg.on_demand_fallback,
+                     "quotas": {f"{r}/{m}": self.quota(r, m) for r in self.regions for m in self.markets()}}
         self.journal.append("run_start", run_id=cfg.run_id, mode=mode, branch=cfg.branch,
                             jobs=[j.name for j in jobs], ceiling=cfg.ceiling, max_parallel=cfg.max_parallel,
-                            max_vcpu=cfg.vcpu_quota)
+                            max_vcpu=cfg.vcpu_quota, **extra)
         need = sum(j.vcpu for j in jobs)
+        quota = self.total_quota()
+        qtxt = (f"квота={cfg.vcpu_quota} vCPU" if not self.v3 else
+                f"квоты={quota} vCPU по регионам {','.join(self.regions)}"
+                + (" (спот + по требованию)" if cfg.on_demand_fallback else ""))
         self.say(f"[прогон] {cfg.run_id} режим={mode} задач={len(jobs)} ветка={cfg.branch} "
-                 f"параллельно≤{cfg.max_parallel} квота={cfg.vcpu_quota} vCPU потолок={cfg.ceiling} долл."
-                 + (f" — очередь: {need} vCPU пакета > квоты, запуск по мере освобождения" if need > cfg.vcpu_quota else ""))
+                 f"параллельно≤{cfg.max_parallel} {qtxt} потолок={cfg.ceiling} долл."
+                 + (f" — очередь: {need} vCPU пакета > квоты, запуск по мере освобождения" if need > quota else ""))
         for j in jobs:
             for w in job_warnings(j):
                 self.say(f"[внимание] {w}")
@@ -1778,14 +2083,25 @@ class Runner:
             if len(self.active) >= cfg.max_parallel:
                 return False
             job, attempt = pending[0]
-            used = sum(a.job.vcpu for a in self.active.values())
-            if used + job.vcpu > cfg.vcpu_quota:
-                if self.active:
-                    return False
-                self.results[job.name] = {"status": "quota", "attempts": attempt,
-                                          "detail": f"{job.vcpu} vCPU > квоты {cfg.vcpu_quota}"}
-                pending.popleft()
-                continue
+            if self.v3:
+                if not self._room(job):
+                    if self.active:
+                        return False
+                    self.results[job.name] = {"status": "quota", "attempts": attempt,
+                                              "detail": f"{job.vcpu} vCPU > свободной квоты во всех регионах: " + ", ".join(
+                                                  f"{r} {m} {self.quota(r, m)}" + (" (нет прав)" if (r, m) in self._denied else "")
+                                                  for r in self.regions for m in self.markets())}
+                    pending.popleft()
+                    continue
+            else:
+                used = sum(a.job.vcpu for a in self.active.values())
+                if used + job.vcpu > cfg.vcpu_quota:
+                    if self.active:
+                        return False
+                    self.results[job.name] = {"status": "quota", "attempts": attempt,
+                                              "detail": f"{job.vcpu} vCPU > квоты {cfg.vcpu_quota}"}
+                    pending.popleft()
+                    continue
             if self.active and self._budget_wait.get(job.name) == self._closed_n:
                 return False                             # с прошлого отказа бюджет не менялся
             status, act = self.launch(job, attempt)
@@ -1823,9 +2139,12 @@ class Runner:
         return False
 
     def _res(self, a: Active) -> dict:
-        return {"attempts": a.attempt, "itype": a.itype, "iid": a.iid, "az": a.az, "az_rank": a.az_rank,
-                "az_cheapest": a.az_cheapest, "spot_usd_h": round(a.spot_usd_h, 4),
-                "cheapest_zone": bool(a.az_cheapest) and a.az == a.az_cheapest}
+        d = {"attempts": a.attempt, "itype": a.itype, "iid": a.iid, "az": a.az, "az_rank": a.az_rank,
+             "az_cheapest": a.az_cheapest, "spot_usd_h": round(a.spot_usd_h, 4),
+             "cheapest_zone": bool(a.az_cheapest) and a.az == a.az_cheapest}
+        if self.v3:
+            d.update(region=a.region or self.cfg.region, market=a.market)
+        return d
 
     def _poll(self, pending: deque) -> None:
         info = self.describe(list(self.active))
@@ -1878,7 +2197,7 @@ class Runner:
                     self.collect(a.job.name, attempt=a.attempt, dest=lost_dir)
                     self._close(a, "lost", state, reason)
                     if a.az:
-                        self._avoid[(a.itype, a.az)] = now + self.cfg.avoid_s
+                        self._avoid[(self._akey(a.itype, a.market), a.az)] = now + self.cfg.avoid_s
                     pending.appendleft((a.job, a.attempt + 1))
                     self.say(f"[итог] {a.job.name}: машина {state} без итога ({reason or 'метка ' + str((done or {}).get('exit_code'))}) "
                              f"— повтор в префикс попытки {a.attempt + 1}, зона {a.az} — в конце очереди")

@@ -17,12 +17,12 @@
  "jobs": [
   {
    "name": "uq-l1_debug-m0",
-   "command": "python routes/gtu/funnel/uq/uq_l1.py --l1-in routes/gtu/funnel/aws/l1_debug --l1-kv KV-3 --l1-m 150 --l1-shards 10 --n 500 --n-od 100 --od auto --od-pdp-min 0.2 --od-score-min 4.5 --shards 10 --shard 0,1,2,3,4,5,6,7,8,9 --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
+   "command": "python routes/gtu/funnel/uq/uq_l1.py --l1-in routes/gtu/funnel/aws/l1_debug --l1-kv KV-3 --l1-m 150 --l1-shards 10 --n 500 --n-od 100 --od auto --od-pdp-min 0.2 --od-score-min 4.5 --shards 10 --shard 0,1,2,3,4,5,6,7,8,9 --tag _l1_debug --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc",
    "max_min": 45
   }
  ],
  "merge": {
-  "uq-l1_debug": "python3 routes/gtu/funnel/uq/merge_uq.py --kv KV-3 --shards 10 --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/uq/aws/l1_debug --suffix _l1_debug"
+  "uq-l1_debug": "python3 routes/gtu/funnel/uq/merge_uq.py --kv KV-3 --shards 10 --tag _l1_debug --in routes/gtu/platform/aws/runs/<run_id> --out-dir routes/gtu/funnel/uq/aws/l1_debug --suffix _l1_debug"
  },
  "estimate": {
   "machine_hours": 0.346,

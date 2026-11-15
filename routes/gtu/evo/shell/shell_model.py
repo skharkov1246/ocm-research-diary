@@ -263,6 +263,20 @@ NZ = 161
 ZG = np.linspace(0.0, INP["zs"][-1], NZ)
 
 
+def T_wall(z):
+    """температура стенки корпуса, °C: зона входа — T входа; ступени 1 и 2 — линейный рост от входа к выходу ступени;
+    камера и турбина — воздух за компрессором (оценка)"""
+    zs, zn = INP["zs"], INP["zones"]
+    xp = [zs[0], zs[1], zs[2], zs[3], zs[5]]
+    fp = [zn[0]["T"], zn[0]["T"], zn[1]["T"], zn[2]["T"], zn[2]["T"]]
+    return np.interp(z, xp, fp)
+
+
+def T_kink(z, h=1e-4):
+    """перепад наклона T(z) на изломе, К/м (правый наклон минус левый)"""
+    return float((T_wall(z + h) - T_wall(z)) / h - (T_wall(z) - T_wall(z - h)) / h)
+
+
 def _zone_of(z):
     zs = INP["zs"]
     return np.clip(np.searchsorted(zs, z, side="right") - 1, 0, len(zs) - 2)
@@ -619,7 +633,7 @@ def evaluate_params(p, variant, with_geom=False):
     route = p["route"]
     shell_mat = "ti64" if route == "печать" else p["cast_mat"]
     zi = _zone_of(z)
-    T_z = np.array([INP["zones"][k]["T"] for k in zi])
+    T_z = T_wall(z)
     T_mean = float(np.mean(T_z))
     mp = mat_props(shell_mat, T_mean)
     rho_m = mp["rho"]
@@ -704,16 +718,15 @@ def evaluate_params(p, variant, with_geom=False):
         sth = zn["p_g"] * R / t_hoop
         sz = zn["p_g"] * R / (2 * t_ax)
         svm = math.sqrt(sth ** 2 - sth * sz + sz ** 2)
-        mpz = mat_props(shell_mat, zn["T"])
+        mpz = mat_props(shell_mat, float(np.max(T_z[m])))
         allow = route_k * mpz["sy"] / SF_YIELD
-        # перепад температур к соседней зоне на длине перехода ℓ = 0,5·min(L зон) (оценка): решение для оболочки с изломами
-        # температуры (функция Грина балки на упругом основании) σ ≈ 0,40·EαΔT·√(Rt)/ℓ, не больше, чем у ступеньки (0,55·EαΔT) — README
+        # температура стенки растёт линейно по длине каждой ступени (оценка); на границах зон — излом с перепадом
+        # наклона ΔS. Решение для оболочки (балка на упругом основании, функция Грина): σ_x = 0,361·EαΔS√(Rt),
+        # σ_θ = 0,196·EαΔS√(Rt), по Мизесу не больше 0,49·EαΔS√(Rt) (вывод — README)
         s_th = 0.0
-        for kk in (k - 1, k + 1):
-            if 0 <= kk < 5:
-                dT = abs(zn["T"] - INP["zones"][kk]["T"])
-                ell = 0.5 * min(Lz, INP["zones"][kk]["z1"] - INP["zones"][kk]["z0"])
-                s_th = max(s_th, mpz["E"] * mpz["alpha"] * dT * min(0.55, 0.40 * math.sqrt(R * tt) / ell))
+        for zb_ in (zn["z0"], zn["z1"]):
+            dS = abs(T_kink(zb_))
+            s_th = max(s_th, 0.49 * mpz["E"] * mpz["alpha"] * dS * math.sqrt(R * tt))
         Kt = 1.0 + (C_KT * math.sqrt(min(p["rib_h"], tt) / p["rib_fillet"]) if (rib_bz[k, 2] > 0) else 0.0)
         speak = Kt * svm + s_th
         u = speak / allow
@@ -956,8 +969,8 @@ def reference_params(variant="оболочка", kind="литой с фланц�
     p.update({f"core{k}": 0.0 for k in range(4)})
     p.update(route="литьё", cast_mat="zg15", rib_type="кольца", rib_n=0.0, rib_n2=0.3, rib_h=0.04, rib_w=0.03, rib_fillet=0.006,
              sym_n=1, asym1=0.0, asym2=0.0, asym_phase=0.0, f_n=8, f_lean=0.0, f_bow=0.0, f_cone=0.0, f_chord=0.10, f_tc=0.18,
-             f_tub=0.0, r_n=10, r_lean=0.0, r_bow=0.0, r_cone=0.0, r_chord=0.12, r_tc=0.18, hf_n=24, hf_t=0.004, hf_b=0.04,
-             hf_shape=1.0, hf_span=0.12, emb=0, murray_k=2.41, build_dir="+z", extract="вперёд", mount_drop=0.0)
+             f_tub=0.0, r_n=10, r_lean=0.0, r_bow=0.0, r_cone=0.0, r_chord=0.12, r_tc=0.18, hf_n=48, hf_t=0.0015, hf_b=0.06,
+             hf_shape=1.0, hf_span=0.10, emb=0, murray_k=2.41, build_dir="+z", extract="вперёд", mount_drop=0.0)
     if kind == "литой с осевыми рёбрами":
         p.update(rib_type="ортогрид", rib_n=0.7, sym_n=4, rib_h=0.03)
     elif kind == "гладкая оболочка":

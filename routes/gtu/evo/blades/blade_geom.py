@@ -29,7 +29,8 @@ T_MIN = {"print": 1.0e-3, "cast": 1.5e-3}      # наименьшая стенк
 T_EDGE = {"print": 0.5e-3, "cast": 0.8e-3}      # наименьшая толщина у самой кромки (скругление; оценка)
 R_MIN_CURV = 0.5e-3                             # наименьший радиус кривизны кромок под печать/литьё (оценка)
 T_TE_TURB = 0.8e-3                              # выходная кромка турбины (как funnel/meanline_l1.T_TE)
-KB_MAX = 1.6                                    # задняя поверхность ступени 2: не глубже 1,6 кованой frame3 (поиск)
+Q_LO = 0.45                                     # задняя поверхность ступени 2: доля остатка глубины на узле от 0,45 до 1
+RMIN_H = 0.1                                    # наименьший радиус кривизны задней поверхности / местная толщина
 SLOPE_MAX = 20.0                                # область применимости быстрой оценки диска: |dh/dr| ≤ 20 на 0,1…0,95·r2
                                                 # (калибровка CalculiX, disk1d_calibration.json → domain)
 
@@ -89,7 +90,7 @@ GENES_COMP = [
     Gene("ffd1", -1.0, 1.0), Gene("ffd2", -1.0, 1.0), Gene("ffd3", -1.0, 1.0), Gene("ffd4", -1.0, 1.0),
     Gene("route", 0, 1, "choice", note="0 — печать металлом, 1 — литьё"),
 ]
-GENES_COMP2_EXTRA = [Gene(f"zb{i}", 0.0, 1.0, note="задняя поверхность: узел PCHIP (0 — стенка 10 мм, 1 — 1,6 кованой)") for i in range(6)] + [
+GENES_COMP2_EXTRA = [Gene(f"zb{i}", 0.0, 1.0, note="задняя поверхность: доля остатка глубины на узле PCHIP (монотонно к ободу)") for i in range(6)] + [
     Gene("boss", 0.8, 2.0, note="глубина ступицы у оси / кованой frame3"),
     Gene("fish", 0.10, 0.60, "switch", 0.3, "«рыбья кость»: глубина карманов / толщина"),
     Gene("fish_r0", 0.25, 0.55, note="карманы: от r/r2"), Gene("fish_r1", 0.60, 0.92, note="карманы: до r/r2")]
@@ -470,21 +471,29 @@ def impeller_disk(ml, p, stage, hub, Z, theta, mt, rr, n=241):
         fb = FRAME3_BACK()
         r_knots = np.r_[0.0, 0.058, 0.07, 0.11, 0.15, 0.20, 0.25, 0.30, fb["r2"]] / fb["r2"] * r2
         base = np.interp(r_knots / r2 * fb["r2"], fb["r"], fb["depth"]) * r2 / fb["r2"]     # отступ за плоскость Lz
-        lo = np.full_like(r_knots, 0.010)
-        zb = np.array([p[f"zb{i}"] for i in range(6)])
         xh_k = np.interp(r_knots, hub[:, 1], hub[:, 0], left=0.0, right=Lz)
-        xb_min = xh_k + 0.010                     # стенка не тоньше 10 мм (как profile_opt)
+        xb_min = xh_k + 0.010                     # стенка не тоньше 10 мм под трактом (как profile_opt)
+        # глубина задней поверхности монотонно убывает от ступицы к ободу по построению: на каждом узле остаётся доля
+        # q = Q_LO + (1 − Q_LO)·zb от глубины предыдущего узла над глубиной обода (перетяжки и обратный ход исключены:
+        # именно они давали концентрацию, которую быстрая оценка не видит — disk1d_calibration.json → domain)
+        dep = np.zeros_like(r_knots)
+        dep[0] = dep[1] = p.get("boss", 1.0) * base[0]
+        d_end = t_rim
+        zb = np.array([p[f"zb{i}"] for i in range(6)])
+        for k_ in range(2, 8):
+            q = Q_LO + (1 - Q_LO) * zb[k_ - 2]
+            dep[k_] = d_end + (dep[k_ - 1] - d_end) * q
+        dep[-1] = d_end
+        xb_k = Lz + dep
         xb_base = Lz + base
-        xb_max = Lz + KB_MAX * base
-        xb_k = xb_base.copy()
-        xb_k[2:8] = xb_min[2:8] + zb * (xb_max[2:8] - xb_min[2:8])
-        xb_k[-1] = Lz + t_rim
-        xb_k[0] = xb_k[1] = Lz + p.get("boss", 1.0) * base[0]
-        xb = PchipInterpolator(r_knots, np.maximum(xb_k, xb_min))(r)
+        # кубический B-сплайн по управляющим точкам (r_k, x_k): гладкий (C2) и монотонный при монотонных точках
+        # (свойство уменьшения вариации) — без изломов в узлах, которые давал PCHIP
+        cv = C.bspline_eval(np.c_[r_knots, xb_k], np.linspace(0, 1, 801), 3)
+        xb = np.interp(r, cv[:, 0], cv[:, 1])
         xb = np.maximum(xb, xh + 0.010)
         h = xb - xh
         info["xb_knots"] = xb_k.tolist()
-        info["lo"] = lo.tolist()
+        info["xb_base_knots"] = xb_base.tolist()
         # «рыбья кость»: средняя по окружности глубина карманов = половина амплитуды sin²
         fish = np.zeros_like(r)
         if p.get("fish", 0) > 0:
@@ -497,6 +506,13 @@ def impeller_disk(ml, p, stage, hub, Z, theta, mt, rr, n=241):
     slope = float(np.abs(np.gradient(h_eff, r))[m_].max())
     info["slope_max"] = slope
     ok = bool(np.all(h_eff > 0.004) and slope <= SLOPE_MAX)
+    if xb is not None:
+        mb = (r > 0.17 * r2) & (r < 0.97 * r2)
+        dxb = np.gradient(xb, r)
+        kap = np.abs(np.gradient(dxb, r)) / (1 + dxb ** 2) ** 1.5
+        info["back_dxdr_max"] = float(dxb[mb].max())
+        info["back_rmin_over_h"] = float(np.min(1 / np.maximum(kap[mb], 1e-9) / np.maximum(h[mb], 1e-4)))
+        ok = ok and info["back_dxdr_max"] <= 1e-6 and info["back_rmin_over_h"] >= RMIN_H
     return dict(r=r, h=h, h_eff=h_eff, xh=xh, xb=xb, fish=fish, mass=mass, J=J, ok=ok, t_rim=t_rim, info=info, Lz=Lz, slope_max=slope,
                 stage=stage, Z=Z, theta_hub=np.interp(r, rr[:, 0], theta[:, 0]))
 

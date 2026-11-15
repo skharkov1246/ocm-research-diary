@@ -279,18 +279,22 @@ def base_backface(x):
     st = ML.cc_stage(P["T01"], P["p01"], P["m_side"], P["PR"], P["n"], p["mu"], p["kcm"], p["Z"] * (1 + p["lsp"]) / (1 + ML.A["spl"]),
                      False, kD=1.9, nu=p["nu"])
     g = st["g"]
-    r2, Lz = g["r2"], g["Lax"]
-    hub, _ = BG.meridional(g, p)
+    r2 = g["r2"]
     fb = BG.FRAME3_BACK()
     r_knots = np.r_[0.0, 0.058, 0.07, 0.11, 0.15, 0.20, 0.25, 0.30, fb["r2"]] / fb["r2"] * r2
     base = np.interp(r_knots / r2 * fb["r2"], fb["r"], fb["depth"]) * r2 / fb["r2"]
-    xh_k = np.interp(r_knots, hub[:, 1], hub[:, 0], left=0.0, right=Lz)
-    xb_min = xh_k + 0.010
-    zb = (Lz + base - xb_min) / (Lz + BG.KB_MAX * base - xb_min)
+    d_end = 0.02 * 2 * r2
+    zb = []
+    prev = base[1]
+    for k_ in range(2, 8):
+        q = (base[k_] - d_end) / max(prev - d_end, 1e-9)
+        zb.append((min(1.0, q) - BG.Q_LO) / (1 - BG.Q_LO))
+        prev = d_end + (prev - d_end) * (BG.Q_LO + (1 - BG.Q_LO) * min(1.0, max(0.0, zb[-1])))
+    zb = np.asarray(zb)
     names = [gg.name for gg in BG.genes_for("comp2")]
     x = np.array(x, float)
     for i in range(6):
-        x[names.index(f"zb{i}")] = float(np.clip(zb[2 + i], 0, 1))
+        x[names.index(f"zb{i}")] = float(np.clip(zb[i], 0, 1))
     return x
 
 

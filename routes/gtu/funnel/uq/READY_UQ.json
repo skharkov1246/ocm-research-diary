@@ -29,24 +29,24 @@
    "plan_exit": 0
   },
   "jobs_uq.json": {
-   "machines": 2,
+   "machines": 3,
    "core_hours": 219.46,
-   "expected_usd": 2.75,
-   "upper_bound_usd": 11.0,
+   "expected_usd": 2.826,
+   "upper_bound_usd": 11.65,
    "plan_exit": 0
   },
   "jobs_pareto.json": {
-   "machines": 18,
-   "core_hours": 2530.88,
-   "expected_usd": 31.274,
-   "upper_bound_usd": 123.93,
+   "machines": 24,
+   "core_hours": 2874.45,
+   "expected_usd": 35.788,
+   "upper_bound_usd": 142.89,
    "plan_exit": 0
   },
   "jobs_uq_pareto.json": {
-   "machines": 27,
+   "machines": 43,
    "core_hours": 3931.62,
-   "expected_usd": 48.507,
-   "upper_bound_usd": 192.19,
+   "expected_usd": 49.717,
+   "upper_bound_usd": 201.62,
    "plan_exit": 0
   }
  },
@@ -56,8 +56,8 @@
   "3. jobs_pareto.json -> merge_pareto по каждой группе (merge.*) -> pareto_cands*.json.gz в ветку",
   "4. jobs_uq_pareto.json -> merge_uq по каждой точке: uq_robust50_*.json - 50 устойчивых разных"
  ],
- "total_expected_usd": 82.8,
- "total_upper_bound_usd": 328.43,
+ "total_expected_usd": 88.6,
+ "total_upper_bound_usd": 357.47,
  "ceiling_usd": 2000.0,
  "spent_note": "израсходовано около 3 долл. (задание 15.11.2026; точное - runner.py status по ledger.jsonl)",
  "within_ceiling": true,
