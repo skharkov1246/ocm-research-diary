@@ -4,8 +4,8 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 437,
-    "total_bytes": 16315577,
+    "datasets": 438,
+    "total_bytes": 16518923,
     "results_files": 191,
     "results_with_script": 59,
     "results_referenced_in_site": 22,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 117,
+      "не определён": 118,
       "прочее": 25
     }
   },
@@ -3367,7 +3367,7 @@
       "path": "routes/gtu/funnel/gtu_funnel_space_results.json",
       "track": "gas-turbine",
       "kind": "результат расчёта",
-      "bytes": 100973,
+      "bytes": 274058,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -3377,6 +3377,7 @@
         "date",
         "seed",
         "status",
+        "sampler",
         "inputs",
         "targets",
         "targets_in_lineup",
@@ -3393,6 +3394,7 @@
         "examples_KV-3",
         "debug_KV-1",
         "debug_KV-6",
+        "closure_tables",
         "elapsed_s"
       ],
       "provenance_fields": [
@@ -3400,9 +3402,9 @@
         "software",
         "date"
       ],
-      "last_change": "2026-11-14",
+      "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "ec29828"
+      "last_commit": "73ef5bc"
     },
     {
       "path": "routes/gtu/gtu_cycle_results.json",
@@ -8028,6 +8030,40 @@
       "last_change": "2026-11-15",
       "last_author": "Claude",
       "last_commit": "2519546"
+    },
+    {
+      "path": "routes/gtu/organic/structure/profile_opt_lim.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 30261,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "mode",
+        "L_req_h",
+        "U_req",
+        "base_80x12",
+        "n_eval",
+        "cobyla",
+        "best",
+        "history",
+        "seconds",
+        "check_160x24",
+        "title",
+        "date",
+        "method",
+        "software",
+        "inputs",
+        "knots_m"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "73ef5bc"
     },
     {
       "path": "routes/gtu/organic/structure/shell_results.json",
