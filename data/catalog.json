@@ -4,8 +4,8 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 436,
-    "total_bytes": 16284122,
+    "datasets": 437,
+    "total_bytes": 16315577,
     "results_files": 191,
     "results_with_script": 59,
     "results_referenced_in_site": 22,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 116,
+      "не определён": 117,
       "прочее": 25
     }
   },
@@ -7891,7 +7891,7 @@
       "path": "routes/gtu/organic/structure/disk_topo_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 17389,
+      "bytes": 24290,
       "referenced_in_site": false,
       "produced_by": "routes/disk_topo.py",
       "shape": "объект",
@@ -7914,7 +7914,7 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "fa60b23"
+      "last_commit": "2519546"
     },
     {
       "path": "routes/gtu/organic/structure/jobs_structure.json",
@@ -7994,6 +7994,40 @@
       "last_change": "2026-11-15",
       "last_author": "Claude",
       "last_commit": "a09c9fa"
+    },
+    {
+      "path": "routes/gtu/organic/structure/profile_opt_eq.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 24554,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "mode",
+        "L_req_h",
+        "U_req",
+        "base_80x12",
+        "n_eval",
+        "cobyla",
+        "best",
+        "history",
+        "seconds",
+        "check_160x24",
+        "title",
+        "date",
+        "method",
+        "software",
+        "inputs",
+        "knots_m"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "2519546"
     },
     {
       "path": "routes/gtu/organic/structure/shell_results.json",
