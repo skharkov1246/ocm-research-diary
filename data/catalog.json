@@ -5,7 +5,7 @@
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
     "datasets": 487,
-    "total_bytes": 20446168,
+    "total_bytes": 20446167,
     "results_files": 203,
     "results_with_script": 65,
     "results_referenced_in_site": 22,
@@ -8326,13 +8326,13 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "b335228"
+      "last_commit": "a656138"
     },
     {
       "path": "routes/gtu/funnel/l0_v3_probe/funnel_l0_results_KV-3_n300.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 182984,
+      "bytes": 182983,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -8369,7 +8369,7 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "b335228"
+      "last_commit": "a656138"
     },
     {
       "path": "routes/gtu/funnel/l0_v3_probe/funnel_l0_select_KV-1_n300.json",
@@ -8401,7 +8401,7 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "b335228"
+      "last_commit": "a656138"
     },
     {
       "path": "routes/gtu/funnel/l0_v3_probe/funnel_l0_select_KV-3_n300.json",
@@ -8433,7 +8433,7 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "b335228"
+      "last_commit": "a656138"
     },
     {
       "path": "routes/gtu/funnel/l2_cases_probe_KV-3.json",
