@@ -223,7 +223,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--N", type=int, default=48)
     ap.add_argument("--rhos", default="0.10,0.15,0.20,0.30,0.45,0.60,0.80")
-    ap.add_argument("--conv", action="store_true", help="сходимость по сетке при ρ* = 0,2 (N = 32, 48, 64)")
+    ap.add_argument("--conv", action="store_true", help="сходимость по сетке при ρ* = 0,2 (N = 24, 32, 48; ρ* = 0,6: N = 24, 32)")
     a = ap.parse_args()
     rhos = [float(v) for v in a.rhos.split(",")]
     out = dict(title="Листовой гироид: гомогенизация упругости и оценка прочности (свой 3D-КЭ)",
@@ -232,11 +232,11 @@ def main():
                software=dict(python=sys.version.split()[0], numpy=np.__version__, scipy=__import__("scipy").__version__),
                date="2026-11-14", inputs=dict(nu=0.3, N=a.N, rhos=rhos), points=[])
     for r in rhos:
-        res = homogenize(r, a.N)
+        res = homogenize(r, a.N if r < 0.7 else min(a.N, 32))   # плотные ячейки: N = 32 (память решателя)
         print(json.dumps({k: res[k] for k in ("rho", "vox_fraction", "E100", "E111", "zener", "S_worst_p995", "seconds")}), flush=True)
         out["points"].append(res)
     if a.conv:
-        out["convergence"] = [homogenize(0.2, n) for n in (32, 48, 64)]
+        out["convergence"] = [homogenize(0.2, n) for n in (24, 32, 48)] + [homogenize(0.6, n) for n in (24, 32)]
     pts = out["points"]
     out["law"] = dict(rho=[p["rho"] for p in pts], E=[p["Emin_dir"] for p in pts], S=[p["S_worst_p995"] for p in pts],
                       note="E — наименьший модуль по направлениям [100]/[111] (консервативно); S — худший 99,5-й процентиль")

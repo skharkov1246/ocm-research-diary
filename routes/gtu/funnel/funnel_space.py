@@ -1108,8 +1108,12 @@ def _core(c, comp_out, eta_gg, eta_pt):
     if wnet <= 0:
         return dict(fail="удельная работа <= 0")
     f_tot = f * mc / 0.995
+    Tstack = Tex
+    if rec:                       # выхлоп за рекуператором - баланс энтальпий (исправление скептика физики P4 вместо T5 - 0,93·(T3 - T2))
+        m_g, b_g = (m5, b5) if c["rotors"] == 1 else (m45, b45)
+        Tstack = E.T_h(E.h(Tex, b_g) - mc * (E.h(T3) - E.h(T2)) / m_g, b_g)
     return dict(wc=wc, wnet=wnet, eta=wnet / (f_tot * E.LHV), f=f_tot, T2=T2, p2=p2, T3=T3, T41=T41, p4=p4,
-                T5=Tex, Tstack=(Tex - (T3 - T2) * 0.93) if rec else Tex, t=t, pt=pt, xn=xn, xr=xr, xl=xl)
+                T5=Tex, Tstack=Tstack, t=t, pt=pt, xn=xn, xr=xr, xl=xl)
 
 
 def turb_umax(c):
@@ -1204,6 +1208,8 @@ PHI_OPT = {"Ц": 0.085, "Д": 0.12}
 PHI_RANGE = {"Ц": (0.02, 0.16), "Д": (0.05, 0.25)}
 PHI_PENALTY = 0.024            # ΔКПД = -0,024·ln²(φ/φ_opt): подбор по двум ступеням frame3 (оценка)
 REC_K, REC_BETA = 120.0, 1500.0  # Вт/(м2·К) - gtu_explore.finalize; м2/м3 печатного рекуператора - оценка
+REC_HDR = 3.0                    # коллекторы и корпус рекуператора: один множитель на массу (×3 gtu_explore.finalize) и объём;
+#                                  сердцевина 1500 м2/м3 со стенкой 0,15 мм весит 1777 кг/м3 (исправление скептика физики P3, оценка)
 CX_T = 0.5                       # ca/U на выходе турбины - frame3 (phi_t 0,5)
 
 
@@ -1265,8 +1271,9 @@ def derive(c, tgt, perf):
     if c["rotors"] == 2:
         p = r["pt"]; Upt = perf["Upt"]; Dpt = 60 * Upt / (math.pi * tgt["n_pkg"])
         rho = p["p_out"] / (E.Rg(p["b"]) * p["T_out"]); Q = p["m"] * G / rho
-        hp = Q / (math.pi * Dpt * c["phit"] * Upt)
-        pt = dict(U=Upt, D=Dpt, h=hp, htr=(Dpt - hp) / (Dpt + hp), Dtip=Dpt + hp, psi=perf["load"].get("psi_pt"), npt=c["npt"])
+        hp = Q / (math.pi * Dpt * c["phipt"] * Upt)
+        pt = dict(U=Upt, D=Dpt, h=hp, htr=(Dpt - hp) / (Dpt + hp), Dtip=Dpt + hp, psi=perf["load"].get("psi_pt"), npt=c["npt"],
+                  AN2=math.pi * Dpt * hp * tgt["n_pkg"] ** 2, Q=Q)
     # габарит и длины (оценка)
     L_rot = sum(0.35 * s["D"] if s["type"] != "О" else 0.12 * s["D"] for s in st) + \
         (0.35 * Dt * c["nt"] if c["turb"] == "Р" else 0.15 * Dt * c["nt"]) + 0.5 * Dc
@@ -1278,10 +1285,10 @@ def derive(c, tgt, perf):
     if c["recup"] == "печатный":
         eps = c["eps_rec"]; ntu = eps / (1 - eps)
         A = ntu * G * 1100.0 / REC_K
-        V = A / REC_BETA
+        V = REC_HDR * A / REC_BETA                          # сердцевина + коллекторы и корпус (P3: тот же множитель, что у массы)
         a_max = 1.1                                        # наибольший куб в камере EP-M2050 (Z 1100 мм)
         mods = max(1, math.ceil(V / a_max ** 3))
-        rec = dict(A_m2=A, V_m3=V, modules=mods, side=(V / mods) ** (1 / 3), mass_kg=A * 0.00015 * 7900 * 3)
+        rec = dict(A_m2=A, V_m3=V, modules=mods, side=(V / mods) ** (1 / 3), mass_kg=REC_HDR * A * 0.00015 * 7900)
         if c["recup_integral"]:
             D_env = math.sqrt(D_env ** 2 + 4 * V / (math.pi * max(D_env, 0.5)))
     # массы (формулы gtu_explore.finalize; прочее - оценка)
@@ -1547,10 +1554,22 @@ NU_RANGE = (0.50, 0.90)                  # U/C0 радиальной турби�
 NS_RANGE = (0.25, 1.00)                  # быстроходность радиальной турбины ω·√Q/Δh^0,75 (оценка)
 HTR_MIN_T, HTR_MIN_AX = 0.40, 0.35       # отношение втулки к периферии: последняя ступень турбины (оценка; frame3 - 0,54), осевая ступень компрессора (оценка)
 T_REC_MAX = 700.0                        # LIM T_rec_max
+HTR_H = (1 - HTR_MIN_T) / (1 + HTR_MIN_T)  # h/D последней ступени при втулке HTR_MIN_T
+AN2_MAX = 6.03e7                         # м2·(об/мин)2: последняя ступень frame3, проверенная прочностью (frame3_fea_results.json,
+#                                          parts.turb3: AN² 6,028e7, σ в корне 469 МПа при 100 %, IN713C, T_rel 536 °C, запас к
+#                                          длительной прочности 1,41, при разгоне 120 % σ/σв 1,02) - предел до уровня 2 (оценка; P2)
+U_PT_MAX = 380.0                         # окружная скорость силовой турбины, м/с (gtu_explore.evaluate, gtu_family)
+
+
+def _sig6(x):
+    """6 значащих цифр (а не 4 знака после запятой: φ 0,019995 не должен становиться 0,02 - пределом правила)"""
+    if isinstance(x, float) and x != 0 and math.isfinite(x):
+        return float(f"{x:.6g}")
+    return x
 
 
 def _rule(code, ok, val=None, lim=None, text=""):
-    f = (lambda x: round(x, 4) if isinstance(x, float) else x)
+    f = (lambda x: [_sig6(float(v)) for v in x] if isinstance(x, (list, tuple)) else (_sig6(float(x)) if isinstance(x, float) else x))
     return dict(code=code, ok=bool(ok), val=f(val), lim=f(lim), text=text)
 
 
@@ -1585,12 +1604,16 @@ def check(c, tgt, perf, g):
     if c["turb"] == "О":
         R.append(_rule("turb_psi", tg["psi"] <= PSI_MAX, tg["psi"], PSI_MAX, "нагрузка ступени осевой турбины (gtu_explore, frame3)"))
         R.append(_rule("turb_htr", tg["htr"] >= HTR_MIN_T, tg["htr"], HTR_MIN_T, "втулка/периферия последней ступени турбины (оценка; frame3 - 0,54)"))
+        R.append(_rule("turb_ansq", tg["AN2"] <= AN2_MAX, tg["AN2"], AN2_MAX,
+                       "AN² последней ступени турбины не выше проверенной прочностью ступени frame3 (оценка до уровня 2)"))
     else:
         R.append(_rule("turb_nu", NU_RANGE[0] <= tg["nu"] <= NU_RANGE[1], tg["nu"], list(NU_RANGE), "U/C0 ступени радиальной турбины (оценка)"))
         R.append(_rule("turb_ns", NS_RANGE[0] <= tg["ns"] <= NS_RANGE[1], tg["ns"], list(NS_RANGE), "быстроходность радиальной турбины (оценка)"))
     if g["pt"]:
         R.append(_rule("pt_psi", g["pt"]["psi"] <= PSI_MAX, g["pt"]["psi"], PSI_MAX, "нагрузка ступени силовой турбины"))
         R.append(_rule("pt_htr", g["pt"]["htr"] >= HTR_MIN_T, g["pt"]["htr"], HTR_MIN_T, "втулка/периферия последней ступени СТ (оценка)"))
+        R.append(_rule("pt_ansq", g["pt"]["AN2"] <= AN2_MAX, g["pt"]["AN2"], AN2_MAX,
+                       "AN² последней ступени СТ не выше проверенной прочностью ступени frame3 (оценка до уровня 2)"))
     if c["rotor_join"] in ("заодно", "сварка"):
         R.append(_rule("mono_blisk", all(g["blisk"]), sum(g["blisk"]), c["nt"], "ротор заодно или сварной требует цельных колёс турбины"))
     for p in g["parts_mk"]:
@@ -1618,8 +1641,8 @@ def violation(bad):
     for r in bad:
         val, lim = r.get("val"), r.get("lim")
         if isinstance(lim, list) and isinstance(val, (int, float)):
-            lo, hi = lim
-            v += (lo - val) / abs(lo) if val < lo else (val - hi) / abs(hi)
+            lo, hi = lim                                    # вне диапазона - расстояние до ближней границы, не меньше 0
+            v += max(0.0, lo - val) / abs(lo) + max(0.0, val - hi) / abs(hi)
         elif isinstance(val, (int, float)) and isinstance(lim, (int, float)) and lim:
             v += abs(val - lim) / abs(lim)
         else:

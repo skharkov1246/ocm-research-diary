@@ -268,23 +268,45 @@ def run_spec(spec):
     stages = spec.get("stages")
     if stages is None:
         stages = ([dict(beta=1, it=50, move=0.1), dict(beta=2, it=30, move=0.08), dict(beta=4, it=30, move=0.06),
-                   dict(beta=8, it=30, move=0.05), dict(beta=16, it=40, move=0.04)] if variant == "A" else
-                  [dict(beta=0, it=120, move=0.08)])
+                   dict(beta=8, it=30, move=0.05), dict(beta=16, it=40, move=0.03), dict(beta=32, it=40, move=0.02)]
+                  if variant == "A" else [dict(beta=0, it=150, move=0.08)])
     R = spec.get("R_filter", 2.5 * h)
+    # цель с запасом 3 % на переход от проецированного к двоичному проекту; затем досборка (до двух раз), если
+    # двоичный проект всё же нарушает ограничение: цель уменьшается пропорционально превышению
+    tgt_eff = [t * 0.97 for t in tgt]
     opt = TA.optimize(model, x0, design, cases, prm, objective=spec["objective"], R_filter=R, stages=stages, log=log,
-                      u_target=tgt)
-    logf.close()
-    xb = opt["xb"]
-    if variant == "A":
-        xe = np.where(xb >= 0.5, 1.0, 0.0); xe[model.group == 0] = 1.0
-        solid = xe > 0.5
-    else:
+                      u_target=tgt_eff)
+    hist = list(opt["hist"])
+    repairs = []
+
+    def binarize(xb):
+        if variant == "A":
+            xe = np.where(xb >= 0.5, 1.0, 0.0); xe[model.group == 0] = 1.0
+            return xe, xe > 0.5
         xe = xb.copy(); xe[model.group == 0] = 1.0
-        solid = np.ones(model.ne, bool)
+        return xe, np.ones(model.ne, bool)
+
+    for rep in range(3):
+        xe, solid = binarize(opt["xb"])
+        sol = model.solve(xe, prm, cases, need_sens=False)
+        ub = [float(np.max(np.where(solid, c["u"], 0.0))) for c in sol["cases"]]
+        repairs.append(dict(round=rep, u_binary=ub, target_eff=list(tgt_eff)))
+        if all(ub[k] <= tgt[k] * 1.005 for k in range(len(tgt))) or rep == 2:
+            break
+        tgt_eff = [tgt_eff[k] * min(1.0, tgt[k] / ub[k]) * 0.99 for k in range(len(tgt))]
+        last = dict(stages[-1]); last["it"] = 40
+        opt = TA.optimize(model, opt["x"], design, cases, prm, objective=spec["objective"], R_filter=R, stages=[last],
+                          log=log, u_target=tgt_eff)
+        hist += opt["hist"]
+    logf.close()
+    opt["hist"] = hist
+    xb = opt["xb"]
+    xe, solid = binarize(xb)
     sol = model.solve(xe, prm, cases, need_sens=False)
     eE, em, es, *_ = model.interp(xe, prm)
     out = summarize(model, xe, em, sol, cases, solid, meta)
     out.update(name=spec["name"], part=part, variant=variant, objective=spec["objective"], u_target=tgt,
+               repairs=repairs, constraint_ok=bool(all(out["cases"][k]["u_max"] <= tgt[k] * 1.005 for k in range(len(tgt)))),
                iterations=len(opt["hist"]), seconds=round(time.time() - t0, 1),
                grey_final=float(opt["hist"][-1]["grey"]), R_filter_m=R, meta={k: v for k, v in meta.items()
                                                                               if k not in ("envelope", "base_poly")})
@@ -302,15 +324,19 @@ def run_spec(spec):
     return out
 
 
-def specs(h_t, h_c, u_eq_c):
-    S = [dict(name="turb1_A_mass", part="turb1", variant="A", h=h_t, objective="mass"),
-         dict(name="turb1_A_J", part="turb1", variant="A", h=h_t, objective="inertia"),
-         dict(name="turb1_B_mass", part="turb1", variant="B", h=h_t, objective="mass"),
-         dict(name="comp2_A_mass_eq", part="comp2", variant="A", h=h_c, objective="mass", u_target=u_eq_c),
+def specs(h_t, h_c, u_eq):
+    """eq — не хуже исходного ни по одному случаю (цель по загрузке = загрузка исходного профиля в той же сетке);
+    lim — до предела материала (u ≤ 1)."""
+    ut, uc = u_eq["turb1"], u_eq["comp2"]
+    S = [dict(name="turb1_A_mass_eq", part="turb1", variant="A", h=h_t, objective="mass", u_target=ut),
+         dict(name="turb1_A_mass_lim", part="turb1", variant="A", h=h_t, objective="mass"),
+         dict(name="turb1_A_J_eq", part="turb1", variant="A", h=h_t, objective="inertia", u_target=ut),
+         dict(name="comp2_A_mass_eq", part="comp2", variant="A", h=h_c, objective="mass", u_target=uc),
          dict(name="comp2_A_mass_lim", part="comp2", variant="A", h=h_c, objective="mass"),
-         dict(name="comp2_A_J_lim", part="comp2", variant="A", h=h_c, objective="inertia"),
-         dict(name="comp2_B_mass_lim", part="comp2", variant="B", h=h_c, objective="mass"),
-         dict(name="comp2_B_mass_eq", part="comp2", variant="B", h=h_c, objective="mass", u_target=u_eq_c)]
+         dict(name="comp2_A_J_eq", part="comp2", variant="A", h=h_c, objective="inertia", u_target=uc),
+         dict(name="turb1_B_mass_eq", part="turb1", variant="B", h=h_t, objective="mass", u_target=ut),
+         dict(name="comp2_B_mass_eq", part="comp2", variant="B", h=h_c, objective="mass", u_target=uc),
+         dict(name="comp2_B_J_eq", part="comp2", variant="B", h=h_c, objective="inertia", u_target=uc)]
     return S
 
 
@@ -329,8 +355,8 @@ def main():
         b, _, _ = baseline(part, h)
         base[part] = b
         print(part, "baseline", json.dumps(b, default=float)[:400], flush=True)
-    u_eq_c = [c["u_max"] for c in base["comp2"]["cases"]]
-    S = specs(a.h_t, a.h_c, u_eq_c)
+    u_eq = {p: [c["u_max"] for c in base[p]["cases"]] for p in base}
+    S = specs(a.h_t, a.h_c, u_eq)
     if a.only:
         S = [s for s in S if s["name"] in a.only.split(",")]
     with Pool(a.workers) as pool:

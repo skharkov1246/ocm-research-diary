@@ -157,45 +157,9 @@ def corrections(c, perf, g):
 
 
 def perf_pass(c, tgt, d_eta_c=None, d_eta_t=0.0):
-    """быстрый цикл как funnel_space.quick_perf, плюс поправка d_eta_t к КПД радиальной турбины газогенератора"""
-    E = FS._E()
-    pis = FS.stages_pi(c); typ = FS.stage_types(c)
-    d_eta_c = d_eta_c or [0.0] * len(pis)
-    mats = [c["mat_cw"] if not (c["mat_cw"] == "Al" and k > 0) else "Ti64" for k in range(len(pis))]
-    mus = FS.stage_mus(c)
-    comp = FS._comp([(p, max(0.60, FS.eta_comp(t, p, m, k, c["inlet"], mu) + de))
-                     for k, (p, t, m, de, mu) in enumerate(zip(pis, typ, mats, d_eta_c, mus))])
-    Ut, Ulim, _ = FS.turb_speed(c)
-    Upt = c["kUpt"] * 380.0
-    eg, ep = 0.86, 0.88
-    r, load = None, {}
-    for _ in range(8):
-        r = FS._core(c, comp, eg, ep)
-        if "fail" in r:
-            break
-        if c["turb"] == "О":
-            psi = r["t"]["w"] / (c["nt"] * Ut ** 2)
-            eg_n = E.eta_axial(psi) - FS.leaving_loss(c["phit"], Ut, r["t"]["w"] / eg)
-            load = dict(psi=psi)
-        else:
-            eg_n, nu, dhs = FS._radial_stage(r["t"], c["nt"], Ut)
-            eg_n += d_eta_t
-            load = dict(nu=nu, dhs=dhs)
-        ep_n = ep
-        if r["pt"]:
-            psi_pt = r["pt"]["w"] / (c["npt"] * Upt ** 2)
-            ep_n = E.eta_axial(psi_pt) - FS.leaving_loss(c["phit"], Upt, r["pt"]["w"] / ep)
-            load["psi_pt"] = psi_pt
-        eg_n, ep_n = max(0.40, eg_n), max(0.40, ep_n)
-        if abs(eg_n - eg) < 1e-4 and abs(ep_n - ep) < 1e-4:
-            break
-        eg, ep = eg_n, ep_n
-    if r is None or "fail" in r:
-        return dict(ok=False, fail=(r or {}).get("fail", "нет решения"), comp=comp)
-    G = tgt["P_shaft_kW"] * 1e3 / r["wnet"]
-    return dict(ok=True, comp=comp, r=r, eta_gg=eg, eta_pt=ep if r["pt"] else None, load=load, G=G, Ut=Ut, Ulim_t=Ulim,
-                Upt=Upt, eta_th=r["eta"], w=r["wnet"] / 1e3, EGT=r["Tstack"] - 273.15, T5=r["T5"] - 273.15,
-                T2=r["T2"] - 273.15)
+    """быстрый цикл funnel_space.quick_perf (одна реализация на оба модуля) с поправками КПД ступеней компрессора d_eta_c
+    и радиальной турбины газогенератора d_eta_t"""
+    return FS.quick_perf(c, tgt, d_eta_c, d_eta_t)
 
 
 # =========================================================================== габарит и масса (оценка)
@@ -251,9 +215,10 @@ def niche_of(c):
 # =========================================================================== запись концепции
 AX_COLS = [a for a in FS.AXES if a != "arch"]
 COLUMNS = (["idx", "kv", "arch", "niche"] + [a for a in AX_COLS if a in FS.CAT] + ["pi_max_U"] + [a for a in AX_COLS if a in FS.CONT]
+           + ["repair", "dflags", "w_need", "t41_lo", "t41_hi", "pi_lo", "pi_hi", "n_gg"]
            + ["feasible", "reject", "reject_detail", "violation",
               "eta_th_shaft", "eta_el", "w_kJkg", "G", "dG_pct", "EGT", "dEGT", "T2", "T5", "pi_stages", "eta_c", "ns_c",
-              "deta_c", "eta_t", "ns_t", "deta_t", "eta_pt",
+              "deta_c", "eta_t", "ns_t", "deta_t", "eta_pt", "psi_t", "nu_t", "htr_t", "AN2_t", "psi_pt", "htr_pt", "AN2_pt",
               "n_rpm", "D2", "U2", "b2_mm", "phi", "D_turb", "U_turb", "h_turb", "D_pt", "h_pt", "D_case", "D_env",
               "L_env", "W_env", "H_env", "V_env", "mass_kg", "rotor_kg", "rec_modules", "rec_V",
               "s_parts", "s_plugplay", "s_service", "s_make", "s_eta", "s_size", "s_etasize", "s_effmake", "score",
@@ -333,6 +298,10 @@ def evaluate_l0(i, n, kv="KV-3", seed=SEED, detail=False):
                T2=_r(perf["T2"], 1), T5=_r(perf["T5"], 1), pi_stages=_j([s["pi"] for s in st], 3),
                eta_c=_j([s["eta"] for s in st]), ns_c=_j(nsc or [], 3), deta_c=_j(dc or [], 4), eta_t=_r(perf["eta_gg"], 4),
                ns_t=_r(nst, 3), deta_t=_r(dt, 4), eta_pt=_r(perf["eta_pt"], 4),
+               psi_t=_r(g["tg"].get("psi"), 3), nu_t=_r(g["tg"].get("nu"), 3), htr_t=_r(g["tg"].get("htr"), 3),
+               AN2_t=_r(g["tg"].get("AN2") and g["tg"]["AN2"] / 1e7, 3),
+               psi_pt=_r(g["pt"]["psi"], 3) if g["pt"] else None, htr_pt=_r(g["pt"]["htr"], 3) if g["pt"] else None,
+               AN2_pt=_r(g["pt"]["AN2"] / 1e7, 3) if g["pt"] else None,
                n_rpm=_r(float(g["n"]), 0), D2=_j([s["D"] for s in st]), U2=_j([s["U"] for s in st], 1),
                b2_mm=_j([s["b2"] * 1e3 if "b2" in s else None for s in st], 1),
                phi=_j([s.get("phi") for s in st]), D_turb=_r(g["tg"]["D"]), U_turb=_r(g["tg"]["U"], 1),
