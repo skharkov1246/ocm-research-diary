@@ -394,9 +394,18 @@ def part_path(out, kv, K, shard, shards, tag="", gz=False):
     return os.path.join(out, f"{PART_PREFIX}{tag}_{kv}_c{K}_s{shard:03d}of{shards:03d}.json" + (".gz" if gz else ""))
 
 
+def _write(doc, p, gz):
+    txt = json.dumps(doc, ensure_ascii=False, separators=(",", ":"), default=_r)
+    tmp = p + ".tmp"
+    with (gzip.open(tmp, "wt", encoding="utf-8") if gz else open(tmp, "w", encoding="utf-8")) as fh:
+        fh.write(txt)
+    os.replace(tmp, p)
+
+
 def run_parts(cands, meta_in, shard_list, shards, out, n=DEFAULT_N, n_od=DEFAULT_N_OD, seed=UF.UQ_SEED, od_rule="auto",
               pdp_min=OD_PDP_MIN, score_min=SCORE_MIN - OD_SCORE_MARGIN, workers=1, gz=False, tag=""):
-    t0 = time.time()
+    """части по очереди: у каждой - расчётная точка и нерасчётные режимы всем пулом, файл части пишется сразу (сторож раннера
+    снимает команду в срок и выгружает папку - теряется только недосчитанная часть)"""
     K = len(cands)
     kv = meta_in["kv"]
     tgt = FS.target(kv)
@@ -405,43 +414,46 @@ def run_parts(cands, meta_in, shard_list, shards, out, n=DEFAULT_N, n_od=DEFAULT
         L1._prep(int(c0.get("n") or 2000), int(c0.get("seed") or FS.SEED), kv)
     u, X, vals, dummy = UF.sample(n, seed, dummy=True)
     n_od = min(n_od, n)
-    idx_by = {k: FS.shard_indices(K, k, shards) for k in shard_list}
-    ids = sorted(i for v in idx_by.values() for i in v)
-    t1 = time.time()
-    dp, nom, cpu_dp = run_dp(cands, ids, vals, tgt, workers)
-    t_dp = time.time() - t1
-    sms = {i: summarize_dp(dp[i], X, nom[i], dummy) for i in ids}
-    qual = [i for i in ids if od_qualifies(sms[i], od_rule, pdp_min, score_min)]
-    tasks = [(i, s) for i in qual for s in range(n_od) if dp[i][s]["feas"]]
-    t2 = time.time()
-    odr, cpu_od = run_od(tasks, cands, vals, tgt, workers)
-    t_od = time.time() - t2
-    rows = {}
-    for i in ids:
-        od = None
-        if i in qual:
-            od = summarize_od(sms[i], {s: odr[(i, s)] for s in range(n_od) if (i, s) in odr}, n_od)
-        rows[i] = dict(u=i, **finalize(cands[i], sms[i], od))
-    el = time.time() - t0
-    n_ev = len(ids) * (n + 1)
-    meta = dict(level=LEVEL, date=DATE, software=FS.software(), method=__doc__.split("\n")[0], kv=kv, K=K, shards=shards, tag=tag,
+    base = dict(level=LEVEL, date=DATE, software=FS.software(), method=__doc__.split("\n")[0], kv=kv, K=K, shards=shards, tag=tag,
                 input=meta_in, cand_sha=cand_sha(cands), code_sha=code_sha(), l1_code_sha=L1.code_sha(), factors_sha=UF.table_sha(),
                 n=n, n_od=n_od, seed=seed, sample_fingerprint=UF.fingerprint(n, seed), od_rule=od_rule, od_pdp_min=pdp_min,
-                od_score_min=score_min, score_key="score_f: взвешенная × (0,5 + 0,5·TRL/9)", workers=workers,
-                call=dict(shards=shard_list, variants=len(ids), od_variants=len(qual), od_runs=len(tasks), elapsed_s=round(el, 2),
-                          dp_s=round(t_dp, 2), od_s=round(t_od, 2), cpu_dp_s=round(cpu_dp, 2), cpu_od_s=round(cpu_od, 2),
-                          cpu_s_per_dp_eval=round(cpu_dp / max(1, n_ev), 5), cpu_s_per_od_eval=round(cpu_od / max(1, len(tasks)), 3) if tasks else None,
-                          host_cpus=os.cpu_count(), started=datetime.datetime.fromtimestamp(t0, datetime.timezone.utc).isoformat()))
+                od_score_min=score_min, score_key="score_f: взвешенная × (0,5 + 0,5·TRL/9)", workers=workers)
     os.makedirs(out, exist_ok=True)
-    paths = []
+    paths, rows_all, calls = [], {}, []
     for k in shard_list:
-        doc = dict(meta, shard=k, n_rows=len(idx_by[k]), rows=[rows[i] for i in idx_by[k]])
+        t0 = time.time()
+        ids = FS.shard_indices(K, k, shards) if K else []
+        dp, nom, cpu_dp = run_dp(cands, ids, vals, tgt, workers)
+        t_dp = time.time() - t0
+        sms = {i: summarize_dp(dp[i], X, nom[i], dummy) for i in ids}
+        qual = [i for i in ids if od_qualifies(sms[i], od_rule, pdp_min, score_min)]
+        tasks = [(i, s) for i in qual for s in range(n_od) if dp[i][s]["feas"]]
+        t2 = time.time()
+        odr, cpu_od = run_od(tasks, cands, vals, tgt, workers)
+        t_od = time.time() - t2
+        rows = []
+        for i in ids:
+            od = None
+            if i in qual:
+                od = summarize_od(sms[i], {s: odr[(i, s)] for s in range(n_od) if (i, s) in odr}, n_od)
+            rows.append(dict(u=i, **finalize(cands[i], sms[i], od)))
+            rows_all[i] = rows[-1]
+        n_ev = len(ids) * (n + 1)
+        call = dict(shards=[k], variants=len(ids), od_variants=len(qual), od_runs=len(tasks), elapsed_s=round(time.time() - t0, 2),
+                    dp_s=round(t_dp, 2), od_s=round(t_od, 2), cpu_dp_s=round(cpu_dp, 2), cpu_od_s=round(cpu_od, 2),
+                    cpu_s_per_dp_eval=round(cpu_dp / max(1, n_ev), 5), cpu_s_per_od_eval=round(cpu_od / max(1, len(tasks)), 3) if tasks else None,
+                    host_cpus=os.cpu_count(), started=datetime.datetime.fromtimestamp(t0, datetime.timezone.utc).isoformat())
         p = part_path(out, kv, K, k, shards, tag, gz)
-        txt = json.dumps(doc, ensure_ascii=False, separators=(",", ":"), default=_r)
-        with (gzip.open(p, "wt", encoding="utf-8") if gz else open(p, "w", encoding="utf-8")) as fh:
-            fh.write(txt)
+        _write(dict(base, call=call, shard=k, n_rows=len(rows), rows=rows), p, gz)
         paths.append(p)
-    return paths, meta, rows
+        calls.append(call)
+    tot = dict(shards=shard_list, variants=sum(c["variants"] for c in calls), od_variants=sum(c["od_variants"] for c in calls),
+               od_runs=sum(c["od_runs"] for c in calls), elapsed_s=round(sum(c["elapsed_s"] for c in calls), 2),
+               cpu_dp_s=round(sum(c["cpu_dp_s"] for c in calls), 2), cpu_od_s=round(sum(c["cpu_od_s"] for c in calls), 2))
+    nev = max(1, tot["variants"] * (n + 1))
+    tot.update(cpu_s_per_dp_eval=round(tot["cpu_dp_s"] / nev, 5),
+               cpu_s_per_od_eval=round(tot["cpu_od_s"] / tot["od_runs"], 3) if tot["od_runs"] else None)
+    return paths, dict(base, call=tot), rows_all
 
 
 def main(argv=None):

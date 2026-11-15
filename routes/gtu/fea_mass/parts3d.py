@@ -232,24 +232,23 @@ def axial_parts(v, role):
             R = 0.92 * r_h
         disc_alloy = alloy if blisk else "IN718"
         rho_disc = _rho(disc_alloy)
-        if not disc:
+        if not disc or not disc.get("sigma_d_MPa"):
             pending.append(dict(id=sid, what="диск ступени", why="в записи уровня 1 нет диска (strength.disc)"))
             continue
-        dr, dt = _disc_profile(disc, rpm, rho_disc, R)
         Tb = float(st["T_rel_in"]) - 273.15 - (175.0 if cooled else 0.0)
         if i == 0 and t.get("T_blade_C") is not None:
             Tb = float(t["T_blade_C"])
         Tdisc = Tb - T_DISC_DROP
         geom = dict(name=sid, Z=zt, blisk=blisk, blisk_basis=basis, r_hub=r_h, r_tip=r_t, R_live=R, chord=float(st["chord_R"]),
-                    bx=float(st["bx_R"]), t_rim=float(disc.get("t_rim") or 0.0), disc_r=dr, disc_t=dt,
-                    sections=_free_vortex_sections(st, rpm, r_h, r_t))
+                    bx=float(st["bx_R"]), rpm=rpm, sigma_d_MPa=float(disc["sigma_d_MPa"]), rho_disc=rho_disc, rho_blade=_rho(alloy),
+                    t_rim_L1=float(disc.get("t_rim") or 0.0), sections=_free_vortex_sections(st, rpm, r_h, r_t))
         eo = [dict(eo=k, kind="low", source=f"низкий порядок {k}") for k in range(1, LOW_EO + 1)]
         if zn:
             eo += [dict(eo=zn, kind="ngv", source=f"СА {zn} лопаток × 1"), dict(eo=2 * zn, kind="ngv2", source=f"СА {zn} лопаток × 2")]
         if role == "turb" and i == 0 and ninj:
             eo.append(dict(eo=ninj, kind="inj", source=f"горелки камеры: {ninj}"))
         out.append(dict(id=sid, kind="axial", role=role, stage=i + 1, geom=geom, rpm=rpm, alloy=alloy, disc_alloy=disc_alloy,
-                        T_spec=dict(type="axial", r_bore=dr[0], R=R, r_root=r_h, T_hub=Tdisc - T_HUB_DROP_AX, T_rim=Tdisc, T_blade=Tb),
+                        T_spec=dict(type="axial", r_bore=0.20 * R, R=R, r_root=r_h, T_hub=Tdisc - T_HUB_DROP_AX, T_rim=Tdisc, T_blade=Tb),
                         eo_sources=eo, free_stator=None, op=_op(v, role), solid=False))
     return out, pending
 

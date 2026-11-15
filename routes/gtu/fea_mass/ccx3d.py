@@ -84,11 +84,11 @@ def static_deck(N, mat_cards, rpm, fractions, node_ids, T):
     """статика: шаги NLGEOM при rpm·f для f в fractions; вывод U и S в .frd по каждому шагу"""
     L = ["*HEADING", "fea_mass static", "*INCLUDE, INPUT=mesh.inp"] + mat_cards + cyclic_cards(N)
     L += ["*TRANSFORM, NSET=NFIX, TYPE=C", "0., 0., 0., 0., 0., 1.", "*BOUNDARY", "NFIX, 2, 3",
-          "*INITIAL CONDITIONS, TYPE=TEMPERATURE", "NALL, 20."]
+          "*TIME POINTS, NAME=TEND", "1.", "*INITIAL CONDITIONS, TYPE=TEMPERATURE", "NALL, 20."]
     for k, f in enumerate(fractions):
         L += ["*STEP, NLGEOM, INC=200", "*STATIC", "0.125, 1." if k == 0 else "0.5, 1.", "*DLOAD", f"EALL, CENTRIF, {omega2(rpm * f):.9e}, 0., 0., 0., 0., 0., 1."]
         L += temperature_cards(node_ids, T)
-        L += ["*NODE FILE", "U", "*EL FILE", "S", "*END STEP"]
+        L += ["*NODE FILE, TIME POINTS=TEND", "U", "*EL FILE, TIME POINTS=TEND", "S", "*END STEP"]   # только конец шага
     return "\n".join(L) + "\n"
 
 
@@ -137,23 +137,26 @@ def _children_cpu():
 
 # ----------------------------------------------------------------------------- разбор выхода
 def read_frd_steps(path, blocks=("DISP", "STRESS")):
-    """узловые блоки .frd по шагам: [ {блок: (ids (n,), values (n, k))}, ... ] в порядке записи"""
-    steps, cur, name, ids, vals = [], None, None, [], []
+    """узловые блоки .frd по шагам: [ {блок: (ids (n,), values (n, k))}, ... ] в порядке номеров шагов; если в файле
+    несколько приращений шага, берётся последнее (номер шага - из строки 1PSTEP)"""
+    by_step, step, name, ids, vals = {}, None, None, [], []
 
     def flush():
-        if name is not None and cur is not None:
-            cur[name] = (np.asarray(ids, dtype=np.int64), np.asarray(vals, dtype=float))
+        if name is not None and step is not None:
+            by_step.setdefault(step, {})[name] = (np.asarray(ids, dtype=np.int64), np.asarray(vals, dtype=float))
     with open(path) as f:
         for ln in f:
-            if ln.startswith(" -4"):
+            if ln.startswith("    1PSTEP"):
+                p = ln.split()
+                try:
+                    step = int(p[3])
+                except (IndexError, ValueError):
+                    step = None
+            elif ln.startswith(" -4"):
                 flush()
                 name = ln.split()[1]
                 if name not in blocks:
                     name = None
-                    continue
-                if not steps or name in steps[-1]:
-                    steps.append({})
-                cur = steps[-1]
                 ids, vals = [], []
             elif name is not None and ln.startswith(" -1"):
                 body = ln[13:].rstrip("\n")
@@ -163,7 +166,7 @@ def read_frd_steps(path, blocks=("DISP", "STRESS")):
                 flush()
                 name = None
     flush()
-    return steps
+    return [by_step[k] for k in sorted(by_step)]
 
 
 def read_eigen_steps(path):

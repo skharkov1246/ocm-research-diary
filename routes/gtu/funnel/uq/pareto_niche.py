@@ -390,30 +390,48 @@ def run_parts(select_path, shard_list, shards, out, pop=DEFAULT_POP, gens=DEFAUL
         seeds = sorted(l1_by.get(r["niche"], []), key=lambda cd: -((cd.get("rec") or {}).get("score") or 0.0))[:max(0, pop // 4)]
         seeds = [dict(concept=cd["concept"], rec=dict(cd.get("rec") or {})) for cd in seeds]
         tasks.append((k, r["niche"], kv, r["ref_idx"], n0, seed, r["l0_idx"], seeds, P))
-    if workers <= 1 or len(tasks) < 2:
-        got = [run_niche(t) for t in tasks]
-    else:
-        with U._pool(workers) as ex:
-            got = list(ex.map(run_niche, tasks, chunksize=1))
-    by = {g["k"]: g for g in got}
-    el = time.time() - t0
-    meta = dict(level=LEVEL, date=DATE, software=FS.software(), method=__doc__.split("\n")[0], kv=kv, NN=NN, shards=shards, tag=tag,
+    base = dict(level=LEVEL, date=DATE, software=FS.software(), method=__doc__.split("\n")[0], kv=kv, NN=NN, shards=shards, tag=tag,
                 input=meta_in, l1=l1_meta, code_sha=code_sha(), l1_code_sha=L1.code_sha(), factors_sha=UF.table_sha(), pop=pop, gens=gens,
-                check=check, robust=robust, p_target=p_target if robust else None, genes=GENES, objectives=OBJ, workers=workers,
-                call=dict(shards=shard_list, niches=len(ks), elapsed_s=round(el, 2), evals=sum(g["evals"] for g in got),
-                          robust_evals=sum(g["robust_evals"] for g in got), checked=sum(len(g["checked"]) for g in got),
-                          cpu_s=round(sum(g["t_cpu_s"] for g in got), 2), host_cpus=os.cpu_count(),
-                          started=datetime.datetime.fromtimestamp(t0, datetime.timezone.utc).isoformat()))
+                check=check, robust=robust, p_target=p_target if robust else None, genes=GENES, objectives=OBJ, workers=workers)
     os.makedirs(out, exist_ok=True)
-    paths = []
+    left = {k: set(v) for k, v in idx_by.items()}
+    shard_of = {i: k for k, v in idx_by.items() for i in v}
+    by, paths = {}, []
+
+    def done(g):
+        by[g["k"]] = g
+        k = shard_of[g["k"]]
+        left[k].discard(g["k"])
+        if not left[k]:                    # часть готова - файл сразу (сторож раннера выгружает папку при снятии команды)
+            rows = [by[i] for i in idx_by[k]]
+            call = dict(shards=[k], niches=len(rows), evals=sum(r["evals"] for r in rows), robust_evals=sum(r["robust_evals"] for r in rows),
+                        checked=sum(len(r["checked"]) for r in rows), cpu_s=round(sum(r["t_cpu_s"] for r in rows), 2), host_cpus=os.cpu_count(),
+                        finished=datetime.datetime.now(datetime.timezone.utc).isoformat())
+            p = part_path(out, kv, NN, k, shards, tag, gz)
+            U._write(dict(base, call=call, shard=k, n_rows=len(rows), rows=rows), p, gz)
+            paths.append(p)
     for k in shard_list:
-        doc = dict(meta, shard=k, n_rows=len(idx_by[k]), rows=[by[i] for i in idx_by[k]])
-        p = part_path(out, kv, NN, k, shards, tag, gz)
-        txt = json.dumps(doc, ensure_ascii=False, separators=(",", ":"), default=_r)
-        with (gzip.open(p, "wt", encoding="utf-8") if gz else open(p, "w", encoding="utf-8")) as fh:
-            fh.write(txt)
-        paths.append(p)
-    return paths, meta, got
+        if not idx_by[k]:
+            done_empty = dict(base, call=dict(shards=[k], niches=0), shard=k, n_rows=0, rows=[])
+            p = part_path(out, kv, NN, k, shards, tag, gz)
+            U._write(done_empty, p, gz)
+            paths.append(p)
+    if workers <= 1 or len(tasks) < 2:
+        for t in tasks:
+            done(run_niche(t))
+    else:
+        from concurrent.futures import as_completed
+        with U._pool(workers) as ex:
+            futs = [ex.submit(run_niche, t) for t in tasks]
+            for f in as_completed(futs):
+                done(f.result())
+    got = [by[k] for k in ks]
+    el = time.time() - t0
+    meta = dict(base, call=dict(shards=shard_list, niches=len(ks), elapsed_s=round(el, 2), evals=sum(g["evals"] for g in got),
+                                robust_evals=sum(g["robust_evals"] for g in got), checked=sum(len(g["checked"]) for g in got),
+                                cpu_s=round(sum(g["t_cpu_s"] for g in got), 2), host_cpus=os.cpu_count(),
+                                started=datetime.datetime.fromtimestamp(t0, datetime.timezone.utc).isoformat()))
+    return sorted(paths), meta, got
 
 
 def main(argv=None):

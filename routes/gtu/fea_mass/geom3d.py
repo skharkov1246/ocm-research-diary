@@ -583,6 +583,71 @@ def _airfoil(c_ax, beta_in, beta_out, t_max_c, t_te_c, n=36):
     return pts - np.array([xc, 0.0]), chord
 
 
+def _poly_area_centroid(P):
+    x, y = P[:, 0], P[:, 1]
+    a = x * np.roll(y, -1) - np.roll(x, -1) * y
+    A_ = 0.5 * a.sum()
+    return abs(A_)
+
+
+def disc_design(spec):
+    """равнопрочный диск под нагрузку лопаток этой геометрии (как strength_l1.disc_axial, но масса пера, полки, ножки и мёртвого
+    обода - из размеров 3D-модели, а не из доли массы уровня 1): t_об = F/(2πRσ_d), t(r) = t_об·exp(ρω²(R² − r²)/(2σ_d)),
+    σ_d - расчётное напряжение диска уровня 1; ширина обода не меньше rim_w_bx·bx (место под замок, оценка); отверстие 0,2 R;
+    толщина ступицы не больше DISC_RATIO_MAX·t_об"""
+    Z, R, r_h, r_t = int(spec["Z"]), spec["R_live"], spec["r_hub"], spec["r_tip"]
+    pitch = 2 * math.pi / Z
+    om = 2 * math.pi * spec["rpm"] / 60.0
+    rho_b, rho_d = spec["rho_blade"], spec["rho_disc"]
+    s_d = spec["sigma_d_MPa"] * 1e6
+    bx, chord = spec["bx"], spec["chord"]
+    t_plat = A["plat_t_c"] * chord
+    blisk = bool(spec["blisk"])
+    r_root = r_h if blisk else r_h + t_plat
+    secs = spec["sections"]
+    rs = [r_root, secs[1]["r"], r_t]
+    areas = [_poly_area_centroid(_airfoil(sc["c_ax"], sc["beta_in"], sc["beta_out"], sc["t_max_c"], A["t_te_c"])[0]) for sc in secs]
+    rr = np.linspace(r_root, r_t, 41)
+    Ar = np.interp(rr, rs, areas)
+    V_foil = float(np.trapezoid(Ar, rr))
+    M_foil_r = float(np.trapezoid(Ar * rr, rr)) * rho_b                 # ∫ρ A r dr
+    w_min = A["rim_w_bx"] * bx
+    if blisk:
+        r_ft = None
+        Fb = M_foil_r * om ** 2
+
+        def F_of(L):
+            return Fb + rho_d * om ** 2 * (pitch / 2) * L * (2.0 / 3.0) * (r_h ** 3 - R ** 3)
+    else:
+        h_neck = A["neck_h_c"] * chord
+        r_ft = max(R + 0.3 * (r_h - R), r_h - h_neck)
+        w_pl = (1 - A["plat_gap_pitch"]) * pitch * r_h
+        L_pl = A["plat_len_bx"] * bx
+        F_pl = rho_b * w_pl * L_pl * t_plat * (r_h + 0.5 * t_plat)
+        a_neck = 0.5 * A["neck_w_pitch"] * pitch * R / r_ft
+        r_nt = r_h + 0.5 * t_plat
+        Fb = (M_foil_r + F_pl) * om ** 2
+        rho_ring = 0.5 * (rho_b + rho_d) * A["dead_fill"]
+
+        def F_of(L):
+            neck = rho_b * a_neck * L * (2.0 / 3.0) * (r_nt ** 3 - r_ft ** 3)
+            ring = rho_ring * (pitch / 2) * L * (2.0 / 3.0) * (r_ft ** 3 - R ** 3)
+            return Fb + om ** 2 * (neck + ring)
+    # ширина обода L: L = max(w_min, Z·F(L)/(2πRσ_d)) - неподвижная точка (F линейна по L)
+    L = w_min
+    for _ in range(50):
+        Ln = max(w_min, Z * F_of(L) / (2 * math.pi * R * s_d))
+        if abs(Ln - L) < 1e-9:
+            break
+        L = Ln
+    t_rim = L
+    r = [R * (A["disc_bore_R"] + (1 - A["disc_bore_R"]) * k / 12) for k in range(13)]
+    t = [min(6.0 * t_rim, t_rim * math.exp(rho_d * om ** 2 * (R ** 2 - x ** 2) / (2 * s_d))) for x in r]
+    return dict(r=r, t=t, t_rim=t_rim, w_rim=t_rim, r_ft=r_ft, F_rim_N=Z * F_of(L), sigma_d_MPa=spec["sigma_d_MPa"],
+                rim_width_governed=("замок (rim_w_bx·bx)" if t_rim <= w_min + 1e-12 else "нагрузка лопаток"),
+                V_airfoil_m3=V_foil, t_rim_L1=spec.get("t_rim_L1"), ratio=t[0] / t_rim)
+
+
 def _box_wedge(occ, r0, r1, L, a0, da):
     """клин: прямоугольник r0..r1 × z ±L/2 в плоскости x-z, повёрнутый на угол da от a0"""
     p = [occ.addPoint(r0, 0, -L / 2), occ.addPoint(r1, 0, -L / 2), occ.addPoint(r1, 0, L / 2), occ.addPoint(r0, 0, L / 2)]
@@ -611,14 +676,15 @@ def axial_sector(spec, level="base", threads=1, keep_step=None):
     r_h, r_t = spec["r_hub"], spec["r_tip"]
     bx, chord = spec["bx"], spec["chord"]
     R = spec["R_live"]
-    w_rim = max(A["rim_w_bx"] * bx, spec.get("t_rim") or 0.0)
-    prof_r, prof_t = np.asarray(spec["disc_r"], float), np.asarray(spec["disc_t"], float)
+    secs = spec["sections"]
+    t_plat = A["plat_t_c"] * chord
+    design = disc_design(spec)
+    w_rim = design["w_rim"]
+    prof_r, prof_t = np.asarray(design["r"], float), np.asarray(design["t"], float)
     t_mid = 0.5 * (A["t_max_c_hub"] + A["t_max_c_tip"]) * chord
     lv = A["levels"][level]
     h_b = lv["k_blade"] * 0.6 * t_mid
     h_hub = lv["k_hub"] * h_b
-    t_plat = A["plat_t_c"] * chord
-    secs = spec["sections"]
     k_ch = 0.5 * (math.tan(math.radians(secs[0]["beta_in"])) - math.tan(math.radians(secs[0]["beta_out"])))
     _init(gmsh, threads)
     try:
@@ -654,10 +720,9 @@ def axial_sector(spec, level="base", threads=1, keep_step=None):
             # 2) замок: «мёртвый» обод R..r_ft (хвостовики лопаток и выступы диска между пазами) - кольцевой слой без окружной
             #    жёсткости (ортотропный материал в ccx3d: E_θ ≈ 0 - паз рвёт окружную связь), плотность - доля заполнения;
             #    ножка лопатки r_ft..r_h - сегмент толщиной neck_w_pitch шага, связан с полкой и мёртвым ободом
-            h_neck = A["neck_h_c"] * chord
-            r_ft = max(R + 0.3 * (r_h - R), r_h - h_neck)
             a_neck = 0.5 * A["neck_w_pitch"] * pitch * R / r_ft
             L_att = float(prof_t[-1])          # ширина мёртвого обода = ширине живого обода (совпадающие грани без щелей)
+            r_ft = design["r_ft"]
             ov = 2e-3 * R
             ring = _box_wedge(occ, R - ov, r_ft, L_att, -0.5 * pitch, pitch)
             neck = _box_wedge(occ, r_ft - ov, r_h + 0.5 * t_plat, L_att, -a_neck, 2 * a_neck)   # верх - в середине полки
@@ -736,7 +801,7 @@ def axial_sector(spec, level="base", threads=1, keep_step=None):
     nfix = _fix_node(nodes, nb, ns, nm, 0.0)
     sets = dict(NMASTER=nm, NSLAVE=ns, NBORE=[t for t in nb if t not in set(ns)], NFIX=[nfix])
     meta = dict(kind="axial", Z=Z, pitch_rad=pitch, blisk=blisk, r_bore=float(prof_r[0]), R_live=R, r_hub=r_h, r_root=r_root, r_tip=r_t,
-                r_foot_top=(None if blisk else r_ft), dead_fill=A["dead_fill"],
+                r_foot_top=(None if blisk else r_ft), dead_fill=A["dead_fill"], disc_design=design,
                 w_rim=w_rim, chord=chord, bx=bx, t_plat=t_plat, h_blade=h_b, h_hub=h_hub, level=level,
                 volume=dict(V_sector_occ=V_sector, V_airfoil=V_foil), quality=q, periodic=per, periodic_snap=snap,
                 n_nodes=int(len(ids)), n_elems=int(len(elems)), n_hub_elems=int((ecls == CLASS_HUB).sum()),

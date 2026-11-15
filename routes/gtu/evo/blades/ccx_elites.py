@@ -81,6 +81,7 @@ def columns(case, res_dir):
 
 
 X_BINS = [0.0, 0.1, 0.2, 0.35, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 5.0, 1e9]
+YR_CAL_MAX = 1.0           # таблица — по профилям вблизи допустимости (σ/σ0,2 по ccx ≤ 1): там нужна точность
 
 
 def zone_max(case, res_dir, r_split):
@@ -189,7 +190,7 @@ def calibrate(n=12, mesh=(80, 12), workers=4):
         rows = pool.map(run_comp, jobs)
     X, K = [], []
     for r_ in rows:
-        if not r_["ccx"]["gate"] or r_["tag"].startswith("out_"):
+        if not r_["ccx"]["gate"] or r_["tag"].startswith("out_") or r_["ccx"]["yield_ratio_max"] > YR_CAL_MAX:
             continue
         cc = r_["columns"]
         for x, a, b, rv in zip(cc["x"], cc["ccx"], cc["fast"], cc["r"]):
@@ -234,12 +235,19 @@ def calibrate(n=12, mesh=(80, 12), workers=4):
         f_ = D1.solve(dk["r"], dk["h_eff"], fac, T, "ti64", case["rpm"], k_table=kt)["yield_ratio_max"]
         ccx_ = [q for q in rows if q["tag"] == tag][0]["ccx"]["yield_ratio_max"]
         sl = geo["disk"]["slope_max"]
-        chk.append(dict(tag=tag, ccx=ccx_, fast_table=f_, ratio=ccx_ / f_, slope_max=sl, in_domain=not tag.startswith("out_")))
+        raw = [q for q in rows if q["tag"] == tag][0]["fast"]
+        chk.append(dict(tag=tag, ccx=ccx_, fast_table=f_, fast_raw=max(raw["yr_axis_raw"], raw["yr_web_raw"]), ratio=ccx_ / f_, slope_max=sl,
+                        in_domain=not tag.startswith("out_"), used_for_table=(not tag.startswith("out_")) and ccx_ <= YR_CAL_MAX,
+                        verdict_ccx=bool(ccx_ <= 0.9), verdict_fast=bool(f_ <= 0.9)))
     ind = [q for q in chk if q["in_domain"]]
     d["domain"] = dict(slope_max_limit=__import__("blade_geom").SLOPE_MAX, rule="|dh/dr| на 0,1…0,95·r2",
                        out_of_domain=[q for q in chk if not q["in_domain"]],
                        note="вне области (крутой переход ступицы в тонкое полотно) отношение ccx/тонкий диск неустойчиво — такие профили недопустимы в поиске")
+    agree = [q["verdict_ccx"] == q["verdict_fast"] for q in ind]
+    unsafe = [q["tag"] for q in ind if q["verdict_fast"] and not q["verdict_ccx"]]
     d["table_check"] = dict(cases=chk, ratio_min=min(q["ratio"] for q in ind), ratio_max=max(q["ratio"] for q in ind),
+                            verdict_threshold="σ/σ0,2 ≤ 0,9 при 100 % (порядок предела 120 %/k: 0,9·σ0,2 при k = 0,9 и запасе 1,2² — справочно)",
+                            verdict_agree_share=float(np.mean(agree)), unsafe_cases=unsafe,
                             note="ratio ≤ 1 — быстрая оценка с таблицей не ниже CalculiX (консервативна) на калибровочных профилях")
     with open(D1.CAL_JSON, "w", encoding="utf-8") as f:
         json.dump(d, f, ensure_ascii=False, indent=1, default=float)

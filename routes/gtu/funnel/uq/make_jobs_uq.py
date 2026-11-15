@@ -31,6 +31,7 @@ FREL = "routes/gtu/funnel"
 SAFETY = 1.5
 CEILING, SPENT_NOTE = 2000.0, "израсходовано около 3 долл. (задание 15.11.2026; точное - runner.py status по ledger.jsonl)"
 MAX_COMPUTE_MIN = 150         # расчёт на машину не дольше (оценка: сторож вдвое больше - запас на медленную машину)
+UQ_COMPUTE_MIN = 90           # Монте-Карло: мелкие задачи пула - больше машин, короче прогон при той же цене
 TAIL = "\nrc=$?\nls -l \"$GTU_OUT\" > \"$GTU_OUT/_parts_list.txt\"\nexit $rc"
 RUNS = "routes/gtu/platform/aws/runs/<run_id>"
 SELECT = {"KV-3": f"{FREL}/l0_aws_full/funnel_l0_select_KV-3_n200000.json", "KV-1": f"{FREL}/l0_aws_full/funnel_l0_select_KV-1_n50000.json",
@@ -79,8 +80,8 @@ def niches_of(kv):
     return len(rows)
 
 
-def machines_for(core_s, shards, cap=None):
-    m = max(1, math.ceil(core_s / (J0.VCPU * 60 * MAX_COMPUTE_MIN)))
+def machines_for(core_s, shards, cap=None, max_min=MAX_COMPUTE_MIN):
+    m = max(1, math.ceil(core_s / (J0.VCPU * 60 * max_min)))
     return min(m, shards, cap or shards)
 
 
@@ -117,13 +118,13 @@ def uq_group(name, kv, M, n, n_od, od_frac, p_dp, shards, l1=None, cand_files=()
     if cand_files:
         parts.append("--candidates " + " ".join(cand_files))
     src = " ".join(parts)
+    tag = name.replace("uq-", "")
 
     def cmd(sh):
         return (f"python {REL}/uq_l1.py {src} --n {n} --n-od {n_od} --od auto --od-pdp-min {pdp} --od-score-min {smin} --shards {shards} "
-                f"--shard {sh} --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"")
-    jobs, info = group_jobs(name, cmd, shards, machines_for(core, shards, 6 if K < 5000 else None), core)
-    tag = name.replace("uq-", "")
-    merge = (f"python3 {REL}/merge_uq.py --kv {kv} --shards {shards} --in {RUNS} --out-dir {REL}/aws/{tag} --suffix _{tag}")
+                f"--shard {sh} --tag _{tag} --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"")
+    jobs, info = group_jobs(name, cmd, shards, machines_for(core, shards, None, UQ_COMPUTE_MIN), core)
+    merge = (f"python3 {REL}/merge_uq.py --kv {kv} --shards {shards} --tag _{tag} --in {RUNS} --out-dir {REL}/aws/{tag} --suffix _{tag}")
     info.update(kv=kv, candidates_assumed=K, n=n, n_od=n_od, od_rule=dict(pdp_min=pdp, score_min=smin),
                 assume=dict(od_frac=od_frac, p_dp_at_od=p_dp), core_s_basis="SAFETY × (K·(N + 1)·t_расч + K·доля·N_od·P·t_нерасч)")
     return jobs, info, merge, core
@@ -133,19 +134,24 @@ def pareto_group(name, kv, NN, P, shards, m, l1=None, top=None):
     nn = min(NN, top) if top else NN
     evals = P["pop"] * (P["gens"] + 1)
     t_eval = evals * m["nsga_eval"] + (evals * P["robust"] * m["dp_eval"] if P.get("robust") else 0.0)   # устойчивый: каждое построенное × K
-    core = SAFETY * nn * (t_eval + P["check"] * m["check"] + m["seed_niche"])
+    t_n = SAFETY * (t_eval + P["check"] * m["check"] + m["seed_niche"])          # ниша - одна задача пула (один процесс)
+    waves_max = max(1, int(MAX_COMPUTE_MIN * 60 // t_n))
+    mach = min(shards, max(1, math.ceil(nn / (J0.VCPU * waves_max))))
+    waves = math.ceil(math.ceil(nn / mach) / J0.VCPU)
+    core = mach * J0.VCPU * waves * t_n            # оплачиваемое: целые волны по 64 ниши, неполная волна - с простоем ядер
     extra = (f" --l1-in {l1['dir']} --l1-m {l1['M']} --l1-shards {l1['shards']} --l1-optional" if l1 else "") + \
             (f" --robust {P['robust']} --p-target {P['p_target']} --tag {P['tag']}" if P.get("robust") else "") + (f" --top {top}" if top else "")
 
     def cmd(sh):
         return (f"python {REL}/pareto_niche.py --select {SELECT[kv]} --pop {P['pop']} --gens {P['gens']} --check {P['check']}{extra} "
                 f"--shards {shards} --shard {sh} --workers \"$NPROC\" --gzip --out \"$GTU_OUT\"")
-    jobs, info = group_jobs(name, cmd, shards, machines_for(core, shards), core)
+    jobs, info = group_jobs(name, cmd, shards, mach, core)
     tg = P.get("tag", "")
     merge = (f"python3 {REL}/merge_pareto.py --kv {kv} --nn {nn} --shards {shards}" + (f" --tag {tg}" if tg else "") +
              f" --in {RUNS} --out-dir {REL}/aws/pareto --suffix {tg}_{kv}")
     info.update(kv=kv, niches=nn, pop=P["pop"], gens=P["gens"], evals_per_niche=evals, robust=P.get("robust", 0), p_target=P.get("p_target"),
-                check=P["check"], core_s_basis="SAFETY × ниши × (вычисления × t + проверка × t_нерасч + затравка)" +
+                check=P["check"], niche_s=round(t_n, 1), waves=waves, core_s_basis="машины × 64 × волны × t_ниши; t_ниши = SAFETY × (вычисления × t + "
+                                                                                "проверка × t_нерасч + затравка)" +
                                                 (" ; устойчивый: каждое построенное решение ещё × K выборок" if P.get("robust") else ""))
     return jobs, info, merge, core
 

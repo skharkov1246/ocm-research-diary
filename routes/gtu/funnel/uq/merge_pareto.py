@@ -48,7 +48,7 @@ def load_part(p):
 
 
 def content_hash(d):
-    rows = [{k: v for k, v in r.items() if k not in ("t_s", "t_cpu_s")} for r in d["rows"]]
+    rows = [{k: v for k, v in r.items() if k not in ("t_s", "t_cpu_s", "t_cpu")} for r in d["rows"]]
     return hashlib.sha256(json.dumps(rows, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
 
 

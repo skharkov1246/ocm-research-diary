@@ -91,8 +91,12 @@ VCPU = {f"c7{f}.{s}": n for f in "ai"
         for s, n in (("4xlarge", 16), ("8xlarge", 32), ("16xlarge", 64))}
 
 IMAGES = {
+    # Версия 3: вне us-east-1 ssm:GetParameter ключу агента не разрешён (us-east-2, us-west-2, eu-north-1 —
+    # AccessDenied, проверка 15.11.2026) — запасной путь DescribeImages: владелец amazon, имя al2023-ami-2023*-x86_64,
+    # самый свежий по CreationDate. Только в режиме версии 3 ("fallback": "v3"): без новых флагов — как версия 2.
     "al2023": {"ssm": "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64",
-               "root": "/dev/xvda", "pkg": "dnf"},
+               "root": "/dev/xvda", "pkg": "dnf", "owner": "amazon", "name": "al2023-ami-2023*-x86_64",
+               "fallback": "v3"},
     # Параметр SSM Canonical в живом прогоне 14.11.2026 — AccessDenied (дополнение политики не применено).
     # Запасной путь — DescribeImages по владельцу Canonical (099720109477); вживую не проверен: есть ли
     # у ключа агента ec2:DescribeImages — неизвестно. Не вышло — задача получает статус image_unavailable.
@@ -116,8 +120,12 @@ MARKETS = ("spot", "on-demand")
 # примеру awscli 1.46.3 examples/service-quotas/get-service-quota.rst); L-34B43A08 — All Standard (A, C, D, H, I,
 # M, R, T, Z) Spot Instance Requests (по выдержкам поиска, не сверено).
 QUOTA_CODES = {"spot": "L-34B43A08", "on-demand": "L-1216C47A"}
-QUOTA_FALLBACK = 64                    # квота соседнего региона, если её не задали и service-quotas не ответил
+# Квота соседнего региона, если её не задали флагом и service-quotas не ответил: 0 — регион не используется.
+# Квоты регионов различаются на порядки (15.11.2026: спот us-east-2 и eu-north-1 — 5 vCPU, us-west-2 — 384):
+# запуск сверх неизвестной квоты не пробуется (--vcpu-quota-fallback меняет это значение).
+QUOTA_FALLBACK = 0
 PRICE_REF = HERE / "aws_prices_ref.json"   # справочник: цены по требованию и межрегиональная передача, с датой
+VCPU_REF = 64                          # vCPU типовой машины пакета (c7a/c7i.16xlarge): --max-parallel по сумме квот
 
 NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 BRANCH_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]{0,199}$")
@@ -663,15 +671,16 @@ class Config:
     offline_zones: dict | None = None    # режим plan: цены по зонам (допущение) для порядка зон
     # ---- версия 3 (без этих полей — точно версия 2)
     regions: list = field(default_factory=list)          # разрешённые регионы машин; [] — только region
-    vcpu_quota_region: dict = field(default_factory=dict)      # явная квота спота по регионам, vCPU
-    od_vcpu_quota_region: dict = field(default_factory=dict)   # явная квота по требованию по регионам, vCPU
-    od_vcpu_quota: int = 384             # запасная квота по требованию в region (данные владельца: 384)
+    vcpu_quota_region: dict = field(default_factory=dict)      # квота спота по регионам из флага, vCPU
+    od_vcpu_quota_region: dict = field(default_factory=dict)   # квота по требованию по регионам из флага, vCPU
+    vcpu_quota_explicit: bool = False    # --max-vcpu задан явно: в версии 3 — флаг квоты спота региона region
+    od_vcpu_quota: int = 384             # запасная квота по требованию в region (проверка 15.11.2026: 384)
     vcpu_quota_fallback: int = QUOTA_FALLBACK   # запасная квота соседнего региона (спот и по требованию)
     on_demand_fallback: bool = False     # спот недоступен везде — машина по требованию
     region_price_margin: float = 0.05    # соседний регион берётся, только если дешевле с этим запасом
     xfer_gb: float = 10.0                # объём результатов задачи для сметы межрегиональной передачи, ГБ
     price_ref: Path = PRICE_REF          # справочник цен по требованию и передачи
-    max_parallel_auto: bool = False      # --max-parallel не задан: в режиме регионов — по сумме квот
+    max_parallel_auto: bool = False      # --max-parallel не задан: в режиме версии 3 — по сумме квот
     offline_no_spot: bool = False        # режим plan: спот недоступен (проверка пути по требованию)
 
     @property
@@ -839,6 +848,11 @@ class Runner:
         self._iid_region: dict = {}     # машина -> регион
         self._ledger_regions = None
         self._ref = None                # справочник цен (версия 3), читается лениво
+        self._planned: dict = {}        # plan / DryRun версии 3: (регион, рынок) -> vCPU «запущенных» задач волны
+        self._placements: list = []     # plan / DryRun версии 3: (волна, задача, регион, рынок)
+        self._wave = 1
+        self.last_region = None         # регион и рынок последней спланированной / запущенной задачи
+        self.last_market = None
         self.redact = Redactor(cfg.bucket)
         self.ledger = Ledger(cfg.ledger_path, self.redact, clock)          # общий учёт
         side = cfg.dryrun or cfg.offline_price is not None
@@ -954,47 +968,72 @@ class Runner:
         return self._quota[(region, market)][0]
 
     def _read_quota(self, region: str, market: str) -> tuple:
-        """(vCPU, источник): флаг → service-quotas → запасное значение (только чтение, без изменений)."""
+        """(vCPU, источник) — только чтение, без изменений квот.
+
+        Фактическая квота региона — service-quotas get-service-quota (L-34B43A08 спот, L-1216C47A по требованию).
+        Флаг (--vcpu-quota-per-region / --od-vcpu-quota-per-region; для region спота — и явный --max-vcpu)
+        только ограничивает сверху: сверх фактической квоты раннер не запускает, даже если флаг больше
+        (заявка на 1536 ещё на рассмотрении). Service-quotas не ответил — флаг, иначе запасное значение:
+        для region — --max-vcpu (384) и od_vcpu_quota (384), для соседнего — --vcpu-quota-fallback (0: не используется).
+        """
         cfg = self.cfg
         explicit = cfg.vcpu_quota_region if market == "spot" else cfg.od_vcpu_quota_region
-        if region in explicit:
-            return int(explicit[region]), "флаг"
+        flag = explicit.get(region)
+        if flag is None and market == "spot" and region == cfg.region and cfg.vcpu_quota_explicit:
+            flag = cfg.vcpu_quota
         if region == cfg.region:
             fb = cfg.vcpu_quota if market == "spot" else cfg.od_vcpu_quota
         else:
             fb = cfg.vcpu_quota_fallback
+        code = QUOTA_CODES[market]
         if self.offline:
+            if flag is not None:
+                return int(flag), "флаг (plan: service-quotas не вызывается)"
             return fb, "запасное (plan: service-quotas не вызывается)"
+        actual, why = None, ""
         try:
             sq = self.client(region, "servicequotas")
             if sq is None:
-                return fb, "запасное (нет клиента service-quotas)"
-            v = sq.get_service_quota(ServiceCode="ec2", QuotaCode=QUOTA_CODES[market])["Quota"]["Value"]
-            return int(v), f"service-quotas {QUOTA_CODES[market]}"
-        except Exception as e:      # нет прав (у ключа агента их нет), сеть, неизвестный ответ — запасное
+                why = "нет клиента service-quotas"
+            else:
+                actual = int(float(sq.get_service_quota(ServiceCode="ec2", QuotaCode=code)["Quota"]["Value"]))
+        except Exception as e:      # нет прав, сеть, неизвестный ответ — флаг или запасное значение
             resp = getattr(e, "response", None)
-            code = resp.get("Error", {}).get("Code") if isinstance(resp, dict) else None
-            return fb, f"запасное (service-quotas: {code or type(e).__name__})"
+            why = "service-quotas: " + str((resp.get("Error", {}).get("Code") if isinstance(resp, dict) else None)
+                                           or type(e).__name__)
+        if actual is not None:
+            if flag is not None and int(flag) < actual:
+                return int(flag), f"флаг (service-quotas {code}: {actual})"
+            note = f"; флаг {int(flag)} выше фактической — взята фактическая" if flag is not None and int(flag) > actual else ""
+            return actual, f"service-quotas {code}{note}"
+        if flag is not None:
+            return int(flag), f"флаг ({why})"
+        return fb, f"запасное ({why})"
 
     def markets(self) -> list:
         return ["spot", "on-demand"] if self.cfg.on_demand_fallback else ["spot"]
 
     def load_quotas(self) -> None:
-        """Версия 3: квоты по регионам — в начале прогона и plan, с источником; --max-parallel по сумме квот."""
+        """Версия 3: справочник цен и квоты по регионам — в начале прогона и plan, с источником;
+        --max-parallel (не задан) — по сумме квот / 64 vCPU."""
         if not self.v3:
             return
+        ref = self.ref                       # битый справочник — отказ до первого запуска, а не посреди пакета
+        self.say(f"[справочник] {Path(self.cfg.price_ref).name} от {ref['date']}"
+                 + (f" ({ref['status']})" if ref["status"] else ""))
         rows = []
         for r in self.regions:
             for m in self.markets():
                 self.quota(r, m)
                 v, src = self._quota[(r, m)]
                 rows.append([r, m, v, src])
-                self.say(f"[квоты] {r} {'спот' if m == 'spot' else 'по требованию'}: {v} vCPU ({src})")
+                tail = " — регион не используется (задайте --vcpu-quota-per-region)" if v <= 0 else ""
+                self.say(f"[квоты] {r} {'спот' if m == 'spot' else 'по требованию'}: {v} vCPU ({src}){tail}")
         self.journal.append("quotas", run_id=self.cfg.run_id, quotas=rows)
         if self.cfg.max_parallel_auto:
-            n = max(self.cfg.max_parallel, sum(self.quota(r, "spot") for r in self.regions) // 64)
+            n = max(self.cfg.max_parallel, self.total_quota() // VCPU_REF)
             if n != self.cfg.max_parallel:
-                self.say(f"[очередь] --max-parallel не задан: {n} машин (сумма квот спота по регионам / 64 vCPU)")
+                self.say(f"[очередь] --max-parallel не задан: {n} машин (сумма квот по регионам / {VCPU_REF} vCPU)")
             self.cfg.max_parallel = n
 
     def total_quota(self) -> int:
@@ -1002,15 +1041,38 @@ class Runner:
             return self.cfg.vcpu_quota
         return sum(self.quota(r, m) for r in self.regions for m in self.markets())
 
+    @property
+    def _sideline(self) -> bool:
+        """plan или DryRun: машины не запускаются (в версии 3 квоты считаются по «волнам» пакета)."""
+        return self.offline or self.cfg.dryrun
+
     def _used(self, region: str, market: str = "spot") -> int:
-        return sum(a.job.vcpu for a in self.active.values()
+        used = sum(a.job.vcpu for a in self.active.values()
                    if (a.region or self.cfg.region) == region and a.market == market)
+        return used + self._planned.get((region, market), 0)
 
     def _fits(self, job: Job) -> bool:
         """Есть ли регион (и рынок), где задача помещается в квоту вместе с машинами прогона."""
         if not self.v3:
             return sum(a.job.vcpu for a in self.active.values()) + job.vcpu <= self.cfg.vcpu_quota
-        return any(self._used(r, m) + job.vcpu <= self.quota(r, m) for r in self.regions for m in self.markets())
+        return any((r, m) not in self._denied and self._used(r, m) + job.vcpu <= self.quota(r, m)
+                   for r in self.regions for m in self.markets())
+
+    def _room(self, job: Job) -> bool:
+        """_fits; в plan / DryRun версии 3 квоты всех регионов «заняты» задачами пакета — следующая волна."""
+        if self._fits(job):
+            return True
+        if self.v3 and self._sideline and any(self._planned.values()):
+            self._wave += 1
+            self._planned.clear()
+            self.say(f"[план] квоты регионов заняты пакетом — волна {self._wave} (после освобождения машин)")
+            return self._fits(job)
+        return False
+
+    def _plan_use(self, job: Job, region: str, market: str) -> None:
+        if self.v3 and self._sideline:
+            self._planned[(region, market)] = self._planned.get((region, market), 0) + job.vcpu
+            self._placements.append((self._wave, job.name, region, market))
 
     def _blocked(self, region: str, market: str) -> str:
         """Почему регион сейчас не годится для рынка: отказ в правах / пауза после квотной ошибки / ''."""
