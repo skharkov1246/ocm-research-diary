@@ -5,7 +5,7 @@
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
     "datasets": 406,
-    "total_bytes": 13737804,
+    "total_bytes": 13737839,
     "results_files": 179,
     "results_with_script": 54,
     "results_referenced_in_site": 22,
@@ -6633,7 +6633,7 @@
       "path": "routes/gtu/combustor/comb_l0_debug_results.json",
       "track": "не определён",
       "kind": "результат расчёта",
-      "bytes": 139750,
+      "bytes": 139766,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -6664,9 +6664,9 @@
         "software",
         "date"
       ],
-      "last_change": "2026-11-14",
+      "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "303e81c"
+      "last_commit": "1325928"
     },
     {
       "path": "routes/gtu/combustor/jobs_aws_comb_l0.json",
@@ -6692,7 +6692,7 @@
       "path": "routes/gtu/combustor/jobs_l0.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 36630,
+      "bytes": 36649,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -6700,9 +6700,9 @@
         "jobs",
         "estimate"
       ],
-      "last_change": "2026-11-14",
+      "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "303e81c"
+      "last_commit": "1325928"
     },
     {
       "path": "routes/gtu/combustor/targets_basis_results.json",
