@@ -613,8 +613,28 @@ def evaluate(cs, rho_cells, amax, q, label, Re_list=(0.0,)):
     S1 = Brinkman2D(nx, ny, h, cs["ops"])
     u1, p1 = S1.solve(al)
     Phi1 = S1.dissipation(u1, al)
+    # давление у каждого выхода при заданных равных расходах (среднее по ячейкам у отверстия)
+    P1 = p1.reshape(nx, ny)
+    pk = []
+    for o in cs["ops"][1:]:
+        sl = range(o["j0"], o["j1"])
+        if o["side"] == "E":
+            pk.append(float(np.mean([P1[nx - 1, j] for j in sl])))
+        elif o["side"] == "W":
+            pk.append(float(np.mean([P1[0, j] for j in sl])))
+        elif o["side"] == "N":
+            pk.append(float(np.mean([P1[i, ny - 1] for i in sl])))
+        else:
+            pk.append(float(np.mean([P1[i, 0] for i in sl])))
+    pk = np.array(pk)
+    Qk = cs["Qin"] / cs["n_out"]
+    throttle = float(Qk * np.sum(pk - pk.min()))            # идеальные дроссели до общего давления выходов
     S2 = Brinkman2D(nx, ny, h, with_pressure_outlets(cs))
-    out = dict(label=label, fluid_fraction=float(rho_cells.mean()), Phi_equal_split=Phi1)
+    out = dict(label=label, fluid_fraction=float(rho_cells.mean()), Phi_equal_split=Phi1,
+               outlet_pressures_equal_split=[float(v) for v in pk], Phi_throttles=throttle,
+               Phi_balanced=Phi1 + throttle,
+               note_balanced="Φ_balanced = Φ при равных расходах + мощность идеальных дросселей, выравнивающих "
+                             "давления выходов: цена равной раздачи на одинаковое противодавление")
     rows = []
     for Re in Re_list:
         if Re == 0:
@@ -670,11 +690,12 @@ def plot(cs, evals, path, title):
         sm = np.ma.masked_where(rho < 0.5, spd)
         ax.imshow(sm.T, origin="lower", extent=ext, cmap="inferno", alpha=0.9)
         x = (np.arange(nx) + 0.5) * h; y = (np.arange(ny) + 0.5) * h
-        ax.streamplot(x, y, uc.T, vc.T, color="#9fe0ff", linewidth=0.5, density=1.3, arrowsize=0.6)
+        um = np.where(rho > 0.5, uc, np.nan); vm = np.where(rho > 0.5, vc, np.nan)
+        ax.streamplot(x, y, um.T, vm.T, color="#9fe0ff", linewidth=0.5, density=1.6, arrowsize=0.6)
         r = ev["pressure_outlets"][0]
         nu = r["nonuniformity_max_min"]
-        ax.set_title(f"{ev['label']}\nΦ(равные расходы) = {ev['Phi_equal_split']:.0f};  Φ(p_вых = const) = {r['Phi']:.0f}\n"
-                     f"разброс расходов при p_вых = const: {100 * nu:.1f} %", fontsize=8.5)
+        ax.set_title(f"{ev['label']}\nразброс расходов при p_вых = const: {100 * nu:.1f} %\n"
+                     f"Φ с дросселями до равных расходов: {ev['Phi_balanced']:.0f}", fontsize=8.5)
         ax.set_xticks([]); ax.set_yticks([])
     fig.suptitle(title, fontsize=10)
     fig.tight_layout()
@@ -753,7 +774,7 @@ def run_all(out_dir, nx=90, vol=0.30, cases=("comb6", "fan8")):
             setup=dict(nx=cs["nx"], ny=cs["ny"], Lx=cs["Lx"], Ly=cs["Ly"], n_out=cs["n_out"], Q_in=cs["Qin"]),
             designs=rows,
             comb_header_width=float(wh),
-            history_uniform=[dict(it=i, **{k: (float(v) if isinstance(v, (float, np.floating)) else v) for k, v in hh.items()})
+            history_uniform=[dict(step=i, **{k: (float(v) if isinstance(v, (float, np.floating)) else v) for k, v in hh.items()})
                              for i, hh in enumerate(rU["hist"]) if i % 10 == 0 or i == len(rU["hist"]) - 1],
             dissipation_ratio_uniform_vs_comb=float(evs[1]["pressure_outlets"][0]["Phi"] / base_phi),
             nonuniformity=dict(comb=evb["pressure_outlets"][0]["nonuniformity_max_min"],
@@ -761,8 +782,11 @@ def run_all(out_dir, nx=90, vol=0.30, cases=("comb6", "fan8")):
                                uniform=evs[1]["pressure_outlets"][0]["nonuniformity_max_min"]),
             murray2d=murray2d_check(rU["rho"], cs["h"]),
             stl=stl, time_s=round(time.time() - t0, 1))
+        res["cases"][case]["balanced_ratio_uniform_vs_conventional"] = float(evs[1]["Phi_balanced"] / evb["Phi_balanced"])
+        res["cases"][case]["balanced_ratio_bp_vs_conventional"] = float(evs[0]["Phi_balanced"] / evb["Phi_balanced"])
         print(case, "готово", round(time.time() - t0), res["cases"][case]["nonuniformity"],
-              res["cases"][case]["dissipation_ratio_uniform_vs_comb"], flush=True)
+              res["cases"][case]["balanced_ratio_uniform_vs_conventional"], flush=True)
+        Path(out_dir, "topo_results.partial.json").write_text(json.dumps(res, ensure_ascii=False, indent=1, default=float))
     return res
 
 

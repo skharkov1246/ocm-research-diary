@@ -6,7 +6,7 @@
 поэтому показатель ищется численно: минимум перепада давления дерева при заданном объёме с трением по Haaland.
 Сравнение при одинаковом объёме каналов: (A) кольцевой коллектор, подвод в одной точке, 14 трубок к форсункам;
 (B) симметричное дерево 1 → 2 → 7 (равные длины путей) в стенке оболочки. Неравномерность расхода по форсункам —
-решением сети (уравнения узлов, Ньютон), разброс от допусков печати — методом Монте-Карло (±σ диаметра).
+решением сети (давления узлов, fsolve; Δp = R·m|m|, трение пересчитывается по Re), разброс от допусков печати — методом Монте-Карло (±σ диаметра).
 Газ — метан (Cantera gri30): плотность и вязкость при давлении коллектора. Расход — frame3 (Wf).
 """
 import json
@@ -84,108 +84,58 @@ def murray_tree(m_tot, rho, mu, L, V):
     return D, k01, k12, r
 
 
-def ring_network(D_ring, R_ring, d_pig, m_tot, rho, mu, p_in, K_inj, dvec=None):
-    """кольцо, подвод в узле 0 на угле 0; форсунки — в N_INJ узлах кольца через трубку и сопло.
-    Неизвестные: давления узлов кольца (N_INJ). Возврат: расходы форсунок."""
+def R_pipe(m, D, L, rho, mu):
+    """квадратичное сопротивление Δp = R·m|m| при трении для расхода m (Haaland)"""
+    A = math.pi * D * D / 4
+    Re = max(4 * abs(m) / (math.pi * D * mu), 1.0)
+    return f_haaland(Re, D) * L / D / (2 * rho * A * A)
+
+
+def solve_net(edges, n_nodes, src, m_tot, sinks, K_inj, rho, mu):
+    """сеть: edges [(a, b, D, L)], узлы 0..n−1; src — узел подвода m_tot; sinks [(узел, D_трубки, L_трубки)] —
+    трубка + сопло к давлению p3 (принято 0). Неизвестные — давления узлов (над p3). Две итерации по трению."""
+    m_e = np.full(len(edges), m_tot / max(len(sinks), 1))
+    m_s = np.full(len(sinks), m_tot / len(sinks))
+    x = np.full(n_nodes, K_inj * (m_tot / len(sinks)) ** 2 * 1.05)
+    for _ in range(3):
+        Re_ = [R_pipe(m, D, L, rho, mu) for m, (a, b, D, L) in zip(m_e, edges)]
+        Rs = [R_pipe(m, d, l, rho, mu) + K_inj for m, (nd, d, l) in zip(m_s, sinks)]
+
+        def flows(p):
+            fe = np.array([math.copysign(math.sqrt(abs(p[a] - p[b]) / R), p[a] - p[b]) for (a, b, D, L), R in zip(edges, Re_)])
+            fs = np.array([math.sqrt(max(p[nd], 0.0) / R) for (nd, d, l), R in zip(sinks, Rs)])
+            return fe, fs
+
+        def resid(p):
+            fe, fs = flows(p)
+            r = np.zeros(n_nodes)
+            for (a, b, D, L), q in zip(edges, fe):
+                r[a] -= q; r[b] += q
+            for (nd, d, l), q in zip(sinks, fs):
+                r[nd] -= q
+            r[src] += m_tot
+            return r / m_tot
+        x = fsolve(resid, x, xtol=1e-13)
+        m_e, m_s = flows(x)
+    return m_s, x
+
+
+def ring_network(D_ring, R_ring, d_pig, m_tot, rho, mu, K_inj, dvec=None):
+    """кольцо из N_INJ участков, подвод в узле 0; форсунки — в узлах через трубку длины L_PIGTAIL"""
     N = N_INJ
     Ls = 2 * math.pi * R_ring / N
     dvec = np.ones(N) if dvec is None else dvec
-    # подвод: узел 0 получает m_tot (подача — от источника, давление p_in не фиксируем: ищем давления узлов)
-
-    def inj_flow(p_node, j):
-        # трубка + сопло: p_node − p3 = dp_pipe(m) + K m²  ->  решаем относительно m (монотонно)
-        dpt = p_node - p3_
-        lo, hi = 0.0, 5 * m_tot / N
-        for _ in range(60):
-            mm = 0.5 * (lo + hi)
-            if dp_pipe(mm, d_pig * dvec[j], L_PIGTAIL, rho, mu) + K_inj * mm * mm < dpt:
-                lo = mm
-            else:
-                hi = mm
-        return 0.5 * (lo + hi)
-
-    def seg_flow(pa, pb):
-        dpt = pa - pb
-        s = 1.0 if dpt >= 0 else -1.0
-        lo, hi = 0.0, 2 * m_tot
-        for _ in range(60):
-            mm = 0.5 * (lo + hi)
-            if dp_pipe(mm, D_ring, Ls, rho, mu) < abs(dpt):
-                lo = mm
-            else:
-                hi = mm
-        return s * 0.5 * (lo + hi)
-
-    p3_ = p_in
-
-    def resid(x):
-        p = p3_ + x * 1e5
-        r = np.zeros(N)
-        for j in range(N):
-            r[j] = -inj_flow(p[j], j)
-            r[j] -= seg_flow(p[j], p[(j + 1) % N])
-            r[j] -= seg_flow(p[j], p[(j - 1) % N])
-        r[0] += m_tot
-        return r / m_tot
-
-    dp0 = K_inj * (m_tot / N) ** 2 / 1e5
-    x = fsolve(resid, np.full(N, dp0 * 1.05), xtol=1e-12)
-    p = p3_ + x * 1e5
-    q = np.array([inj_flow(p[j], j) for j in range(N)])
-    return q, p
+    edges = [(j, (j + 1) % N, D_ring, Ls) for j in range(N)]
+    sinks = [(j, d_pig * dvec[j], L_PIGTAIL) for j in range(N)]
+    return solve_net(edges, N, 0, m_tot, sinks, K_inj, rho, mu)
 
 
-def tree_flows(D, L, m_tot, rho, mu, p3, K_inj, dvec=None):
-    """дерево 1 → 2 → 7 с разбросом диаметров (dvec — множители для 1 + 2 + 14 каналов): расходы форсунок"""
+def tree_flows(D, L, m_tot, rho, mu, K_inj, dvec=None):
+    """дерево: узел 0 (вход) —ствол→ узел 1 —2 ветви→ узлы 2, 3 —по 7 листьев (лист = канал + сопло)"""
     dvec = np.ones(17) if dvec is None else dvec
-    D0, D1s, D2s = D[0] * dvec[0], D[1] * dvec[1:3], D[2] * dvec[3:]
-
-    def leaf_m(dp_avail, d):
-        lo, hi = 0.0, m_tot
-        for _ in range(60):
-            mm = 0.5 * (lo + hi)
-            if dp_pipe(mm, d, L[2], rho, mu) + K_inj * mm * mm < dp_avail:
-                lo = mm
-            else:
-                hi = mm
-        return 0.5 * (lo + hi)
-
-    def branch(dp_avail, d1, d2s):
-        # подбор давления в узле разветвления: сумма листьев = расход ветви
-        lo, hi = 0.0, dp_avail
-        for _ in range(60):
-            pn = 0.5 * (lo + hi)
-            ml = sum(leaf_m(pn, d) for d in d2s)
-            if dp_pipe(ml, d1, L[1], rho, mu) + pn < dp_avail:
-                lo = pn
-            else:
-                hi = pn
-        pn = 0.5 * (lo + hi)
-        return [leaf_m(pn, d) for d in d2s]
-
-    # давление на входе — подбор так, чтобы сумма = m_tot
-    lo, hi = 0.0, 50e5
-    for _ in range(50):
-        P = 0.5 * (lo + hi)
-        # в узле 0 после ствола
-        mt = 0.0
-        q = []
-        # ствол: делим на две ветви
-        lo2, hi2 = 0.0, P
-        for _ in range(50):
-            pn = 0.5 * (lo2 + hi2)
-            qa = branch(pn, D1s[0], D2s[:7]); qb = branch(pn, D1s[1], D2s[7:])
-            ms = sum(qa) + sum(qb)
-            if dp_pipe(ms, D0, L[0], rho, mu) + pn < P:
-                lo2 = pn
-            else:
-                hi2 = pn
-        q = qa + qb
-        if sum(q) < m_tot:
-            lo = P
-        else:
-            hi = P
-    return np.array(q), P
+    edges = [(0, 1, D[0] * dvec[0], L[0]), (1, 2, D[1] * dvec[1], L[1]), (1, 3, D[1] * dvec[2], L[1])]
+    sinks = [(2 if k < 7 else 3, D[2] * dvec[3 + k], L[2]) for k in range(14)]
+    return solve_net(edges, 4, 0, m_tot, sinks, K_inj, rho, mu)
 
 
 def main():
@@ -202,22 +152,22 @@ def main():
     # (A) кольцо: D_ring и d_pig — типичные (оценка): 1" кольцо и 1/2" трубки
     D_ring, d_pig = 0.025, 0.012
     V_ring = math.pi * D_ring ** 2 / 4 * 2 * math.pi * R_ring + N_INJ * math.pi * d_pig ** 2 / 4 * L_PIGTAIL
-    qA, pA = ring_network(D_ring, R_ring, d_pig, Wf, rho, mu, p3, K_inj)
+    qA, pA = ring_network(D_ring, R_ring, d_pig, Wf, rho, mu, K_inj)
     # (B) дерево той же ёмкости: длины уровней — ствол 0,3 м, ветви — четверть окружности, листья — до форсунок
     L_tree = [0.30, math.pi * R_ring / 2, 0.45 * R_ring]
     D_opt, k01, k12, r = murray_tree(Wf, rho, mu, L_tree, V_ring)
-    qB, PB = tree_flows(D_opt, L_tree, Wf, rho, mu, p3, K_inj)
+    qB, PB = tree_flows(D_opt, L_tree, Wf, rho, mu, K_inj)
     # Монте-Карло допусков
     rng = np.random.default_rng(2026)
     devA, devB = [], []
     for _ in range(200):
-        qa, _ = ring_network(D_ring, R_ring, d_pig, Wf, rho, mu, p3, K_inj, dvec=1 + TOL_D * rng.standard_normal(N_INJ))
-        qb, _ = tree_flows(D_opt, L_tree, Wf, rho, mu, p3, K_inj, dvec=1 + TOL_D * rng.standard_normal(17))
+        qa, _ = ring_network(D_ring, R_ring, d_pig, Wf, rho, mu, K_inj, dvec=1 + TOL_D * rng.standard_normal(N_INJ))
+        qb, _ = tree_flows(D_opt, L_tree, Wf, rho, mu, K_inj, dvec=1 + TOL_D * rng.standard_normal(17))
         devA.append((qa.max() - qa.min()) / qa.mean()); devB.append((qb.max() - qb.min()) / qb.mean())
     # закон Мюррея ламинарный для сравнения (тот же объём): D0³ = 2D1³, D1³ = 7D2³
     res = dict(
         title="Встроенный коллектор топливного газа KV-3: дерево по закону Мюррея против кольца с трубками",
-        method="сеть каналов: трение Haaland (ε = %.0f мкм), сопла форсунок Δp = K·m², уравнения узлов (fsolve / бисекции); "
+        method="сеть каналов: трение Haaland (ε = %.0f мкм), сопла форсунок Δp = K·m², давления узлов (fsolve, 3 итерации трения); "
                "дерево 1→2→7: диаметры — минимум перепада при объёме кольцевого варианта (SLSQP); Монте-Карло 200 выборок "
                "с σ диаметра %.0f %%" % (EPS_ROUGH * 1e6, TOL_D * 100),
         software=dict(python=sys.version.split()[0], numpy=np.__version__, cantera=ctv),

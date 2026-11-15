@@ -754,11 +754,10 @@ def liner_case(pt):
     return panel, p_in, p_out
 
 
-NET_TITLE = {"straight": "прямые каналы (16 корней, K = 0)", "tree_r8": "8 деревьев, K = 1 (Мюррей)",
+NET_TITLE = {"straight": "прямые каналы (K = 0)", "tree_r8": "8 деревьев, K = 1 (Мюррей)",
              "tree_r4": "4 дерева, K = 2 (Мюррей)", "tree_r2": "2 дерева, K = 3 (Мюррей)",
              "tree_r1": "1 дерево, K = 4 (Мюррей)", "tree_r4_u": "4 дерева, K = 2 (Uylings 7/3)",
-             "cco": "растущее дерево по тепловому потоку (4 корня, слив у кромки)",
-             "cco_eff": "растущее дерево, выпуски в газ с дозированием"}
+             "cco": "растущее дерево (CCO)"}
 NET_K = {"straight": 0, "tree_r8": 1, "tree_r4": 2, "tree_r2": 3, "tree_r1": 4}
 
 
@@ -846,10 +845,12 @@ def run(out_dir=HERE, quick=False):
                 row.update(strip(r))
                 row["x_ngv_pct"] = 100 * 2 * N_v * r["m_c"] / pt["G"]
                 row["p_in_kPa"] = r["p_in"] / 1e3
-                if T41 == 1100.0:
-                    figs[("ngv", T41, name)] = (panel, net, r["_Ts"])
+                if T41 == 1050.0:
+                    figs[("ngv", T41, name)] = (panel, net, r["_Ts"], True)
             else:
                 row["at_full_dp"] = strip(r["at_full_dp"])
+                if T41 == 1050.0:
+                    figs[("ngv", T41, name)] = (panel, net, r["at_full_dp"]["_Ts"], False)
             ngv["rows"].append(row)
             print("NGV", T41, name, row.get("x_ngv_pct"), row.get("T_spread"), round(time.time() - t0), flush=True)
     # одинаковый расход (как у прямых при 1100 °C): сравнение неравномерности и энтропии
@@ -880,7 +881,7 @@ def run(out_dir=HERE, quick=False):
         if r["feasible"]:
             row["at_limit"] = strip(r)
             row["coolant_per_m2_kg_s"] = r["m_c"] / (a["Lx"] * a["H"])
-        figs[("liner", 0, name)] = (panel, net, full["_Ts"])
+        figs[("liner", 0, name)] = (panel, net, full["_Ts"], True)
         lin["rows"].append(row)
         print("liner", name, full["T_max"] - 273.15, row.get("coolant_per_m2_kg_s"), round(time.time() - t0), flush=True)
     res["cases"]["liner"] = lin
@@ -927,14 +928,14 @@ def plots(res, figs, out_dir):
     import matplotlib.pyplot as plt
     names = ["straight", "tree_r4", "tree_r1", "cco"]
     title = NET_TITLE
-    for art, T41 in (("ngv", 1100.0), ("liner", 0)):
+    for art, T41 in (("ngv", 1050.0), ("liner", 0)):
         fig, axs = plt.subplots(1, 4, figsize=(17, 4.6) if art == "ngv" else (17, 3.9))
         vmin = min(figs[(art, T41, n)][2].min() for n in names if (art, T41, n) in figs) - 273.15
-        vmax = max(figs[(art, T41, n)][2].max() for n in names if (art, T41, n) in figs) - 273.15
+        vmax = min(max(figs[(art, T41, n)][2].max() for n in names if (art, T41, n) in figs) - 273.15, 1150.0)
         for ax, n in zip(axs, names):
             if (art, T41, n) not in figs:
                 ax.axis("off"); continue
-            panel, net, Ts = figs[(art, T41, n)]
+            panel, net, Ts, ok = figs[(art, T41, n)]
             ext = [0, panel.Lx * 1e3, 0, panel.H * 1e3]
             im = ax.imshow((Ts - 273.15).T, origin="lower", extent=ext, cmap="magma", vmin=vmin, vmax=vmax, aspect="equal")
             P = np.array(net.nodes) * 1e3
@@ -942,12 +943,15 @@ def plots(res, figs, out_dir):
             for a_, b_, d in net.seg:
                 if d > 0.01:
                     continue
-                ax.plot([P[a_, 0], P[b_, 0]], [P[a_, 1], P[b_, 1]], color="#7fd3ff", lw=0.6 + 3.0 * d / dmax,
-                        solid_capstyle="round")
+                ax.plot([P[a_, 0], P[b_, 0]], [P[a_, 1], P[b_, 1]], color="#7fd3ff", lw=0.3 + 1.7 * d / dmax,
+                        solid_capstyle="round", alpha=0.85)
             rows = res["cases"][art]["rows"]
             if art == "ngv":
                 rr = [r for r in rows if r["net"] == n and r["T41_C"] == T41]
-                lab = f"x_ngv = {rr[0]['x_ngv_pct']:.2f} %, разброс {rr[0]['T_spread']:.0f} K" if rr and rr[0]["feasible"] else "не держит предел"
+                if rr and rr[0]["feasible"]:
+                    lab = f"x_ngv = {rr[0]['x_ngv_pct']:.2f} %, разброс {rr[0]['T_spread']:.0f} K"
+                else:
+                    lab = f"не держит 950 °C: весь перепад, T_max {Ts.max() - 273.15:.0f} °C"
             else:
                 rr = [r for r in rows if r["net"] == n][0]
                 lab = f"T_max {rr['at_full_dp']['T_max'] - 273.15:.0f} °C, разброс {rr['at_full_dp']['T_spread']:.0f} K"
@@ -956,7 +960,8 @@ def plots(res, figs, out_dir):
             ax.tick_params(labelsize=7)
         cb = fig.colorbar(im, ax=axs, shrink=0.85, pad=0.01)
         cb.set_label("температура горячей поверхности, °C", fontsize=8)
-        fig.suptitle(("Сопловая лопатка KV-3, сторона (развёртка), T41 = 1100 °C, расход — наименьший для предела 950 °C"
+        fig.suptitle(("Сопловая лопатка KV-3, сторона (развёртка), T41 = 1050 °C, расход — наименьший для предела 950 °C "
+                      "(у не держащих предел — весь перепад)"
                       if art == "ngv" else
                       "Жаровая труба KV-3, участок у первичной зоны, весь перепад 3 % p3"), fontsize=10)
         fig.savefig(out_dir / f"vascular_{art}.png", dpi=130, bbox_inches="tight")
@@ -965,6 +970,8 @@ def plots(res, figs, out_dir):
     fig, ax = plt.subplots(figsize=(6.4, 4.2))
     mk = {"straight": "o", "tree_r8": "v", "tree_r4": "s", "tree_r2": "<", "tree_r1": "^", "tree_r4_u": "x", "cco": "D"}
     for n in NET_TITLE:
+        if n not in mk:
+            continue
         rr = [r for r in res["cases"]["ngv"]["rows"] if r["net"] == n and r["feasible"]]
         ax.plot([r["T41_C"] for r in rr], [r["x_ngv_pct"] for r in rr], marker=mk[n], label=title[n])
     ax.axhline(3.0, color="0.5", ls="--", lw=0.8)
@@ -1001,10 +1008,22 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--quick", action="store_true")
     ap.add_argument("--out", default=str(HERE))
+    ap.add_argument("--figs", default=None, help="куда сохранить поля для перерисовки (pickle; по умолчанию — в --out)")
     a_ = ap.parse_args()
     out = Path(a_.out)
     res, figs, nets, nets_l = run(out, quick=a_.quick)
-    plots(res, figs, out)
+    (out / "vascular_results.json").write_text(json.dumps(res, ensure_ascii=False, indent=1, default=float))
+    try:
+        import pickle
+        pk = Path(a_.figs) if a_.figs else out / "vascular_figs.pkl"
+        with open(pk, "wb") as fh:                # поля для перерисовки картинок без пересчёта
+            pickle.dump(dict(res=res, figs=figs), fh)
+    except Exception:
+        pass
+    try:
+        plots(res, figs, out)
+    except Exception as e:                      # картинка не должна терять расчёт
+        res["plot_error"] = repr(e)
     stl = {}
     for name, net in nets.items():
         stl[name] = net_stl(net, out / f"vascular_ngv_{name}.stl")

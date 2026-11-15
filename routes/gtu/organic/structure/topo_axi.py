@@ -202,9 +202,19 @@ class AxiModel:
         if s.any():
             q, Emin = prm["q"], prm["Emin"]
             x = xb[s]
-            den = 1 + q * (1 - x)
-            eE[s] = Emin + (1 - Emin) * x / den
-            dE[s] = (1 - Emin) * (1 + q) / den ** 2
+            if prm.get("interp", "ramp") == "simp":
+                # SIMP с линейным участком ниже x0 (Bruyneel & Duysinx 2005): конечное отношение массы к жёсткости в
+                # пустоте и сильный штраф промежуточных плотностей (RAMP давал дешёвую «пену» под обшивкой колеса)
+                p_, x0 = prm.get("p", 3.0), prm.get("x0", 0.1)
+                lin = x <= x0
+                Es_ = np.where(lin, x * x0 ** (p_ - 1), x ** p_)
+                dEs = np.where(lin, x0 ** (p_ - 1), p_ * x ** (p_ - 1))
+                eE[s] = Emin + (1 - Emin) * Es_
+                dE[s] = (1 - Emin) * dEs
+            else:
+                den = 1 + q * (1 - x)
+                eE[s] = Emin + (1 - Emin) * x / den
+                dE[s] = (1 - Emin) * (1 + q) / den ** 2
             em[s] = x; dm[s] = 1.0
             xs = np.maximum(x, 1e-9)
             es[s] = xs ** prm["qs"]; ds[s] = prm["qs"] * xs ** (prm["qs"] - 1)

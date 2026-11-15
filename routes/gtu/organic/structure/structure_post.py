@@ -156,3 +156,112 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# =========================================================================== доводка порога
+LEVELS = (0.5, 0.45, 0.4, 0.35, 0.3, 0.25, 0.2, 0.15, 0.1, 0.05)
+
+
+def pick_threshold(name, part, variant, h, u_target):
+    """наибольший уровень x̄, при котором двоичный проект (x̄ ≥ уровня -> металл) выполняет ограничения (воксельный КЭ)"""
+    model, design, cases, prm, meta, inb = DT.setup(part, variant, h)
+    d = np.load(os.path.join(OUTDIR, f"disk_{name}.npz"))
+    assert np.array_equal(d["ei"], model.ei) and np.array_equal(d["ej"], model.ej), "сетка прогона не совпадает"
+    xb = d["xb"]
+    scan = []
+    best = None
+    for lv in LEVELS:
+        xe = np.where(xb >= lv, 1.0, 0.0); xe[model.group == 0] = 1.0
+        sol = model.solve(xe, prm, cases, need_sens=False)
+        eE, em, *_ = model.interp(xe, prm)
+        u = [float(np.max(np.where(xe > 0.5, c["u"], 0.0))) for c in sol["cases"]]
+        ok = all(u[k] <= u_target[k] * 1.01 for k in range(len(u)))
+        scan.append(dict(level=lv, mass_kg=model.mass(em), J_kgm2=model.inertia(em), u=u, ok=ok))
+        if ok and best is None:
+            best = scan[-1]
+    return dict(scan=scan, chosen=best)
+
+
+# =========================================================================== диск турбины: профиль -> disk.py (CalculiX)
+def turb_profile(name, n_pts=48):
+    """профиль t(r), zc(r) из двоичного проекта: толщина металла по столбцу и его средняя линия; сглаживание по 3 столбцам"""
+    D = OG.load(name)
+    F = np.nan_to_num(D["F"], nan=0.0)
+    nr, nz = F.shape
+    dr, dz = D["r1"] / nr, (D["z1"] - D["z0"]) / nz
+    zc = D["z0"] + (np.arange(nz) + 0.5) * dz
+    S = F >= 0.5
+    t = S.sum(axis=1) * dz
+    zm = np.array([zc[S[i]].mean() if S[i].any() else 0.0 for i in range(nr)])
+    k = np.ones(3) / 3
+    t_s = np.convolve(np.r_[t[0], t, t[-1]], k, mode="valid"); zm_s = np.convolve(np.r_[zm[0], zm, zm[-1]], k, mode="valid")
+    rc = (np.arange(nr) + 0.5) * dr
+    r = np.r_[0.0, np.linspace(rc[0], rc[-1], n_pts - 2), D["r1"]]
+    tt = np.interp(r, rc, t_s); zz = np.interp(r, rc, zm_s)
+    return dict(r=r.tolist(), t=tt.tolist(), zc=zz.tolist())
+
+
+def disk_case(name, prof, rpm, k_thick=1.0, mesh=(120, 16), t_cap=None, r_fix=None):
+    """случай disk.py: профиль с утолщением k (кроме слоя под пазами r ≥ r_fix), поле cooled_750, давление лопаток ∝ ω²"""
+    sys.path.insert(0, DT.TA.FEA)
+    import disk as DK
+    d = DT.frame3(); P = d["parts"]["turb1"]
+    Tv = P["variants"]["cooled_750"]["T_C"]
+    p_rim = P["variants"]["cooled_750"]["cases"]["100"]["rim_p_MPa"]
+    r = np.asarray(prof["r"]); t = np.asarray(prof["t"]).copy()
+    if k_thick != 1.0:
+        m = r < (r_fix if r_fix is not None else r[-1])
+        t[m] = t[m] * k_thick
+        if t_cap:
+            t = np.minimum(t, t_cap)
+    case = dict(name=name, material="in713c", rpm=rpm, profile=dict(r=r.tolist(), t=t.tolist(), zc=prof.get("zc", [0.0] * len(r))),
+                profile_interp="pchip", T_C=Tv, rim=dict(p_MPa=p_rim * (rpm / DT.RPM0) ** 2), mesh=dict(nr=mesh[0], nz=mesh[1]))
+    wd = os.path.join(OUTDIR, "diskpy", f"{name}_{int(rpm)}")
+    res = DK.run_case(case, workdir=wd, keep=True)
+    # местный σв(T)/σ_экв по узлам .frd этого прогона (как frame3_fea: uts_local)
+    frd = DK.parse_frd(os.path.join(wd, "disk.frd"))
+    mat = DK.load_material("in713c"); ua = np.asarray(mat["uts_MPa"], float)
+    S, TN = frd["STRESS"], frd.get("NDTEMP", {})
+    rat = []
+    for n, sv in S.items():
+        vm = DK.von_mises(*sv[:6]) / 1e6
+        if vm > 1.0:
+            rat.append(float(np.interp(TN[n][0], ua[:, 0], ua[:, 1])) / vm)
+    res["uts_local"] = dict(ratio=min(rat))
+    rho = 7916.0
+    rr = np.linspace(r[0], r[-1], 4001); tt = np.interp(rr, r, t)
+    mass = float(np.trapezoid(rho * tt * 2 * math.pi * rr, rr)); J = float(np.trapezoid(rho * tt * 2 * math.pi * rr ** 3, rr))
+    return dict(rpm=rpm, k=k_thick, mass_kg=mass, J_kgm2=J, vm_max_MPa=res["vm_max_node_MPa"], vm_max_at=res["vm_max_at"],
+                uts_ratio=(res.get("uts_local") or {}).get("ratio"), creep_local_min_h=res["creep"]["local_min_h"],
+                creep_local_s1_min_h=res["creep"]["local_s1_min_h"], creep_at=res["creep"]["local_at"],
+                burst_margin=res["burst"]["margin"], gate=res["quality"]["passed"], flags=res["flags"],
+                profile=dict(r=r.tolist(), t=t.tolist()))
+
+
+def size_turb(name, prof, crit, mesh=(120, 16)):
+    """наименьшее k ≥ 1 (бисекция), при котором: местный ресурс LC1 ≥ crit['life_h'] и σв/σ при 120 % ≥ crit['uts_ratio']"""
+    d = DT.frame3(); g = d["parts"]["turb1"]["geometry"]
+    r_fix = g["r_live_rim_m"] - 4e-3; t_cap = d["parts"]["turb1"]["profile_info"]["t_max_m"]
+
+    def ok(k):
+        a = disk_case(name, prof, DT.RPM0, k, mesh, t_cap, r_fix); b = disk_case(name, prof, 1.2 * DT.RPM0, k, mesh, t_cap, r_fix)
+        good = a["creep_local_min_h"] >= crit["life_h"] and (b["uts_ratio"] or 0) >= crit["uts_ratio"]
+        return good, a, b
+    log = []
+    g1, a, b = ok(1.0); log.append(dict(k=1.0, ok=g1, life=a["creep_local_min_h"], uts120=b["uts_ratio"], mass=a["mass_kg"]))
+    if g1:
+        return dict(k=1.0, c100=a, c120=b, log=log)
+    lo, hi = 1.0, 1.6
+    g2, a2, b2 = ok(hi); log.append(dict(k=hi, ok=g2, life=a2["creep_local_min_h"], uts120=b2["uts_ratio"], mass=a2["mass_kg"]))
+    if not g2:
+        return dict(k=None, c100=a2, c120=b2, log=log, note="при k = 1,6 критерии не выполнены")
+    best = (hi, a2, b2)
+    for _ in range(7):
+        mid = 0.5 * (lo + hi)
+        gm, am, bm = ok(mid)
+        log.append(dict(k=mid, ok=gm, life=am["creep_local_min_h"], uts120=bm["uts_ratio"], mass=am["mass_kg"]))
+        if gm:
+            hi, best = mid, (mid, am, bm)
+        else:
+            lo = mid
+    return dict(k=best[0], c100=best[1], c120=best[2], log=log)

@@ -261,6 +261,8 @@ def run_spec(spec):
     part, variant, h = spec["part"], spec["variant"], spec["h"]
     model, design, cases, prm, meta, in_base_e = setup(part, variant, h)
     tgt = spec.get("u_target", [1.0, 1.0])
+    if spec.get("interp"):
+        prm.update(interp=spec["interp"], p=spec.get("p", 3.0), x0=spec.get("x0", 0.1))
     x0 = np.ones(model.ne) if variant == "A" else np.full(model.ne, spec.get("x0", 0.5))
     logf = open(os.path.join(OUTDIR, f"log_{spec['name']}.txt"), "w")
 
@@ -308,6 +310,7 @@ def run_spec(spec):
     eE, em, es, *_ = model.interp(xe, prm)
     out = summarize(model, xe, em, sol, cases, solid, meta)
     out.update(name=spec["name"], part=part, variant=variant, objective=spec["objective"], u_target=tgt,
+               interp=prm.get("interp", "ramp") if variant == "A" else "lattice",
                repairs=repairs, constraint_ok=bool(all(out["cases"][k]["u_max"] <= tgt[k] * 1.005 for k in range(len(tgt)))),
                iterations=len(opt["hist"]), seconds=round(time.time() - t0, 1),
                grey_final=float(opt["hist"][-1]["grey"]), R_filter_m=R, meta={k: v for k, v in meta.items()
@@ -333,9 +336,9 @@ def specs(h_t, h_c, u_eq):
     S = [dict(name="turb1_A_mass_eq", part="turb1", variant="A", h=h_t, objective="mass", u_target=ut),
          dict(name="turb1_A_mass_lim", part="turb1", variant="A", h=h_t, objective="mass"),
          dict(name="turb1_A_J_eq", part="turb1", variant="A", h=h_t, objective="inertia", u_target=ut),
-         dict(name="comp2_A_mass_eq", part="comp2", variant="A", h=h_c, objective="mass", u_target=uc),
-         dict(name="comp2_A_mass_lim", part="comp2", variant="A", h=h_c, objective="mass"),
-         dict(name="comp2_A_J_eq", part="comp2", variant="A", h=h_c, objective="inertia", u_target=uc),
+         dict(name="comp2_A_mass_eq", part="comp2", variant="A", h=h_c, objective="mass", u_target=uc, interp="simp"),
+         dict(name="comp2_A_mass_lim", part="comp2", variant="A", h=h_c, objective="mass", interp="simp"),
+         dict(name="comp2_A_J_eq", part="comp2", variant="A", h=h_c, objective="inertia", u_target=uc, interp="simp"),
          dict(name="turb1_B_mass_eq", part="turb1", variant="B", h=h_t, objective="mass", u_target=ut),
          dict(name="comp2_B_mass_eq", part="comp2", variant="B", h=h_c, objective="mass", u_target=uc),
          dict(name="comp2_B_J_eq", part="comp2", variant="B", h=h_c, objective="inertia", u_target=uc)]

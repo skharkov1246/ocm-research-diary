@@ -511,7 +511,7 @@ def build_liner_case(e, cell_out, out, level="coarse", of="2512", iters=None):
 
 
 # =========================================================================== общие файлы кейса
-def _write_common(case, e, L, inlets, patches, of, it, hot_box, Lscale):
+def _write_common(case, e, L, inlets, patches, of, it, hot_box, Lscale, special=None, solver="reactingFoam"):
     p3, T3 = L["p3_Pa"], L["T3_K"]
     Ya = air_Y()
     # constant: механизм и модели
@@ -556,7 +556,7 @@ def _write_common(case, e, L, inlets, patches, of, it, hot_box, Lscale):
         "        libs            (fieldFunctionObjects);\n        executeControl  writeTime;\n"
         "        writeControl    writeTime;\n    }\n}\n")
     foam_file(os.path.join(sysd, "controlDict"), "dictionary", "controlDict",
-              f"application     reactingFoam;\nstartFrom       latestTime;\nstartTime       0;\nstopAt          endTime;\n"
+              f"application     {solver};\nstartFrom       latestTime;\nstartTime       0;\nstopAt          endTime;\n"
               f"endTime         {it['cold']};\ndeltaT          1;\nwriteControl    timeStep;\nwriteInterval   {it['write']};\n"
               f"purgeWrite      3;\nwriteFormat     ascii;\nwritePrecision  9;\nwriteCompression off;\ntimeFormat      general;\n"
               f"timePrecision   8;\nrunTimeModifiable true;\n" + funcs)
@@ -610,8 +610,9 @@ def _write_common(case, e, L, inlets, patches, of, it, hot_box, Lscale):
                 bf[p] = fn_out(p)
             elif p == "side_sym":
                 bf[p] = sym
-        bf["wedge_neg"] = bf["wedge_pos"] = wedge
-        bf["axis"] = empty
+        for sp_name, sp_entry in (special if special is not None else
+                                  {"wedge_neg": wedge, "wedge_pos": wedge, "axis": empty}).items():
+            bf[sp_name] = sp_entry
         return bf
 
     def U_in(p):
