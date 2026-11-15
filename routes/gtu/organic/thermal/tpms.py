@@ -130,6 +130,11 @@ def recuperators(mac_rows, inertia, quick=False):
         case["designs"]["plate_NuH1"] = strip(pl2)
         pl3 = R.size_plate(du, PH, PC, 0.75e-3, PLATE["NuH1"])          # тот же Dh 1,5 мм, что у TPMS
         case["designs"]["plate_NuH1_Dh15"] = strip(pl3)
+        for nm, gap, Nu in (("plate_NuT_as_cycles", 1.0e-3, PLATE["NuT"]), ("plate_NuH1", 1.0e-3, PLATE["NuH1"]),
+                            ("plate_NuH1_Dh15", 0.75e-3, PLATE["NuH1"])):
+            mf = R.min_frontal(du, PH, PC, "plate", dict(gap=gap, Nu=Nu))
+            if mf is not None:
+                case["designs"][nm]["min_frontal"] = strip(mf)
         runs = [("gyroid", True, None, models), ("diamond", True, None, models)]
         if key == "R90-ic-RH-ibc-none-none":
             runs += [("gyroid", False, None, models), ("diamond", False, None, models),
@@ -140,7 +145,13 @@ def recuperators(mac_rows, inertia, quick=False):
             name = f"{topo}_{'graded' if graded else 'uniform'}" + ("_tw025" if tw else "") + \
                    ("_inertia" if mm is models_in else "")
             r = R.size_tpms(du, PH, PC, mm[topo], graded=graded, tw=tw, maxiter=25 if quick else 50)
+            z = r["z"]
+            prof = dict(a=R.pw(z[2:5]) if len(z) == 8 else R.pw([z[2]] * 3),
+                        c=R.pw(z[5:8]) if len(z) == 8 else R.pw([z[3]] * 3))
+            mf = R.min_frontal(du, PH, PC, "tpms", prof, tw=tw, model=mm[topo])
             case["designs"][name] = strip(r)
+            if mf is not None:
+                case["designs"][name]["min_frontal"] = strip(mf)
             if key == "R90-ic-RH-ibc-none-none":
                 profiles[name] = r.get("_prof")
             print(key, name, round(r["mass_core"]), round(r["V"], 3), r["feasible"], round(time.time() - t0), flush=True)
@@ -190,9 +201,11 @@ def plots(res, profiles, out_dir):
               "diamond_uniform": "Schwarz-D, пост.", "diamond_graded": "Schwarz-D, переменная",
               "gyroid_graded_tw025": "гироид, стенка 0,25", "gyroid_graded_inertia": "гироид + инерция (LBM)"}
     for ax, field_, yl in ((axs[0], "mass_core", "масса сердцевины, т"), (axs[1], "V", "объём сердцевины, м³"),
-                           (axs[2], "A_fr", "фронт, м²")):
+                           (axs[2], "A_fr", "наименьший фронт при тех же потерях, м²")):
         names = [n for n in labels if n in rc.get("R90-ic-RH-ibc-none-none", {}).get("designs", {})]
-        vals = [rc["R90-ic-RH-ibc-none-none"]["designs"][n][field_] / (1e3 if field_ == "mass_core" else 1) for n in names]
+        D = rc["R90-ic-RH-ibc-none-none"]["designs"]
+        vals = [(D[n].get("min_frontal", {}).get("A_fr", D[n]["A_fr"]) if field_ == "A_fr" else D[n][field_])
+                / (1e3 if field_ == "mass_core" else 1) for n in names]
         cols = ["0.55" if n.startswith("plate") else "#3b7dd8" for n in names]
         ax.barh(range(len(names)), vals, color=cols)
         ax.set_yticks(range(len(names))); ax.set_yticklabels([labels[n] for n in names], fontsize=8)

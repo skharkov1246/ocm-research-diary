@@ -1,0 +1,122 @@
+{
+ "id": "v3_ladder",
+ "axis": "обратная связь",
+ "title": "Лестница по линии дросселя с гейтом на каждой ступени и откатом при NaN",
+ "mechanism": "Частота ступенями 0,30 -> 0,55 -> 0,75 -> 0,90 -> 1,00, давление на выходе на каждой ступени — по линии дросселя p = p_нач + w^2 (0,60 оценки − p_нач), рампа ступени 120 итераций, порция 220, гейт и до трёх порций по 200 на установление. NaN или непройденный гейт -> откат к последнему пройденному рестарту: та же ступень с рампой вдвое длиннее и пределом CFL вдвое ниже, затем — ступень пополам (всего откатов до 4). Потом плавный второй порядок и давление до 0,75.",
+ "hypothesis": "Любое заранее заданное расписание может оказаться слишком быстрым на каком-то отрезке; квазистационарный путь с проверкой каждого состояния и возвратом при срыве его найдёт.",
+ "differs_from_smoke": "5 ступеней частоты с давлением ~ w^2, гейт на каждой, автоматический откат",
+ "transforms": [
+  "hist"
+ ],
+ "set": {
+  "OUTPUT_FILES": "RESTART",
+  "WRT_FREQ": "100",
+  "LIMITER": "VENKATAKRISHNAN_WANG",
+  "VENKAT": "0.05"
+ },
+ "backoff": {
+  "max_total": 4
+ },
+ "steps": [
+  {
+   "name": "r1_w030",
+   "frac": 0.3,
+   "load": 0.6,
+   "iter": 220,
+   "ramp": 120,
+   "pramp": 120,
+   "muscl": false,
+   "gate": "intermediate",
+   "hold": {
+    "iter": 200,
+    "max": 3
+   }
+  },
+  {
+   "name": "r2_w055",
+   "frac": 0.55,
+   "load": 0.6,
+   "iter": 220,
+   "ramp": 120,
+   "pramp": 120,
+   "muscl": false,
+   "gate": "intermediate",
+   "hold": {
+    "iter": 200,
+    "max": 3
+   }
+  },
+  {
+   "name": "r3_w075",
+   "frac": 0.75,
+   "load": 0.6,
+   "iter": 220,
+   "ramp": 120,
+   "pramp": 120,
+   "muscl": false,
+   "gate": "intermediate",
+   "hold": {
+    "iter": 200,
+    "max": 3
+   }
+  },
+  {
+   "name": "r4_w090",
+   "frac": 0.9,
+   "load": 0.6,
+   "iter": 220,
+   "ramp": 120,
+   "pramp": 120,
+   "muscl": false,
+   "gate": "intermediate",
+   "hold": {
+    "iter": 200,
+    "max": 3
+   }
+  },
+  {
+   "name": "r5_w100",
+   "frac": 1.0,
+   "load": 0.6,
+   "iter": 220,
+   "ramp": 120,
+   "pramp": 120,
+   "muscl": false,
+   "gate": "intermediate",
+   "hold": {
+    "iter": 200,
+    "max": 3
+   }
+  },
+  {
+   "name": "f_order2",
+   "frac": 1.0,
+   "load": 0.6,
+   "iter": 400,
+   "ramp": 0,
+   "pramp": 0,
+   "muscl": true,
+   "gate": "intermediate",
+   "hold": {
+    "iter": 200,
+    "max": 2
+   },
+   "muscl_ramp": 250
+  },
+  {
+   "name": "g_base",
+   "frac": 1.0,
+   "load": 0.75,
+   "iter": 500,
+   "ramp": 0,
+   "pramp": 300,
+   "muscl": true,
+   "gate": "final",
+   "hold": {
+    "iter": 300,
+    "max": 40
+   }
+  }
+ ],
+ "_comment": "Стратегия разгона базовой точки для sweep_ramp.py run (перебор jobs_aws_su2_kv3_sweep.json). Сгенерировано make_jobs_su2_kv3_sweep.py; правки — в нём. load — доля оценки давления на выходе при номинальной частоте (char_points.p_out_estimate); при частоте w < 1 давление — по линии дросселя p_нач + w^2 (load x оценка − p_нач); load null — давление прежнее. set — поля шаблона run_case.py (--set), transforms — правки производного шаблона (sweep_ramp.py rc)."
+}

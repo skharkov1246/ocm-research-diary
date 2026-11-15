@@ -395,5 +395,485 @@
    "jobs": "routes/gtu/organic/cycles/aws_jobs_cycles.json",
    "note": "мелкая сетка (CYCLES_FINE): 864 топологии, π через 0,5; проверено командой plan без AWS; выполнимо после попадания файлов в ветку claude/lucid-allen-yvps5d"
   }
+ },
+ "thermal": {
+  "source": [
+   "routes/gtu/organic/thermal/vascular_results.json",
+   "routes/gtu/organic/thermal/tpms_results.json",
+   "routes/gtu/organic/thermal/topo_results.json"
+  ],
+  "date": "2026-11-14",
+  "status": "оценка уровня облика: 1D-сеть + 2D-стенка; переносы TPMS — предел Стокса (воксели 32³) с поправкой LBM; оптимизация топологии — 2D, малое Re; всё — к проверке трёхмерным расчётом (jobs_thermal.json)",
+  "engine_funnel": {
+   "target": "routes/gtu/funnel/funnel_space.py (CAT, CONT), parts_model.py, make_model.py",
+   "new_axes": [
+    {
+     "axis": "cool",
+     "kind": "CAT",
+     "add_value": "P (печатный сопловой аппарат с каналами у стенки)",
+     "note": "x_ngv по T41 — таблица vascular.x_ngv_pct_by_T41 (предел поверхности — оценка); лучшая сеть: при умеренной нагрузке — одно-два ветвления, при высокой — прямые каналы",
+     "model": "vascular.min_flow_for_limit(ngv_case(T41), сеть) → x_ngv = 2·N·ṁ/G"
+    },
+    {
+     "axis": "ngv_network",
+     "kind": "CAT",
+     "values": [
+      "прямые",
+      "8 деревьев K=1",
+      "4 дерева K=2"
+     ],
+     "note": "глубокие деревья (K ≥ 3) и растущее дерево на равном объёме предел не держат — в перебор не включать"
+    },
+    {
+     "axis": "recup_core",
+     "kind": "CAT",
+     "values": [
+      "пластины LPBF (cycles)",
+      "фольга (cycles)",
+      "гироид LPBF, переменная ячейка",
+      "Schwarz-D LPBF, переменная ячейка"
+     ],
+     "note": "масса и объём сердцевины — tpms.designs; в ламинарном режиме (предел Стокса) гироид не легче плоских каналов при той же стенке; выигрыш TPMS — только с инерцией (Re ≥ 100), это задача AWS thermal-tpms-lbm-*"
+    },
+    {
+     "axis": "manifold",
+     "kind": "CAT",
+     "values": [
+      "гребёнка/спицы из труб",
+      "печатный (оптимизация топологии)"
+     ],
+     "note": "печатный коллектор — 1 деталь вместо N труб + коллектора + 2N соединений; равномерность раздачи и потери — topo (2D, малое Re: показатель, не число для KV-3)"
+    }
+   ],
+   "models": {
+    "vascular": {
+     "x_ngv_pct_by_T41": {
+      "1000.0": {
+       "straight": 0.8,
+       "tree_r8": 0.8,
+       "tree_r4": 0.725,
+       "tree_r4_u": 0.746
+      },
+      "1050.0": {
+       "straight": 1.202,
+       "tree_r8": 1.2,
+       "tree_r4": 1.557,
+       "tree_r4_u": 1.612
+      },
+      "1100.0": {
+       "straight": 1.618,
+       "tree_r8": 1.615
+      },
+      "1150.0": {
+       "straight": 2.05,
+       "tree_r8": 2.047
+      }
+     },
+     "best_network_by_T41": {
+      "1000.0": {
+       "net": "tree_r4",
+       "x_ngv_pct": 0.725
+      },
+      "1050.0": {
+       "net": "tree_r8",
+       "x_ngv_pct": 1.2
+      },
+      "1100.0": {
+       "net": "tree_r8",
+       "x_ngv_pct": 1.615
+      },
+      "1150.0": {
+       "net": "tree_r8",
+       "x_ngv_pct": 2.047
+      }
+     },
+     "T_lim_surface_C": 950.0,
+     "N_vanes_estimate": 53,
+     "liner_panel": {
+      "straight": {
+       "coolant_kg_s_m2": null,
+       "T_max_full_dp_C": 952.9,
+       "spread_full_dp_K": 153.2
+      },
+      "tree_r8": {
+       "coolant_kg_s_m2": null,
+       "T_max_full_dp_C": 967.7,
+       "spread_full_dp_K": 176.3
+      },
+      "tree_r4": {
+       "coolant_kg_s_m2": null,
+       "T_max_full_dp_C": 1081.8,
+       "spread_full_dp_K": 265.2
+      },
+      "tree_r2": {
+       "coolant_kg_s_m2": null,
+       "T_max_full_dp_C": 1354.7,
+       "spread_full_dp_K": 573.6
+      },
+      "tree_r1": {
+       "coolant_kg_s_m2": null,
+       "T_max_full_dp_C": 1547.8,
+       "spread_full_dp_K": 890.3
+      },
+      "tree_r4_u": {
+       "coolant_kg_s_m2": null,
+       "T_max_full_dp_C": 1091.2,
+       "spread_full_dp_K": 261.6
+      },
+      "cco": {
+       "coolant_kg_s_m2": null,
+       "T_max_full_dp_C": 1165.2,
+       "spread_full_dp_K": 603.5
+      }
+     },
+     "liner_T_lim_C": 900.0
+    },
+    "tpms": {
+     "designs": {
+      "R80-ic-RH-ibc-none-none": {
+       "plate_NuT_as_cycles": {
+        "mass_core_kg": 2351,
+        "mass_with_headers_kg": 3762,
+        "V_core_m3": 1.075,
+        "A_front_m2": 6.44,
+        "L_m": 0.167,
+        "modules_BLT_S1500": 1,
+        "feasible": true
+       },
+       "plate_NuH1": {
+        "mass_core_kg": 2154,
+        "mass_with_headers_kg": 3446,
+        "V_core_m3": 0.984,
+        "A_front_m2": 10.68,
+        "L_m": 0.092,
+        "modules_BLT_S1500": 1,
+        "feasible": true
+       },
+       "gyroid_graded": {
+        "mass_core_kg": 2710,
+        "mass_with_headers_kg": 4336,
+        "V_core_m3": 0.975,
+        "A_front_m2": 11.5,
+        "L_m": 0.085,
+        "modules_BLT_S1500": 1,
+        "feasible": true
+       },
+       "diamond_graded": {
+        "mass_core_kg": 2671,
+        "mass_with_headers_kg": 4274,
+        "V_core_m3": 0.974,
+        "A_front_m2": 13.75,
+        "L_m": 0.071,
+        "modules_BLT_S1500": 1,
+        "feasible": true
+       },
+       "plate_NuH1_Dh15": {
+        "mass_core_kg": 1617,
+        "mass_with_headers_kg": 2588,
+        "V_core_m3": 0.602,
+        "A_front_m2": 5.81,
+        "L_m": 0.104,
+        "modules_BLT_S1500": 1,
+        "feasible": true
+       },
+       "cycles_plate_lpbf": {
+        "V_core_m3": 1.097,
+        "mass_kg": 3840.8,
+        "L_m": 0.21947,
+        "A_front_m2": 4.9987,
+        "modules": 2
+       }
+      },
+      "R85-ic-RH-ibc-none-none": {
+       "plate_NuT_as_cycles": {
+        "mass_core_kg": 3204,
+        "mass_with_headers_kg": 5126,
+        "V_core_m3": 1.464,
+        "A_front_m2": 15.85,
+        "L_m": 0.092,
+        "modules_BLT_S1500": 2,
+        "feasible": true
+       },
+       "plate_NuH1": {
+        "mass_core_kg": 2934,
+        "mass_with_headers_kg": 4695,
+        "V_core_m3": 1.341,
+        "A_front_m2": 10.08,
+        "L_m": 0.133,
+        "modules_BLT_S1500": 2,
+        "feasible": true
+       },
+       "gyroid_graded": {
+        "mass_core_kg": 3701,
+        "mass_with_headers_kg": 5921,
+        "V_core_m3": 1.335,
+        "A_front_m2": 24.79,
+        "L_m": 0.054,
+        "modules_BLT_S1500": 2,
+        "feasible": true
+       },
+       "diamond_graded": {
+        "mass_core_kg": 3626,
+        "mass_with_headers_kg": 5801,
+        "V_core_m3": 1.318,
+        "A_front_m2": 13.32,
+        "L_m": 0.099,
+        "modules_BLT_S1500": 2,
+        "feasible": true
+       },
+       "plate_NuH1_Dh15": {
+        "mass_core_kg": 2203,
+        "mass_with_headers_kg": 3526,
+        "V_core_m3": 0.821,
+        "A_front_m2": 8.83,
+        "L_m": 0.093,
+        "modules_BLT_S1500": 1,
+        "feasible": true
+       },
+       "cycles_plate_lpbf": {
+        "V_core_m3": 1.5109,
+        "mass_kg": 5289.7,
+        "L_m": 0.26,
+        "A_front_m2": 5.8111,
+        "modules": 2
+       }
+      },
+      "R90-ic-RH-ibc-none-none": {
+       "plate_NuT_as_cycles": {
+        "mass_core_kg": 4730,
+        "mass_with_headers_kg": 7568,
+        "V_core_m3": 2.162,
+        "A_front_m2": 8.46,
+        "L_m": 0.256,
+        "modules_BLT_S1500": 3,
+        "feasible": true
+       },
+       "plate_NuH1": {
+        "mass_core_kg": 4332,
+        "mass_with_headers_kg": 6932,
+        "V_core_m3": 1.98,
+        "A_front_m2": 7.61,
+        "L_m": 0.26,
+        "modules_BLT_S1500": 2,
+        "feasible": true
+       },
+       "gyroid_graded": {
+        "mass_core_kg": 5524,
+        "mass_with_headers_kg": 8838,
+        "V_core_m3": 2.013,
+        "A_front_m2": 14.38,
+        "L_m": 0.14,
+        "modules_BLT_S1500": 2,
+        "feasible": true
+       },
+       "diamond_graded": {
+        "mass_core_kg": 5286,
+        "mass_with_headers_kg": 8458,
+        "V_core_m3": 1.899,
+        "A_front_m2": 18.11,
+        "L_m": 0.105,
+        "modules_BLT_S1500": 2,
+        "feasible": true
+       },
+       "gyroid_uniform": {
+        "mass_core_kg": 5524,
+        "mass_with_headers_kg": 8838,
+        "V_core_m3": 2.013,
+        "A_front_m2": 14.38,
+        "L_m": 0.14,
+        "modules_BLT_S1500": 2,
+        "feasible": true
+       },
+       "diamond_uniform": {
+        "mass_core_kg": 5286,
+        "mass_with_headers_kg": 8458,
+        "V_core_m3": 1.899,
+        "A_front_m2": 18.11,
+        "L_m": 0.105,
+        "modules_BLT_S1500": 2,
+        "feasible": true
+       },
+       "gyroid_graded_tw025": {
+        "mass_core_kg": 3677,
+        "mass_with_headers_kg": 5883,
+        "V_core_m3": 1.71,
+        "A_front_m2": 12.39,
+        "L_m": 0.138,
+        "modules_BLT_S1500": 2,
+        "feasible": true
+       },
+       "plate_NuH1_Dh15": {
+        "mass_core_kg": 3253,
+        "mass_with_headers_kg": 5205,
+        "V_core_m3": 1.211,
+        "A_front_m2": 10.79,
+        "L_m": 0.112,
+        "modules_BLT_S1500": 2,
+        "feasible": true
+       },
+       "cycles_plate_lpbf": {
+        "V_core_m3": 2.2777,
+        "mass_kg": 7974.2,
+        "L_m": 0.32221,
+        "A_front_m2": 7.0688,
+        "modules": 3
+       }
+      }
+     },
+     "transport_stokes": {
+      "gyroid": [
+       {
+        "level": -0.4,
+        "eps": 0.629,
+        "fRe": 55.15,
+        "Nu_H1": 7.352
+       },
+       {
+        "level": -0.2,
+        "eps": 0.564,
+        "fRe": 53.05,
+        "Nu_H1": 6.711
+       },
+       {
+        "level": 0.0,
+        "eps": 0.5,
+        "fRe": 51.93,
+        "Nu_H1": 6.194
+       },
+       {
+        "level": 0.2,
+        "eps": 0.436,
+        "fRe": 51.06,
+        "Nu_H1": 5.763
+       },
+       {
+        "level": 0.4,
+        "eps": 0.371,
+        "fRe": 51.29,
+        "Nu_H1": 5.362
+       },
+       {
+        "level": 0.6,
+        "eps": 0.305,
+        "fRe": 51.33,
+        "Nu_H1": 4.998
+       }
+      ],
+      "diamond": [
+       {
+        "level": -0.4,
+        "eps": 0.664,
+        "fRe": 59.75,
+        "Nu_H1": 7.922
+       },
+       {
+        "level": -0.2,
+        "eps": 0.582,
+        "fRe": 57.07,
+        "Nu_H1": 6.969
+       },
+       {
+        "level": 0.0,
+        "eps": 0.5,
+        "fRe": 56.41,
+        "Nu_H1": 6.295
+       },
+       {
+        "level": 0.2,
+        "eps": 0.418,
+        "fRe": 56.62,
+        "Nu_H1": 5.774
+       },
+       {
+        "level": 0.4,
+        "eps": 0.336,
+        "fRe": 60.55,
+        "Nu_H1": 5.338
+       },
+       {
+        "level": 0.6,
+        "eps": 0.253,
+        "fRe": 66.33,
+        "Nu_H1": 5.007
+       }
+      ]
+     },
+     "crosscheck": {
+      "topo": "gyroid",
+      "level": 0.0,
+      "n": 32,
+      "k_mac_over_a2": 0.002032208996560263,
+      "k_lbm_over_a2": 0.002186552153799221,
+      "k_diff_pct": 7.594846666863542,
+      "Nu_mac": 6.186165082532801,
+      "Nu_lbm": 6.4183640527195625,
+      "Nu_diff_pct": 3.753520429682622,
+      "lbm_steps": 3000,
+      "lbm_converged": true,
+      "Pe_lbm": 0.0023359163849633663
+     },
+     "inertia": null
+    },
+    "manifold": {
+     "comb6": {
+      "n_out": 6,
+      "nonuniformity_max_min_at_equal_back_pressure": {
+       "comb": 0.6100018134617513,
+       "bp": 2.396202886561421,
+       "uniform": 0.10282277807229012,
+       "warm": 0.03854726234594441
+      },
+      "balanced_dissipation_ratio_vs_conventional": {
+       "bp_plus_orifices": 0.528,
+       "warm_start_uniform": 0.651,
+       "cold_start_uniform": 1.806
+      },
+      "note": "Φ_balanced — рассеяние при равных расходах + идеальные дроссели до общего давления выходов; 2D, Стокс, безразмерно — показатель, не число для KV-3"
+     },
+     "fan8": {
+      "n_out": 8,
+      "nonuniformity_max_min_at_equal_back_pressure": {
+       "comb": 1.4792108784798668,
+       "bp": 0.2599305384959283,
+       "uniform": 0.17642713047226377,
+       "warm": 0.046083450331607434
+      },
+      "balanced_dissipation_ratio_vs_conventional": {
+       "bp_plus_orifices": 0.357,
+       "warm_start_uniform": 0.352,
+       "cold_start_uniform": 0.991
+      },
+      "note": "Φ_balanced — рассеяние при равных расходах + идеальные дроссели до общего давления выходов; 2D, Стокс, безразмерно — показатель, не число для KV-3"
+     }
+    }
+   }
+  },
+  "combustor_funnel": {
+   "target": "routes/gtu/combustor (targets.json, comb_space.py)",
+   "new_axes": [
+    {
+     "axis": "liner_cooling",
+     "kind": "CAT",
+     "values": [
+      "плёночное (как есть)",
+      "печатные каналы у стенки"
+     ],
+     "note": "расход охладителя на м² стенки при перепаде 3 % p3 и пределе 900 °C — vascular.liner_panel (оценка; излучение пламени — ε = 0,20)"
+    },
+    {
+     "axis": "fuel_manifold",
+     "kind": "CAT",
+     "values": [
+      "трубы",
+      "печатный с равномерной раздачей"
+     ],
+     "note": "разброс расходов по форсункам при одинаковом давлении — topo.nonuniformity"
+    }
+   ]
+  },
+  "aws": {
+   "jobs": "routes/gtu/organic/thermal/jobs_thermal.json",
+   "note": "5 задач, проверено командой plan без AWS; прогноз пакета — поле estimate (верхняя граница); трёхмерные CFD/CHT — блок planned_3d (кода сборки кейсов нет)"
+  }
  }
 }

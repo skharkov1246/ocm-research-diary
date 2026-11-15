@@ -62,8 +62,13 @@ def topo_block(tp):
         return None
     out = {}
     for case, c in tp["cases"].items():
-        out[case] = dict(n_out=c["setup"]["n_out"], nonuniformity_max_min=c["nonuniformity"],
-                         dissipation_ratio_uniform_vs_conventional=round(c["dissipation_ratio_uniform_vs_comb"], 3))
+        out[case] = dict(n_out=c["setup"]["n_out"], nonuniformity_max_min_at_equal_back_pressure=c["nonuniformity"],
+                         balanced_dissipation_ratio_vs_conventional=dict(
+                             bp_plus_orifices=round(c["balanced_ratio_bp_vs_conventional"], 3),
+                             warm_start_uniform=round(c["balanced_ratio_warm_vs_conventional"], 3),
+                             cold_start_uniform=round(c["balanced_ratio_uniform_vs_conventional"], 3)),
+                         note="Φ_balanced — рассеяние при равных расходах + идеальные дроссели до общего давления выходов; "
+                              "2D, Стокс, безразмерно — показатель, не число для KV-3")
     return out
 
 

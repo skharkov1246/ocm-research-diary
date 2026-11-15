@@ -701,7 +701,7 @@ def plot(cs, evals, path, title):
                      f"Φ с дросселями до равных расходов: {ev['Phi_balanced']:.0f}", fontsize=8.5)
         ax.set_xticks([]); ax.set_yticks([])
     fig.suptitle(title, fontsize=10)
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, 0, 1, 0.90))
     fig.savefig(path, dpi=130)
     plt.close(fig)
 
@@ -804,7 +804,32 @@ def run_all(out_dir, nx=90, vol=0.30, cases=("comb6", "fan8")):
     return res
 
 
-if __name__ == "__main__":
+def replot(out_dir, nx=80, vol=0.30):
+    """картинки по сохранённым полям ρ (topo_<случай>_rho.npz) без новой оптимизации"""
+    out_dir = Path(out_dir)
+    for case in ("comb6", "fan8"):
+        f = out_dir / f"topo_{case}_rho.npz"
+        if not f.exists():
+            continue
+        z = np.load(f)
+        cs = setup_case(case, nx)
+        evs = []
+        labels = (("bp", "Борвалл — Петерсон: расходы заданы"), ("uniform", "равномерность в цели (выходы на давлении)"),
+                  ("warm", "Б — П, затем равномерность (тёплый старт)"),
+                  ("conventional", "обычная гребёнка (та же доля жидкости)" if case == "comb6"
+                   else "ступица и спицы (та же доля жидкости)"))
+        for key, lab in labels:
+            ev = evaluate(cs, z[key], 1.0 / 1e-5, 0.1, lab, Re_list=(0.0,))
+            ev["_rho"] = z[key]
+            ev["_S"] = Brinkman2D(cs["nx"], cs["ny"], cs["h"], with_pressure_outlets(cs))
+            evs.append(ev)
+        plot(cs, [evs[3], evs[0], evs[1], evs[2]], out_dir / f"topo_{case}.png",
+             f"Коллектор: 1 вход → {cs['n_out']} выходов, доля жидкости {vol:.2f} (2D, Стокс — Бринкман, безразмерно)")
+
+
+if __name__ == "__main__" and "--replot" in sys.argv:
+    replot(sys.argv[sys.argv.index("--replot") + 1])
+elif __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser()
     ap.add_argument("--nx", type=int, default=90)

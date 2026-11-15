@@ -323,8 +323,8 @@ def build_liner3d_cht_case(e, cell_out, out, level="L2", of="2512", iters=None):
                 solver="chtMultiRegionFoam (v2512/v2606): газ - реагирующий (EDC, GRI-Mech 3.0 + TDAC, P1), стенка - "
                        "heSolidThermo; стык - compressible::turbulentTemperatureRadCoupledMixed; снаружи - "
                        "externalWallHeatFluxTemperature (h, T3 из comb_crn.wall_temperature)",
-                todo="словари областей (constant/gas, constant/solid, 0/gas, 0/solid) пишет cht_region_dicts; свойства "
-                     "печатного сплава (k(T), cp(T), ρ) - с источником до прогона (data/known_gaps)")
+                todo="словари областей (constant/gas, constant/solid, 0/gas, 0/solid, regionProperties) не написаны; свойства "
+                     "печатного сплава (k(T), cp(T), ρ) - с источником до прогона (README, «Ограничения и пробелы»)")
     json.dump(desc, open(os.path.join(case, "case.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     return desc
 

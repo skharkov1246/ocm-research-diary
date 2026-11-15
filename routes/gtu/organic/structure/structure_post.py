@@ -573,3 +573,21 @@ def summary():
     with open(os.path.join(HERE, "structure_results.json"), "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=1, default=float)
     return out
+
+
+def comp2_refine_variants(name="comp2_A_mass_eq", r_keep=0.10, fillet=4e-3):
+    """доводка колеса: полости полотна (центр дальше r_keep) заполняются, полость носка остаётся; вариант 2 — ещё
+    скругление вогнутых углов радиусом fillet (замыкание: расширение + сужение), в пределах огибающей"""
+    from shapely.geometry import Polygon
+    D = OG.load(name)
+    gs = OG.section_polygons(D, smooth_tol=0.3e-3)
+    env = Polygon(D["env"]).buffer(0)
+    g = gs[0]
+    keep = [i for i in g.interiors if Polygon(i).centroid.x < r_keep]
+    v1 = Polygon(g.exterior, keep).buffer(0)
+    v2 = v1.buffer(fillet, join_style="round").buffer(-fillet, join_style="round").intersection(env).buffer(0)
+    out = {}
+    for tag, p in (("fill", v1), ("fill_fillet", v2.simplify(0.5e-3, preserve_topology=True).buffer(0))):
+        p = max(p.geoms, key=lambda q: q.area) if p.geom_type == "MultiPolygon" else p
+        out[f"{name}_{tag}"] = p
+    return out

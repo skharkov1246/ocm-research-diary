@@ -342,6 +342,10 @@ def build_smoke() -> dict:
                                    "выгрузка и merge прошли (база стартовала на 248-й с после загрузки машины); база "
                                    "обеих линий разошлась (NaN) на 9–10-й итерации стадии s2 (разгон 0,6 -> 1,0 за 8 "
                                    "итераций), точки не считались",
+                           "local_repro": "та же команда core130 (--base-iter-scale 0.1) в контейнере gtu-platform:local, "
+                                          "4 процесса, код a0afbd1, сетка 138 863 узла: NaN на 9-й итерации s2 — "
+                                          "расхождение не от AWS и не от 64 процессов; полный план smoke075 на core130 "
+                                          "coarse прошёл без NaN (README, прогон Б: 520 итераций, дисбаланс 1,4 %)",
                            "files": "routes/gtu/platform/su2/aws_smoke_20261115T003035Z-c8f9/"}],
         "defaults": {"instance_type": "c7a.16xlarge", "fallback_types": ["c7i.16xlarge"], "image": "al2023",
                      "container": CONTAINER, "container_setup": CONTAINER_SETUP},
