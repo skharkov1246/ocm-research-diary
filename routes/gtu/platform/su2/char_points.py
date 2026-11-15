@@ -282,8 +282,27 @@ def cmd_run(a) -> int:
     base_dir = os.path.join(a.work, "base")
     tl_base = min(a.base_max_frac * total, deadline - time.monotonic() - 60)
     print(f"[char] {summ['label']} {a.level}: оценка p_вых {est['p_out_estimate']:.0f} Па, база {p_base:.0f} Па "
-          f"({a.base_pfrac:g}), точки {pfracs}, {np_pt} процессов на точку; срок {total:.0f} с, база до {tl_base:.0f} с",
-          flush=True)
+          f"({a.base_pfrac:g}), точки {pfracs}, {np_pt} процессов на точку; срок {total:.0f} с, база до {tl_base:.0f} с"
+          + (f"; база — стратегия {os.path.basename(a.base_strategy)}" if a.base_strategy else ""), flush=True)
+    if a.base_strategy:   # база — стратегия перебора sweep_ramp.py (переходы по гейту расхода), а не план run_case.py
+        summ["plans"]["base"] = os.path.basename(a.base_strategy)
+        p = subprocess.Popen(base_strategy_argv(a, nproc=nproc, work=base_dir, out=os.path.join(a.out, "base"),
+                                                time_limit=tl_base, label=summ["label"]))
+        _CHILDREN.append(p)
+        rc_base = p.wait()
+        _CHILDREN.clear()
+        base, restart, p_sw = base_from_sweep(os.path.join(a.out, "base", "sweep_summary.json"), rc_base)
+        if p_sw is not None:
+            p_base = p_sw
+            summ["p_base_Pa"] = p_base
+        summ["base"] = base
+        save()
+        if restart is None:
+            print(f"[char] база-стратегия: {base.get('verdict')} — точки не считаются", flush=True)
+            summ["verdict"] = "base_failed"
+            save()
+            return 3
+        return run_points(a, summ, save, est, pfracs, np_pt, deadline, restart, p_base, t_start)
     p = subprocess.Popen(run_case_argv(a, out=base_dir, np_=nproc, p_out=p_base, plan=a.base_plan,
                                        time_limit=tl_base, iter_scale=a.base_iter_scale))
     _CHILDREN.append(p)
@@ -313,8 +332,44 @@ def cmd_run(a) -> int:
         summ["verdict"] = "base_failed"
         save()
         return 3
+    return run_points(a, summ, save, est, pfracs, np_pt, deadline, restart, p_base, t_start)
 
-    # 2) точки параллельно от рестарта базы
+
+def base_strategy_argv(a, *, nproc: int, work: str, out: str, time_limit: float, label: str) -> list:
+    """sweep_ramp.py run для базы по стратегии перебора (plan_sweep_*.json). Ключи SU2 (--extra, --output-files,
+    --turb) задаёт сама стратегия; давление базы — её итоговый шаг (load x та же оценка char_points.p_out_estimate)."""
+    cmd = [sys.executable, "-u", os.path.join(HERE, "sweep_ramp.py"), "run", "--strategy", a.base_strategy,
+           "--case", a.case, "--level", a.level, "--geom-out", a.geom_out, "--label", label, "--np", str(nproc),
+           f"--mpi-args={a.mpi_args}", "--shroud", a.shroud, "--vaneless", a.vaneless,
+           "--time-limit", f"{max(time_limit, 1.0):.0f}", "--work", work, "--out", out]
+    if a.su2_src:
+        cmd += ["--su2-src", a.su2_src]
+    return cmd
+
+
+BASE_STRATEGY_OK = ("success", "established")   # база годится для точек: расход согласован и установился, п и КПД физичны
+
+
+def base_from_sweep(summary_path: str, returncode: int) -> tuple:
+    """(запись базы, рестарт или None, давление базы или None) по sweep_summary.json стратегии."""
+    base = {"returncode": returncode, "dir": "base", "kind": "sweep_strategy"}
+    if not os.path.isfile(summary_path):
+        base["verdict"] = "no_summary"
+        base["restart_ok"] = False
+        return base, None, None
+    s = json.load(open(summary_path, encoding="utf-8"))
+    fs = s.get("final_state") or {}
+    base.update(verdict=s.get("verdict"), verdict_detail=s.get("verdict_detail"), verdict_step=s.get("verdict_step"),
+                strategy=s.get("strategy"), criteria=s.get("criteria"), su2_version=s.get("su2_version"),
+                key_check=s.get("key_check"), iters_total=s.get("iters_total"), final_state=fs)
+    rf = os.path.join(os.path.dirname(summary_path), s["final_restart"]) if s.get("final_restart") else None
+    ok = s.get("verdict") in BASE_STRATEGY_OK and rf and os.path.isfile(rf) and abs(float(fs.get("frac", 0)) - 1.0) < 1e-9
+    base["restart_ok"] = bool(ok)
+    return base, (rf if ok else None), (float(fs["p_out"]) if ok else None)
+
+
+def run_points(a, summ, save, est, pfracs, np_pt, deadline, restart, p_base, t_start) -> int:
+    """2) точки параллельно от рестарта базы."""
     plan_file = os.path.join(a.work, "plan_point.json")
     with open(plan_file, "w", encoding="utf-8") as f:
         json.dump(point_plan(a.point_iter, a.point_pramp), f)
@@ -457,6 +512,9 @@ def build_parser():
     r.add_argument("--base-pfrac", type=float, default=0.75)
     r.add_argument("--base-plan", default=BASE_PLAN, help="план базы для run_case.py (имя или JSON)")
     r.add_argument("--base-iter-scale", type=float, default=1.0)
+    r.add_argument("--base-strategy", default=None,
+                   help="база — стратегия перебора sweep_ramp.py (plan_sweep_*.json) вместо --base-plan: переходы по "
+                        "гейту расхода; точки — от её итогового рестарта при её давлении (вердикт success или established)")
     r.add_argument("--base-max-frac", type=float, default=0.3, help="доля срока на базу")
     r.add_argument("--point-iter", type=int, default=6000)
     r.add_argument("--point-pramp", type=int, default=300)

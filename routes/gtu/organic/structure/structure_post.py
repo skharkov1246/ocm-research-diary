@@ -537,7 +537,20 @@ def summary():
                          lattice=runs[k].get("lattice"), ccx=_ccx_brief(cx.get(k)),
                          geometry=(geo["comp2A"] or {}).get(k, {}).get("stats") if geo["comp2A"] else None)
                  for k in ("comp2_A_mass_eq", "comp2_A_J_eq", "comp2_A_mass_lim", "comp2_B_mass_eq", "comp2_B_J_eq")},
-        ccx_baseline=_ccx_brief(cx.get("comp2_baseline")))
+        ccx_baseline=_ccx_brief(cx.get("comp2_baseline")),
+        ccx_refine={r["name"]: _ccx_brief(r) for r in (_load(os.path.join(OUTDIR, "ccx_refine.json")) or {}).get("results", [])})
+    pc = _load("profile_opt_comp2.json")
+    if pc and pc.get("check_160x24"):
+        c = pc["check_160x24"]
+        comp["profile_eq"] = dict(mass_kg=c["c100"]["mass_kg"], J_kgm2=c["c100"]["J_kgm2"],
+                                  d_mass=rel(c["c100"]["mass_kg"], c["base_c100"]["mass_kg"]),
+                                  d_J=rel(c["c100"]["J_kgm2"], c["base_c100"]["J_kgm2"]),
+                                  yield_ratio_100=c["c100"]["yield_ratio"], yield_ratio_120=c["c120"]["yield_ratio"],
+                                  base_yield_ratio_100=c["base_c100"]["yield_ratio"], base_yield_ratio_120=c["base_c120"]["yield_ratio"],
+                                  burst_margin=c["c100"]["burst_margin"], base_burst_margin=c["base_c100"]["burst_margin"],
+                                  base_mass_kg=c["base_c100"]["mass_kg"], base_J_kgm2=c["base_c100"]["J_kgm2"],
+                                  n_eval=pc["n_eval"], cobyla=pc["cobyla"], profile=c["c100"]["profile"],
+                                  verdict="не хуже кованого по наибольшему σ/σ0,2 на 100 и 120 % (disk.py 160×24, k = 1)")
     lat = dict(law=L["law"], fit_power=L["fit_power"], sheet_thickness_mm=L["sheet_thickness_mm"],
                convergence=[dict(rho=c["rho"], N=c["N"], E100=c["E100"], S=c["S_worst_p995"]) for c in L["convergence"]],
                zener=[(p["rho"], p["zener"]) for p in L["points"]])

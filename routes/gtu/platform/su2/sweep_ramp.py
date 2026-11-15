@@ -68,6 +68,10 @@ VERDICT_RANK = {"success": 6, "established": 5, "reached_base": 4, "stuck": 3, "
 
 # ----------------------------------------------------------------------------------------------- производный шаблон
 HIST_ADD = ["CFL_NUMBER", "LINSOL", "MAX_RES"]   # группы истории SU2 v8.6.0 (CFlowCompOutput.cpp, CFlowOutput.cpp)
+# Giles MASS_FLOW_OUTLET (v8.6.0, CEulerSolver::BC_Giles): p_e = p_ср + MF_RELAX * (dp/drho) * (m_ср - m_цели); m — расход
+# канала через выход, > 0 при прямом течении (как MassFlowOut_1). Значение принято здесь; знак и отклик проверены
+# прогоном с рестарта (jobs_aws_su2_kv3_sweep.json, diagnosis.massflow_probe).
+MF_RELAX = 0.1
 RIEMANN_LINE = ("MARKER_RIEMANN= (inlet, TOTAL_CONDITIONS_PT, ${P01}, ${T01}, 0.0, 0.0, 1.0, "
                 "outlet, STATIC_PRESSURE, ${P_OUT}, 0.0, 0.0, 0.0, 0.0)")
 
@@ -86,6 +90,13 @@ def derive_template(text: str, transforms: list) -> tuple:
             have = [x.strip() for x in m[0].group(2).split(",") if x.strip()]
             new = have + [g for g in HIST_ADD if g not in have]
             text = text[:m[0].start()] + m[0].group(1) + ", ".join(new) + m[0].group(3) + text[m[0].end():]
+            applied.append(t)
+        elif t == "massflow":
+            pat = re.compile(r"outlet, STATIC_PRESSURE_1D, \$\{P_OUT\}, 0\.0,")
+            m = list(pat.finditer(text))
+            if len(m) != 1:
+                raise SystemExit(f"правка massflow: выход Giles STATIC_PRESSURE_1D найден {len(m)} раз — шаблон изменился")
+            text = text[:m[0].start()] + f"outlet, MASS_FLOW_OUTLET, ${{P_OUT}}, {MF_RELAX:g}," + text[m[0].end():]
             applied.append(t)
         elif t == "riemann":
             pat = re.compile(r"^MARKER_GILES=.*$", re.M)

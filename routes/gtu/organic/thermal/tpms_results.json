@@ -2135,5 +2135,6 @@
    "note": "ИЛЛЮСТРАЦИЯ метода переменной ячейки (a от 1 до 2 оптимальных по длине), не оптимум: в ламинарном пределе оптимизатор выбрал постоянную ячейку"
   }
  },
- "runtime_s": 731.9
+ "runtime_s": 731.9,
+ "postprocess": "после основного прогона теми же функциями дописаны: plate_NuH1_Dh15 (tpms_recup.size_plate, зазор 0,75 мм) и min_frontal у всех вариантов (tpms_recup.min_frontal); STL и tpms_cells.png — tpms.geometry_outputs (--geometry-only). В текущем коде tpms.py это делается в одном прогоне."
 }

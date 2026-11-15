@@ -67,6 +67,7 @@ def test_lbm_plates():
 
 
 def test_tpms_areas():
+    pytest.importorskip("skimage")
     from tpms_geom import surface_density
     assert abs(surface_density("gyroid", 0.0, 160) / 3.0919 - 1) < 0.003
     assert abs(surface_density("diamond", 0.0, 160) / 3.8379 - 1) < 0.003

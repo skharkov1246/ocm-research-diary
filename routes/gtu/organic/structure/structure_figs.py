@@ -53,10 +53,10 @@ def disks_figure(path, sel):
                 base = D["base"]
                 ax.fill(base[:, 0] * 1e3, base[:, 1] * 1e3, color="#3a3936", lw=0)
             elif kind == "prof":
-                r = np.asarray(name["r"]); t = np.asarray(name["t"])
+                r = np.asarray(name["r"]); t = np.asarray(name["t"]); zc = np.asarray(name.get("zc", [0.0] * len(r)))
                 from scipy.interpolate import PchipInterpolator
-                rr = np.linspace(r[0], r[-1], 300); tt = PchipInterpolator(r, t)(rr)
-                ax.fill(np.r_[rr, rr[::-1]] * 1e3, np.r_[tt / 2, -tt[::-1] / 2] * 1e3, color="#3a3936", lw=0)
+                rr = np.linspace(r[0], r[-1], 300); tt = PchipInterpolator(r, t)(rr); zz = PchipInterpolator(r, zc)(rr)
+                ax.fill(np.r_[rr, rr[::-1]] * 1e3, np.r_[zz + tt / 2, (zz - tt / 2)[::-1]] * 1e3, color="#3a3936", lw=0)
                 D = field(next(n for n, _, k in items if isinstance(n, str)))
                 base = D["base"]
                 ax.plot(base[:, 0] * 1e3, base[:, 1] * 1e3, color=C2, lw=1.0)
