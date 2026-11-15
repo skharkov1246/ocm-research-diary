@@ -4,12 +4,12 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 414,
-    "total_bytes": 13860812,
-    "results_files": 182,
-    "results_with_script": 55,
+    "datasets": 415,
+    "total_bytes": 13863282,
+    "results_files": 183,
+    "results_with_script": 56,
     "results_referenced_in_site": 22,
-    "results_with_provenance_fields": 33,
+    "results_with_provenance_fields": 34,
     "by_track": {
       "ammonia": 91,
       "battery-cathode": 1,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 94,
+      "не определён": 95,
       "прочее": 25
     }
   },
@@ -7487,6 +7487,38 @@
       "last_change": "2026-11-15",
       "last_author": "Claude",
       "last_commit": "497bb58"
+    },
+    {
+      "path": "routes/gtu/organic/structure/manifold_results.json",
+      "track": "не определён",
+      "kind": "результат расчёта",
+      "bytes": 2470,
+      "referenced_in_site": false,
+      "produced_by": "routes/manifold.py",
+      "shape": "объект",
+      "top_keys": [
+        "title",
+        "method",
+        "software",
+        "date",
+        "inputs",
+        "assumptions",
+        "gas",
+        "Wf_kg_s",
+        "m_inj_kg_s",
+        "volume_m3",
+        "ring",
+        "tree",
+        "note"
+      ],
+      "provenance_fields": [
+        "method",
+        "software",
+        "date"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "a09c9fa"
     },
     {
       "path": "routes/gtu/organic/structure/shell_results.json",
