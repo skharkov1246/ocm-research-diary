@@ -183,8 +183,9 @@ def pick_threshold(name, part, variant, h, u_target):
 
 
 # =========================================================================== диск турбины: профиль -> disk.py (CalculiX)
-def turb_profile(name, n_pts=48):
-    """профиль t(r), zc(r) из двоичного проекта: толщина металла по столбцу и его средняя линия; сглаживание по 3 столбцам"""
+def turb_profile(name, n_pts=48, sigma_s=0.0):
+    """профиль t(r), zc(r) из двоичного проекта: толщина металла по столбцу и его средняя линия; сглаживание по 3 столбцам
+    и (sigma_s > 0) гауссом по радиусу (м) — доводка формы: снимает концентрацию на уступе ступицы"""
     D = OG.load(name)
     F = np.nan_to_num(D["F"], nan=0.0)
     nr, nz = F.shape
@@ -196,6 +197,10 @@ def turb_profile(name, n_pts=48):
     k = np.ones(3) / 3
     t_s = np.convolve(np.r_[t[0], t, t[-1]], k, mode="valid"); zm_s = np.convolve(np.r_[zm[0], zm, zm[-1]], k, mode="valid")
     rc = (np.arange(nr) + 0.5) * dr
+    if sigma_s > 0:
+        from scipy.ndimage import gaussian_filter1d
+        keep = rc < D["r1"] - 6e-3                          # слой под пазами и обод не сглаживаются
+        t_s = np.where(keep, gaussian_filter1d(t_s, sigma_s / dr, mode="nearest"), t_s)
     r = np.r_[0.0, np.linspace(rc[0], rc[-1], n_pts - 2), D["r1"]]
     tt = np.interp(r, rc, t_s); zz = np.interp(r, rc, zm_s)
     return dict(r=r.tolist(), t=tt.tolist(), zc=zz.tolist())
@@ -265,3 +270,32 @@ def size_turb(name, prof, crit, mesh=(120, 16)):
         else:
             lo = mid
     return dict(k=best[0], c100=best[1], c120=best[2], log=log)
+
+
+def size_turb_job(job):
+    prof = turb_profile(job["name"], sigma_s=job.get("sigma_s", 8e-3))
+    out = size_turb(job["name"] + job.get("tag", ""), prof, job["crit"])
+    out.update(name=job["name"], crit=job["crit"], sigma_s=job.get("sigma_s", 8e-3), profile_k1=prof)
+    return out
+
+
+def run_turb_sizing(workers=3):
+    d = DT.frame3(); pr = d["parts"]["turb1"]["profile"]
+    base = dict(r=pr["r"], t=pr["t"], zc=[0.0] * len(pr["r"]))
+    b100 = disk_case("turb1_baseline", base, DT.RPM0); b120 = disk_case("turb1_baseline", base, 1.2 * DT.RPM0)
+    crit_eq = dict(life_h=b100["creep_local_min_h"], uts_ratio=b120["uts_ratio"], name="eq: не хуже литого профиля")
+    crit_lim = dict(life_h=DT.CREEP_H, uts_ratio=1.0, name="lim: ресурс ≥ 25 000 ч, σв/σ при 120 % ≥ 1")
+    jobs = [dict(name="turb1_A_mass_eq", crit=crit_eq), dict(name="turb1_A_J_eq", crit=crit_eq),
+            dict(name="turb1_A_mass_lim", crit=crit_lim)]
+    with Pool(workers) as p:
+        res = p.map(size_turb_job, jobs, chunksize=1)
+    out = dict(title="Диск турбины ступени 1: профиль из оптимизации топологии -> доводка формы и толщины в CalculiX (disk.py)",
+               date="2026-11-14",
+               method="t(r) из двоичного проекта (толщина металла по столбцу), сглаживание гауссом σ_s по радиусу, утолщение k "
+                      "(кроме слоя под пазами) бисекцией до выполнения критериев; каждый шаг — два расчёта disk.py (CAX8, 120×16, "
+                      "pchip, cooled_750, давление лопаток ∝ ω²)",
+               software=dict(ccx=DT.TA.DK.ccx_version()), baseline=dict(c100=b100, c120=b120), crit=dict(eq=crit_eq, lim=crit_lim),
+               runs=res)
+    with open(os.path.join(HERE, "turb_sizing_results.json"), "w", encoding="utf-8") as f:
+        json.dump(out, f, ensure_ascii=False, indent=1, default=float)
+    return out

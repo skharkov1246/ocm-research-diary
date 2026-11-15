@@ -927,6 +927,10 @@ CONTAINER_SETUP = [
 # без btl_vader_single_copy_mechanism=none нет прямого копирования между процессами (../docker/Dockerfile, там же проверка)
 CONTAINER_ENV = "export OMPI_MCA_osc=^ucx OMPI_MCA_btl_vader_single_copy_mechanism=none"
 RUNNER_UPLOAD_MIN = 8  # runner.py оставляет 8 мин срока на выгрузку (README узла aws, «Как идёт прогон», п. 6)
+# OpenMPI 4.1 считает слоты по физическим ядрам: у запасного c7i.16xlarge их 32 при 64 vCPU, и «mpirun -np 64» без
+# ключа отказывает («not enough slots»; ../bench/README.md, проверено локально: на 4 ядрах -np 5 — отказ). У c7a.16xlarge
+# 64 ядра без SMT — ключ ничего не меняет. Писать с «=»: значение, начинающееся с «--», argparse иначе примет за ключ.
+MPI_ARGS_AWS = "--use-hwthread-cpus"
 
 
 def line_points(pfracs: list, first_iter: int, next_iter: int) -> str:
@@ -979,7 +983,7 @@ def aws_plan(a) -> int:
                 f"python3 routes/gtu/platform/su2/su2_case.py run --geom-results \"$GTU_OUT/frame3_geom_results.json\" "
                 f"--stage {stage} --level {a.level} --point routes/gtu/frame3/frame3_point_results.json:{stage} "
                 f"--speed {sp:g} --points {pts} --iter-scale {a.iter_scale:g} --shroud {a.shroud} --vaneless {a.vaneless} "
-                f"--np \"$NPROC\" --mpi-args \"\" --time-limit {su2_limit_s} --output-files RESTART "
+                f"--np \"$NPROC\" --mpi-args={MPI_ARGS_AWS} --time-limit {su2_limit_s} --output-files RESTART "
                 f"--out \"$GTU_OUT/run\" --record \"$GTU_OUT/su2_line.json\" || rc=$?\n"
                 "# сетки (сотни МБ) не выгружаются: их заново строит frame3_geom.py по коммиту\n"
                 "rm -f \"$GTU_OUT/run/mesh.su2\" \"$GTU_OUT/run/mesh_split.su2\" \"$GTU_OUT\"/geom/*/passage_custom_*.su2\n"

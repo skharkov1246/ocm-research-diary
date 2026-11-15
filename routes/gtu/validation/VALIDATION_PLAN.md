@@ -336,6 +336,14 @@ JSON сверяется с закоммиченным (`compare_results.py`: ч�
 до публикации. Смета — блок `estimate` файла задач. Эталонов SU2 (Rotor 37, CC3, SRV2) там нет: геометрии и
 сеток в репозитории нет.
 
+Локальная проба команд (15.11.2026, копия HEAD через `git archive`, без AWS): `val-cycle` на Python 3.12.16
+(uv) — тесты узла 22 passed (полная конфигурация); `balances.py` повторил все 253 числа `balances_results.json`
+без отклонения; `validate_fleet.py` в миниатюре (3 паспорта, 5 записей, 2 варианта + `interp_1shaft_noduct`)
+повторил 472 числа этих записей без отклонения. `val-fea` в контейнере образа платформы (Python 3.12.3, ccx 2.21,
+пакеты как у `requirements.txt`) целиком: `test_disk.py` 12 passed, `disk.py --examples` — 5350 чисел и
+`frame3_fea.py` — 4799 чисел совпали с веткой. Установка `apt-get`/`pip` из `container_setup` локально не
+выполнялась (в контейнере сессии нет сети); тот же `apt-get install calculix-ccx` прошёл вживую в пробе `smoke-ccx`.
+
 ## 7. Источники и их состояние (14.11.2026)
 
 Тексты стандартов из контейнера не открылись (хосты law.resource.org, asme.org, cdn.asme.org,

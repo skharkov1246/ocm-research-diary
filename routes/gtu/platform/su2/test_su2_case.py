@@ -406,6 +406,8 @@ def test_aws_plan_jobs_pass_runner_and_budget(tmp_path):
     assert len(set(names)) == 10 and "su2-f3-stage1-n105" in names
     for j in jobs["jobs"]:
         assert "--speed" in j["command"] and "--np \"$NPROC\"" in j["command"] and j["max_min"] <= 720
+        # запасной c7i.16xlarge: 32 ядра при 64 vCPU — без ключа mpirun -np 64 отказывает
+        assert "--mpi-args=--use-hwthread-cpus" in j["command"]
         assert "aws " not in j["command"]  # команда задачи не вызывает AWS CLI
     plan = json.load(open(tp))["aws_plan"]
     t_ref = (2.0 * 100 + 3.0 * 300) / 400

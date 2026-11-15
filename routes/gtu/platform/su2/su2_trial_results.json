@@ -836,7 +836,8 @@
    "jobs_accepted": 10,
    "budget_ok_lines": 10,
    "forecast_usd": 133.7,
-   "forecast_note": "прогноз предохранителя runner.py: MaxPrice = максимум цены по зонам (допущение 0,955 у us-east-1a) × 1,2, весь срок max_min + 10 мин по каждой задаче — верхняя граница; AWS не вызывался"
+   "forecast_note": "прогноз предохранителя runner.py: MaxPrice = максимум цены по зонам (допущение 0,955 у us-east-1a) × 1,2, весь срок max_min + 10 мин по каждой задаче — верхняя граница; AWS не вызывался",
+   "mpi_args_fix": "проверка 15.11.2026: в командах задач было --mpi-args \"\"; на запасном типе c7i.16xlarge (32 ядра при 64 vCPU) OpenMPI 4.1 считает слоты по физическим ядрам и mpirun -np 64 отказал бы («not enough slots»; механизм проверен локально: на 4 ядрах -np 5 — отказ; то же в ../bench/README.md). Теперь --mpi-args=--use-hwthread-cpus (su2_case.py, MPI_ARGS_AWS), jobs_frame3.json пересобран той же командой generated_by: отличие только в этом ключе, числа сметы не изменились; runner.py plan той же командой — код 0, 10 задач, бюджет «можно» у всех 10, прогноз 133,70 долл."
   },
   "generated_by": "python3 routes/gtu/platform/su2/su2_case.py aws-plan --trial-results su2_trial_results.json --out jobs_frame3.json --t-ref-kind p10 --t-ref-stages s1_ramp --pfracs 0.45,0.52,0.58,0.64,0.70,0.76,0.83,0.90 --first-iter 2500 --next-iter 1500 (остальное — умолчания: частоты 0.7,0.8,0.9,1.0,1.05; medium; 64 процесса; эффективность 0,6; 0,71 долл./ч; потолок 300)",
   "t_ref_choice_note": "t_ref — нижний дециль стадии s1 (средняя загрузка машины ~10–13); стадия s2 шла при загрузке 20–34 (медиана 9,67 с) и в t_ref не взята; её влияние — в pessimistic_median_speed"

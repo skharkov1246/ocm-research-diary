@@ -53,23 +53,34 @@ def hex_matrices(h, nu, E=1.0):
     return Ke, Bc, fth, fb, D
 
 
-def solve_spd(K, F, tol=1e-8, B=None):
-    """K — симметричная положительно определённая (CSR/CSC); F — (n,) или (n, k)."""
-    try:
-        import pypardiso
-        return pypardiso.spsolve(K.tocsr(), F)
-    except ImportError:
-        pass
+def solve_spd(K, F, tol=1e-8, B=None, method="auto"):
+    """K — симметричная положительно определённая (CSR/CSC); F — (n,) или (n, k).
+    method: auto — PARDISO (если есть) до 100 тыс. неизвестных, больше — AMG-CG (память: PARDISO на 3D-ячейке
+    200 тыс. неизвестных занимал 7,8 ГБ и был убит OOM 2026-11-14); direct; amg."""
     n = K.shape[0]
-    if n < 250_000:
+    if method == "auto":
+        method = "direct" if n < 100_000 else "amg"
+    if method == "direct":
+        try:
+            import pypardiso
+            return pypardiso.spsolve(K.tocsr(), F)
+        except ImportError:
+            pass
+    if method == "direct" and n < 250_000:
         lu = spla.splu(K.tocsc())
         return lu.solve(F)
     import pyamg
+    if B is None and n % 3 == 0:
+        B = np.kron(np.ones((n // 3, 1)), np.eye(3))       # поступательные моды упругости (3 на узел)
     ml = pyamg.smoothed_aggregation_solver(K.tocsr(), B=B, max_coarse=2000)
     F2 = F.reshape(n, -1)
     X = np.zeros_like(F2)
     for k in range(F2.shape[1]):
-        X[:, k] = ml.solve(F2[:, k], tol=tol, accel="cg", maxiter=500)
+        res = []
+        X[:, k] = ml.solve(F2[:, k], tol=tol, accel="cg", maxiter=1000, residuals=res)
+        rel = res[-1] / max(res[0], 1e-300)
+        if rel > 1e3 * tol:
+            raise RuntimeError(f"AMG-CG не сошёлся: невязка {rel:.2e}")
     return X.reshape(F.shape)
 
 

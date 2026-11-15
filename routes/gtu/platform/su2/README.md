@@ -397,7 +397,9 @@ c7a.16xlarge (запасной c7i.16xlarge), образ al2023, контейн�
 venv по `../docker/requirements.txt`, собирает SU2 (`install_su2.sh`) и сверяет коммит тега; команда задаёт
 `OMPI_MCA_osc=^ucx` и `OMPI_MCA_btl_vader_single_copy_mechanism=none` (без них SU2 под `mpirun` в docker падает —
 `../docker/Dockerfile`), строит сетку medium (`frame3_geom.py --levels medium --stages <ступень>`) и считает
-`su2_case.py run --speed <доля> --points ...` на 64 процессах с лимитом счёта; сетки не выгружаются.
+`su2_case.py run --speed <доля> --points ...` на 64 процессах с лимитом счёта (`--mpi-args=--use-hwthread-cpus`:
+OpenMPI 4.1 считает слоты по физическим ядрам, у запасного c7i.16xlarge их 32 при 64 vCPU — без ключа `mpirun -np 64`
+отказывает; исправлено при проверке 15.11.2026); сетки не выгружаются.
 
 - Итерации линии: разгон 740 (× 2 к пробному), первая точка 2500, следующие по 1500 — 13 740.
 - Время итерации: t = t_ref × (узлы / 258 565) × (4 / 64) / 0,6, t_ref = 4,05 с — нижний дециль ITER_TIME стадии
