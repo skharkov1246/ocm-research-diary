@@ -5,7 +5,7 @@
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
     "datasets": 504,
-    "total_bytes": 21122341,
+    "total_bytes": 21139874,
     "results_files": 207,
     "results_with_script": 66,
     "results_referenced_in_site": 22,
@@ -7186,7 +7186,7 @@
       "path": "routes/gtu/evo/blades/disk1d_calibration.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 33239,
+      "bytes": 38072,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -7201,15 +7201,15 @@
         "note",
         "zones",
         "table",
-        "table_check",
-        "domain"
+        "domain",
+        "table_check"
       ],
       "provenance_fields": [
         "method"
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "297a8ba"
+      "last_commit": "8e2895b"
     },
     {
       "path": "routes/gtu/evo/core/.owner.json",
@@ -8837,7 +8837,7 @@
       "path": "routes/gtu/funnel/uq/jobs_pareto.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 22728,
+      "bytes": 25863,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -8852,13 +8852,13 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "07b61b6"
+      "last_commit": "8e2895b"
     },
     {
       "path": "routes/gtu/funnel/uq/jobs_uq_debug.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 3857,
+      "bytes": 3889,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -8872,13 +8872,13 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "07b61b6"
+      "last_commit": "8e2895b"
     },
     {
       "path": "routes/gtu/funnel/uq/jobs_uq_pareto.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 25690,
+      "bytes": 34145,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -8892,13 +8892,13 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "07b61b6"
+      "last_commit": "8e2895b"
     },
     {
       "path": "routes/gtu/funnel/uq/jobs_uq.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 5042,
+      "bytes": 6118,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -8912,7 +8912,7 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "07b61b6"
+      "last_commit": "8e2895b"
     },
     {
       "path": "routes/gtu/funnel/uq/pareto_probe_results.json",
@@ -8992,7 +8992,7 @@
       "path": "routes/gtu/funnel/uq/READY_UQ.json",
       "track": "не определён",
       "kind": "данные",
-      "bytes": 3033,
+      "bytes": 3035,
       "referenced_in_site": false,
       "shape": "объект",
       "top_keys": [
@@ -9015,7 +9015,7 @@
       ],
       "last_change": "2026-11-15",
       "last_author": "Claude",
-      "last_commit": "07b61b6"
+      "last_commit": "8e2895b"
     },
     {
       "path": "routes/gtu/funnel/uq/uq_probe_results.json",
