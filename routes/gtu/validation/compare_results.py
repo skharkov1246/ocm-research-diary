@@ -12,13 +12,20 @@ AWS) обходятся параллельно: словари — по объе
 или разная структура, 2 — файл не прочитан.
 
   python3 compare_results.py NEW.json REF.json --out repro.json [--rtol 1e-6] [--atol 1e-9] [--ignore k1,k2]
+
+Сбор итогов задач AWS (jobs_aws_validation.json, блок merge): --collect <runs/run_id> — все repro_*.json, timing.txt,
+env.txt, commit.txt и последние строки pytest*.txt задач в одну сводку для ветки (без больших файлов).
+
+  python3 compare_results.py --collect routes/gtu/platform/aws/runs/<run_id> --run-id <run_id> --out aws_repro_results.json
 """
 from __future__ import annotations
 
 import argparse
 import datetime
+import glob
 import json
 import math
+import os
 import sys
 
 DEFAULT_IGNORE = {"date", "software", "runtime_s", "workers", "seconds", "wall_s", "workdir", "dir",
@@ -104,16 +111,70 @@ def compare(new, ref, rtol: float = 1e-6, atol: float = 1e-9, ignore=frozenset(D
     return st
 
 
+def _tail(path: str, n: int = 3) -> list[str]:
+    try:
+        return [ln.rstrip() for ln in open(path, encoding="utf-8", errors="replace").read().splitlines() if ln.strip()][-n:]
+    except OSError:
+        return []
+
+
+def collect(run_dir: str, run_id: str = "") -> dict:
+    """Сводка задач прогона: сверки repro_*.json (без списков подробностей сверх первых), время, окружение, тесты."""
+    jobs = {}
+    for d in sorted(glob.glob(os.path.join(run_dir, "*"))):
+        if not os.path.isdir(d) or os.path.basename(d).startswith("_"):
+            continue
+        reps = sorted(glob.glob(os.path.join(d, "repro_*.json")))
+        if not reps:
+            continue
+        j = dict(repro={}, timing=_tail(os.path.join(d, "timing.txt"), 20), env=_tail(os.path.join(d, "env.txt"), 10),
+                 commit=(_tail(os.path.join(d, "commit.txt"), 1) or [None])[0],
+                 pytest={os.path.basename(p): _tail(p, 2) for p in sorted(glob.glob(os.path.join(d, "pytest*.txt")))})
+        for r in reps:
+            try:
+                x = json.load(open(r, encoding="utf-8"))
+            except (OSError, json.JSONDecodeError) as e:
+                j["repro"][os.path.basename(r)] = dict(ok=False, error=type(e).__name__)
+                continue
+            j["repro"][os.path.basename(r)] = {k: x.get(k) for k in (
+                "label", "ok", "structure_ok", "numbers", "numbers_bad", "strings_diff", "max_abs", "max_rel", "bad",
+                "missing_in_new", "extra_in_new", "length_mismatch", "rtol", "atol")}
+        jobs[os.path.basename(d)] = j
+    ok = bool(jobs) and all(r.get("ok") for j in jobs.values() for r in j["repro"].values())
+    return dict(title="Повтор эталонных расчётов трека ГТУ на машинах AWS: сверка с веткой", run_id=run_id,
+                method="compare_results.py на машине (повтор против закоммиченного JSON) + --collect по папке прогона",
+                created_utc=datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                ok=ok, jobs=jobs)
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("new", help="пересчитанный JSON")
-    ap.add_argument("ref", help="эталон (закоммиченный JSON)")
+    ap.add_argument("new", nargs="?", help="пересчитанный JSON")
+    ap.add_argument("ref", nargs="?", help="эталон (закоммиченный JSON)")
+    ap.add_argument("--collect", default="", help="папка прогона runs/<run_id>: собрать repro_*.json задач")
+    ap.add_argument("--run-id", default="")
     ap.add_argument("--out", help="куда записать итог сверки (JSON); без него — печать")
     ap.add_argument("--rtol", type=float, default=1e-6)
     ap.add_argument("--atol", type=float, default=1e-9)
     ap.add_argument("--ignore", default="", help="доп. ключи через запятую (пропускаются на любом уровне)")
     ap.add_argument("--label", default="", help="подпись сверки")
     a = ap.parse_args(argv)
+    if a.collect:
+        doc = collect(a.collect, a.run_id)
+        if not doc["jobs"]:
+            print(f"[сверка] в {a.collect} нет repro_*.json", file=sys.stderr)
+            return 2
+        txt = json.dumps(doc, ensure_ascii=False, indent=1, default=str)
+        if a.out:
+            with open(a.out, "w", encoding="utf-8") as f:
+                f.write(txt + "\n")
+        for job, j in doc["jobs"].items():
+            for name, r in j["repro"].items():
+                print(f"[сверка] {job}/{name}: {'OK' if r.get('ok') else 'РАСХОЖДЕНИЕ'}, чисел {r.get('numbers')}, "
+                      f"вне допуска {r.get('numbers_bad')}")
+        return 0 if doc["ok"] else 3
+    if not (a.new and a.ref):
+        ap.error("нужны NEW и REF или --collect")
     try:
         new = json.load(open(a.new, encoding="utf-8"))
         ref = json.load(open(a.ref, encoding="utf-8"))

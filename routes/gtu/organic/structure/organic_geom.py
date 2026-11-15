@@ -28,38 +28,46 @@ def load(name):
 
 
 def section_polygons(D, level=0.5, smooth_tol=None):
-    """многоугольники сплошного металла: контур поля (вне огибающей — 1, у оси — зеркало) ∩ огибающая"""
+    """многоугольники сплошного металла: огибающая минус пустоты (контуры x̄ = level); поле продолжено наружу"""
     from skimage import measure
     import shapely
     from shapely.geometry import Polygon
     from shapely.ops import unary_union
-    F = np.nan_to_num(D["F"].copy(), nan=1.0)
-    nr, nz = F.shape
+    from scipy import ndimage
+    F0 = D["F"].copy()
+    nr, nz = F0.shape
     dr, dz = D["r1"] / nr, (D["z1"] - D["z0"]) / nz
-    P = np.ones((nr + 4, nz + 4))
-    P[2:-2, 2:-2] = F
-    P[0:2, 2:-2] = F[1::-1]          # зеркало относительно оси
+    # вне огибающей поле продолжается значением ближайшей активной ячейки: изолиния пересекает огибающую сама,
+    # без ложных лепестков у её изломов (металл у границы обрезается точно по огибающей, пустота — остаётся пустотой)
+    P = np.full((nr + 4, nz + 4), np.nan)
+    P[2:-2, 2:-2] = F0
+    P[0:2, 2:-2] = F0[1::-1]         # зеркало относительно оси
+    nan = np.isnan(P)
+    idx = ndimage.distance_transform_edt(nan, return_distances=False, return_indices=True)
+    P = P[tuple(idx)]
+    P = np.pad(P, 1, constant_values=1.0)   # рамка «металла» вне огибающей: контуры пустот всегда замкнуты
+    F = np.nan_to_num(F0, nan=1.0)
     cs = measure.find_contours(P, level)
     env = Polygon(D["env"]).buffer(0)
     polys = []
     for c in cs:
-        r = (c[:, 0] - 2 + 0.5) * dr; z = D["z0"] + (c[:, 1] - 2 + 0.5) * dz
+        r = (c[:, 0] - 3 + 0.5) * dr; z = D["z0"] + (c[:, 1] - 3 + 0.5) * dz
         if len(c) < 4:
             continue
         pg = Polygon(np.c_[r, z]).buffer(0)
         if pg.area > 0:
             polys.append(pg)
-    # контуры от find_contours: внешние и дыры — разделяем чётностью вложенности
+    # по краю массива поле = 1, поэтому замкнутые контуры обходят ПУСТОТЫ (глубина вложенности 0),
+    # внутри них — островки металла (глубина 1) и т. д.: пустота = Σ(−1)^глубина·контур, металл = огибающая − пустота
     polys.sort(key=lambda p: -p.area)
-    solid = None
+    void = None
     for p in polys:
         depth = sum(1 for q in polys if q is not p and q.area > p.area and q.contains(p.representative_point()))
-        if solid is None:
-            solid = p if depth % 2 == 0 else None
-            continue
-        solid = solid.union(p) if depth % 2 == 0 else solid.difference(p)
-    if solid is None:
-        solid = env
+        if depth % 2 == 0:
+            void = p if void is None else void.union(p)
+        elif void is not None:
+            void = void.difference(p)
+    solid = env if void is None else env.difference(void)
     res = solid.intersection(env)
     res = res.buffer(0)
     if smooth_tol:
@@ -120,6 +128,9 @@ def revolve_stl(geoms, path, sections=180, angle=2 * math.pi):
         for k, ring in enumerate(poly_rings(g)):
             ring = np.vstack([ring, ring[:1]])
             m = trimesh.creation.revolve(ring, angle=angle, sections=sections)
+            # наружное кольцо — положительный объём, дыра — отрицательный (нормали внутрь полости)
+            if (m.volume < 0) == (k == 0):
+                m.invert()
             parts.append(m)
     mesh = trimesh.util.concatenate(parts)
     mesh.merge_vertices()

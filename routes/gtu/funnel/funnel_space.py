@@ -134,12 +134,13 @@ GOOD = dict(phi={"Ц": (0.055, 0.13), "Д": (0.08, 0.20)}, nu=(0.62, 0.78), psi=
 GOOD_BASIS = ("хорошие диапазоны для выборки (оценка): φ центробежной ступени 0,055-0,13 (оптимум КПД около 0,085-0,11, frame3 при 0,028-0,040 "
               "теряет 1,2-3,2 п.); U/C0 радиальной турбины 0,62-0,78 вокруг оптимума 0,70 (gtu_explore.turb_radial); ψ осевой 0,9-2,0 "
               "(eta_axial 0,885 ниже 1,2 и 0,857 при 2,0; предел 2,5); быстроходность радиальной турбины 0,35-0,85 вокруг 0,60; правила check шире")
-M_W, M_T, M_GEO = 0.01, 3.0, 0.03     # запасы окон: удельная работа +1 %, температуры -3 K, геометрия 3 % (оценка)
-ETA_NOM = dict(comp=-0.012, ax=-0.005, rad=-0.015, pt=0.87)  # номинальные КПД окон: поправки к формулам ступеней (зазор, ns, политропный
-#                                                             эквивалент радиальной, выходная скорость) и КПД СТ - оценка, сверка с итогом - в README
+M_W, M_T, M_GEO = 0.015, 8.0, 0.03    # запасы окон: удельная работа +1,5 %, температуры -8 K, геометрия 3 % (оценка)
+ETA_NOM = dict(comp=-0.012, ax=-0.016, rad=-0.042, pt=0.86)  # номинальные КПД окон: поправки к формулам ступеней (зазор, ns, политропный
+#   эквивалент радиальной, выходная скорость) и КПД СТ; подобраны по медианам «итог - номинал» короткой пробы KV-3 N = 300 (осевая -0,011,
+#   радиальная -0,027 к первым значениям -0,005 и -0,015) - оценка; остаток покрывают запасы M_W, M_T
 SPLIT_RANGE = {"2Ц": (0.35, 0.65), "ОЦ": (0.12, 0.60)}
 N_PI_GRID, N_T41_GRID, N_SPLIT_GRID = 10, 6, 21
-REPAIR_AXES = ("mat_tw", "mat_cw", "cool", "comp", "turb", "recup", "rotors")
+REPAIR_AXES = ("mat_tw", "mat_cw", "m_tw", "cool", "comp", "turb", "recup", "rotors")
 _DEF = dict(rotors=[1, 2], comp=["1Ц", "2Ц", "Д", "ОЦ"], n_ax=[1, 2], inlet=["одно", "двух"], turb=["Р", "О"], nt=[1, 2],
             npt=[1, 2], cool=["U", "N", "K"], recup=["нет", "печатный"], comb=["выносная", "кольцевая"], bear=["масло", "магнит"],
             cores=[1], rotor_join=["сварка", "сборный"], m_cw=["поковка", "литьё", "печать"], m_tw=["литьё", "печать"],
@@ -282,7 +283,10 @@ def _discrete(u, arch, ov=None):
 
 
 def _mat_tw_list(c, T):
-    tw = [m for m in MAT_TW[c["m_tw"]] if not (m == "SC" and c["turb"] != "О") and not (m == "Si3N4" and c["turb"] != "Р")]
+    """сплавы колеса турбины: монокристалл - только осевая и только сборный ротор (лопатки в замках не бывают цельным колесом,
+    правило mono_blisk), нитрид кремния - только радиальная"""
+    tw = [m for m in MAT_TW[c["m_tw"]] if not (m == "SC" and (c["turb"] != "О" or c["rotor_join"] in ("заодно", "сварка")))
+          and not (m == "Si3N4" and c["turb"] != "Р")]
     if "mat_tw" in T:
         tw = [m for m in tw if m in T["mat_tw"]] or tw
     return tw
@@ -650,81 +654,49 @@ def design(c, u, tgt):
     r, G = nm["r"], nm["G"]
     Gc = G / c["cores"]
     stn = _stages_nom(c, nm["comp"], Gc)
-    # ---------------------------------------------------------------- турбина газогенератора: число ступеней и нагрузка
+    # ---------------------------------------------------------------- турбина газогенератора и частота: совместный выбор (вход, nt)
     t = r["t"]
     rho5 = t["p_out"] / (E.Rg(t["b"]) * t["T_out"]); Q5 = t["m"] * Gc / rho5
-    n_fix = tgt["n_pkg"] if fixed else None
-    U_lim = MK.u_limit_turb(c["turb"], c["mat_tw"], c["t41"])[0]
-    U_max = min(U_lim, u_cap_size(c, d_cap_turb(c)) * (1 - M_GEO))
     nts = _axis_vals(c, c["arch"], "nt")
-    cand = []
-    for nt in nts:
-        if c["turb"] == "О":
-            psi_min = t["w"] / (nt * U_max ** 2)
-            good = psi_min <= GOOD["psi"][1]; rule = psi_min <= PSI_MAX
-        else:
-            dhs = _stage_dhs(t, nt); C0 = math.sqrt(2 * dhs)
-            nu_max = U_max / C0
-            good = nu_max >= GOOD["nu"][0]; rule = nu_max >= NU_RANGE[0]
-            if fixed:
-                ns = (2 * math.pi * n_fix / 60) * math.sqrt(Q5) / dhs ** 0.75
-                good = good and GOOD["ns_t"][0] <= ns <= GOOD["ns_t"][1]
-                rule = rule and NS_RANGE[0] <= ns <= NS_RANGE[1]
-        cand.append((nt, good, rule))
-    k0 = nts.index(c["nt"])
-    rot = cand[k0:] + cand[:k0]
-    pick = next((x for x in rot if x[1]), None) or next((x for x in rot if x[2]), None)
-    if pick is None:
-        fl.append("турбина: нет числа ступеней с допустимой нагрузкой (ψ, U/C0, быстроходность)")
-    elif pick[0] != c["nt"]:
-        c["repair"] = (c["repair"] + "; " if c["repair"] else "") + f"nt: {c['nt']} -> {pick[0]} (нагрузка турбины)"
-        c["nt"] = pick[0]
-    if c["turb"] == "О":
-        psi_min = t["w"] / (c["nt"] * U_max ** 2) * (1 + M_GEO)
-        win = _interval([GOOD["psi"], (psi_min, math.inf)]) or (min(psi_min, PSI_MAX), PSI_MAX)
-        c["lt"] = min(win[1], max(win[0], c["lt"]))           # ψ окон T41/π, если входит в окно; иначе ближняя граница
-        Ut = math.sqrt(t["w"] / (c["nt"] * c["lt"]))
-    else:
-        C0 = math.sqrt(2 * _stage_dhs(t, c["nt"]))
-        win = _interval([GOOD["nu"], (-math.inf, U_max / C0)]) or (NU_RANGE[0], max(NU_RANGE[0], U_max / C0))
-        c["lt"] = min(win[1], max(win[0], c["lt"]))
-        Ut = c["lt"] * C0
-    Ut = min(Ut, U_max)
-    # ---------------------------------------------------------------- частота газогенератора (двухвальная) или пакета
-    if fixed:
-        n = tgt["n_pkg"]
-        c["n_gg"] = n
-        c["phi1"] = 0.0
-    else:
-        inl0 = c["inlet"]
-        nwin, how = None, None
-        for inl in order:
-            stn_i = _stages_nom(dict(c, inlet=inl), nm["comp"], Gc)
-            nwin, how = _n_window(c, stn_i, Ut, Q5, t)
-            if how != "нет":
-                if inl != c["inlet"]:
-                    c["repair"] = (c["repair"] + "; " if c["repair"] else "") + f"inlet: {c['inlet']} -> {inl} (частота газогенератора)"
-                    c["inlet"] = inl
-                stn = stn_i
+    nts = nts[nts.index(c["nt"]):] + nts[:nts.index(c["nt"])]
+    inl_order = [c["inlet"]] + ([i for i in order if i != c["inlet"]] if not fixed else [])
+    lt0 = c["lt"]
+    trials = []
+    for inl in inl_order:
+        stn_i = _stages_nom(dict(c, inlet=inl), nm["comp"], Gc)
+        for nt in nts:
+            tr = _turb_trial(dict(c, inlet=inl, nt=nt), tgt, t, Q5, stn_i, lt0, fixed)
+            trials.append((inl, nt, stn_i, tr))
+            if tr["tier"] == "хорошее":
                 break
-        if how == "нет":
-            c["inlet"] = inl0
-            stn = _stages_nom(c, nm["comp"], Gc)
-            nwin, _ = _n_window(c, stn, Ut, Q5, t)
-            fl.append("частота газогенератора: окно пусто (размеры, коэффициенты расхода, турбина) - взята наименее нарушающая")
-        elif how == "правило":
-            fl.append("частота газогенератора: только в пределах правил, не в GOOD")
-        n = _place(u["phi1"], nwin, log=True)
-        k = next(k for k, s in enumerate(stn) if s["type"] != "О")
-        s = stn[k]
-        c["phi1"] = s["Gs"] * (math.pi * n / 60) ** 2 / (s["rho1"] * s["U"] ** 3)
+        if trials[-1][3]["tier"] == "хорошее":
+            break
+    rank = {"хорошее": 0, "правило": 1, "нет": 2}
+    inl, nt, stn, tr = min(trials, key=lambda x: rank[x[3]["tier"]])     # первый лучший по порядку перебора
+    if nt != c["nt"]:
+        c["repair"] = (c["repair"] + "; " if c["repair"] else "") + f"nt: {c['nt']} -> {nt} (нагрузка турбины, частота)"
+    if inl != c["inlet"]:
+        c["repair"] = (c["repair"] + "; " if c["repair"] else "") + f"inlet: {c['inlet']} -> {inl} (частота газогенератора)"
+    c["nt"], c["inlet"], c["lt"] = nt, inl, tr["lt"]
+    fl += tr["flags"]
+    Ut, n = tr["Ut"], tr["n"]
+    if fixed:
+        c["n_gg"], c["phi1"] = n, 0.0
+    else:
+        n = _place(u["phi1"], tr["nwin"], log=True)
+        k = next(k for k, s_ in enumerate(stn) if s_["type"] != "О")
+        s_ = stn[k]
+        c["phi1"] = s_["Gs"] * (math.pi * n / 60) ** 2 / (s_["rho1"] * s_["U"] ** 3)
         c["n_gg"] = n
     # ---------------------------------------------------------------- выход осевой турбины: ca/U по втулке и AN²
     if c["turb"] == "О":
         D = 60 * Ut / (math.pi * n)
         lo = max(GOOD["phit"][0], Q5 / (math.pi * D ** 2 * Ut * HTR_H * (1 - M_GEO)), n ** 2 * Q5 / (Ut * AN2_MAX * (1 - M_GEO)))
+        hmax = _blisk_hmax(c, D)
+        if hmax is not None:
+            lo = max(lo, Q5 / (math.pi * D * Ut * hmax) if hmax > 0 else math.inf)
         if lo > GOOD["phit"][1]:
-            fl.append("турбина: втулка или AN² не проходят и при ca/U = 0,8")
+            fl.append("турбина: втулка, AN² или цельное колесо не проходят и при ca/U = 0,8")
             c["phit"] = GOOD["phit"][1]
         else:
             c["phit"] = _place(u["phit"], (lo, GOOD["phit"][1]))
@@ -780,6 +752,69 @@ def design(c, u, tgt):
             c["eps_rec"] = _place(u["eps_rec"], (0.75, min(0.92, emax)))
     c["dflags"] = "|".join(fl)
     return c
+
+
+def _blisk_hmax(c, D):
+    """наибольшая высота последней лопатки, при которой осевое колесо - цельное: ротор заодно или сварной требует блисков
+    (правило mono_blisk); литой блиск - Dtip <= 0,50 м (LIM D_axcast), печатный - камера принтера (здесь не ограничивает);
+    None - цельное колесо не требуется"""
+    if c["turb"] != "О" or c["rotor_join"] not in ("заодно", "сварка") or c["m_tw"] != "литьё":
+        return None
+    return MK.CAST["turb_axial_blisk"]["max"] * (1 - M_GEO) - D
+
+
+def _turb_trial(c, tgt, t, Q5, stn, lt0, fixed):
+    """турбина газогенератора при данных входе и числе ступеней: окно нагрузки lt (ψ или U/C0) - предел окружной скорости,
+    (вал с частотой пакета) втулка, AN² и цельное колесо при ca/U <= 0,8, быстроходность радиальной; окружная скорость;
+    частота (вал пакета) или окно частоты газогенератора. Возврат: dict(tier, lt, Ut, n, nwin, flags)"""
+    fl = []
+    U_lim = MK.u_limit_turb(c["turb"], c["mat_tw"], c["t41"])[0]
+    U_max = min(U_lim, u_cap_size(c, d_cap_turb(c)) * (1 - M_GEO))
+    n_fix = tgt["n_pkg"] if fixed else None
+    tier = "хорошее"
+    if c["turb"] == "О":
+        U_min = 0.0
+        if fixed:
+            U_min = max(n_fix ** 2 * Q5 / (GOOD["phit"][1] * AN2_MAX * (1 - M_GEO)),
+                        (Q5 * (math.pi * n_fix / 60) ** 2 / (math.pi * GOOD["phit"][1] * HTR_H * (1 - M_GEO))) ** (1 / 3))
+        psi_lo = t["w"] / (c["nt"] * U_max ** 2) * (1 + M_GEO)
+        psi_hi = t["w"] / (c["nt"] * U_min ** 2) if U_min > 0 else math.inf
+        win = _interval([GOOD["psi"], (psi_lo, psi_hi)])
+        if win is None:
+            win = _interval([(0.0, PSI_MAX), (psi_lo, psi_hi)])
+            tier = "правило" if win else "нет"
+        if win is None:
+            win = (min(psi_lo, PSI_MAX), min(psi_lo, PSI_MAX))
+            fl.append("турбина: нагрузка ψ, втулка или AN² - окно пусто")
+        lt = min(win[1], max(win[0], lt0))
+        Ut = min(U_max, math.sqrt(t["w"] / (c["nt"] * lt)))
+    else:
+        dhs = _stage_dhs(t, c["nt"]); C0 = math.sqrt(2 * dhs)
+        win = _interval([GOOD["nu"], (-math.inf, U_max / C0)])
+        if win is None:
+            win = _interval([NU_RANGE, (-math.inf, U_max / C0)])
+            tier = "правило" if win else "нет"
+        if win is None:
+            win = (U_max / C0, U_max / C0)
+            fl.append("турбина: U/C0 вне 0,5-0,9 при пределе окружной скорости")
+        lt = min(win[1], max(win[0], lt0))
+        Ut = lt * C0
+        if fixed:
+            ns = (2 * math.pi * n_fix / 60) * math.sqrt(Q5) / dhs ** 0.75
+            if not GOOD["ns_t"][0] <= ns <= GOOD["ns_t"][1]:
+                if NS_RANGE[0] <= ns <= NS_RANGE[1]:
+                    tier = "правило" if tier == "хорошее" else tier
+                else:
+                    tier = "нет"; fl.append(f"турбина: быстроходность {ns:.2f} вне 0,25-1,00 при частоте пакета")
+    if fixed:
+        return dict(tier=tier, lt=lt, Ut=Ut, n=n_fix, nwin=(n_fix, n_fix), flags=fl)
+    nwin, how = _n_window(c, stn, Ut, Q5, t)
+    if how == "нет":
+        fl.append("частота газогенератора: окно пусто (размеры, коэффициенты расхода, турбина) - взята наименее нарушающая")
+        tier = "нет"
+    elif how == "правило" and tier == "хорошее":
+        tier = "правило"
+    return dict(tier=tier, lt=lt, Ut=Ut, n=None, nwin=nwin, flags=fl)
 
 
 def _fill_defaults(c, u):
@@ -1049,7 +1084,7 @@ def d_cap_comp(c):
     return (MK.FORGE if m == "поковка" else MK.CAST)[kind]["max"]
 
 
-DTIP_AX = 1.15        # Dtip / D осевой турбины для предела размера до расчёта высоты лопатки (оценка; frame3 - 1,2 на последней ступени)
+DTIP_AX = 1.25        # Dtip / D осевой турбины для предела размера до расчёта высоты лопатки (оценка; frame3 - 1,2 на последней ступени)
 
 
 def d_cap_turb(c):
