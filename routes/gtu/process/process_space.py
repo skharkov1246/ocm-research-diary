@@ -283,6 +283,129 @@ def decode(x, kv="KV-3"):
     return C
 
 
+def _cat_x(gid, val):
+    g = GENES[GI[gid]]
+    opts = g["opts"]
+    k = opts.index(val)
+    w = g.get("w")
+    if not w:
+        return (k + 0.5) / len(opts)
+    cw = np.concatenate([[0.0], np.cumsum(w) / float(sum(w))])
+    return float(0.5 * (cw[k] + cw[k + 1]))
+
+
+def _inv_lin(v, lo, hi):
+    return 0.5 if hi <= lo else min(max((float(v) - lo) / (hi - lo), 0.0), 1.0 - 1e-9)
+
+
+def _inv_log(v, lo, hi):
+    return _inv_lin(math.log(v), math.log(lo), math.log(hi))
+
+
+def make_family(C):
+    """семья изготовления по способам концепции блоков (для encode опорных концепций)"""
+    t, b, c = C["turbine"], C["build"], C["compressor"]
+    if b.get("case_make") == "печать" or c.get("make") == "печать":
+        return "печать"
+    if t.get("hot_make") == "печать":
+        return "гибрид"
+    if c.get("make") == "поковка":
+        return "традиционная"
+    return "литьё КНР"
+
+
+def encode(C, make=None):
+    """приближённая обратная к decode: концепция блоков (полная, после blocks.concept.normalize) -> геном. Нужна, чтобы начать
+    острова с известных допустимых концепций (родители: опорные примеры блоков, выбор владельца, архив прошлого этапа).
+    decode(encode(C)) воспроизводит дискретные выборы и непрерывные величины внутри окон (вне окна - ближайшая граница)."""
+    FS, MK = T.FS(), T.MK()
+    c, t, hx, f, b = C["compressor"], C["turbine"], C["hx"], C["fuel"], C["build"]
+    fam = make or C.get("_make") or make_family(C)
+    x = np.full(D, 0.5)
+    x[GI["recup"]] = _cat_x("recup", 1 if hx.get("recup") else 0)
+    x[GI["ic"]] = _cat_x("ic", c.get("intercool", "нет"))
+    x[GI["rh"]] = _cat_x("rh", 1 if hx.get("reheat") else 0)
+    x[GI["ibc"]] = _cat_x("ibc", 1 if hx.get("ibc") else 0)
+    x[GI["fuel"]] = _cat_x("fuel", f.get("prep", "нет"))
+    x[GI["scheme"]] = _cat_x("scheme", C["combustor"]["scheme"])
+    x[GI["chamber"]] = _cat_x("chamber", C["combustor"].get("chamber", "кольцевая"))
+    x[GI["comp"]] = _cat_x("comp", c["arch"])
+    x[GI["n_ax"]] = _cat_x("n_ax", max(1, int(c.get("n_ax") or 1)))
+    x[GI["inlet"]] = _cat_x("inlet", c.get("inlet", "одно"))
+    x[GI["turb"]] = _cat_x("turb", t["type"])
+    nt = t.get("nt", "auto")
+    x[GI["nt"]] = _cat_x("nt", nt if nt == "auto" else int(nt))
+    x[GI["cool"]] = _cat_x("cool", t["cool"])
+    x[GI["drive"]] = _cat_x("drive", C["shaft"]["drive"])
+    x[GI["make"]] = _cat_x("make", fam)
+    x[GI["cmat"]] = _cat_x("cmat", c.get("mat", "Ti64"))
+    x[GI["join"]] = _cat_x("join", b.get("rotor_join", "сборный"))
+    x[GI["bear"]] = _cat_x("bear", b.get("bear", "масло"))
+    x[GI["case"]] = _cat_x("case", b.get("case", "картридж"))
+    x[GI["rmake"]] = _cat_x("rmake", hx.get("recup_make", "фольга"))
+    mk = MAKE[fam]
+    t_make = "керамика" if t["cool"] == "C" else mk["turb_make"]
+    h_make = "керамика" if t["cool"] == "C" else mk["hot_make"]
+    tmats = [m for m in FS.MAT_TW[t_make] if not (m == "SC" and t["type"] == "Р")]
+    x[GI["tmat"]] = (tmats.index(t["mat"]) + 0.5) / len(tmats) if t["mat"] in tmats else 0.5
+    hm = FS.MAT_HOT[h_make]
+    x[GI["hmat"]] = (hm.index(t["hot_mat"]) + 0.5) / len(hm) if t.get("hot_mat") in hm else 0.5
+    tmat = _pick(tmats, x[GI["tmat"]])
+    tl = MK.t41_limit(t["type"], t["cool"], tmat, t_make)[0]
+    t41_lo = max(FS.T41_MIN, tl - RANGES["t41_below"])
+    x[GI["t41"]] = _inv_lin(t["t41"], t41_lo, max(tl, t41_lo))
+    arch, n_ax = c["arch"], (int(c.get("n_ax") or 1) if c["arch"] == "ОЦ" else 0)
+    lo, hi = FS.PI_RANGE[(arch, n_ax)] if arch == "ОЦ" else FS.PI_RANGE[arch]
+    x[GI["pi"]] = _inv_log(c["pi"], lo, hi)
+    if arch in FS.SPLIT_RANGE and c.get("split") is not None:
+        x[GI["split"]] = _inv_lin(c["split"], *FS.SPLIT_RANGE[arch])
+    stypes = {"1Ц": ["Ц"], "Д": ["Д"], "2Ц": ["Ц", "Ц"], "ОЦ": ["О"] * max(n_ax, 1) + ["Ц"]}[arch]
+    mus = c.get("mu") or []
+    if mus:
+        x[GI["mu1"]] = _inv_lin(mus[0], *FS.MU_RANGE[stypes[0]])
+        x[GI["mu2"]] = _inv_lin(mus[-1], *FS.MU_RANGE[stypes[-1]])
+    if c.get("ic_after") is not None and len(stypes) > 1:
+        x[GI["icpos"]] = (int(c["ic_after"]) + 0.5) / (len(stypes) - 1)
+    if c.get("kcm") is not None:
+        x[GI["kcm"]] = _inv_lin(c["kcm"], *RANGES["kcm"])
+    if hx.get("recup"):
+        x[GI["eps"]] = _inv_lin(hx["recup"], *RANGES["eps"])
+    if hx.get("reheat"):
+        x[GI["xrh"]] = _inv_lin(hx.get("x_rh", 0.5), *RANGES["xrh"])
+        t41d = _lin(x[GI["t41"]], t41_lo, max(tl, t41_lo))
+        trh_lo = max(FS.T41_MIN, t41d - RANGES["trh_below"])
+        x[GI["trh"]] = _inv_lin(hx.get("t_rh") or t41d, trh_lo, max(tl, trh_lo))
+    if f.get("prep") == "паровой риформинг":
+        x[GI["reform"]] = _inv_lin(f.get("sc", 2.0), *RANGES["sc"])
+    elif f.get("prep") == "сухой риформинг":
+        x[GI["reform"]] = _inv_log(f.get("R_egr", 1.0), *RANGES["R_egr"])
+    if t.get("lt") is not None:
+        x[GI["lt"]] = _inv_lin(t["lt"], *(RANGES["lt_ax"] if t["type"] == "О" else RANGES["lt_rad"]))
+    for gid, key in (("phit", "phit"), ("kUpt", "kUpt"), ("phipt", "phipt")):
+        if t.get(key) is not None:
+            x[GI[gid]] = _inv_lin(t[key], *RANGES[gid])
+    if b.get("kD_case") is not None:
+        x[GI["kD"]] = _inv_lin(b["kD_case"], *RANGES["kD"])
+    return np.clip(x, 0.0, 1.0 - 1e-12)
+
+
+def reference_seeds(kv):
+    """геномы опорных концепций блоков (reference.EXAMPLES и точка frame3) для этой точки - начальные родители островов;
+    допустимость не предполагается: их оценивает прогон (бюджет оценок включает их)"""
+    from blocks import reference as REF
+    from blocks.concept import normalize
+    out = []
+    for name in REF.EXAMPLES:
+        c = REF.example(name)
+        if c.get("kv", "KV-3") != kv and not (kv != "KV-3" and c.get("kv") is None):
+            continue
+        if c.get("build", {}).get("cores", 1) > 1:
+            continue
+        Cn = normalize(dict(c, kv=kv))
+        out.append((name, encode(Cn)))
+    return out
+
+
 def blocks_concept(C):
     """концепция без служебных полей (для blocks.evaluate)"""
     return {k: v for k, v in C.items() if not k.startswith("_")}

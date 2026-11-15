@@ -265,7 +265,14 @@ def mass_of(C, r, detail=False):
     geom["rows"] += rows
     geom["hx"] = hxl
     ev = MM.evaluate(geom, cal=calibration())
-    out = dict(total_kg=ev["total_kg"], total_lo_kg=ev["total_lo_kg"], total_hi_kg=ev["total_hi_kg"], engine_kg=ev["engine_kg"],
+    # строки группы «теплообменники», добавленные сюда (газоходы, вентиляторы, катализатор, вентилятор рециркуляции), входят в итог
+    # mass_model.evaluate, но не в его полосу (там - только сердцевины geom["hx"]): добавляются к обеим границам (с рамой)
+    extra_hx = sum(x["mass_kg"] for x in rows if x["group"] == "hx")
+    k_fr = 1.0 + (MM.A["cradle_k"] if geom.get("frame") else 0.0)
+    lo_kg, hi_kg = ev["total_lo_kg"] + extra_hx * k_fr, ev["total_hi_kg"] + extra_hx * k_fr
+    eta = r["eff_el"]
+    ev["kpd_per_t_range"] = [round(MM.kpd_per_tonne(eta, hi_kg), 3), round(MM.kpd_per_tonne(eta, lo_kg), 3)]
+    out = dict(total_kg=ev["total_kg"], total_lo_kg=round(lo_kg, 1), total_hi_kg=round(hi_kg, 1), engine_kg=ev["engine_kg"],
                hx_kg=ev["hx_kg"], bearings_extra_kg=ev["bearings_extra_kg"], frame_kg=ev["frame_kg"], kW_per_kg=ev.get("kW_per_kg"),
                kpd_per_t=ev.get("kpd_per_t"), kpd_per_t_range=ev.get("kpd_per_t_range"), K=ev["K"], groups_raw=ev["groups_raw"],
                dims=dict(L_engine=geom["dims"].get("L_engine"), D_case_max=geom["dims"].get("D_case_max"),
@@ -295,9 +302,9 @@ def _compact_reasons(rules, limit=6):
     return [dict(code=x["code"], text=str(x.get("text", ""))[:160], val=x.get("val"), lim=x.get("lim")) for x in rules[:limit]]
 
 
-def evaluate(x=None, kv="KV-3", concept=None, detail=False, uid=""):
+def evaluate(x=None, kv="KV-3", concept=None, detail=False, uid="", mass_always=False):
     """геном x (или готовая концепция process_space.decode) -> запись оценки. Никаких исключений наружу: сбой модели -
-    недопустимо с причиной."""
+    недопустимо с причиной. mass_always - масса и у недопустимой по блокам (для сверок; feasible не меняется)."""
     t0 = time.process_time()
     C = concept if concept is not None else PS.decode(x, kv)
     cell = PS.descriptors(C)
@@ -333,6 +340,17 @@ def evaluate(x=None, kv="KV-3", concept=None, detail=False, uid=""):
     bad = [x for x in r["rules"] if x.get("hard") and not x["ok"] and x.get("group") not in blocks.evaluator.RULE_GROUP_SECONDARY]
     if not r["feasible"]:
         rec.update(stage="блоки", reject=r["reject"], reasons=_compact_reasons(bad))
+        if mass_always and r.get("sizing"):
+            try:
+                m = mass_of(C, r, detail=detail)
+                rec.update(mass_t=round(m["total_kg"] / 1e3, 4), mass_lo_t=round(m["total_lo_kg"] / 1e3, 4),
+                           mass_hi_t=round(m["total_hi_kg"] / 1e3, 4), engine_t=round(m["engine_kg"] / 1e3, 4),
+                           hx_t=round(m["hx_kg"] / 1e3, 4), frame_t=round(m["frame_kg"] / 1e3, 4), kW_per_kg=m["kW_per_kg"],
+                           kpd_per_t_if_feasible=m["kpd_per_t"])
+                if detail:
+                    rec["mass"] = m
+            except Exception as e:  # noqa: BLE001
+                rec["mass_error"] = f"{type(e).__name__}: {e}"[:160]
         rec["cpu_s"] = round(time.process_time() - t0, 5)
         if detail:
             rec["blocks"] = r
@@ -379,8 +397,10 @@ def reference_concepts():
         C = copy.deepcopy(base)
         M = PS.MAKE[mk]
         C["compressor"]["make"] = M["comp_make"]
-        C["turbine"].update(make=M["turb_make"], hot_make=M["hot_make"], mat="SC" if M["turb_make"] == "литьё" else "CM247LC",
-                            hot_mat="K438" if M["hot_make"] == "литьё" else "Haynes282")
+        tmat = "SC" if M["turb_make"] == "литьё" else "Haynes282"
+        tl = T.MK().t41_limit("О", "U", tmat, M["turb_make"])[0]
+        C["turbine"].update(make=M["turb_make"], hot_make=M["hot_make"], mat=tmat, hot_mat="K438" if M["hot_make"] == "литьё" else "Haynes282",
+                            t41=min(1000.0, tl))
         C["build"].update(comb_make=M["comb_make"], case_make=M["case_make"], case="разъём" if mk == "традиционная" else "картридж")
         C.setdefault("fuel", dict(prep="нет"))
         C.setdefault("hx", dict(recup=0.0, reheat=False, ibc=False))
@@ -411,9 +431,9 @@ def selfcheck():
     out = []
     for C in reference_concepts():
         Cf = _full(C)
-        rec = evaluate(concept=Cf, detail=True)
+        rec = evaluate(concept=Cf, detail=True, mass_always=True)
         row = {k: rec.get(k) for k in ("label", "feasible", "reject", "eff_el", "mass_t", "mass_lo_t", "mass_hi_t", "kW_per_kg", "kpd_per_t",
-                                       "engine_t", "hx_t", "frame_t", "parts", "pnp", "trl", "cpu_s")}
+                                       "kpd_per_t_if_feasible", "engine_t", "hx_t", "frame_t", "parts", "pnp", "trl", "G_air", "cpu_s")}
         row["name"] = C.get("name")
         if rec.get("mass"):
             row["top_rows"] = [(x["name"], round(x["mass_kg"])) for x in rec["mass"]["rows"][:8]]
