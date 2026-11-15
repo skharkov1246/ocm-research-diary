@@ -97,8 +97,8 @@ def main():
     cc = []
     for fn in a.ccx:
         d = json.load(open(fn, encoding="utf-8"))
-        c = d.get("ccx", {})
-        cc.append(dict(case=d.get("uid"), variant=d.get("variant"), mesh=c.get("mesh"), seconds=c.get("seconds"), solids=c.get("solids"),
+        c = d.get("ccx", d)
+        cc.append(dict(case=d.get("uid") or c.get("tag"), variant=d.get("variant"), mesh=c.get("mesh"), seconds=c.get("seconds"), solids=c.get("solids"),
                        beams=c.get("beams"), freq_Hz=c.get("freq_Hz"), modes=c.get("modes"), shell_vm_max_MPa=c.get("shell_vm_max_MPa"),
                        shell_vm_p999_MPa=c.get("shell_vm_p999_MPa"), zones=(d.get("compare") or {}).get("zones"),
                        cheap_f_beam_Hz=(d.get("compare") or {}).get("cheap_f_beam_Hz"), donnell_Hz=d.get("donnell_Hz"), ratio=d.get("ratio")))
