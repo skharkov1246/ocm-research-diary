@@ -4,8 +4,8 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 505,
-    "total_bytes": 21145876,
+    "datasets": 506,
+    "total_bytes": 21161072,
     "results_files": 207,
     "results_with_script": 66,
     "results_referenced_in_site": 22,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 185,
+      "не определён": 186,
       "прочее": 25
     }
   },
@@ -7210,6 +7210,22 @@
       "last_change": "2026-11-15",
       "last_author": "Claude",
       "last_commit": "56bd874"
+    },
+    {
+      "path": "routes/gtu/evo/blades/jobs_evo_blades.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 15196,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "_comment",
+        "defaults",
+        "jobs"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "f9e4919"
     },
     {
       "path": "routes/gtu/evo/core/.owner.json",
