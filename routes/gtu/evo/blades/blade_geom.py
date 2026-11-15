@@ -30,6 +30,8 @@ T_EDGE = {"print": 0.5e-3, "cast": 0.8e-3}      # наименьшая толщ�
 R_MIN_CURV = 0.5e-3                             # наименьший радиус кривизны кромок под печать/литьё (оценка)
 T_TE_TURB = 0.8e-3                              # выходная кромка турбины (как funnel/meanline_l1.T_TE)
 KB_MAX = 1.6                                    # задняя поверхность ступени 2: не глубже 1,6 кованой frame3 (поиск)
+SLOPE_MAX = 20.0                                # область применимости быстрой оценки диска: |dh/dr| ≤ 20 на 0,1…0,95·r2
+                                                # (калибровка CalculiX, disk1d_calibration.json → domain)
 
 
 # =========================================================================== гены
@@ -434,6 +436,8 @@ def impeller(ml, p, stage, nu_=29, ns=9, n_th=72, build_mesh=True, route=None):
                mass_kg=Mb + disk["mass"], J_kgm2=Jb + disk["J"], blade_fill_phi=phi, hb=hb, disk=disk, checks=checks,
                wrap_shroud_deg=float(math.degrees(theta[-1, -1] - theta[0, -1])),
                wrap_hub_deg=float(math.degrees(theta[-1, 0] - theta[0, 0])), lean_deg=p["lean"], beta=beta, theta=theta)
+    out["checks"]["disk_slope_max"] = disk["slope_max"]
+    out["checks"]["disk_ok"] = disk["ok"]
     out["checks"]["valid"] = bool(checks["t_min_ok"] and checks["ffd_ok"] and checks["passage_ok"] and not si
                                   and checks["rows_ok"] and checks["area_monotone"] and disk["ok"])
     # ---------------- признаки формы (эффектность)
@@ -489,8 +493,11 @@ def impeller_disk(ml, p, stage, hub, Z, theta, mt, rr, n=241):
             fish = p["fish"] * web * w
     h_eff = h - 0.5 * fish
     mass, J = _mi(r, h_eff, 4430.0)
-    ok = bool(np.all(h_eff > 0.004))
-    return dict(r=r, h=h, h_eff=h_eff, xh=xh, xb=xb, fish=fish, mass=mass, J=J, ok=ok, t_rim=t_rim, info=info, Lz=Lz,
+    m_ = (r > 0.1 * r2) & (r < 0.95 * r2)
+    slope = float(np.abs(np.gradient(h_eff, r))[m_].max())
+    info["slope_max"] = slope
+    ok = bool(np.all(h_eff > 0.004) and slope <= SLOPE_MAX)
+    return dict(r=r, h=h, h_eff=h_eff, xh=xh, xb=xb, fish=fish, mass=mass, J=J, ok=ok, t_rim=t_rim, info=info, Lz=Lz, slope_max=slope,
                 stage=stage, Z=Z, theta_hub=np.interp(r, rr[:, 0], theta[:, 0]))
 
 

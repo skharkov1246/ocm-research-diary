@@ -142,13 +142,14 @@ def run_comp(job):
                 mass_kg=r["meta"].get("mass_kg"), feasible_fast=r["feasible"], seconds=round(time.time() - t0, 1))
 
 
-def calibration_set(n=12):
+def calibration_set(n=12, n_out=4):
     """профили для калибровки: облик frame3 обеих ступеней и варианты (задняя поверхность тоньше/толще, ступица,
     втулка, «рыбья кость») — геномы детерминированы"""
     import blade_eval as BE
     import blade_geom as BG
     import core_local as C
     out = []
+    n_o = 0
     for comp in ("comp1", "comp2"):
         x0 = BE.baseline_genes(comp)
         out.append((comp, x0, f"cal_{comp}_base"))
@@ -168,22 +169,27 @@ def calibration_set(n=12):
                 x[names.index(f"zb{i}")] = np.clip(z + 0.15 * rng.standard_normal(), 0, 1)
             x[names.index("boss")] = rng.uniform(0, 1)
             x[names.index("fish")] = rng.uniform(0, 1)
-        r = BE.evaluate(comp, x)
-        if r["meta"].get("checks", {}).get("valid", False) or r["meta"].get("checks") is None:
+        r = BE.evaluate(comp, x, want_geom=True)
+        sl = r["geom"]["disk"]["slope_max"]
+        if sl <= BG.SLOPE_MAX and len([o for o in out if not o[2].startswith("out_")]) < n:
             out.append((comp, x, f"cal_{comp}_{k:02d}"))
+        elif sl > BG.SLOPE_MAX and n_o < n_out:
+            out.append((comp, x, f"out_{comp}_{k:02d}"))
+            n_o += 1
         k += 1
-        if k > 400:
+        if k > 2000 or (len(out) >= n + n_out):
             break
     return out
 
 
 def calibrate(n=12, mesh=(80, 12), workers=4):
-    jobs = [(c, x.tolist(), tag, mesh, 1.0, False) for c, x, tag in calibration_set(n)]
+    cset = calibration_set(n)
+    jobs = [(c, x.tolist(), tag, mesh, 1.0, False) for c, x, tag in cset]
     with Pool(min(workers, len(jobs))) as pool:
         rows = pool.map(run_comp, jobs)
     X, K = [], []
     for r_ in rows:
-        if not r_["ccx"]["gate"]:
+        if not r_["ccx"]["gate"] or r_["tag"].startswith("out_"):
             continue
         cc = r_["columns"]
         for x, a, b, rv in zip(cc["x"], cc["ccx"], cc["fast"], cc["r"]):
@@ -201,8 +207,8 @@ def calibrate(n=12, mesh=(80, 12), workers=4):
     ks = np.maximum.accumulate(np.array(ks)).tolist()        # не убывает с толщиной (огибающая)
     table = dict(x=[0.0] + xs + [1e6], k=[ks[0]] + ks + [ks[-1]], n_points=ns, bins=X_BINS[:-1],
                  method="верхняя огибающая отношения ccx/тонкий диск по столбцам сетки, сгруппированного по местному h/r; не убывает")
-    ka = np.array([r_["ccx"]["yr_axis"] / r_["fast"]["yr_axis_raw"] for r_ in rows if r_["ccx"]["gate"]])
-    kw = np.array([r_["ccx"]["yr_web"] / r_["fast"]["yr_web_raw"] for r_ in rows if r_["ccx"]["gate"]])
+    ka = np.array([r_["ccx"]["yr_axis"] / r_["fast"]["yr_axis_raw"] for r_ in rows if r_["ccx"]["gate"] and not r_["tag"].startswith("out_")])
+    kw = np.array([r_["ccx"]["yr_web"] / r_["fast"]["yr_web_raw"] for r_ in rows if r_["ccx"]["gate"] and not r_["tag"].startswith("out_")])
     zones = dict(method=("CalculiX disk.py (CAX8 %d×%d, 100 %% частоты) против тонкого диска на %d профилях: облик frame3 и варианты "
                          "задней поверхности, ступицы, втулки, «рыбьей кости»; k — наибольшее из отношений по зонам "
                          "(консервативно), среднее и разброс — для сведения") % (mesh[0], mesh[1], len(rows)),
@@ -219,7 +225,7 @@ def calibrate(n=12, mesh=(80, 12), workers=4):
     # проверка таблицы на тех же профилях: max_r k(h/r)·быстрая против max ccx
     chk = []
     kt = (np.asarray(table["x"]), np.asarray(table["k"]))
-    for c_, x_, tag in calibration_set(n):
+    for c_, x_, tag in cset:
         case, r = comp_case(c_, x_, 1.0, mesh, tag)
         geo = r["geom"]
         dk = geo["disk"]
@@ -227,8 +233,13 @@ def calibrate(n=12, mesh=(80, 12), workers=4):
         T = __import__("blade_eval").comp_temperature(1 if c_ == "comp1" else 2, dk["r"], dk["r"][-1])
         f_ = D1.solve(dk["r"], dk["h_eff"], fac, T, "ti64", case["rpm"], k_table=kt)["yield_ratio_max"]
         ccx_ = [q for q in rows if q["tag"] == tag][0]["ccx"]["yield_ratio_max"]
-        chk.append(dict(tag=tag, ccx=ccx_, fast_table=f_, ratio=ccx_ / f_))
-    d["table_check"] = dict(cases=chk, ratio_min=min(q["ratio"] for q in chk), ratio_max=max(q["ratio"] for q in chk),
+        sl = geo["disk"]["slope_max"]
+        chk.append(dict(tag=tag, ccx=ccx_, fast_table=f_, ratio=ccx_ / f_, slope_max=sl, in_domain=not tag.startswith("out_")))
+    ind = [q for q in chk if q["in_domain"]]
+    d["domain"] = dict(slope_max_limit=__import__("blade_geom").SLOPE_MAX, rule="|dh/dr| на 0,1…0,95·r2",
+                       out_of_domain=[q for q in chk if not q["in_domain"]],
+                       note="вне области (крутой переход ступицы в тонкое полотно) отношение ccx/тонкий диск неустойчиво — такие профили недопустимы в поиске")
+    d["table_check"] = dict(cases=chk, ratio_min=min(q["ratio"] for q in ind), ratio_max=max(q["ratio"] for q in ind),
                             note="ratio ≤ 1 — быстрая оценка с таблицей не ниже CalculiX (консервативна) на калибровочных профилях")
     with open(D1.CAL_JSON, "w", encoding="utf-8") as f:
         json.dump(d, f, ensure_ascii=False, indent=1, default=float)
