@@ -167,7 +167,19 @@ def report(C, ch, PRb_obj):
     if sch:
         out["comb_l0_scheme"] = dict(variants=sch["total"], feasible=sch["ok"], hard_ok=sch["hard_ok"], dp_min=sch.get("dp_min"),
                                      parts_min=sch.get("parts_min"), NOx_100_median=sch.get("NOx_100_median"))
-    out["targets"] = targets()
+    tg = targets()
+    if SCHEME[cb["scheme"]]["premix"]:
+        out["T4_max_K"] = tg["tad_max"]
+        out["T4_max_basis"] = ("газ за камерой не горячее верхней границы адиабатической температуры зоны пламени 1850 K "
+                               "(targets.json nox_gas.derived flame_zone_Tad); T41 после охлаждения соплового аппарата - ниже")
+    elif cb["scheme"] == "CAT":
+        out["T4_max_K"] = None
+        out["T4_max_basis"] = ("катализатор до 1173 K, дальше гомогенное догорание (combustor/README, пороги - оценка); предел T41 - "
+                               "по турбине")
+    else:
+        out["T4_max_K"] = None
+        out["T4_max_basis"] = "предел T41 - по турбине (класс охлаждения)"
+    out["targets"] = tg
     return out
 
 

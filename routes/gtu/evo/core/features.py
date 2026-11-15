@@ -74,13 +74,16 @@ def convexity_deficit(points2d):
     return float(1.0 - area / hull.volume) if hull.volume > 0 else 0.0
 
 
-def angular_symmetry(rho, tol=0.08, n_max=24):
+def angular_symmetry(rho, tol=0.08, n_max=24, rel_amp_min=0.05):
     """rho — угловое распределение на равномерной сетке θ (n,) или (n_z, n). Возврат: N_eff — наибольший порядок N ≤ n_max,
     при котором сдвиг на 2π/N совпадает с исходным с невязкой ≤ tol (относительно размаха); 0 — осесимметрично
-    (нет углового рисунка); mirror — лучшая зеркальная невязка; asym — 1 − 1/N_eff (0 для осесимметричного)."""
+    (нет углового рисунка или его размах меньше rel_amp_min от среднего); mirror — лучшая зеркальная невязка;
+    asym — 1 − 1/N_eff (0 для осесимметричного)."""
     R = np.atleast_2d(np.asarray(rho, float))
     n = R.shape[1]
     amp = np.sqrt(np.mean((R - R.mean(axis=1, keepdims=True)) ** 2))
+    if amp < 1e-9 or amp < rel_amp_min * abs(float(R.mean())):      # рябь меньше 5 % среднего — узора нет
+        return dict(N_eff=0, mirror=0.0, asym=0.0, axisym=True)
     if amp < 1e-9:
         return dict(N_eff=0, mirror=0.0, asym=0.0, axisym=True)
     best = 1

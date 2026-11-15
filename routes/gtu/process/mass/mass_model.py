@@ -909,7 +909,7 @@ def kv3_spec(practice="industrial", **over):
     p = json.load(open(F_FRAME3_POINT))
     cyc = p["cycle"]["frame3"]
     s1, s2 = p["stage1"], p["stage2"]
-    spec = dict(id="kv3_simple", name="KV-3 простой (frame3)", practice=practice, P_kW=cyc["P_shaft_kW"], eta_pct=round(100 * cyc["eff_shaft"], 2),
+    spec = dict(id="kv3_simple", name="KV-3 простой (frame3)", practice=practice, P_kW=cyc["P_shaft_kW"], eta_pct=round(100 * cyc["eff_el"], 2),
                 m_air_kg_s=s1["m_total_kg_s"], PR=round(s1["PR"] * s2["PR"], 3), T_exh_C=cyc["EGT_C"],
                 comp=[dict(type="C", sides=2, pi=s1["PR"]), dict(type="C", sides=1, pi=s2["PR"])],
                 turb_gg=dict(type="A", n=int(p["turbine"]["selected_z"])), turb_pt=None, rpm_gg=s1["n_rpm"], rpm_pt=None,
@@ -961,45 +961,45 @@ def checks(db, cal):
 
 
 def examples(cal):
-    """KV-3: простой (frame3) в двух практиках и с разными подшипниками; KV-3 + рекуператор 0,90 + подогрев «как есть» (organic/cycles)
-    с разными сердцевинами - масса, кВт/кг, КПД на тонну, фронт Парето"""
+    """KV-3 простой (frame3) и KV-3 + рекуператор 0,90 + подогрев «как есть» (organic/cycles, компрессор KV-3 π 13,5) при разных
+    способах изготовления корпусов, сердцевинах рекуператора и подшипниках: масса, кВт/кг, КПД на клеммах, КПД на тонну; фронт Парето
+    строится внутри промышленной K (авиационная практика - нижняя граница массы, отдельно)"""
     calk = {k: dict(K=v["K"], sigma_log=v["loo"]["rms_log"]) for k, v in cal["per_practice"].items()}
     items = []
-    variants = [("industrial", None, "oil_pkg", "промышл. практика, литьё в песок, масло пакета"),
-                ("industrial", None, "magnetic", "промышл. практика, литьё в песок, магнитные"),
-                ("industrial", "cast_invest", "oil_pkg", "промышл. K, точное литьё КНР, масло пакета"),
-                ("industrial", "lpbf", "oil_pkg", "промышл. K, печать LPBF, масло пакета"),
-                ("industrial", "lpbf", "magnetic", "промышл. K, печать LPBF, магнитные"),
-                ("aero", None, "oil_pkg", "авиац. практика, масло пакета"),
-                ("aero", None, "magnetic", "авиац. практика, магнитные")]
-    for pr, proc, bk, label in variants:
-        sp = kv3_spec(pr, bearings=dict(kind=bk, n_radial=2, n_thrust=1), process=proc)
-        sp["name"] = f"KV-3 простой, {label}"
+    PROC_RU = {"cast_sand": "литьё в песок", "cast_invest": "точное литьё КНР", "lpbf": "печать LPBF", "forged_fab": "авиац. практика"}
+    simple = [("industrial", "cast_sand", "oil_pkg"), ("industrial", "cast_sand", "magnetic"), ("industrial", "cast_invest", "oil_pkg"),
+              ("industrial", "lpbf", "oil_pkg"), ("industrial", "lpbf", "magnetic"), ("aero", "forged_fab", "oil_pkg")]
+    for pr, proc, bk in simple:
+        sp = kv3_spec(pr, bearings=dict(kind=bk, n_radial=2, n_thrust=1), process=None if proc in ("cast_sand", "forged_fab") else proc)
+        sp["name"] = f"KV-3 простой; {PROC_RU[proc]}; {'масло пакета' if bk == 'oil_pkg' else 'магнитные'}"
         ev = evaluate(size_from_passport(sp), cal=calk)
-        ev["process"] = proc or ("cast_sand" if pr == "industrial" else "forged_fab")
+        ev.update(process=proc, concept="простой", eta_basis="КПД на клеммах frame3 (cycle.frame3.eff_el)")
         items.append(ev)
-    # «как есть»: компрессор KV-3 π 13,5, рекуператор 0,90 + подогрев (cycles_results.json, key R90-ic-RH-ibc-none-none, pr135)
     try:
         cy = json.load(open(F_CYCLES))
         r = next(x for x in cy["results"] if x.get("key") == "R90-ic-RH-ibc-none-none")["pr135"]
         A_foil = r["hx"]["foil"][0]["A_m2"]
         A_lpbf = r["hx"]["lpbf"][0]["A_m2"]
-        for typ, Aa in (("psr", A_foil), ("tpms_print", A_lpbf), ("plate_print", A_lpbf)):
-            sp = kv3_spec("industrial")
-            # тот же компрессор, другой расход и КПД (cycles); турбина - 3 ступени (размеры по своему перепаду)
-            sp.update(name=f"KV-3 + рекуператор 0,90 + подогрев (как есть), сердцевина {typ}", m_air_kg_s=r["W_air"], eta_pct=round(100 * r["eff_el"], 2),
-                      P_kW=kv3_spec()["P_kW"], T_exh_C=r["T_rec_in_C"], hx=[dict(name="рекуператор", type=typ, A_m2=Aa)],
-                      eta_basis="КПД на клеммах (cycles eff_el), у простого - на валу (frame3): сравнение смещено на ~1,5 п. п. в пользу простого")
-            ev = evaluate(size_from_passport(sp), cal=calk)
-            ev["note"] = ("межтурбинная камера подогрева не добавлена отдельным блоком; турбина в размерах - перепад до входа в рекуператор; "
-                          "мощность принята равной простому KV-3 (cycles считает на 1 кг/с - масштаб по расходу)")
-            items.append(ev)
+        for proc in ("cast_sand", "lpbf"):
+            for typ, Aa in (("psr", A_foil), ("tpms_print", A_lpbf), ("plate_print", A_lpbf)):
+                sp = kv3_spec("industrial", process=None if proc == "cast_sand" else proc)
+                sp.update(name=f"KV-3 + рекуп. 0,90 + подогрев (как есть); {PROC_RU[proc]}; сердцевина {typ}", m_air_kg_s=r["W_air"],
+                          P_kW=r["W_air"] * r["w_kJkg"], eta_pct=round(100 * r["eff_el"], 2), T_exh_C=r["T_rec_in_C"],
+                          hx=[dict(name="рекуператор", type=typ, A_m2=Aa)])
+                ev = evaluate(size_from_passport(sp), cal=calk)
+                ev.update(process=proc, concept="рекуператор 0,90 + подогрев", eta_basis="КПД на клеммах organic/cycles (pr135.eff_el)",
+                          note=("межтурбинная камера подогрева отдельным блоком не добавлена (её корпус - внутри корпуса турбины, оценка); "
+                                "турбина в размерах - перепад до входа в рекуператор; поверхность рекуператора - organic/cycles (hx foil / lpbf A_m2)"))
+                items.append(ev)
     except (OSError, StopIteration, KeyError):
         pass
     for ev in items:
         ev.pop("rows", None)
-    front = pareto_front(items)
-    return dict(items=items, pareto_idx=front, pareto_names=[items[i]["name"] for i in front])
+    ind = [i for i, ev in enumerate(items) if ev["practice"] == "industrial"]
+    front = [ind[j] for j in pareto_front([items[i] for i in ind])]
+    return dict(items=items, pareto_industrial_idx=front, pareto_industrial=[items[i]["name"] for i in front],
+                best_kpd_per_t_industrial=max((items[i] for i in ind), key=lambda e: e["kpd_per_t"])["name"],
+                note="фронт и лучший «КПД на тонну» - только внутри промышленной K; авиационная практика - нижняя граница массы")
 
 
 def _sha(path):

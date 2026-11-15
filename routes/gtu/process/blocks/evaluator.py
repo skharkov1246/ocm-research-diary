@@ -199,6 +199,7 @@ def evaluate(concept, detail=False):
                             W_exh=round(W_exh, 3), W_exh_cap=round(W_cap, 3) if W_cap else None,
                             dWexh_pct=round((W_exh / tgt0["W_exh0"] - 1) * 100, 2) if tgt0["W_exh0"] else None,
                             EGT_C=round(EGT, 1), EGT_cap_C=EGT_cap, dEGT=round(EGT - tgt0["EGT0"], 1), n_out_rpm=tgt0["n_pkg_true"],
+                            P_at_G_cap_kW=round(w * G_cap / 1e3, 1), P_margin_at_G_cap_pct=round((w * G_cap / 1e3 / P - 1) * 100, 2),
                             rule="мягкий допуск: воздух и выхлоп до +20 %, выхлоп до +100 °C (решение владельца 14.11.2026)")
     rules.append(dict(code="pkg_Wexh", hard=True, ok=(W_cap is None) or W_exh <= W_cap + 1e-9, val=round(W_exh, 4),
                       lim=round(W_cap, 4) if W_cap else None, group="пакет",
@@ -224,7 +225,7 @@ def evaluate(concept, detail=False):
         g2["rec"] = hx.funnel_rec(C, sz, g2.get("rec"))
     if g2 is not None:
         for r in FS.check(fc, tgt, perf2, g2):
-            if r["code"] in ("recup_T",):
+            if r["code"] in ("recup_T", "T41_class"):          # свои: предел газа задаётся концепцией; T41 - в turbine.static_rules
                 continue
             rules.append(dict(r, hard=True, group="воронка"))
         rules += shaft.rules(C, tgt0, g2["n"])

@@ -12,7 +12,7 @@
   "cycles": "routes/gtu/organic/cycles/cycles_results.json",
   "fleet": "routes/gtu/fleet",
   "densities": "routes/gtu/funnel/make_model.py: MAT[*].rho",
-  "code_sha16": "3c7a6fc187187430"
+  "code_sha16": "4bf7a676910164a9"
  },
  "assumptions": {
   "A": {
@@ -1813,7 +1813,7 @@
  "examples": {
   "items": [
    {
-    "name": "KV-3 простой, промышл. практика, литьё в песок, масло пакета",
+    "name": "KV-3 простой; литьё в песок; масло пакета",
     "practice": "industrial",
     "K": 2.7892,
     "sigma_log": 0.20906560006350824,
@@ -1832,16 +1832,18 @@
     "total_lo_kg": 5141.1,
     "total_hi_kg": 7730.1,
     "kW_per_kg": 0.9175,
-    "eta_pct": 31.63,
-    "kpd_per_t": 5.02,
+    "eta_pct": 30.28,
+    "kpd_per_t": 4.806,
     "kpd_per_t_range": [
-     4.092,
-     6.152
+     3.917,
+     5.89
     ],
-    "process": "cast_sand"
+    "process": "cast_sand",
+    "concept": "простой",
+    "eta_basis": "КПД на клеммах frame3 (cycle.frame3.eff_el)"
    },
    {
-    "name": "KV-3 простой, промышл. практика, литьё в песок, магнитные",
+    "name": "KV-3 простой; литьё в песок; магнитные",
     "practice": "industrial",
     "K": 2.7892,
     "sigma_log": 0.20906560006350824,
@@ -1860,16 +1862,18 @@
     "total_lo_kg": 5260.0,
     "total_hi_kg": 7790.8,
     "kW_per_kg": 0.9042,
-    "eta_pct": 31.63,
-    "kpd_per_t": 4.947,
+    "eta_pct": 30.28,
+    "kpd_per_t": 4.736,
     "kpd_per_t_range": [
-     4.06,
-     6.013
+     3.887,
+     5.757
     ],
-    "process": "cast_sand"
+    "process": "cast_sand",
+    "concept": "простой",
+    "eta_basis": "КПД на клеммах frame3 (cycle.frame3.eff_el)"
    },
    {
-    "name": "KV-3 простой, промышл. K, точное литьё КНР, масло пакета",
+    "name": "KV-3 простой; точное литьё КНР; масло пакета",
     "practice": "industrial",
     "K": 2.7892,
     "sigma_log": 0.20906560006350824,
@@ -1888,16 +1892,18 @@
     "total_lo_kg": 3370.5,
     "total_hi_kg": 5040.4,
     "kW_per_kg": 1.4036,
-    "eta_pct": 31.63,
-    "kpd_per_t": 7.68,
+    "eta_pct": 30.28,
+    "kpd_per_t": 7.352,
     "kpd_per_t_range": [
-     6.275,
-     9.384
+     6.007,
+     8.984
     ],
-    "process": "cast_invest"
+    "process": "cast_invest",
+    "concept": "простой",
+    "eta_basis": "КПД на клеммах frame3 (cycle.frame3.eff_el)"
    },
    {
-    "name": "KV-3 простой, промышл. K, печать LPBF, масло пакета",
+    "name": "KV-3 простой; печать LPBF; масло пакета",
     "practice": "industrial",
     "K": 2.7892,
     "sigma_log": 0.20906560006350824,
@@ -1916,16 +1922,18 @@
     "total_lo_kg": 2953.7,
     "total_hi_kg": 4407.3,
     "kW_per_kg": 1.6037,
-    "eta_pct": 31.63,
-    "kpd_per_t": 8.774,
+    "eta_pct": 30.28,
+    "kpd_per_t": 8.4,
     "kpd_per_t_range": [
-     7.177,
-     10.709
+     6.87,
+     10.252
     ],
-    "process": "lpbf"
+    "process": "lpbf",
+    "concept": "простой",
+    "eta_basis": "КПД на клеммах frame3 (cycle.frame3.eff_el)"
    },
    {
-    "name": "KV-3 простой, промышл. K, печать LPBF, магнитные",
+    "name": "KV-3 простой; печать LPBF; магнитные",
     "practice": "industrial",
     "K": 2.7892,
     "sigma_log": 0.20906560006350824,
@@ -1944,16 +1952,18 @@
     "total_lo_kg": 3072.6,
     "total_hi_kg": 4467.9,
     "kW_per_kg": 1.5634,
-    "eta_pct": 31.63,
-    "kpd_per_t": 8.554,
+    "eta_pct": 30.28,
+    "kpd_per_t": 8.189,
     "kpd_per_t_range": [
-     7.079,
-     10.294
+     6.777,
+     9.855
     ],
-    "process": "lpbf"
+    "process": "lpbf",
+    "concept": "простой",
+    "eta_basis": "КПД на клеммах frame3 (cycle.frame3.eff_el)"
    },
    {
-    "name": "KV-3 простой, авиац. практика, масло пакета",
+    "name": "KV-3 простой; авиац. практика; масло пакета",
     "practice": "aero",
     "K": 0.9848,
     "sigma_log": 0.39398841231493964,
@@ -1972,135 +1982,213 @@
     "total_lo_kg": 1053.0,
     "total_hi_kg": 2195.9,
     "kW_per_kg": 3.82,
-    "eta_pct": 31.63,
-    "kpd_per_t": 20.901,
+    "eta_pct": 30.28,
+    "kpd_per_t": 20.009,
     "kpd_per_t_range": [
-     14.404,
-     30.037
+     13.79,
+     28.755
     ],
-    "process": "forged_fab"
+    "process": "forged_fab",
+    "concept": "простой",
+    "eta_basis": "КПД на клеммах frame3 (cycle.frame3.eff_el)"
    },
    {
-    "name": "KV-3 простой, авиац. практика, магнитные",
-    "practice": "aero",
-    "K": 0.9848,
-    "sigma_log": 0.39398841231493964,
-    "groups_raw": {
-     "rotor": 613.1,
-     "static": 660.5,
-     "hx": 0,
-     "bearings": 214.0,
-     "frame": 0
-    },
-    "engine_kg": 1263.6,
-    "hx_kg": 0,
-    "bearings_extra_kg": 214.0,
-    "frame_kg": 218.0,
-    "total_kg": 1695.6,
-    "total_lo_kg": 1251.2,
-    "total_hi_kg": 2354.5,
-    "kW_per_kg": 3.4094,
-    "eta_pct": 31.63,
-    "kpd_per_t": 18.655,
-    "kpd_per_t_range": [
-     13.434,
-     25.28
-    ],
-    "process": "forged_fab"
-   },
-   {
-    "name": "KV-3 + рекуператор 0,90 + подогрев (как есть), сердцевина psr",
+    "name": "KV-3 + рекуп. 0,90 + подогрев (как есть); литьё в песок; сердцевина psr",
     "practice": "industrial",
     "K": 2.7892,
     "sigma_log": 0.20906560006350824,
     "groups_raw": {
      "rotor": 618.0,
-     "static": 1764.5,
+     "static": 1764.6,
      "hx": 2098.3,
      "bearings": 0,
      "frame": 0
     },
-    "engine_kg": 5539.4,
+    "engine_kg": 5539.7,
     "hx_kg": 2098.3,
     "bearings_extra_kg": 0,
     "frame_kg": 761.2,
-    "total_kg": 8398.9,
-    "total_lo_kg": 6703.7,
-    "total_hi_kg": 10356.5,
-    "kW_per_kg": 0.6883,
+    "total_kg": 8399.2,
+    "total_lo_kg": 6703.9,
+    "total_hi_kg": 10356.9,
+    "kW_per_kg": 0.7051,
     "eta_pct": 35.7,
-    "kpd_per_t": 4.251,
+    "kpd_per_t": 4.25,
     "kpd_per_t_range": [
      3.447,
      5.325
     ],
-    "note": "межтурбинная камера подогрева не добавлена отдельным блоком; турбина в размерах - перепад до входа в рекуператор; мощность принята равной простому KV-3 (cycles считает на 1 кг/с - масштаб по расходу)"
+    "process": "cast_sand",
+    "concept": "рекуператор 0,90 + подогрев",
+    "eta_basis": "КПД на клеммах organic/cycles (pr135.eff_el)",
+    "note": "межтурбинная камера подогрева отдельным блоком не добавлена (её корпус - внутри корпуса турбины, оценка); турбина в размерах - перепад до входа в рекуператор; поверхность рекуператора - organic/cycles (hx foil / lpbf A_m2)"
    },
    {
-    "name": "KV-3 + рекуператор 0,90 + подогрев (как есть), сердцевина tpms_print",
+    "name": "KV-3 + рекуп. 0,90 + подогрев (как есть); литьё в песок; сердцевина tpms_print",
     "practice": "industrial",
     "K": 2.7892,
     "sigma_log": 0.20906560006350824,
     "groups_raw": {
      "rotor": 618.0,
-     "static": 1764.5,
+     "static": 1764.6,
      "hx": 5816.6,
      "bearings": 0,
      "frame": 0
     },
-    "engine_kg": 5539.4,
+    "engine_kg": 5539.7,
     "hx_kg": 5816.6,
     "bearings_extra_kg": 0,
     "frame_kg": 1058.7,
-    "total_kg": 12414.7,
-    "total_lo_kg": 10029.7,
-    "total_hi_kg": 15062.2,
-    "kW_per_kg": 0.4656,
+    "total_kg": 12415.0,
+    "total_lo_kg": 10029.9,
+    "total_hi_kg": 15062.6,
+    "kW_per_kg": 0.477,
     "eta_pct": 35.7,
     "kpd_per_t": 2.876,
     "kpd_per_t_range": [
      2.37,
      3.559
     ],
-    "note": "межтурбинная камера подогрева не добавлена отдельным блоком; турбина в размерах - перепад до входа в рекуператор; мощность принята равной простому KV-3 (cycles считает на 1 кг/с - масштаб по расходу)"
+    "process": "cast_sand",
+    "concept": "рекуператор 0,90 + подогрев",
+    "eta_basis": "КПД на клеммах organic/cycles (pr135.eff_el)",
+    "note": "межтурбинная камера подогрева отдельным блоком не добавлена (её корпус - внутри корпуса турбины, оценка); турбина в размерах - перепад до входа в рекуператор; поверхность рекуператора - organic/cycles (hx foil / lpbf A_m2)"
    },
    {
-    "name": "KV-3 + рекуператор 0,90 + подогрев (как есть), сердцевина plate_print",
+    "name": "KV-3 + рекуп. 0,90 + подогрев (как есть); литьё в песок; сердцевина plate_print",
     "practice": "industrial",
     "K": 2.7892,
     "sigma_log": 0.20906560006350824,
     "groups_raw": {
      "rotor": 618.0,
-     "static": 1764.5,
+     "static": 1764.6,
      "hx": 9839.8,
      "bearings": 0,
      "frame": 0
     },
-    "engine_kg": 5539.4,
+    "engine_kg": 5539.7,
     "hx_kg": 9839.8,
     "bearings_extra_kg": 0,
     "frame_kg": 1380.5,
-    "total_kg": 16759.7,
-    "total_lo_kg": 13505.7,
-    "total_hi_kg": 20276.2,
-    "kW_per_kg": 0.3449,
+    "total_kg": 16760.0,
+    "total_lo_kg": 13505.9,
+    "total_hi_kg": 20276.6,
+    "kW_per_kg": 0.3533,
     "eta_pct": 35.7,
     "kpd_per_t": 2.13,
     "kpd_per_t_range": [
      1.761,
      2.643
     ],
-    "note": "межтурбинная камера подогрева не добавлена отдельным блоком; турбина в размерах - перепад до входа в рекуператор; мощность принята равной простому KV-3 (cycles считает на 1 кг/с - масштаб по расходу)"
+    "process": "cast_sand",
+    "concept": "рекуператор 0,90 + подогрев",
+    "eta_basis": "КПД на клеммах organic/cycles (pr135.eff_el)",
+    "note": "межтурбинная камера подогрева отдельным блоком не добавлена (её корпус - внутри корпуса турбины, оценка); турбина в размерах - перепад до входа в рекуператор; поверхность рекуператора - organic/cycles (hx foil / lpbf A_m2)"
+   },
+   {
+    "name": "KV-3 + рекуп. 0,90 + подогрев (как есть); печать LPBF; сердцевина psr",
+    "practice": "industrial",
+    "K": 2.7892,
+    "sigma_log": 0.20906560006350824,
+    "groups_raw": {
+     "rotor": 618.0,
+     "static": 862.8,
+     "hx": 2098.3,
+     "bearings": 0,
+     "frame": 0
+    },
+    "engine_kg": 3024.5,
+    "hx_kg": 2098.3,
+    "bearings_extra_kg": 0,
+    "frame_kg": 560.0,
+    "total_kg": 5682.8,
+    "total_lo_kg": 4500.0,
+    "total_hi_kg": 7008.9,
+    "kW_per_kg": 1.0421,
+    "eta_pct": 35.7,
+    "kpd_per_t": 6.282,
+    "kpd_per_t_range": [
+     5.094,
+     7.933
+    ],
+    "process": "lpbf",
+    "concept": "рекуператор 0,90 + подогрев",
+    "eta_basis": "КПД на клеммах organic/cycles (pr135.eff_el)",
+    "note": "межтурбинная камера подогрева отдельным блоком не добавлена (её корпус - внутри корпуса турбины, оценка); турбина в размерах - перепад до входа в рекуператор; поверхность рекуператора - organic/cycles (hx foil / lpbf A_m2)"
+   },
+   {
+    "name": "KV-3 + рекуп. 0,90 + подогрев (как есть); печать LPBF; сердцевина tpms_print",
+    "practice": "industrial",
+    "K": 2.7892,
+    "sigma_log": 0.20906560006350824,
+    "groups_raw": {
+     "rotor": 618.0,
+     "static": 862.8,
+     "hx": 5816.6,
+     "bearings": 0,
+     "frame": 0
+    },
+    "engine_kg": 3024.5,
+    "hx_kg": 5816.6,
+    "bearings_extra_kg": 0,
+    "frame_kg": 857.5,
+    "total_kg": 9698.7,
+    "total_lo_kg": 7826.0,
+    "total_hi_kg": 11714.6,
+    "kW_per_kg": 0.6106,
+    "eta_pct": 35.7,
+    "kpd_per_t": 3.681,
+    "kpd_per_t_range": [
+     3.047,
+     4.562
+    ],
+    "process": "lpbf",
+    "concept": "рекуператор 0,90 + подогрев",
+    "eta_basis": "КПД на клеммах organic/cycles (pr135.eff_el)",
+    "note": "межтурбинная камера подогрева отдельным блоком не добавлена (её корпус - внутри корпуса турбины, оценка); турбина в размерах - перепад до входа в рекуператор; поверхность рекуператора - organic/cycles (hx foil / lpbf A_m2)"
+   },
+   {
+    "name": "KV-3 + рекуп. 0,90 + подогрев (как есть); печать LPBF; сердцевина plate_print",
+    "practice": "industrial",
+    "K": 2.7892,
+    "sigma_log": 0.20906560006350824,
+    "groups_raw": {
+     "rotor": 618.0,
+     "static": 862.8,
+     "hx": 9839.8,
+     "bearings": 0,
+     "frame": 0
+    },
+    "engine_kg": 3024.5,
+    "hx_kg": 9839.8,
+    "bearings_extra_kg": 0,
+    "frame_kg": 1179.3,
+    "total_kg": 14043.7,
+    "total_lo_kg": 11302.0,
+    "total_hi_kg": 16928.6,
+    "kW_per_kg": 0.4217,
+    "eta_pct": 35.7,
+    "kpd_per_t": 2.542,
+    "kpd_per_t_range": [
+     2.109,
+     3.159
+    ],
+    "process": "lpbf",
+    "concept": "рекуператор 0,90 + подогрев",
+    "eta_basis": "КПД на клеммах organic/cycles (pr135.eff_el)",
+    "note": "межтурбинная камера подогрева отдельным блоком не добавлена (её корпус - внутри корпуса турбины, оценка); турбина в размерах - перепад до входа в рекуператор; поверхность рекуператора - organic/cycles (hx foil / lpbf A_m2)"
    }
   ],
-  "pareto_idx": [
-   5,
-   7
+  "pareto_industrial_idx": [
+   3,
+   9
   ],
-  "pareto_names": [
-   "KV-3 простой, авиац. практика, масло пакета",
-   "KV-3 + рекуператор 0,90 + подогрев (как есть), сердцевина psr"
-  ]
+  "pareto_industrial": [
+   "KV-3 простой; печать LPBF; масло пакета",
+   "KV-3 + рекуп. 0,90 + подогрев (как есть); печать LPBF; сердцевина psr"
+  ],
+  "best_kpd_per_t_industrial": "KV-3 простой; печать LPBF; масло пакета",
+  "note": "фронт и лучший «КПД на тонну» - только внутри промышленной K; авиационная практика - нижняя граница массы"
  },
  "how_to_use": "import mass_model as MM; g = MM.size_from_passport(spec) (spec - как запись mass_db.json или MM.kv3_spec()); ev = MM.evaluate(g) -> total_kg, total_lo_kg/total_hi_kg, kW_per_kg, kpd_per_t; свои блоки: g['rows'] - список строк MM.block_* (группы rotor/static/hx/bearings/frame), g['hx'] - [dict(type, A_m2)], g['bearings'] - dict(kind); MM.pareto_front(list_of_evaluations)",
  "not_done": [
@@ -2112,5 +2200,5 @@
   "двухвальный LM6000 сведён к средней линии на каждую группу ступеней; LM2500 и LM2500+ - силовая турбина принята 6-ступенчатой 3600 об/мин",
   "хосты geaerospace.com, wikipedia.org, vericor.com, motorsich.com, trid.trb.org, cloudfront Capstone не разрешены сетью сессии - их числа только по выдержке поиска"
  ],
- "runtime_s": 0.09
+ "runtime_s": 0.16
 }

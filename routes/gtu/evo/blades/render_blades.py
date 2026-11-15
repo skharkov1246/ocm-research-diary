@@ -109,12 +109,14 @@ def main(argv=None):
             ax = fig.add_axes([0, 0, 1, 1])
             ax.imshow(img)
             ax.set_axis_off()
-            tp = os.path.join(a.thumb_dir, f"gallery_{comp}.png")
+            tp = os.path.join(a.thumb_dir, f"gallery_{comp}.png")          # уменьшенная копия (≤ 200 КБ после ужатия ниже)
             fig.savefig(tp, dpi=100)
             plt.close(fig)
             try:
                 from PIL import Image
                 im = Image.open(tp).convert("L")
+                w_, h_ = im.size
+                im = im.resize((1150, int(h_ * 1150 / w_)), Image.LANCZOS).quantize(colors=32).convert("L")
                 im.save(tp, optimize=True)
             except ImportError:
                 pass
