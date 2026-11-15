@@ -130,6 +130,21 @@ def write_inp(model, path):
     def new_node(x, y, zz, T):
         k = nxt[0]; nxt[0] += 1
         extra.append((k, x, y, zz, T)); return k
+    patch_beams = []                # (a, b) жёсткие балки от узла крепления к узлам пятна на стенке
+
+    def attach(iz, it, dz_n, dt_n, T):
+        """узел крепления балки к стенке: пятно (2·dz_n+1)×(2·dt_n+1) узлов внутренней поверхности и столбец по толщине —
+        как корень стойки со скруглением; точечное крепление к узлу объёмной сетки давало бы ложную местную податливость"""
+        P = np.array([X[iz, it, 0], Y[iz, it, 0], Z[iz, it, 0]])
+        P = P - 0.006 * np.array([P[0], P[1], 0.0]) / max(math.hypot(P[0], P[1]), 1e-9)   # на 6 мм внутрь: балки пятна — ненулевой длины
+        tipn = new_node(*P, T)
+        for di in range(-dz_n, dz_n + 1):
+            for dj in range(-dt_n, dt_n + 1):
+                i2, j2 = min(max(iz + di, 0), nz), (it + dj) % nt
+                patch_beams.append((tipn, int(nid[i2, j2, 0])))
+        for kk in (1, 2, 3):
+            patch_beams.append((tipn, int(nid[iz, it, kk])))
+        return tipn, P
     E = model["E"]
     ew, ec = [], []
     for k, (n, m) in enumerate(zip(E, model["emat"])):
@@ -162,8 +177,8 @@ def write_inp(model, path):
                 h_eq = math.sqrt(12 * I / A); b_eq = A / h_eq
                 thj = 2 * math.pi * jj / N - math.pi / 2
                 it = int(np.round((thj % (2 * math.pi)) / (2 * math.pi) * nt)) % nt
-                tip = int(nid[iz, it, 0])
-                tipxyz = np.array([X[iz, it, 0], Y[iz, it, 0], Z[iz, it, 0]])
+                dzc = float(z[1] - z[0])
+                tip, tipxyz = attach(iz, it, max(1, int(round(0.5 * chord / dzc))), 1, T_st)
                 er = np.array([math.cos(thj), math.sin(thj), 0.0]); et = np.array([-math.sin(thj), math.cos(thj), 0.0])
                 L0 = float(np.hypot(tipxyz[0], tipxyz[1])) - SM.R_HUB
                 lean = math.tan(math.radians(p[pre + "lean"])) * L0
@@ -203,11 +218,10 @@ def write_inp(model, path):
             th0 = 2 * math.pi * jj / N
             th1 = th0 + sweep
             it = int(np.round((th1 % (2 * math.pi)) / (2 * math.pi) * nt)) % nt
-            tip = int(nid[iz1, it, 0])
             rn = new_node(r_hot * math.cos(th0), r_hot * math.sin(th0), z0, T_hs)
             beams["SPIDER"].append((nh, rn))
             prev = rn
-            tipxyz = np.array([X[iz1, it, 0], Y[iz1, it, 0], Z[iz1, it, 0]])
+            tip, tipxyz = attach(iz1, it, 1, 0, T_case)
             rt = float(np.hypot(tipxyz[0], tipxyz[1]))
             for q in (1, 2, 3):
                 s = q / 4
@@ -242,6 +256,12 @@ def write_inp(model, path):
     for key, lst in beam_sets.items():
         L.append(f"*ELEMENT, TYPE=B31, ELSET=B_{key}")
         L += [f"{e},{a},{b}" for e, a, b in lst]
+    patch_ids = []
+    xyz = {int(n): (x, y, zz) for n, x, y, zz in zip(flat, X.ravel(), Y.ravel(), Z.ravel())}
+    xyz.update({k: (x, y, zz) for (k, x, y, zz, T) in extra})
+    for (a, b) in patch_beams:
+        L.append(f"*ELEMENT, TYPE=B31, ELSET=P{eid}\n{eid},{a},{b}")
+        patch_ids.append((eid, a, b)); eid += 1
     if masses:
         for k, (n, m) in enumerate(masses):
             L.append(f"*ELEMENT, TYPE=MASS, ELSET=M{k}\n{eid},{n}")
@@ -278,6 +298,11 @@ def write_inp(model, path):
             a = 2 * math.pi * jj / p["hf_n"]
             L.append(f"*BEAM SECTION, ELSET=B_{key}, MATERIAL=FINGER, SECTION=RECT\n{p['hf_t']:.5e},{p['hf_b']:.5e}\n"
                      f"{math.cos(a):.5f},{math.sin(a):.5f},0.")
+    for (e_, a, b) in patch_ids:
+        d = np.array(xyz[b]) - np.array(xyz[a]); d /= (np.linalg.norm(d) + 1e-30)
+        ref = np.array([0.0, 0.0, 1.0]) if abs(d[2]) < 0.9 else np.array([1.0, 0.0, 0.0])
+        n1 = np.cross(d, ref); n1 /= np.linalg.norm(n1)
+        L.append(f"*BEAM SECTION, ELSET=P{e_}, MATERIAL=STIFF, SECTION=RECT\n0.012,0.012\n{n1[0]:.5f},{n1[1]:.5f},{n1[2]:.5f}")
     for k, (n, m) in enumerate(masses):
         L.append(f"*MASS, ELSET=M{k}\n{m:.4f}")
     # ------------------------------------------------ опоры
@@ -344,7 +369,7 @@ def write_inp(model, path):
     L.append("*STEP\n*FREQUENCY\n12\n*NODE FILE\nU\n*END STEP")
     with open(path, "w") as f:
         f.write("\n".join(L) + "\n")
-    return dict(nmax=nmax, extra=len(extra), elements=int(eid - 1), solids=ne, beams=sum(len(v) for v in beam_sets.values()),
+    return dict(nmax=nmax, extra=len(extra), elements=int(eid - 1), solids=ne, beams=sum(len(v) for v in beam_sets.values()) + len(patch_ids),
                 masses=masses, pads=pads, load_rings=loads_rings, mass_nodes=[n for n, _ in masses])
 
 
@@ -463,18 +488,37 @@ def run(p, variant, out, mesh="coarse", canonical=None, tag="case", threads=2):
     # отнесение мод: доля кинетической энергии в массах ротора и горячей части (масса корпуса — по объёмам элементов)
     disp = [b for nm, b in blocks if nm == "DISP"]
     modes = disp[1:] if len(disp) > len(freqs) else disp[-len(freqs):] if freqs else []
-    mrot = {n: m for n, m in info["masses"]}
-    nm_shell = _nodal_mass(model)
+    coords = _frd_coords(os.path.join(out, tag + ".frd"))
+    z_e0 = SM.INP["zones"][4]["z0"]
     rows = []
     for f_, U in zip(freqs, modes):
-        ke_r = sum(m * np.sum(np.square(U.get(n, [0, 0, 0])[:3])) for n, m in info["masses"][:2])
-        ke_h = sum(m * np.sum(np.square(U.get(n, [0, 0, 0])[:3])) for n, m in info["masses"][2:])
-        ke_s = sum(m * np.sum(np.square(U.get(n, [0, 0, 0])[:3])) for n, m in nm_shell.items())
-        tot = ke_r + ke_h + ke_s + 1e-300
-        rows.append(dict(f_Hz=f_, rotor=ke_r / tot, hot=ke_h / tot, shell=ke_s / tot))
+        ns = np.array(list(U.keys())); u2 = np.array([float(np.sum(np.square(U[n][:3]))) for n in ns])
+        im = int(np.argmax(u2)); xm = coords.get(int(ns[im]), (0, 0, 0))
+        rm, zm = math.hypot(xm[0], xm[1]), xm[2]
+        shell_share = float(u2[[int(n) in used for n in ns]].sum() / max(u2.sum(), 1e-300))
+        if rm < 0.25:
+            kind = "ротор и рама подшипника"
+        elif zm > z_e0 - 0.02 and rm < float(np.interp(zm, z, model["r_i"])) - 0.003:
+            kind = "горячая часть и клетка"
+        else:
+            kind = "корпус"
+        rows.append(dict(f_Hz=f_, kind=kind, max_at_r_z=[round(rm, 3), round(zm, 3)], shell_share_u2=shell_share))
     res["modes"] = rows
-    del mrot
     return res
+
+
+def _frd_coords(path):
+    out, on = {}, False
+    with open(path, errors="replace") as f:
+        for line in f:
+            if line.startswith("    2C"):
+                on = True; continue
+            if on:
+                if line.startswith(" -3"):
+                    break
+                if line.startswith(" -1"):
+                    out[int(line[3:13])] = (float(line[13:25]), float(line[25:37]), float(line[37:49]))
+    return out
 
 
 def _vm(s):

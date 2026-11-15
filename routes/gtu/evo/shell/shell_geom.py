@@ -52,6 +52,10 @@ def heightfield(p, variant, res="draft", geo=None):
     Dp, _ = S.segments_distance_grid(z, s, pads, 0.12, period_y=2 * math.pi * R_ref)
     hp = np.where(np.isfinite(Dp), 0.04 * S.rib_profile(Dp, 0.07, 0.03), 0.0)
     h = np.maximum(h, hp)
+    # кольца жёсткости рам (передняя, задняя, клетка): ring_h × ring_w, то же скругление, что у рёбер
+    for zr in (SM.INP["z_fb"], SM.INP["z_rb"], SM.INP["zones"][4]["z0"] + p["hf_span"]):
+        hr = p["ring_h"] * S.rib_profile(np.abs(z - zr), 0.5 * p["ring_w"], p["rib_fillet"])
+        h = np.maximum(h, hr[:, None])
     # концы: рельеф гаснет у фланцев (2 см)
     fade = S.smoothstep5(np.minimum(z, z[-1] - z) / 0.02)[:, None]
     h = h * fade
