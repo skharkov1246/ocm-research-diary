@@ -49,9 +49,18 @@ def disks_figure(path, sel):
         for col, (name, label, kind) in enumerate(items):
             ax = axs[row, col]
             if name is None:
-                D = field(items[1][0])
+                D = field(next(n for n, _, k in items if isinstance(n, str)))
                 base = D["base"]
                 ax.fill(base[:, 0] * 1e3, base[:, 1] * 1e3, color="#3a3936", lw=0)
+            elif kind == "prof":
+                r = np.asarray(name["r"]); t = np.asarray(name["t"])
+                from scipy.interpolate import PchipInterpolator
+                rr = np.linspace(r[0], r[-1], 300); tt = PchipInterpolator(r, t)(rr)
+                ax.fill(np.r_[rr, rr[::-1]] * 1e3, np.r_[tt / 2, -tt[::-1] / 2] * 1e3, color="#3a3936", lw=0)
+                D = field(next(n for n, _, k in items if isinstance(n, str)))
+                base = D["base"]
+                ax.plot(base[:, 0] * 1e3, base[:, 1] * 1e3, color=C2, lw=1.0)
+                ax.set_xlim(0, D["r1"] * 1e3); ax.set_ylim(D["z0"] * 1e3, D["z1"] * 1e3)
             else:
                 D = field(name)
                 F = D["F"].copy()
@@ -93,7 +102,7 @@ def lattice_figure(path):
     for a, y, fit, lab, c in ((ax[0], E, fe, "E*/E (наименьший по [100], [111])", C1), (ax[1], S, fs, "S = σ*/σ (начало текучести, 99,5 %)", C2)):
         a.loglog(r, y, "o", color=c, ms=6, label="гомогенизация, 3D-КЭ")
         a.loglog(xx, np.exp(fit["lnC"]) * xx ** fit["n"], "-", color=c, lw=1.5,
-                 label=f"степенная подгонка 0,10–0,45: n = {fit['n']:.2f}")
+                 label=("степенная подгонка 0,10–0,45: n = %.2f" % fit["n"]).replace(".", ","))
         a.loglog(xx, xx ** 2, ":", color=MUTED, lw=1.2, label="Гибсон — Эшби, изгиб: ρ*²")
         a.loglog(xx, xx, "--", color=MUTED, lw=1.0, label="правило смеси: ρ*")
         a.set_xlabel("относительная плотность ρ*"); a.set_title(lab, fontsize=9, loc="left")
@@ -128,8 +137,8 @@ def shell_figure(path):
     ax.plot(th, np.r_[ko, ko[0]], "-o", color=C1, lw=2, ms=5, label="оптимизация топологии")
     ax.plot(th, np.r_[kr, kr[0]], "-s", color=C2, lw=2, ms=5, label="8 прямых стоек")
     ax.set_title("жёсткость опоры подшипника, Н/мкм", fontsize=9, loc="left")
-    ax.legend(fontsize=7, frameon=False, loc="lower left", bbox_to_anchor=(-0.15, -0.18))
-    fig.tight_layout(); fig.savefig(path, dpi=130); plt.close(fig)
+    ax.legend(fontsize=7, frameon=False, loc="upper left", bbox_to_anchor=(-0.25, -0.04), ncol=1)
+    fig.tight_layout(); fig.subplots_adjust(bottom=0.2); fig.savefig(path, dpi=130); plt.close(fig)
 
 
 def renders(out_dir, scratch, items):

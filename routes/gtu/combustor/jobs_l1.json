@@ -7,7 +7,7 @@
   ],
   "image": "al2023",
   "disk_gb": 50,
-  "max_min": 260,
+  "max_min": 410,
   "container": "opencfd/openfoam-default:2512",
   "container_setup": [
    "apt-get update -q",
@@ -17,103 +17,103 @@
  "jobs": [
   {
    "name": "comb-l1-p00",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 0 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 0 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p01",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 1 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 1 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p02",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 2 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 2 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p03",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 3 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 3 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p04",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 4 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 4 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p05",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 5 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 5 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p06",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 6 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 6 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p07",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 7 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 7 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p08",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 8 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 8 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p09",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 9 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 9 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p10",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 10 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 10 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p11",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 11 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 11 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p12",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 12 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 12 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p13",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 13 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 13 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p14",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 14 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 14 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p15",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 15 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 15 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p16",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 16 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 16 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p17",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 17 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 17 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p18",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 18 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 18 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p19",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 19 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 19 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p20",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 20 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 20 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p21",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 21 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 21 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p22",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 22 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 22 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p23",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 23 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 23 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   },
   {
    "name": "comb-l1-p24",
-   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 24 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 117"
+   "command": "export OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/l1_inputs_KV-3.json --n 500 --shard 24 --shards 25 --out \"$GTU_OUT\" --workers \"$NPROC\" --grid-every 10 --timeout-min 184"
   }
  ],
  "merge": {
@@ -131,56 +131,56 @@
   "cases_per_shard": 82,
   "s_per_cell_iter": {
    "cold": 5.037593984962406e-05,
-   "hot": 6.316515465011407e-05
+   "hot": 0.0002760280422726797
   },
   "iterations": {
    "cold": 1500,
-   "hot": 5000
+   "hot": 4000
   },
   "mean_cells": {
    "cell": 3887.4166666666665,
    "liner": 2981.3333333333335
   },
-  "cpu_s_per_shard": 135644.67069570912,
-  "critical_path_s": 5109.983701574484,
+  "cpu_s_per_shard": 426820.9866145233,
+  "critical_path_s": 15401.850885663462,
   "compute_min": {
-   "expected": 85.1663950262414,
-   "planning": 236.3471832560339
+   "expected": 256.6975147610577,
+   "planning": 385.0462721415866
   },
   "setup_min": 15.0,
   "upload_min": 8.0,
-  "max_min": 260,
-  "core_hours": 941.9768798313133,
+  "max_min": 410,
+  "core_hours": 2964.034629267523,
   "machine_hours": {
-   "expected": 45.06933126093392,
-   "planning": 108.06132635668078
+   "expected": 116.5406311504407,
+   "planning": 170.0192800589944
   },
   "outputs_gb": 1.23,
   "usd": {
-   "spot_expected": 31.836975602723722,
-   "spot_planning": 33.80199844570044,
-   "disk": 0.2469552397859393,
-   "ipv4": 0.2253466563046696,
+   "spot_expected": 82.32430184467131,
+   "spot_planning": 87.40547336283052,
+   "disk": 0.6385788008243326,
+   "ipv4": 0.5827031557522035,
    "s3_3months": 0.08487,
    "transfer_to_session": 0.11069999999999999,
-   "total_expected": 32.504847498814335,
-   "total_planning": 34.46987034179106
+   "total_expected": 83.74115380124783,
+   "total_planning": 88.82232531940704
   },
-  "usd_planning_hours": 82.37398825604292,
-  "rule": "кейс - одно ядро; часть - пул на 64 ядра; труба после ячейки 100 %; срок сторожа = подготовка + 2 × max(ЦП части / 64, путь ячейка + труба + ещё ячейка) + выгрузка"
+  "usd_planning_hours": 129.49173893801472,
+  "rule": "кейс - одно ядро; часть - пул на 64 ядра; труба после ячейки 100 %; срок сторожа = подготовка + 1,5 × max(ЦП части / 64, путь ячейка + труба или ячейка medium) + выгрузка"
  },
  "plan_check": {
   "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/combustor/jobs_l1.json --assume-price 0.75 --assume-zone-prices us-east-1a=0.9554,us-east-1b=0.7478,us-east-1c=0.7064,us-east-1d=0.8576,us-east-1f=1.1804",
   "exit_code": 0,
-  "forecast_usd": 160.54,
+  "forecast_usd": 249.72,
   "spent_in_ledger": 0.91,
   "lines": [
    "[зоны] comb-l1-p22 c7a.16xlarge: us-east-1c 0.7064 → us-east-1b 0.7478 → us-east-1d 0.8576 → us-east-1a 0.9554 → us-east-1f 1.1804 (допущение plan); ожидается us-east-1c по 0.7064 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.4165 и бюджет — по максимуму цены за окно",
-   "[бюджет] comb-l1-p23 на c7a.16xlarge: израсходовано 0.91 + в работе 0.00 + пакет 147.69 + новая 6.42 = 155.02 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[бюджет] comb-l1-p23 на c7a.16xlarge: израсходовано 0.91 + в работе 0.00 + пакет 229.74 + новая 9.99 = 240.64 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
    "[зоны] comb-l1-p23 c7a.16xlarge: us-east-1c 0.7064 → us-east-1b 0.7478 → us-east-1d 0.8576 → us-east-1a 0.9554 → us-east-1f 1.1804 (допущение plan); ожидается us-east-1c по 0.7064 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.4165 и бюджет — по максимуму цены за окно",
-   "[бюджет] comb-l1-p24 на c7a.16xlarge: израсходовано 0.91 + в работе 0.00 + пакет 154.11 + новая 6.42 = 161.44 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[бюджет] comb-l1-p24 на c7a.16xlarge: израсходовано 0.91 + в работе 0.00 + пакет 239.73 + новая 9.99 = 250.63 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
    "[зоны] comb-l1-p24 c7a.16xlarge: us-east-1c 0.7064 → us-east-1b 0.7478 → us-east-1d 0.8576 → us-east-1a 0.9554 → us-east-1f 1.1804 (допущение plan); ожидается us-east-1c по 0.7064 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.4165 и бюджет — по максимуму цены за окно",
-   "[план] прогноз пакета 160.54 долл. (цена спота — допущение 0.75/ч)"
+   "[план] прогноз пакета 249.72 долл. (цена спота — допущение 0.75/ч)"
   ]
  }
 }

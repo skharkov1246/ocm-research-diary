@@ -17,7 +17,7 @@ complete=false и код выхода 2.
   * сетка: разница coarse/medium по ячейке 100 % у каждого k-го варианта;
   * цели targets.json, пересчитанные L1: nox_gas, co_gas, load_range, exit_uniformity (по RTDF), pressure_loss,
     wall_life; остальные - статус уровня 0. Рейтинг - веса merge_l0, КПД и NOx - по L1, штраф жёстких целей.
-Отбор на уровень 2: 40 вариантов (--k2) - по кругу ниш по рейтингу L1.
+Отбор на уровень 2: 30 вариантов (--k2) - по кругу ниш по рейтингу L1.
 
 Запуск: python merge_l1.py runs/<run_id> --inputs l1_inputs_KV-3.json --out comb_l1_KV-3_results.json
 """
@@ -239,7 +239,7 @@ def score_l1(s, e):
     return M0.score(sc, math.exp(-M0.PENALTY_K * viol), M0.WEIGHTS)
 
 
-def merge(paths, inputs, out, k2=40):
+def merge(paths, inputs, out, k2=30):
     t0 = time.time()
     import comb_crn as CR
     parts = load_parts(paths)
@@ -303,7 +303,7 @@ def main(argv=None):
     ap.add_argument("paths", nargs="+")
     ap.add_argument("--inputs", required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--k2", type=int, default=40)
+    ap.add_argument("--k2", type=int, default=30)
     a = ap.parse_args(argv)
     complete, res = merge(a.paths, a.inputs, a.out, a.k2)
     c = res["counts"]

@@ -7,7 +7,7 @@
   ],
   "image": "al2023",
   "disk_gb": 30,
-  "max_min": 100,
+  "max_min": 295,
   "container": "opencfd/openfoam-default:2512",
   "container_setup": [
    "apt-get update -q",
@@ -17,7 +17,7 @@
  "jobs": [
   {
    "name": "calib-sandiaD",
-   "max_min": 100,
+   "max_min": 295,
    "command": "bash routes/gtu/combustor/cfd/calib_sandiaD.sh 1.44 &\nbash routes/gtu/combustor/cfd/calib_sandiaD.sh 1.6 &\nwait"
   }
  ],
@@ -46,33 +46,33 @@
  },
  "estimate": {
   "cells": 5170,
-  "cpu_s_per_case": 1533.6388869276486,
+  "cpu_s_per_case": 5385.392838457974,
   "cases": 2,
-  "max_min": 100,
+  "max_min": 295,
   "machine_hours": {
-   "expected": 0.8093441352576801,
-   "planning": 2.4280324057730405
+   "expected": 1.8792757884605484,
+   "planning": 5.6378273653816455
   },
   "usd": {
-   "spot_expected": 0.5717206971460252,
-   "spot_planning": 0.6070081014432601,
-   "disk": 0.0026608574309841537,
-   "ipv4": 0.0040467206762884005,
+   "spot_expected": 1.3275204169685315,
+   "spot_planning": 1.4094568413454114,
+   "disk": 0.006178440948363446,
+   "ipv4": 0.009396378942302743,
    "s3_3months": 0.00345,
    "transfer_to_session": 0.0045,
-   "total_expected": 0.5863782752532978,
-   "total_planning": 0.6216656795505326
+   "total_expected": 1.3510452368591976,
+   "total_planning": 1.4329816612360775
   }
  },
  "plan_check": {
   "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/combustor/jobs_calib.json --assume-price 0.75 --assume-zone-prices us-east-1a=0.9554,us-east-1b=0.7478,us-east-1c=0.7064,us-east-1d=0.8576,us-east-1f=1.1804",
   "exit_code": 0,
-  "forecast_usd": 2.61,
+  "forecast_usd": 7.24,
   "spent_in_ledger": 0.91,
   "lines": [
-   "[бюджет] calib-sandiaD на c7a.16xlarge: израсходовано 0.91 + в работе 0.00 + пакет 0.00 + новая 2.61 = 3.52 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
+   "[бюджет] calib-sandiaD на c7a.16xlarge: израсходовано 0.91 + в работе 0.00 + пакет 0.00 + новая 7.24 = 8.15 из 2000.00 долл. (MaxPrice 1.4165/ч) — можно",
    "[зоны] calib-sandiaD c7a.16xlarge: us-east-1c 0.7064 → us-east-1b 0.7478 → us-east-1d 0.8576 → us-east-1a 0.9554 → us-east-1f 1.1804 (допущение plan); ожидается us-east-1c по 0.7064 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.4165 и бюджет — по максимуму цены за окно",
-   "[план] прогноз пакета 2.61 долл. (цена спота — допущение 0.75/ч)"
+   "[план] прогноз пакета 7.24 долл. (цена спота — допущение 0.75/ч)"
   ]
  }
 }

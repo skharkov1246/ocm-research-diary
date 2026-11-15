@@ -121,7 +121,7 @@ def pkg_l1(T, MS, n=500, shards=25, grid_every=10):
     second = 0.3 * per * 3 * mean_cell * 3000 * th           # второй проход 30 % несошедшихся ячеек (+3000 итераций)
     crit = max(case_s(max_cell) + case_s(max_lin), case_s(MS["cell_medium"]["max"]))   # ячейка -> труба; сетка medium
     comp_exp = max((cpu + second) / VCPU, crit) / 60.0
-    comp_plan = 2.0 * max((cpu + second) / VCPU, crit + case_s(max_cell)) / 60.0
+    comp_plan = 1.5 * max((cpu + second) / VCPU, crit) / 60.0
     mm = ceil5(SETUP_MIN + comp_plan + UPLOAD_MIN)
     jobs = [dict(name=f"comb-l1-p{k:02d}",
                  command=f"{ROOT_ENV}\npython3 -u routes/gtu/combustor/comb_l1.py --inputs routes/gtu/combustor/"
@@ -137,7 +137,7 @@ def pkg_l1(T, MS, n=500, shards=25, grid_every=10):
                machine_hours=dict(expected=mh, planning=mh_plan), outputs_gb=gb,
                usd=money(mh, gb, 50), usd_planning_hours=money(mh_plan, gb, 50)["total_planning"],
                rule="кейс - одно ядро; часть - пул на 64 ядра; труба после ячейки 100 %; срок сторожа = подготовка + "
-                    "2 × max(ЦП части / 64, путь ячейка + труба + ещё ячейка) + выгрузка")
+                    "1,5 × max(ЦП части / 64, путь ячейка + труба или ячейка medium) + выгрузка")
     pk = dict(_comment="Уровень 1 воронки камеры KV-3 (README, «Уровень 1»). Раннер берёт только defaults и jobs. Перед "
                        "запуском: эталон Sandia D пройден (jobs_calib.json), l1_inputs_KV-3.json в ветке (prepare_l1.py "
                        "по частям уровня 0). Сгенерировано make_jobs_l123.py.",
@@ -152,13 +152,13 @@ def pkg_l1(T, MS, n=500, shards=25, grid_every=10):
     return pk
 
 
-def pkg_l2(T, MS, n=40, shards=20, np_=8):
+def pkg_l2(T, MS, n=30, shards=30, np_=16):
     per = math.ceil(n / shards)
     tc, th = T["cold_s_per_cell_iter"], T["hot_s_per_cell_iter"]
     base = lambda c: c * (800 * tc + 3500 * th)
     rst = lambda c: c * 1500 * th
     m, mx = MS["element3d_L2"]["mean"], MS["element3d_L2"]["max"]
-    eff = 0.8                                                  # параллельная эффективность 8 ядер на кейс (оценка)
+    eff = 0.8                                                  # параллельная эффективность 16 ядер на кейс (оценка)
     lbo = lambda c: base(c) + 5 * rst(c)
     fb = lambda c: base(c) + 4 * rst(c)
     cpu_var = 2 * base(m) + lbo(m) + fb(m)
@@ -207,7 +207,7 @@ def pkg_l2(T, MS, n=40, shards=20, np_=8):
 def pkg_l3(T, MS, n=5, np_=64):
     th = T["hot_s_per_cell_iter"]
     m, mx = MS["element3d_L3_les"]["mean"], MS["element3d_L3_les"]["max"]
-    steps = 70000                                              # 14 времён протекания зоны пламени при Co 0,5 (оценка)
+    steps = 50000                                              # 14 времён протекания зоны пламени при Co 0,5 (оценка)
     s_step = 1.5 * th                                          # PIMPLE 3 коррекции против 2 в RANS (оценка)
     eff = 0.75
     run_s = lambda c: c * steps * s_step / eff
@@ -371,7 +371,7 @@ def main(argv=None):
     other_upper = sum((o["upper_usd"] or 0) for o in others if not o["name"].startswith("камера L0")) + comb_l0_upper
     other_exp = sum((o["expected_usd"] or 0) for o in others if not o["name"].startswith("камера L0")) + \
         max([o["expected_usd"] or 0 for o in others if o["name"].startswith("камера L0")] or [0])
-    spent = checks["l1"]["spent_in_ledger"] or 0.0
+    spent = max([c["spent_in_ledger"] or 0.0 for c in checks.values()] or [0.0])
     comb_exp = sum(r["expected_usd"] for r in rows)
     comb_plan = sum(r["planning_usd"] for r in rows)
     comb_upper = sum((r["upper_runner_usd"] or r["planning_usd"]) for r in rows)

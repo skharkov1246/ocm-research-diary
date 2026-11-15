@@ -40,7 +40,7 @@ MESH = {
     "coarse": dict(nr_ch=10, nz_ch_max=30, nz_cell=110, nr_out_max=30, nr_liner=36, nz_liner=90),
     "medium": dict(nr_ch=16, nz_ch_max=48, nz_cell=180, nr_out_max=48, nr_liner=56, nz_liner=140),
 }
-ITERS = dict(cold=1500, hot=5000, write=500)  # без химии / с химией / шаг записи (образец SandiaD_LTS: 1500 + 3500)
+ITERS = dict(cold=1500, hot=4000, write=500)  # без химии / с химией / шаг записи (образец SandiaD_LTS: 1500 + 3500)
 RING = False   # кольцевая щель топлива (k_je >= 4) выключена: щель в десятки мкм дала локальный шаг LTS ~3e-8 с, и за 3600
                # итераций поток не дошёл до выхода (обкатка 14.11.2026, comb_l1_smoke_results.json). Топливо - профиль смеси
                # с неравномерностью уровня 0; разрешение струй - уровень 2 (элемент 3D)

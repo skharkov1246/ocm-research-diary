@@ -10,7 +10,7 @@
    "field": "timing",
    "used": {
     "cold": 5.037593984962406e-05,
-    "hot": 6.316515465011407e-05
+    "hot": 0.0002760280422726797
    }
   },
   {
@@ -114,21 +114,21 @@
   },
   "element3d_L3_les": {
    "values": [
-    138600,
-    85800,
-    84744,
-    94260,
-    59444,
-    138432,
-    81000,
-    337428,
-    119814,
-    304434,
-    103428,
-    142736
+    62118,
+    38934,
+    38286,
+    44486,
+    31752,
+    64680,
+    32934,
+    143220,
+    51900,
+    134540,
+    48950,
+    57504
    ],
-   "mean": 140843.33333333334,
-   "max": 337428
+   "mean": 62442.0,
+   "max": 143220
   },
   "liner3d_cht": {
    "values": [
@@ -205,76 +205,85 @@
     "case": "run233b_100",
     "phase": "cold",
     "cells": 2280,
-    "iters": 1161.0,
-    "cpu_s": 126.11,
-    "s_per_cell_iter": 4.764117442616015e-05,
+    "iters": 1490.0,
+    "cpu_s": 161.08,
+    "s_per_cell_iter": 4.7415518662427886e-05,
+    "ended": true
+   },
+   {
+    "case": "run233b_100",
+    "phase": "hot",
+    "cells": 2280,
+    "iters": 503.0,
+    "cpu_s": 316.56,
+    "s_per_cell_iter": 0.0002760280422726797,
     "ended": false
    }
   ],
   "cold_s_per_cell_iter": 5.037593984962406e-05,
-  "hot_s_per_cell_iter": 6.316515465011407e-05,
-  "cold_median": 4.764117442616015e-05,
-  "hot_median": 6.021666253808962e-05,
+  "hot_s_per_cell_iter": 0.0002760280422726797,
+  "cold_median": 4.7415518662427886e-05,
+  "hot_median": 6.316515465011407e-05,
   "rule": "в смету - наибольшее по кейсам обкатки (между 10-й и последней итерацией журнала)"
  },
  "combustor_rows": [
   {
    "item": "камера CALIB",
    "file": "routes/gtu/combustor/jobs_calib.json",
-   "expected_usd": 0.5863782752532978,
-   "planning_usd": 0.6216656795505326,
-   "upper_runner_usd": 2.61,
+   "expected_usd": 1.3510452368591976,
+   "planning_usd": 1.4329816612360775,
+   "upper_runner_usd": 7.24,
    "plan_exit_code": 0
   },
   {
    "item": "камера L1",
    "file": "routes/gtu/combustor/jobs_l1.json",
-   "expected_usd": 32.504847498814335,
-   "planning_usd": 82.37398825604292,
-   "upper_runner_usd": 160.54,
+   "expected_usd": 83.74115380124783,
+   "planning_usd": 129.49173893801472,
+   "upper_runner_usd": 249.72,
    "plan_exit_code": 0
   },
   {
    "item": "камера L2",
    "file": "routes/gtu/combustor/jobs_l2.json",
-   "expected_usd": 26.518408100104757,
-   "planning_usd": 80.91699351024607,
-   "upper_runner_usd": 157.33,
+   "expected_usd": 73.88584264815474,
+   "planning_usd": 244.08949294637722,
+   "upper_runner_usd": 464.84,
    "plan_exit_code": 0
   },
   {
    "item": "камера L2 - comb-l2-cht (не готово к запуску)",
-   "expected_usd": 2.8019602128813204,
-   "planning_usd": 4.462351698034379,
+   "expected_usd": 9.183302048079941,
+   "planning_usd": 14.625162519946112,
    "upper_runner_usd": null,
    "basis": "40 × средняя сетка × 4000 итераций × 1,2·t_хим (оценка)"
   },
   {
    "item": "камера L2 - comb-l2-spray (не готово к запуску)",
-   "expected_usd": 6.332302542663625,
-   "planning_usd": 10.084711722107272,
+   "expected_usd": 20.753844626974995,
+   "planning_usd": 33.05220159307314,
    "upper_runner_usd": null,
    "basis": "40 × 2 × средняя сетка × 3000 итераций × 3·t_хим (механизм 100 веществ, оценка)"
   },
   {
    "item": "камера L2 - comb-l2-active (не готово к запуску)",
-   "expected_usd": 3.9645606391696226,
-   "planning_usd": 6.313888333898395,
+   "expected_usd": 12.142732714780866,
+   "planning_usd": 19.338298845028984,
    "upper_runner_usd": null,
    "basis": "30 % счёта L2 (оценка)"
   },
   {
    "item": "камера L3",
    "file": "routes/gtu/combustor/jobs_l3.json",
-   "expected_usd": 42.13627026640107,
-   "planning_usd": 66.83149408745935,
-   "upper_runner_usd": 108.63,
+   "expected_usd": 57.12520408145037,
+   "planning_usd": 90.67194359274687,
+   "upper_runner_usd": 148.02,
    "plan_exit_code": 0
   },
   {
    "item": "камера L3 - calib-preccinsta-les (не готово к запуску)",
-   "expected_usd": 34.8592697225317,
-   "planning_usd": 55.51624920420181,
+   "expected_usd": 152.33297582923512,
+   "planning_usd": 242.60277152872237,
    "upper_runner_usd": null,
    "basis": "1 млн ячеек × 45 000 шагов × 1,5·t_хим / 0,75 на режим (оценка)"
   },
@@ -325,15 +334,15 @@
   {
    "name": "воронка двигателя L0, отладка (запущен 14.11.2026)",
    "file": "routes/gtu/funnel/jobs_l0_debug.json",
-   "expected_usd": 0.152,
-   "upper_usd": 1.67,
+   "expected_usd": 0.165,
+   "upper_usd": 1.91,
    "note": "расход уже в ledger.jsonl"
   },
   {
    "name": "воронка двигателя L0, полный (запущен 14.11.2026)",
    "file": "routes/gtu/funnel/jobs_l0.json",
-   "expected_usd": 0.263,
-   "upper_usd": 2.86,
+   "expected_usd": 1.157,
+   "upper_usd": 6.14,
    "note": "расход уже в ledger.jsonl"
   },
   {
@@ -374,15 +383,15 @@
  ],
  "totals": {
   "spent_ledger": 0.91,
-  "combustor_expected": 165.19855480753324,
-  "combustor_planning": 331.7976975926558,
-  "combustor_upper": 530.1635560593569,
-  "other_expected": 48.15200000000001,
-  "other_upper": 163.54000000000002,
-  "all_upper": 694.6135560593568,
+  "combustor_expected": 426.0106585364966,
+  "combustor_planning": 799.9809467262606,
+  "combustor_upper": 1204.1147895878858,
+  "other_expected": 49.059000000000005,
+  "other_upper": 167.06,
+  "all_upper": 1372.0847895878858,
   "ceiling": 2000.0,
-  "headroom_upper": 1305.3864439406432,
-  "share_upper": 0.3473067780296784,
+  "headroom_upper": 627.9152104121142,
+  "share_upper": 0.6860423947939429,
   "engine_funnel_L1plus": "сметы уровней 1+ воронки двигателя в репозитории нет; должна уложиться в headroom_upper"
  },
  "run_order": [

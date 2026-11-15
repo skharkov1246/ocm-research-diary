@@ -492,3 +492,84 @@ def _ccx_brief(r):
     if "creep_life_min_h" in c1:
         out["creep_life_min_h"] = c1["creep_life_min_h"]
     return out
+
+
+def summary():
+    R = _load("disk_topo_results.json"); runs = {r["name"]: r for r in R["runs"]}
+    pe, pl = _load("profile_opt_eq.json"), _load("profile_opt_lim.json")
+    L = _load("lattice_results.json"); S = _load("shell_results.json"); M = _load("manifold_results.json")
+    T3 = _load("topo3d_demo_results.json"); TS = _load("turb_sizing_results.json")
+    cx = _ccx_index(os.path.join(OUTDIR, "ccx_A.json"), os.path.join(OUTDIR, "ccx_B.json"), CCX_RES)
+    geo = {k: _load(os.path.join(OUTDIR, f"geom_{k}.json")) for k in ("turb", "comp2A", "comp2B", "frame")}
+    base = R["baseline"]
+    fe, fl = pe["check_160x24"], pl["check_160x24"]
+    b_t = fe["base_c100"]; b_t120 = fe["base_c120"]
+
+    def rel(a, b):
+        return round(a / b - 1, 4)
+    turb = dict(
+        baseline_cast_frame3=dict(mass_kg=b_t["mass_kg"], J_kgm2=b_t["J_kgm2"], creep_life_local_h=b_t["creep_local_min_h"],
+                                  uts_ratio_120=b_t120["uts_ratio"], burst_margin=b_t["burst_margin"], source="disk.py 160×24"),
+        topo_voxel={k: dict(mass_kg=runs[k]["mass_kg"], J_kgm2=runs[k]["J_kgm2"], u_binary=[c["u_max"] for c in runs[k]["cases"]],
+                            u_target=runs[k]["u_target"], interp="ramp") for k in ("turb1_A_mass_eq", "turb1_A_J_eq", "turb1_A_mass_lim")},
+        profile_eq=dict(mass_kg=fe["c100"]["mass_kg"], J_kgm2=fe["c100"]["J_kgm2"], d_mass=rel(fe["c100"]["mass_kg"], b_t["mass_kg"]),
+                        d_J=rel(fe["c100"]["J_kgm2"], b_t["J_kgm2"]), creep_life_local_h=fe["c100"]["creep_local_min_h"],
+                        uts_ratio_120=fe["c120"]["uts_ratio"], burst_margin=fe["c100"]["burst_margin"], profile=fe["profile"],
+                        verdict="не хуже литого по всем трём критериям (disk.py 160×24)"),
+        profile_lim=dict(mass_kg=fl["c100"]["mass_kg"], J_kgm2=fl["c100"]["J_kgm2"], d_mass=rel(fl["c100"]["mass_kg"], b_t["mass_kg"]),
+                         d_J=rel(fl["c100"]["J_kgm2"], b_t["J_kgm2"]), creep_life_local_h_160x24=fl["c100"]["creep_local_min_h"],
+                         creep_life_local_h_80x12=pl["best"]["life"], uts_ratio_120=fl["c120"]["uts_ratio"],
+                         burst_margin=fl["c100"]["burst_margin"], profile=fl["profile"],
+                         verdict="предел 25 000 ч выполнен на сетке поиска 80×12, на 160×24 — 18 929 ч: требуется доводка (оценка)"),
+        lattice_B=dict(mass_kg=runs["turb1_B_mass_eq"]["mass_kg"], u=[c["u_max"] for c in runs["turb1_B_mass_eq"]["cases"]],
+                       rho_mean=runs["turb1_B_mass_eq"]["lattice"]["rho_mean"],
+                       verdict="решётка вытесняется сплошным металлом (ρ* ср. 0,99): выигрыша нет"),
+        ccx_voxel_designs={k: _ccx_brief(cx.get(k)) for k in ("turb1_baseline", "turb1_A_mass_eq", "turb1_A_mass_lim", "turb1_A_J_eq")},
+        thickening_and_blend_attempts="turb_sizing_results.json: утолщение и «переход как у литого» — не сошлись (см. README)")
+    bc = base["comp2"]
+    comp = dict(
+        baseline_forged_frame3=dict(mass_kg=bc["mass_kg"], J_kgm2=bc["J_kgm2"], u=[c["u_max"] for c in bc["cases"]],
+                                    note="тот же воксельный расчёт; масса лопаток — на поверхности ступицы"),
+        designs={k: dict(mass_kg=runs[k]["mass_kg"], J_kgm2=runs[k]["J_kgm2"], d_mass=rel(runs[k]["mass_kg"], bc["mass_kg"]),
+                         d_J=rel(runs[k]["J_kgm2"], bc["J_kgm2"]), u_binary=[c["u_max"] for c in runs[k]["cases"]],
+                         u_target=runs[k]["u_target"], constraint_ok=runs[k]["constraint_ok"], k_am=runs[k]["meta"]["k_am"],
+                         burst_margin=runs[k]["burst_margin"], interp=runs[k].get("interp"),
+                         lattice=runs[k].get("lattice"), ccx=_ccx_brief(cx.get(k)),
+                         geometry=(geo["comp2A"] or {}).get(k, {}).get("stats") if geo["comp2A"] else None)
+                 for k in ("comp2_A_mass_eq", "comp2_A_J_eq", "comp2_A_mass_lim", "comp2_B_mass_eq", "comp2_B_J_eq")},
+        ccx_baseline=_ccx_brief(cx.get("comp2_baseline")))
+    lat = dict(law=L["law"], fit_power=L["fit_power"], sheet_thickness_mm=L["sheet_thickness_mm"],
+               convergence=[dict(rho=c["rho"], N=c["N"], E100=c["E100"], S=c["S_worst_p995"]) for c in L["convergence"]],
+               zener=[(p["rho"], p["zener"]) for p in L["points"]])
+    shell = dict(frame=dict(stiffness_ratio_worst=S["stiffness_ratio_worst"], mass_kg=S["optimized"]["mass_kg"],
+                            vm_max_MPa_opt=S["optimized"]["vm_max_MPa"], vm_max_MPa_ref=S["reference_8_spokes"]["vm_max_MPa"],
+                            k_min_opt_N_m=min(S["optimized"]["k_bearing_N_per_m"]), k_min_ref_N_m=min(S["reference_8_spokes"]["k_bearing_N_per_m"]),
+                            pressure_compliance_ratio=S["optimized"]["C_rel"][-1] / S["reference_8_spokes"]["C_rel"][-1]),
+                 parts=S["parts"]["removed"], parts_reference=S["parts"]["reference"]["parts"],
+                 parts_shell=S["parts"]["shell_one_piece"]["parts"],
+                 fasteners_reference=S["parts"]["reference"]["fasteners"], fasteners_shell=S["parts"]["shell_one_piece"]["fasteners"],
+                 printer_fit=[dict(frame=r["frame"], D_m=r["fit"]["kD1.9"]["D_m"], L_m=r["fit"]["kD1.9"]["L_m"],
+                                   printers_kD19=r["fit"]["kD1.9"]["printers"], printers_kD21=r["fit"]["kD2.1"]["printers"])
+                              for r in S["printer_fit"]["rows"]],
+                 manifold=dict(ring_spread_pct=M["ring"]["spread_pct"], ring_mc_p95_pct=M["ring"]["mc_spread_pct_p95"],
+                               tree_spread_pct=M["tree"]["spread_pct"], tree_mc_p95_pct=M["tree"]["mc_spread_pct_p95"],
+                               murray_k=[M["tree"]["murray_k_01"], M["tree"]["murray_k_12"]], parts_removed=M["ring"]["parts"],
+                               joints_removed=M["ring"]["joints"] - M["tree"]["joints"]))
+    out = dict(title="KV-3: генеративная геометрия ротора и корпуса (organic/structure) — сводка", date="2026-11-14",
+               method="см. README узла: осесимметричная оптимизация топологии (свой КЭ, SIMP/RAMP, MMA, p-норма напряжений), "
+                      "доводка формы профиля в CalculiX (disk.py, COBYLA), проверка в ccx (Gmsh CAX6), гомогенизация гироида (3D-КЭ), "
+                      "2D-оптимизация рамы оболочки, сеть каналов по Мюррею, 3D-код для AWS",
+               software=dict(python=sys.version.split()[0], numpy=np.__version__, scipy=__import__("scipy").__version__,
+                             ccx=DT.TA.DK.ccx_version()),
+               status="оценка уровня облика: профили и поля температур frame3, допускаемые materials.json (по выдержкам поиска), "
+                      "k_AM, t_skin, размеры рамы и коллектора — приняты",
+               inputs=R["inputs"] + [dict(file="routes/gtu/funnel/make_model.py", field="PRINTERS"),
+                                     dict(file="routes/gtu/funnel/parts_model.py", field="count, REF_BOM"),
+                                     dict(file="routes/gtu/frame3/frame3_point_results.json", field="D2, Wf, p3")],
+               turbine_disk_stage1=turb, compressor_wheel_stage2=comp, lattice=lat, shell=shell,
+               topo3d_demo=T3, geometry=geo,
+               aws=dict(jobs="routes/gtu/organic/structure/jobs_structure.json", plan_exit=0, forecast_usd_at_1usd_h=40.31,
+                        note="runner.py plan --assume-price 1.0: 5 задач, верхняя граница по сторожам; AWS не вызывался"))
+    with open(os.path.join(HERE, "structure_results.json"), "w", encoding="utf-8") as f:
+        json.dump(out, f, ensure_ascii=False, indent=1, default=float)
+    return out
