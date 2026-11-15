@@ -30,9 +30,9 @@ def sel():
 
 @pytest.fixture(scope="module")
 def point(sel):
-    """первый вариант порядка: оптимизация (1 старт: DE 8 поколений + COBYLA 100) и расчётная точка"""
+    """первый вариант порядка с рекуператором (иначе первый): оптимизация (1 старт: DE 8 поколений + COBYLA 100) и расчётная точка"""
     d, E = sel
-    e = E[0]
+    e = next((x for x in E if "|печатный|" in x["niche"] and x.get("feasible")), E[0])   # с рекуператором - проверяется и он
     c0 = FS.concept(e["idx"], d["n"], d["kv"], d["seed"])
     c0 = FS.apply_case(c0, e.get("case_arch") or FS.case_base(c0))
     tgt = FS.target(d["kv"])

@@ -26,6 +26,10 @@
 | 2 | геометрия колёс, грубый CFD центробежных ступеней (SU2), осесимметричная прочность всех колёс и дисков (CalculiX) | 50 разных | AWS | файлы задач и код (`funnel_l2.py`); SU2 — после ворот; локальная проба — 2 варианта |
 | 3 | полные линии частоты (SU2 medium); 3D-прочность, частоты, ползучесть; сопряжённый теплообмен; камера | 5–10 лучших уровня 2 | AWS | файлы задач; часть узлов ждёт кода |
 
+**v3 (решения владельца 15.11.2026: множитель готовности TRL, ось «корпус» картридж / оболочка, правки KV-6)** — раздел
+«v3: решения владельца 15.11.2026» ниже: код и тесты готовы, короткие пробы — `l0_v3_probe/`, файлы задач AWS — `jobs_l0_v3.json`,
+`jobs_l1_v3.json`; пересчёт отбора 50 идущего прогона v2 без нового счёта — `merge_l1.py --rescore`.
+
 Порядок прогонов, смета и точки остановки уровней 0–1 — **`RUNBOOK_L0_L1.md`**. Сводная смета уровней 0–3 против потолка 2000 долл.
 — `funnel_budget.json`. Индекс прогонов AWS и места для результатов — `aws/RUNS.json`.
 
@@ -289,6 +293,9 @@ KV-3 по архетипам (допустимых из ~18 180 каждого):
 | `make_jobs_l23.py`, `jobs_l2.json`, `jobs_l3.json` | задачи AWS уровней 2–3 (готовые и `pending_jobs`), сводная смета, индекс прогонов, `plan` всех файлов |
 | `test_funnel_l2.py` | проверки уровня 2, учёта CalculiX в отборе уровня 1 и файлов задач уровней 2–3 |
 | `l2_cases_probe_KV-3.json`, `funnel_l2_probe_results.json` | короткая локальная проба уровня 2 (2 варианта: геометрия без сетки, `disk.py`) |
+| `l0_v3_probe/` | короткие пробы уровня 0 v3 (KV-3 N = 300, KV-1 N = 300, KV-6 N = 1000): отборы и результаты слияния; `funnel_v3_probe_compare.json` — до/после против v2 по тем же концепциям; отбор KV-3 — вход тестов и пробы уровня 1 |
+| `jobs_l0_v3.json`, `jobs_l0_v3_kv1_n400000.json` | задачи AWS уровня 0 v3 (KV-3 200 000, KV-1 200 000 + шаг сходимости ниш 400 000, KV-6 100 000): блоки `merge`, `converge`, `estimate`, `plan_check` |
+| `jobs_l1_v3.json`, `jobs_l1_v3_fea.json` | задачи AWS уровня 1 v3 по отбору уровня 0 v3 (перегенерировать после его слияния) и CalculiX лучших 300; блок `merge.rescore_v2_l1_full` — пересчёт прогона v2 |
 
 ## Запуск
 
@@ -297,7 +304,10 @@ pip install cantera==3.2.0 scipy==1.18.1 numpy==2.5.3 gmsh pytest      # ccx (Ca
 cd routes/gtu/funnel
 python3 -m pytest -q test_models.py test_funnel_l0.py test_funnel_l1.py test_funnel_l2.py
 python3 merge_l0.py --probe                 # уровень 0: проба KV-3, N = 256
-python3 merge_l1.py --probe                 # уровень 1: 12 вариантов, 2 старта
+python3 merge_l1.py --probe                 # уровень 1: 12 вариантов, 2 старта (v3: вход - l0_v3_probe/funnel_l0_select_KV-3_n300.json)
+python3 merge_l1.py --rescore --kv KV-3 --m 3983 --shards 40 --in <части уровня 1> --out-dir aws/l1_full_rescore_v3   # пересчёт без счёта
+python3 make_jobs_l0.py --v3                # jobs_l0_v3.json, jobs_l0_v3_kv1_n400000.json (plan - без AWS)
+python3 make_jobs_l1.py --v3                # jobs_l1_v3.json, jobs_l1_v3_fea.json
 python3 coverage_l0.py                      # покрытие осей по слитым прогонам AWS
 python3 funnel_l2.py probe                  # уровень 2: 2 варианта, STEP и disk.py
 python3 make_jobs_l1.py && python3 make_jobs_l23.py     # задачи AWS, сметы, plan (без AWS)

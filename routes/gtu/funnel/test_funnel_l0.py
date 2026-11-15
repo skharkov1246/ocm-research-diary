@@ -493,6 +493,8 @@ def test_shell_parts_live_geometry_and_trap_rule():
     r = PM.count(sh)
     assert r["parts"] == 211 and ref["parts"] - r["parts"] == 108 and r["fasteners"] == 340
     assert (r["trap"]["n_trap"], r["trap"]["add_cold"], r["trap"]["add_hot"]) == (6, 1, 2)
+    old = {k: v for k, v in sh.items() if k != "case_arch"}                          # ведомость без оси (organic/structure/shell_topo.py)
+    assert PM.count(old)["parts"] == 211 + 6                                        # то же правило; встроенные каналы (-6) shell_topo вычитает сам
     small = PM.count(dict(sh, case=dict(sh["case"], D=1.1)))                       # фланец под хомут: +2 вместо болтов
     assert small["fasteners"] == ref["by_unit"]["ротор"]["fasteners"] + 3 * 2
     cart = PM.count(dict(sh, case_arch="картридж"))                                 # печатный внешний корпус картриджа

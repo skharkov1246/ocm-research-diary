@@ -253,7 +253,8 @@ def trap_rule(bom, cp):
     cover (чем закрыты), add_cold, add_hot, split (элементы из половин у ротора одной деталью), rule_cold, rule_hot"""
     comp, turb, case = bom["comp"], bom["turb"], bom["case"]
     n_cw, n_t = len(comp), len(turb["stages"])
-    shell = (bom.get("case_arch") or "разъём") == "оболочка"
+    # оболочка; ведомость без оси (внешние вызовы прежнего вида: organic/structure/shell_topo.py) с печатным корпусом - тоже оболочка
+    shell = bom.get("case_arch") == "оболочка" or (bom.get("case_arch") is None and case["method"] == "печать")
     hot_int = bool(bom.get("hot_integral"))
     one_piece = bom["rotor_join"] in ("заодно", "сварка")
     m = case["method"]
