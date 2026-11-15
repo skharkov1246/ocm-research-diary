@@ -4,8 +4,8 @@
   "generated_by": "tools/build_catalog.mjs",
   "how_to_refresh": "node tools/build_catalog.mjs",
   "summary": {
-    "datasets": 494,
-    "total_bytes": 20918170,
+    "datasets": 496,
+    "total_bytes": 20932817,
     "results_files": 204,
     "results_with_script": 65,
     "results_referenced_in_site": 22,
@@ -20,7 +20,7 @@
       "h2-electrocatalysis": 8,
       "ocm": 83,
       "polyolefins": 34,
-      "не определён": 174,
+      "не определён": 176,
       "прочее": 25
     }
   },
@@ -7863,6 +7863,44 @@
       "last_change": "2026-11-15",
       "last_author": "Claude",
       "last_commit": "04ac811"
+    },
+    {
+      "path": "routes/gtu/funnel/jobs_l1_v3_fea.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 2674,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "_comment",
+        "defaults",
+        "jobs",
+        "estimate",
+        "plan_check"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "17582df"
+    },
+    {
+      "path": "routes/gtu/funnel/jobs_l1_v3.json",
+      "track": "не определён",
+      "kind": "данные",
+      "bytes": 11973,
+      "referenced_in_site": false,
+      "shape": "объект",
+      "top_keys": [
+        "_comment",
+        "defaults",
+        "jobs",
+        "input",
+        "merge",
+        "estimate",
+        "plan_check"
+      ],
+      "last_change": "2026-11-15",
+      "last_author": "Claude",
+      "last_commit": "17582df"
     },
     {
       "path": "routes/gtu/funnel/jobs_l1.json",
