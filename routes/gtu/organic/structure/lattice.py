@@ -223,20 +223,22 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--N", type=int, default=48)
     ap.add_argument("--rhos", default="0.10,0.15,0.20,0.30,0.45,0.60,0.80")
-    ap.add_argument("--conv", action="store_true", help="сходимость по сетке при ρ* = 0,2 (N = 24, 32, 48; ρ* = 0,6: N = 24, 32)")
+    ap.add_argument("--n-dense", type=int, default=32, help="N для ρ* ≥ 0,5 (память решателя; на 128 ГБ — как --N)")
+    ap.add_argument("--out", default=RESULTS)
+    ap.add_argument("--conv", action="store_true", help="сходимость по сетке при ρ* = 0,2 (ρ* 0,2: N = 24, 32 и основная; ρ* 0,6: N = 24 и основная 32)")
     a = ap.parse_args()
     rhos = [float(v) for v in a.rhos.split(",")]
     out = dict(title="Листовой гироид: гомогенизация упругости и оценка прочности (свой 3D-КЭ)",
                method="Andreassen & Andreasen (2014), воксели hex8 N³, периодические условия; пустые воксели исключены; "
                       "прочность — начало текучести по 99,5-му процентилю местного σ_экв, худшее из пяти видов макронапряжения",
                software=dict(python=sys.version.split()[0], numpy=np.__version__, scipy=__import__("scipy").__version__),
-               date="2026-11-14", inputs=dict(nu=0.3, N=a.N, rhos=rhos), points=[])
+               date="2026-11-14", inputs=dict(nu=0.3, N=a.N, N_dense=a.n_dense, rhos=rhos), points=[])
     for r in rhos:
-        res = homogenize(r, a.N if r < 0.7 else min(a.N, 32))   # плотные ячейки: N = 32 (память решателя)
+        res = homogenize(r, a.N if r < 0.5 else min(a.N, a.n_dense))   # плотные ячейки: N = 32 (память PARDISO: при N = 48 и ρ* 0,6 — 7,8 ГБ, OOM)
         print(json.dumps({k: res[k] for k in ("rho", "vox_fraction", "E100", "E111", "zener", "S_worst_p995", "seconds")}), flush=True)
         out["points"].append(res)
     if a.conv:
-        out["convergence"] = [homogenize(0.2, n) for n in (24, 32, 48)] + [homogenize(0.6, n) for n in (24, 32)]
+        out["convergence"] = [homogenize(0.2, n) for n in (24, 32)] + [homogenize(0.6, 24)]   # + основные точки (0,2 при N; 0,6 при 32)
     pts = out["points"]
     out["law"] = dict(rho=[p["rho"] for p in pts], E=[p["Emin_dir"] for p in pts], S=[p["S_worst_p995"] for p in pts],
                       note="E — наименьший модуль по направлениям [100]/[111] (консервативно); S — худший 99,5-й процентиль")
@@ -253,9 +255,9 @@ def main():
     out["sheet_thickness_mm"] = th
     out["surface_area_per_cell_L2"] = round(sheet_thickness(0.2, 1.0)[1], 4)
     out["schwarz_d_threshold"] = {f"{r:.2f}": sheet_threshold(r, "schwarz_d") for r in (0.15, 0.3)}
-    with open(RESULTS, "w", encoding="utf-8") as f:
+    with open(a.out, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=1)
-    print("->", RESULTS)
+    print("->", a.out)
 
 
 if __name__ == "__main__":

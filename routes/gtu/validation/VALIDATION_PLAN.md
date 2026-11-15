@@ -327,6 +327,15 @@ python3 -m pytest -q         # 18 тестов, 25–50 с
 Конфигурация — `validation_fleet.toml` (tomllib стандартной библиотеки). Модель `gtu_cycle.py` не
 меняется. В `.github/workflows/gate.yml` pytest не входит — тесты запускаются вручную.
 
+**Повтор на AWS (подготовлено 15.11.2026, не запускалось).** `jobs_aws_validation.json` (генератор
+`make_jobs_validation.py`, раннер `routes/gtu/platform/aws/runner.py`): `val-cycle` — al2023 + Python 3.12,
+тесты, `balances.py`, `validate_fleet.py` на всех ядрах (`workers = $NPROC` только на машине); `val-fea` —
+ubuntu:24.04 + ccx 2.21: `test_disk.py`, `disk.py --examples`, `frame3_fea.py`. На машине каждый пересчитанный
+JSON сверяется с закоммиченным (`compare_results.py`: числа в пределах 1e-9 + 1e-6·|эталон|, служебные ключи
+пропускаются), сводка для ветки — `compare_results.py --collect` → `aws_repro_results.json`. Расхождение — разбор
+до публикации. Смета — блок `estimate` файла задач. Эталонов SU2 (Rotor 37, CC3, SRV2) там нет: геометрии и
+сеток в репозитории нет.
+
 ## 7. Источники и их состояние (14.11.2026)
 
 Тексты стандартов из контейнера не открылись (хосты law.resource.org, asme.org, cdn.asme.org,

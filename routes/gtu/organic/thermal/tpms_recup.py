@@ -130,14 +130,35 @@ class TPMSModel:
     def B(self, l):
         return np.interp(l, self.lv, self.beta)
 
+    def build_t_table(self):
+        """таблица t(c, t_w/a) для быстрого счёта"""
+        from scipy.interpolate import RegularGridInterpolator
+        self.cg = np.linspace(-0.45, 0.45, 37)
+        self.rg = np.linspace(0.005, 0.30, 60)
+        T = np.full((len(self.cg), len(self.rg)), np.nan)
+        for i, c in enumerate(self.cg):
+            for j, r in enumerate(self.rg):
+                t = self.t_level_exact(c, r)
+                T[i, j] = np.nan if t is None else t
+        self._T = RegularGridInterpolator((self.cg, self.rg), T, bounds_error=False, fill_value=np.nan)
+
+    def t_level_vec(self, c, r):
+        if not hasattr(self, "_T"):
+            self.build_t_table()
+        return self._T(np.stack([np.asarray(c), np.asarray(r)], -1))
+
     def t_level(self, c, tw_over_a):
+        t = float(self.t_level_vec([c], [tw_over_a])[0])
+        return None if not np.isfinite(t) else t
+
+    def t_level_exact(self, c, tw_over_a):
         """полуширина уровня t для заданной толщины стенки t_w/a при смещении c"""
         bm = self.B(c)
 
         def r(t):
             return (1 - self.E(c + t) - self.E(t - c)) / bm - tw_over_a
         hi = 0.95 - abs(c)
-        if r(hi) < 0:
+        if r(hi) < 0 or r(1e-6) > 0:
             return None
         return brentq(r, 1e-6, hi)
 
@@ -168,17 +189,18 @@ def core_eval(du, PH, PC, geom, prof, A_fr, L, N=40, tw=None, model=None, return
     if geom == "tpms":
         a = prof["a"](x / L)
         c = prof["c"](x / L)
-        segs = []
-        for ai, ci in zip(a, c):
-            t = model.t_level(ci, tw / ai)
-            if t is None:
-                return None
-            eA, bA, dA, fA, nA = model.side(ci + t)          # газ
-            eB, bB, dB, fB, nB = model.side(t - ci)          # воздух (зеркало)
-            bm = model.B(ci)
-            ew = 1 - eA - eB
-            segs.append((eA, bA / ai, dA * ai, fA, nA, eB, bB / ai, dB * ai, fB, nB, bm / ai, ew))
-        S = np.array(segs)
+        t = model.t_level_vec(c, tw / a)
+        if not np.all(np.isfinite(t)):
+            return None
+        lA, lB = c + t, t - c                              # газ: F > c + t; воздух — зеркало: F > t − c
+        if lA.min() < model.tl[0] - 1e-9 or lA.max() > model.tl[-1] + 1e-9 or lB.min() < model.tl[0] - 1e-9 \
+                or lB.max() > model.tl[-1] + 1e-9:
+            return None                                    # вне таблицы переносов — не экстраполируем
+        eA, bA = model.E(lA), model.B(lA)
+        eB, bB = model.E(lB), model.B(lB)
+        S = np.stack([eA, bA / a, 4 * eA / bA * a, np.interp(lA, model.tl, model.fRe), np.interp(lA, model.tl, model.Nu0),
+                      eB, bB / a, 4 * eB / bB * a, np.interp(lB, model.tl, model.fRe), np.interp(lB, model.tl, model.Nu0),
+                      model.B(c) / a, 1 - eA - eB], 1)
     else:
         g = prof["gap"]
         pitch = 2 * g + 2 * tw
@@ -279,7 +301,7 @@ def size_tpms(du, PH, PC, model, graded=True, tw=None, seed=0, maxiter=60):
         pen += max(0.0, r["dp_h"] / du["dp_h"] - 1) * 1e2
         pen += max(0.0, r["dp_c"] / du["dp_c"] - 1) * 1e2
         pen += max(0.0, 1 - min(r["Dh_h_mm"][0], r["Dh_c_mm"][0]) / (PRINT["Dh_min"] * 1e3)) * 1e2
-        return r["mass_core"] / 1e3 + pen * 10
+        return r["mass_core"] / 1e3 + 0.002 * Afr + pen * 10   # малый вес фронта: при равной массе — компактнее
     amin, amax = PRINT["a_min"], PRINT["a_max"]
     if graded:
         bounds = [(2.0, 40.0), (0.05, 1.5)] + [(amin, amax)] * 3 + [(-0.35, 0.3)] * 3
@@ -309,7 +331,7 @@ def size_plate(du, PH, PC, gap, Nu, tw=None):
         r = core_eval(du, PH, PC, "plate", dict(gap=gap, Nu=Nu), Afr, L, tw=tw)
         pen = max(0.0, 1 - r["Q_kW"] / Qt) * 1e3 + max(0.0, r["dp_h"] / du["dp_h"] - 1) * 1e2 + \
             max(0.0, r["dp_c"] / du["dp_c"] - 1) * 1e2
-        return r["mass_core"] / 1e3 + pen * 10
+        return r["mass_core"] / 1e3 + 0.002 * Afr + pen * 10
     res = differential_evolution(obj, [(1.0, 40.0), (0.03, 1.5)], seed=0, maxiter=80, popsize=20, tol=1e-8, polish=False)
     loc = minimize(obj, res.x, method="Nelder-Mead", options=dict(maxiter=400, xatol=1e-6, fatol=1e-8))
     z = loc.x if loc.fun < res.fun else res.x

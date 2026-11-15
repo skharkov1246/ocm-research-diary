@@ -392,7 +392,8 @@ def thermal(panel, net, hyd, Tc_in, p_mean):
         nxt = []
         for s in pending:
             a, b, d = net.seg[s]
-            up, dn = (a, b) if hyd["m"][s] >= 0 else (b, a)
+            mref = max(np.max(np.abs(hyd["m"])), 1e-30)
+            up, dn = (a, b) if hyd["m"][s] >= -1e-9 * mref else (b, a)
             if up in known:
                 order.append((s, up, dn))
                 known.add(dn)

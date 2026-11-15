@@ -243,7 +243,7 @@ def run_config(a, level: str, np_: int, k: int, geom: str, plan_path: str, limit
         if a.su2_src:
             cmd += ["--su2-src", a.su2_src]
         if a.mpi_args is not None:
-            cmd += ["--mpi-args", a.mpi_args]
+            cmd.append(f"--mpi-args={a.mpi_args}")  # с «=»: значение вида --use-hwthread-cpus argparse иначе примет за ключ
         fh = open(os.path.join(d, "run_case.out"), "w")
         procs.append((d, subprocess.Popen(cmd, stdout=fh, stderr=subprocess.STDOUT), fh))
     for d, p, fh in procs:
@@ -364,7 +364,7 @@ def main(argv=None) -> int:
     r.add_argument("--pfrac", type=float, default=0.95, help="доля оценки давления на выходе")
     r.add_argument("--shroud", default="slip")
     r.add_argument("--vaneless", default="slip")
-    r.add_argument("--mpi-args", default=None, help="ключи mpirun (по умолчанию — как в run_case.py)")
+    r.add_argument("--mpi-args", default=None, help="ключи mpirun (по умолчанию — как в run_case.py); писать с «=»: --mpi-args=--use-hwthread-cpus")
     r.add_argument("--nproc", type=int, default=int(os.environ.get("NPROC") or os.cpu_count() or 1))
     r.add_argument("--mesh-threads", type=int, default=0, help="потоков Gmsh (0 — все ядра)")
     r.add_argument("--impeller-args", default="", help="доп. ключи impeller.py")

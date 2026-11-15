@@ -140,7 +140,7 @@ ETA_NOM = dict(comp=-0.012, ax=-0.016, rad=-0.042, pt=0.86)  # номиналь�
 #   радиальная -0,027 к первым значениям -0,005 и -0,015) - оценка; остаток покрывают запасы M_W, M_T
 SPLIT_RANGE = {"2Ц": (0.35, 0.65), "ОЦ": (0.12, 0.60)}
 N_PI_GRID, N_T41_GRID, N_SPLIT_GRID = 10, 6, 21
-REPAIR_AXES = ("mat_tw", "mat_cw", "m_tw", "cool", "comp", "turb", "recup", "rotors")
+REPAIR_AXES = ("mat_tw", "mat_cw", "m_tw", "cool", "comp", "turb", "recup", "rotors", "rotor_join")
 _DEF = dict(rotors=[1, 2], comp=["1Ц", "2Ц", "Д", "ОЦ"], n_ax=[1, 2], inlet=["одно", "двух"], turb=["Р", "О"], nt=[1, 2],
             npt=[1, 2], cool=["U", "N", "K"], recup=["нет", "печатный"], comb=["выносная", "кольцевая"], bear=["масло", "магнит"],
             cores=[1], rotor_join=["сварка", "сборный"], m_cw=["поковка", "литьё", "печать"], m_tw=["литьё", "печать"],

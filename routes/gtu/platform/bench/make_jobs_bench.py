@@ -5,7 +5,7 @@
   bench-su2-c7a16 / bench-su2-c7i16 — SU2 v8.6.0 (сборка в контейнере ubuntu:24.04, как задачи узла su2):
       speed_su2.py на канале core130 — medium (64x1, 32x2, 16x4) и fine (64x1, 32x2); c7i.16xlarge — запасной тип
       раннера (64 vCPU = 32 ядра × 2 потока), замер показывает, во сколько обойдётся точка, если c7a не дадут;
-  bench-ccx-c7a16 — CalculiX 2.21 (пакет Ubuntu) в контейнере: speed_ccx.py, колесо core130 C3D10 на 60, 200 и 600 тыс.
+  bench-ccx-c7a16 — CalculiX 2.21 (пакет Ubuntu) в контейнере: speed_ccx.py, колесо core130 C3D10 на 50, 150 и 450 тыс.
       узлов, статика при 1, 8, 64 потоках, упаковка 8 копий × 8 потоков, частоты до 250 тыс. узлов.
 Слияние — speed_merge.py → speed_aws_results.json (цена точки SU2 medium/fine и расчёта ccx).
 
@@ -44,6 +44,10 @@ SU2_SETUP = [
     "/opt/su2/bin/SU2_CFD --help | head -n 1 | tee /opt/su2/VERSION",
 ]
 
+# --use-hwthread-cpus: OpenMPI 4.1 по умолчанию считает слоты по физическим ядрам; у c7i.16xlarge их 32 при 64 vCPU,
+# и «mpirun -np 64» без ключа отказывает («not enough slots»; проверено локально на 4 ядрах: -np 5 — отказ). У c7a.16xlarge
+# 64 ядра без SMT — ключ ничего не меняет.
+
 # CalculiX из пакета Ubuntu 24.04 (calculix-ccx 2.21-1) + Python-пакеты образа (gmsh для сетки колеса).
 CCX_SETUP = [
     "apt-get update -q",
@@ -69,7 +73,8 @@ def su2_cmd(levels, configs, warm, iters, deadline_args, su2_src="/opt/SU2-src")
     return "\n".join([
         "set -e", ENV_SU2, ENV_TXT.format(ver="cat /opt/su2/VERSION; mpirun --version | head -n 1"),
         f"python routes/gtu/platform/bench/speed_su2.py run --case core130 --levels {','.join(levels)} {cfg} "
-        f"--warm {warm} --iters {iters} --nproc \"$NPROC\" --mpi-args \"\" {deadline_args} --su2-src {su2_src} "
+        f"--warm {warm} --iters {iters} --nproc \"$NPROC\" --mpi-args=--use-hwthread-cpus {deadline_args} "
+        f"--su2-src {su2_src} "
         "--work /tmp/gtu_speed_su2 --out \"$GTU_OUT\""])
 
 
@@ -84,8 +89,8 @@ def ccx_cmd(targets, threads, pack, freq_max, deadline_args):
 SU2_LEVELS = ["medium", "fine"]
 SU2_CONFIGS = {"medium": ["64x1", "32x2", "16x4"], "fine": ["64x1", "32x2"]}
 SU2_MAX_MIN = 90
-CCX_TARGETS = [60000, 200000, 600000]
-CCX_MAX_MIN = 80
+CCX_TARGETS = [50000, 150000, 450000]
+CCX_MAX_MIN = 100
 PRICE, PRICE_UPPER = 0.75, 1.4206
 DISK_RATE, IPV4 = 0.08 / 730, 0.005
 
@@ -125,8 +130,8 @@ def ccx_estimate():
         mesh = 0.5 + n / 200000  # мин, оценка (Gmsh HXT)
         parts = dict(mesh_min=mesh, t1_min=t1 / 60, t8_min=t1 / 2 / 60, t64_min=t64 / 60, pack_min=t1 / 2 / 60 * 1.5,
                      freq_min=(4 * t64 / 60) if n <= 250000 else 0)
-        # прогноз раннего пропуска: 1 поток на 600 тыс. не успеет — не считаем
-        if n >= 600000:
+        # как пропуск в speed_ccx.py: на большой сетке 1 поток и упаковка по прогнозу не успевают — не считаются
+        if n > 200000:
             parts["t1_min"] = 0.0
             parts["pack_min"] = 0.0
         m = sum(parts.values())
@@ -172,7 +177,7 @@ def build():
             "bench-su2-c7a16": "секунды на итерацию канала core130 (medium 584 357 узлов, fine — уровень impeller.py) при "
                                "64x1, 32x2, 16x4 (medium) и 64x1, 32x2 (fine); время сетки; память SU2",
             "bench-su2-c7i16": "то же на запасном типе раннера (c7i: 64 vCPU = 32 ядра × 2 потока)",
-            "bench-ccx-c7a16": "CalculiX: колесо core130, C3D10 на 60/200/600 тыс. узлов — статика CENTRIF при 1/8/64 потоках, "
+            "bench-ccx-c7a16": "CalculiX: колесо core130, C3D10 на 50/150/450 тыс. узлов — статика CENTRIF при 1/8/64 потоках, "
                                "упаковка 8×8, частоты (10 форм) до 250 тыс. узлов; время, память, max|U| для сверки",
             "fallback_types": "пусто нарочно: замер должен идти на заданном типе (иначе сравнение типов теряет смысл)",
         },

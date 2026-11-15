@@ -113,7 +113,9 @@ def setup(part, variant, h, objective="mass"):
     in_base = inside(base_poly, rc.ravel(), zcg.ravel()).reshape(nr, nz)
     group = np.ones((nr, nz), int)
     if part == "turb1":
-        passive = (rc >= meta["r_b"] - 1e-9)                       # живой обод (замки лопаток — нагрузка на грани)
+        # пассивен только слой под дном пазов (4 мм): переход «полотно — обод» проектируется (при пассивном ободе от r_b
+        # оптимизация упирала тонкое полотно в острый входящий угол — особенность напряжений в гладкой сетке ccx)
+        passive = (rc >= meta["r_live"] - 4.0e-3)
     else:
         R2 = meta["R2"]
         hub_line = np.c_[r, ztop]
@@ -268,7 +270,7 @@ def run_spec(spec):
     stages = spec.get("stages")
     if stages is None:
         stages = ([dict(beta=1, it=50, move=0.1), dict(beta=2, it=30, move=0.08), dict(beta=4, it=30, move=0.06),
-                   dict(beta=8, it=30, move=0.05), dict(beta=16, it=40, move=0.03), dict(beta=32, it=40, move=0.02)]
+                   dict(beta=8, it=30, move=0.05), dict(beta=16, it=50, move=0.03)]
                   if variant == "A" else [dict(beta=0, it=150, move=0.08)])
     R = spec.get("R_filter", 2.5 * h)
     # цель с запасом 3 % на переход от проецированного к двоичному проекту; затем досборка (до двух раз), если
@@ -347,6 +349,7 @@ def main():
     ap.add_argument("--h-t", type=float, default=1.0e-3)
     ap.add_argument("--h-c", type=float, default=1.5e-3)
     ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--results", default=RESULTS)
     a = ap.parse_args()
     os.makedirs(OUTDIR, exist_ok=True)
     t0 = time.time()
@@ -362,8 +365,8 @@ def main():
     with Pool(a.workers) as pool:
         res = pool.map(run_spec, S, chunksize=1)
     prev = {}
-    if os.path.exists(RESULTS) and a.only:
-        with open(RESULTS, encoding="utf-8") as f:
+    if os.path.exists(a.results) and a.only:
+        with open(a.results, encoding="utf-8") as f:
             prev = {r["name"]: r for r in json.load(f).get("runs", [])}
     for r in res:
         prev[r["name"]] = r
@@ -383,9 +386,9 @@ def main():
                                 note="k_AM и t_skin — оценка; поля температур — frame3 (оценка облика)"),
                baseline=base, runs=sorted(prev.values(), key=lambda r: r["name"]),
                seconds=round(time.time() - t0, 1))
-    with open(RESULTS, "w", encoding="utf-8") as f:
+    with open(a.results, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=1, default=float)
-    print("->", RESULTS)
+    print("->", a.results)
 
 
 if __name__ == "__main__":

@@ -24,6 +24,7 @@ import scipy.sparse as sp
 import scipy.sparse.linalg as spla
 
 HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[3]
 
 
 class Brinkman2D:
@@ -574,6 +575,37 @@ def comb_baseline(cs, vol):
     return best[2], best[1]
 
 
+def _opening_center(cs, o):
+    h, nx, ny = cs["h"], cs["nx"], cs["ny"]
+    m = 0.5 * (o["j0"] + o["j1"]) * h
+    return {"W": (0.0, m), "E": (nx * h, m), "S": (m, 0.0), "N": (m, ny * h)}[o["side"]]
+
+
+def spoke_baseline(cs, vol):
+    """обычный коллектор «ступица и спицы»: прямой подвод от входа к центру и прямые трубы равной ширины к выходам"""
+    nx, ny, h = cs["nx"], cs["ny"], cs["h"]
+    X, Y = np.meshgrid((np.arange(nx) + 0.5) * h, (np.arange(ny) + 0.5) * h, indexing="ij")
+    hub = (0.5 * nx * h, 0.45 * ny * h)
+    cin = _opening_center(cs, cs["ops"][0])
+    win = (cs["ops"][0]["j1"] - cs["ops"][0]["j0"]) * h
+
+    def seg_mask(P, Q, w):
+        P, Q = np.array(P), np.array(Q)
+        d = Q - P
+        t = np.clip(((X - P[0]) * d[0] + (Y - P[1]) * d[1]) / (d @ d), 0, 1)
+        return np.hypot(X - P[0] - t * d[0], Y - P[1] - t * d[1]) <= w / 2
+    target = vol * nx * ny
+    best = None
+    for w in np.linspace(0.02, 0.3, 120):
+        m = seg_mask(cin, hub, win)
+        for o in cs["ops"][1:]:
+            m |= seg_mask(hub, _opening_center(cs, o), w)
+        d = abs(m.sum() - target)
+        if best is None or d < best[0]:
+            best = (d, w, m)
+    return best[2], best[1]
+
+
 def evaluate(cs, rho_cells, amax, q, label, Re_list=(0.0,)):
     """форма → (1) потери при заданных равных расходах; (2) выходы на одинаковое давление: расходы и потери"""
     nx, ny, h = cs["nx"], cs["ny"], cs["h"]
@@ -619,13 +651,12 @@ def contour_stl(path, rho, h, thickness=0.1, level=0.5):
     return write_stl(path, v, f, solid="manifold")
 
 
-def plot(res_opt, evals, path):
+def plot(cs, evals, path, title):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    cs = res_opt["case"]
     nx, ny, h = cs["nx"], cs["ny"], cs["h"]
-    fig, axs = plt.subplots(1, len(evals), figsize=(5.2 * len(evals), 6.0))
+    fig, axs = plt.subplots(1, len(evals), figsize=(4.6 * len(evals), 4.6 * cs["Ly"] / cs["Lx"] + 0.9))
     for ax, ev in zip(np.atleast_1d(axs), evals):
         rho = ev["_rho"]
         u = ev["_u2"]
@@ -633,29 +664,116 @@ def plot(res_opt, evals, path):
         U = u[:S.Nu].reshape(nx + 1, ny)
         V = u[S.Nu:].reshape(nx, ny + 1)
         uc = 0.5 * (U[1:] + U[:-1]); vc = 0.5 * (V[:, 1:] + V[:, :-1])
-        sp_ = np.hypot(uc, vc)
+        spd = np.hypot(uc, vc)
         ext = [0, cs["Lx"], 0, cs["Ly"]]
         ax.imshow(rho.T, origin="lower", extent=ext, cmap="Greys_r", vmin=0, vmax=1)
-        sm = np.ma.masked_where(rho < 0.5, sp_)
-        im = ax.imshow(sm.T, origin="lower", extent=ext, cmap="inferno", alpha=0.85)
+        sm = np.ma.masked_where(rho < 0.5, spd)
+        ax.imshow(sm.T, origin="lower", extent=ext, cmap="inferno", alpha=0.9)
         x = (np.arange(nx) + 0.5) * h; y = (np.arange(ny) + 0.5) * h
-        ax.streamplot(x, y, uc.T, vc.T, color="white", linewidth=0.5, density=1.2, arrowsize=0.6)
+        ax.streamplot(x, y, uc.T, vc.T, color="#9fe0ff", linewidth=0.5, density=1.3, arrowsize=0.6)
         r = ev["pressure_outlets"][0]
-        ax.set_title(f"{ev['label']}\nΦ(равные расходы) = {ev['Phi_equal_split']:.1f};  "
-                     f"разброс при p_вых = const: {100 * r['nonuniformity_max_min']:.1f} %", fontsize=9)
+        nu = r["nonuniformity_max_min"]
+        ax.set_title(f"{ev['label']}\nΦ(равные расходы) = {ev['Phi_equal_split']:.0f};  Φ(p_вых = const) = {r['Phi']:.0f}\n"
+                     f"разброс расходов при p_вых = const: {100 * nu:.1f} %", fontsize=8.5)
         ax.set_xticks([]); ax.set_yticks([])
+    fig.suptitle(title, fontsize=10)
     fig.tight_layout()
     fig.savefig(path, dpi=130)
     plt.close(fig)
 
 
+def murray2d_check(rho, h, level=0.5):
+    """проверка «закона Мюррея» плоских каналов: для течения Пуазейля в щели Q ∝ w³, оптимум Мюррея даёт
+    w₀² = w₁² + w₂² (показатель 2); ширины ветвей — по скелету и расстоянию до стенки (skimage)"""
+    from skimage.morphology import skeletonize
+    from scipy import ndimage
+    m = rho > level
+    sk = skeletonize(m)
+    dist = ndimage.distance_transform_edt(m) * h
+    # узлы ветвления: точки скелета с ≥ 3 соседями
+    k = ndimage.convolve(sk.astype(int), np.ones((3, 3), int), mode="constant") - sk
+    br = sk & (k >= 3)
+    lab, n = ndimage.label(sk & ~ndimage.binary_dilation(br, iterations=2))
+    widths = []
+    for i in range(1, n + 1):
+        sel = lab == i
+        if sel.sum() < 6:
+            continue
+        widths.append(float(2 * np.median(dist[sel])))
+    return dict(n_branch_nodes=int(ndimage.label(br)[1]), n_segments=len(widths),
+                widths=sorted(widths, reverse=True)[:20])
+
+
+def run_all(out_dir, nx=90, vol=0.30, cases=("comb6", "fan8")):
+    from tpms_geom import write_stl
+    out_dir = Path(out_dir)
+    res = dict(title="Оптимизация топологии коллектора: минимум потерь при равномерной раздаче (2D, Стокс — Бринкман)",
+               method=__doc__.strip(),
+               software=f"python {sys.version.split()[0]}, numpy {np.__version__}, scipy (SuperLU), scikit-image (изолинии)",
+               date="2026-11-14",
+               status="демонстрация метода в 2D при малом Re (безразмерно); реальный коллектор KV-3 — турбулентный "
+                      "(Re ~ 10⁵–10⁶): нужна трёхмерная оптимизация с CFD (задача AWS)",
+               inputs=dict(note="безразмерная постановка; связь с KV-3 — только по числу выходов (6 и 8) и по смыслу узла"),
+               parameters=dict(nx=nx, vol=vol, Da=1e-5, rmin_cells=1.5, stages=STAGES, w_uniform=1.0), cases={})
+    for case in cases:
+        t0 = time.time()
+        rB = optimize(case, nx=nx, vol=vol, qs=(0.01, 0.1), iters=(60, 60), verbose=False)   # классика: расходы заданы
+        rU = optimize_uniform(case, nx=nx, vol=vol, verbose=False)         # выходы на давлении + равномерность
+        cs = rU["case"]
+        amax = rU["amax"]
+        # оценка всех форм при одинаковой α (q = 0,1, как в конце rU) — честное сравнение
+        q = 0.1
+        evs = []
+        for label, rho in (("Борвалл — Петерсон: расходы заданы", rB["rho"]),
+                           ("равномерность в цели (выходы на давлении)", rU["rho"])):
+            ev = evaluate(cs, rho, amax, q, label, Re_list=(0.0, 20.0, 50.0))
+            ev["_rho"] = rho
+            ev["_S"] = Brinkman2D(cs["nx"], cs["ny"], cs["h"], with_pressure_outlets(cs))
+            evs.append(ev)
+        if case == "comb6":
+            mb, wh = comb_baseline(cs, float(rU["rho"].mean()))
+            blabel = "обычная гребёнка (та же доля жидкости)"
+        else:
+            mb, wh = spoke_baseline(cs, float(rU["rho"].mean()))
+            blabel = "ступица и спицы (та же доля жидкости)"
+        evb = evaluate(cs, mb.astype(float), amax, q, blabel, Re_list=(0.0, 20.0, 50.0))
+        evb["_rho"] = mb.astype(float)
+        evb["_S"] = Brinkman2D(cs["nx"], cs["ny"], cs["h"], with_pressure_outlets(cs))
+        evs.append(evb)
+        plot(cs, [evs[2], evs[0], evs[1]], out_dir / f"topo_{case}.png",
+             f"Коллектор: 1 вход → {cs['n_out']} выходов, доля жидкости {vol:.2f} (2D, Стокс — Бринкман, безразмерно)")
+        stl = contour_stl(out_dir / f"topo_{case}.stl", rU["rho"], cs["h"] * 100.0, thickness=4.0)
+        stl["path"] = str(Path(stl["path"]).relative_to(ROOT)) if str(stl["path"]).startswith(str(ROOT)) else stl["path"]
+        stl["units"] = "условные мм: ширина области 100, толщина 4 (выдавливание формы каналов)"
+        rows = []
+        for ev in evs:
+            rows.append({k: v for k, v in ev.items() if not k.startswith("_")})
+        base_phi = evb["pressure_outlets"][0]["Phi"]
+        res["cases"][case] = dict(
+            setup=dict(nx=cs["nx"], ny=cs["ny"], Lx=cs["Lx"], Ly=cs["Ly"], n_out=cs["n_out"], Q_in=cs["Qin"]),
+            designs=rows,
+            comb_header_width=float(wh),
+            history_uniform=[dict(it=i, **{k: (float(v) if isinstance(v, (float, np.floating)) else v) for k, v in hh.items()})
+                             for i, hh in enumerate(rU["hist"]) if i % 10 == 0 or i == len(rU["hist"]) - 1],
+            dissipation_ratio_uniform_vs_comb=float(evs[1]["pressure_outlets"][0]["Phi"] / base_phi),
+            nonuniformity=dict(comb=evb["pressure_outlets"][0]["nonuniformity_max_min"],
+                               bp=evs[0]["pressure_outlets"][0]["nonuniformity_max_min"],
+                               uniform=evs[1]["pressure_outlets"][0]["nonuniformity_max_min"]),
+            murray2d=murray2d_check(rU["rho"], cs["h"]),
+            stl=stl, time_s=round(time.time() - t0, 1))
+        print(case, "готово", round(time.time() - t0), res["cases"][case]["nonuniformity"],
+              res["cases"][case]["dissipation_ratio_uniform_vs_comb"], flush=True)
+    return res
+
+
 if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser()
-    ap.add_argument("--case", default="comb6")
-    ap.add_argument("--nx", type=int, default=80)
+    ap.add_argument("--nx", type=int, default=90)
     ap.add_argument("--vol", type=float, default=0.30)
+    ap.add_argument("--cases", nargs="+", default=["comb6", "fan8"])
     ap.add_argument("--out", default=str(HERE))
     a = ap.parse_args()
-    r = optimize(a.case, a.nx, a.vol)
-    print("готово", r["time_s"])
+    res = run_all(a.out, a.nx, a.vol, a.cases)
+    Path(a.out, "topo_results.json").write_text(json.dumps(res, ensure_ascii=False, indent=1, default=float))
+    print("записано")

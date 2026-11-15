@@ -21,7 +21,7 @@ Gmsh из 10-узловых тетраэдров (C3D10, промежуточн�
 Расчёт, который по прогнозу (время меньшей сетки × (N/N_пред)^2) не успевает до конца срока, пропускается
 (status skipped_time). Срок — как в speed_su2.py (--job-max-min от /proc/uptime или --budget-s).
 
-  python3 speed_ccx.py run --case core130 --targets 60000,200000,600000 --threads 1,8,64 --pack 8 \\
+  python3 speed_ccx.py run --case core130 --targets 50000,150000,450000 --threads 1,8,64 --pack 8 \\
           --nproc "$NPROC" --job-max-min 75 --out "$GTU_OUT"
 Выход: <out>/speed_ccx_<case>.json; рабочие файлы ccx — в --work (не выгружаются). Код 0 — хотя бы одна статика
 на каждой сетке прошла; 3 — нет; 2 — ошибка входа.
@@ -401,7 +401,7 @@ def main(argv=None) -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
     r = sub.add_parser("run", help="замер на этой машине")
     r.add_argument("--case", default="core130")
-    r.add_argument("--targets", default="60000,200000,600000", help="целевые числа узлов C3D10")
+    r.add_argument("--targets", default="50000,150000,450000", help="целевые числа узлов C3D10")
     r.add_argument("--threads", default="1,8,64", help="числа потоков ccx (обрезаются до --nproc)")
     r.add_argument("--pack", type=int, default=8, help="потоков на копию при упаковке (0 — без упаковки)")
     r.add_argument("--freq-modes", type=int, default=10)
