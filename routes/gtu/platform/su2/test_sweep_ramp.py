@@ -19,11 +19,11 @@ import make_jobs_su2_kv3_sweep as MS  # noqa: E402
 
 COLS = ["Inner_Iter", "rms[Rho]", "rms[k]", "max[Rho]", "Avg_Massflow(inlet)", "Avg_Massflow(outlet)",
         "Avg_TotalPress(inlet)", "Avg_TotalPress(outlet)", "Avg_TotalTemp(inlet)", "Avg_TotalTemp(outlet)", "PRTT",
-        "TotTotEff", "Avg CFL"]
+        "TotTotEff", "Avg CFL", "PressureOut_1", "MassFlowOut_1"]
 
 
 def write_history(path, n, *, m_in=1.0, imb=0.005, rho0=-4.0, rho1=-7.5, pr=3.2, tr=1.55, backflow=False, drift=0.0,
-                  nan_last=False):
+                  nan_last=False, p_meas=210000.0):
     """SYNTHETIC история: расход m_in (с дрейфом drift на всю длину), дисбаланс imb, rms[Rho] линейно rho0 -> rho1."""
     eta = (pr ** (0.4 / 1.4) - 1) / (tr - 1)
     with open(path, "w", newline="", encoding="utf-8") as f:
@@ -33,13 +33,15 @@ def write_history(path, n, *, m_in=1.0, imb=0.005, rho0=-4.0, rho1=-7.5, pr=3.2,
             mi = m_in * (1 + drift * i / max(n - 1, 1))
             mo = (mi * (1 - imb)) if backflow else -mi * (1 - imb)
             rho = rho0 + (rho1 - rho0) * i / max(n - 1, 1)
-            row = [i, rho, rho + 1, rho + 2, mi, mo, 101325.0, 101325.0 * pr, 288.15, 288.15 * tr, pr, 100 * eta, 12.0]
+            row = [i, rho, rho + 1, rho + 2, mi, mo, 101325.0, 101325.0 * pr, 288.15, 288.15 * tr, pr, 100 * eta, 12.0,
+                   p_meas, -mo]
             if nan_last and i == n - 1:
                 row[1] = "nan"
             w.writerow(row)
 
 
-CTX = {"est": 300000.0, "fs_p": 90750.0, "pr_1d": 4.3, "omega_nom": 1500.0, "deadline": 1e12, "work": "/nonexistent"}
+CTX = {"est": 300000.0, "fs_p": 90750.0, "pr_1d": 4.3, "omega_nom": 1500.0, "deadline": 1e12, "work": "/nonexistent",
+       "m_pass_1d": 1.2}
 
 
 def strat_two_steps(**kw):
@@ -73,42 +75,43 @@ class FakeRunner:
 
 
 # ----------------------------------------------------------------------------------------------- шаблон
-def test_derive_template_hist_and_riemann_on_real_template():
+def test_derive_template_hist_and_massflow_on_real_template():
     tpl = open(RC.TEMPLATE, encoding="utf-8").read()
-    txt, applied, skipped = SW.derive_template(tpl, ["hist", "riemann"])
-    assert applied == ["hist", "riemann"] and skipped == []
+    txt, applied, skipped = SW.derive_template(tpl, ["hist", "massflow"])
+    assert applied == ["hist", "massflow"] and skipped == []
     hist = [ln for ln in txt.splitlines() if ln.startswith("HISTORY_OUTPUT=")][0]
     for g in ("TURBO_PERF", "CFL_NUMBER", "LINSOL", "MAX_RES"):
         assert hist.count(g) == 1
-    assert "MARKER_GILES=" not in txt and txt.count("MARKER_RIEMANN=") == 1
-    assert "${P_OUT}" in txt and "MARKER_TURBOMACHINERY= (inlet, outlet)" in txt
-    # повторная правка hist не дублирует группы
+    giles = [ln for ln in txt.splitlines() if ln.startswith("MARKER_GILES=")][0]
+    assert "outlet, MASS_FLOW_OUTLET, ${P_OUT}, 0.1," in giles and "STATIC_PRESSURE_1D" not in giles
+    # повторная правка hist не дублирует группы; massflow второй раз — отказ (строки давления уже нет)
     txt2, _, _ = SW.derive_template(txt, ["hist"])
     assert [ln for ln in txt2.splitlines() if ln.startswith("HISTORY_OUTPUT=")][0] == hist
-
-
-def test_derive_template_riemann_requires_giles_line():
     with pytest.raises(SystemExit):
-        SW.derive_template("SOLVER= RANS\n", ["riemann"])
+        SW.derive_template(txt, ["massflow"])
+
+
+def test_derive_template_soft_and_unknown():
     txt, applied, skipped = SW.derive_template("SOLVER= RANS\n", ["hist"])
     assert applied == [] and skipped == ["hist"]
-    with pytest.raises(SystemExit):
-        SW.derive_template("X\n", ["nope"])
+    for bad in (["nope"], ["riemann"]):
+        with pytest.raises(SystemExit):
+            SW.derive_template("X\n", bad)
 
 
-def test_riemann_template_fills_with_run_case_fields():
-    """Производный шаблон заполняется теми же полями run_case.py; 7 значений на маркер Riemann (CConfig v8.6.0)."""
-    tpl, _, _ = SW.derive_template(open(RC.TEMPLATE, encoding="utf-8").read(), ["hist", "riemann"])
+def test_massflow_template_fills_with_run_case_fields():
+    """Производный шаблон заполняется теми же полями run_case.py; у Giles 9 значений на маркер (CConfig v8.6.0)."""
+    tpl, _, _ = SW.derive_template(open(RC.TEMPLATE, encoding="utf-8").read(), ["hist", "massflow"])
     params = dict(RC.NUMERICS, FS_P="90750", FS_T="279", RESTART="NO", SOLUTION_FILENAME="s.dat", P01="101325", T01="288.15",
                   OMEGA_X="0", OMEGA_Y="0", OMEGA_Z="1500", PER_MASTER="periodic_1", PER_SLAVE="periodic_2", ANGLE="40",
-                  P_OUT="250000", ITER=3, MUSCL="NO", HISTORY_NAME="h", RESTART_NAME="r.dat", VOLUME_NAME="v",
+                  P_OUT="0.72", ITER=3, MUSCL="NO", HISTORY_NAME="h", RESTART_NAME="r.dat", VOLUME_NAME="v",
                   MESH="m.su2", RAMP_ROT="NO", RAMP_ROT_INI="0", RAMP_ROT_FREQ=5, RAMP_ROT_ITER=1, RAMP_OUT="NO",
                   RAMP_OUT_INI="90750", RAMP_OUT_FREQ=5, RAMP_OUT_ITER=1)
     params.update(RC.wall_lines("slip", "slip"))
     cfg = RC.build_cfg(tpl, params)
-    line = [ln for ln in cfg.splitlines() if ln.startswith("MARKER_RIEMANN=")][0]
+    line = [ln for ln in cfg.splitlines() if ln.startswith("MARKER_GILES=")][0]
     vals = [v.strip() for v in line.split("(", 1)[1].rstrip(")").split(",")]
-    assert len(vals) == 14 and vals[1] == "TOTAL_CONDITIONS_PT" and vals[8] == "STATIC_PRESSURE" and vals[9] == "250000"
+    assert len(vals) == 18 and vals[10] == "MASS_FLOW_OUTLET" and vals[11] == "0.72" and vals[12] == "0.1"
 
 
 # ----------------------------------------------------------------------------------------------- давление и рампы
@@ -138,8 +141,9 @@ def test_generated_strategies_valid_and_distinct():
         SW.validate_strategy(s)
     jst = next(s for s in MS.STRATEGIES if s["id"] == "v4_jst")
     assert all(not st.get("muscl") for st in jst["steps"])
-    rie = next(s for s in MS.STRATEGIES if s["id"] == "v6_riemann")
-    assert "riemann" in rie["transforms"] and all(int(st.get("pramp", 0)) == 0 for st in rie["steps"])
+    mf = next(s for s in MS.STRATEGIES if s["id"] == "v6_massflow")
+    assert [st.get("outlet", "pressure") for st in mf["steps"]].count("massflow") == 4
+    assert mf["steps"][4]["load"] == "measured"
     for s in MS.STRATEGIES:   # база у всех одна — 0,75 оценки при номинале
         last = s["steps"][-1]
         assert last["load"] == MS.BASE_LOAD and last.get("frac", 1.0) == 1.0
@@ -153,7 +157,20 @@ def test_validate_strategy_rejects_bad():
         SW.validate_strategy(bad)                         # JST с MUSCL
     bad = strat_two_steps(transforms=["hist", "riemann"])
     with pytest.raises(SystemExit):
-        SW.validate_strategy(bad)                         # Riemann с рампой давления
+        SW.validate_strategy(bad)                         # Riemann: SU2 v8.6.0 падает
+    bad = strat_two_steps()
+    bad["steps"][0].update(outlet="massflow", m_frac=0.6, load=None)
+    with pytest.raises(SystemExit):
+        SW.validate_strategy(bad)                         # расход на выходе с рампой давления
+    bad["steps"][0]["pramp"] = 0
+    with pytest.raises(SystemExit):
+        SW.validate_strategy(bad)                         # после расхода давление — только measured
+    bad["steps"].insert(1, {"name": "x_to_p", "frac": 1.0, "load": "measured", "iter": 200})
+    SW.validate_strategy(bad)
+    bad = strat_two_steps()
+    bad["steps"][0]["load"] = "measured"
+    with pytest.raises(SystemExit):
+        SW.validate_strategy(bad)                         # measured без расхода перед ним
     bad = strat_two_steps()
     bad["steps"][0]["iter"] = 250
     with pytest.raises(SystemExit):
@@ -332,3 +349,67 @@ def test_jobs_file_loads_in_runner(tmp_path):
     # срок стратегии + подготовка + выгрузка раннера помещаются в сторожа
     assert MS.SETUP_MIN + MS.TIME_LIMIT_S / 60 + MS.FINISH_MIN + 8 <= MS.MAX_MIN
     assert math.isfinite(e["machine_hours_expected"])
+
+
+def test_run_strategy_massflow_then_measured_pressure(tmp_path):
+    strat = {"id": "t_mf", "title": "SYNTHETIC", "transforms": ["hist"], "set": {},
+             "steps": [{"name": "a_mf", "frac": 1.0, "load": None, "iter": 300, "ramp": 150, "outlet": "massflow",
+                        "m_frac": 0.6, "hold": {"iter": 200, "max": 1}},
+                       {"name": "b_to_p", "frac": 1.0, "load": "measured", "iter": 200, "hold": {"iter": 200, "max": 1}},
+                       {"name": "c_base", "frac": 1.0, "load": 0.75, "iter": 500, "pramp": 200, "gate": "final",
+                        "hold": {"iter": 300, "max": 1}}]}
+    fr = FakeRunner(str(tmp_path), script={"a_mf": {"p_meas": 205000.0}, "b_to_p": {"p_meas": 205100.0}})
+    s = SW.run_strategy(strat, dict(CTX), runner=fr)
+    assert s["verdict"] == "success"
+    assert fr.calls[0][3] == pytest.approx(0.6 * 1.2)            # цель — доля x расход канала x w
+    assert fr.calls[1][3] == pytest.approx(205000.0)             # давление — измеренное в конце шага с расходом
+    assert fr.calls[1][2]["p"] == pytest.approx(205000.0) and fr.calls[1][2]["outlet"] == "pressure"
+    assert fr.calls[2][2]["p"] == pytest.approx(205000.0) and fr.calls[2][3] == pytest.approx(225000.0)
+    assert s["steps"][0]["outlet"] == "massflow" and s["points_full_speed"][0]["p_out"] == pytest.approx(205000.0)
+
+
+def test_step_argv_massflow_transform(tmp_path):
+    strat = next(x for x in MS.STRATEGIES if x["id"] == "v6_massflow")
+    ctx = dict(CTX, case="core130", level="coarse", geom_out="/g", np=32, mpi_args="--use-hwthread-cpus",
+               shroud="slip", vaneless="slip", su2_src=None, work=str(tmp_path))
+    j = " ".join(SW.step_argv(ctx, strat, strat["steps"][0], "p.json", 0.36, 600, "/o", {"restart": None}))
+    assert "--transforms hist,massflow" in j and "--restart-from" not in j
+    j = " ".join(SW.step_argv(ctx, strat, strat["steps"][4], "p.json", 2.1e5, 600, "/o", {"restart": None}))
+    assert "--transforms hist " in j
+
+
+def test_char_points_base_strategy(tmp_path):
+    import char_points as C
+    a = C.build_parser().parse_args(["run", "--case", "core130", "--level", "medium", "--geom-out", "/g", "--pfracs",
+                                     "0.7,0.9", "--work", "/w", "--out", "/o", "--base-strategy", "plan_sweep_v2_decouple.json",
+                                     "--su2-src", "/s"])
+    argv = C.base_strategy_argv(a, nproc=64, work="/w/base", out="/o/base", time_limit=1800.4, label="core130")
+    j = " ".join(argv)
+    assert "sweep_ramp.py run --strategy plan_sweep_v2_decouple.json" in j and "--np 64" in j
+    assert "--time-limit 1800" in j and "--su2-src /s" in j and "--work /w/base --out /o/base" in j
+    # сводка стратегии -> база: годится только success / established при номинальной частоте и с рестартом
+    d = tmp_path / "base"
+    d.mkdir()
+    (d / "final_restart.dat").write_bytes(b"SYNTHETIC")
+    summ = {"verdict": "established", "final_restart": "final_restart.dat",
+            "final_state": {"frac": 1.0, "p_out": 233000.0}, "strategy": {"id": "v2_decouple"}}
+    (d / "sweep_summary.json").write_text(json.dumps(summ))
+    base, rf, p = C.base_from_sweep(str(d / "sweep_summary.json"), 0)
+    assert rf.endswith("final_restart.dat") and p == 233000.0 and base["restart_ok"]
+    (d / "sweep_summary.json").write_text(json.dumps(dict(summ, verdict="reached_base")))
+    base, rf, p = C.base_from_sweep(str(d / "sweep_summary.json"), 0)
+    assert rf is None and p is None and not base["restart_ok"]
+    base, rf, p = C.base_from_sweep(str(tmp_path / "nope.json"), 3)
+    assert base["verdict"] == "no_summary" and rf is None
+
+
+def test_run_strategy_deadline_on_established_base(tmp_path):
+    """Срок кончился во время удержания базы, а гейт базы уже пройден (без 3 порядков) — established, не timeout."""
+    t = [0.0]
+
+    def clock():
+        t[0] += 100.0
+        return t[0]
+    fr = FakeRunner(str(tmp_path), default={"rho1": -5.0})        # невязка упала только на порядок
+    s = SW.run_strategy(strat_two_steps(), dict(CTX, deadline=1000.0), runner=fr, clock=clock)
+    assert s["verdict"] == "established" and s["criteria"]["established"] and not s["criteria"]["success"]

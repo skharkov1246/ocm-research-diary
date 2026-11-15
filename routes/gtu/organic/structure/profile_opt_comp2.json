@@ -1804,5 +1804,15 @@
    }
   }
  },
- "seconds": 148.3
+ "seconds": 148.3,
+ "inputs": [
+  {
+   "file": "routes/gtu/frame3/frame3_fea_results.json",
+   "field": "parts.comp2.variants.solid (profile, T_C), blade_fill"
+  },
+  {
+   "file": "routes/gtu/platform/fea/materials.json",
+   "field": "ti64"
+  }
+ ]
 }

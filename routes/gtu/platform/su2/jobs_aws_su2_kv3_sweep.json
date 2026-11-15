@@ -50,8 +50,8 @@
    "disk_gb": 40
   },
   {
-   "name": "su2-kv3-sweep-v6-riemann",
-   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; free -g; df -h /tmp; } > \"$GTU_OUT/env.txt\" 2>&1 || true\nH=$(( NPROC / 2 )); [ \"$H\" -ge 1 ] || H=1\n( python routes/gtu/frame3/frame3_geom.py --out \"$W/geom\" --levels coarse --stages stage1 --gzip-levels --threads \"$H\" --results \"$GTU_OUT/frame3_geom_results.json\" > \"$GTU_OUT/geom_kv3_stage1.log\" 2>&1 ) & G1=$!\n( python routes/gtu/platform/geom/impeller.py --case core130 --level coarse --no-step --out \"$W/geom/core130_coarse\" --threads \"$H\" > \"$GTU_OUT/geom_core130.log\" 2>&1 ) & G2=$!\nwait \"$G1\"; wait \"$G2\"\nS=routes/gtu/platform/su2/plan_sweep_v6_riemann.json\npython routes/gtu/platform/su2/sweep_ramp.py run --strategy \"$S\" --case custom --level coarse --geom-out \"$W/geom/stage1_coarse\" --label kv3_stage1 --np \"$H\" --su2-src /opt/SU2-src --time-limit 1320 --job-max-min 45 --work \"$W/sw_kv3_stage1\" --out \"$GTU_OUT/kv3_stage1\" > \"$GTU_OUT/sweep_kv3_stage1.out\" 2>&1 & P1=$!\npython routes/gtu/platform/su2/sweep_ramp.py run --strategy \"$S\" --case core130 --level coarse --geom-out \"$W/geom/core130_coarse\" --label core130 --np \"$H\" --su2-src /opt/SU2-src --time-limit 1320 --job-max-min 45 --work \"$W/sw_core130\" --out \"$GTU_OUT/core130\" > \"$GTU_OUT/sweep_core130.out\" 2>&1 & P2=$!\nwait \"$P1\" || echo \"kv3_stage1 exit $?\" >> \"$GTU_OUT/sweep_exits.txt\"\nwait \"$P2\" || echo \"core130 exit $?\" >> \"$GTU_OUT/sweep_exits.txt\"\npython routes/gtu/platform/su2/sweep_ramp.py merge --in \"$GTU_OUT\" --out \"$GTU_OUT/sweep_merge.json\" --expect kv3_stage1,core130",
+   "name": "su2-kv3-sweep-v6-massflow",
+   "command": "set -e\nexport PATH=\"/opt/venv/bin:/opt/su2/bin:$PATH\" SU2_RUN=/opt/su2/bin PYTHONDONTWRITEBYTECODE=1\nexport OMPI_MCA_btl_vader_single_copy_mechanism=none OMPI_MCA_osc=^ucx\nW=/tmp/gtu_work; mkdir -p \"$W\"\n{ cat /opt/su2/VERSION; python -V; mpirun --version | head -n 1; echo \"nproc $(nproc) NPROC $NPROC\"; free -g; df -h /tmp; } > \"$GTU_OUT/env.txt\" 2>&1 || true\nH=$(( NPROC / 2 )); [ \"$H\" -ge 1 ] || H=1\n( python routes/gtu/frame3/frame3_geom.py --out \"$W/geom\" --levels coarse --stages stage1 --gzip-levels --threads \"$H\" --results \"$GTU_OUT/frame3_geom_results.json\" > \"$GTU_OUT/geom_kv3_stage1.log\" 2>&1 ) & G1=$!\n( python routes/gtu/platform/geom/impeller.py --case core130 --level coarse --no-step --out \"$W/geom/core130_coarse\" --threads \"$H\" > \"$GTU_OUT/geom_core130.log\" 2>&1 ) & G2=$!\nwait \"$G1\"; wait \"$G2\"\nS=routes/gtu/platform/su2/plan_sweep_v6_massflow.json\npython routes/gtu/platform/su2/sweep_ramp.py run --strategy \"$S\" --case custom --level coarse --geom-out \"$W/geom/stage1_coarse\" --label kv3_stage1 --np \"$H\" --su2-src /opt/SU2-src --time-limit 1320 --job-max-min 45 --work \"$W/sw_kv3_stage1\" --out \"$GTU_OUT/kv3_stage1\" > \"$GTU_OUT/sweep_kv3_stage1.out\" 2>&1 & P1=$!\npython routes/gtu/platform/su2/sweep_ramp.py run --strategy \"$S\" --case core130 --level coarse --geom-out \"$W/geom/core130_coarse\" --label core130 --np \"$H\" --su2-src /opt/SU2-src --time-limit 1320 --job-max-min 45 --work \"$W/sw_core130\" --out \"$GTU_OUT/core130\" > \"$GTU_OUT/sweep_core130.out\" 2>&1 & P2=$!\nwait \"$P1\" || echo \"kv3_stage1 exit $?\" >> \"$GTU_OUT/sweep_exits.txt\"\nwait \"$P2\" || echo \"core130 exit $?\" >> \"$GTU_OUT/sweep_exits.txt\"\npython routes/gtu/platform/su2/sweep_ramp.py merge --in \"$GTU_OUT\" --out \"$GTU_OUT/sweep_merge.json\" --expect kv3_stage1,core130",
    "max_min": 45,
    "disk_gb": 40
   }
@@ -205,6 +205,7 @@
     "NaN на 9-й (KV-3) и 10-й (core130) итерации s2 — через 1–2 итерации после того, как частота скачком дошла до 1,0 на 8-й итерации",
     "до NaN невязка плотности в истории не росла лавиной (rms[Rho] KV-3: начало −4,29, максимум −3,93, последняя −4,32): срыв местный и внезапный, а не постепенный",
     "в последней строке s2 расход на выходе обратный у обоих колёс (Avg_Massflow(outlet) > 0, MassFlowOut_1 < 0), PR_tt 0,99 и 1,11, КПД нефизичен (TotTotEff KV-3 −200 %)",
+    "повтор той же команды core130 (масштаб 0,1) в контейнере gtu-platform:local на 4 процессах — NaN на 9-й итерации s2 (запись другого потока в make_jobs_su2_kv3.py, рабочая копия, не в HEAD): дело не в AWS и не в 64 процессах",
     "для сравнения — прогон Б (README, core130 coarse, тот же путь целиком, по частям): после s1 (170 итераций) дисбаланс 43,5 %, после s2 (200) — 23,2 %, после s3 (150, MUSCL) — 1,4 %: даже полный s1 не устанавливает расход, но и не расходится"
    ]
   },
@@ -238,8 +239,13 @@
   ],
   "not_used": {
    "euler_or_laminar_then_rans": "CTurbSolver::LoadRestart читает турбулентные переменные из столбцов сразу после консервативных: в рестарте Эйлера или ламинарного решения с VOLUME_OUTPUT (…, PRIMITIVE) шаблона там давление и температура, без PRIMITIVE — нули, и SST получает k = w = 0 (мю_t = 0/0). Эмуляция «RANS со всеми стенками без трения» тоже не годится: без вязких стенок SU2 ставит расстояние до стенки 0 во всей области (CGeometry::ComputeWallDistance), а SST и SA на него делят. Вместо этого — ось «модель турбулентности» (v5_sa).",
-   "giles_mass_flow_outlet": "MASS_FLOW_OUTLET у Giles в v8.6.0 есть и рампуется, но образца в TestCases нет, коэффициент релаксации давления (второе значение) размерный и не подобран, знак AverageMassFlowRate выхода сверен только косвенно (MassFlowOut_1 > 0 при прямом течении, прогон Б) — кандидат следующего перебора.",
-   "classic_venkat_coefficient_scan": "коэффициент классического Venkatakrishnan в размерном расчёте не действует (см. выше)"
+   "classic_venkat_coefficient_scan": "коэффициент классического Venkatakrishnan в размерном расчёте не действует (см. выше)",
+   "riemann_inlet_outlet": "MARKER_RIEMANN (вход TOTAL_CONDITIONS_PT, выход STATIC_PRESSURE) вместе с MARKER_TURBOMACHINERY в SU2 v8.6.0 падает: Segmentation fault сразу после «Setting rotating frame grid velocities», до первой итерации, с рампой частоты и без неё; Giles на той же сетке в той же проверке идёт (контейнер gtu-platform:local, core130 coarse 139 095 узлов, 2 процесса, 15.11.2026). Без MARKER_TURBOMACHINERY нет рампы частоты и TURBO_PERF. Ось «граничное условие» — v6_massflow."
+  },
+  "massflow_probe": {
+   "what": "проверка знака и отклика Giles MASS_FLOW_OUTLET до перебора: рестарт конца прогона Б (core130 coarse 139 121 узел, 1,0 частоты, 0,75 оценки, расход канала 0,693 кг/с), цель 0,80 кг/с — выше текущего, против собственного дрейфа расхода вниз (прогон В), MF_RELAX 0,1, MUSCL, 60 итераций, 4 процесса",
+   "result": "давление на выходе (PressureOut_1) 232,9 -> 207,6 кПа монотонно, расход через выход (MassFlowOut_1) 0,703 -> 0,759 кг/с к цели без колебаний — знак верный (расход > 0 при прямом течении), отклик устойчив; расход на входе за 60 итераций не догнал (0,693 -> 0,636 — собственный дрейф точки Б), дисбаланс 19 %: условие сначала опустошает безлопаточный участок — переход дальше только по гейту",
+   "files": "scratchpad сессии (не в ветке): probe_mf/mf080 — history, cfg, журнал"
   }
  },
  "strategies": [
@@ -339,7 +345,7 @@
    "axis": "модель турбулентности",
    "title": "Модель Спаларта — Аллмараса вместо SST на том же пути, что v2",
    "mechanism": "Путь и численная схема v2 (частота при лёгком выходе -> плавный второй порядок -> нагружение), но SA (одно уравнение, SA_OPTIONS= NONE) вместо SST. Вместо «сначала Эйлер или ламинарное решение, потом RANS», которое в SU2 v8.6.0 с этим шаблоном не делается (см. diagnosis.not_used).",
-   "hypothesis": "Срыв вызывает уравнение для w модели SST на сетке без пристенных призм (в истории пробы rms[w] не записывался по уравнениям до NaN); SA мягче.",
+   "hypothesis": "Срыв вызывает модель SST (уравнение для w) на тетраэдрах без пристенных призм при большой относительной скорости; SA (одно уравнение) мягче. В сводке пробы — только rms[Rho], какое уравнение сорвалось первым, не установлено.",
    "differs_from_smoke": "SA вместо SST; остальное — как v2",
    "steps": [
     "a_spin_light",
@@ -355,32 +361,29 @@
    "mandatory_min_core130": 7.4
   },
   {
-   "job": "su2-kv3-sweep-v6-riemann",
-   "file": "routes/gtu/platform/su2/plan_sweep_v6_riemann.json",
-   "id": "v6_riemann",
+   "job": "su2-kv3-sweep-v6-massflow",
+   "file": "routes/gtu/platform/su2/plan_sweep_v6_massflow.json",
+   "id": "v6_massflow",
    "axis": "граничное условие",
-   "title": "Вход и выход Riemann вместо Giles, давление на выходе ступенями (лестница «частота, потом давление»)",
-   "mechanism": "MARKER_RIEMANN: вход TOTAL_CONDITIONS_PT (p0, T0, направление +z), выход STATIC_PRESSURE; MARKER_TURBOMACHINERY остаётся (рампа частоты и TURBO_PERF). Рампы давления у Riemann в SU2 v8.6.0 нет — давление ступенью между порциями: частота 0 -> 0,5 при p_нач, давление на линию дросселя; 0,5 -> 0,8, давление; 0,8 -> 1,0, давление 0,60; плавный второй порядок; 0,675; 0,75. Каждое состояние — с гейтом.",
-   "hypothesis": "Неотражающее условие Giles (осреднение 1D, релаксация 0,3) ведёт себя плохо при обратном токе на выходе, который был в пробе к концу s1; характеристическое условие Riemann его терпит.",
-   "differs_from_smoke": "Riemann вместо Giles на входе и выходе, давление ступенями, лестница, гейты",
+   "title": "Расход на выходе (Giles MASS_FLOW_OUTLET) при разгоне, затем переход на давление по измеренному",
+   "mechanism": "Выход Giles MASS_FLOW_OUTLET: SU2 сам двигает давление на выходе так, чтобы расход канала через выход шёл к цели (p_e = p_ср + 0,1 (dp/drho)(m − m_цели)). Лестница по частоте 0 -> 0,5 -> 0,75 -> 1,0, цель на ступени — 0,65 x одномерный расход канала x w (подобие, у core130 — около расхода прогона Б при 0,75 оценки); цель ставится сразу концом ступени — со стороны большого расхода, не помпажа. Затем плавный второй порядок при расходе, переход на давление: выход STATIC_PRESSURE_1D при давлении, измеренном в последней порции (PressureOut_1, без скачка), и рампа до 0,75 оценки за 300.",
+   "hypothesis": "В пробе давление на выходе задавалось при неустановившемся течении и вызвало обратный ток на выходе; управляя расходом, обратного тока на выходе не получить (условие само снижает давление), а на давление переходим уже с установившегося поля.",
+   "differs_from_smoke": "управляемая величина на выходе — расход, а не давление; лестница; переход на давление по замеру",
    "steps": [
-    "a_spin050",
-    "b_p050",
-    "c_spin080",
-    "d_p080",
-    "e_spin100",
-    "f_p100",
-    "g_order2",
-    "h_p0675",
-    "i_base"
+    "a_mf050",
+    "b_mf075",
+    "c_mf100",
+    "d_order2",
+    "e_to_p",
+    "f_base"
    ],
    "turbulence": "SST",
    "scheme": "ROE",
-   "outlet": "Riemann STATIC_PRESSURE",
+   "outlet": "Giles MASS_FLOW_OUTLET -> STATIC_PRESSURE_1D",
    "backoff": false,
    "expected_min_machine": 28.0,
-   "mandatory_min_kv3": 15.7,
-   "mandatory_min_core130": 9.8
+   "mandatory_min_kv3": 12.9,
+   "mandatory_min_core130": 7.9
   }
  ],
  "success_criteria": {
@@ -615,38 +618,38 @@
     "max_min": 45
    },
    {
-    "job": "su2-kv3-sweep-v6-riemann",
-    "strategy": "v6_riemann",
-    "mandatory_iters_per_wheel": 2150,
-    "su2_launches_min": 9,
+    "job": "su2-kv3-sweep-v6-massflow",
+    "strategy": "v6_massflow",
+    "mandatory_iters_per_wheel": 1850,
+    "su2_launches_min": 6,
     "wheels": {
      "kv3_stage1": {
       "expected": {
        "s_per_iter": 0.355,
-       "mandatory_s": 944,
-       "iters_in_limit": 3208
+       "mandatory_s": 777,
+       "iters_in_limit": 3377
       },
       "sizing": {
        "s_per_iter": 0.505,
-       "mandatory_s": 1265,
-       "iters_in_limit": 2258
+       "mandatory_s": 1054,
+       "iters_in_limit": 2377
       }
      },
      "core130": {
       "expected": {
        "s_per_iter": 0.191,
-       "mandatory_s": 591,
-       "iters_in_limit": 5960
+       "mandatory_s": 474,
+       "iters_in_limit": 6274
       },
       "sizing": {
        "s_per_iter": 0.272,
-       "mandatory_s": 764,
-       "iters_in_limit": 4196
+       "mandatory_s": 623,
+       "iters_in_limit": 4417
       }
      }
     },
     "machine_min_expected": 28.0,
-    "machine_min_if_success_early": 21.7,
+    "machine_min_if_success_early": 18.9,
     "max_min": 45
    }
   ],
@@ -679,5 +682,39 @@
    "basis": "ledger.jsonl: спот c7a.16xlarge us-east-1c 0,7064 (проба c8f9); MaxPrice раннера 1,4206"
   },
   "outputs": "на колесо: sweep_summary.json, история и журнал каждой порции, cfg, итоговый рестарт (~14–27 МБ), рестарт перед NaN, если был; оценка выхода 6 x 2 x ~60 МБ"
+ },
+ "plan_check": {
+  "command": "python3 routes/gtu/platform/aws/runner.py plan routes/gtu/platform/su2/jobs_aws_su2_kv3_sweep.json --assume-price 0.748 --assume-zone-prices us-east-1a=0.955,us-east-1b=0.748,us-east-1c=0.706 --branch claude/lucid-allen-yvps5d",
+  "exit_code": 0,
+  "lines": [
+   "[задача] su2-kv3-sweep-v1-control: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 45 мин",
+   "[бюджет] su2-kv3-sweep-v1-control на c7a.16xlarge: израсходовано 1.20 + в работе 0.00 + пакет 0.00 + новая 1.06 = 2.26 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] su2-kv3-sweep-v1-control c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] su2-kv3-sweep-v2-decouple: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 45 мин",
+   "[бюджет] su2-kv3-sweep-v2-decouple на c7a.16xlarge: израсходовано 1.20 + в работе 0.00 + пакет 1.06 + новая 1.06 = 3.31 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] su2-kv3-sweep-v2-decouple c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] su2-kv3-sweep-v3-ladder: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 45 мин",
+   "[бюджет] su2-kv3-sweep-v3-ladder на c7a.16xlarge: израсходовано 1.20 + в работе 0.00 + пакет 2.12 + новая 1.06 = 4.37 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] su2-kv3-sweep-v3-ladder c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] su2-kv3-sweep-v4-jst: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 45 мин",
+   "[бюджет] su2-kv3-sweep-v4-jst на c7a.16xlarge: израсходовано 1.20 + в работе 0.00 + пакет 3.18 + новая 1.06 = 5.43 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] su2-kv3-sweep-v4-jst c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] su2-kv3-sweep-v5-sa: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 45 мин",
+   "[бюджет] su2-kv3-sweep-v5-sa на c7a.16xlarge: израсходовано 1.20 + в работе 0.00 + пакет 4.24 + новая 1.06 = 6.49 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] su2-kv3-sweep-v5-sa c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[задача] su2-kv3-sweep-v6-massflow: образ al2023, контейнер ubuntu:24.04, команд container_setup: 8, 64 vCPU, сторож 45 мин",
+   "[бюджет] su2-kv3-sweep-v6-massflow на c7a.16xlarge: израсходовано 1.20 + в работе 0.00 + пакет 5.30 + новая 1.06 = 7.55 из 2000.00 долл. (MaxPrice 1.1460/ч) — можно",
+   "[зоны] su2-kv3-sweep-v6-massflow c7a.16xlarge: us-east-1c 0.7060 → us-east-1b 0.7480 → us-east-1a 0.9550 (допущение plan); ожидается us-east-1c по 0.7060 долл./ч, самая дешёвая us-east-1c; MaxPrice 1.1460 и бюджет — по максимуму цены за окно",
+   "[план] прогноз пакета 6.35 долл. (цена спота — допущение 0.748/ч)"
+  ],
+  "userdata_sizes": [
+   "\"UserData\": \"<8570 байт>\"",
+   "\"UserData\": \"<8574 байт>\"",
+   "\"UserData\": \"<8566 байт>\"",
+   "\"UserData\": \"<8554 байт>\"",
+   "\"UserData\": \"<8550 байт>\"",
+   "\"UserData\": \"<8574 байт>\""
+  ],
+  "stderr": ""
  }
 }

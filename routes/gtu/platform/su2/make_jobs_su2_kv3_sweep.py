@@ -3,7 +3,7 @@
 c7a.16xlarge, на каждой оба колеса (KV-3 ступень 1 и core130), сетка coarse, ~20–30 мин на машину.
 
 Пишет рядом:
-  plan_sweep_v1_control.json … plan_sweep_v6_riemann.json — стратегии для sweep_ramp.py run (шаги, гейты, ключи SU2);
+  plan_sweep_v1_control.json … plan_sweep_v6_massflow.json — стратегии для sweep_ramp.py run (шаги, гейты, ключи SU2);
   jobs_aws_su2_kv3_sweep.json — 6 задач раннера + разбор провала пробы 20261115T003035Z-c8f9 (diagnosis), таблица
                                 стратегий, критерии успеха, смета, сбор (merge) и вывод runner.py plan (plan_check).
 Команда задачи: обе сетки параллельно (frame3_geom.py, impeller.py), затем sweep_ramp.py run для двух колёс
@@ -123,8 +123,9 @@ STRATEGIES = [
         "mechanism": ("Путь и численная схема v2 (частота при лёгком выходе -> плавный второй порядок -> нагружение), "
                       "но SA (одно уравнение, SA_OPTIONS= NONE) вместо SST. Вместо «сначала Эйлер или ламинарное "
                       "решение, потом RANS», которое в SU2 v8.6.0 с этим шаблоном не делается (см. diagnosis.not_used)."),
-        "hypothesis": ("Срыв вызывает уравнение для w модели SST на сетке без пристенных призм (в истории пробы "
-                       "rms[w] не записывался по уравнениям до NaN); SA мягче."),
+        "hypothesis": ("Срыв вызывает модель SST (уравнение для w) на тетраэдрах без пристенных призм при большой "
+                       "относительной скорости; SA (одно уравнение) мягче. В сводке пробы — только rms[Rho], какое "
+                       "уравнение сорвалось первым, не установлено."),
         "differs_from_smoke": "SA вместо SST; остальное — как v2",
         "transforms": ["hist"], "set": dict(OUT_SET, **WANG), "turb": "SA",
         "steps": [_st("a_spin_light", 1.0, LIGHT_LOAD, 1000, ramp=450, pramp=900, cfl=5.0),
@@ -132,26 +133,26 @@ STRATEGIES = [
                   _st("c_base", 1.0, BASE_LOAD, 600, pramp=400, muscl=True, gate="final", hold=FINAL_HOLD)],
     },
     {
-        "id": "v6_riemann", "axis": "граничное условие",
-        "title": "Вход и выход Riemann вместо Giles, давление на выходе ступенями (лестница «частота, потом давление»)",
-        "mechanism": ("MARKER_RIEMANN: вход TOTAL_CONDITIONS_PT (p0, T0, направление +z), выход STATIC_PRESSURE; "
-                      "MARKER_TURBOMACHINERY остаётся (рампа частоты и TURBO_PERF). Рампы давления у Riemann в SU2 "
-                      "v8.6.0 нет — давление ступенью между порциями: частота 0 -> 0,5 при p_нач, давление на линию "
-                      "дросселя; 0,5 -> 0,8, давление; 0,8 -> 1,0, давление 0,60; плавный второй порядок; 0,675; 0,75. "
-                      "Каждое состояние — с гейтом."),
-        "hypothesis": ("Неотражающее условие Giles (осреднение 1D, релаксация 0,3) ведёт себя плохо при обратном токе "
-                       "на выходе, который был в пробе к концу s1; характеристическое условие Riemann его терпит."),
-        "differs_from_smoke": "Riemann вместо Giles на входе и выходе, давление ступенями, лестница, гейты",
-        "transforms": ["hist", "riemann"], "set": dict(OUT_SET, **WANG),
-        "steps": [_st("a_spin050", 0.5, None, 300, ramp=200, hold={"iter": 200, "max": 2}),
-                  _st("b_p050", 0.5, LIGHT_LOAD, 200, hold={"iter": 200, "max": 3}),
-                  _st("c_spin080", 0.8, None, 250, ramp=150, hold={"iter": 200, "max": 2}),
-                  _st("d_p080", 0.8, LIGHT_LOAD, 200, hold={"iter": 200, "max": 3}),
-                  _st("e_spin100", 1.0, None, 200, ramp=100, hold={"iter": 200, "max": 2}),
-                  _st("f_p100", 1.0, LIGHT_LOAD, 200, hold={"iter": 200, "max": 3}),
-                  _st("g_order2", 1.0, LIGHT_LOAD, 350, muscl=True, muscl_ramp=250, hold={"iter": 200, "max": 2}),
-                  _st("h_p0675", 1.0, 0.675, 200, muscl=True, hold={"iter": 200, "max": 3}),
-                  _st("i_base", 1.0, BASE_LOAD, 250, muscl=True, gate="final", hold=FINAL_HOLD)],
+        "id": "v6_massflow", "axis": "граничное условие",
+        "title": "Расход на выходе (Giles MASS_FLOW_OUTLET) при разгоне, затем переход на давление по измеренному",
+        "mechanism": ("Выход Giles MASS_FLOW_OUTLET: SU2 сам двигает давление на выходе так, чтобы расход канала через "
+                      "выход шёл к цели (p_e = p_ср + 0,1 (dp/drho)(m − m_цели)). Лестница по частоте 0 -> 0,5 -> 0,75 -> 1,0, "
+                      "цель на ступени — 0,65 x одномерный расход канала x w (подобие, у core130 — около расхода прогона Б "
+                      "при 0,75 оценки); цель ставится сразу концом ступени — со стороны большого расхода, не помпажа. "
+                      "Затем плавный второй порядок при расходе, переход на давление: выход STATIC_PRESSURE_1D при давлении, "
+                      "измеренном в последней порции (PressureOut_1, без скачка), и рампа до 0,75 оценки за 300."),
+        "hypothesis": ("В пробе давление на выходе задавалось при неустановившемся течении и вызвало обратный ток на "
+                       "выходе; управляя расходом, обратного тока на выходе не получить (условие само снижает давление), "
+                       "а на давление переходим уже с установившегося поля."),
+        "differs_from_smoke": "управляемая величина на выходе — расход, а не давление; лестница; переход на давление по замеру",
+        "transforms": ["hist"], "set": dict(OUT_SET, **WANG),
+        "steps": [_st("a_mf050", 0.5, None, 300, ramp=200, outlet="massflow", m_frac=0.65, hold={"iter": 200, "max": 2}),
+                  _st("b_mf075", 0.75, None, 250, ramp=150, outlet="massflow", m_frac=0.65, hold={"iter": 200, "max": 2}),
+                  _st("c_mf100", 1.0, None, 250, ramp=150, outlet="massflow", m_frac=0.65, hold={"iter": 200, "max": 3}),
+                  _st("d_order2", 1.0, None, 350, muscl=True, muscl_ramp=250, outlet="massflow", m_frac=0.65,
+                      hold={"iter": 200, "max": 2}),
+                  _st("e_to_p", 1.0, "measured", 200, muscl=True, hold={"iter": 200, "max": 3}),
+                  _st("f_base", 1.0, BASE_LOAD, 500, pramp=300, muscl=True, gate="final", hold=FINAL_HOLD)],
     },
 ]
 
@@ -285,6 +286,9 @@ def diagnosis() -> dict:
                       "последняя −4,32): срыв местный и внезапный, а не постепенный",
                       "в последней строке s2 расход на выходе обратный у обоих колёс (Avg_Massflow(outlet) > 0, "
                       "MassFlowOut_1 < 0), PR_tt 0,99 и 1,11, КПД нефизичен (TotTotEff KV-3 −200 %)",
+                      "повтор той же команды core130 (масштаб 0,1) в контейнере gtu-platform:local на 4 процессах — NaN на "
+                      "9-й итерации s2 (запись другого потока в make_jobs_su2_kv3.py, рабочая копия, не в HEAD): дело не "
+                      "в AWS и не в 64 процессах",
                       "для сравнения — прогон Б (README, core130 coarse, тот же путь целиком, по частям): после s1 (170 "
                       "итераций) дисбаланс 43,5 %, после s2 (200) — 23,2 %, после s3 (150, MUSCL) — 1,4 %: даже полный "
                       "s1 не устанавливает расход, но и не расходится"]},
@@ -341,11 +345,23 @@ def diagnosis() -> dict:
                 "стенками без трения» тоже не годится: без вязких стенок SU2 ставит расстояние до стенки 0 во всей "
                 "области (CGeometry::ComputeWallDistance), а SST и SA на него делят. Вместо этого — ось «модель "
                 "турбулентности» (v5_sa)."),
-            "giles_mass_flow_outlet": (
-                "MASS_FLOW_OUTLET у Giles в v8.6.0 есть и рампуется, но образца в TestCases нет, коэффициент релаксации "
-                "давления (второе значение) размерный и не подобран, знак AverageMassFlowRate выхода сверен только "
-                "косвенно (MassFlowOut_1 > 0 при прямом течении, прогон Б) — кандидат следующего перебора."),
             "classic_venkat_coefficient_scan": "коэффициент классического Venkatakrishnan в размерном расчёте не действует (см. выше)",
+            "riemann_inlet_outlet": (
+                "MARKER_RIEMANN (вход TOTAL_CONDITIONS_PT, выход STATIC_PRESSURE) вместе с MARKER_TURBOMACHINERY в SU2 v8.6.0 "
+                "падает: Segmentation fault сразу после «Setting rotating frame grid velocities», до первой итерации, с "
+                "рампой частоты и без неё; Giles на той же сетке в той же проверке идёт (контейнер gtu-platform:local, "
+                "core130 coarse 139 095 узлов, 2 процесса, 15.11.2026). Без MARKER_TURBOMACHINERY нет рампы частоты и "
+                "TURBO_PERF. Ось «граничное условие» — v6_massflow."),
+        },
+        "massflow_probe": {
+            "what": ("проверка знака и отклика Giles MASS_FLOW_OUTLET до перебора: рестарт конца прогона Б (core130 coarse "
+                     "139 121 узел, 1,0 частоты, 0,75 оценки, расход канала 0,693 кг/с), цель 0,80 кг/с — выше текущего, "
+                     "против собственного дрейфа расхода вниз (прогон В), MF_RELAX 0,1, MUSCL, 60 итераций, 4 процесса"),
+            "result": ("давление на выходе (PressureOut_1) 232,9 -> 207,6 кПа монотонно, расход через выход (MassFlowOut_1) "
+                       "0,703 -> 0,759 кг/с к цели без колебаний — знак верный (расход > 0 при прямом течении), отклик "
+                       "устойчив; расход на входе за 60 итераций не догнал (0,693 -> 0,636 — собственный дрейф точки Б), "
+                       "дисбаланс 19 %: условие сначала опустошает безлопаточный участок — переход дальше только по гейту"),
+            "files": "scratchpad сессии (не в ветке): probe_mf/mf080 — history, cfg, журнал",
         },
     }
 
@@ -430,7 +446,9 @@ def build() -> dict:
                       "title": s["title"], "mechanism": s["mechanism"], "hypothesis": s["hypothesis"],
                       "differs_from_smoke": s["differs_from_smoke"], "steps": [x["name"] for x in s["steps"]],
                       "turbulence": s.get("turb", "SST"), "scheme": s.get("set", {}).get("FLOW_SCHEME", "ROE"),
-                      "outlet": "Riemann STATIC_PRESSURE" if "riemann" in s.get("transforms", []) else "Giles STATIC_PRESSURE_1D",
+                      "outlet": ("Giles MASS_FLOW_OUTLET -> STATIC_PRESSURE_1D" if any(x.get("outlet") == "massflow"
+                                                                                       for x in s["steps"])
+                                 else "Giles STATIC_PRESSURE_1D"),
                       "backoff": bool(s.get("backoff")),
                       "expected_min_machine": er["machine_min_expected"],
                       "mandatory_min_kv3": round(er["wheels"]["kv3_stage1"]["expected"]["mandatory_s"] / 60, 1),

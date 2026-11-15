@@ -2669,5 +2669,15 @@
    }
   }
  ],
- "method_blend": "переход к ободу как у литого профиля: t(r) = max(t_проекта, t_литого) при r ≥ r_s, r_s — наибольший из сетки, при котором выполнены критерии; каждый шаг — два расчёта disk.py"
+ "method_blend": "переход к ободу как у литого профиля: t(r) = max(t_проекта, t_литого) при r ≥ r_s, r_s — наибольший из сетки, при котором выполнены критерии; каждый шаг — два расчёта disk.py",
+ "inputs": [
+  {
+   "file": "routes/gtu/frame3/frame3_fea_results.json",
+   "field": "parts.turb1"
+  },
+  {
+   "file": "routes/gtu/organic/structure/disk_topo_results.json",
+   "field": "turb1_A_*"
+  }
+ ]
 }

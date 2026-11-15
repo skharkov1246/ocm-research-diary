@@ -31,7 +31,7 @@ sys.path.insert(0, os.path.join(ROOT, "routes", "gtu", "funnel"))
 import make_model as MK  # noqa: E402  (камеры принтеров с источниками — одна точка правды воронки)
 import parts_model as PM  # noqa: E402  (счёт деталей воронки)
 
-OUTDIR = os.environ.get("ORGANIC_OUT", "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/organic")
+OUTDIR = os.environ.get("ORGANIC_OUT") or os.path.join(__import__("tempfile").gettempdir(), "organic_structure")
 RESULTS = os.path.join(HERE, "shell_results.json")
 F3P = os.path.join(ROOT, "routes", "gtu", "frame3", "frame3_point_results.json")
 FAM = os.path.join(ROOT, "routes", "gtu", "gtu_family_results.json")

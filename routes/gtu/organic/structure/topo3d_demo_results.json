@@ -41,5 +41,23 @@
   "Cmax_rel_final": 0.21101516815659413,
   "seconds": 134.4,
   "mass_kg": 441.1988510620822
+ },
+ "inputs": [
+  {
+   "file": "routes/gtu/frame3/frame3_fea_results.json",
+   "field": "parts.turb1 (геометрия, cooled_750)"
+  },
+  {
+   "file": "routes/gtu/frame3/frame3_point_results.json",
+   "field": "D2 (рама)"
+  },
+  {
+   "file": "routes/gtu/platform/fea/materials.json",
+   "field": "in713c"
+  }
+ ],
+ "software": {
+  "python": "3.13.18",
+  "solver": "pypardiso 0.4.7 (MKL PARDISO)"
  }
 }

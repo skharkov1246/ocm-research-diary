@@ -959,7 +959,7 @@
  "geometry": {
   "turb": {
    "eq": {
-    "full": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/organic/stl/turb1_profile_eq.stl",
+    "full": "$ORGANIC_OUT/stl/turb1_profile_eq.stl",
     "full_MB": 21.38,
     "full_faces": 427680,
     "repo": "routes/gtu/organic/structure/stl/turb1_profile_eq.stl",
@@ -983,7 +983,7 @@
     }
    },
    "lim": {
-    "full": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/organic/stl/turb1_profile_lim.stl",
+    "full": "$ORGANIC_OUT/stl/turb1_profile_lim.stl",
     "full_MB": 21.38,
     "full_faces": 427680,
     "repo": "routes/gtu/organic/structure/stl/turb1_profile_lim.stl",
@@ -1007,7 +1007,7 @@
     }
    },
    "baseline": {
-    "full": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/organic/stl/turb1_profile_baseline_frame3.stl",
+    "full": "$ORGANIC_OUT/stl/turb1_profile_baseline_frame3.stl",
     "full_MB": 21.38,
     "full_faces": 427680,
     "repo": "routes/gtu/organic/structure/stl/turb1_profile_baseline_frame3.stl",
@@ -1031,7 +1031,7 @@
     }
    },
    "comp2_profile_eq": {
-    "full": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/organic/stl/comp2_profile_eq.stl",
+    "full": "$ORGANIC_OUT/stl/comp2_profile_eq.stl",
     "full_MB": 21.53,
     "full_faces": 430560,
     "repo": "routes/gtu/organic/structure/stl/comp2_profile_eq.stl",
@@ -1057,7 +1057,7 @@
   },
   "comp2A": {
    "comp2_A_mass_eq": {
-    "full": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/organic/stl/comp2_A_mass_eq.stl",
+    "full": "$ORGANIC_OUT/stl/comp2_A_mass_eq.stl",
     "full_MB": 14.58,
     "full_faces": 291600,
     "repo": "routes/gtu/organic/structure/stl/comp2_A_mass_eq.stl",
@@ -1081,7 +1081,7 @@
     }
    },
    "comp2_A_mass_lim": {
-    "full": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/organic/stl/comp2_A_mass_lim.stl",
+    "full": "$ORGANIC_OUT/stl/comp2_A_mass_lim.stl",
     "full_MB": 17.62,
     "full_faces": 352440,
     "repo": "routes/gtu/organic/structure/stl/comp2_A_mass_lim.stl",
@@ -1105,7 +1105,7 @@
     }
    },
    "comp2_A_J_eq": {
-    "full": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/organic/stl/comp2_A_J_eq.stl",
+    "full": "$ORGANIC_OUT/stl/comp2_A_J_eq.stl",
     "full_MB": 17.51,
     "full_faces": 350280,
     "repo": "routes/gtu/organic/structure/stl/comp2_A_J_eq.stl",
@@ -1130,7 +1130,7 @@
    }
   },
   "comp2B": {
-   "full": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/organic/stl/comp2_B_mass_eq_gyroid_sector40.stl",
+   "full": "$ORGANIC_OUT/stl/comp2_B_mass_eq_gyroid_sector40.stl",
    "full_MB": 110.99,
    "full_faces": 2219774,
    "repo": "routes/gtu/organic/structure/stl/comp2_B_mass_eq_gyroid_sector40.stl",
@@ -1144,7 +1144,7 @@
    "sheet_thickness_note": "толщина листа при ρ* и L — lattice_results.json → sheet_thickness_mm"
   },
   "frame": {
-   "full": "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/organic/stl/shell_frame_kv3.stl",
+   "full": "$ORGANIC_OUT/stl/shell_frame_kv3.stl",
    "full_MB": 0.22,
    "full_faces": 4476,
    "repo": "routes/gtu/organic/structure/stl/shell_frame_kv3.stl",

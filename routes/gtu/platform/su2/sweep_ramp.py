@@ -12,7 +12,7 @@
   run    — на машине: одна стратегия (plan_sweep_*.json) для одного колеса -> sweep_summary.json и файлы шагов в --out.
   merge  — сводка sweep_summary.json всех задач -> один JSON (стратегия x колесо), ранжирование стратегий.
   rc     — тонкая обёртка run_case.py: производный шаблон (история с CFL, линейным решателем и макс. невязками;
-           вход и выход Riemann вместо Giles); вызывается из run, вручную не нужна.
+           выход Giles MASS_FLOW_OUTLET вместо STATIC_PRESSURE_1D); вызывается из run, вручную не нужна.
 
 Давление на выходе. База — как в char_points.py: p_base = доля x оценка (char_points.p_out_estimate, у двустороннего
 колеса — по расходу стороны). Промежуточные состояния идут по линии дросселя p(w) = p_нач + w^2 (доля x оценка -
@@ -72,13 +72,12 @@ HIST_ADD = ["CFL_NUMBER", "LINSOL", "MAX_RES"]   # группы истории S
 # канала через выход, > 0 при прямом течении (как MassFlowOut_1). Значение принято здесь; знак и отклик проверены
 # прогоном с рестарта (jobs_aws_su2_kv3_sweep.json, diagnosis.massflow_probe).
 MF_RELAX = 0.1
-RIEMANN_LINE = ("MARKER_RIEMANN= (inlet, TOTAL_CONDITIONS_PT, ${P01}, ${T01}, 0.0, 0.0, 1.0, "
-                "outlet, STATIC_PRESSURE, ${P_OUT}, 0.0, 0.0, 0.0, 0.0)")
 
 
 def derive_template(text: str, transforms: list) -> tuple:
-    """Шаблон run_case.py с правками по списку. hist — мягкая (строки нет — пропуск), riemann — жёсткая (строка
-    MARKER_GILES должна встретиться ровно один раз). Возвращает (текст, применённые, пропущенные)."""
+    """Шаблон run_case.py с правками по списку. hist — мягкая (строки нет — пропуск); massflow — жёсткая (выход Giles
+    STATIC_PRESSURE_1D -> MASS_FLOW_OUTLET, значение — то же поле ${P_OUT}: расход канала, кг/с). Возвращает
+    (текст, применённые, пропущенные)."""
     applied, skipped = [], []
     for t in transforms:
         if t == "hist":
@@ -97,13 +96,6 @@ def derive_template(text: str, transforms: list) -> tuple:
             if len(m) != 1:
                 raise SystemExit(f"правка massflow: выход Giles STATIC_PRESSURE_1D найден {len(m)} раз — шаблон изменился")
             text = text[:m[0].start()] + f"outlet, MASS_FLOW_OUTLET, ${{P_OUT}}, {MF_RELAX:g}," + text[m[0].end():]
-            applied.append(t)
-        elif t == "riemann":
-            pat = re.compile(r"^MARKER_GILES=.*$", re.M)
-            m = list(pat.finditer(text))
-            if len(m) != 1:
-                raise SystemExit(f"правка riemann: строк MARKER_GILES в шаблоне {len(m)}, нужна одна — шаблон изменился")
-            text = text[:m[0].start()] + RIEMANN_LINE + text[m[0].end():]
             applied.append(t)
         else:
             raise SystemExit(f"неизвестная правка шаблона: {t}")
@@ -144,7 +136,7 @@ def fs_pressure(d1: dict, init_mach: float | None = None, gamma: float = 1.4) ->
 
 
 STEP_KEYS = {"name", "kind", "plan", "frac", "load", "ramp", "pramp", "iter", "muscl", "muscl_ramp", "cfl",
-             "flow_scheme", "limiter", "gate", "hold", "note"}
+             "flow_scheme", "limiter", "gate", "hold", "note", "outlet", "m_frac"}
 
 
 def flow_scheme_of(strat: dict, st: dict) -> str:
@@ -153,15 +145,19 @@ def flow_scheme_of(strat: dict, st: dict) -> str:
 
 def validate_strategy(strat: dict) -> None:
     """Проверка стратегии до запуска (без SU2): поля шагов, гейт успевает увидеть окно после рамп, JST без MUSCL
-    (SU2 v8.6.0: «Centered schemes do not use MUSCL reconstruction», CConfig.cpp), Riemann без рампы давления
-    (SU2: «Outlet pressure ramp only implemented for NRBC», CFluidIteration.cpp)."""
+    (SU2 v8.6.0: «Centered schemes do not use MUSCL reconstruction», CConfig.cpp); шаг с расходом на выходе — без
+    рампы давления (run_case.py включает рампу только при изменении значения больше чем на 1 — у расхода в кг/с её не
+    будет, а начало рампы — давление), после него шаг с давлением — только с load "measured", база — по давлению."""
     for k in ("id", "title", "steps"):
         if k not in strat:
             raise SystemExit(f"стратегия: нет поля {k}")
     if not strat["steps"]:
         raise SystemExit("стратегия: пустой список шагов")
     names = set()
-    riemann = "riemann" in strat.get("transforms", [])
+    if "riemann" in strat.get("transforms", []):
+        raise SystemExit("правки riemann нет: SU2 v8.6.0 с MARKER_RIEMANN и MARKER_TURBOMACHINERY падает (Segmentation "
+                         "fault до первой итерации, миниатюра 15.11.2026)")
+    prev_outlet = "pressure"
     for st in strat["steps"]:
         unknown = set(st) - STEP_KEYS
         if unknown:
@@ -190,10 +186,26 @@ def validate_strategy(strat: dict) -> None:
             raise SystemExit(f"шаг {nm}: muscl_ramp без muscl")
         if flow_scheme_of(strat, st) == "JST" and st.get("muscl"):
             raise SystemExit(f"шаг {nm}: JST с MUSCL_FLOW= YES SU2 v8.6.0 не запускает — muscl: false")
-        if riemann and int(st.get("pramp", 0)) > 0:
-            raise SystemExit(f"шаг {nm}: с выходом Riemann рампы давления нет — pramp 0, давление ступенью")
-    if strat["steps"][-1].get("gate", "intermediate") != "final" and strat["steps"][-1].get("kind") != "plan":
+        outlet = st.get("outlet", "pressure")
+        if outlet not in ("pressure", "massflow"):
+            raise SystemExit(f"шаг {nm}: outlet — pressure или massflow")
+        if outlet == "massflow":
+            mf = st.get("m_frac")
+            if not isinstance(mf, (int, float)) or not 0.05 <= mf <= 1.5 or int(st.get("pramp", 0)) or st.get("load") is not None:
+                raise SystemExit(f"шаг {nm}: расход на выходе — m_frac 0,05…1,5 доли одномерного расхода канала, pramp 0, без load")
+        else:
+            if st.get("load") == "measured" and prev_outlet != "massflow":
+                raise SystemExit(f"шаг {nm}: load measured — только сразу после шага с расходом на выходе")
+            if prev_outlet == "massflow" and st.get("load") != "measured":
+                raise SystemExit(f"шаг {nm}: после шага с расходом на выходе давление берётся измеренным (load measured)")
+            if isinstance(st.get("load"), str) and st["load"] != "measured":
+                raise SystemExit(f"шаг {nm}: load — число, null или measured")
+        prev_outlet = outlet
+    last = strat["steps"][-1]
+    if last.get("gate", "intermediate") != "final" and last.get("kind") != "plan":
         raise SystemExit("последний шаг стратегии — с gate final (база)")
+    if last.get("outlet", "pressure") != "pressure" or not isinstance(last.get("load"), (int, float)):
+        raise SystemExit("база — по давлению на выходе: последний шаг с числовым load")
 
 
 def mini_step(st: dict, n: int) -> dict:
@@ -254,6 +266,8 @@ def backoff_steps(st: dict, state: dict, strat_set: dict) -> list:
         return [finish(_stretch(orig, 2), f"{orig['name']}_r1", 1)]
     f0, f1 = float(state["frac"]), float(orig["frac"])
     l1, l0 = orig.get("load"), state.get("load")
+    if isinstance(l1, str):
+        l1 = None
     same_load = l1 is None or (l0 is not None and abs(l0 - l1) < 1e-9)
     if abs(f1 - f0) < 1e-9 and same_load:
         return []   # делить нечего (шаг без смены частоты и нагрузки — например, переход ко второму порядку)
@@ -324,6 +338,13 @@ def gate_metrics(d: dict, gamma: float, window: int, imb_rows: int, pi_eta_windo
                      ("Max CFL", "max_cfl"), ("Linear_Solver_Iterations", "linsol_iter"), ("LinSolRes", "linsol_res")):
         if d.get(col):
             out[key] = d[col][-1]
+    pm = d.get("PressureOut_1") or d.get("Avg_Press(outlet)")
+    if pm:
+        out["p_out_meas"] = pm[-1]
+    if d.get("MassFlowOut_1"):
+        out["m_out_meas"] = d["MassFlowOut_1"][-1]
+    elif d.get("Avg_Massflow(outlet)"):
+        out["m_out_meas"] = -d["Avg_Massflow(outlet)"][-1]
     last = [v[-1] for v in d.values() if v]
     out["nan_in_last_row"] = any(isinstance(v, float) and math.isnan(v) for v in last)
     return out
@@ -436,7 +457,7 @@ def _forward(signum, frame):  # noqa: ARG001
 
 def step_argv(ctx: dict, strat: dict, st: dict, plan_ref: str, p_out: float, time_limit: float, out_dir: str,
               state: dict, iter_scale: float = 1.0) -> list:
-    tr = ",".join(strat.get("transforms", []))
+    tr = ",".join(list(strat.get("transforms", [])) + (["massflow"] if st.get("outlet") == "massflow" else []))
     cmd = [sys.executable, "-u", os.path.abspath(__file__), "rc", "--transforms", tr, "--tpl-dir",
            os.path.join(ctx["work"], "_tpl"), "--",
            "--case", ctx["case"], "--level", ctx["level"], "--geom-out", ctx["geom_out"], "--plan", plan_ref,
@@ -499,7 +520,8 @@ def run_strategy(strat: dict, ctx: dict, runner=None, clock=time.monotonic) -> d
     mini = ctx.get("mini_iter")
     enforce = not mini
     est, fs_p, pr_1d = ctx["est"], ctx["fs_p"], ctx["pr_1d"]
-    state = {"frac": 0.0, "p": fs_p, "load": None, "restart": None}
+    state = {"frac": 0.0, "p": fs_p, "load": None, "restart": None, "outlet": "pressure"}
+    prev_met = {}   # метрики последней пройденной порции: измеренные давление и расход на выходе для смены условия
     summ = {"steps": [], "verdict": None, "verdict_step": None, "verdict_detail": None, "points_full_speed": [],
             "divergences": [], "rho_first": None, "backoffs": 0, "iters_total": 0, "time_to_base_s": None,
             "iters_to_base": None}
@@ -544,22 +566,39 @@ def run_strategy(strat: dict, ctx: dict, runner=None, clock=time.monotonic) -> d
         st = queue[idx]
         kind = st.get("kind", "stage")
         gate_kind = st.get("gate", "final" if kind == "plan" else "intermediate")
+        outlet = st.get("outlet", "pressure")
         if kind == "plan":
             st["frac"], st["_p_out"] = 1.0, st["load"] * est
             st.setdefault("hold", {}).setdefault("muscl", True)
         else:
-            st["_p_out"] = (state["p"] if st.get("load") is None
-                            else throttle_p(float(st["frac"]), float(st["load"]), est, fs_p))
+            if outlet != state.get("outlet", "pressure"):
+                # смена условия на выходе: начало — измеренное значение новой величины (без скачка у давления)
+                meas = prev_met.get("m_out_meas" if outlet == "massflow" else "p_out_meas")
+                if outlet == "massflow" and not _fin(meas):
+                    # свежий старт или нет замера: у расхода рампы нет (run_case.py), начало рампы не используется
+                    meas = float(st["m_frac"]) * ctx["m_pass_1d"] * float(st["frac"])
+                if not _fin(meas):
+                    summ["verdict"], summ["verdict_step"] = "error", st["name"]
+                    summ["verdict_detail"] = f"нет измеренного {'расхода' if outlet == 'massflow' else 'давления'} на выходе для смены условия"
+                    break
+                state = dict(state, p=float(meas), outlet=outlet)
+            if outlet == "massflow":
+                st["_p_out"] = float(st["m_frac"]) * ctx["m_pass_1d"] * float(st["frac"])
+            elif st.get("load") is None or st.get("load") == "measured":
+                st["_p_out"] = state["p"]
+            else:
+                st["_p_out"] = throttle_p(float(st["frac"]), float(st["load"]), est, fs_p)
         hold = dict({"iter": 300, "max": 3}, **st.get("hold", {}))
         st["hold"] = hold
-        buf, chunk, decided, last_met = None, 0, None, {}
+        buf, chunk, decided, last_met, last_gate = None, 0, None, {}, {}
         while True:
             if _CUR["signal"]:
                 decided = ("terminated", "сигнал останова")
                 break
             left = ctx["deadline"] - clock()
             if left < MIN_STEP_S:
-                decided = ("timeout", f"до срока {left:.0f} с — порция не начата")
+                decided = (("established", "срок на базе") if gate_kind == "final" and last_gate.get("established")
+                           else ("timeout", f"до срока {left:.0f} с — порция не начата"))
                 break
             st["_dir"] = f"{idx:02d}_{st['name']}" + (f"_h{chunk}" if chunk else "")
             res = run(st, state, chunk)
@@ -579,8 +618,10 @@ def run_strategy(strat: dict, ctx: dict, runner=None, clock=time.monotonic) -> d
             met = gate_metrics(buf or {}, 1.4, g["window"], g["imb_rows"], GATES["final"]["pi_eta_window"])
             last_met = met
             gate = gate_check(met, gate_kind, summ["rho_first"], pr_1d)
+            last_gate = gate
             log = res.get("log") or {}
             rec = {"step": st["name"], "dir": st["_dir"], "chunk": chunk, "kind": kind, "attempt": st.get("_attempt", 0),
+                   "outlet": outlet, "m_frac": st.get("m_frac"),
                    "frac": st["frac"], "frac_from": state["frac"], "p_out": st["_p_out"], "p_from": state["p"],
                    "load": st.get("load"), "ramp": int(st.get("ramp", 0)) if chunk == 0 else 0,
                    "pramp": int(st.get("pramp", 0)) if chunk == 0 else 0,
@@ -610,11 +651,21 @@ def run_strategy(strat: dict, ctx: dict, runner=None, clock=time.monotonic) -> d
                                f"{status} на шаге {st['name']}")
             else:
                 # порция дошла до конца: состояние зафиксировано, её рестарт — начало следующей
+                if outlet == "massflow":
+                    new_load = None
+                elif st.get("load") == "measured":
+                    new_load = st["_p_out"] / est
+                elif st.get("load") is None:
+                    new_load = state.get("load")
+                else:
+                    new_load = float(st["load"])
                 state = {"frac": float(st["frac"]), "p": st["_p_out"], "restart": res.get("restart"),
-                         "load": st.get("load") if st.get("load") is not None else state.get("load")}
+                         "load": new_load, "outlet": outlet}
+                prev_met = met
                 if abs(state["frac"] - 1.0) < 1e-9 and gate_kind != "none" and gate.get("pass"):
                     summ["points_full_speed"].append(
-                        {"step": st["name"], "chunk": chunk, "p_out": state["p"], "load": state["load"],
+                        {"step": st["name"], "chunk": chunk, "outlet": outlet, "p_out": met.get("p_out_meas"),
+                         "bc_value": state["p"], "load": state["load"],
                          "muscl": rec["muscl"], **{k: met.get(k) for k in ("m_in_last", "imbalance_mean", "PR_tt",
                                                                            "eta_tt", "PRTT_su2", "TotTotEff_su2",
                                                                            "rms_rho_last")}})
@@ -704,7 +755,8 @@ def cmd_run(a) -> int:
     ctx = {"case": a.case, "level": a.level, "geom_out": os.path.abspath(a.geom_out), "np": a.np, "mpi_args": a.mpi_args,
            "shroud": a.shroud, "vaneless": a.vaneless, "su2_src": a.su2_src, "work": os.path.abspath(a.work),
            "deadline": t0 + budget, "est": est["p_out_estimate"], "fs_p": fs_p, "pr_1d": float(d1["PR"]),
-           "omega_nom": float(mj["su2"]["rotation_rate_rad_s"][2]), "mini_iter": a.mini_iter}
+           "omega_nom": float(mj["su2"]["rotation_rate_rad_s"][2]), "mini_iter": a.mini_iter,
+           "m_pass_1d": est["m_for_estimate"] / round(360.0 / float(mj["su2"]["periodic"]["angle_deg"]))}
     head = {"created_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "label": a.label or a.case,
             "case": a.case, "level": a.level, "job": os.environ.get("GTU_JOB"), "run_id": os.environ.get("GTU_RUN_ID"),
             "itype": os.environ.get("GTU_ITYPE"), "az": os.environ.get("GTU_AZ_MACHINE") or os.environ.get("GTU_AZ"),
@@ -715,6 +767,7 @@ def cmd_run(a) -> int:
             "d1_reference": {k: d1.get(k) for k in ("m", "m_side", "PR", "rpm", "D2", "U2", "b2", "T01", "p01",
                                                     "eta_comp_stage")},
             "estimate": est, "fs_p": fs_p, "p_base_target": None, "np": a.np, "mini_iter": a.mini_iter,
+            "m_passage_1d": ctx["m_pass_1d"],
             "budget": {"time_s": round(budget, 1), "time_limit_s": a.time_limit, "job_max_min": a.job_max_min,
                        "uptime_at_start_s": round(uptime, 1), "reserve_s": a.reserve_s},
             "gates": GATES, "physical_bounds": PHYS, "ramp_freq": RAMP_FREQ,

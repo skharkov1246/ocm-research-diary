@@ -31,7 +31,7 @@ import lattice as LT  # noqa: E402
 
 ROOT = os.path.normpath(os.path.join(HERE, "..", "..", "..", ".."))
 F3 = os.path.join(ROOT, "routes", "gtu", "frame3", "frame3_fea_results.json")
-OUTDIR = os.environ.get("ORGANIC_OUT", "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/organic")
+OUTDIR = os.environ.get("ORGANIC_OUT") or os.path.join(__import__("tempfile").gettempdir(), "organic_structure")
 RESULTS = os.path.join(HERE, "disk_topo_results.json")
 RPM0 = 14950.0
 K_AM = 0.9          # оценка: печать + ГИП против поковки (funnel/make_model.u_limit_comp: 0,9 × 620 м/с)

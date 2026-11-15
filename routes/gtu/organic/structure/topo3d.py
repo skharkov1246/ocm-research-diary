@@ -410,7 +410,11 @@ def main():
         r1 = run_disk(6e-3, 40, a.out, log=log)
         r2 = run_frame(40, 40, a.out, log=log)
         res = dict(title="topo3d: демонстрация на грубой сетке (проверка кода перед AWS)", date="2026-11-14",
-                   method="воксельный SIMP/RAMP, MMA, PARDISO; см. docstring", disk=r1, frame=r2)
+                   method="воксельный SIMP/RAMP, MMA, PARDISO; см. docstring", disk=r1, frame=r2,
+                   software=dict(python=sys.version.split()[0], numpy=np.__version__),
+                   inputs=[dict(file="routes/gtu/frame3/frame3_fea_results.json", field="parts.turb1"),
+                           dict(file="routes/gtu/frame3/frame3_point_results.json", field="D2"),
+                           dict(file="routes/gtu/platform/fea/materials.json", field="in713c")])
         with open(os.path.join(HERE, "topo3d_demo_results.json"), "w", encoding="utf-8") as f:
             json.dump(res, f, ensure_ascii=False, indent=1)
         return

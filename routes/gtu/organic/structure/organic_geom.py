@@ -13,7 +13,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-OUTDIR = os.environ.get("ORGANIC_OUT", "/tmp/claude-0/-home-user/a62745e4-d2fd-56e0-974f-12746b1a2ae0/scratchpad/organic")
+OUTDIR = os.environ.get("ORGANIC_OUT") or os.path.join(__import__("tempfile").gettempdir(), "organic_structure")
 
 
 def load(name):

@@ -171,7 +171,10 @@ def run_comp2(maxiter=70):
                method="задняя поверхность — PCHIP по узлам RC_KNOTS, тракт и обод — как у кованого профиля frame3; масса лопаток — "
                       "в плотности столбца (как frame3); цель — масса; ограничения — наибольшее σ/σ0,2 при 100 и 120 % не выше "
                       "кованого (k = 1); COBYLA; проверка лучшего на сетке 160×24",
-               software=dict(ccx=DT.TA.DK.ccx_version()), knots_m=list(RC_KNOTS), base=dict(c100=b1, c120=b2), n_eval=len(hist),
+               software=dict(ccx=DT.TA.DK.ccx_version(), python=sys.version.split()[0]), knots_m=list(RC_KNOTS),
+               inputs=[dict(file="routes/gtu/frame3/frame3_fea_results.json", field="parts.comp2.variants.solid (profile, T_C), blade_fill"),
+                       dict(file="routes/gtu/platform/fea/materials.json", field="ti64")],
+               base=dict(c100=b1, c120=b2), n_eval=len(hist),
                cobyla=dict(success=bool(r.success), message=str(r.message)), best=best, history=hist)
     if best:
         a = comp2_case("pc2_fine", np.asarray(best["x"]), DT.RPM0, mesh=(160, 24))
