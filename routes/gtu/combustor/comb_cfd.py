@@ -447,7 +447,8 @@ def build_liner_case(e, cell_out, out, level="coarse", of="2512", iters=None):
     m_core = cell_out["m_dot_can"]
     rho_hot = rho_of(p3, cell_out["T"], cell_out["Y"])
     A_tot = math.pi * (r_hi ** 2 - r_lo ** 2)
-    A_film = min(0.3 * A_tot, m_film_in / (rho3 * max(cell_out["Uz"], 5.0)))
+    u_core_est = m_core / (rho_hot * A_tot)
+    A_film = min(0.3 * A_tot, m_film_in / (rho3 * max(u_core_est, 5.0)))   # слой охлаждения со скоростью ядра
     t_film = A_film / (2 * math.pi * r_hi) / len(walls)
     # щели: разбавление - одна на стенку на 0,15·Ld; охлаждение - ряды через ~25 мм ниже по течению
     z_dil = 0.15 * Ld

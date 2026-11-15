@@ -141,7 +141,8 @@ def entry(i, n, seed, kv, bc, K, why, score, l0):
     der = {k: d[k] for k in keep if k in d}
     der["zones"] = d["zones"]
     return dict(idx=i, why=why, l0_score=score, l0=l0, concept=c, derived=der, loads=loads,
-                n_can=CS.N_CAN[c["chamber"]], far_st=bc["far_st_CH4"], D2_m=bc["D2_m"])
+                n_can=CS.N_CAN[c["chamber"]], far_st=bc["far_st_CH4"], D2_m=bc["D2_m"],
+                lhv={k: bc["LHV_J_kg"][k] for k in ("CH4", "CO", "H2")})
 
 
 def main(argv=None):

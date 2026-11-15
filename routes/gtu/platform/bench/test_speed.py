@@ -44,6 +44,19 @@ def test_history_first_time_column_and_median_of_second_half(tmp_path):
     assert st["sum_s"] == pytest.approx(16.2)
 
 
+def test_stage_without_history_is_not_measured(tmp_path):
+    # срок вышел до стадии MUSCL: истории m2 нет — конфигурация помечается неизмеренной, без исключения
+    d = tmp_path / "r0"
+    d.mkdir()
+    _history(d / "history_w1.csv", [2.0] * 4)
+    json.dump({"inputs": {"mesh_header": {"NPOIN": 1000}}, "stages": [{"name": "w1", "status": "timeout", "seconds": 9.0}]},
+              open(d / "run_summary.json", "w"))
+    r = S.summarize_run(str(d))
+    assert r["m2"]["rows"] == 0 and r["w1"]["rows"] == 4
+    agg = S.aggregate("coarse", 2, 1, [r], 1000, 0.1)
+    assert agg["muscl"] == {"measured": False} and agg["first_order"]["measured"]
+
+
 def test_summarize_and_aggregate(tmp_path):
     runs = []
     for i, base in enumerate((0.50, 0.52)):

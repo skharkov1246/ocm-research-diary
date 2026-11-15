@@ -80,6 +80,8 @@ def parse_configs(items: list[str], levels: list[str], nproc: int) -> dict:
 def read_history_times(path: str) -> list[float]:
     """Время каждой итерации: первая колонка «Time(sec)» истории SU2 (вторая с тем же именем — среднее)."""
     import csv
+    if not os.path.isfile(path):
+        return []  # стадия не началась (срок вышел раньше) — замера нет, это не ошибка
     with open(path, encoding="utf-8", errors="replace") as f:
         rows = [r for r in csv.reader(f) if r]
     if not rows:
@@ -327,9 +329,14 @@ def cmd_run(a) -> int:
                 continue
             limit = int(min(a.config_limit_s, remain))
             print(f"[speed_su2] {level} {np_}x{k}: срок {limit} с", flush=True)
-            runs, rss = run_config(a, level, np_, k, geom, plan_path, limit)
-            nodes = next((r["nodes"] for r in runs if r.get("nodes")), minfo.get("nodes"))
-            agg = aggregate(level, np_, k, runs, nodes, rss)
+            try:
+                runs, rss = run_config(a, level, np_, k, geom, plan_path, limit)
+                nodes = next((r["nodes"] for r in runs if r.get("nodes")), minfo.get("nodes"))
+                agg = aggregate(level, np_, k, runs, nodes, rss)
+            except Exception as e:  # noqa: BLE001 — сбой одной конфигурации не теряет остальные замеры
+                doc["skipped"].append(dict(level=level, np=np_, k=k, reason="error", error=f"{type(e).__name__}: {e}"))
+                save()
+                continue
             doc["configs"].append(agg)
             mu = agg["muscl"]
             print(f"[speed_su2] {level} {np_}x{k}: MUSCL {mu.get('s_iter')} с/итер, C {mu.get('C_us_core_node_iter')} мкс, "

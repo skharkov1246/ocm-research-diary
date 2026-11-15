@@ -304,8 +304,14 @@ def main():
         z = d["z"]
         fa = R.pw(np.array(z[2:5]) * 1e3)
         fc = R.pw(z[5:8])
-        st = graded_block_stl(out / "tpms_graded_demo.stl", "gyroid", fa, fc, R.PRINT["t_w"] * 1e3, (60.0, 20.0, 20.0), 0.45)
-        st["note"] = "образец 60 × 20 × 20 мм: профиль a(x), c(x) оптимума ε = 0,90 сжат по длине в 60 мм; мм"
+        from tpms_geom import decimate_stl
+        big_dir = Path(a.big) if a.big else out
+        full = big_dir / "tpms_graded_demo_full.stl"
+        st0 = graded_block_stl(full, "gyroid", fa, fc, R.PRINT["t_w"] * 1e3, (60.0, 20.0, 20.0), 0.12)
+        st = decimate_stl(full, out / "tpms_graded_demo.stl")
+        st["full"] = dict(path=str(full), triangles=st0["triangles"], bytes=st0["bytes"])
+        st["note"] = ("образец 60 × 20 × 20 мм: профиль a(x), c(x) оптимума ε = 0,90 сжат по длине в 60 мм; мм; "
+                      "воксель 0,12 мм (стенка 0,35 мм), в репозитории — упрощённая копия ≤ 5 МБ")
         st["path"] = str(Path(st["path"]).relative_to(ROOT)) if str(st["path"]).startswith(str(ROOT)) else st["path"]
         stl["demo"] = st
         render_png(out / "tpms_graded_demo.stl", out / "tpms_graded_demo.png",
@@ -313,8 +319,8 @@ def main():
         if a.big:
             big = Path(a.big) / "tpms_graded_module_section.stl"
             L = d["L"] * 1e3
-            stb = graded_block_stl(big, "gyroid", fa, fc, R.PRINT["t_w"] * 1e3, (L, 40.0, 40.0), 0.25)
-            stb["note"] = f"сечение 40 × 40 мм на всю длину сердцевины {L:.0f} мм — в scratchpad (большой файл)"
+            stb = graded_block_stl(big, "gyroid", fa, fc, R.PRINT["t_w"] * 1e3, (L, 20.0, 20.0), 0.2)
+            stb["note"] = f"сечение 20 × 20 мм на всю длину сердцевины {L:.0f} мм — в scratchpad (большой файл)"
             stl["full_length_section"] = stb
     res["stl"] = stl
     res["runtime_s"] = round(time.time() - t0, 1)

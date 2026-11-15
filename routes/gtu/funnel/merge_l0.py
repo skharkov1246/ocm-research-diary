@@ -492,7 +492,8 @@ CSV_BRANCH_MAX_MB = 5.0      # CSV крупнее - в ветку не клад�
 
 
 def run_merge(found, kv, n, shards, out_dir, sfx="", weights=None, seed=L0.SEED, k=3, top=40, use_pareto=True, k_near=1,
-              near_max=0.25, target=None, csv_gz=False, detail_top=TOP_LIST, cycle_k=6, extra_results=None, csv_dir=None):
+              near_max=0.25, target=None, csv_gz=False, detail_top=TOP_LIST, cycle_k=6, extra_results=None, csv_dir=None,
+              closure_proof=True):
     t0 = time.time()
     cols, rows, ref, checks, calls = merge_parts(found, kv, n, shards, seed)
     w = L0.check_weights(dict(weights or L0.WEIGHTS))
@@ -613,6 +614,11 @@ def run_merge(found, kv, n, shards, out_dir, sfx="", weights=None, seed=L0.SEED,
                                      "(самый тяжёлый модуль, 0,30 балла монтажа) и подъём plugplay_model (модуль против массы исходного) - "
                                      "заниженная абсолютная масса завышает эти два балла одинаково для всех концепций; сравнение концепций "
                                      "между собой - по относительной массе (исправление скептика физики: прежде было написано «в баллы не входит»)")
+    zero = [a for a, v in res["summary"]["by_arch"].items() if not v["feasible"]]
+    if zero and closure_proof:
+        res["closure_proof"] = dict(note="архетипы без допустимых в выборке: перебор всех сочетаний осей цикла их шаблона (funnel_space."
+                                         "closure_table) - сколько замыкают точку и чего не хватает лучшему из незамыкающих",
+                                    **FS.closure_table(kv, zero))
     if extra_results:
         res.update(extra_results)
     res["timing"]["merge_s"] = round(time.time() - t0, 2)

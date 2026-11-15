@@ -104,3 +104,16 @@ def write_stl(path, v, f, solid="tpms"):
         fh.write(np.uint32(len(f)).tobytes())
         fh.write(rec.tobytes())
     return dict(path=str(path), triangles=int(len(f)), bytes=84 + 50 * len(f))
+
+
+def decimate_stl(src, dst, max_bytes=4.8e6):
+    """уменьшенная копия STL для репозитория (≤ max_bytes): квадратичное упрощение (trimesh + fast-simplification);
+    полный файл остаётся в scratchpad"""
+    import trimesh
+    m = trimesh.load(src)
+    target = int(max_bytes / 50)
+    if len(m.faces) > target:
+        m = m.simplify_quadric_decimation(face_count=target)
+    m.export(dst)
+    return dict(path=str(dst), triangles=int(len(m.faces)), bytes=int(84 + 50 * len(m.faces)),
+                source_triangles=int(len(trimesh.load(src).faces)))

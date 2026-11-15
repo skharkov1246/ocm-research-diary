@@ -21,12 +21,14 @@ REL = "routes/gtu/funnel"
 
 PIP = ["cantera==3.2.0", "scipy==1.18.1", "numpy==2.5.3"]      # закреплены: скремблирование Соболя зависит от версии scipy
 PROFILES = {
-    "debug": dict(file="jobs_l0_debug.json", runs=[("KV-3", 2000)], shards=10, machines=2, max_min=25,
+    "debug": dict(file="jobs_l0_debug.json", runs=[("KV-3", 2000), ("KV-1", 2000), ("KV-6", 2000)], shards=10, machines=2, max_min=30,
                   merge=dict(top=40, target=150, k_near=1, near_max=0.25),
-                  why="отладочный прогон: путь части -> машины -> S3 -> слияние на настоящем раннере; отбор около 150"),
-    "full": dict(file="jobs_l0.json", runs=[("KV-3", 200000), ("KV-1", 50000), ("KV-6", 50000)], shards=30, machines=3, max_min=30,
+                  why="отладочный прогон выборки v2 на всех трёх точках: доли допустимых, ниши, архетипы и время на концепцию при "
+                      "64 процессах (кэш замыканий тёплый) - до полного; отбор около 150 на точку"),
+    "full": dict(file="jobs_l0.json", runs=[("KV-3", 200000), ("KV-1", 50000), ("KV-6", 50000)], shards=30, machines=6, max_min=None,
                  merge=dict(top=1000, target=4000, k_near=1, near_max=0.25),
-                 why="полный уровень 0 (приоритет владельца 14.11.2026: KV-3 200 000, KV-1 и KV-6 по 50 000; отбор 3000-5000)"),
+                 why="полный уровень 0 (приоритет владельца 14.11.2026: KV-3 200 000, KV-1 и KV-6 по 50 000; отбор 3000-5000); "
+                     "6 машин - одна волна под квоту 384 vCPU"),
 }
 PRICE = dict(expected=0.706, alt=0.748, upper=1.4206,
              basis="ожидаемая: спот c7a.16xlarge us-east-1c 0,706 долл./ч, us-east-1b 0,748 (замер сессии с ключами 22:08 14.11.2026, "
@@ -58,6 +60,10 @@ def build(profile, shards=None, machines=None, branch="claude/lucid-allen-yvps5d
     if not 1 <= M <= min(6, S):
         raise ValueError(f"машин {M}: от 1 до min(6, частей)")
     jobs = []
+    if P["max_min"] is None:                     # сторож: подготовка + счёт с запасом ×2 + 10 мин, не меньше 30
+        t, _, _ = measured()
+        comp = sum(n for _, n in P["runs"]) * t * SAFETY / M / VCPU / 60
+        P["max_min"] = max(30, int(math.ceil(SETUP_MIN + 2 * comp + 10)))
     for j in range(M):
         mine = [k for k in range(S) if k % M == j]
         lines = [f"python {REL}/funnel_l0.py --kv {kv} --n {n} --shards {S} --shard {','.join(map(str, mine))} "
@@ -69,7 +75,8 @@ def build(profile, shards=None, machines=None, branch="claude/lucid-allen-yvps5d
         m = P["merge"]
         merge.append(f"python3 {REL}/merge_l0.py --kv {kv} --n {n} --shards {S} --in routes/gtu/platform/aws/runs/<run_id> "
                      f"--out-dir {REL}/l0_aws_{profile} --suffix _{kv}_n{n} --top {m['top']} --target {m['target']} "
-                     f"--k-near {m['k_near']} --near-max {m['near_max']}" + (" --csv-gz" if n > 20000 else ""))
+                     f"--k-near {m['k_near']} --near-max {m['near_max']}" +
+                     (f" --csv-gz --csv-dir routes/gtu/platform/aws/runs/<run_id>/merged" if n > 20000 else ""))
     return P, S, M, jobs, merge
 
 
@@ -128,7 +135,9 @@ def main(argv=None):
                    defaults=dict(instance_type="c7a.16xlarge", fallback_types=["c7i.16xlarge"], image="al2023", disk_gb=EBS_GB,
                                  python="3.12", pip=PIP),
                    jobs=jobs,
-                   merge=dict(where="сессия с ключами после run: результаты уже в routes/gtu/platform/aws/runs/<run_id>/<задача>/ "
+                   merge=dict(csv_rule="CSV крупнее 5 МБ (полный прогон) - в --csv-dir внутри runs/ (в .gitignore) и в S3; в ветку - "
+                                       "только funnel_l0_results_*.json и funnel_l0_select_*.json",
+                              where="сессия с ключами после run: результаты уже в routes/gtu/platform/aws/runs/<run_id>/<задача>/ "
                                     "(или collect --run-id <run_id> --job <задача> по каждой); Python с теми же версиями пакетов "
                                     "(pip install " + " ".join(PIP) + ") - иначе отпечаток выборки не совпадёт",
                               commands=merge, profile_why=P["why"],

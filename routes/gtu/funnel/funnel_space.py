@@ -70,7 +70,7 @@ CAT = {
     "arch": None,  # заполняется ключами ARCH
     "rotors": [1, 2],
     "comp": ["1Ц", "2Ц", "Д", "ОЦ"],
-    "n_ax": [1, 2],
+    "n_ax": [1, 2, 3],
     "inlet": ["одно", "двух"],
     "turb": ["Р", "О"],
     "nt": [1, 2, 3],
@@ -142,7 +142,7 @@ SPLIT_RANGE = {"2Ц": (0.35, 0.65), "ОЦ": (0.12, 0.60)}
 N_PI_GRID, N_T41_GRID, N_SPLIT_GRID = 10, 6, 21
 REPAIR_AXES = ("m_tw", "cool", "comp", "turb", "recup", "rotors", "rotor_join")   # считаются: не больше REPAIR_MAX_AXES изменений
 REPAIR_FREE = ("mat_tw", "mat_cw")                                                # материалы перебираются внутри каждой замены
-_DEF = dict(rotors=[1, 2], comp=["1Ц", "2Ц", "Д", "ОЦ"], n_ax=[1, 2], inlet=["одно", "двух"], turb=["Р", "О"], nt=[1, 2],
+_DEF = dict(rotors=[1, 2], comp=["1Ц", "2Ц", "Д", "ОЦ"], n_ax=[1, 2, 3], inlet=["одно", "двух"], turb=["Р", "О"], nt=[1, 2],
             npt=[1, 2], cool=["U", "N", "K"], recup=["нет", "печатный"], comb=["выносная", "кольцевая"], bear=["масло", "магнит"],
             cores=[1], rotor_join=["сварка", "сборный"], m_cw=["поковка", "литьё", "печать"], m_tw=["литьё", "печать"],
             m_hot=["литьё", "печать"], m_comb=["литьё", "печать", "обработка"], m_case=["литьё", "печать", "обработка"],
@@ -172,8 +172,9 @@ ARCH = {
         comp=["1Ц", "2Ц"], turb=["Р"], cool=["C"], rotor_join=["сборный"], m_cw=["поковка", "литьё"], mat_cw=["Ti64"],
         m_tw=["керамика"], mat_tw=["Si3N4"], m_hot=["керамика"], mat_hot=["CMC"], m_comb=["керамика", "печать"])),
     "кластер": dict(name="кластер малых ядер + общая силовая турбина", allowed=dict(
-        cores=[2, 4], rotors=[2], comp=["1Ц", "2Ц"], inlet=["одно"], turb=["Р"], cool=["U", "N", "K", "P"], recup=["нет"],
-        rotor_join=["заодно", "сварка", "сборный"], m_tw=["литьё", "печать"])),
+        cores=[2, 4], rotors=[2], comp=["1Ц", "2Ц"], inlet=["одно"], turb=["Р", "О"], cool=["U", "N", "K", "P"], recup=["нет"],
+        rotor_join=["заодно", "сварка", "сборный"], m_tw=["литьё", "печать"]),
+        note="v2: добавлена осевая турбина ядра; с одной радиальной (U/C0, T41 <= 1100 °C) кластер не замыкает KV-6 - closure_table"),
     "простой ротор": dict(name="предельно простой ротор: одно трансзвуковое колесо + одна турбина", allowed=dict(
         rotors=[1], comp=["1Ц"], nt=[1], cool=["U", "N", "K", "P"], rotor_join=["заодно", "сварка", "сборный"])),
     "безмасляный": dict(name="безмасляный ротор на магнитных подшипниках", allowed=dict(
@@ -188,7 +189,7 @@ CAT["arch"] = ARCH_KEYS
 AXES = list(CAT) + list(CONT)
 MAT_TW = {"литьё": ["K418", "CM247LC", "SC"], "печать": ["IN718", "Haynes282", "CM247LC"], "керамика": ["Si3N4"]}
 MAT_HOT = {"литьё": ["K438"], "печать": ["HastX", "IN625", "Haynes282"], "керамика": ["CMC"]}
-PI_RANGE = {"1Ц": (3.0, 8.0), "Д": (2.5, 6.0), "2Ц": (6.0, 20.0), ("ОЦ", 1): (4.0, 14.0), ("ОЦ", 2): (5.0, 18.0)}
+PI_RANGE = {"1Ц": (3.0, 8.0), "Д": (2.5, 6.0), "2Ц": (6.0, 20.0), ("ОЦ", 1): (4.0, 14.0), ("ОЦ", 2): (5.0, 18.0), ("ОЦ", 3): (6.0, 22.0)}
 MU_RANGE = {"Ц": (0.60, 0.80), "Д": (0.50, 0.70), "О": (0.20, 0.35)}
 T41_MIN = 850.0
 
@@ -402,8 +403,28 @@ def _margins(c, tgt, pi, t41):
         m["T5"] = (T_REC_MAX - M_T - t5) / 100.0
     if c["mat_cw"] == "Al":
         m["T_al"] = (MK.MAT["Al"]["T_max"] - M_T - (nm["comp"][0]["T2"] - 273.15)) / 100.0
+    an2 = an2_min(cc, tgt, r, nm["G"])
+    if an2 is not None:
+        m["AN2"] = (AN2_MAX * (1 - M_GEO) - an2) / AN2_MAX
     worst = min(m, key=m.get)
     return m[worst], dict(w=w / 1e3, EGT=egt, T5=t5, worst=worst, G=nm["G"])
+
+
+def an2_min(c, tgt, r, G):
+    """наименьший AN² последней ступени, который допускает расход: силовая турбина на частоте пакета при 380 м/с и ca/U = 0,8;
+    вал пакета с осевой турбиной - при предельной окружной скорости и ca/U = 0,8 (AN² = n²·Q/(ca/U·U)). None - не ограничивает
+    (двухвальная: частота газогенератора свободна)"""
+    E = _E()
+    if c["rotors"] == 2:
+        p = r["pt"]
+        Q = p["m"] * G / (p["p_out"] / (E.Rg(p["b"]) * p["T_out"]))
+        return tgt["n_pkg"] ** 2 * Q / (GOOD["phit"][1] * U_PT_MAX)
+    if c["turb"] == "О":
+        t = r["t"]
+        Q = t["m"] * G / c["cores"] / (t["p_out"] / (E.Rg(t["b"]) * t["T_out"]))
+        Umax = min(MK.u_limit_turb("О", c["mat_tw"], c["t41"])[0], u_cap_size(c, d_cap_turb(c)))
+        return tgt["n_pkg"] ** 2 * Q / (GOOD["phit"][1] * Umax)
+    return None
 
 
 def _run_edges(xs, ms):
@@ -540,7 +561,8 @@ def closure(c):
     if not ok:
         b = best or {}
         why = {"w": "мала удельная работа", "EGT": "горячий выхлоп", "T5": "газ перед рекуператором выше 700 °C",
-               "T_al": "алюминиевое колесо выше 200 °C", "turb": b.get("turb", "")}.get(b.get("worst"), b.get("fail", "цикл не решается"))
+               "T_al": "алюминиевое колесо выше 200 °C", "turb": b.get("turb", ""),
+               "AN2": "AN² последней ступени выше проверенного 6,03e7 (большой объёмный расход выхлопа)"}.get(b.get("worst"), b.get("fail", "цикл не решается"))
         res["why"] = b.get("worst") or "perf"
         res["reason"] = why if b.get("worst") == "turb" else (f"{why}: лучшая точка T41 {b.get('t41', tl):.0f} °C, π {b.get('pi', 0):.2f} - w {b.get('w', 0):.0f} кДж/кг "
                          f"(нужно {res['w_need']:.0f}), выхлоп {b.get('EGT') or 0:.0f} °C (предел {egt_max(tgt) - M_T:.0f})"
@@ -607,6 +629,58 @@ def _repair(u, arch, c0):
 def _repair_note(c0, c, cl):
     diff = [f"{a}: {c0[a]} -> {c[a]}" for a in CAT if a != "arch" and c[a] != c0[a]]
     return "; ".join(diff) + f" (исходная не замыкает точку - {cl['reason']})"
+
+
+def closure_table(kv, archs=None):
+    """доказательство расчётом: для каждого архетипа - все сочетания осей, меняющих номинальный цикл и турбину на валу пакета
+    (роторы, ядра, компрессор, турбина, охлаждение, рекуператор, камера, способ и сплав колеса турбины, соединение ротора), в
+    шаблоне архетипа; колесо компрессора - лучшее из шаблона (поковка Ti-6Al-4V, если разрешена). Сколько замыкают точку KV
+    (closure) и чего не хватает лучшему из незамыкающих. Перебор детерминирован (порядок шаблонов)"""
+    out = {}
+    for arch in (archs or ARCH_KEYS):
+        T = ARCH[arch]["allowed"]
+        L = lambda a: list(T.get(a, _DEF[a]))
+        combos, ok, by_cool, worst = 0, 0, {}, {}
+        best_fail = None
+        seen = set()
+        for cores, rot, comp, turb, cool, recup, comb, m_tw, rj in itertools.product(
+                L("cores"), L("rotors"), L("comp"), L("turb"), L("cool"), L("recup"), L("comb"), L("m_tw"), L("rotor_join")):
+            rot = 2 if cores > 1 else rot
+            rj = "сборный" if m_tw == "керамика" else rj
+            for n_ax in (L("n_ax") if comp == "ОЦ" else [0]):
+                c = dict(arch=arch, kv=kv, cores=cores, rotors=rot, comp=comp, n_ax=n_ax, turb=turb, cool=cool, recup=recup, comb=comb,
+                         m_tw=m_tw, rotor_join=rj)
+                if rj in ("заодно", "сварка"):
+                    c["m_cw"], c["mat_cw"] = m_tw, "Ni"
+                else:
+                    c["m_cw"] = "поковка" if "поковка" in L("m_cw") else L("m_cw")[0]
+                    mcw = [m for m in L("mat_cw") if m != "Ni"]
+                    c["mat_cw"] = "Ti64" if "Ti64" in mcw else mcw[0]
+                for mt in _mat_tw_list(c, T):
+                    cc = dict(c, mat_tw=mt)
+                    k = _sig(cc)
+                    if k in seen:
+                        continue
+                    seen.add(k)
+                    combos += 1
+                    r = closure(cc)
+                    by_cool.setdefault(cool, [0, 0]); by_cool[cool][0] += 1
+                    if r["ok"]:
+                        ok += 1; by_cool[cool][1] += 1
+                    else:
+                        why = r.get("why", "perf")
+                        worst[why] = worst.get(why, 0) + 1
+                        m = (r.get("best") or {}).get("m", -9)
+                        if best_fail is None or m > best_fail[0]:
+                            best_fail = (m, {a: cc[a] for a in ("rotors", "cores", "comp", "n_ax", "turb", "cool", "recup", "comb", "m_tw",
+                                                                 "mat_tw", "rotor_join")}, r["reason"])
+        out[arch] = dict(combos=combos, closable=ok, share=round(ok / combos, 3) if combos else None,
+                         by_cool={k: dict(combos=v[0], closable=v[1]) for k, v in by_cool.items()}, fail_reasons=worst,
+                         nearest_fail=(dict(combo=best_fail[1], reason=best_fail[2]) if best_fail else None))
+    return dict(kv=kv, w_need_kJkg=round(w_need(target(kv)) / 1e3, 1), margin_w=M_W, margin_T=M_T,
+                method="closure(): номинальный цикл с лучшими в диапазонах непрерывными осями, строки T41 от предела вниз, π по сетке; "
+                       "вал с частотой пакета - ещё существование турбины (turbine_exists). Оценка уровня 0",
+                archetypes=out)
 
 
 def _interval(bounds):
@@ -2064,7 +2138,7 @@ def cross_check():
     return rows
 
 
-SELF_N = {"KV-3": 1024, "KV-1": 256, "KV-6": 512}
+SELF_N = {"KV-3": 256, "KV-1": 128, "KV-6": 128}      # решение владельца 14.11.2026: локально уровень 0 - не больше 300 концепций
 SELF_WORKERS = 4
 
 
@@ -2078,14 +2152,17 @@ def selfcheck(out_path=RESULTS):
                       "дискретных осей; быстрый цикл уровня 0 на таблицах свойств gtu_explore (Cantera GRI-Mech 3.0, метан, ISO) с КПД "
                       "турбин по нагрузке ступеней; геометрия по окружным скоростям и коэффициентам расхода; правила допустимости; "
                       "баллы parts_model, service_model, plugplay_model, make_model (формулы - README узла). Всё - оценка.",
-               software=software(), date=DATE, seed=SEED, status="отладка части 1 на 4 ядрах; объёмы воронки (20 000 / 5 000) считаются на AWS",
+               software=software(), date=DATE, seed=SEED, status="отладка части 1 на 4 ядрах (выборка v2); объёмы воронки считаются на AWS",
+               sampler=dict(version=SAMPLER, good=GOOD, good_basis=GOOD_BASIS, margins=dict(M_W=M_W, M_T=M_T, M_GEO=M_GEO), eta_nom=ETA_NOM,
+                            split_range=SPLIT_RANGE, repair_axes=REPAIR_AXES, repair_free=REPAIR_FREE, repair_max_axes=REPAIR_MAX_AXES,
+                            an2_max=AN2_MAX, u_pt_max=U_PT_MAX),
                inputs=inputs(), targets={kv: target(kv) for kv in KV}, targets_in_lineup=member,
                axes=dict(categorical={k: v for k, v in CAT.items()}, continuous=CONT, order=AXES),
                archetypes={k: dict(name=v["name"], allowed=v["allowed"], note=v.get("note")) for k, v in ARCH.items()},
                defaults=_DEF,
                rules=dict(AX_PI_MAX=AX_PI_MAX, D_PI_MAX=D_PI_MAX, PSI_MAX=PSI_MAX, NU_RANGE=NU_RANGE, NS_RANGE=NS_RANGE,
                           HTR_MIN_T=HTR_MIN_T, HTR_MIN_AX=HTR_MIN_AX, T_REC_MAX=T_REC_MAX, PHI_RANGE=PHI_RANGE, PHI_OPT=PHI_OPT,
-                          PHI_PENALTY=PHI_PENALTY, T41_MIN=T41_MIN, soft=PP.SOFT),
+                          PHI_PENALTY=PHI_PENALTY, T41_MIN=T41_MIN, soft=PP.SOFT, AN2_MAX=AN2_MAX, HTR_H=HTR_H),
                models=dict(parts=dict(N_HALF=round(PM.N_HALF, 2), K=dict(assembly=PM.K_ASSEMBLY, fastener=PM.K_FASTENER, moving=PM.K_MOVING,
                                                                             cooled=PM.K_COOLED), ref_bom=PM.REF_BOM),
                            service=dict(weights=SM.W, step=SM.STEP, m_one_person=SM.M_ONE_PERSON, m_zero=SM.M_ZERO),
@@ -2128,6 +2205,9 @@ def selfcheck(out_path=RESULTS):
         res[f"debug_{kv}"] = summarize(rk)
         near = sorted([r for r in rk if not r["feasible"]], key=lambda r: r["violation"])[:10]
         res[f"debug_{kv}"]["nearest_infeasible"] = [dict(idx=r["idx"], arch=r["arch"], violation=r["violation"], reject=r["reject"]) for r in near]
+    tc = time.time()
+    res["closure_tables"] = {kv: closure_table(kv) for kv in KV}
+    res["closure_tables_s"] = round(time.time() - tc, 1)
     res["elapsed_s"] = round(time.time() - t0, 1)
     with open(out_path, "w", encoding="utf-8") as fh:
         json.dump(res, fh, ensure_ascii=False, indent=1, default=_jd)

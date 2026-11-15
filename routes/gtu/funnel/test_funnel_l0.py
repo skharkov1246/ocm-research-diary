@@ -26,7 +26,7 @@ def tmp():
 # =========================================================================== повторяемость
 def test_record_repeatable_and_order_free():
     a = [L0.evaluate_l0(i, 64, "KV-3") for i in range(6)]
-    FS._DM.clear()
+    FS._DM.clear(); FS._CLOSURE.clear(); FS._CANDS.clear()          # запись не зависит от кэшей замыкания и порядка счёта
     b = [L0.evaluate_l0(i, 64, "KV-3") for i in reversed(range(6))][::-1]
     assert json.dumps(a, ensure_ascii=False) == json.dumps(b, ensure_ascii=False)
     assert list(a[0]) == L0.COLUMNS
@@ -124,7 +124,7 @@ def test_parts_union_equals_whole(parts):
 
 def test_merge_outputs_identical_for_parts_and_whole(parts, tmp):
     pdir, wdir = parts
-    kw = dict(k=2, top=5, k_near=1, near_max=0.5, target=None, detail_top=0, cycle_k=0)
+    kw = dict(k=2, top=5, k_near=1, near_max=0.5, target=None, detail_top=0, cycle_k=0, closure_proof=False)
     a = M.run_merge(M.find_parts([pdir], "KV-3", N_T, S_T), "KV-3", N_T, S_T, os.path.join(tmp, "ma"), **kw)
     b = M.run_merge(M.find_parts([wdir], "KV-3", N_T, 1), "KV-3", N_T, 1, os.path.join(tmp, "mb"), **kw)
     assert open(a["csv"], encoding="utf-8").read() == open(b["csv"], encoding="utf-8").read()
@@ -236,7 +236,7 @@ def test_pareto_layers_small():
 def test_selection_on_real_sample_keeps_niches(parts, tmp):
     pdir, _ = parts
     r = M.run_merge(M.find_parts([pdir], "KV-3", N_T, S_T), "KV-3", N_T, S_T, os.path.join(tmp, "mr"), k=1, top=1, k_near=0,
-                    target=None, detail_top=0, cycle_k=0)
+                    target=None, detail_top=0, cycle_k=0, closure_proof=False)
     s = r["sel"]["summary"]
     assert s["lost_feasible_niches"] == [] and s["feasible_niches_covered"] == s["feasible_niches"]
 
