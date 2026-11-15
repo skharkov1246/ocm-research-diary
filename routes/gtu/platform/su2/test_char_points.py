@@ -133,6 +133,11 @@ def test_merge(tmp_path):
     b.write_text(json.dumps(char_summary("jb", [0.7], [0.7], nodes=2000)))
     with pytest.raises(ValueError, match="разные сетки"):
         C.merge([str(a), str(b)])
+    # сетку каждая задача строит сама (HXT в несколько потоков): узлы расходятся на доли процента — сводится
+    b.write_text(json.dumps(char_summary("jb", [0.7], [0.7], nodes=1005)))
+    g = C.merge([str(a), str(b)])["lines"]["kv3_stage1/medium"]
+    assert g["mesh_nodes_by_job"] == {"ja": 1000, "jb": 1005}
+    assert {p["pfrac"]: p["mesh_nodes"] for p in g["points"]} == {0.5: 1000, 0.7: 1005, 0.9: 1000}
 
 
 def test_merge_cli(tmp_path, capsys):
@@ -192,6 +197,7 @@ def test_jobs_generated_load_in_runner(tmp_path):
         assert len(assigned) == len(set(assigned))
         for row in doc["estimate"]["jobs"]:
             assert row["total_min"] <= row["max_min"] <= 720 and row["mem_gb_points"] < M.MEM_GB
+            assert row["max_min"] >= M.WATCHDOG_X * row["total_min"] and row["max_min"] >= row["total_min_at_C_sizing"]
 
 
 def test_medium_split_interleaved():

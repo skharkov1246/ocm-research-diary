@@ -36,6 +36,9 @@ OUT_MEDIUM = os.path.join(HERE, "jobs_aws_su2_kv3.json")
 OUT_FINE = os.path.join(HERE, "jobs_aws_su2_kv3_fine.json")
 OUT_SMOKE = os.path.join(HERE, "jobs_aws_su2_kv3_smoke.json")
 SMOKE_MAX_MIN = 60
+SMOKE_POINT_ITER = 200    # точки этапа 0: рестарт, 4 x 16 процессов, выгрузка рестарта (не характеристика)
+SMOKE_POINT_PRAMP = 100
+SMOKE_LINE_MIN = 5        # на линию coarse: база 520 итераций на 64 процессах + точки (оценка по C_EXPECTED ~4 мин)
 BRANCH = "claude/lucid-allen-yvps5d"
 
 SU2_COMMIT = "7048fd35f56d4bf52e586429d6746a36a10255f8"   # тег v8.6.0 (Dockerfile узла docker, сверено при сборке)
@@ -133,6 +136,7 @@ BASE_ITERS = 520    # план smoke075 run_case.py: 170 + 200 + 150
 POINT_ITER = 6000
 POINT_PRAMP = 300
 RESERVE_MIN = 5 + 8  # запас обёртки (--reserve-s 300) + запас раннера на выгрузку (8 мин)
+WATCHDOG_X = 1.5     # сторож max_min >= 1,5 x ожидаемое время машины
 
 
 def c_us(name: str) -> float:
@@ -249,9 +253,12 @@ def build(stage: str, fine_pfracs: list) -> dict:
     for line, level, pf, np_pt, tag in plan_jobs(stage, fine_pfracs):
         t = job_time(line, level, len(pf), np_pt)
         tz = job_time(line, level, len(pf), np_pt, c=C_SIZING)
-        max_min = min(720, int(math.ceil(tz["total_min"] / 30.0) * 30))
-        if t["total_min"] > 720 - 10:
-            raise SystemExit(f"{line}/{level}: оценка {t['total_min']} мин не влезает в 720")
+        # сторож — не меньше оценки по C_sizing и не меньше WATCHDOG_X x ожидаемое время (проверка 15.11.2026:
+        # по одному C_sizing выходило 1,38–1,45 x ожидаемого)
+        need = max(tz["total_min"], WATCHDOG_X * t["total_min"])
+        max_min = int(math.ceil(need / 30.0) * 30)
+        if max_min > 720:
+            raise SystemExit(f"{line}/{level}: сторож {max_min} мин (оценка {t['total_min']} мин) не влезает в 720")
         disk = 50 if level == "medium" else 80
         jobs.append({"name": f"su2-{line.replace('_', '-')}-{level}-{tag}",
                      "command": command(line, level, pf, np_pt, max_min), "max_min": max_min, "disk_gb": disk,
@@ -296,15 +303,21 @@ def build(stage: str, fine_pfracs: list) -> dict:
 
 
 def smoke_command() -> str:
-    """Этап 0: обе линии на coarse одной машиной; итерации — десятки (план smoke075 x 0,1 = 52, точки по 40);
-    код задачи — merge --require-base-ok (база каждой линии дошла до конца, рестарт есть)."""
+    """Этап 0: обе линии на coarse одной машиной; база — полный план smoke075 (520 итераций, как у этапов A и B),
+    точки — по SMOKE_POINT_ITER итераций с рампой давления SMOKE_POINT_PRAMP; код задачи — merge --require-base-ok
+    (база каждой линии дошла до конца, рестарт есть).
+
+    Первый прогон 15.11.2026 (20261115T003035Z-c8f9) шёл с --base-iter-scale 0.1: разгон частоты 0,6 -> 1,0 за 8
+    итераций и давления за 16 — база обеих линий разошлась (NaN) на 9–10-й итерации стадии s2, точки не считались.
+    Сжатая рампа проверяет не тот план, что пойдёт на этапах A и B, поэтому база этапа 0 — без сжатия."""
     lines = list(ENV_LINES)
     for line in LINES:
         L = LINES[line]
         lines.append(L["mesh"].format(level="coarse").replace("geom.log", f"geom_{line}.log"))
         args = [f"--case {L['case']}", "--level coarse", f"--geom-out \"{L['geom_out'].format(level='coarse')}\"",
                 f"--label {line}", "--pfracs 0.70,0.90,1.00,1.10", "--base-pfrac 0.75", "--np-per-point 16",
-                "--base-iter-scale 0.1", "--point-iter 40", "--point-pramp 10", f"--job-max-min {SMOKE_MAX_MIN}",
+                "--base-iter-scale 1", f"--point-iter {SMOKE_POINT_ITER}", f"--point-pramp {SMOKE_POINT_PRAMP}",
+                f"--job-max-min {SMOKE_MAX_MIN}",
                 "--su2-src /opt/SU2-src", f"--work \"$W/runs_{line}\"", f"--out \"$GTU_OUT/{line}\""]
         lines.append("python routes/gtu/platform/su2/char_points.py run " + " ".join(args)
                      + f" || echo \"{line} exit $?\" >> \"$GTU_OUT/smoke_exits.txt\"")
@@ -315,7 +328,7 @@ def smoke_command() -> str:
 
 def build_smoke() -> dict:
     disk = 40
-    t_min = BOOT_MIN + SETUP_MIN + 2 * 5 + 2 * 3     # две сетки coarse (~2 мин здесь) и два прогона по ~3 мин
+    t_min = BOOT_MIN + SETUP_MIN + 2 * 5 + 2 * SMOKE_LINE_MIN    # две сетки coarse (~2 мин здесь) и два прогона
     upper = (PRICE_UPPER + disk * DISK_USD_GB_H + IPV4_USD_H) * (SMOKE_MAX_MIN + 10) / 60
     job = {"name": "su2-kv3-core130-smoke", "command": smoke_command(), "max_min": SMOKE_MAX_MIN, "disk_gb": disk}
     return {

@@ -230,17 +230,22 @@ def run(inputs, n, shard, shards, out, level, np_, workers, of="2512", timeout_m
     t0 = time.time()
     data = json.load(open(inputs, encoding="utf-8"))
     ents = data["entries"]
-    idx = L1.shard_indices(n, shard, shards)
     work = os.path.join(out, f"work_{level}_s{shard:03d}")
     os.makedirs(work, exist_ok=True)
     tasks = []
-    for i in idx:
-        ents[i]["_pos"] = i
-        if level == "L2":
+    if level == "L2":                     # разбиение по варианту: i % shards == shard
+        idx = L1.shard_indices(n, shard, shards)
+        for i in idx:
+            ents[i]["_pos"] = i
             tasks += [(ents[i], li, level, work, of, np_, timeout_min * 60, generate_only, "base") for li in (1, 2)]
             tasks += [(ents[i], 0, level, work, of, np_, timeout_min * 60, generate_only, k) for k in ("lbo", "flashback")]
-        else:
-            tasks += [(ents[i], 0, level, work, of, np_, timeout_min * 60, generate_only, k) for k in ("les", "les_forced")]
+    else:                                 # L3: разбиение по задаче (вариант × вид): t % shards == shard, t = 2·i + вид
+        allt = [(i, k) for i in range(n) for k in ("les", "les_forced")]
+        mine = [allt[t] for t in L1.shard_indices(len(allt), shard, shards)]
+        idx = sorted(set(i for i, _ in mine))
+        for i, k in mine:
+            ents[i]["_pos"] = i
+            tasks.append((ents[i], 0, level, work, of, np_, timeout_min * 60, generate_only, k))
     rows = {i: dict(pos=i, idx=ents[i]["idx"], cases={}) for i in idx}
     packs = os.path.join(out, f"cases_{level}_s{shard:03d}")
     os.makedirs(packs, exist_ok=True)

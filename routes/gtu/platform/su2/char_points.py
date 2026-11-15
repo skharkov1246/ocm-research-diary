@@ -49,6 +49,11 @@ RUNNER_UPLOAD_RESERVE_S = 8 * 60   # runner.py: команда идёт до «�
 BASE_PLAN = "smoke075"             # прошёл дымовую проверку на core130 coarse (README, прогон Б)
 WINDOW_CONV = 500                  # окно сходимости навыка su2-turbo: π и η меняются < 0,1 % за 500 итераций
 CONV_TOL = 1e-3
+# Сетку каждая задача строит сама, а 3D-сетка Gmsh (HXT, Mesh.Algorithm3D = 10, несколько потоков) от запуска к
+# запуску разная: core130 coarse — 139 121 / 139 087 / 139 010 узлов, KV-3 coarse — 258 565 / 258 411 / 258 299
+# (bench, AWS 15.11.2026, миниатюры). Задачи одной линии сводятся, если узлы расходятся не больше чем на MESH_TOL;
+# узлы каждой задачи — в сводке (mesh_nodes_by_job, у точки — mesh_nodes).
+MESH_TOL = 0.01
 KEEP_PATTERNS = ("run_summary.json", "history_*.csv", "su2_*.log", "dry_*.log", "case_*.cfg", "surface*.vtu", "surface*.csv")
 SKIP_ALWAYS = ("mesh_vaneless_split.su2", "restart_in.dat")
 
@@ -352,19 +357,24 @@ def cmd_run(a) -> int:
 # ----------------------------------------------------------------------------- сводка прогона
 def merge(paths: list, run_id: str | None = None) -> dict:
     """char_summary.json задач -> характеристика по (метка, уровень). Отказ (ValueError), если точка задана
-    дважды или задача прислала точку, которой ей не задавали."""
+    дважды, задача прислала точку, которой ей не задавали, или сетки задач линии расходятся больше MESH_TOL."""
     groups, problems, jobs = {}, [], []
     for p in sorted(paths):
         s = json.load(open(p, encoding="utf-8"))
         key = f"{s['label']}/{s['level']}"
+        nodes = s["mesh"]["header"].get("NPOIN")
         g = groups.setdefault(key, {"label": s["label"], "case": s["case"], "level": s["level"],
-                                    "mesh_nodes": s["mesh"]["header"].get("NPOIN"),
+                                    "mesh_nodes": nodes,
                                     "mesh_cells": s["mesh"]["header"].get("NELEM"),
+                                    "mesh_nodes_by_job": {},
                                     "double_sided": s["mesh"]["double_sided"], "estimate": s["estimate"],
                                     "d1_reference": s["d1_reference"], "settings": s["settings"],
                                     "plans": s["plans"], "assigned": [], "points": [], "bases": []})
-        if g["mesh_nodes"] != s["mesh"]["header"].get("NPOIN"):
-            problems.append(f"{key}: у задач разные сетки ({g['mesh_nodes']} и {s['mesh']['header'].get('NPOIN')} узлов)")
+        g["mesh_nodes_by_job"][str(s.get("job"))] = nodes
+        ref = g["mesh_nodes"]
+        if not (isinstance(ref, int) and isinstance(nodes, int) and ref > 0
+                and abs(nodes - ref) / ref <= MESH_TOL):
+            problems.append(f"{key}: у задач разные сетки ({ref} и {nodes} узлов, допуск {MESH_TOL:.0%})")
         jobs.append({"job": s.get("job"), "file": os.path.relpath(p), "label": s["label"], "level": s["level"],
                      "verdict": s.get("verdict"), "itype": s.get("itype"), "az": s.get("az"),
                      "t_total_s": s.get("t_total_s"), "budget": s.get("budget")})
@@ -375,7 +385,7 @@ def merge(paths: list, run_id: str | None = None) -> dict:
         for r in s.get("points", []):
             if r["pfrac"] not in s["pfracs_assigned"]:
                 problems.append(f"{key}: точка {r['pfrac']} не задавалась задаче {s.get('job')}")
-            g["points"].append(dict(r, job=s.get("job")))
+            g["points"].append(dict(r, job=s.get("job"), mesh_nodes=nodes))
     for key, g in groups.items():
         seen = [round(x, 6) for x in g["assigned"]]
         dup = sorted({x for x in seen if seen.count(x) > 1})

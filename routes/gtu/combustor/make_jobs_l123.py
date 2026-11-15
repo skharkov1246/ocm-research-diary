@@ -212,19 +212,21 @@ def pkg_l3(T, MS, n=5, np_=32):
     run_s = lambda c: c * steps * s_step / eff
     comp_plan_min = min(700.0, 1.3 * run_s(m) / np_ / 60.0)
     mm = min(720, ceil5(SETUP_MIN + comp_plan_min + UPLOAD_MIN))
-    jobs = [dict(name=f"comb-l3-v{k}",
+    shards = 2 * n                                             # задача = вариант × вид (собственный режим, возбуждение)
+    jobs = [dict(name=f"comb-l3-p{k:02d}",
                  command=f"{ROOT_ENV}\npython3 -u routes/gtu/combustor/comb_l23.py --level L3 --inputs routes/gtu/combustor/"
-                         f"l3_inputs_KV-3.json --n {n} --shard {k} --shards {n} --out \"$GTU_OUT\" --np {np_} "
-                         f"--workers \"$NPROC\" --timeout-min {int(0.95 * mm)}") for k in range(n)]
+                         f"l3_inputs_KV-3.json --n {n} --shard {k} --shards {shards} --out \"$GTU_OUT\" --np {np_} "
+                         f"--workers {np_} --timeout-min {int(0.95 * mm)}") for k in range(shards)]
     core_h = n * 2 * run_s(m) / 3600
-    mh = core_h / VCPU + n * (SETUP_MIN + UPLOAD_MIN) / 60.0
+    mh = n * 2 * (run_s(m) / np_ / 3600 * (VCPU / np_) ** 0 + (SETUP_MIN + UPLOAD_MIN) / 60.0)
     gb = n * 2 * 0.2
     pre_core_h = 1.0e6 * 45000 * s_step / eff / 3600
     est = dict(level="L3 (LES элемента: собственный режим и с возбуждением)", variants=n, np_per_case=np_, steps=steps,
                s_per_cell_step=s_step, parallel_eff=eff, mean_cells=m, max_cells=mx, core_hours=core_h,
                max_min=mm, machine_hours=dict(expected=mh, planning=1.5 * mh), outputs_gb=gb, usd=money(mh, gb, 100),
                usd_planning_hours=money(1.5 * mh, gb, 100)["total_planning"],
-               note="задача - один вариант (два кейса по 32 ядра); сторож 720 мин - если LES не уложится, раннер "
+               note="задача - один кейс (вариант × вид) на 32 ядрах машины (половина ядер простаивает - LES на 64 "
+                    "ядрах при 0,3 млн ячеек упирается в обмен; оценка); сторож 720 мин - если LES не уложится, раннер "
                     "получит код 124: продолжение с последней записи вторым пакетом (контрольные точки в $GTU_OUT)",
                session_side=["comb_acoustic.py: сеть элементов с F(ω) из LES (identify_ftf) - секунды",
                              "CalculiX: прочность и ползучесть картриджа (навык calculix-rotor) - минуты, AWS не нужен"])
