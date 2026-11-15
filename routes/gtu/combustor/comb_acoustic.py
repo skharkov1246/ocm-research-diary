@@ -153,6 +153,20 @@ def azimuthal_estimate(e):
     return [dict(m=m, f_Hz=m * c / (math.pi * d["D_m"])) for m in (1, 2, 3)]
 
 
+def identify_ftf(u, q, dt, n_taps=64, freqs=None):
+    """передаточная функция пламени по рядам LES (уровень 3): u = u'/ū на входе, q = Q'/Q̄; КИХ-фильтр
+    q[k] = Σ h[j]·u[k−j] методом наименьших квадратов (уравнение Винера - Хопфа), F(ω) = Σ h[j]·e^(−iωjΔt)"""
+    u, q = np.asarray(u, float), np.asarray(q, float)
+    N = len(u)
+    X = np.zeros((N - n_taps, n_taps))
+    for j in range(n_taps):
+        X[:, j] = u[n_taps - j:N - j]
+    h, *_ = np.linalg.lstsq(X, q[n_taps:], rcond=None)
+    freqs = np.linspace(10, 0.4 / dt, 200) if freqs is None else np.asarray(freqs)
+    F = np.array([np.sum(h * np.exp(-1j * 2 * np.pi * f * dt * np.arange(n_taps))) for f in freqs])
+    return dict(h=h, f=freqs, F=F)
+
+
 def selfcheck():
     """аналитика: закрытая - открытая и закрытая - закрытая труба, скачок температуры, знак роста трубы Рийке"""
     out = {}

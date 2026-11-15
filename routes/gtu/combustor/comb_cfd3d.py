@@ -100,14 +100,14 @@ def _seg_cells(L, d, nmin, nmax):
     return int(max(nmin, min(nmax, math.ceil(L / max(d, 1e-9)))))
 
 
-def build_element3d_case(e, li, out, level="L2", of="2512", iters=None, fuel_scale=1.0, h2_vol=0.0):
+def build_element3d_case(e, li, out, level="L2", of="2512", iters=None, fuel_scale=1.0, h2_vol=0.0, length_frac=1.0):
     """элемент 3D уровня 2 (или 3 - level L3); fuel_scale и h2_vol - шаги цепочек запаса по срыву и проскоку"""
     it = dict(CF.ITERS, **(iters or {}))
     M = MESH3[level]
     c, d, L = e["concept"], e["derived"], e["loads"][li]
     g = CF.cell_geometry(e, li)
     p3, T3, rho3 = L["p3_Pa"], L["T3_K"], L["rho3"]
-    r_ch, R_c, l_ch, L_c = g["r_ch"], g["R_c"], g["l_ch"], g["L_cell"]
+    r_ch, R_c, l_ch, L_c = g["r_ch"], g["R_c"], g["l_ch"], g["L_cell"] * length_frac
     kje = max(1, int(c["k_je"]))
     swirl = c["swirl"]
     if kje >= 2 and swirl > 0.05:
@@ -202,6 +202,7 @@ def build_element3d_case(e, li, out, level="L2", of="2512", iters=None, fuel_sca
     desc = dict(kind="element3d", level=level, load=L["load"], mode=mode, theta_deg=theta, n_cells=B.n_cells(),
                 patches=patches, zs=zs, rs=rs, ts=ts, z_dump=l_ch, z_end=zs[-1], r_cell=R_c, p3=p3, T3=T3,
                 fuel_scale=fuel_scale, h2_vol=h2_vol, jet=dict(side=a_side, u=u_f, rho=rho_f, m=m_fuel_jet),
+                u_ch=u, length_frac=length_frac,
                 geometry=dict(r_ch=r_ch, R_c=R_c, l_ch=l_ch, L_cell=L_c, n_el_can=g["n_el_can"]),
                 swirl_note="крутка задана равномерной окружной скоростью 2·S·u·0,5 (оценка); при k_je = 1 крутка не "
                            "учитывается (половина элемента с плоскостями симметрии)" if swirl > 0.05 and mode != "cyclic" else "")

@@ -283,7 +283,7 @@ def cmd_run(a) -> int:
         date=datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         machine=machine_info(a.nproc), commit=_git_head(),
         inputs=dict(case=a.case, levels=levels, configs={lv: [f"{n}x{k}" for n, k in c] for lv, c in cfgs.items()},
-                    plan=plan, shroud=a.shroud, vaneless=a.vaneless, frac=a.frac, pfrac=a.pfrac,
+                    plan=plan, shroud=a.shroud, vaneless=a.vaneless, frac=a.frac, pfrac=a.pfrac, mpi_args=a.mpi_args,
                     job_max_min=a.job_max_min, reserve_min=a.reserve_min, config_limit_s=a.config_limit_s,
                     mesh_threads=a.mesh_threads or a.nproc),
         meshes={}, configs=[], skipped=[],

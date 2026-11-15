@@ -279,10 +279,16 @@ def pw(v):
     return lambda s: np.interp(s, [0.0, 0.5, 1.0], v)
 
 
-def size_tpms(du, PH, PC, model, graded=True, tw=None, seed=0, maxiter=60):
-    """наименьшая масса сердцевины при Q ≥ Q_цикла, dp ≤ бюджета, Dh ≥ Dh_min, a ≤ a_max"""
+def size_tpms(du, PH, PC, model, graded=True, tw=None, seed=0, maxiter=60, x0=None):
+    """наименьшая масса сердцевины при Q ≥ Q_цикла, dp ≤ бюджета, Dh ≥ Dh_min, a ≤ a_max.
+    graded: сначала решается постоянная ячейка, её оптимум — начальная точка (x0) переменной: так переменная
+    по построению не хуже постоянной (постоянная — её частный случай)"""
     tw = PRINT["t_w"] if tw is None else tw
     Qt = du["Q_kW"]
+    if graded and x0 is None:
+        u = size_tpms(du, PH, PC, model, graded=False, tw=tw, seed=seed, maxiter=maxiter)
+        Afr, L, a0, c0 = u["z"]
+        x0 = [Afr, L, a0, a0, a0, c0, c0, c0]
 
     def unpack(z):
         if graded:
@@ -307,12 +313,16 @@ def size_tpms(du, PH, PC, model, graded=True, tw=None, seed=0, maxiter=60):
         bounds = [(2.0, 40.0), (0.05, 1.5)] + [(amin, amax)] * 3 + [(-0.35, 0.3)] * 3
     else:
         bounds = [(2.0, 40.0), (0.05, 1.5), (amin, amax), (-0.35, 0.3)]
+    if x0 is not None:
+        x0 = [min(max(v, lo), hi) for v, (lo, hi) in zip(x0, bounds)]
     res = differential_evolution(obj, bounds, seed=seed, maxiter=maxiter, popsize=14, tol=1e-6, polish=False,
-                                 updating="deferred", workers=1)
-    z = res.x
-    loc = minimize(obj, z, method="Nelder-Mead", options=dict(maxiter=600, xatol=1e-5, fatol=1e-7))
-    if loc.fun < res.fun:
-        z = loc.x
+                                 updating="deferred", workers=1, x0=x0)
+    z, fz = res.x, res.fun
+    starts = [z] + ([np.array(x0)] if x0 is not None else [])
+    for st in starts:
+        loc = minimize(obj, st, method="Nelder-Mead", options=dict(maxiter=1500, xatol=1e-6, fatol=1e-8, adaptive=True))
+        if loc.fun < fz:
+            z, fz = loc.x, loc.fun
     Afr, L, fa, fc = unpack(z)
     r = core_eval(du, PH, PC, "tpms", dict(a=fa, c=fc), Afr, L, tw=tw, model=model, return_profiles=True)
     r["z"] = [float(v) for v in z]

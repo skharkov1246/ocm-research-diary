@@ -631,7 +631,7 @@ def p_floor(net, p_out):
 def mdot_for(panel, net, p_out, Tc_in, m_target, p_hi):
     """давление подвода (дросселирование), дающее заданный расход охладителя"""
     def r(pin):
-        return evaluate(panel, net, pin, p_out, Tc_in, outer=1)["m_c"] - m_target
+        return evaluate(panel, net, pin, p_out, Tc_in, outer=3)["m_c"] - m_target
     lo = p_floor(net, p_out) * (1 + 1e-4)
     if r(p_hi) < 0:
         return None
@@ -1028,7 +1028,8 @@ if __name__ == "__main__":
     for name, net in nets.items():
         stl[name] = net_stl(net, out / f"vascular_ngv_{name}.stl")
     for st in stl.values():
-        st["path"] = str(Path(st["path"]).relative_to(ROOT))
+        pth = Path(st["path"])
+        st["path"] = str(pth.relative_to(ROOT)) if str(pth).startswith(str(ROOT)) else pth.name
     res["geometry"] = dict(stl=stl, note="каналы — трубки в плоскости развёртки, мм; для печати — вычитаются из стенки")
     res["networks"] = {k: dict(nodes=len(n.nodes), segments=len(n.seg), outlets=len(n.outlets),
                                d_min_mm=1e3 * min(d for _, _, d in n.seg if d < 0.01),

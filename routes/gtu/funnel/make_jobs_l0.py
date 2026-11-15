@@ -76,7 +76,7 @@ def build(profile, shards=None, machines=None, branch="claude/lucid-allen-yvps5d
         merge.append(f"python3 {REL}/merge_l0.py --kv {kv} --n {n} --shards {S} --in routes/gtu/platform/aws/runs/<run_id> "
                      f"--out-dir {REL}/l0_aws_{profile} --suffix _{kv}_n{n} --top {m['top']} --target {m['target']} "
                      f"--k-near {m['k_near']} --near-max {m['near_max']}" +
-                     (f" --csv-gz --csv-dir routes/gtu/platform/aws/runs/<run_id>/merged" if n > 20000 else ""))
+                     (" --csv-gz --csv-dir routes/gtu/platform/aws/runs/<run_id>/merged" if n > 20000 else ""))
     return P, S, M, jobs, merge
 
 
@@ -126,6 +126,7 @@ def main(argv=None):
     ap.add_argument("--plan-out", default=os.environ.get("TMPDIR", "/tmp"))
     a = ap.parse_args(argv)
     t, b, probe = measured()
+    docs = {}
     for prof in ("debug", "full"):
         P, S, M, jobs, merge = build(prof, a.shards if prof == "full" else None, a.machines if prof == "full" else None)
         est = estimate(P, S, M, jobs, t, b)
@@ -155,7 +156,73 @@ def main(argv=None):
         for ln in doc["plan_check"]["lines"]:
             if ln.startswith("[план]"):
                 print("  ", ln)
+        docs[prof] = (P, S, M, doc)
+    write_ready(docs)
     return 0
+
+
+READY = os.path.join(HERE, "READY_L0.json")
+
+
+def write_ready(docs):
+    """READY_L0.json - передача уровня 0 в AWS: готовность, файлы задач, команды plan и слияния, смета, известные ограничения"""
+    res = json.load(open(os.path.join(HERE, "funnel_l0_results.json"), encoding="utf-8"))
+    probes = {}
+    for f in sorted(os.listdir(HERE)):
+        if f.startswith("funnel_l0_results") and f.endswith(".json"):
+            d = json.load(open(os.path.join(HERE, f), encoding="utf-8"))
+            s_ = d["summary"]
+            probes[f] = dict(kv=d["kv"], n=d["n"], feasible_share=s_["feasible_share"], feasible=s_["feasible"],
+                             feasible_niches=d["niches"]["n_feasible"], archetypes_feasible=s_.get("archetypes_feasible"),
+                             code_sha=d["merge_checks"]["code_sha"])
+    plan_ok = all(v[3]["plan_check"]["exit_code"] == 0 for v in docs.values())
+    tot = round(sum(v[3]["estimate"]["usd"]["total_expected"] for v in docs.values()), 2)
+    bound = round(sum(v[3]["estimate"]["upper_bound_usd"] for v in docs.values()), 2)
+    doc = dict(
+        title="Уровень 0 воронки двигателя-заменителя: готовность к AWS (выборка v2)", date="2026-11-14",
+        ready_for_aws=bool(plan_ok), ready_basis=("pytest test_models.py + test_funnel_l0.py, короткие пробы KV-3/KV-1/KV-6 (см. probes), "
+                                                  "runner.py plan обоих файлов - код 0" if plan_ok else "plan вернул ошибку - см. файлы задач"),
+        branch="claude/lucid-allen-yvps5d (PR #62) - код задач берётся из ветки: перед run изменения узла funnel должны быть в ней",
+        order=["1. jobs_l0_debug.json (KV-3, KV-1, KV-6 по N = 2000; 2 машины): run -> слияние (команды merge.commands файла) -> "
+               "проверить доли допустимых, ниши, архетипы и s_per_concept_core против проб",
+               "2. jobs_l0.json (KV-3 200 000, KV-1 и KV-6 по 50 000; 6 машин - одна волна под квоту 384 vCPU) -> слияние с --csv-dir "
+               "вне ветки -> в ветку только funnel_l0_results_*.json и funnel_l0_select_*.json"],
+        files=dict(debug="routes/gtu/funnel/jobs_l0_debug.json", full="routes/gtu/funnel/jobs_l0.json"),
+        plan_commands={k: v[3]["plan_check"]["command"] for k, v in docs.items()},
+        plan_exit_codes={k: v[3]["plan_check"]["exit_code"] for k, v in docs.items()},
+        plan_note=docs["full"][3]["plan_check"]["runner_note"],
+        run_commands={k: dict(dryrun="python3 routes/gtu/platform/aws/runner.py run routes/gtu/funnel/" + docs[k][0]["file"],
+                              live="python3 routes/gtu/platform/aws/runner.py run routes/gtu/funnel/" + docs[k][0]["file"] + " --live",
+                              note="живой запуск (--live) - только сессия с ключами AWS; здесь AWS не вызывался") for k in docs},
+        merge_commands={k: v[3]["merge"]["commands"] for k, v in docs.items()},
+        merge_where=docs["full"][3]["merge"]["where"], csv_rule=docs["full"][3]["merge"]["csv_rule"],
+        estimate={k: dict(concepts=v[3]["estimate"]["concepts"], machines=v[2], shards=v[1],
+                          machine_hours=v[3]["estimate"]["machine_hours"], usd_expected=v[3]["estimate"]["usd"]["total_expected"],
+                          usd_upper_bound=v[3]["estimate"]["upper_bound_usd"], max_min=v[3]["jobs"][0]["max_min"],
+                          s_per_concept_core_measured=v[3]["estimate"]["s_per_concept_core_measured"], safety=v[3]["estimate"]["safety"])
+                  for k, v in docs.items()},
+        estimate_total_usd=dict(expected=tot, upper_bound=bound, cap_level0_usd=300, cap_ok=bound < 300),
+        probes=probes,
+        sampler=res.get("probe", {}).get("params") and "v2: окна допустимости по номинальному циклу, ремонт незамыкающих комбинаций "
+                                                       "(funnel_space.SAMPLER)",
+        known_limitations=[
+            "все числа уровня 0 - оценка (КПД узлов по формулам трека, без характеристик и нерасчётных режимов); погрешность модели "
+            "трека ±2 п. п.",
+            "время на концепцию в пробах замерено на общем контейнере (4 ядра, нагрузка чужими задачами) с холодным кэшем замыканий; "
+            "смета берёт его с запасом ×3 - фактическое время даст отладочный прогон",
+            "KV-6: последняя ступень на 11 220 об/мин при проверенном frame3 AN² 6,03e7 пропускает около 146 м³/с выхлопа (СТ, 380 м/с, "
+            "ca/U 0,8) - допустимы только концепции с высокой удельной работой и холодным выхлопом (охлаждаемая турбина, высокая π); "
+            "доля допустимых KV-6 в пробе мала, это физика модели, а не дефект выборки (README, раздел «Выборка v2»)",
+            "простой ротор (одно колесо + одна ступень турбины на валу пакета) не замыкает KV-3 и KV-6 - доказательство в closure_proof "
+            "результатов и README",
+            "предел AN² = 6,03e7 - единственная проверенная прочностью точка (frame3 turb3, 536 °C); для более горячей последней ступени "
+            "он не снижается - проверка на уровне 2",
+            "модель массы занижена против Taurus 60 MD (results: mass_reference); абсолютная масса входит в s_mass и подъём plugplay",
+            "раннер v2 - в рабочей копии; если к запуску он изменится, повторить plan"],
+        how_to_regenerate="python3 routes/gtu/funnel/make_jobs_l0.py (пишет jobs_l0_debug.json, jobs_l0.json, READY_L0.json; AWS не вызывает)")
+    with open(READY, "w", encoding="utf-8") as fh:
+        json.dump(doc, fh, ensure_ascii=False, indent=1)
+    print(f"{os.path.basename(READY)}: ready_for_aws={doc['ready_for_aws']}, ожидаемо {tot} долл., верхняя граница {bound} долл.")
 
 
 if __name__ == "__main__":

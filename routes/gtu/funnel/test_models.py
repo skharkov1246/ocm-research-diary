@@ -1,6 +1,6 @@
 """Проверки узла воронки (уровень 0, часть 1): генератор, разбиение на части, правила допустимости, четыре модели.
 Корпуса проверок - придуманные ведомости и модули (не данные установок). Запуск: python3 -m pytest -q test_models.py"""
-import copy, json, math, os, sys, tempfile
+import copy, json, os, sys
 
 import pytest
 

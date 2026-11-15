@@ -22,7 +22,7 @@ KV-1 ... KV-7, ../gtu_lineup_results.json). Воронка: 20 000 концеп�
   python funnel_space.py --selfcheck                                                    # отладка на малой выборке
 Все результаты уровня 0 - «оценка»: КПД узлов, пределы и коэффициенты - принятые величины трека и свои оценки (README).
 """
-import argparse, datetime, hashlib, inspect, itertools, json, math, os, platform, sys, time, warnings
+import argparse, hashlib, inspect, itertools, json, math, os, platform, sys, time, warnings
 
 import numpy as np
 import scipy
@@ -532,7 +532,6 @@ def closure(c):
     tl = MK.t41_limit(c["turb"], c["cool"], c["mat_tw"], c["m_tw"])[0]
     Ts = [tl] if tl <= T41_MIN else [tl - (tl - T41_MIN) * k / (N_T41_GRID - 1) for k in range(N_T41_GRID)]
     best, ok, mu_ok = None, False, None
-    st = stage_types(c)
     for mode in ("mid", "hi"):                  # μ середина диапазона, затем верх (выше π при том же пределе окружной скорости)
         cc = best_case(c, mode)
         for T in Ts:
@@ -611,6 +610,11 @@ def _repair(u, arch, c0):
     cl = closure(c0)
     if cl["ok"]:
         return c0, ""
+    T = ARCH[arch]["allowed"]
+    nkey = (arch, tuple(c0[a] for a in NOCLOSE_KEYS), _pick(u["m_cw"], T.get("m_cw", _DEF["m_cw"])),
+            _pick(u["n_ax"], T.get("n_ax", _DEF["n_ax"])))
+    if nkey in _NOCLOSE:          # чистый кэш: исход «нет замыкающей» - функция этих величин (материалы перебираются все)
+        return c0, _NOCLOSE[nkey]
     for ch in _repair_cands(arch, c0):
         c = _discrete(u, arch, ch); c["kv"] = c0["kv"]
         if any(c[a] != v for a, v in ch.items()):
@@ -623,7 +627,13 @@ def _repair(u, arch, c0):
                     continue
                 if closure(c2)["ok"]:
                     return c2, _repair_note(c0, c2, cl)
-    return c0, f"нет замыкающей комбинации в шаблоне архетипа (до {REPAIR_MAX_AXES} осей) - {cl['reason']}"
+    note = f"нет замыкающей комбинации в шаблоне архетипа (до {REPAIR_MAX_AXES} осей) - {cl['reason']}"
+    _NOCLOSE[nkey] = note
+    return c0, note
+
+
+_NOCLOSE = {}
+NOCLOSE_KEYS = ("kv", "rotors", "cores", "comp", "n_ax", "turb", "cool", "recup", "comb", "m_tw", "mat_tw", "rotor_join", "m_cw", "mat_cw")
 
 
 def _repair_note(c0, c, cl):
@@ -1319,7 +1329,7 @@ def stage_mus(c):
 
 
 def stages_pi(c):
-    st, pi, s = stage_types(c), c["pi"], c["split"]
+    pi, s = c["pi"], c["split"]
     if c["comp"] in ("1Ц", "Д"):
         return [pi]
     if c["comp"] == "2Ц":

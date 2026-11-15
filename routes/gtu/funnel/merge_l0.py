@@ -631,10 +631,11 @@ def run_merge(found, kv, n, shards, out_dir, sfx="", weights=None, seed=L0.SEED,
 PROBE = dict(kv="KV-3", n=256, shards=10, workers=4, top=40, target=150, k=3, k_near=1, near_max=0.25)
 
 
-def probe(out_dir=HERE, scale=False, **kw):
+def probe(out_dir=HERE, scale=False, whole=True, sfx="", **kw):
     """короткая проба (владелец: локально уровень 0 - не больше 300 концепций): части funnel_l0 в пуле из 4 процессов ->
     слияние; та же выборка одной частью в одном процессе (объединение частей = расчёт целиком, независимость от числа
     процессов); замер времени на концепцию в одном процессе"""
+    detail = kw.pop("detail", True)
     P = dict(PROBE, **kw)
     if P["n"] > 300:
         raise ValueError("локальная проба уровня 0 - не больше 300 концепций (решение владельца 14.11.2026)")
@@ -645,28 +646,36 @@ def probe(out_dir=HERE, scale=False, **kw):
         t_par = time.time() - t0
         gz_bytes = sum(os.path.getsize(x) for x in paths)
         whole = os.path.join(tmp, "whole")
+        do_whole = whole
+        whole = os.path.join(tmp, "whole")
         t1 = time.time()
-        L0.run_parts(P["kv"], P["n"], [0], 1, whole, workers=1)
-        t_ser = time.time() - t1
-        a = merge_parts(find_parts([tmp], P["kv"], P["n"], P["shards"]), P["kv"], P["n"], P["shards"])[1]
-        b = merge_parts(find_parts([whole], P["kv"], P["n"], 1), P["kv"], P["n"], 1)[1]
-        same = json.dumps(a, ensure_ascii=False) == json.dumps(b, ensure_ascii=False)
+        same, t_ser = None, None
+        if do_whole:
+            L0.run_parts(P["kv"], P["n"], [0], 1, whole, workers=1)
+            t_ser = time.time() - t1
+            a = merge_parts(find_parts([tmp], P["kv"], P["n"], P["shards"]), P["kv"], P["n"], P["shards"])[1]
+            b = merge_parts(find_parts([whole], P["kv"], P["n"], 1), P["kv"], P["n"], 1)[1]
+            same = json.dumps(a, ensure_ascii=False) == json.dumps(b, ensure_ascii=False)
         extra = dict(status=f"короткая локальная проба (4 общих ядра): {P['kv']}, N = {P['n']}, {P['shards']} частей; отладочный "
                             "(N = 2000) и полный прогоны - задачи AWS jobs_l0_debug.json и jobs_l0.json",
                      probe=dict(params=P, sharding_check=dict(parts_union_equals_whole=same, n=P["n"], shards=P["shards"],
                                                               workers_parts=P["workers"], workers_whole=1),
-                                timing=dict(parts_wall_s=round(t_par, 2), whole_serial_wall_s=round(t_ser, 2),
-                                            s_per_concept_serial=round(t_ser / P["n"], 5),
-                                            parts_bytes_gz=gz_bytes, whole_bytes_json=os.path.getsize(L0.part_path(whole, P["kv"], P["n"], 0, 1)),
-                                            note="whole_serial - один процесс, включая запись файла; это и есть время на вариант")),
+                                timing=dict(parts_wall_s=round(t_par, 2), whole_serial_wall_s=round(t_ser, 2) if t_ser else None,
+                                            s_per_concept_serial=round(t_ser / P["n"], 5) if t_ser else None,
+                                            s_per_concept_parts=round(t_par * P["workers"] / P["n"], 5),
+                                            parts_bytes_gz=gz_bytes,
+                                            whole_bytes_json=(os.path.getsize(L0.part_path(whole, P["kv"], P["n"], 0, 1)) if do_whole else None),
+                                            note="whole_serial - один процесс с холодным кэшем замыканий, включая запись файла; контейнер "
+                                                 "общий (4 ядра, нагрузка чужими задачами) - время завышено против машины AWS")),
                      )
         extra["probe"]["part_bytes_per_concept"] = round(gz_bytes / P["n"], 1)
         if scale:
             whole_doc = load_part(L0.part_path(whole, P["kv"], P["n"], 0, 1))
             meta = {x: whole_doc[x] for x in whole_doc if x not in ("rows", "columns", "n_rows")}
             extra["merge_scale_check"] = scale_check(whole_doc["rows"], whole_doc["columns"], meta)
-        r = run_merge(find_parts([tmp], P["kv"], P["n"], P["shards"]), P["kv"], P["n"], P["shards"], out_dir, "",
-                      k=P["k"], top=P["top"], k_near=P["k_near"], near_max=P["near_max"], target=P["target"], extra_results=extra)
+        r = run_merge(find_parts([tmp], P["kv"], P["n"], P["shards"]), P["kv"], P["n"], P["shards"], out_dir, sfx,
+                      k=P["k"], top=P["top"], k_near=P["k_near"], near_max=P["near_max"], target=P["target"], extra_results=extra,
+                      detail_top=TOP_LIST if detail else 0, cycle_k=6 if detail else 2)
         return r
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
@@ -703,7 +712,8 @@ def scale_check(src_rows, columns, meta, n=200000, shards=30):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--probe", action="store_true", help="короткая локальная проба (KV-3, N=256, 10 частей)")
+    ap.add_argument("--probe", action="store_true", help="короткая локальная проба (KV-3, N=256, 10 частей; с --kv/--n - другая точка, "
+                                                          "файлы с суффиксом _probe_<KV>_n<N>, без проверки «целиком»)")
     ap.add_argument("--kv", default="KV-3", choices=sorted(FS.KV))
     ap.add_argument("--n", type=int)
     ap.add_argument("--shards", type=int)
@@ -728,7 +738,11 @@ def main(argv=None):
     a = ap.parse_args(argv)
     t0 = time.time()
     if a.probe:
-        r = probe(scale=a.scale_check)
+        if a.kv == "KV-3" and not a.n:
+            r = probe(scale=a.scale_check)
+        else:
+            n = a.n or 128
+            r = probe(scale=False, whole=False, sfx=f"_probe_{a.kv}_n{n}", kv=a.kv, n=n, target=min(PROBE["target"], n), detail=False)
     else:
         if not (a.n and a.shards):
             ap.error("нужны --n и --shards")

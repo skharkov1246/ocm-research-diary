@@ -26,7 +26,7 @@ def tmp():
 # =========================================================================== повторяемость
 def test_record_repeatable_and_order_free():
     a = [L0.evaluate_l0(i, 64, "KV-3") for i in range(6)]
-    FS._DM.clear(); FS._CLOSURE.clear(); FS._CANDS.clear()          # запись не зависит от кэшей замыкания и порядка счёта
+    FS._DM.clear(); FS._CLOSURE.clear(); FS._CANDS.clear(); FS._NOCLOSE.clear()   # запись не зависит от кэшей замыкания и порядка счёта
     b = [L0.evaluate_l0(i, 64, "KV-3") for i in reversed(range(6))][::-1]
     assert json.dumps(a, ensure_ascii=False) == json.dumps(b, ensure_ascii=False)
     assert list(a[0]) == L0.COLUMNS
@@ -362,6 +362,6 @@ def test_sampler_v2_windows_and_repair():
         if c["rotor_join"] in ("заодно", "сварка"):
             assert c["mat_tw"] != "SC"
     a = [FS.concept(i, n, "KV-3") for i in range(6)]
-    FS._CLOSURE.clear(); FS._CANDS.clear(); FS._DM.clear()
+    FS._CLOSURE.clear(); FS._CANDS.clear(); FS._NOCLOSE.clear(); FS._DM.clear()
     b = [FS.concept(i, n, "KV-3") for i in reversed(range(6))][::-1]
     assert a == b
