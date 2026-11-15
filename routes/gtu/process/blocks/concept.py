@@ -20,7 +20,7 @@ from . import _track as T
 DEFAULT = dict(
     kv="KV-3", name=None,
     fuel=dict(prep="нет", T_max=None, sc=2.0, R_egr=1.0),
-    compressor=dict(arch="2Ц", n_ax=0, inlet="одно", mat="Ti64", make="поковка", pi=None, split=0.5, mu=None, kcm=0.28, zc=11,
+    compressor=dict(arch="2Ц", n_ax=0, inlet="одно", mat="Ti64", make="поковка", pi=None, split=None, mu=None, kcm=0.28, zc=11,
                     intercool="нет", ic_after=None),
     combustor=dict(scheme="LPP", chamber="кольцевая", dp_source="comb_l0", pgc_real=None, dp=None),
     turbine=dict(type="О", nt="auto", cool="U", mat="SC", make="литьё", hot_make="литьё", hot_mat="K438", t41=1000.0, lt=None,
@@ -36,6 +36,7 @@ DEFAULT = dict(
 PI_DEFAULT = {"1Ц": 6.0, "Д": 4.5, "2Ц": 13.5, "ОЦ": 12.0}          # середины диапазонов воронки (funnel_space.PI_RANGE) - оценка
 MU_DEFAULT = {"Ц": 0.70, "Д": 0.60, "О": 0.28}                      # comp_stage (gtu_explore) - 0,70; середины MU_RANGE воронки
 LT_DEFAULT = {"О": 1.2, "Р": 0.70}                                  # ψ при наибольшем КПД eta_axial; U/C0 оптимума turb_radial
+AX_PI_DEFAULT = 1.6     # π осевой ступени ОЦ по умолчанию (воронка: не выше AX_PI_MAX 1,8) - оценка
 PSI_AUTO = 1.6           # число ступеней осевой турбины «auto»: наименьшее с ψ <= 1,6 при пределе окружной скорости (оценка по
 #                          frame3: при ψ 1,79 число Маха за сопловым аппаратом 1,24-1,44 > 1,2 - frame3_point_results.json turbine)
 NU_AUTO = 0.60           # радиальная: наименьшее число ступеней с U/C0 >= 0,60 при пределе окружной скорости (оценка)
@@ -74,6 +75,11 @@ def normalize(concept):
     if c["pi"] is None:
         c["pi"] = PI_DEFAULT[c["arch"]]
     typ = stage_types(C)
+    if c["split"] is None:
+        if c["arch"] == "ОЦ":          # осевые ступени по π 1,6 (предел воронки AX_PI_MAX 1,8), в окне SPLIT_RANGE ОЦ 0,12-0,60
+            c["split"] = min(0.60, max(0.12, c["n_ax"] * math.log(AX_PI_DEFAULT) / math.log(c["pi"])))
+        else:
+            c["split"] = 0.5           # 2Ц - поровну по ln π (frame3: 0,578 - оптимум по работе сжатия)
     if c["mu"] is None:
         c["mu"] = [MU_DEFAULT[x] for x in typ]
     elif isinstance(c["mu"], (int, float)):
