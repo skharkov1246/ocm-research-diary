@@ -231,11 +231,11 @@ def k_peak_cal():
 R_SPLIT_FRAC = 0.25        # граница зон «у оси» / «полотно», доля r2
 
 
-def k_table_cal():
-    """таблица k(h/r) из disk1d_calibration.json → table; нет — None"""
+def k_table_cal(comp):
+    """таблица k(h/r) ступени comp из disk1d_calibration.json → table[comp]; нет — None"""
     import json
     if os.path.exists(CAL_JSON):
-        t = json.load(open(CAL_JSON, encoding="utf-8")).get("table")
+        t = (json.load(open(CAL_JSON, encoding="utf-8")).get("table") or {}).get(comp)
         if t:
             return np.asarray(t["x"], float), np.asarray(t["k"], float)
     return None

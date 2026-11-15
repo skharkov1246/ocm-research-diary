@@ -245,10 +245,13 @@ _REF = {}
 _KP = []
 
 
-def _ktable():
-    if not _KP:
-        _KP.append(D1.k_table_cal())
-    return _KP[0]
+_KT = {}
+
+
+def _ktable(comp):
+    if comp not in _KT:
+        _KT[comp] = D1.k_table_cal(comp)
+    return _KT[comp]
 
 
 def baseline_genes(comp):
@@ -346,7 +349,7 @@ def eval_comp(comp, x, want_geom=False, use_ref=True):
     hb = geo["hb"]
     fac = 1 + geo["blade_fill_phi"] * hb / np.maximum(dk["h_eff"], 1e-6)
     T = comp_temperature(stage, r, r[-1])
-    kt = _ktable()
+    kt = _ktable(comp)
     if kt is not None:
         s100 = D1.solve(r, dk["h_eff"], fac, T, "ti64", P["n"], k_table=kt)
         s120 = D1.solve(r, dk["h_eff"], fac, T, "ti64", 1.2 * P["n"], k_table=kt)

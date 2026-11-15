@@ -636,6 +636,27 @@ class Ledger:
         return {"spent": spent, "committed": committed, "open": open_,
                 "closed": len(launches) - len(open_)}
 
+    def by_region(self) -> dict:
+        """Версия 3 (status): {(регион, рынок): {spent, committed, open, closed}} — по тем же формулам, что summary
+        без now; запись без полей региона и рынка — (None, None) (журнал версии 2). Пусто — полей нет нигде."""
+        recs = self.records()
+        launches = {r["iid"]: r for r in recs if r.get("ev") == "launch"}
+        if not any("region" in L or "market" in L for L in launches.values()):
+            return {}
+        ends = {r["iid"]: r for r in recs if r.get("ev") == "end"}
+        out: dict = {}
+        for iid, L in launches.items():
+            g = out.setdefault((L.get("region"), L.get("market")), {"spent": 0.0, "committed": 0.0, "open": 0, "closed": 0})
+            extra = L["ebs_usd_h"] + L.get("ip_usd_h", 0.0)
+            if iid in ends:
+                dur = max(60.0, ends[iid]["t_end"] - L["t_launch"])
+                g["spent"] += (L["spot_usd_h"] + extra) * dur / 3600.0 + L.get("xfer_usd", 0.0)
+                g["closed"] += 1
+            else:
+                g["committed"] += (L["max_usd_h"] + extra) * L["allot_min"] / 60.0 + L.get("xfer_usd", 0.0)
+                g["open"] += 1
+        return out
+
 
 # --------------------------------------------------------------------------- конфигурация
 @dataclass
@@ -1856,7 +1877,8 @@ class Runner:
         self.active.pop(a.iid, None)
         self._closed_n += 1
         self.ledger.append("end", run_id=self.cfg.run_id, job=a.job.name, iid=a.iid,
-                           t_end=round(self.clock(), 1), outcome=outcome, state=state, reason=reason)
+                           t_end=round(self.clock(), 1), outcome=outcome, state=state, reason=reason,
+                           **self._rf(a.region or self.cfg.region, a.market))
 
     def _drop(self, a: Active) -> None:
         """Гашение не подтверждено: снять с наблюдения, но запись в журнале оставить открытой.
@@ -2189,8 +2211,10 @@ class Runner:
                     res["interrupted"] = True
                 self.results[a.job.name] = res
                 where = "самая дешёвая" if res["cheapest_zone"] else f"место по цене {a.az_rank + 1}"
+                if a.market != "spot":
+                    where = "по требованию"
                 self.say(f"[итог] {a.job.name}: {res['status']} (фаза {res['phase']}, код {res['exit_code']}), "
-                         f"зона {a.az} ({where}, {a.spot_usd_h:.4f} долл./ч)")
+                         f"зона {a.az}{self._where(a.region)} ({where}, {a.spot_usd_h:.4f} долл./ч)")
             elif gone:
                 if retry:
                     lost_dir = self.cfg.out_dir / self.cfg.run_id / "_lost" / f"a{a.attempt}" / a.job.name
@@ -2227,6 +2251,15 @@ def _clients(region: str):
     c = BCfg(region_name=region, retries={"max_attempts": 8, "mode": "adaptive"})
     return (boto3.client("ec2", config=c), boto3.client("s3", config=c),
             boto3.client("ssm", config=c), boto3.client("sts", config=c))
+
+
+def _region_clients(region: str) -> dict:
+    """Версия 3: клиенты региона машин (EC2, SSM, Service Quotas — только чтение квот). Бакет — один, в --region."""
+    import boto3
+    from botocore.config import Config as BCfg
+    c = BCfg(region_name=region, retries={"max_attempts": 8, "mode": "adaptive"})
+    return {"ec2": boto3.client("ec2", config=c), "ssm": boto3.client("ssm", config=c),
+            "servicequotas": boto3.client("service-quotas", config=c)}
 
 
 def _check_branch(repo: str, branch: str) -> None:
@@ -2266,6 +2299,21 @@ def _config_from_args(a, need_env: bool) -> Config:
             setattr(cfg, name, getattr(a, name))
     if getattr(a, "out", None):
         cfg.out_dir = Path(a.out)
+    # ---- версия 3: без этих флагов конфигурация — точно версия 2
+    if getattr(a, "regions", None):
+        cfg.regions = parse_regions(a.regions)
+    if getattr(a, "vcpu_quota_per_region", None):
+        cfg.vcpu_quota_region = parse_region_ints(a.vcpu_quota_per_region, "--vcpu-quota-per-region")
+    if getattr(a, "od_vcpu_quota_per_region", None):
+        cfg.od_vcpu_quota_region = parse_region_ints(a.od_vcpu_quota_per_region, "--od-vcpu-quota-per-region")
+    for name in ("vcpu_quota_fallback", "region_price_margin", "xfer_gb"):
+        if getattr(a, name, None) is not None:
+            setattr(cfg, name, getattr(a, name))
+    if getattr(a, "price_ref", None):
+        cfg.price_ref = Path(a.price_ref)
+    cfg.on_demand_fallback = bool(getattr(a, "on_demand_fallback", False))
+    cfg.vcpu_quota_explicit = bool(getattr(a, "vcpu_quota_set", False))
+    cfg.max_parallel_auto = hasattr(a, "max_parallel") and not getattr(a, "max_parallel_set", False)
     validate_config(cfg)
     return cfg
 
@@ -2285,12 +2333,25 @@ def validate_config(cfg: Config) -> None:
         bad.append("grace_min ≥ 5 (запас на загрузку машины до старта сторожа)")
     if not cfg.poll_s >= 5 or cfg.retries < 0 or cfg.quota_wait_polls < 0 or cfg.capacity_wait_polls < 0:
         bad.append("poll_s ≥ 5, retries ≥ 0, quota_wait_polls ≥ 0, capacity_wait_polls ≥ 0")
+    if not (cfg.region_price_margin >= 0 and cfg.xfer_gb >= 0 and cfg.vcpu_quota_fallback >= 0
+            and cfg.od_vcpu_quota >= 0):
+        bad.append("region_price_margin, xfer_gb, vcpu_quota_fallback, od_vcpu_quota ≥ 0 (иначе смета занижена)")
+    if not REGION_RE.match(cfg.region) or any(not REGION_RE.match(r) for r in cfg.regions):
+        bad.append("регионы вида us-east-1")
     if bad:
         raise RunnerError("; ".join(bad))
 
 
+class _Mark(argparse.Action):
+    """Сохранить значение и отметить, что флаг задан явно (<dest>_set): умолчание не отличить от явного 384."""
+
+    def __call__(self, parser, ns, values, option_string=None):
+        setattr(ns, self.dest, values)
+        setattr(ns, self.dest + "_set", True)
+
+
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(description="Прогоны ГТУ-платформы на спотовых машинах AWS (us-east-1).")
+    p = argparse.ArgumentParser(description="Прогоны ГТУ-платформы на спотовых машинах AWS (us-east-1 и соседние регионы).")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     def common(sp):
@@ -2303,8 +2364,9 @@ def build_parser() -> argparse.ArgumentParser:
         sp.add_argument("--branch", default=os.environ.get("GTU_BRANCH", "main"))
         sp.add_argument("--repo", default=DEFAULT_REPO)
         sp.add_argument("--run-id")
-        sp.add_argument("--max-parallel", type=int, default=6, help="машин одновременно (6)")
-        sp.add_argument("--max-vcpu", "--vcpu-quota", dest="vcpu_quota", type=int, default=384,
+        sp.add_argument("--max-parallel", type=int, default=6, action=_Mark,
+                        help="машин одновременно (6; с --regions / --on-demand-fallback не задан — сумма квот / 64)")
+        sp.add_argument("--max-vcpu", "--vcpu-quota", dest="vcpu_quota", type=int, default=384, action=_Mark,
                         help="квота спота, vCPU (384): сверх неё задачи ждут в очереди")
         sp.add_argument("--quota-wait-polls", type=int, default=15,
                         help="квотная ошибка AWS без своих машин в работе: опросов ожидания (15)")
@@ -2320,6 +2382,21 @@ def build_parser() -> argparse.ArgumentParser:
         sp.add_argument("--spent-before", type=float, default=0.0, help="расход вне журнала, долл.")
         sp.add_argument("--max-job-min", type=int, default=720)
         sp.add_argument("--out", help="куда скачивать результаты (runs/)")
+        g = sp.add_argument_group("версия 3 — соседние мощности (без этих флагов — как версия 2)")
+        g.add_argument("--regions", help="регионы машин через запятую: us-east-1,us-east-2,us-west-2 "
+                                         "(по умолчанию только --region); бакет — один, в --region")
+        g.add_argument("--vcpu-quota-per-region", help="квота спота по регионам, vCPU: us-east-1=384,us-west-2=384 "
+                                                      "(ограничивает сверху фактическую из service-quotas)")
+        g.add_argument("--od-vcpu-quota-per-region", help="квота по требованию по регионам, vCPU: us-east-1=384,us-west-2=300")
+        g.add_argument("--vcpu-quota-fallback", type=int,
+                       help=f"квота соседнего региона, если нет ни флага, ни service-quotas ({QUOTA_FALLBACK} — не использовать)")
+        g.add_argument("--on-demand-fallback", action="store_true",
+                       help="спот недоступен во всех регионах (ёмкость, цена, права, квота) — машина по требованию "
+                            "по цене справочника, при своей квоте по требованию")
+        g.add_argument("--region-price-margin", type=float,
+                       help="соседний регион раньше --region, только если дешевле с этим запасом (0.05)")
+        g.add_argument("--xfer-gb", type=float, help="объём результатов задачи для сметы межрегиональной передачи, ГБ (10)")
+        g.add_argument("--price-ref", help=f"справочник цен по требованию и передачи ({PRICE_REF.name})")
         common(sp)
 
     sp = sub.add_parser("run", help="по умолчанию проверка прав (DryRun); --live — живой запуск")
@@ -2330,13 +2407,17 @@ def build_parser() -> argparse.ArgumentParser:
     sp = sub.add_parser("plan", help="без AWS: user-data, параметры run_instances, порядок зон, бюджет")
     knobs(sp)
     sp.add_argument("--assume-price", type=float, required=True, help="цена спота, долл./ч (допущение)")
-    sp.add_argument("--assume-zone-prices", help="цены по зонам (допущение): us-east-1a=0.955,us-east-1c=0.706")
+    sp.add_argument("--assume-zone-prices", help="цены по зонам (допущение): us-east-1a=0.955,us-east-1c=0.706 "
+                                                 "(с --regions — зоны всех регионов: us-east-2b=0.601,…)")
+    sp.add_argument("--assume-no-spot", action="store_true",
+                    help="допущение: спот недоступен во всех регионах (показать путь --on-demand-fallback)")
     sp.add_argument("--show-userdata", action="store_true")
     sp = sub.add_parser("status", help="журнал: израсходовано, в работе, остаток")
     common(sp)
-    sp = sub.add_parser("reap", help="погасить машины прогона по тегам")
+    sp = sub.add_parser("reap", help="погасить машины прогона по тегам (во всех регионах прогона по журналу)")
     sp.add_argument("--run-id", required=True)
     sp.add_argument("--list-only", action="store_true")
+    sp.add_argument("--regions", help="искать ещё и в этих регионах (к регионам прогона из журнала)")
     common(sp)
     sp = sub.add_parser("collect", help="скачать результаты задачи")
     sp.add_argument("--run-id", required=True)
@@ -2363,6 +2444,11 @@ def main(argv=None) -> int:
             print(f"журнал: {a.ledger}\nзакрыто машин: {s['closed']}, израсходовано ≈ {s['spent']:.2f} долл.\n"
                   f"открыто: {len(s['open'])} {s['open']}, верхняя граница по ним {s['committed']:.2f} долл.\n"
                   f"итого {total:.2f} из {a.ceiling:.2f}, остаток {a.ceiling - total:.2f} долл.")
+            groups = led.by_region()          # версия 3: только если в журнале есть записи с регионом и рынком
+            for (reg, mk), g in sorted(groups.items(), key=lambda kv: (str(kv[0][0]), str(kv[0][1]))):
+                print(f"  {reg or a.region + ' (журнал v2)'} {'по требованию' if mk == 'on-demand' else 'спот'}: "
+                      f"закрыто {g['closed']}, ≈ {g['spent']:.2f} долл.; открыто {g['open']}, "
+                      f"верхняя граница {g['committed']:.2f} долл.")
             return 0
         if a.cmd == "plan":
             if not a.assume_price > 0:
@@ -2371,9 +2457,13 @@ def main(argv=None) -> int:
             cfg.offline_price = a.assume_price
             if a.assume_zone_prices:
                 cfg.offline_zones = parse_zone_prices(a.assume_zone_prices)
+            cfg.offline_no_spot = bool(a.assume_no_spot)
+            if cfg.offline_no_spot and not cfg.on_demand_fallback:
+                raise RunnerError("--assume-no-spot имеет смысл только с --on-demand-fallback")
             jobs = load_jobs(a.jobs, a.max_job_min)
             r = Runner(cfg)
             r.check_userdata(jobs)            # все попытки: повтор пишет в более длинный префикс
+            r.load_quotas()                   # версия 3: справочник и квоты (plan: флаги или запасные значения)
             for job in jobs:
                 extra = {"python": f"Python {job.python} (uv)", "system": "системный python3",
                          "container": f"контейнер {job.container}, команд container_setup: {len(job.container_setup)}"}
@@ -2385,6 +2475,10 @@ def main(argv=None) -> int:
                 r.results[job.name] = {"status": st}
                 if job.name in r._why:
                     r.results[job.name]["detail"] = r._why[job.name]
+                if r.v3 and st == "planned":
+                    r.results[job.name].update(region=r.last_region, market=r.last_market)
+                    r.say(f"[регион] {job.name}: {r.last_region}, "
+                          f"{'спот' if r.last_market == 'spot' else 'по требованию'} (волна {r._wave})")
                 if r.last_params and st == "planned":
                     shown = dict(r.last_params)
                     ud = shown.pop("UserData")
@@ -2394,10 +2488,21 @@ def main(argv=None) -> int:
                         r.say(ud)
                 r.last_params = None
             need = sum(j.vcpu for j in jobs)
-            if need > cfg.vcpu_quota:
-                r.say(f"[очередь] пакет {need} vCPU > квоты {cfg.vcpu_quota}: одновременно не больше "
-                      f"{cfg.vcpu_quota} vCPU и {cfg.max_parallel} машин, остальные ждут освобождения")
-            r.say(f"[план] прогноз пакета {r.virtual:.2f} долл. (цена спота — допущение {a.assume_price}/ч)")
+            quota = r.total_quota()
+            if need > quota:
+                r.say(f"[очередь] пакет {need} vCPU > квоты {quota}: одновременно не больше "
+                      f"{quota} vCPU и {cfg.max_parallel} машин, остальные ждут освобождения")
+            if r.v3 and r._placements:
+                waves: dict = {}
+                for w, _name, reg, mk in r._placements:
+                    key = f"{reg} {'спот' if mk == 'spot' else 'по требованию'}"
+                    waves.setdefault(w, {}).setdefault(key, 0)
+                    waves[w][key] += 1
+                for w, d in sorted(waves.items()):
+                    r.say(f"[план] волна {w}: " + ", ".join(f"{k} ×{n}" for k, n in d.items()))
+            tail = (" (цена спота — допущение {}/ч; бюджет и MaxPrice — по максимуму по регионам)".format(a.assume_price)
+                    if r.v3 else f" (цена спота — допущение {a.assume_price}/ч)")
+            r.say(f"[план] прогноз пакета {r.virtual:.2f} долл.{tail}")
             bad = {k: v for k, v in r.results.items() if v["status"] != "planned"}
             if bad:
                 r.say(f"[план] НЕ спланированы: {bad}")
@@ -2417,7 +2522,7 @@ def main(argv=None) -> int:
             ec2, s3, ssm, sts = _clients(cfg.region)
             arn = sts.get_caller_identity()["Arn"]
             print("вызов от имени:", re.sub(r"::\d{12}:", "::<аккаунт>:", arn))
-            r = Runner(cfg, ec2, s3, ssm, sts)
+            r = Runner(cfg, ec2, s3, ssm, sts, region_clients=_region_clients)
             if dry:   # чтение префикса результатов — проверка s3:ListBucket
                 from botocore.exceptions import ClientError
                 try:
@@ -2431,7 +2536,8 @@ def main(argv=None) -> int:
             return 1 if bad else 0
         cfg = _config_from_args(a, need_env=True)
         ec2, s3, ssm, sts = _clients(cfg.region)
-        r = Runner(cfg, ec2, s3, ssm, sts)
+        # клиенты соседних регионов создаются лениво: только если журнал прогона или --regions их называют
+        r = Runner(cfg, ec2, s3, ssm, sts, region_clients=_region_clients)
         if a.cmd == "reap":
             r.reap("ручной сборщик", run_id=a.run_id, list_only=a.list_only)
             if not a.list_only:

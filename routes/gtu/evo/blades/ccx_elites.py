@@ -82,6 +82,7 @@ def columns(case, res_dir):
 
 X_BINS = [0.0, 0.1, 0.2, 0.35, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 5.0, 1e9]
 YR_CAL_MAX = 1.0           # таблица — по профилям вблизи допустимости (σ/σ0,2 по ccx ≤ 1): там нужна точность
+TABLE_Q = float(os.environ.get("EVO_TABLE_Q", "0.75"))   # квантиль отношения в ячейке h/r (1 — огибающая по максимуму)
 
 
 def zone_max(case, res_dir, r_split):
@@ -128,7 +129,7 @@ def run_comp(job):
     fy = np.interp(rc, F["r"][o], F["yr_raw"][o])
     hx = np.interp(rc, F["r"][o], F["h"][o]) / np.maximum(rc, 1e-3)
     col = dict(r=rc.tolist(), x=hx.tolist(), ccx=yc.tolist(), fast=fy.tolist())
-    kt = D1.k_table_cal()
+    kt = D1.k_table_cal(comp)
     fast_cal = None
     if kt is not None:
         fast_cal = D1.solve(dk["r"], dk["h_eff"], fac, T, "ti64", case["rpm"], k_table=kt)["yield_ratio_max"]
@@ -189,26 +190,32 @@ def calibrate(n=12, mesh=(80, 12), workers=4):
     jobs = [(c, x.tolist(), tag, mesh, 1.0, False) for c, x, tag in cset]
     with Pool(min(workers, len(jobs))) as pool:
         rows = pool.map(run_comp, jobs)
-    X, K = [], []
-    for r_ in rows:
-        if not r_["ccx"]["gate"] or r_["tag"].startswith("out_") or r_["ccx"]["yield_ratio_max"] > YR_CAL_MAX:
-            continue
-        cc = r_["columns"]
-        for x, a, b, rv in zip(cc["x"], cc["ccx"], cc["fast"], cc["r"]):
-            if a >= 0.15 and b > 0 and rv < 0.97 * cc["r"][-1]:      # у обода напряжения малы — отношение неустойчиво
-                X.append(x)
-                K.append(a / b)
-    X, K = np.array(X), np.array(K)
-    xs, ks, ns = [], [], []
-    for lo_, hi_ in zip(X_BINS[:-1], X_BINS[1:]):
-        m = (X >= lo_) & (X < hi_)
-        if m.any():
-            xs.append(float(np.median(X[m])))
-            ks.append(float(K[m].max()))
-            ns.append(int(m.sum()))
-    ks = np.maximum.accumulate(np.array(ks)).tolist()        # не убывает с толщиной (огибающая)
-    table = dict(x=[0.0] + xs + [1e6], k=[ks[0]] + ks + [ks[-1]], n_points=ns, bins=X_BINS[:-1],
-                 method="верхняя огибающая отношения ccx/тонкий диск по столбцам сетки, сгруппированного по местному h/r; не убывает")
+    def build_table(comp_):
+        X, K = [], []
+        for r_ in rows:
+            if (r_["comp"] != comp_ or not r_["ccx"]["gate"] or r_["tag"].startswith("out_")
+                    or r_["ccx"]["yield_ratio_max"] > YR_CAL_MAX):
+                continue
+            cc = r_["columns"]
+            for x, a, b, rv in zip(cc["x"], cc["ccx"], cc["fast"], cc["r"]):
+                if a >= 0.15 and b > 0 and rv < 0.97 * cc["r"][-1]:      # у обода напряжения малы — отношение неустойчиво
+                    X.append(x)
+                    K.append(a / b)
+        X, K = np.array(X), np.array(K)
+        xs, ks, ns = [], [], []
+        for lo_, hi_ in zip(X_BINS[:-1], X_BINS[1:]):
+            m = (X >= lo_) & (X < hi_)
+            if m.any():
+                xs.append(float(np.median(X[m])))
+                ks.append(float(np.quantile(K[m], TABLE_Q)))
+                ns.append(int(m.sum()))
+        ks = np.maximum.accumulate(np.array(ks)).tolist()        # не убывает с толщиной (огибающая)
+        return dict(x=[0.0] + xs + [1e6], k=[ks[0]] + ks + [ks[-1]], n_points=ns, bins=X_BINS[:-1],
+                    n_profiles=len({r_["tag"] for r_ in rows if r_["comp"] == comp_ and not r_["tag"].startswith("out_")
+                                    and r_["ccx"]["yield_ratio_max"] <= YR_CAL_MAX}),
+                    quantile=TABLE_Q,
+                    method="квантиль TABLE_Q отношения ccx/тонкий диск по столбцам сетки в ячейках местного h/r; не убывает с h/r")
+    table = {cm: build_table(cm) for cm in ("comp1", "comp2")}
     ka = np.array([r_["ccx"]["yr_axis"] / r_["fast"]["yr_axis_raw"] for r_ in rows if r_["ccx"]["gate"] and not r_["tag"].startswith("out_")])
     kw = np.array([r_["ccx"]["yr_web"] / r_["fast"]["yr_web_raw"] for r_ in rows if r_["ccx"]["gate"] and not r_["tag"].startswith("out_")])
     zones = dict(method=("CalculiX disk.py (CAX8 %d×%d, 100 %% частоты) против тонкого диска на %d профилях: облик frame3 и варианты "
@@ -226,8 +233,8 @@ def calibrate(n=12, mesh=(80, 12), workers=4):
         json.dump(d, f, ensure_ascii=False, indent=1, default=float)
     # проверка таблицы на тех же профилях: max_r k(h/r)·быстрая против max ccx
     chk = []
-    kt = (np.asarray(table["x"]), np.asarray(table["k"]))
     for c_, x_, tag in cset:
+        kt = (np.asarray(table[c_]["x"]), np.asarray(table[c_]["k"]))
         case, r = comp_case(c_, x_, 1.0, mesh, tag)
         geo = r["geom"]
         dk = geo["disk"]
