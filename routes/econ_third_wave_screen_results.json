@@ -1,0 +1,1061 @@
+{
+ "model": "Третья волна скрининга: 10 идей (Лукойл L11-L15, Норникель N13-N17) — один скрипт, unit economics одной установки/линии на идею",
+ "tier": "screening_pm_3_5x",
+ "tier_note": "ГРУБЕЕ второй волны (±2-3x): по 5-8 параметров на идею, три угла (pess/base/opt), без implementation-блоков; цель — отсев, не проектирование",
+ "not_bankable": true,
+ "tier_legend": {
+  "anchor_repo": "число из наших файлов или физика (помечено)",
+  "market": "рыночный диапазон, порядок величины",
+  "company_assumption": "допущение о компании — проверить у неё",
+  "literature": "литература/индустрия, не наш расчёт"
+ },
+ "anchors_check": {
+  "oer_eta_V": {
+   "model": 0.435,
+   "anchor": 0.435,
+   "source": "h2_oer_ladder_results.json: eta OER на Ni(OH)2 в щёлочи — фундамент N13",
+   "ok": true
+  },
+  "fes_cogef_F_max_nN": {
+   "model": 1.97,
+   "anchor": 1.97,
+   "source": "calc/fes_cogef_results.json: разрыв Fe-S(тиолат) — механовскрытие хвостов для N17 (T3)",
+   "ok": true
+  },
+  "mining_3x_usd_t": {
+   "model": 751.0,
+   "anchor": 751.0,
+   "source": "econ_vs_mining_results.json: порог specialty; проходят L11/L14/L15, НЕ проходят N15/N17 (помечено)",
+   "ok": true
+  },
+  "capital_charge_formula": {
+   "model": 494,
+   "anchor": 494.0,
+   "source": "msa_cost_model.json: $4.5M x 12% / 1093 т — та же формула капплатежа, что в econ() этого скрипта",
+   "ok": true
+  }
+ },
+ "ideas": {
+  "L11_dmds": {
+   "owner": "Лукойл",
+   "name": "L11 DMDS: диметилдисульфид из кислого газа",
+   "link": "связка L6 (CoMo/NiMo гидроочистка): свой же спрос на сульфидирование — гарантированный якорный offtake",
+   "assumptions": {
+    "dmds_price_usd_t": {
+     "value": [
+      1500,
+      2500
+     ],
+     "unit": "$/т",
+     "tier": "market",
+     "note": "DMDS: сульфидирующий агент CoMo/NiMo (связка L6 — свой же гидроочистной катализатор) + агрохимия (фумигант)"
+    },
+    "line_kt_y": {
+     "value": [
+      5,
+      10
+     ],
+     "unit": "кт/год",
+     "tier": "market",
+     "note": "мировой рынок DMDS ~30-50 кт/г — линия 5-10 кт заметна, но не ломает цену"
+    },
+    "meoh_usd_t": {
+     "value": [
+      250,
+      350
+     ],
+     "unit": "$/т",
+     "tier": "market"
+    },
+    "meoh_t_per_t": {
+     "value": 0.75,
+     "unit": "т MeOH/т DMDS",
+     "tier": "literature",
+     "note": "стехиометрия 2 CH3SH на (CH3S)2 ~0.68 + потери"
+    },
+    "h2s_own_usd_t": {
+     "value": [
+      0,
+      50
+     ],
+     "unit": "$/т H2S",
+     "tier": "company_assumption",
+     "note": "кислый газ свой (аминовая очистка НПЗ) — трансфертная цена ~0, возможен даже кредит утилизации; проверить у компании"
+    },
+    "h2s_t_per_t": {
+     "value": 0.4,
+     "unit": "т H2S/т DMDS",
+     "tier": "literature"
+    },
+    "opex_fixed_usd_t": {
+     "value": [
+      200,
+      400
+     ],
+     "unit": "$/т",
+     "tier": "company_assumption",
+     "note": "обслуживаемая площадка НПЗ (как L4)"
+    },
+    "capex_musd": {
+     "value": [
+      15,
+      30
+     ],
+     "unit": "$M",
+     "tier": "market",
+     "note": "линия меркаптан + окислительная конденсация, E1 ±3-5x"
+    }
+   },
+   "unit": "$/т DMDS",
+   "scenarios": {
+    "pess": {
+     "full_usd_unit": 1402.5,
+     "margin_usd_unit": 97.5,
+     "units_y": 5000,
+     "ebitda_musd_y": 0.49,
+     "capex_musd": 30,
+     "payback_y": 61.5
+    },
+    "base": {
+     "full_usd_unit": 887.0,
+     "margin_usd_unit": 1113.0,
+     "units_y": 7500,
+     "ebitda_musd_y": 8.35,
+     "capex_musd": 22,
+     "payback_y": 2.6
+    },
+    "opt": {
+     "full_usd_unit": 567.5,
+     "margin_usd_unit": 1932.5,
+     "units_y": 10000,
+     "ebitda_musd_y": 19.32,
+     "capex_musd": 15,
+     "payback_y": 0.8
+    }
+   },
+   "anchors_used": {
+    "mining_x3": "цена $1500-2500 >> $751 — specialty, тест econ_vs_mining пройден"
+   },
+   "gate": "ГЛАВНЫЙ ГЕЙТ: качество сульфидирующего агента (примеси в CH3SH из кислого газа) + подтверждённый offtake L6/агрохимия",
+   "kill": "цена DMDS < $1000/т (китайское перепредложение) — маржа базы падает к нулю; или запрет меркаптанового узла (ОПО)",
+   "verdict": "alive",
+   "verdict_note": "база: маржа $1113/т, EBITDA $8.3M/г, окуп. 2.6 г; даже pess-угол ($1500, всё дорого) держит маржу $97/т > 0 — редкость в этой волне"
+  },
+  "L12_ods": {
+   "owner": "Лукойл",
+   "name": "L12 ODS: окислительная десульфуризация судового топлива (H2O2 + Mo-POM)",
+   "link": "стык N7 (дешёвый H2O2) + наша Mo-пероксо-химия; убирает S БЕЗ водорода — против гидроочистки это и есть смысл",
+   "assumptions": {
+    "hsfo_vlsfo_spread_usd_t": {
+     "value": [
+      80,
+      200
+     ],
+     "unit": "$/т",
+     "tier": "market",
+     "note": "экономика = спред: окислили HSFO -> продали как compliant; спред волатилен (IMO-2020 пик ~$300, спады к $60-80)"
+    },
+    "unit_kt_y": {
+     "value": [
+      100,
+      500
+     ],
+     "unit": "кт/год",
+     "tier": "market"
+    },
+    "h2o2_kg_t": {
+     "value": [
+      3,
+      6
+     ],
+     "unit": "кг/т топлива",
+     "tier": "literature",
+     "note": "стехиометрия S->сульфон ~2 моль H2O2/моль S + избыток"
+    },
+    "h2o2_usd_t": {
+     "value": [
+      600,
+      900
+     ],
+     "unit": "$/т",
+     "tier": "market",
+     "note": "покупной 100%-эквивалент; стык N7 (прямой синтез) — ниже"
+    },
+    "cat_makeup_usd_t": {
+     "value": [
+      2,
+      5
+     ],
+     "unit": "$/т топлива",
+     "tier": "company_assumption",
+     "note": "догрузка Mo-полиоксометаллата — НАША Mo-химия (спин/пероксо)"
+    },
+    "yield_loss_usd_t": {
+     "value": [
+      5,
+      20
+     ],
+     "unit": "$/т",
+     "tier": "literature",
+     "note": "экстракция сульфонов уносит 1-3% топлива"
+    },
+    "opex_usd_t": {
+     "value": [
+      15,
+      30
+     ],
+     "unit": "$/т",
+     "tier": "company_assumption"
+    },
+    "capex_musd": {
+     "value": [
+      30,
+      80
+     ],
+     "unit": "$M",
+     "tier": "market",
+     "note": "на 100-500 кт/год"
+    }
+   },
+   "unit": "$/т топлива (доход = спред HSFO/VLSFO)",
+   "scenarios": {
+    "pess": {
+     "full_usd_unit": 96.4,
+     "margin_usd_unit": -16.4,
+     "units_y": 100000,
+     "ebitda_musd_y": -1.64,
+     "capex_musd": 30,
+     "payback_y": null
+    },
+    "base": {
+     "full_usd_unit": 60.4,
+     "margin_usd_unit": 79.6,
+     "units_y": 300000,
+     "ebitda_musd_y": 23.89,
+     "capex_musd": 55,
+     "payback_y": 2.3
+    },
+    "opt": {
+     "full_usd_unit": 43.0,
+     "margin_usd_unit": 157.0,
+     "units_y": 500000,
+     "ebitda_musd_y": 78.5,
+     "capex_musd": 80,
+     "payback_y": 1.0
+    }
+   },
+   "gate": "ГЛАВНЫЙ ГЕЙТ: устойчивый спред >= $100/т + ПРИЁМКА окисленного топлива (спецификация ISO 8217 / стабильность после экстракции сульфонов) — без неё продукта нет",
+   "kill": "спред < $60/т дольше года (маржа базы уходит < 0) или отказ бункеровщиков от окисленного продукта",
+   "verdict": "borderline",
+   "verdict_note": "база: маржа $80/т при спреде $140, EBITDA $23.9M/г, окуп. 2.3 г — красиво, но ВЕСЬ доход = волатильный спред: pess ($80) уже -$16/т; это опцион на спред, не бизнес с себестоимостной защитой"
+  },
+  "L13_co2_eor": {
+   "owner": "Лукойл",
+   "name": "L13 CO2-EOR: свой CO2 в зрелые пласты",
+   "link": "утилизация CO2 от SMR (и будущего L3): вместо платы за выброс — баррели; углеродная отчётность бонусом",
+   "assumptions": {
+    "bbl_per_t_co2": {
+     "value": [
+      2,
+      4
+     ],
+     "unit": "барр./т CO2",
+     "tier": "literature",
+     "note": "инкрементальная нефть на тонну закачанного CO2 (miscible flood, мировая практика); на конкретном пласте — MMP-тест"
+    },
+    "urals_usd_bbl": {
+     "value": [
+      55,
+      70
+     ],
+     "unit": "$/барр.",
+     "tier": "market"
+    },
+    "inject_usd_t": {
+     "value": [
+      20,
+      40
+     ],
+     "unit": "$/т CO2",
+     "tier": "literature",
+     "note": "компрессия + скважины + рецикл CO2"
+    },
+    "co2_supply_usd_t": {
+     "value": [
+      25,
+      50
+     ],
+     "unit": "$/т CO2",
+     "tier": "company_assumption",
+     "note": "захват+осушка+труба от своего SMR (или будущего L3); проверить у компании"
+    },
+    "lifting_usd_bbl": {
+     "value": [
+      15,
+      25
+     ],
+     "unit": "$/барр.",
+     "tier": "literature",
+     "note": "подъём/подготовка инкрементальной нефти"
+    },
+    "tax_take": {
+     "value": [
+      0.15,
+      0.45
+     ],
+     "unit": "доля выручки",
+     "tier": "company_assumption",
+     "note": "НДПИ/экспортная нагрузка; 0.15 = адресная льгота на ТрИЗ/EOR — ключевая ручка, проверить у компании"
+    },
+    "scale_mt_y": {
+     "value": [
+      0.5,
+      1.0
+     ],
+     "unit": "Мт CO2/год",
+     "tier": "market"
+    },
+    "capex_musd": {
+     "value": [
+      100,
+      200
+     ],
+     "unit": "$M",
+     "tier": "market",
+     "note": "труба CO2 + компрессия + переобвязка куста, E1 ±3-5x"
+    }
+   },
+   "unit": "$/т CO2 (доход = инкрементальная нефть)",
+   "scenarios": {
+    "pess": {
+     "full_usd_unit": 164.0,
+     "margin_usd_unit": -103.5,
+     "units_y": 500000,
+     "ebitda_musd_y": -51.75,
+     "capex_musd": 100,
+     "payback_y": null
+    },
+    "base": {
+     "full_usd_unit": 149.0,
+     "margin_usd_unit": -18.8,
+     "units_y": 750000,
+     "ebitda_musd_y": -14.1,
+     "capex_musd": 150,
+     "payback_y": null
+    },
+    "opt": {
+     "full_usd_unit": 129.0,
+     "margin_usd_unit": 109.0,
+     "units_y": 1000000,
+     "ebitda_musd_y": 109.0,
+     "capex_musd": 200,
+     "payback_y": 1.8
+    }
+   },
+   "gate": "ГЛАВНЫЙ ГЕЙТ: налоговый режим (льгота НДПИ на EOR/ТрИЗ) + подтверждение 2-4 барр./т CO2 на КОНКРЕТНОМ пласте (MMP)",
+   "kill": "< 1.5 барр./т CO2 на пилотном участке или полная налоговая ставка без льготы — маржа < 0 при любой цене Urals $55-70",
+   "verdict": "borderline",
+   "verdict_note": "база: маржа $-19/т CO2 — В МИНУСЕ после налога 30% и капплатежа; вся экономика живёт в налоговой ручке: льгота 15% даёт $109/т ($109M/г на 1 Мт, окуп. 1.8 г), полная ставка убивает"
+  },
+  "L14_mesophase_pitch": {
+   "owner": "Лукойл",
+   "name": "L14 Мезофазный пек из гудрона",
+   "link": "гейт — контроль радикальной конденсации ПАУ: наша NEVPT2 π-радикальная химия (какие радикалы растить, какие глушить — от этого зависит мезофаза vs изотроп vs кокс)",
+   "assumptions": {
+    "gudron_usd_t": {
+     "value": [
+      150,
+      300
+     ],
+     "unit": "$/т",
+     "tier": "market",
+     "note": "остаток вакуумной перегонки — свой, трансферт ~топочный мазут"
+    },
+    "pitch_price_usd_t": {
+     "value": [
+      800,
+      3000
+     ],
+     "unit": "$/т",
+     "tier": "market",
+     "note": "изотропный пек (связующее анодов/электродов) $800-1200; МЕЗОФАЗНЫЙ (прекурсор углеволокна/игольчатого кокса) $2000-3000 — премия и есть приз"
+    },
+    "yield_t_t": {
+     "value": [
+      0.4,
+      0.6
+     ],
+     "unit": "т пека/т гудрона",
+     "tier": "literature",
+     "note": "термополиконденсация 400-440°C"
+    },
+    "distillate_credit_usd_t": {
+     "value": [
+      100,
+      200
+     ],
+     "unit": "$/т пека",
+     "tier": "company_assumption",
+     "note": "отгон (крекинг-дистилляты) в топливный пул завода"
+    },
+    "opex_usd_t": {
+     "value": [
+      150,
+      350
+     ],
+     "unit": "$/т пека",
+     "tier": "company_assumption"
+    },
+    "line_kt_y": {
+     "value": [
+      20,
+      50
+     ],
+     "unit": "кт пека/год",
+     "tier": "market"
+    },
+    "capex_musd": {
+     "value": [
+      40,
+      80
+     ],
+     "unit": "$M",
+     "tier": "market"
+    }
+   },
+   "unit": "$/т пека",
+   "scenarios": {
+    "pess": {
+     "full_usd_unit": 1240.0,
+     "margin_usd_unit": -440.0,
+     "units_y": 20000,
+     "ebitda_musd_y": -8.8,
+     "capex_musd": 40,
+     "payback_y": null
+    },
+    "base": {
+     "full_usd_unit": 755.7,
+     "margin_usd_unit": 744.3,
+     "units_y": 35000,
+     "ebitda_musd_y": 26.05,
+     "capex_musd": 60,
+     "payback_y": 2.3
+    },
+    "opt": {
+     "full_usd_unit": 368.0,
+     "margin_usd_unit": 2632.0,
+     "units_y": 50000,
+     "ebitda_musd_y": 131.6,
+     "capex_musd": 70,
+     "payback_y": 0.5
+    }
+   },
+   "anchors_used": {
+    "mining_x3": "мезофазная цена $1500-3000 >> $751 — specialty; изотропная $800-1200 — на грани"
+   },
+   "gate": "ГЛАВНЫЙ ГЕЙТ: воспроизводимое МЕЗОФАЗНОЕ качество (содержание мезофазы, QI, точка размягчения) = контроль π-радикальной конденсации; изотроп премии не несёт",
+   "kill": "если достижим только изотропный пек И цена < $800/т — маржа < 0 (pess-угол): вариант умирает, остаётся топливо",
+   "verdict": "alive",
+   "verdict_note": "база (мезофаза $1500): маржа $744/т, EBITDA $26M/г, окуп. 2.3 г — самый большой приз волны; но вердикт живёт РОВНО за гейтом качества: изотроп-угол -$440/т — бинарный исход"
+  },
+  "L15_hppo": {
+   "owner": "Лукойл",
+   "name": "L15 HPPO: пропиленоксид на Ставролене",
+   "link": "стык N7 (on-site H2O2) + TS-1 эпоксидирование — наша спин/пероксо-химия (Ti-OOH интермедиат)",
+   "assumptions": {
+    "po_price_usd_t": {
+     "value": [
+      1500,
+      2200
+     ],
+     "unit": "$/т",
+     "tier": "market",
+     "note": "пропиленоксид, импортозамещение РФ"
+    },
+    "c3h6_usd_t": {
+     "value": [
+      800,
+      1000
+     ],
+     "unit": "$/т",
+     "tier": "market",
+     "note": "свой пропилен (Ставролен)"
+    },
+    "c3h6_t_per_t": {
+     "value": 0.76,
+     "unit": "т C3H6/т PO",
+     "tier": "literature",
+     "note": "стехиометрия 0.72 + селективность ~95%"
+    },
+    "h2o2_t_per_t": {
+     "value": 0.76,
+     "unit": "т H2O2(100%)/т PO",
+     "tier": "literature"
+    },
+    "h2o2_usd_t": {
+     "value": [
+      600,
+      900
+     ],
+     "unit": "$/т",
+     "tier": "market",
+     "note": "покупной; СТЫК N7: on-site прямой синтез -> $400-550"
+    },
+    "opex_usd_t": {
+     "value": [
+      150,
+      250
+     ],
+     "unit": "$/т PO",
+     "tier": "company_assumption"
+    },
+    "line_kt_y": {
+     "value": [
+      50,
+      100
+     ],
+     "unit": "кт PO/год",
+     "tier": "market",
+     "note": "мини-линия против world-scale 300+ кт — капекс/т тяжёлый"
+    },
+    "capex_musd": {
+     "value": [
+      150,
+      250
+     ],
+     "unit": "$M",
+     "tier": "market",
+     "note": "E1 ±3-5x"
+    }
+   },
+   "unit": "$/т PO",
+   "scenarios": {
+    "pess": {
+     "full_usd_unit": 2054.0,
+     "margin_usd_unit": -554.0,
+     "units_y": 50000,
+     "ebitda_musd_y": -27.7,
+     "capex_musd": 150,
+     "payback_y": null
+    },
+    "base": {
+     "full_usd_unit": 1774.0,
+     "margin_usd_unit": 76.0,
+     "units_y": 75000,
+     "ebitda_musd_y": 5.7,
+     "capex_musd": 200,
+     "payback_y": 35.1
+    },
+    "opt": {
+     "full_usd_unit": 1362.0,
+     "margin_usd_unit": 838.0,
+     "units_y": 100000,
+     "ebitda_musd_y": 83.8,
+     "capex_musd": 250,
+     "payback_y": 3.0
+    }
+   },
+   "n7_upside": {
+    "full_usd_unit": 1546.0,
+    "margin_usd_unit": 304.0,
+    "units_y": 75000,
+    "ebitda_musd_y": 22.8,
+    "capex_musd": 200,
+    "payback_y": 8.8,
+    "note": "база, но H2O2 on-site $450 (N7): маржа $304/т, окуп. 8.8 г — жив только этот вариант"
+   },
+   "anchors_used": {
+    "mining_x3": "PO $1500-2200 >> $751 — specialty"
+   },
+   "gate": "ГЛАВНЫЙ ГЕЙТ: дешёвый on-site H2O2 (N7, <= $550/т) — при покупном $750 маржа $76/т и окуп. 35 лет: мёртво",
+   "kill": "H2O2 > $850/т при PO < $1700/т — маржа < 0; или мини-масштаб не строится дешевле ~$2500/т мощности",
+   "verdict": "borderline",
+   "verdict_note": "база на ПОКУПНОМ H2O2: маржа $76/т, окуп. 35 лет — мертво; с N7-перекисью $450 оживает до $304/т (окуп. 8.8 г) — идея-сателлит N7, сама по себе не стоит"
+  },
+  "N13_ni_electrodes": {
+   "owner": "Норникель",
+   "name": "N13 Активированные Ni-электроды для щелочных электролизёров",
+   "link": "свой Ni + наша OER-лестница (eta=0.435 В) как расчётный фундамент дизайна покрытия — самая 'наша' идея волны",
+   "assumptions": {
+    "price_usd_m2": {
+     "value": [
+      200,
+      600
+     ],
+     "unit": "$/м2",
+     "tier": "market",
+     "note": "активированный (Raney-Ni / NiMo-покрытие) электрод для AWE; голая Ni-сетка ~$100-150 — премия за активацию и ресурс"
+    },
+    "ni_kg_m2": {
+     "value": [
+      0.8,
+      2.5
+     ],
+     "unit": "кг Ni/м2",
+     "tier": "literature",
+     "note": "пена/сетка + покрытие"
+    },
+    "ni_usd_kg": {
+     "value": [
+      15,
+      19
+     ],
+     "unit": "$/кг",
+     "tier": "market",
+     "note": "LME + передел; Ni свой"
+    },
+    "processing_usd_m2": {
+     "value": [
+      60,
+      150
+     ],
+     "unit": "$/м2",
+     "tier": "company_assumption",
+     "note": "плазменное/гальваническое нанесение, выщелачивание Al, QC"
+    },
+    "line_k_m2_y": {
+     "value": [
+      10,
+      50
+     ],
+     "unit": "тыс. м2/год",
+     "tier": "market",
+     "note": "рынок AWE растёт с ГВт-заводами электролизёров"
+    },
+    "capex_musd": {
+     "value": [
+      5,
+      15
+     ],
+     "unit": "$M",
+     "tier": "market"
+    },
+    "oer_eta_V": {
+     "value": 0.435,
+     "unit": "В",
+     "tier": "anchor_repo",
+     "note": "h2_oer_ladder_results: НАША OER-лестница на Ni(OH)2 в щёлочи — прямая расчётная валидация продукта (редкий случай: якорь репозитория лежит ровно на идее)"
+    }
+   },
+   "unit": "$/м2",
+   "scenarios": {
+    "pess": {
+     "full_usd_unit": 257.5,
+     "margin_usd_unit": -57.5,
+     "units_y": 10000,
+     "ebitda_musd_y": -0.57,
+     "capex_musd": 5,
+     "payback_y": null
+    },
+    "base": {
+     "full_usd_unit": 165.5,
+     "margin_usd_unit": 234.5,
+     "units_y": 30000,
+     "ebitda_musd_y": 7.04,
+     "capex_musd": 10,
+     "payback_y": 1.4
+    },
+    "opt": {
+     "full_usd_unit": 108.0,
+     "margin_usd_unit": 492.0,
+     "units_y": 50000,
+     "ebitda_musd_y": 24.6,
+     "capex_musd": 15,
+     "payback_y": 0.6
+    }
+   },
+   "anchors_used": {
+    "oer_eta": "0.435 В из h2_oer_ladder_results — сверено в anchors_check"
+   },
+   "gate": "ГЛАВНЫЙ ГЕЙТ: ресурс покрытия (10 000+ ч, циклы/реверсы поляризации) + вход в цепочку OEM-электролизёрщиков — премию платят за подтверждённые часы, не за eta на бумаге",
+   "kill": "цена < $150/м2 (коммодитизация китайскими сетками без подтверждённого ресурса) — маржа уходит < 0",
+   "verdict": "alive",
+   "verdict_note": "база: маржа $234/м2, EBITDA $7.0M/г, окуп. 1.4 г; pess-угол -$57/м2 (активированный по цене голой сетки — маловероятная комбинация); малый капекс, быстрый вход"
+  },
+  "N14_cu2o_antifouling": {
+   "owner": "Норникель",
+   "name": "N14 Cu2O-антифоулинг для флота СМП",
+   "link": "своя медь + свой флот: замкнутая мини-цепочка; upside — продажа краски другим операторам СМП",
+   "assumptions": {
+    "fleet_vessels": {
+     "value": [
+      6,
+      12
+     ],
+     "unit": "судов",
+     "tier": "company_assumption",
+     "note": "свой флот СМП (Arc7 контейнеровозы + танкеры/баржи); проверить у компании"
+    },
+    "fuel_t_y_vessel": {
+     "value": [
+      5000,
+      12000
+     ],
+     "unit": "т топлива/судно/год",
+     "tier": "company_assumption"
+    },
+    "fuel_usd_t": {
+     "value": [
+      450,
+      650
+     ],
+     "unit": "$/т",
+     "tier": "market"
+    },
+    "incr_saving": {
+     "value": [
+      0.03,
+      0.07
+     ],
+     "unit": "доля",
+     "tier": "literature",
+     "note": "брутто чистый корпус даёт 5-15%; ИНКРЕМЕНТ к обычной краске — честно 3-7%"
+    },
+    "cu2o_t_per_docking": {
+     "value": [
+      5,
+      15
+     ],
+     "unit": "т Cu2O/судно/докование",
+     "tier": "literature"
+    },
+    "docking_interval_y": {
+     "value": 3,
+     "unit": "лет",
+     "tier": "literature"
+    },
+    "program_cost_musd_y": {
+     "value": [
+      0.3,
+      0.8
+     ],
+     "unit": "$M/год",
+     "tier": "company_assumption",
+     "note": "краска (свой Cu -> Cu2O) + нанесение в доке"
+    },
+    "capex_musd": {
+     "value": 1.5,
+     "unit": "$M",
+     "tier": "market",
+     "note": "малый узел Cu->Cu2O + склад"
+    }
+   },
+   "unit": "$M/год на флот (не $/т — экономика услуги)",
+   "scenarios": {
+    "pess": {
+     "benefit_musd_y": 0.41,
+     "net_musd_y": -0.4,
+     "cu2o_t_y": 20.0,
+     "payback_y": null
+    },
+    "base": {
+     "benefit_musd_y": 1.76,
+     "net_musd_y": 1.26,
+     "cu2o_t_y": 26.7,
+     "payback_y": 1.2
+    },
+    "opt": {
+     "benefit_musd_y": 6.55,
+     "net_musd_y": 6.25,
+     "cu2o_t_y": 40.0,
+     "payback_y": 0.2
+    }
+   },
+   "gate": "ГЛАВНЫЙ ГЕЙТ: ледовая абразия — стойкость Cu2O-покрытия под льдом Arc7 (обычный антифоулинг лёд сдирает за навигацию); нужен ледостойкий связующий матрикс",
+   "kill": "покрытие не живёт одну навигацию во льду — программа теряет смысл (перекраска чаще докования невозможна)",
+   "verdict": "borderline",
+   "verdict_note": "ЧЕСТНО МИКРО: Cu2O ~26.7 т/г (не тоннажный продукт), чистый эффект базы $1.3M/г, окуп. 1.2 г — для НН нематериально; жив как практика флота, не как бизнес"
+  },
+  "N15_an_explosives": {
+   "owner": "Норникель",
+   "name": "N15 Селитра/эмульсионные ВВ on-site (мини-Haber-Bosch, Таймыр)",
+   "link": "газ Таймыра -> NH3 -> АС/эмульсии для СВОИХ рудников; доход = замещение северного завоза, не рынок",
+   "assumptions": {
+    "an_delivered_usd_t": {
+     "value": [
+      400,
+      700
+     ],
+     "unit": "$/т",
+     "tier": "company_assumption",
+     "note": "альтернатива — северный завоз аммиачной селитры/эмульсий на Таймыр (цена delivered); проверить у компании"
+    },
+    "nh3_kt_y": {
+     "value": [
+      20,
+      50
+     ],
+     "unit": "кт NH3/год",
+     "tier": "market",
+     "note": "мини-Haber-Bosch на газе Таймыра — КЛАССИКА малого масштаба, НЕ наша электрохимия (честно)"
+    },
+    "nh3_cash_usd_t": {
+     "value": [
+      250,
+      450
+     ],
+     "unit": "$/т NH3",
+     "tier": "literature",
+     "note": "малый HB на своём дешёвом газе: газ ~$50-80/т NH3 + opex малого масштаба"
+    },
+    "nh3_t_per_t_an": {
+     "value": 0.43,
+     "unit": "т NH3/т АС",
+     "tier": "literature",
+     "note": "0.213 в АС + 0.21 через HNO3"
+    },
+    "conv_opex_usd_t": {
+     "value": [
+      80,
+      160
+     ],
+     "unit": "$/т АС",
+     "tier": "literature",
+     "note": "узел HNO3 + нейтрализация + приллирование/эмульсия"
+    },
+    "capex_musd": {
+     "value": [
+      120,
+      250
+     ],
+     "unit": "$M",
+     "tier": "market",
+     "note": "мини-NH3 + HNO3 + АС: капекс малого масштаба — ГЛАВНАЯ неопределённость (E1 ±3-5x); модульные мини-HB могут сдвинуть"
+    },
+    "tea_anchor_usd_kg_n": {
+     "value": 2.0,
+     "unit": "$/кг N",
+     "tier": "anchor_repo",
+     "note": "flagship #1 (screening): ~$2/кг-N — планка стоимости азота, доставленного в Арктику"
+    }
+   },
+   "unit": "$/т АС (цена = завоз delivered)",
+   "scenarios": {
+    "pess": {
+     "full_usd_unit": 998.5,
+     "margin_usd_unit": -548.5,
+     "units_y": 46512,
+     "ebitda_musd_y": -25.51,
+     "capex_musd": 250,
+     "payback_y": null,
+     "usd_kg_n": 2.89
+    },
+    "base": {
+     "full_usd_unit": 580.1,
+     "margin_usd_unit": -30.1,
+     "units_y": 69767,
+     "ebitda_musd_y": -2.1,
+     "capex_musd": 180,
+     "payback_y": null,
+     "usd_kg_n": 1.68
+    },
+    "opt": {
+     "full_usd_unit": 311.3,
+     "margin_usd_unit": 388.7,
+     "units_y": 116279,
+     "ebitda_musd_y": 45.19,
+     "capex_musd": 120,
+     "payback_y": 2.7,
+     "usd_kg_n": 0.9
+    }
+   },
+   "anchors_used": {
+    "tea_flagship": "full базы = $1.68/кг-N против якоря ~$2/кг-N (flagship #1) — сходится по порядку; завоз $550/т = $1.59/кг-N",
+    "mining_x3": "АС $400-700 < $751 — НЕ specialty: это замещение затрат, не продукт с премией"
+   },
+   "gate": "ГЛАВНЫЙ ГЕЙТ: капекс мини-HB (E1 ±3-5x) — при модульном <$1500/т мощности и завозе $650+ оживает; плюс безопасность снабжения рудников (стратегическая, не в цифрах)",
+   "kill": "завоз стабильно < $450/т (сильный рубль/субсидия) или капекс > $250M — full выше завоза навсегда",
+   "verdict": "borderline",
+   "verdict_note": "база: full $580/т ПРОТИВ завоза $550 — маржа $-30/т, около нуля; opt (модульный капекс + завоз $700) даёт $388/т и окуп. 2.7 г; решает капекс, не химия"
+  },
+  "N16_ni63_betavoltaics": {
+   "owner": "Норникель",
+   "name": "N16 Ni-63 бета-вольтаика (КОНЦЕПТ с Росатомом)",
+   "link": "свой никель как сырьё изотопа; арктический IoT — свой же спрос (мерзлота/трубы/СМП)",
+   "assumptions": {
+    "source_price_usd_unit": {
+     "value": [
+      1000,
+      5000
+     ],
+     "unit": "$/шт",
+     "tier": "market",
+     "note": "микроисточник мкВт-класса (по аналогам NanoTritium/City Labs)"
+    },
+    "arctic_iot_units_y": {
+     "value": [
+      1000,
+      100000
+     ],
+     "unit": "шт/год",
+     "tier": "market",
+     "note": "датчики трубопроводов/геотехника вечной мерзлоты/СМП-буи — рамка ниши, не прогноз"
+    },
+    "ni62_feed": {
+     "value": "свой Ni (изотоп Ni-62 ~3.6%)",
+     "unit": "-",
+     "tier": "company_assumption",
+     "note": "обогащение и облучение — только Росатом"
+    },
+    "partner": {
+     "value": "Росатом (облучение в реакторе, изотопная лицензия)",
+     "unit": "-",
+     "tier": "company_assumption"
+    },
+    "half_life_y": {
+     "value": 101.0,
+     "unit": "лет",
+     "tier": "literature",
+     "note": "Ni-63: бета без гаммы — идеален для необслуживаемых датчиков"
+    }
+   },
+   "unit": "рамка рынка, БЕЗ unit economics",
+   "concept_no_economics": true,
+   "market_frame": "ниша $1M-$500M/год в самом широком допущении (1-100 тыс. шт по $1000-5000) — но себестоимость обогащения Ni-62 и облучения знает только Росатом: числа не наши, модель честно молчит",
+   "gate": "ГЛАВНЫЙ ГЕЙТ: партнёрство с Росатомом (реакторное облучение + изотопная лицензия) — без него идеи не существует",
+   "kill": "Росатом не входит / лицензия на изотопное производство вне контура Росатома невозможна — концепт закрывается",
+   "verdict": "concept",
+   "verdict_note": "concept_no_economics: в скрине только рамка рынка; не считаем alive/dead без себестоимости изотопа"
+  },
+  "N17_fecl3_coagulant": {
+   "owner": "Норникель",
+   "name": "N17 FeCl3-коагулянт из пирротиновых хвостов + хлора Кольской",
+   "link": "ДВОЙНАЯ утилизация: железо хвостов (T3, механовскрытие Fe-S — наш COGEF-якорь) и хлор Кольской в один продукт",
+   "assumptions": {
+    "price_usd_t": {
+     "value": [
+      250,
+      450
+     ],
+     "unit": "$/т 40%-р-ра",
+     "tier": "market",
+     "note": "коагулянт для водоканалов (замещение импорта/Al-соли)"
+    },
+    "line_kt_y": {
+     "value": [
+      20,
+      60
+     ],
+     "unit": "кт/год (40% р-р)",
+     "tier": "market"
+    },
+    "cl2_t_per_t": {
+     "value": 0.262,
+     "unit": "т Cl2/т 40%-р-ра",
+     "tier": "literature",
+     "note": "стехиометрия FeCl3: 65.6% Cl x 0.4"
+    },
+    "cl2_own_usd_t": {
+     "value": [
+      0,
+      150
+     ],
+     "unit": "$/т Cl2",
+     "tier": "company_assumption",
+     "note": "хлор Кольской — свой, местами проблемный актив (кредит утилизации возможен); проверить у компании"
+    },
+    "fe_units_usd_t": {
+     "value": [
+      30,
+      90
+     ],
+     "unit": "$/т р-ра",
+     "tier": "company_assumption",
+     "note": "железо из пирротиновых хвостов (T3): механоактивация + выщелачивание/хлорирование"
+    },
+    "opex_usd_t": {
+     "value": [
+      40,
+      80
+     ],
+     "unit": "$/т",
+     "tier": "company_assumption"
+    },
+    "delivery_usd_t": {
+     "value": [
+      30,
+      120
+     ],
+     "unit": "$/т",
+     "tier": "market",
+     "note": "40% р-р = возим 60% воды: радиус ~1000-1500 км (СЗФО)"
+    },
+    "capex_musd": {
+     "value": [
+      15,
+      40
+     ],
+     "unit": "$M",
+     "tier": "market"
+    }
+   },
+   "unit": "$/т 40%-раствора",
+   "scenarios": {
+    "pess": {
+     "full_usd_unit": 299.3,
+     "margin_usd_unit": -169.3,
+     "units_y": 20000,
+     "ebitda_musd_y": -3.39,
+     "capex_musd": 15,
+     "payback_y": null
+    },
+    "base": {
+     "full_usd_unit": 214.7,
+     "margin_usd_unit": 75.3,
+     "units_y": 40000,
+     "ebitda_musd_y": 3.01,
+     "capex_musd": 25,
+     "payback_y": 8.3
+    },
+    "opt": {
+     "full_usd_unit": 130.0,
+     "margin_usd_unit": 290.0,
+     "units_y": 60000,
+     "ebitda_musd_y": 17.4,
+     "capex_musd": 30,
+     "payback_y": 1.7
+    }
+   },
+   "anchors_used": {
+    "fes_cogef": "F_max(Fe-S) = 1.97 нН << C-C 5.58 нН (calc/fes_cogef_results): механохимическое вскрытие пирротиновой решётки доступно — гейт T3 пройден расчётом, сверено в anchors_check",
+    "mining_x3": "FeCl3 $250-450 < $751 — НЕ specialty; живёт только на почти бесплатном сырье из отходов"
+   },
+   "gate": "ГЛАВНЫЙ ГЕЙТ: логистика раствора (радиус сбыта) + СанПиН-примеси (Ni/Co/As из хвостов в питьевой воде — сертификация коагулянта)",
+   "kill": "доставка > $120/т (возим воду дальше 1500 км) или непрохождение по примесям для питьевого применения",
+   "verdict": "borderline",
+   "verdict_note": "база: маржа $75/т, EBITDA $3.0M/г, окуп. 8.3 г — живо, но тонко и некрупно; красота идеи в утилизации двух проблемных потоков, не в марже"
+  }
+ },
+ "summary": {
+  "verdicts": {
+   "L11_dmds": "alive",
+   "L12_ods": "borderline",
+   "L13_co2_eor": "borderline",
+   "L14_mesophase_pitch": "alive",
+   "L15_hppo": "borderline",
+   "N13_ni_electrodes": "alive",
+   "N14_cu2o_antifouling": "borderline",
+   "N15_an_explosives": "borderline",
+   "N16_ni63_betavoltaics": "concept",
+   "N17_fecl3_coagulant": "borderline"
+  },
+  "counts": {
+   "alive": 3,
+   "borderline": 6,
+   "dead": 0,
+   "concept": 1
+  },
+  "top3_by_attractiveness": [
+   "L14_mesophase_pitch",
+   "L11_dmds",
+   "N13_ni_electrodes"
+  ],
+  "top3_scores_ebitda_per_payback": {
+   "L11_dmds": 3.21,
+   "L14_mesophase_pitch": 5.66,
+   "N13_ni_electrodes": 2.51
+  },
+  "top3_note": "скоринг = EBITDA базы / окупаемость базы, дисконт x0.5 если pess-угол в минусе; только alive-идеи"
+ },
+ "honesty": "скрин ±3-5x, не банк. Честные выводы: (1) НИ ОДНОЙ мёртвой при базовых допущениях — подозрительно добрый результат для третьей волны; причина в том, что все borderline живут на одной непроверенной ручке (спред L12, налог L13, H2O2-цена L15, капекс N15, логистика N17) — каждый гейт способен убить; (2) alive-тройка неоднородна: L14 — самый большой приз за БИНАРНЫМ гейтом качества (π-радикальная конденсация, наша NEVPT2-химия), L11 — единственная идея с положительным pess-углом, N13 — единственная с прямым расчётным якорем репозитория (eta 0.435 В); (3) N14 честно микро ($1-2M/г), N16 честно концепт без экономики; (4) N15/N17 ниже порога specialty $751/т — живут только на бесплатном/отходном сырье и замещении завоза, это другой класс идей; (5) стыки работают в обе стороны: L12 и L15 добавляют спрос на H2O2 (усиливают кейс N7), но сами без N7 не стоят."
+}

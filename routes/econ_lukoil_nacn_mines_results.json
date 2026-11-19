@@ -1,0 +1,488 @@
+{
+ "model": "Лукойл L2: NaCN-скиды у золотых ГОКов + каннибализация Саратоворгсинтеза",
+ "tier": "screening_pm_2_3x",
+ "not_bankable": true,
+ "frame": "скрин ±2-3x; фикс $380/т@1кт/г нормируется по тоннажу; WACC 12%; капитальная строка — перпетуитет capex*WACC/т (как в econ_shock_candidates)",
+ "consistency_anchors": {
+  "econ_shock_candidates.json": "S1: 2500 т/г, $3000/т delivered, var $823, full $1263, маржа $1737, EBITDA $4.34M, окупаемость 1.4 г, выход 65%; WACC 12%",
+  "skid_twin.json": "газ факел $30/т",
+  "econ_vs_mining_results.json": "NaCN $3000/т >> порога 3x к майнингу ($751/т) — категория specialty"
+ },
+ "assumptions": {
+  "wacc": {
+   "value": 0.12,
+   "unit": "1/год",
+   "tier": "anchor_repo",
+   "comment": "econ_shock_candidates / msa_cost_model: 12% годовых на капитал"
+  },
+  "asset_life_y": {
+   "value": 12,
+   "unit": "лет",
+   "tier": "anchor_repo",
+   "comment": "econ_vs_mining: 12 лет у скид-линейки; капитальная строка здесь — перпетуитет capex*WACC/т, как в econ_shock_candidates"
+  },
+  "fix_skid_usd_t_at_1kt": {
+   "value": 380.0,
+   "unit": "$/т при 1 кт/г",
+   "tier": "anchor_repo",
+   "comment": "econ_shock_candidates: фикс малого масштаба, нормируется по тоннажу как 380*(1000/т_г)"
+  },
+  "yield_andrussow": {
+   "value": 0.65,
+   "unit": "доля",
+   "tier": "anchor_repo",
+   "comment": "econ_shock_candidates S1: выход HCN-тракта 65%"
+  },
+  "ch4_per_t_nacn": {
+   "value": 0.5,
+   "unit": "т CH4/т NaCN",
+   "tier": "anchor_repo",
+   "comment": "стехиометрия 0.327 т / выход 0.65 = 0.504 -> якорь 0.50"
+  },
+  "nh3_per_t_nacn": {
+   "value": 0.5,
+   "unit": "т NH3/т NaCN",
+   "tier": "anchor_repo",
+   "comment": "якорь S1; отвечает эфф. использованию NH3 ~69% (стехиометрия 0.347 т; без рецикла при 65% было бы 0.534 т — узел частичного рецикла NH3 обязателен)"
+  },
+  "naoh_per_t_nacn": {
+   "value": 0.82,
+   "unit": "т NaOH(100%)/т NaCN",
+   "tier": "anchor_repo",
+   "comment": "якорь S1 = стехиометрия 0.816 т + ~0.5% избыток"
+  },
+  "gas_usd_t": {
+   "value": 30.0,
+   "unit": "$/т CH4",
+   "tier": "anchor_repo",
+   "comment": "skid_twin: факельный/скважинный газ $30/т (труба $180/т — здесь не нужна, газ у ГОКа скважинный)"
+  },
+  "energy_pt_usd_t": {
+   "value": 180.0,
+   "unit": "$/т NaCN",
+   "tier": "anchor_repo",
+   "comment": "econ_shock_candidates S1: энергия + амортизация Pt/Rh-сеток (823-15-300-328=180)"
+  },
+  "capex_skid_musd": {
+   "value": 6.0,
+   "unit": "$M",
+   "tier": "anchor_repo",
+   "comment": "econ_shock_candidates S1; разбивка в implementation"
+  },
+  "skid_t_y": {
+   "value": 2500.0,
+   "unit": "т NaCN/год",
+   "tier": "anchor_repo",
+   "comment": "econ_shock_candidates S1"
+  },
+  "delivered_price_usd_t": {
+   "value": 3000.0,
+   "unit": "$/т NaCN delivered",
+   "tier": "anchor_repo",
+   "comment": "econ_shock_candidates S1: диапазон 2800-3500 у рудника; в модели = gate + плечо*ставка"
+  },
+  "gok_demand_kt_y": {
+   "value": [
+    3,
+    15
+   ],
+   "unit": "кт NaCN/год на ГОК",
+   "tier": "anchor_repo",
+   "comment": "notes S1: рудник-якорь 3-15 кт/г = 1-6 скидов"
+  },
+  "nh3_usd_t_scenarios": {
+   "value": {
+    "optimistic": 300,
+    "base": 400,
+    "pessimistic": 600
+   },
+   "unit": "$/т NH3 delivered",
+   "tier": "market",
+   "comment": "привозной аммиак жд+авто; якорь S1 считан консервативно по $600 (= наш pessimistic)"
+  },
+  "naoh_usd_t": {
+   "value": 400.0,
+   "unit": "$/т NaOH (100% основа) delivered",
+   "tier": "market",
+   "comment": "каустик как 50% р-р, пересчёт на сухой; из var_s1 якоря"
+  },
+  "competitor_gate_usd_t": {
+   "value": 2200.0,
+   "unit": "$/т NaCN ex-works",
+   "tier": "market",
+   "comment": "мировая цена брикетов 1800-2500 ex-works; delivered у рудника = gate + логистика"
+  },
+  "hazmat_logistics_usd_t_km": {
+   "value": 0.5,
+   "unit": "$/т-км",
+   "tier": "market",
+   "comment": "перевозка цианида класс 6.1: спецконвой, охрана, страховка; диапазон 0.3-0.8"
+  },
+  "delivery_distance_km": {
+   "value": {
+    "near": 800,
+    "base": 1600,
+    "far": 2400
+   },
+   "unit": "км",
+   "tier": "market",
+   "comment": "плечо завод->ГОК; 2200+0.5*1600=3000 воспроизводит delivered-якорь $3000/т"
+  },
+  "gold_to_demand_elasticity": {
+   "value": 1.0,
+   "unit": "б/р",
+   "tier": "market",
+   "comment": "скрин-связка: золото ±30% -> переработка руды и спрос NaCN ±30% (эластичность 1:1)"
+  },
+  "saratov_nacn_capacity_kt_y": {
+   "value": [
+    20,
+    40
+   ],
+   "unit": "кт NaCN/год",
+   "tier": "company_assumption",
+   "comment": "мощность Саратоворгсинтеза по NaCN — проверить у компании"
+  },
+  "plant_margin_usd_t": {
+   "value": [
+    200,
+    500
+   ],
+   "unit": "$/т NaCN",
+   "tier": "company_assumption",
+   "comment": "маржа завода на тонне — проверить у компании"
+  },
+  "plant_gate_price_usd_t": {
+   "value": 2200.0,
+   "unit": "$/т NaCN ex-works",
+   "tier": "company_assumption",
+   "comment": "netback завода принят равным рыночному gate — проверить у компании"
+  },
+  "cannibal_share": {
+   "value": [
+    0.3,
+    0.7
+   ],
+   "unit": "доля скид-тоннажа",
+   "tier": "company_assumption",
+   "comment": "какая часть скид-продаж вытесняет СОБСТВЕННЫЕ продажи завода (остальное — импорт/конкуренты) — проверить"
+  },
+  "goks_with_gas": {
+   "value": [
+    2,
+    5
+   ],
+   "unit": "шт",
+   "tier": "company_assumption",
+   "comment": "число ГОКов-якорей со скважинным газом в досягаемости — проверить по месторождениям"
+  },
+  "andrussow_trl": {
+   "value": 9,
+   "unit": "TRL",
+   "tier": "literature",
+   "comment": "CH4+NH3+1.5O2 -> HCN+3H2O на Pt/Rh(90/10)-сетке ~1100C, промышленность 100 лет; новизна — масштаб и сайтинг"
+  }
+ },
+ "mass_balance": {
+  "reaction": "CH4 + NH3 + 1.5 O2 -> HCN + 3 H2O (Pt/Rh ~1100C); HCN + NaOH -> NaCN + H2O",
+  "per_t_nacn": {
+   "hcn_t": 0.551,
+   "ch4_stoich_t": 0.327,
+   "ch4_at_65pct_t": 0.504,
+   "ch4_model_t": 0.5,
+   "nh3_stoich_t": 0.347,
+   "nh3_at_65pct_no_recycle_t": 0.534,
+   "nh3_model_t": 0.5,
+   "nh3_note": "0.50 т = эфф. использование 69%: непрореагировавший NH3 частично улавливается/рециклится (стандартный узел)",
+   "naoh_stoich_t": 0.816,
+   "naoh_model_t": 0.82,
+   "o2_t": 1.51,
+   "air_t": 6.5,
+   "product_as_30pct_solution_t": 3.33
+  },
+  "per_skid_year_at_2500t": {
+   "ch4_t": 1250,
+   "ch4_mmscf_d_equiv": 0.17,
+   "nh3_t": 1250,
+   "naoh_t_dry": 2050,
+   "note": "CH4 ~0.17 MMscf/д — малая скважина ГОКа покрывает; NH3 1250 т/г = ~60 автоцистерн/год; NaOH завозится как 50% р-р"
+  }
+ },
+ "anchor_reproduction": {
+  "inputs": "NH3 $600, delivered $3000, 2500 т/г, капекс $6.0M",
+  "skid": {
+   "t_per_year": 2500,
+   "price_usd_t": 3000,
+   "variable_usd_t": 823,
+   "fixed_usd_t": 152,
+   "capital_usd_t": 288,
+   "full_cost_usd_t": 1263,
+   "margin_usd_t": 1737,
+   "ebitda_musd_y": 4.34,
+   "payback_y": 1.4
+  },
+  "matches_econ_shock_candidates_S1": true
+ },
+ "scenarios": {
+  "pessimistic": {
+   "skid": {
+    "t_per_year": 2000,
+    "price_usd_t": 2600,
+    "variable_usd_t": 823,
+    "fixed_usd_t": 190,
+    "capital_usd_t": 420,
+    "full_cost_usd_t": 1433,
+    "margin_usd_t": 1167,
+    "ebitda_musd_y": 2.33,
+    "payback_y": 3.0
+   },
+   "fleet_and_cannibalization": {
+    "gok_anchors": 2,
+    "kt_per_gok": 3.0,
+    "demand_kt_y": 6.0,
+    "n_skids": 3,
+    "capex_fleet_musd": 21.0,
+    "ebitda_fleet_musd_y": 7.0,
+    "cannibalized_kt_y": 4.2,
+    "plant_revenue_lost_musd_y": 9.2,
+    "plant_margin_lost_musd_y": 2.1,
+    "net_effect_lukoil_musd_y": 4.9,
+    "payback_fleet_y": 4.3
+   },
+   "note": "NH3 $600 (= консервативный якорь S1); ГОКи близко к заводу (плечо 800 км -> delivered лишь $2600); мелкие якоря 3 кт/г; капекс +$1M северное исполнение; теряем максимум заводской маржи"
+  },
+  "base": {
+   "skid": {
+    "t_per_year": 2500,
+    "price_usd_t": 3000,
+    "variable_usd_t": 723,
+    "fixed_usd_t": 152,
+    "capital_usd_t": 288,
+    "full_cost_usd_t": 1163,
+    "margin_usd_t": 1837,
+    "ebitda_musd_y": 4.59,
+    "payback_y": 1.3
+   },
+   "fleet_and_cannibalization": {
+    "gok_anchors": 3,
+    "kt_per_gok": 5.0,
+    "demand_kt_y": 15.0,
+    "n_skids": 6,
+    "capex_fleet_musd": 36.0,
+    "ebitda_fleet_musd_y": 27.6,
+    "cannibalized_kt_y": 7.5,
+    "plant_revenue_lost_musd_y": 16.5,
+    "plant_margin_lost_musd_y": 2.6,
+    "net_effect_lukoil_musd_y": 24.9,
+    "payback_fleet_y": 1.4
+   },
+   "note": "delivered $3000 = якорь S1; NH3 $400 (типовой рынок); 3 ГОКа по 5 кт/г = 6 скидов; половина тоннажа — бывшие клиенты завода"
+  },
+  "optimistic": {
+   "skid": {
+    "t_per_year": 2500,
+    "price_usd_t": 3400,
+    "variable_usd_t": 673,
+    "fixed_usd_t": 152,
+    "capital_usd_t": 288,
+    "full_cost_usd_t": 1113,
+    "margin_usd_t": 2287,
+    "ebitda_musd_y": 5.72,
+    "payback_y": 1.0
+   },
+   "fleet_and_cannibalization": {
+    "gok_anchors": 5,
+    "kt_per_gok": 8.0,
+    "demand_kt_y": 40.0,
+    "n_skids": 16,
+    "capex_fleet_musd": 96.0,
+    "ebitda_fleet_musd_y": 91.5,
+    "cannibalized_kt_y": 12.0,
+    "plant_revenue_lost_musd_y": 26.4,
+    "plant_margin_lost_musd_y": 2.4,
+    "net_effect_lukoil_musd_y": 89.1,
+    "payback_fleet_y": 1.1
+   },
+   "note": "дальние ГОКи (delivered $3400); 5 якорей по 8 кт/г = 40 кт/г — флот масштаба самого завода (20-40 кт company_assumption): каннибализация выше 0.3 возможна, проверить сбытовую карту у компании"
+  }
+ },
+ "sensitivity": {
+  "nh3_usd_t": {
+   "300": {
+    "full_usd_t": 1113,
+    "margin_usd_t": 1887,
+    "ebitda_musd_y": 4.72,
+    "payback_y": 1.3
+   },
+   "400": {
+    "full_usd_t": 1163,
+    "margin_usd_t": 1837,
+    "ebitda_musd_y": 4.59,
+    "payback_y": 1.3
+   },
+   "600": {
+    "full_usd_t": 1263,
+    "margin_usd_t": 1737,
+    "ebitda_musd_y": 4.34,
+    "payback_y": 1.4
+   },
+   "800": {
+    "full_usd_t": 1363,
+    "margin_usd_t": 1637,
+    "ebitda_musd_y": 4.09,
+    "payback_y": 1.5
+   }
+  },
+  "delivery_distance_km_classic": {
+   "800": {
+    "full_usd_t": 1163,
+    "margin_usd_t": 1437,
+    "ebitda_musd_y": 3.59,
+    "payback_y": 1.7
+   },
+   "1600": {
+    "full_usd_t": 1163,
+    "margin_usd_t": 1837,
+    "ebitda_musd_y": 4.59,
+    "payback_y": 1.3
+   },
+   "2400": {
+    "full_usd_t": 1163,
+    "margin_usd_t": 2237,
+    "ebitda_musd_y": 5.59,
+    "payback_y": 1.1
+   }
+  },
+  "gok_demand_via_gold_pm30pct": {
+   "-30%": {
+    "full_usd_t": 1352,
+    "margin_usd_t": 1648,
+    "ebitda_musd_y": 2.88,
+    "payback_y": 2.1
+   },
+   "+0%": {
+    "full_usd_t": 1163,
+    "margin_usd_t": 1837,
+    "ebitda_musd_y": 4.59,
+    "payback_y": 1.3
+   },
+   "+30%": {
+    "full_usd_t": 1061,
+    "margin_usd_t": 1939,
+    "ebitda_musd_y": 6.3,
+    "payback_y": 1.0
+   }
+  },
+  "capex_pm30pct": {
+   "-30%": {
+    "full_usd_t": 1077,
+    "margin_usd_t": 1923,
+    "ebitda_musd_y": 4.81,
+    "payback_y": 0.9
+   },
+   "+0%": {
+    "full_usd_t": 1163,
+    "margin_usd_t": 1837,
+    "ebitda_musd_y": 4.59,
+    "payback_y": 1.3
+   },
+   "+30%": {
+    "full_usd_t": 1249,
+    "margin_usd_t": 1751,
+    "ebitda_musd_y": 4.38,
+    "payback_y": 1.8
+   }
+  },
+  "notes": {
+   "nh3": "$800 — kill-порог (см. kill_criteria)",
+   "distance": "плечо доставки классики двигает delivered-цену скида: delivered = gate $2200 + плечо * $0.5/т-км",
+   "gold": "золото ±30% -> спрос ГОКа ±30% (эластичность 1:1, скрин); +30% требует запаса шильды скида — дебатлнек не заложен",
+   "capex": "±30% вокруг якорных $6.0M"
+  }
+ },
+ "kill_criteria": {
+  "nh3_delivered_above_800_usd_t": {
+   "threshold": 800,
+   "unit": "$/т NH3 delivered",
+   "margin_at_threshold_usd_t": 1637,
+   "why": "маржа формально ещё положительна (~$1637/т), но NH3 дороже $800/т означает сломанную северную логистику: 1250 т NH3/г на скид едут по тем же зимникам — премисса 'опасные грузы не едут' инвертируется, и завозная классика сравнивается"
+  },
+  "gok_anchor_below_2kt_y": {
+   "threshold": 2000,
+   "unit": "т NaCN/год у ГОКа-якоря",
+   "payback_at_1500_t_y": 2.8,
+   "payback_at_1000_t_y": 5.6,
+   "why": "ниже 2 кт/г фикс+капитал не размазываются (окупаемость уезжает к 3-6 г) и весь скид висит на одном клиенте"
+  },
+  "hcn_production_ban_at_mine": {
+   "threshold": "бинарный (регуляторика)",
+   "why": "запрет производства HCN на промплощадке рудника (лицензия ОПО, Ростехнадзор) убивает вариант целиком; снимается на FEED-стадии ДО денег на серию — см. trl_gates"
+  }
+ },
+ "implementation": {
+  "block_flow": [
+   "1. приём скважинного газа + сероочистка (ZnO)",
+   "2. склад привозного NH3 (изотермический, 2x100 т) + узел испарения",
+   "3. воздушный компрессор + фильтрация",
+   "4. смеситель CH4/NH3/воздух (контроль состава ниже НКПР, пламегасители)",
+   "5. реактор Андруссова: Pt/Rh(90/10)-сетки, ~1100C, мс-контакт",
+   "6. котёл-утилизатор (пар на собственные нужды — реакция экзотермична)",
+   "7. улавливание/частичный рецикл непрореагировавшего NH3",
+   "8. абсорбция HCN в 30% NaOH -> раствор NaCN 30%",
+   "9. (опция) выпарка + грануляция -> брикеты в биг-бэгах",
+   "10. дожиг хвостов (следы HCN) + свеча",
+   "11. ёмкостной парк NaCN + отгрузка на ЗИФ (короткое плечо/трубопровод)"
+  ],
+  "equipment": {
+   "реактор Андруссова + первый комплект Pt/Rh-сеток": 1500000.0,
+   "котёл-утилизатор": 500000.0,
+   "абсорберы (NH3-улавливание + HCN->NaOH)": 900000.0,
+   "склад NH3 (2x100 т) + насосы/испаритель": 600000.0,
+   "склад NaOH (50% р-р) + парк готового NaCN": 500000.0,
+   "компрессоры воздуха + газоподготовка": 500000.0,
+   "КИПиА/ПАЗ: газоанализ HCN/NH3, дожиг, СБ": 700000.0,
+   "монтаж/фундаменты/эстакады, северное исполнение": 800000.0,
+   "note": "сумма $6.0M = якорный капекс; Pt в сетках (~$0.2M) возвратный"
+  },
+  "footprint_m2": 1500,
+  "footprint_note": "установка ~1500 м2 + санитарно-защитная зона; площадка на промзоне ГОКа рядом с ЗИФ",
+  "utilities": {
+   "электричество_кВт": 500,
+   "пар": "самообеспечение от котла-утилизатора",
+   "вода_оборотная_м3_ч": 10,
+   "азот_нм3_ч": 50,
+   "прочее": "H2SO4 для NH3-улавливания (если рецикл неполный)"
+  },
+  "staffing": "10-12 чел: 4 вахтовые бригады x 2 оператора + КИП/механик + начальник установки; ремонты — силами ГОКа по договору",
+  "rollout": [
+   {
+    "stage": "FEED + лицензирование производства HCN/NaCN на площадке",
+    "months": 9
+   },
+   {
+    "stage": "пилотный скид на 1-м ГОКе: пуск, выход >=60-65%, сертификация NaCN у ЗИФ",
+    "months": 12
+   },
+   {
+    "stage": "решение о серии; тираж 2-3 скида/год",
+    "months": 12
+   },
+   {
+    "stage": "целевой флот 6 скидов / 3 ГОКа (base)",
+    "months": 15
+   }
+  ],
+  "trl_gates": [
+   "выход HCN >=60% подтверждён на пилотной сетке (химия TRL 9, но малый масштаб сетки — мерить, не верить)",
+   "CFD/кинетика смесителя: состав вне взрывных пределов во всех режимах — расчётом ДО FEED",
+   "тест выщелачивания руды ГОКа нашим 30% р-ром NaCN — приёмка ЗИФ",
+   "лицензия на производство HCN у рудника получена ДО денег на серию",
+   "контракт зимней NH3-логистики <= $600/т подтверждён"
+  ],
+  "barrier_and_safety": {
+   "категория_перевозки_исчезает": "цианид не едет 1500-3000 км спецконвоем по дорогам общего пользования — он рождается в сотнях метров от ЗИФ и уходит внутризаводским плечом; издержки категории 'транспорт ЦН' (конвой, охрана, страховка, разрешения на маршрут) исчезают из цепочки; остаётся привоз NH3 (рутинная практика) и NaOH (класс ниже)",
+   "барьер_входа": "чтобы отбить клиента, конкуренту нужен свой скид — а площадка, газ и интеграция с ЗИФ уже заняты; take-or-pay с ГОКом на 5-7 лет"
+  }
+ },
+ "honesty": "скрин ±2-3x, НЕ банковская модель. Всё по Лукойлу/Саратоворгсинтезу (мощность 20-40 кт/г, маржа $200-500/т, netback, доля каннибализации, список ГОКов с газом) — company_assumption, проверить у компании. Выход 65% — литературный уровень Андруссова, на пилоте подтвердить. Цены NH3/NaOH/логистики — рыночные оценки без котировок. В optimistic флот 40 кт/г сопоставим с самим заводом — каннибализация там почти наверняка выше заложенных 0.3."
+}
