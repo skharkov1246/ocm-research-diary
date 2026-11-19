@@ -1,0 +1,353 @@
+{
+  "what": "RadShield screen: H-плотность, Z/A, Бете-тормозная способность протонов, CSDA-пробеги, отсечки по слоям, захват тепловых n на 10B",
+  "date": "2026-08-25",
+  "method": "состав-арифметика + Bethe (PDG, full Tmax, no shell/density) + Bragg additivity (ICRU-37) + sigma_th(10B)=3837 b",
+  "validation": {
+    "water_S_100MeV_computed": 7.287,
+    "water_S_100MeV_PSTAR_anchor": "7.28-7.29 (NIST PSTAR, сверено WebSearch 2026-08-25)",
+    "water_anchor_dev_pct": -0.03,
+    "PE_I_eff_computed_eV": 56.5,
+    "PE_I_eff_ICRU37_eV": 57.4,
+    "PE_I_dev_pct": -1.54,
+    "note": "Bethe без shell/density поправок; I по брэгговской аддитивности. Дозовый транспорт (ГКЛ, нейтроны) НЕ считается — нужен HZETRN/Geant4."
+  },
+  "results": [
+    {
+      "material": "Al (корпус, базовая линия)",
+      "weight_fractions": {
+        "Al": 1.0
+      },
+      "H_wt_pct": 0.0,
+      "H_mol_per_g": 0.0,
+      "B_wt_pct": 0.0,
+      "Z_over_A": 0.4818,
+      "I_eff_eV": 166.0,
+      "S_p_MeV_cm2_g": {
+        "10MeV": 34.278,
+        "30MeV": 14.381,
+        "100MeV": 5.687,
+        "250MeV": 3.082
+      },
+      "csda_range_g_cm2": {
+        "10MeV": 0.1651,
+        "30MeV": 1.1664,
+        "100MeV": 9.9718
+      },
+      "proton_cutoff_MeV": {
+        "0.5g_cm2": 18.67,
+        "1g_cm2": 27.53,
+        "2g_cm2": 40.55
+      },
+      "B10_atoms_per_g": "0.000e+00",
+      "thermal_n_capture_prob_1g_cm2": 0.0
+    },
+    {
+      "material": "Вода H2O",
+      "weight_fractions": {
+        "H": 0.11191,
+        "O": 0.88809
+      },
+      "H_wt_pct": 11.19,
+      "H_mol_per_g": 0.11102,
+      "B_wt_pct": 0.0,
+      "Z_over_A": 0.55509,
+      "I_eff_eV": 75.3,
+      "S_p_MeV_cm2_g": {
+        "10MeV": 45.913,
+        "30MeV": 18.777,
+        "100MeV": 7.287,
+        "250MeV": 3.909
+      },
+      "csda_range_g_cm2": {
+        "10MeV": 0.1208,
+        "30MeV": 0.8815,
+        "100MeV": 7.7145
+      },
+      "proton_cutoff_MeV": {
+        "0.5g_cm2": 21.94,
+        "1g_cm2": 32.16,
+        "2g_cm2": 47.16
+      },
+      "B10_atoms_per_g": "0.000e+00",
+      "thermal_n_capture_prob_1g_cm2": 0.0
+    },
+    {
+      "material": "Полиэтилен (CH2)n / СВМПЭ",
+      "weight_fractions": {
+        "C": 0.85628,
+        "H": 0.14372
+      },
+      "H_wt_pct": 14.37,
+      "H_mol_per_g": 0.14258,
+      "B_wt_pct": 0.0,
+      "Z_over_A": 0.57033,
+      "I_eff_eV": 56.5,
+      "S_p_MeV_cm2_g": {
+        "10MeV": 49.57,
+        "30MeV": 20.116,
+        "100MeV": 7.761,
+        "250MeV": 4.15
+      },
+      "csda_range_g_cm2": {
+        "10MeV": 0.1112,
+        "30MeV": 0.8196,
+        "100MeV": 7.2235
+      },
+      "proton_cutoff_MeV": {
+        "0.5g_cm2": 22.87,
+        "1g_cm2": 33.47,
+        "2g_cm2": 49.01
+      },
+      "B10_atoms_per_g": "0.000e+00",
+      "thermal_n_capture_prob_1g_cm2": 0.0
+    },
+    {
+      "material": "Кевлар (C14H10N2O2)n",
+      "weight_fractions": {
+        "C": 0.7058,
+        "H": 0.04231,
+        "N": 0.11758,
+        "O": 0.13431
+      },
+      "H_wt_pct": 4.23,
+      "H_mol_per_g": 0.04197,
+      "B_wt_pct": 0.0,
+      "Z_over_A": 0.52047,
+      "I_eff_eV": 74.8,
+      "S_p_MeV_cm2_g": {
+        "10MeV": 43.105,
+        "30MeV": 17.624,
+        "100MeV": 6.838,
+        "250MeV": 3.668
+      },
+      "csda_range_g_cm2": {
+        "10MeV": 0.1286,
+        "30MeV": 0.9391,
+        "100MeV": 8.2195
+      },
+      "proton_cutoff_MeV": {
+        "0.5g_cm2": 21.19,
+        "1g_cm2": 31.06,
+        "2g_cm2": 45.54
+      },
+      "B10_atoms_per_g": "0.000e+00",
+      "thermal_n_capture_prob_1g_cm2": 0.0
+    },
+    {
+      "material": "LiH",
+      "weight_fractions": {
+        "H": 0.12682,
+        "Li": 0.87318
+      },
+      "H_wt_pct": 12.68,
+      "H_mol_per_g": 0.12582,
+      "B_wt_pct": 0.0,
+      "Z_over_A": 0.50327,
+      "I_eff_eV": 33.3,
+      "S_p_MeV_cm2_g": {
+        "10MeV": 47.64,
+        "30MeV": 19.092,
+        "100MeV": 7.294,
+        "250MeV": 3.879
+      },
+      "csda_range_g_cm2": {
+        "10MeV": 0.1147,
+        "30MeV": 0.8581,
+        "100MeV": 7.6514
+      },
+      "proton_cutoff_MeV": {
+        "0.5g_cm2": 22.34,
+        "1g_cm2": 32.62,
+        "2g_cm2": 47.66
+      },
+      "B10_atoms_per_g": "0.000e+00",
+      "thermal_n_capture_prob_1g_cm2": 0.0
+    },
+    {
+      "material": "MgH2",
+      "weight_fractions": {
+        "H": 0.07659,
+        "Mg": 0.92341
+      },
+      "H_wt_pct": 7.66,
+      "H_mol_per_g": 0.07598,
+      "B_wt_pct": 0.0,
+      "Z_over_A": 0.53189,
+      "I_eff_eV": 115.7,
+      "S_p_MeV_cm2_g": {
+        "10MeV": 40.656,
+        "30MeV": 16.844,
+        "100MeV": 6.6,
+        "250MeV": 3.559
+      },
+      "csda_range_g_cm2": {
+        "10MeV": 0.1378,
+        "30MeV": 0.9893,
+        "100MeV": 8.5553
+      },
+      "proton_cutoff_MeV": {
+        "0.5g_cm2": 20.53,
+        "1g_cm2": 30.18,
+        "2g_cm2": 44.36
+      },
+      "B10_atoms_per_g": "0.000e+00",
+      "thermal_n_capture_prob_1g_cm2": 0.0
+    },
+    {
+      "material": "LiBH4",
+      "weight_fractions": {
+        "B": 0.4963,
+        "H": 0.1851,
+        "Li": 0.3186
+      },
+      "H_wt_pct": 18.51,
+      "H_mol_per_g": 0.18363,
+      "B_wt_pct": 49.63,
+      "Z_over_A": 0.55089,
+      "I_eff_eV": 40.9,
+      "S_p_MeV_cm2_g": {
+        "10MeV": 50.484,
+        "30MeV": 20.326,
+        "100MeV": 7.794,
+        "250MeV": 4.153
+      },
+      "csda_range_g_cm2": {
+        "10MeV": 0.1086,
+        "30MeV": 0.8079,
+        "100MeV": 7.1726
+      },
+      "proton_cutoff_MeV": {
+        "0.5g_cm2": 23.07,
+        "1g_cm2": 33.72,
+        "2g_cm2": 49.31
+      },
+      "B10_atoms_per_g": "5.502e+21",
+      "thermal_n_capture_prob_1g_cm2": 1.0
+    },
+    {
+      "material": "Боразан NH3BH3 (AB)",
+      "weight_fractions": {
+        "B": 0.35026,
+        "H": 0.19594,
+        "N": 0.4538
+      },
+      "H_wt_pct": 19.59,
+      "H_mol_per_g": 0.19439,
+      "B_wt_pct": 35.03,
+      "Z_over_A": 0.58317,
+      "I_eff_eV": 49.5,
+      "S_p_MeV_cm2_g": {
+        "10MeV": 51.82,
+        "30MeV": 20.959,
+        "100MeV": 8.065,
+        "250MeV": 4.306
+      },
+      "csda_range_g_cm2": {
+        "10MeV": 0.1061,
+        "30MeV": 0.7853,
+        "100MeV": 6.9427
+      },
+      "proton_cutoff_MeV": {
+        "0.5g_cm2": 23.42,
+        "1g_cm2": 34.26,
+        "2g_cm2": 50.14
+      },
+      "B10_atoms_per_g": "3.883e+21",
+      "thermal_n_capture_prob_1g_cm2": 1.0
+    },
+    {
+      "material": "BN (нанотрубки BNNT)",
+      "weight_fractions": {
+        "B": 0.43561,
+        "N": 0.56439
+      },
+      "H_wt_pct": 0.0,
+      "H_mol_per_g": 0.0,
+      "B_wt_pct": 43.56,
+      "Z_over_A": 0.48352,
+      "I_eff_eV": 79.4,
+      "S_p_MeV_cm2_g": {
+        "10MeV": 39.616,
+        "30MeV": 16.226,
+        "100MeV": 6.304,
+        "250MeV": 3.384
+      },
+      "csda_range_g_cm2": {
+        "10MeV": 0.1402,
+        "30MeV": 1.0209,
+        "100MeV": 8.9218
+      },
+      "proton_cutoff_MeV": {
+        "0.5g_cm2": 20.23,
+        "1g_cm2": 29.66,
+        "2g_cm2": 43.5
+      },
+      "B10_atoms_per_g": "4.829e+21",
+      "thermal_n_capture_prob_1g_cm2": 1.0
+    },
+    {
+      "material": "ГБК-50: 50% AB + 50% СВМПЭ",
+      "weight_fractions": {
+        "B": 0.17513,
+        "C": 0.42814,
+        "H": 0.16983,
+        "N": 0.2269
+      },
+      "H_wt_pct": 16.98,
+      "H_mol_per_g": 0.16849,
+      "B_wt_pct": 17.51,
+      "Z_over_A": 0.57675,
+      "I_eff_eV": 52.8,
+      "S_p_MeV_cm2_g": {
+        "10MeV": 50.695,
+        "30MeV": 20.538,
+        "100MeV": 7.913,
+        "250MeV": 4.228
+      },
+      "csda_range_g_cm2": {
+        "10MeV": 0.1086,
+        "30MeV": 0.8021,
+        "100MeV": 7.0803
+      },
+      "proton_cutoff_MeV": {
+        "0.5g_cm2": 23.14,
+        "1g_cm2": 33.86,
+        "2g_cm2": 49.58
+      },
+      "B10_atoms_per_g": "1.941e+21",
+      "thermal_n_capture_prob_1g_cm2": 0.9994
+    },
+    {
+      "material": "ГБК-30: 30% AB + 70% СВМПЭ",
+      "weight_fractions": {
+        "B": 0.10508,
+        "C": 0.59939,
+        "H": 0.15939,
+        "N": 0.13614
+      },
+      "H_wt_pct": 15.94,
+      "H_mol_per_g": 0.15812,
+      "B_wt_pct": 10.51,
+      "Z_over_A": 0.57418,
+      "I_eff_eV": 54.3,
+      "S_p_MeV_cm2_g": {
+        "10MeV": 50.245,
+        "30MeV": 20.369,
+        "100MeV": 7.852,
+        "250MeV": 4.197
+      },
+      "csda_range_g_cm2": {
+        "10MeV": 0.1097,
+        "30MeV": 0.809,
+        "100MeV": 7.1369
+      },
+      "proton_cutoff_MeV": {
+        "0.5g_cm2": 23.03,
+        "1g_cm2": 33.71,
+        "2g_cm2": 49.36
+      },
+      "B10_atoms_per_g": "1.165e+21",
+      "thermal_n_capture_prob_1g_cm2": 0.9885
+    }
+  ]
+}

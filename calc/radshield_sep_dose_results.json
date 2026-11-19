@@ -1,0 +1,173 @@
+{
+  "what": "SEP-доза кожи за слоем (straight-ahead, King AL-1972) + коэффициент безопасного времени EVA во время события",
+  "date": "2026-08-30",
+  "spectrum": "J(>E)=7.9e9*exp((30-E)/26.5) cm^-2 (King 1974, AL-1972; сверено 2026-08-30) + скан E0=10/26.5/50",
+  "assumptions": "CSDA straight-ahead; без ядерных взаимодействий, рассеяния, вторичных, геометрии тела; кожа=0.1 г/см² воды; S клампится ниже 1 МэВ. Абсолютные Гр — первый порядок, НЕ сверены с BRYNTRN; выводить только отношения.",
+  "gcr_note": "Хроническая доза на поверхности Луны (ГКЛ+альбедо) 1369 мкЗв/день (Chang'E-4 LND, Sci.Adv. 2020, 10.1126/sciadv.aaz1334) слоем скафандра практически не снижается — коэффициенты ниже относятся ТОЛЬКО к SEP.",
+  "results_1972": [
+    {
+      "depth_g_cm2": 0.3,
+      "material": "Al (корпус, базовая линия)",
+      "cutoff_MeV": 14.01,
+      "fluence_above_cutoff_cm2": "1.444e+10",
+      "skin_dose_Gy_1972_firstorder": 60.992,
+      "dose_ratio_vs_Al": 1.0,
+      "safe_time_factor_vs_Al": 1.0
+    },
+    {
+      "depth_g_cm2": 0.3,
+      "material": "Полиэтилен (CH2)n / СВМПЭ",
+      "cutoff_MeV": 17.27,
+      "fluence_above_cutoff_cm2": "1.277e+10",
+      "skin_dose_Gy_1972_firstorder": 51.419,
+      "dose_ratio_vs_Al": 0.843,
+      "safe_time_factor_vs_Al": 1.19
+    },
+    {
+      "depth_g_cm2": 0.3,
+      "material": "ГБК-50: 50% AB + 50% СВМПЭ",
+      "cutoff_MeV": 17.48,
+      "fluence_above_cutoff_cm2": "1.267e+10",
+      "skin_dose_Gy_1972_firstorder": 50.85,
+      "dose_ratio_vs_Al": 0.834,
+      "safe_time_factor_vs_Al": 1.2
+    },
+    {
+      "depth_g_cm2": 0.3,
+      "material": "Боразан NH3BH3 (AB)",
+      "cutoff_MeV": 17.7,
+      "fluence_above_cutoff_cm2": "1.257e+10",
+      "skin_dose_Gy_1972_firstorder": 50.295,
+      "dose_ratio_vs_Al": 0.825,
+      "safe_time_factor_vs_Al": 1.21
+    },
+    {
+      "depth_g_cm2": 1.0,
+      "material": "Al (корпус, базовая линия)",
+      "cutoff_MeV": 27.53,
+      "fluence_above_cutoff_cm2": "8.673e+09",
+      "skin_dose_Gy_1972_firstorder": 31.494,
+      "dose_ratio_vs_Al": 1.0,
+      "safe_time_factor_vs_Al": 1.0
+    },
+    {
+      "depth_g_cm2": 1.0,
+      "material": "Полиэтилен (CH2)n / СВМПЭ",
+      "cutoff_MeV": 33.47,
+      "fluence_above_cutoff_cm2": "6.931e+09",
+      "skin_dose_Gy_1972_firstorder": 23.662,
+      "dose_ratio_vs_Al": 0.751,
+      "safe_time_factor_vs_Al": 1.33
+    },
+    {
+      "depth_g_cm2": 1.0,
+      "material": "ГБК-50: 50% AB + 50% СВМПЭ",
+      "cutoff_MeV": 33.86,
+      "fluence_above_cutoff_cm2": "6.828e+09",
+      "skin_dose_Gy_1972_firstorder": 23.222,
+      "dose_ratio_vs_Al": 0.737,
+      "safe_time_factor_vs_Al": 1.36
+    },
+    {
+      "depth_g_cm2": 1.0,
+      "material": "Боразан NH3BH3 (AB)",
+      "cutoff_MeV": 34.26,
+      "fluence_above_cutoff_cm2": "6.728e+09",
+      "skin_dose_Gy_1972_firstorder": 22.796,
+      "dose_ratio_vs_Al": 0.724,
+      "safe_time_factor_vs_Al": 1.38
+    },
+    {
+      "depth_g_cm2": 2.0,
+      "material": "Al (корпус, базовая линия)",
+      "cutoff_MeV": 40.55,
+      "fluence_above_cutoff_cm2": "5.305e+09",
+      "skin_dose_Gy_1972_firstorder": 17.371,
+      "dose_ratio_vs_Al": 1.0,
+      "safe_time_factor_vs_Al": 1.0
+    },
+    {
+      "depth_g_cm2": 2.0,
+      "material": "Полиэтилен (CH2)n / СВМПЭ",
+      "cutoff_MeV": 49.01,
+      "fluence_above_cutoff_cm2": "3.855e+09",
+      "skin_dose_Gy_1972_firstorder": 11.81,
+      "dose_ratio_vs_Al": 0.68,
+      "safe_time_factor_vs_Al": 1.47
+    },
+    {
+      "depth_g_cm2": 2.0,
+      "material": "ГБК-50: 50% AB + 50% СВМПЭ",
+      "cutoff_MeV": 49.58,
+      "fluence_above_cutoff_cm2": "3.773e+09",
+      "skin_dose_Gy_1972_firstorder": 11.514,
+      "dose_ratio_vs_Al": 0.663,
+      "safe_time_factor_vs_Al": 1.51
+    },
+    {
+      "depth_g_cm2": 2.0,
+      "material": "Боразан NH3BH3 (AB)",
+      "cutoff_MeV": 50.14,
+      "fluence_above_cutoff_cm2": "3.694e+09",
+      "skin_dose_Gy_1972_firstorder": 11.228,
+      "dose_ratio_vs_Al": 0.646,
+      "safe_time_factor_vs_Al": 1.55
+    }
+  ],
+  "hardness_scan_HBC50_vs_Al": [
+    {
+      "E0_MeV": 10.0,
+      "depth_g_cm2": 0.3,
+      "dose_ratio_HBC50_vs_Al": 0.678,
+      "safe_time_factor": 1.47
+    },
+    {
+      "E0_MeV": 10.0,
+      "depth_g_cm2": 1.0,
+      "dose_ratio_HBC50_vs_Al": 0.499,
+      "safe_time_factor": 2.0
+    },
+    {
+      "E0_MeV": 10.0,
+      "depth_g_cm2": 2.0,
+      "dose_ratio_HBC50_vs_Al": 0.378,
+      "safe_time_factor": 2.64
+    },
+    {
+      "E0_MeV": 26.5,
+      "depth_g_cm2": 0.3,
+      "dose_ratio_HBC50_vs_Al": 0.834,
+      "safe_time_factor": 1.2
+    },
+    {
+      "E0_MeV": 26.5,
+      "depth_g_cm2": 1.0,
+      "dose_ratio_HBC50_vs_Al": 0.737,
+      "safe_time_factor": 1.36
+    },
+    {
+      "E0_MeV": 26.5,
+      "depth_g_cm2": 2.0,
+      "dose_ratio_HBC50_vs_Al": 0.663,
+      "safe_time_factor": 1.51
+    },
+    {
+      "E0_MeV": 50.0,
+      "depth_g_cm2": 0.3,
+      "dose_ratio_HBC50_vs_Al": 0.888,
+      "safe_time_factor": 1.13
+    },
+    {
+      "E0_MeV": 50.0,
+      "depth_g_cm2": 1.0,
+      "dose_ratio_HBC50_vs_Al": 0.828,
+      "safe_time_factor": 1.21
+    },
+    {
+      "E0_MeV": 50.0,
+      "depth_g_cm2": 2.0,
+      "dose_ratio_HBC50_vs_Al": 0.781,
+      "safe_time_factor": 1.28
+    }
+  ]
+}
